@@ -1829,7 +1829,7 @@ HEADER;
                                 list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
                                 if($r_type===false){
                                     $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.DIV_E;
+                                    $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. '.$r_value);
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -1839,7 +1839,7 @@ HEADER;
                                 if(! $res33 )
                                 {
                                     $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.DIV_E;
+                                    $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error);
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -2263,8 +2263,8 @@ HEADER;
                                 if(!$update_res)
                                 {
                                     $resStatus = false;
-                                    $resMsg = '<div class="error" style="color:red">Cannot replace terms in record details. Query :'
-                                            .$update_query.'  SQL error: '.$mysqli->error.DIV_E;
+                                    $resMsg = error_Div('Cannot replace terms in record details. Query :'
+                                            .$update_query.'  SQL error: '.$mysqli->error);
                                     $mysqli->rollback();
                                     fclose($this->out);
                                     $this->out = null;

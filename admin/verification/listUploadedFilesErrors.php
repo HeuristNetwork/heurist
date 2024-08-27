@@ -174,12 +174,9 @@ $mysqli = $system->get_mysqli();
 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-//print $upd_query.'<br>';
-//print $del_query.'<br>';
-                $mysqli->query($upd_query);
-                $mysqli->query($del_query);
+                
+                filestoreReplaceDuplicatesInDetails($max_ulf_id, $dups_ids);
+                
                 $fix_dupes = $fix_dupes + count($dups_ids);
             }
 
@@ -220,11 +217,9 @@ $mysqli = $system->get_mysqli();
 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                $dups_ids = prepareIds($dups_ids);//for stupid snyk
-                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-                $mysqli->query($upd_query);
-                $mysqli->query($del_query);
+                
+                filestoreReplaceDuplicatesInDetails($max_ulf_id, $dups_ids);
+                
                 $fix_dupes = $fix_dupes + count($dups_ids);
                 $fix_url++;
             }
@@ -301,15 +296,11 @@ $mysqli = $system->get_mysqli();
                 foreach ($dups_files as $ulf_ID=>$file_a){
                     if(is_array($file_a['dupes']) && count($file_a['dupes'])>0){
 
-                        $dup_ids = implode(',',array_keys($file_a['dupes']));
-                        $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='
-                                .$ulf_ID.' WHERE dtl_UploadedFileID in ('.$dup_ids.')';
-                        $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.$dup_ids.')';
-        //print $upd_query.'<br>';
-        //print $del_query.'<br>';
-                        $mysqli->query($upd_query);
-                        $mysqli->query($del_query);
-                        $cnt_dupes = $cnt_dupes + count($file_a['dupes']);
+                        $dup_ids = array_keys($file_a['dupes']);
+                        
+                        filestoreReplaceDuplicatesInDetails($ulf_ID, $dup_ids);
+                        
+                        $cnt_dupes = $cnt_dupes + count($dup_ids);
                         $cnt_unique++;
 
                         /* report
@@ -759,9 +750,7 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_unused_local as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="unused_file_local" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
-                            .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['res_fullpath']).( $row['isfound']?'':' ( file not found )' ).'</label></div>';
-                                    //@$row['ulf_ExternalFileReference'];
+                    out_checkbox('unused_file_local', $row['ulf_ID'], htmlspecialchars($row['res_fullpath']).( $row['isfound']?'':' ( file not found )' ));
                 }//for
 
                 /*  24/12/23 - removed by Ian b/c too dangerous, see explanation below
@@ -800,8 +789,7 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_unused_remote as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
-                            .'<b>'.intval($row['ulf_ID']).'</b> '.filter_var($row['ulf_ExternalFileReference'],FILTER_SANITIZE_URL).'</label></div>';
+                    out_checkbox('unused_file_remote', $row['ulf_ID'], filter_var($row['ulf_ExternalFileReference'],FILTER_SANITIZE_URL));
                 }//for
 
                 /*
@@ -836,8 +824,7 @@ $mysqli = $system->get_mysqli();
                     <br>
                 <?php
                 foreach ($files_notfound as $row) {
-                    print '<div class="msgline"><label><input type=checkbox class="files_notfound" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
-                            .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['db_fullpath']).'</label></div>';
+                    out_checkbox('files_notfound', $row['ulf_ID'], htmlspecialchars($row['db_fullpath']));
                 }//for
                 if(count($files_notfound)>10){
                     print '<div><br><button onclick="doRepairAction(\'files_notfound\')">Remove entries for missing files</button></div>';
@@ -878,6 +865,14 @@ $mysqli = $system->get_mysqli();
             }else{
                 print "<br><br><p><h3>All uploaded file entries are valid</h3></p>";
             }
+            
+function out_checkbox($ele_class, $ulf_id, $text){
+    
+    $ulf_id = intval($ulf_id);
+    print <<<EXP
+<div class="msgline"><label><input type=checkbox class="$ele_class" data-id="$ulf_id">&nbsp;<b>$ulf_id</b> $text</label></div>
+EXP;
+}            
             ?>
 
 

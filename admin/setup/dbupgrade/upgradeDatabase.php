@@ -173,9 +173,7 @@ if(!defined('PDIR')){
                                 }else{
                                     $error = $system->getError();
                                     if($error){
-                                        print '<p style="color:red">'
-                                            .$error['message']
-                                            .'<br>'.@$error['sysmsg'].'</p>';
+                                        print error_Div($error['message'].BR.@$error['sysmsg']);
                                     }
 
                                     $upgrade_success = false;

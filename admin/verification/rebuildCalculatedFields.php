@@ -195,11 +195,11 @@ if($init_client){
     }
 }else{
     if( is_bool($res) && !$res ){
-        print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
+        print error_Div(htmlspecialchars($system->getError()['message']));
         print '</div></body></html>';
         exit;
     }elseif($res['message']){
-        print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
+        print error_Div(htmlspecialchars($system->getError()['message']));
     }
 
     if($res['q_updates']){

@@ -264,12 +264,12 @@ foreach ($arg_database as $idx=>$db_name){
     echo_flush2("Exporting database definitions as readable text<br>");
 
     $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-    saveURLasFile($url, $folder."/Database_Structure.txt");//save to $upload_root.'backup/'.HEURIST_DBNAME
+    saveURLasFile($url, $folder."/Database_Structure.txt");//save to $upload_root.DIR_BACKUP.HEURIST_DBNAME
 
     echo_flush2("Exporting database definitions as XML<br>");
 
     $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-    saveURLasFile($url, $folder."/Database_Structure.xml");//save to $upload_root.'backup/'.HEURIST_DBNAME
+    saveURLasFile($url, $folder."/Database_Structure.xml");//save to $upload_root.DIR_BACKUP.HEURIST_DBNAME
     */
 
     // Do an SQL dump of the whole database

@@ -95,9 +95,6 @@ if(false){
 }elseif(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
 }elseif(false){
-
-    __updateDatabases_To_V14( @$_REQUEST['process']);
-}elseif(false){
     __correctGetEstDate();
 }elseif(false){
     __removeDuplicationValues();
@@ -116,6 +113,8 @@ __fixDirectPathImages();
 */
 
 __checkVersionDatabase();
+
+print '<br>[end]';
 
 //
 // Report database versions and missed tables
@@ -175,9 +174,7 @@ function __checkVersionDatabase(){
                         if(!$rep){
                             $error = $system->getError();
                             if($error){
-                                print '<p style="color:red">'
-                                    .$error['message']
-                                    .'<br>'.@$error['sysmsg'].'</p>';
+                                print error_Div($error['message'].BR.@$error['sysmsg']);
                             }
                             break;
                         }
@@ -194,8 +191,6 @@ function __checkVersionDatabase(){
             }
         }
     }
-    print '<p>COMPLETED</p>';
-
 }
 
 //
@@ -247,7 +242,6 @@ function __updateDatabase(){
 
         }
     }
-    print '[end report]';
 }
 
 //------------------------------
@@ -288,7 +282,6 @@ function __renameDegreeToKM(){
                 }
         }
     }//for
-    print '[end report]';
 }
 
 //------------------------------
@@ -341,7 +334,7 @@ function findMissedTermLinks() {
                         $query = "UPDATE `$db_name`.defDetailTypes SET dty_JsonTermIDTree='' WHERE (dty_Type='relationtype')";
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.DIV_E;
+                            print error_Div($mysqli->error);
                             exit;
                         }
                     }
@@ -422,7 +415,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
     }
 */
 
-    print '[end report]</div>';
+    print '</div>';
 }
 
 //
@@ -444,7 +437,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
 
             if(!($fields[3]==$f_code[0] && $fields[4]==$f_code[1])){
                 //need change ccode for field
-                print '<div style="color:red">NEED CHANGE FIELD CCODES</div>';
+                print error_Div('NEED CHANGE FIELD CCODES');
             }
 
             $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
@@ -460,7 +453,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                             .' where trm_ID='.intval($fields[2]);
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.DIV_E;
+                            print error_Div($mysqli->error);
                             exit;
                         }
                     }
@@ -475,16 +468,16 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                     $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$term)));
                     print TR_S.$list.TR_E;
                 }
-                print '</table>';
+                print TABLE_E;
             }else{
-                print '<div style="color:red">VOCAB NOT DEFINED</div>';
+                print error_Div('VOCAB NOT DEFINED');
             }
         }else{
             $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
                 .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
-                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).DIV_E;
+                print error_Div('FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]));
             }
         }
 }
@@ -522,7 +515,7 @@ function __findWrongChars(){
                     }catch(Exception $exception) {
                         $isOK = false;
                         $wrong_string = $exception->getMessage();
-                        print '<div style="color:red">'.$db_name.' rtyID='.$id.'. invalid: '.$wrong_string.DIV_E;
+                        print error_Div($db_name.' rtyID='.$id.'. invalid: '.$wrong_string);
                     }
                 }//foreach
 
@@ -532,7 +525,6 @@ function __findWrongChars(){
             }
         }
     }
-    print '[end report]';
 }
 
 function find_invalid_string($val){
@@ -565,14 +557,14 @@ function __findLongTermLabels(){
 
                 print htmlspecialchars($db_name).'<br>';
                 foreach($list as $id=>$row){
-                    print '<div style="padding-left:100px">'.$id.'&nbsp;'.intval($row['chars']).'&nbsp;'.intval($row['len'])
-                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).DIV_E;
+                    $lbl = htmlspecialchars($row['trm_Label']);
+                    $len = intval($row['len']);
+                    $chars = intval($row['chars']);
+                    print "<div style=\"padding-left:100px\">$id&nbsp;$chars&nbsp;$len&nbsp;$lbl</div>";
                 }
 
             }
     }
-    print '[end report]';
-
 }
 
 //
@@ -600,7 +592,6 @@ $query = "ALTER TABLE `defTerms` "
             print htmlspecialchars($db_name).'<br>';
         }
     }
-    print '[end update]';
 }
 
 /*
@@ -628,6 +619,8 @@ The local IDs in record details will continue to point to those terms
 function __setTermYesNo(){
 
     global $mysqli, $databases;
+    
+    define('UPDATE_QUERY','INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES(');
 
     print '[Fix Yes/No terms]<br>';
 
@@ -674,7 +667,7 @@ function __setTermYesNo(){
                 $mysqli->query($query);
     //add references to vocabulary 99-5445
                 if($vocab>0){
-                    $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_0.')';
+                    $query = UPDATE_QUERY.$vocab.','.$yes_0.')';
                     $mysqli->query($query);
                 }
     //remove old term
@@ -687,7 +680,7 @@ function __setTermYesNo(){
                 $query = 'UPDATE defTerms set trm_OriginatingDBID=2 trm_IDInOriginatingDB=532 WHERE trm_ID='.$yes_1;
                 $mysqli->query($query);
                 if($vocab>0){
-                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$yes_1.')';
+                $query = UPDATE_QUERY.$vocab.','.$yes_1.')';
                 $mysqli->query($query);
                 }
                 print ' "yes" added';
@@ -708,7 +701,7 @@ function __setTermYesNo(){
                 $mysqli->query($query);
     //add references to vocabulary 99-5445
                 if($vocab>0){
-                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$no_0.')';
+                $query = UPDATE_QUERY.$vocab.','.$no_0.')';
                 $mysqli->query($query);
                 }
     //remove old term
@@ -720,7 +713,7 @@ function __setTermYesNo(){
                 $query = 'UPDATE defTerms set trm_OriginatingDBID=2 trm_IDInOriginatingDB=531 WHERE trm_ID='.$no_1;
                 $mysqli->query($query);
                 if($vocab>0){
-                $query = 'INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES('.$vocab.','.$no_1.')';
+                $query = UPDATE_QUERY.$vocab.','.$no_1.')';
                 $mysqli->query($query);
                 }
                 print ' "no" added';
@@ -1251,122 +1244,6 @@ if($cnt>0) {echo $db_name.'   terms:'.$cnt.'<br>';}
           */
 }
 
-
-//
-//
-//
-function __updateDatabases_To_V14($db_process){
-
-    global $system, $mysqli, $databases;
-
-    $cnt_db = 0;
-    $cnt_db_old = 0;
-    $skip_work = true;
-
-    /*
-    $is_action = ($db_process!=null);
-
-    if($db_process=='all'){
-        $db_process = null;
-    }
-
-    */
-
-    foreach ($databases as $idx=>$db_name){
-
-        if($db_name=='') {continue;}
-
-        if($db_process!=null){
-            $db_name = $db_process;
-        }
-        /*
-        if($db_name=='misha_cruches_gallo_romaines'){
-            $skip_work = false;
-            //continue;
-        }elseif($skip_work){
-            continue;
-        }*/
-
-        if( !$system->set_dbname_full($db_name, true) ){
-                $response = $system->getError();
-                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
-                break;
-        }
-
-        mysql__usedatabase($mysqli, $db_name);
-
-        //get version of database
-        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
-        $ver = mysql__select_row_assoc($mysqli, $query);
-
-
-        //statistics
-        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
-        $cnt_dates = intval(mysql__select_value($mysqli, $query));
-
-        $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
-        $cnt_fuzzy_dates = intval(mysql__select_value($mysqli, $query));
-
-        $cnt_index = 0;
-        $cnt_fuzzy_dates2 = 0;
-
-        $is_big = ($cnt_dates>100000);
-
-        if($is_big){
-            $cnt_dates = '<b>'.$cnt_dates.'</b>';
-        }
-
-        if($ver['sys_dbSubSubVersion']>12){
-            $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
-            $cnt_index = intval(mysql__select_value($mysqli, $query));
-
-            $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
-            $cnt_fuzzy_dates2 = intval(mysql__select_value($mysqli, $query));
-
-            print '<br>'.htmlspecialchars($db_name).'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
-                .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
-                .'  index='.$cnt_index.' ( '.($cnt_fuzzy_dates>0?'<b>'.$cnt_fuzzy_dates.'</b>':'0').','.$cnt_fuzzy_dates2.' )</span>';
-        }else{
-            $cnt_db_old++;
-            print '<br>'.htmlspecialchars($db_name).'  v'.($ver['sys_dbSubVersion']<3?'<b>'.$ver['sys_dbSubVersion'].'</b>':'')
-            .'.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates.'  ( '.$cnt_fuzzy_dates.' )';
-
-            if($ver['sys_dbSubVersion']<3){
-                continue;
-            }
-
-            if(!updateDatabseTo_v1_3_12($system)){
-                $response = $system->getError();
-                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
-                break;
-            }
-        }
-
-        if(true && ($db_process!=null ||
-            (!$is_big && ($ver['sys_dbSubSubVersion']<=13 || ($cnt_dates>0 && $cnt_index*100/$cnt_dates<94) ))))
-        {
-            print '<br>';
-            if(recreateRecDetailsDateIndex($system, true, true)){
-
-            }else{
-                $response = $system->getError();
-                print '<div><h3 class="error">'.$response['message'].'</h3></div>';
-                break;
-            }
-        }
-
-        $cnt_db++;
-
-        //if($db_name=='bnf_lab_musrdm_test') {break;}
-        if($db_process!=null){
-            break;
-        }
-    }
-
-    print '<br><br>'.$cnt_db_old.'  '.$cnt_db;
-
-}
-
 //
 //
 //
@@ -1431,7 +1308,7 @@ function __listOfAdminUsers(){
             echo '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
         }
     }
-    print '<br>Earliest: '.$mind.'<br>END';
+    print '<br>Earliest: '.$mind.'<br>';
 }
 
 
@@ -1472,8 +1349,12 @@ function __convertTustep(){
     //print '<xmp>'.htmlspecialchars_decode($s).'</xmp>';
 */
     //print print_r(get_html_translation_table(HTML_ENTITIES),true);
+    
+    define('AMP', '&amp;');
+    define('TS_AMP', '#%#%#');
+    
 $tustep_to_html = array(
-'&amp;' =>'#%#%#',
+AMP =>TS_AMP,
 '^u'    =>'&uuml;',
 '#.s'   =>'&#x017F;',
 '%/u'   =>'&uacute;',
@@ -1574,7 +1455,7 @@ $html_to_hex = array(
 );
 
 $tustep_to_html = array(
-'&amp;' =>'#%#%#',
+AMP =>TS_AMP,
 '#;ou' =>'&#x016F;',
 '#;eo' =>'&#xE4CF;',
 '#;ev' =>'&#x011B;'
@@ -1628,7 +1509,7 @@ $tustep_to_html = array(
             //2. Decode HTML entities
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
 
-            $m2 = str_replace('#%#%#', '&amp;', $m);//convert back
+            $m2 = str_replace(TS_AMP, AMP, $m);//convert back
 
             //3. List unrecognized
             if($m2!=$row[1]){
@@ -1649,7 +1530,7 @@ $tustep_to_html = array(
                     $missed = array_merge_unique($missed, $matches[0]);
             }
 
-            $m = str_replace('#%#%#', '&amp;', $m);//convert back
+            $m = str_replace(TS_AMP, AMP, $m);//convert back
 
             //update in database
             /*
@@ -1658,7 +1539,7 @@ $tustep_to_html = array(
             if(! $res33 )
             {
                 $isOk = false;
-                print '<div class="error" style="color:red">Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error.DIV_E;
+                print error_Div('Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error);
                 $mysqli->rollback();
                 break;
             }
@@ -1724,7 +1605,6 @@ function __findRDF(){
             echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";//$s1/$s2
         }
     }
-    print '<br>END';
 }
 
 function __dropBkpDateIndex(){
@@ -1745,7 +1625,6 @@ function __dropBkpDateIndex(){
             print $db_name.'<br>';
         }
     }
-    print '<br>END';
 }
 
 function __findBelegSpan($context){
@@ -1957,7 +1836,7 @@ function __fixDirectPathImages(){
                     //extract image tag
                     $img = substr($val, $start, $end-$start);
 
-                    print $rec_ID.' <xmp>'.$img.'</xmp>';
+                    print $rec_ID." <xmp>$img</xmp>";
 
                     $img2 = str_replace('\"','"',$img);
 
@@ -1989,7 +1868,7 @@ function __fixDirectPathImages(){
                         $img2 = $doc->saveHTML($imgele);
                         $img2 = str_replace('"','\"',$img2);
 
-                        print '<xmp>'.$img2.'</xmp><br>';
+                        print "<xmp>$img2</xmp><br>";
                     }
 
                     $was_replaced = true;
@@ -2000,7 +1879,7 @@ function __fixDirectPathImages(){
 
                 }else{
                     $success = false;
-                    print 'end of tag not found <xmp>'.substr($val, $start, 50).'</xmp>';
+                    print "end of tag not found <xmp>{substr($val, $start, 50)}</xmp>";
                     break;
                 }
             }
@@ -2064,7 +1943,7 @@ function __fixDirectPathImages(){
     }
 
     print '<br>'.implode(',',$affected_recs);
-    print '<br>Entries:'.$cnt.'  Fields:'.$cnt2.' [END]';
+    print '<br>Entries:'.$cnt.'  Fields:'.$cnt2;
 
 }
 

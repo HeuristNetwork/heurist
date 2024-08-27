@@ -35,10 +35,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 
 
-define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);
-define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql');
-define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_hml');
-define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_tsv');// TSV folder, for standalone download
+define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME);
+define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_sql');
+define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_hml');
+define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_tsv');// TSV folder, for standalone download
 
 $mode = @$_REQUEST['mode'];// mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
 $format = 'zip';//default
@@ -68,7 +68,7 @@ if($mode>1){
     }elseif($mode=='6' && folderExists(FOLDER_TSV_BACKUP, false)){  //archived tsv sub directory
         downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
     }elseif($mode=='4'){  //cleanup backup folder on exit
-        folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+        folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false);
     }
     exit;
 }
@@ -767,12 +767,12 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            echo_flush2("Exporting database definitions as readable text<br>");
 
            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.txt");//save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.txt");//save to HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME
 
            echo_flush2("Exporting database definitions as XML<br>");
 
            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.xml");//save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.xml");//save to HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME
 
 
            if($system->is_admin()){
@@ -1054,7 +1054,7 @@ function report_message($message, $is_error=true, $need_cleanup=false)
     if($need_cleanup){
             if(array_key_exists('repository', $_REQUEST)){
                 //cleanup backup after upload to reporsitory
-                folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
+                folderDelete2(HEURIST_FILESTORE_DIR.DIR_BACKUP, false);
             }else{
                 //cleanup temp folders
                 folderDelete2(FOLDER_BACKUP, true);

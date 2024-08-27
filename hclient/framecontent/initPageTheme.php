@@ -70,6 +70,10 @@ define('CLR_ACTIVE', '#212121');
 define('CLR_LIGHTGRAY', '#999999');
 define('CLR_GRAY', '#555555');
 define('CLR_DARKGRAY', '#333333');
+define('CLR_BG_DARKGRAY', '#e0dfe0');
+define('CLR_INPUT', '#F4F2F4');
+define('CLR_HOVER_COLOR', '#2b2b2b');
+define('CLR_SP_BORDER', '#003eff');
 
 if(!isset($ut) || !is_array($ut)){
     $ut = array();
@@ -77,11 +81,10 @@ if(!isset($ut) || !is_array($ut)){
 
 $def_ut = array(
 //main scheme
-'cd_bg'=>'#e0dfe0',
+'cd_bg'=>CLR_BG_DARKGRAY,
 'cl_bg'=>CLR_WHITE,
-'cd_input'=>'#F4F2F4',
-'cd_color'=>'#333333',
-'cd_input'=>'#F4F2F4',
+'cd_input'=>CLR_INPUT,
+'cd_color'=>CLR_DARKGRAY,
 'cd_border'=>CLR_BORDER,
 //alt scheme
 'ca_bg'=>'#364050',
@@ -102,7 +105,7 @@ $def_ut = array(
 
 //clickable hover
 'sh_border' =>CLR_LIGHTGRAY,
-'sh_color'  =>'#2b2b2b',
+'sh_color'  =>CLR_HOVER_COLOR,
 'sh_bg'     =>CLR_BORDER,
 
 //clickable active
@@ -111,7 +114,7 @@ $def_ut = array(
 'sa_color'  =>CLR_ACTIVE,
 
 //clickable pressed
-'sp_border' =>'#003eff',
+'sp_border' =>CLR_SP_BORDER,
 'sp_color'  =>CLR_WHITE,
 'sp_bg'     =>'#9CC4D9'
 
@@ -130,22 +133,22 @@ function uout($idx, $def){
 .ui-dialog .ui-dialog-buttonpane button.ui-state-hover,
 .ui-dialog .ui-dialog-buttonpane button.ui-state-focus  {
     background: none;
-    background-color: <?php uout('cd_bg', '#e0dfe0');?> !important;
+    background-color: <?php uout('cd_bg', CLR_BG_DARKGRAY);?> !important;
 }
 textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
-    background: <?php uout('cd_input', '#F4F2F4');?> !important; /*0511 !important;*/
+    background: <?php uout('cd_input', CLR_INPUT);?> !important; /*0511 !important;*/
 }
 .ui-widget-content, .ui-widget-content-gray {
-    border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>;
-    background: <?php uout('cd_bg', '#e0dfe0');?>;
-    color: <?php uout('cd_color', '#333333');?>;
+    border: 1px solid <?php uout('cd_bg', CLR_BG_DARKGRAY);?>;
+    background: <?php uout('cd_bg', CLR_BG_DARKGRAY);?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ui-widget-content a {
-    color: <?php uout('cd_color', '#333333');?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ui-heurist-bg-light{
     background-color: <?php uout('cl_bg', CLR_WHITE);?> !important;
-    color: <?php uout('cd_color', '#333333');?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 /* BORDERS, HEADERS AND DIALOG TITLE */
 .ui-dialog {
@@ -188,7 +191,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 /* color for submenus */
 .ui-heurist-header2 .ui-menu .ui-menu a {
-    color: <?php uout('cd_color', '#333333');?> !important;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?> !important;
 }
 
 /* EDITOR CONTENT */
@@ -200,7 +203,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 
 .ui-selectmenu-button{
     background:<?php uout('ce_input', CLR_WHITE);?>;
-    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?> !important;
+    border: 1px solid  <?php uout('cd_bg', CLR_BG_DARKGRAY );?> !important;
     outline: none;
     padding: 1px;
 }
@@ -212,7 +215,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 .ent_wrapper.editor .text{
     background: none repeat scroll 0 0 <?php uout('ce_input', CLR_WHITE);?>;/* 0511 !important */
-    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;
+    border: 1px solid  <?php uout('cd_bg', CLR_BG_DARKGRAY );?>;
 }
 .separator2{
     color: black; /* <?php uout('ce_helper', CLR_LIGHTGRAY);?>;*/
@@ -222,7 +225,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     border-top: 1px solid <?php uout('cd_border', CLR_BORDER);?>;
 }
 .ent_wrapper.editor .smallbutton{
-    color:<?php uout('cd_color', '#333333');?>;
+    color:<?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ent_wrapper.editor .heurist-helper1, .prompt{
     color: <?php uout('ce_helper', CLR_LIGHTGRAY);?>;
@@ -301,7 +304,7 @@ a:visited.ui-button,
     border: 1px solid <?php uout('sh_border', CLR_LIGHTGRAY);?>;
     background: <?php uout('sh_bg', CLR_BORDER);?>;
     font-weight: normal;
-    color: <?php uout('sh_color', '#2b2b2b');?>;
+    color: <?php uout('sh_color', CLR_HOVER_COLOR);?>;
 }
 .ui-state-hover a,
 .ui-state-hover a:hover,
@@ -313,7 +316,7 @@ a:visited.ui-button,
 .ui-state-focus a:visited,
 a.ui-button:hover,
 a.ui-button:focus {
-    color: <?php uout('sh_color', '#2b2b2b');?>;
+    color: <?php uout('sh_color', CLR_HOVER_COLOR);?>;
     text-decoration: none;
 }
 
@@ -335,13 +338,13 @@ a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
     background: <?php uout('sp_bg', '#9CC4D9');?>;
-    border: 1px solid <?php uout('sp_border', '#003eff');?>;
+    border: 1px solid <?php uout('sp_border', CLR_SP_BORDER);?>;
     color: <?php uout('sp_color', CLR_WHITE);?>;
     font-weight: normal;
 }
 .ui-icon-background,
 .ui-state-active .ui-icon-background {
-    border: <?php uout('sp_border', '#003eff');?>;
+    border: <?php uout('sp_border', CLR_SP_BORDER);?>;
     background-color: <?php uout('sp_color', CLR_WHITE);?>;
 }
 .ui-state-active a,

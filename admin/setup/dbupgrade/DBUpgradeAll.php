@@ -80,13 +80,11 @@ $mysqli = $system->get_mysqli();
             $res = doUpgradeDatabase($system, $db_name, 1, 3, false);
             if(!$res){
 
-                print '<p style="color:red">Error: Unable upgrade '.htmlspecialchars($db_name).'</p>';
+                print error_Div('Error: Unable upgrade '.htmlspecialchars($db_name));
 
                 $error = $system->getError();
                 if($error){
-                    print '<p style="color:red">'
-                        .$error['message']
-                        .'<br>'.@$error['sysmsg'].'</p>';
+                    print error_Div($error['message'].BR.@$error['sysmsg']);
                 }
                 break;
             }

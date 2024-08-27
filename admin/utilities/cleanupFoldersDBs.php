@@ -160,7 +160,7 @@ foreach ($databases as $idx=>$db_name){
 
     if(file_exists($dir_root)){
 
-        $dir_backup = $dir_root.'backup/';
+        $dir_backup = $dir_root.DIR_BACKUP;
         $dir_scratch = $dir_root.DIR_SCRATCH;
         $dir_docs = $dir_root.'documentation_and_templates/';
 

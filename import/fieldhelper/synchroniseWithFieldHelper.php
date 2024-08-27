@@ -287,10 +287,10 @@ $failed_exts = array();
                     $real_path = isPathInHeuristUploadFolder($dir, true);
                     if($real_path==null){
                             //does not exist - ignore
-                            print '<div style="color:red">'.htmlspecialchars($dir).' is ignored. Folder does not exist.</div>';
+                            print error_Div(htmlspecialchars($dir).' is ignored. Folder does not exist.');
                             continue;
                     }elseif(!$real_path){
-                            print '<div style="color:red">'.htmlspecialchars($dir).' is ignored. Folder must be in Heurist filestore directory.</div>';
+                            print error_Div(htmlspecialchars($dir).' is ignored. Folder must be in Heurist filestore directory.');
                             continue;
                     }
 
@@ -316,7 +316,7 @@ $failed_exts = array();
                         }
 
                         if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                            print '<div style="color:red">'.htmlspecialchars($orig).' is ignored. Folder must be in Heurist filestore directory.</div>';
+                            print error_Div(htmlspecialchars($orig).' is ignored. Folder must be in Heurist filestore directory');
                             continue;
                         }
                     }
@@ -330,7 +330,7 @@ $failed_exts = array();
 
                 if(in_array($dir, $system_folders)){
 
-                    print '<div style="color:red">Files are not scanned in system folder '.htmlspecialchars($dir).DIV_E;
+                    print error_Div('Files are not scanned in system folder '.htmlspecialchars($dir));
 
                 }elseif($dir && file_exists($dir) && is_dir($dir))
                 {
@@ -352,7 +352,7 @@ $failed_exts = array();
                                 }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                                     $isfirst = false;
                                     if($dir == HEURIST_FILESTORE_DIR){
-                                        print '<div style="color:red">Files are not scanned in root upload folder '.htmlspecialchars($dir).DIV_E;
+                                        print error_Div('Files are not scanned in root upload folder '.htmlspecialchars($dir));
                                     }else{
                                         $rep_counter = $rep_counter + doHarvestInDir($dir);
                                     }
@@ -366,7 +366,7 @@ $failed_exts = array();
                         }
                     }
                 }elseif($dir) {
-                    print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).DIV_E;
+                    print error_Div('Folder was not found: '.htmlspecialchars($dir));
                 }
             }
         }
@@ -639,8 +639,8 @@ $failed_exts = array();
                                     $out = recordSave($system, $record);//see recordModify.php
 
                                     if ( @$out['status'] != HEURIST_OK ) {
-                                        print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
-                                        htmlspecialchars($out["message"])."</span></div>";
+                                        print error_Div('File: <i>'.htmlspecialchars($filename_base).'</i> Error: '.
+                                        htmlspecialchars($out["message"]));
 
                                     }else{
                                         $new_recordID = intval($out['data']);
@@ -844,8 +844,7 @@ XML;
                             $out = recordSave($system, $record);//see recordModify.php
                             
                             if ( @$out['status'] != HEURIST_OK ) {
-                                print '<div>File: <i>'.htmlspecialchars($filename_base)
-                                .'</i> <span style="color:red">Error: '.htmlspecialchars($out["message"])."</span></div>";
+                                print error_Div('File: <i>'.htmlspecialchars($filename_base).' Error: '.htmlspecialchars($out["message"]));
                             }else{
                                 $new_recordID = intval($out['data']);
                                 $cnt_added++;

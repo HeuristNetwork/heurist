@@ -931,9 +931,9 @@ function sendSystemEmail($data) {
 
 		if ($rtn_value <= -1) {
 
-			echo '<div style="color:red">An error occurred with preparing and sending the system emails.<br>'
-                    .$email_obj->get_error()
-			        .$email_obj->get_log().DIV_E;
+			echo error_Div('An error occurred with preparing and sending the system emails.'.BR
+                    .$email_obj->get_error().BR
+			        .$email_obj->get_log());
 			$rtn_value = -1;
 		}
 
@@ -943,8 +943,7 @@ function sendSystemEmail($data) {
 		return $rtn_value;
 	} else {
 
-		echo '<div style="color:red">An error occurred with processing the form\'s data.<br>'
-		        .$email_obj->get_error().DIV_E;
+		echo error_Div('An error occurred with processing the form\'s data.<br>'.$email_obj->get_error());
 		return -1;
 	}
 }

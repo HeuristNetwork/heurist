@@ -1310,4 +1310,20 @@ function filestoreGetUsageByDb($system){
 
     return $res;
 }
+
+
+function filestoreReplaceDuplicatesInDetails($ulf_id, $ulf_ids_replaced){
+    
+    $ulf_ids_replaced = prepareIds($ulf_ids_replaced);//for snyk
+    
+    $ids = implode(',', $ulf_ids_replaced);
+
+    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($ulf_id).' WHERE dtl_UploadedFileID in ('.$ids.')';
+    $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.$ids.')';
+
+    $mysqli->query($upd_query);
+    $mysqli->query($del_query);
+}
+
+
 ?>

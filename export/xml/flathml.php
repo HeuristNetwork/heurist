@@ -146,7 +146,7 @@ if(!defined('PDIR')){
 
 //write the output into single file
 // output to file is allowed in the only case - archiving database
-if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME)){
+if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME)){
     $output_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "xml");
 
     $output_file_fd = fopen($output_file, 'w');
@@ -1522,7 +1522,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
                         //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
                         //moreover it is already done in exportMyDataPopup
-                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
+                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
 
                     }else{
                         //otherwise skip copy and use downloadURL
@@ -1531,7 +1531,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
                     /* this code is not use anymore - we copy the entire file_uploads folder
                     // backup file into backup/user folder
-                    $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/resources/";
+                    $folder = HEURIST_FILESTORE_DIR . DIR_BACKUP . get_user_username() . "/resources/";
 
                     if(!file_exists($folder) && !mkdir($folder, 0777, true)){
                     print "<p class='error'>'Failed to create folder for file resources: ".$folder.'</p>';
@@ -2146,7 +2146,7 @@ else{ // single output stream
 
     if($output_file_fd){
         fclose ($output_file_fd);
-        $output_file_name = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
+        $output_file_name = HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
         rename($output_file, $output_file_name);
     }
 

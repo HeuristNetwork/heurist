@@ -204,10 +204,12 @@ define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
 define('TABLE_S','<table>');
 define('TR_S','<tr><td>');
 define('TD','</td><td>');
+define('TD_E','</td>');
 define('TR_E','</td></tr>');
 define('TABLE_E','</table>');
 define('DIV','<div>');
 define('DIV_E','</div>');
+define('BR','<br>');
 
 
 global $glb_lang_codes;
@@ -234,6 +236,7 @@ define('ULF_TILED_IMAGE','_tiled');
 //default system folders
 define('DIR_IMAGE','image/');
 define('DIR_SCRATCH','scratch/');
+define('DIR_BACKUP','backup/');
 
 
 /** RECORD TYPE DEFINITIONS */
@@ -491,6 +494,11 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
 function error_WrongParam($param){
     return $param.' parameter is not defined or wrong';
 }
+
+function error_Div($text){
+    return '<div class="error" style="color:red">'.$text.DIV_E;
+}
+
 
 function redirectURL($url){
     header('Location: '.$url);   

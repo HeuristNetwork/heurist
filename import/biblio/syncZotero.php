@@ -749,8 +749,8 @@ if($step=="1"){  //first step - info about current status
 
                 if($is_empty_zotero_entry){
 
-                    print '<div style="color:red">Warning: zotero id '.htmlspecialchars($zotero_itemid)
-                        .': no data recorded in Zotero for this entry</div>';
+                    print error_Div('Warning: zotero id '.htmlspecialchars($zotero_itemid)
+                        .': no data recorded in Zotero for this entry');
 
                 }elseif(count($details)<1){
                     //no one zotero key has proper mapping to heurist fields

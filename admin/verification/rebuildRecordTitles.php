@@ -210,7 +210,7 @@ if(count($blanks)>0){
 
     if( is_bool($res) && !$res ){
 
-        print '<div><span style="color:red">'.$system->getError()['message'].'</span> are updated</div>';
+        print error_Div($system->getError()['message']);
 
     }else{
         print '<div><span id=total_count>'.intval($res['total_count']).'</span> records in total</div>';

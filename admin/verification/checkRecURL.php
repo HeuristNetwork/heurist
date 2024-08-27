@@ -186,7 +186,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                     $data = strpos($data, 'timeout') !== false ? 'Timeout occurred' : $data;
                     $data = strpos($data, 'does not exist') !== false ? 'Database does not exist' : $data;
 
-                    print ' <span style="color:red">'.htmlspecialchars($data).'</span><br>';
+                    print error_Div(htmlspecialchars($data));
 
                     $failed = true;
                 }

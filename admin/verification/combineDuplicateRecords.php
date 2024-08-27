@@ -41,6 +41,7 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordTitleMask.php';
 
+
 global $mysqli;
 $mysqli = $system->get_mysqli();
 
@@ -223,7 +224,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                             'select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID '
                             .'where rec_ID in ('.$bib_ids_list.')');
 
-                        print '<tr><td></td></tr>';
+                        print TR_S.TR_E;
 
                         //get requirements for details
                         $res = $mysqli->query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
@@ -303,20 +304,18 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $checkDup = !$is_master && count($records) < 5 ? "checked" : "";
                                 $disableDup = $is_master? "none" : "block";
                                 if (!$finished_merge) {
-                                    print '<td><input type="checkbox" name="duplicate[]" '.$checkDup.
-                                    ' value="'.$rec_ID.
-                                    '" title="Check to mark this as a duplicate record for deletion"'.
-                                    '  id="duplicate'.$rec_ID.'" style="display:'.$disableDup.
-                                    '" onclick="if (this.checked) delete_bib('.$rec_ID.'); else undelete_bib('.$rec_ID.
-                                    ');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
+                                    print <<<EXP
+<td><input type="checkbox" name="duplicate[]" $checkDup value="$rec_ID" title="Check to mark this as a duplicate record for deletion"
+    id="duplicate$rec_ID" style="display:$disableDup" onclick="if (this.checked) delete_bib($rec_ID); else undelete_bib($rec_ID);">
+    <div style="font-size: 70%; display:$disableDup;">DUPLICATE</div></td>'
+EXP;
                                 }
                                 print '<td style="width: 500px;">';
                                 if (!$finished_merge) {
-                                    print '<input type="radio" name="keep" '.$checkKeep.
-                                    ' value="'.$rec_ID.
-                                    '" title="Click to select this record as the Master record"'.
-                                    ' id="keep'.$rec_ID.
-                                    '" onclick="keep_bib('.$rec_ID.');">';
+                                    print <<<EXP
+<input type="radio" name="keep" $checkKeep value="$rec_ID" title="Click to select this record as the Master record"
+    id="keep$rec_ID" onclick="keep_bib($rec_ID);">
+EXP;
                                 }
                                 print '<span style="font-size: 120%;">'
                                     .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>')
@@ -327,7 +326,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     if(!@$rec_requirements[$record['rec_RecTypeID']][$rd_type]) {continue;}
                                     $reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
                                     $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
-                                    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
+                                    print '<tr><td style="color: '.$color .';">'.$bdts[$rd_type].TD_E;
                                     print '<td style="padding-left:10px;">';
                                     foreach($detail as $i => $rg){
 
@@ -373,7 +372,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         print '<div style="word-break: break-word;">'. $detail . DIV_E;
                                     }
 
-                                    print '</td>';
+                                    print TD_E;
                                 }
 
                                 if ($record['rec_URL']) {print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.htmlspecialchars($record['rec_URL']).'</a></td></tr>';}
@@ -382,7 +381,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 if ($record['rec_Modified']) {print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).TR_E;}
 
 
-                                print '</table></td><td>';
+                                print TABLE_E.TD;
 
                                 print TABLE_S;
 
@@ -490,7 +489,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     if(!@$rec_requirements[$master_rec_type][$rd_type]) {continue;}
                                     $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
                                     $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
-                                    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
+                                    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].TD_E;
                                     //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
                                     //keep_dt_### where ### is detail Type id and mark both "checked" for master record
                                     print '<td style="padding-left:10px;">';
@@ -517,7 +516,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         print DIV. $detail . DIV_E;
                                     }
 
-                                    print '</td>';
+                                    print TD_E;
                                 }
 
                                 if ($record['rec_URL']) {

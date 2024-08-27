@@ -61,9 +61,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
             }else{
                 $error = $system->getError();
                 if($verbose && $error){
-                    print '<p style="color:red">'
-                    .$error['message']
-                    .'<br>'.@$error['sysmsg'].'</p>';
+                    print error_Div($error['message'].BR.@$error['sysmsg']);
                 }
 
                 $upgrade_success = false;
