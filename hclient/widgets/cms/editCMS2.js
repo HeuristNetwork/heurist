@@ -540,10 +540,10 @@ function editCMS2(website_document){
                             if(res!==false){
                                 was_converted_to_new_format = true;
                                 _layout_content = res;
-                                
+ 
 const sMsg = '<p>The internal storage format of web pages has changed for greater efficiency and stability.</p>'
-+'<p>Page is converted to new format and you can modify it. In order to save, hit <b>Save</b> on page exit.</p>'
-+'<p>For backward compatibility we can display, but not edit, the old format. You may therefore leave the page in the old format by hitting <b>Leave unchanged</b>.</p>'
+'<p>The page has been converted to the new format and you can modify it. In order to save the converted page, hit <b>Save</b> on page exit.</p>'
++'<p>For backward compatibility we can display, <u>but not edit</u>, the old format. You may therefore leave the page in the old format by hitting <b>Leave unchanged</b>.</p>'
 +'<p>We recommend saving in the new format</p>';
                                 
                                 window.hWin.HEURIST4.msg.showMsg(sMsg,{title:'New format', default_palette_class: default_palette_class});
