@@ -597,8 +597,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         if (requiredMembership > 0) {
                             let sGrpName = '';
-                            if (window.hWin.HAPI4.sysinfo.db_usergroups
-                                && window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]) {
+                            if (window.hWin.HAPI4.sysinfo.db_usergroups?.[requiredMembership]) {
                                 sGrpName = ' "' + window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership] + '"';
                             }
                             response.message += ' as member of group #' + requiredMembership + sGrpName;
@@ -609,7 +608,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             response.message += ' as database onwer';
                         } else if (requiredLevel > 0) {
                             let sGrpName = '';
-                            if (window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel]) {
+                            if (window.hWin.HAPI4.sysinfo.db_usergroups?.[requiredLevel]) {
                                 sGrpName = ' "' + window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel] + '"';
                             }
                             response.message += ' as administrator of group #' + requiredLevel + sGrpName;
@@ -1244,6 +1243,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     missed = rty_IDs;
 
                 } else {
+                    
+                    rty_IDs.forEach(function(rty_ID){
+                        let local_id = $Db.getLocalID('rty', rty_ID);
+                        if (!(local_id > 0)) {
+                            //not found
+                            missed.push(rty_ID);
+                        }
+                    });
 
                     for (let i = 0; i < rty_IDs.length; i++) {
                         let local_id = $Db.getLocalID('rty', rty_IDs[i]);
@@ -1256,7 +1263,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 //all record types are in this database
                 if (missed.length == 0) {
-                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                        callback.call();   
+                    }
                     return true;
                 }
 
