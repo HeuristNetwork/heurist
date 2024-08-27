@@ -68,6 +68,7 @@ if(@$params['max_file_size']>0){
 }
 if(@$params['upload_subfolder']){
     $options['upload_subfolder'] = $params['upload_subfolder'];
+    $options['image_versions'] = array('' => array('auto_orient' => true)); //disable thumbnails
 }
 
 //if(@$_REQUEST['upload_folder']){

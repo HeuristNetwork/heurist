@@ -341,8 +341,9 @@ if(!($max_size>0)) {$max_size = 0;}
                 <p class="size">Processing...</p>
                 </td>
                 <td>
+                <!--  disable upload one file - otherwise mass upload may fail -->
                 {% if (!i && !o.options.autoUpload) { %}
-                <button class="start" disabled>Upload</button>
+                <button class="start" style="visibility:hidden" disabled>Upload</button>
                 {% } %}
             {% if (!i) { %}
                 <button class="cancel">Cancel</button>
@@ -362,7 +363,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 {% if (file.thumbnailUrl) { %}
                 <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
                 {% } %}
-            </span>
+                </span>
             </td>
             <td style="{% if (file.error) { %}padding: 10px 0 10px 0; {% } %}">
             <p class="name" style="{% if (file.error) { %}margin-bottom: 5px; {% } %}">
@@ -374,12 +375,14 @@ if(!($max_size>0)) {$max_size = 0;}
               {% } %}
                 </td>
                 <td>
-                <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                <span class="size" file-size="{%=file.deleteUrl?0:file.size%}">{%=o.formatFileSize(file.size)%}</span>
                 </td>
                 <td>
+                <!-- disable delete for already uploaded files - since they are auto-indexed
                 <button class="delete" data-type="{%=file.deleteType%}"
                 data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
                 data-xhr-fields='{"withCredentials":true}'{% } %}>{%=file.error?'Clear':'Remove'%}</button>
+                -->
                 <!-- another confuising control - presumably meant to be a selection checkbox for multiple removals
                 <input type="checkbox" name="delete" value="1" class="toggle">
                 -->
@@ -525,7 +528,7 @@ if(!($max_size>0)) {$max_size = 0;}
 
                 if(do_register && files_to_register.length == to_reg_count && files_to_register.length > 0){
 
-                    var request = {
+                    const request = {
                         'a'          : 'batch',
                         'entity'     : 'recUploadedFiles',
                         'request_id' : window.hWin.HEURIST4.util.random(),
@@ -556,16 +559,8 @@ if(!($max_size>0)) {$max_size = 0;}
                 window.hWin.HEURIST4.filesWereUploaded = false;
 
                 //ART 2021-09-17 $(document).on("mouseleave", closeCheck);
-
-                // Initialize the jQuery File Upload widget:
-                $('#fileupload').fileupload({
-                    // Uncomment the following to send cross-domain cookies:
-                    //xhrFields: {withCredentials: true},
-                    //formData: {name: 'acceptFileTypes', value:"echo implode('|',$allowed_exts)" },
-                    //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>',
-                    url: '<?=HEURIST_BASE_URL?>hserv/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
-                    added: function(e, data){
-
+                
+                function __calculateTotalSizeToBeUploaded(){
                         //verify that all files are processed and show total size to be uploaded
                         var ele = $('tbody.files');
                         var size = 0;
@@ -576,24 +571,26 @@ if(!($max_size>0)) {$max_size = 0;}
                                 return false;
                             }else{
                                 var filesize = Number($(item).attr('file-size'));
-                                if(max_file_size>0 && filesize > max_file_size){
-                                    var template = $(item).parents('tr');
-                                    template.find('button.start').prop('disabled',true).css('color','lightgray');
-                                    $(item).text(window.hWin.HEURIST4.util.formatFileSize(filesize)+' !')
-                                        .attr('title', max_file_size_msg)
-                                        .css('color', 'red');
+                                if(!isNaN(filesize)){
+                                    if(max_file_size>0 && filesize > max_file_size){
+                                        var template = $(item).parents('tr');
+                                        template.find('button.start').prop('disabled',true).css('color','lightgray');
+                                        $(item).text(window.hWin.HEURIST4.util.formatFileSize(filesize)+' !')
+                                            .attr('title', max_file_size_msg)
+                                            .css('color', 'red');
 
-                                    var data = template.data('data') || {};
-                                    if(data.files){ //prevent upload
-                                        data.files[0].error = max_file_size_msg;
+                                        var data = template.data('data') || {};
+                                        if(data.files){ //prevent upload
+                                            data.files[0].error = max_file_size_msg;
+                                        }
+
+                                    }else{
+                                        size = size + filesize;
                                     }
-
-                                }else{
-                                    size = size + filesize;
                                 }
                             }
                         });
-
+                        
                         if(size>0){
 
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);
@@ -608,9 +605,20 @@ if(!($max_size>0)) {$max_size = 0;}
                             $('#btnStart').button('option','label','Start uploads')
                                           .removeClass('ui-button-action');
                         }
+                }
 
+                // Initialize the jQuery File Upload widget:
+                $('#fileupload').fileupload({
+                    // Uncomment the following to send cross-domain cookies:
+                    //xhrFields: {withCredentials: true},
+                    //formData: {name: 'acceptFileTypes', value:"echo implode('|',$allowed_exts)" },
+                    //upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>',
+                    url: '<?=HEURIST_BASE_URL?>hserv/utilities/UploadHandlerInit.php', //was external/jquery-file-upload/server/php/
+                    added: function(e, data){
+                        __calculateTotalSizeToBeUploaded();
                     },
                     finished: function(e, data){
+                        __calculateTotalSizeToBeUploaded();
 
                         var ele = $('tbody.files');
                         var cnt = ele.find('.template-download').length;
@@ -695,7 +703,7 @@ if(!($max_size>0)) {$max_size = 0;}
                     }
                 });
 
-                $('#btnCancel').on('click', function(e){
+                $('#btnCancel').on('click', function(e){ //clear list
 
                     if($('#btnCancel').button('option','label')=='Clear list'){
                         $('tbody.files').find('.template-download').remove();
