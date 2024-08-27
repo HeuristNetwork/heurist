@@ -288,7 +288,7 @@ abstract class DbEntityBase
             $sMsg = 'Cannot get content of settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
@@ -308,13 +308,13 @@ abstract class DbEntityBase
             $sMsg = 'Cannot save content the settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif($ext!='cfg'){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
                 $res = false;
             }elseif($content==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Content'));
                 $res = false;
             }else{
 
@@ -353,7 +353,7 @@ abstract class DbEntityBase
 
 
                 if($filename==null){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'New filename parameter is not defined');
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('New filename'));
                     $res = false;
                 }elseif($ext!='cfg'){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
@@ -376,7 +376,7 @@ abstract class DbEntityBase
             $sMsg = 'Cannot remove the settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');

@@ -81,7 +81,7 @@ if($system->init(@$_REQUEST['db'])){
         }
     }
     if($entity_name==null){
-        $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
+        $response = $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('"entity"'));
     }
 
     if(!$response){

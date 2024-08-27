@@ -716,7 +716,7 @@ function skin_open()
 
 function skin_close()
 {
-  echo '</div>';
+  echo DIV_E;
 }
 
 function error_echo($msg){

@@ -162,8 +162,8 @@ ini_set('max_execution_time', 0);
 
                 $sText = 'Target database '.HEURIST_DBNAME;
                 $sText .= ("<br>".'Source database '.intval(@$req_params["databaseID"]));
-                $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
-                        .$response['report']['rectypes'].'</table>');
+                $sText .= (TABLE.'<tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
+                        .$response['report']['rectypes'].TABLE_E);
 
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'Download templates', $sText, true);
             }

@@ -93,16 +93,16 @@ $mysqli = $system->get_mysqli();
         $dirs = filestoreGetUsageByFolders($system);
 
         print '<p>Disk quota: '.$quota.' MB</p>';
-        print 'Disk usage by folder<br><table><tr><th>folder</th><th>MB</th></tr>';
+        print 'Disk usage by folder<br>'.TABLE_S.'<tr><th>folder</th><th>MB</th></tr>';
 
         foreach ($dirs as $dir=>$size){
             if($size>0){
                 $size /= 1048576;
                 $size = round((float)$size, 2);
-                print '<tr><td>'.htmlspecialchars($dir).'</td><td>'.$size.'</td></tr>';
+                print TR_S.htmlspecialchars($dir).TD.$size.TR_E;
             }
         }//for
-        print '</table>';
+        print TABLE_E;
         print 'Total usage: <b>'.$usage.' MB</b><br><hr>';
 ?>
         <div class="banner">
@@ -314,9 +314,9 @@ $mysqli = $system->get_mysqli();
 
                         /* report
                         foreach($file_a['dupes'] as $id=>$path){
-                            print '<div>'.$id.' '.$path.'</div>';
+                            print DIV.$id.' '.$path.DIV_E;
                         }
-                        print '<div style="padding:0 0 10px 60px">removed in favour of '.$ulf_ID.' '.$file_a['path'].'</div>';
+                        print '<div style="padding:0 0 10px 60px">removed in favour of '.$ulf_ID.' '.$file_a['path'].DIV_E;
                         */
                     }
                 }//foreach

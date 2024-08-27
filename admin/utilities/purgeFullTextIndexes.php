@@ -34,6 +34,8 @@ $tabs0 = '';
 
 if (@$argv) {
 
+    define('PURGE','-purge');
+
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/purgeFullTextIndexes.php -- -purge
 //  sudo php -f purgeFullTextIndexes.php -- -purge  -  action, otherwise only report
@@ -48,8 +50,8 @@ if (@$argv) {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
             } else {
-                if(strpos($argv[$i],'-purge')===0){
-                    $ARGV['-purge'] = true;
+                if(strpos($argv[$i],PURGE)===0){
+                    $ARGV[PURGE] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;
                 }
@@ -61,7 +63,7 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-purge']) {$arg_no_action = false;}
+    if (@$ARGV[PURGE]) {$arg_no_action = false;}
 
 }else{
 
@@ -69,7 +71,7 @@ if (@$argv) {
     $arg_no_action = true;
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
     //exit('This function must be run from the shell');
 }
 

@@ -631,7 +631,7 @@ class DbUtils {
                         'Error importing core definitions from '
                         . basename($templateFileName)
                         .' for database '.$database_name_full.'<br>'
-                        .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
+                        .'Check whether this file or database is valid.'.CONTACT_HEURIST_TEAM_PLEASE.' if needed');
 
                     folderDelete($database_folder);
                     mysql__drop_database( $mysqli, $database_name_full );
@@ -1673,7 +1673,7 @@ class DbUtils {
             {
                 $dbTitle = $rec['sys_dbDescription'];
                 $dbowner = user_getDbOwner($mysqli);
-                $serverURL = HEURIST_SERVER_URL . '/heurist/' . "?db=" . $db_target;
+                $serverURL = HEURIST_SERVER_URL . HEURIST_DEF_DIR . "?db=" . $db_target;
                 $params = array(
                     'action'=>'update',
                     'dbID'=>$regID,

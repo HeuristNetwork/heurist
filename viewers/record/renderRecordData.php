@@ -1145,7 +1145,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 
             print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
-	        print '</div>';
+	        print DIV_E;
 
             $opts = '';
             $list = '';
@@ -1166,7 +1166,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                     if($id!=$rec_id){  //print details for linked records - hidden
                         print '<div data-recid="'.intval($id).'" style="display:none">';//font-size:0.8em;
                         print_details($bibInfo);
-                        print '</div>';
+                        print DIV_E;
                     }
                     $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
 
@@ -1195,7 +1195,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                     </div>
                     <?php
                 }
-                print '</div>';
+                print DIV_E;
 
                 /*Multiple entries here<br><br>
                 print '<div style="font-size:0.8em"><select style="font-size:0.9em"'
@@ -1210,7 +1210,7 @@ if ($bkm_ID>0 || $rec_id>0) {
             print 'No details found';
         }
  if($is_map_popup || $without_header){
-//    print '</div>';
+//    print DIV_E;
  }else{
        ?>
         <div id=bottom><div></div>
@@ -1400,7 +1400,7 @@ function print_private_details($bib) {
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
-                href="<?= HEURIST_SERVER_URL ?>/heurist/?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
+                href="<?= HEURIST_SERVER_URL.HEURIST_DEF_DIR ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link"
@@ -1515,7 +1515,7 @@ function print_private_details($bib) {
     if (is_array($bib) && array_key_exists('bkm_ID', $bib)) {
                 print_personal_details($bib);
     }
-    print '</div>';
+    print DIV_E;
 }
 
 
@@ -2115,7 +2115,7 @@ function print_public_details($bib) {
                     print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);//see recordFile.php
 
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null);
-                    print '</div>';
+                    print DIV_E;
                 }else{
                     print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
                     if($isImageOrPdf && !$without_header){
@@ -2129,7 +2129,7 @@ function print_public_details($bib) {
                         ?''
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
-            print '</div>';
+            print DIV_E;
             print '</div><!--CLOSE THUMB SECTION-->';
             if($is_map_popup){
                 print '<br>';
@@ -2398,9 +2398,9 @@ function print_relation_details($bib) {
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
-				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . DIV_E;
 			}elseif($field_name !== false){
-				print '<div class=detailType>' . $field_name . '</div>';
+				print '<div class=detailType>' . $field_name . DIV_E;
 			}
 
 			print '<div class="detail" '. $extra_styling .'>';
@@ -2486,9 +2486,9 @@ function print_relation_details($bib) {
 			$link_cnt++;
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
-				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . DIV_E;
 			}elseif($field_name !== false){
-				print '<div class=detailType>' . $field_name . '</div>';
+				print '<div class=detailType>' . $field_name . DIV_E;
 			}
 
 			print '<div class="detail" '. $extra_styling .'>';
@@ -2510,7 +2510,7 @@ function print_relation_details($bib) {
         $to_res->close();
     }
 
-    print '</div>';
+    print DIV_E;
 
     //$move_details - array of related records without particular relmarker field
     if(is_array($move_details) && !empty($move_details)){
@@ -2599,10 +2599,10 @@ function print_linked_details($bib, $link_cnt)
                             .'" onclick="return link_open(this);">'
                 .USanitize::sanitizeString($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
 
-        print '</div>';
+        print DIV_E;
     }
 
-    print '</div>';
+    print DIV_E;
     return $link_cnt;
 
 }
@@ -2733,7 +2733,7 @@ function print_threaded_comments($cmts) {
                     $level = 20 * $pair["level"];
                     print '<div style=" font-style:italic; padding: 0px 0px 0px ';
                     print $level;
-                    print  'px ;"> ['.$cmts[$pair['id']]["user"]. "] " . $cmts[$pair['id']]["text"] . "</div>";
+                    print  'px ;"> ['.$cmts[$pair['id']]["user"]. "] " . $cmts[$pair['id']]["text"] . DIV_E;
                 }
                 ?>
             </div>

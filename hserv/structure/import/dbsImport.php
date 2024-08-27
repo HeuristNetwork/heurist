@@ -875,7 +875,7 @@ foreach ($this->imp_fieldtypes as $ftId){
         $this->error_exit2('Can\'t add base field "'.$def_field[$idx_name-1]
             .'" (global code '.$def_field[$idx_ccode-1]
             .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. '
-            .'<br><br>Please '.CONTACT_HEURIST_TEAM.' for advice'
+            .'<br><br>'.CONTACT_HEURIST_TEAM_PLEASE.' for advice'
             .'<br><br>MySQL message:'.$res);
         return false;
     }
@@ -1213,8 +1213,8 @@ $mysqli->commit();
             $defs = $defs['data'];
         }
         if (!($defs['terms']  &&  ($only_terms || ($defs['rectypes'] && $defs['detailtypes'])))) {
-            $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid. Please "
-                .CONTACT_HEURIST_TEAM);
+            $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid."
+                .CONTACT_HEURIST_TEAM_PLEASE);
             return false;
         }
 
@@ -2111,7 +2111,7 @@ $mysqli->commit();
                     }
 
                     $sRectypes = $sRectypes."<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
-                    ."</td><td>"
+                    .TD
                     .$def_rts[$imp_id]['commonFields'][$idx_ccode]
                     ."</td><td>$trg_id</td><td>"
                     .@$trg_rectypes['names'][$trg_id]
@@ -2135,11 +2135,11 @@ $mysqli->commit();
                 }
 
                 $sFields = $sFields."<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
-                ."</td><td>"
+                .TD
                 .$def_dts[$imp_id]['commonFields'][$idx_ccode]
                 ."</td><td>$trg_id</td><td>"
-                .@$trg_detailtypes['names'][$trg_id]."</td></tr>";
-                //.$trg_detailtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
+                .@$trg_detailtypes['names'][$trg_id].TR_E;
+                //.$trg_detailtypes['typedefs'][$trg_id]['commonFields'][$idx_name].TR_E;
             }
         }
 
@@ -2161,10 +2161,10 @@ $mysqli->commit();
             }
 
             $sTerms = $sTerms . "<tr><td>$imp_id</td><td>".$def_terms['termsByDomainLookup'][$domain][$imp_id][$idx_name]
-            ."</td><td>"
+            .TD
             .$def_terms['termsByDomainLookup'][$domain][$imp_id][$idx_ccode]
             ."</td><td>$trg_id</td><td>"
-            .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
+            .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name].TR_E;
         }
 
         $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms,'translations'=>$this->translations_report) );

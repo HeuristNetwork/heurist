@@ -3689,7 +3689,7 @@ function recordLinksFileContent($system, $record){
         recordSearchDetails($system, $record, array(DT_NAME));
     }
 
-    $url = HEURIST_SERVER_URL . '/heurist/?db='.$system->dbname().'&recID='.$record['rec_ID'];
+    $url = HEURIST_SERVER_URL . HEURIST_DEF_DIR . '?db='.$system->dbname().'&recID='.$record['rec_ID'];
 
     return 'Downloaded from: '.$system->get_system('sys_dbName', true)."\n"
     .'Dataset ID: '.$record['rec_ID']."\n"

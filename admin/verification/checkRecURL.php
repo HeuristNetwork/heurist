@@ -36,6 +36,8 @@ set_time_limit(0);
 
 global $glb_curl_error;
 
+define('CURL_RANGE','0-500');
+
 if($is_included){
     $verbose = false;
     print '<div style="padding:10px"><h3 id="records_url_msg">Check Records URL</h3><br>';
@@ -161,14 +163,15 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
             //timeout 10 seconds (default 30)
             if($list_only){
-                print intval($rec_id).' : <a href="'. $rec_url .'" target="_blank" rel="noopener">'.$rec_url . '</a><br>';
+                print intval($rec_id)
+                ." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a><br>";
                 continue;
             }
             if(strpos(strtolower($rec_url),$heurist_server_url)===0){
                 continue; //skip same server
             }
                 
-            $data = loadRemoteURLContentWithRange($rec_url, "0-250", true, 5);
+            $data = loadRemoteURLContentWithRange($rec_url, CURL_RANGE, true, 5);
 
             if ($data){
 
@@ -177,7 +180,8 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                 if($is_check_heurist_instance && (!$return_output || $verbose) && strpos($data, 'error: ')===0){
 
                     $rec_url = htmlspecialchars($rec_url);
-                    print intval($rec_id).' : <a href="'. $rec_url .'" target="_blank" rel="noopener">'.$rec_url . '</a>';
+                    print intval($rec_id)
+                    ." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a>";
 
                     $data = strpos($data, 'timeout') !== false ? 'Timeout occurred' : $data;
                     $data = strpos($data, 'does not exist') !== false ? 'Database does not exist' : $data;
@@ -218,8 +222,8 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
                     $rec_url = htmlspecialchars($rec_url);
 
-                    print '<div>'.intval($rec_id).' : <a href="'.$rec_url.'" target="_blank" rel="noopener">'.$rec_url.'</a> '
-                        .(isset($glb_curl_error)?$glb_curl_error:'').'</div>';
+                    print DIV.intval($rec_id)." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a> "
+                        .(isset($glb_curl_error)?$glb_curl_error:'').DIV_E;
                 }
                 if($return_output){
                     $results[0][0][] = $rec_id;
@@ -318,14 +322,15 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                     }
                     
                     if($list_only){
-                        print intval($rec_id).' : '.$dty_id.'  <a href="'. $url .'" target="_blank" rel="noopener">'.$url . '</a><br>';
+                        print intval($rec_id).' : '.$dty_id
+                        ." : <a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a><br>";
                         continue;
                     }
                     if(strpos(strtolower($url),$heurist_server_url)===0){
                         continue; //skip same server
                     }
 
-                    $data = loadRemoteURLContentWithRange($url, "0-250", true, 5);
+                    $data = loadRemoteURLContentWithRange($url, CURL_RANGE, true, 5);
 
                     if($data){
                         $passed_cnt ++;
@@ -348,7 +353,8 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                         }
 
                         $broken_cnt ++;
-                        $broken_field_urls[$rec_id][$dty_id] .= '<div><a href="'.$url.'" target="_blank" rel="noopener">'.$url.'</a> '.$glb_curl_error.'</div>';
+                        $broken_field_urls[$rec_id][$dty_id] .= "<div><a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a>"
+                                        .$glb_curl_error.DIV_E;
 
                         if($return_output){
                             if(!array_key_exists($rec_id, $results[1])){
@@ -392,14 +398,15 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
             }*/
 
             if($list_only){
-                print intval($rec_id).' : '.$dty_id.'  <a href="'. $url .'" target="_blank" rel="noopener">'.$url . '</a><br>';
+                print intval($rec_id).' : '.$dty_id
+                ." <a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a><br>";
                 continue;
             }
             if(strpos(strtolower($url),$heurist_server_url)===0){
                 continue; //skip same server
             }
             
-            $data = loadRemoteURLContentWithRange($url, "0-250", true, 5);
+            $data = loadRemoteURLContentWithRange($url, CURL_RANGE, true, 5);
 
             if($data){
                 $passed_cnt++;
@@ -422,7 +429,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                 }
 
                 $broken_cnt ++;
-                $broken_field_urls[$rec_id][$dty_id] .= '<div>'.$url.' '.$glb_curl_error.'</div>';
+                $broken_field_urls[$rec_id][$dty_id] .= DIV.$url.' '.$glb_curl_error.DIV_E;
 
                 if($return_output){
                     if(!array_key_exists($rec_id, $results[2])){
@@ -460,7 +467,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                      $fld_names = mysql__select_list2($mysqli, str_replace(array('DTYID'), array($dtyids), $def_name_query));
                 }
 
-                print '<div>' . $recid . ': ' . implode(' ;', array_values($flds))
+                print DIV . $recid . ': ' . implode(' ;', array_values($flds))
                         . '[found in field(s): ' . htmlspecialchars( implode(',', $fld_names) ). ']<br>';
             }
 

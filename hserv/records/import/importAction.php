@@ -2329,9 +2329,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 $res = self::getImportValue($imp_id, $import_table);
                 if(is_array($res)){
                     $s = htmlspecialchars(implode(", ", $res));
-                    print "<div style='padding-left:40px'>".$s."</div>";
+                    print "<div style='padding-left:40px'>".$s.DIV_E;
                 }
-                print "</div>";
+                print DIV_E;
             }
         }else{
             if(self::$rep_skipped<100){
@@ -2418,7 +2418,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
         /*
         if (@$out['warning'] && $mode_output!='json') {
-            print "<div style=\"color:#ff8844\">Warning: ".implode(";",$out["warning"])."</div>";
+            print "<div style=\"color:#ff8844\">Warning: ".implode(";",$out["warning"]).DIV_E;
         }
         */
 

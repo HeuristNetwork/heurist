@@ -260,13 +260,13 @@ $mysqli->query($query);
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
 
                     //find options what may be code for these rectypes
                     foreach($all_rty_regs as $k=>$rty)
                     {
                         if($rty[1]==strtolower($row[0]) || ($row[1] && $rty[1]==strtolower($row[1]))){
-                            print '<tr><td colspan="2"></td><td>'.$rty[1].'</td><td>'.$rty[2].'</td><td>'.$rty[3].'</td></tr>';
+                            print '<tr><td colspan="2"></td><td>'.$rty[1].TD.$rty[2].TD.$rty[3].TR_E;
                         }
                     }
                 }
@@ -275,13 +275,13 @@ $mysqli->query($query);
                 print '<tr><td colspan=5>&nbsp;</td></tr>';
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
                 }
             }
             if(count($terms)>0){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
                 }
             }
             print '</table>';
@@ -291,12 +291,12 @@ $mysqli->query($query);
     print '[end report]</div>';
 
 /*
-    print '<div><table>';
+    print DIV.TABLE;
     foreach($all_rty_regs as $k=>$rty)
     {
-        print '<tr><td>'.$rty[1].'</td><td>'.$rty[2].'</td><td>'.$rty[3].'</td></tr>';
+        print TR_S.$rty[1].TD.$rty[2].TD.$rty[3].TR_E;
     }
-    print '</table></div>';
+    print TABLE_E.DIV_E;
 */
 /*
     asort($registered);

@@ -62,7 +62,7 @@ if (@$argv) {
     /*web browser
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
 
     if(array_key_exists('db', $_REQUEST)){
         $arg_database = explode(',',$_REQUEST['db']);
@@ -96,7 +96,7 @@ $base_url = '';
 if(defined('HEURIST_BASE_URL_PRO')){
     $base_url = HEURIST_BASE_URL_PRO;
 }else{
-    $base_url = 'https://' . HEURIST_SERVER_NAME . '/heurist/';
+    $base_url = 'https://' . HEURIST_SERVER_NAME . HEURIST_DEF_DIR;
 }
 
 if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'https://') == 0){
@@ -106,8 +106,8 @@ if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'h
 if(substr($base_url, -1, 1) != '/'){
     $base_url .= '/';
 }
-if(strpos($base_url, '/heurist/') === false){
-    $base_url = rtrim($base_url, '/') . '/heurist/';
+if(strpos($base_url, HEURIST_DEF_DIR) === false){
+    $base_url = rtrim($base_url, '/') . HEURIST_DEF_DIR;
 }
 
 $mysqli = $system->get_mysqli();

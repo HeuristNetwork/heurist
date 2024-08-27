@@ -184,7 +184,7 @@ if(!defined('PDIR')){
 
                             }else{
                                 print "<p style='font-weight:bold'>Cannot find the database upgrade script '".$filename
-                                ."'. Please ".CONTACT_HEURIST_TEAM."</p>";
+                                ."'.".CONTACT_HEURIST_TEAM_PLEASE.'</p>';
                                 $upgrade_success = false;
                                 break;
                             }
@@ -222,7 +222,7 @@ if(!defined('PDIR')){
                         if($system->is_admin()){
 
                             if($src_maj!=$trg_maj){
-                                print '<p style="font-weight:bold">Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.). Please '.CONTACT_HEURIST_TEAM.' to upgrade major version (1 => 2, 2 => 3)</p>';
+                                print '<p style="font-weight:bold">Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.).'.CONTACT_HEURIST_TEAM_PLEASE.' to upgrade major version (1 => 2, 2 => 3)</p>';
                             }else{
 
                                 //verification that all scripts exist and get safety rating from these scrips
@@ -259,7 +259,8 @@ if(!defined('PDIR')){
                                             }
                                             fclose($file);
                                         }else{
-                                            print "<p style='font-weight:bold'>Cannot read the upgrade script '".$filename."'. Please ".CONTACT_HEURIST_TEAM."</p>";
+                                            print "<p style='font-weight:bold'>Cannot read the upgrade script '".$filename."'."
+                                            .CONTACT_HEURIST_TEAM_PLEASE."</p>";
                                             $is_allfind = false;
                                             break;
                                         }
@@ -271,7 +272,7 @@ if(!defined('PDIR')){
                                         $src_min++;
                                     }else{
                                         print "<p style='font-weight:bold'>Cannot find the upgrade script '".$filename
-                                        ."'. Please ".CONTACT_HEURIST_TEAM."</p>";
+                                        ."'.".CONTACT_HEURIST_TEAM_PLEASE."</p>";
                                         $is_allfind = false;
                                         break;
                                     }
@@ -348,7 +349,7 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
                     Error: Unable to execute <?php echo $filename;?> for database <?php echo HEURIST_DBNAME; ?><br>
-                    Please check whether this file is valid; <?php echo CONTACT_HEURIST_TEAM;?> if needed<br>
+                    Please check whether this file is valid. <?php echo CONTACT_HEURIST_TEAM_PLEASE;?> if needed<br>
                 </div>
 <?php
                 if(!$system->is_admin()){

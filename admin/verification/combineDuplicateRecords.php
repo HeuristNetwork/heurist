@@ -318,8 +318,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     ' id="keep'.$rec_ID.
                                     '" onclick="keep_bib('.$rec_ID.');">';
                                 }
-                                print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
-                                print '<table>';
+                                print '<span style="font-size: 120%;">'
+                                    .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>')
+                                    .' - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
+                                print TABLE_S;
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) {continue;}    //FIXME  check if required and mark it as missing and required
                                     if(!@$rec_requirements[$record['rec_RecTypeID']][$rd_type]) {continue;}
@@ -359,16 +361,16 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         $repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
                                         if ($repeatCount==0){
                                             foreach ($detail as $val) {
-                                                print '<div style="word-break: break-word;">'. htmlspecialchars($val) . '</div>';
+                                                print '<div style="word-break: break-word;">'. htmlspecialchars($val) . DIV_E;
                                             }
                                         } else{
                                             for ($i = 0; $i < $repeatCount; $i++) {
-                                                print '<div style="word-break: break-word;">'. htmlspecialchars($detail[$i]) . '</div>';
+                                                print '<div style="word-break: break-word;">'. htmlspecialchars($detail[$i]) . DIV_E;
                                             }
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div style="word-break: break-word;">'. $detail . '</div>';
+                                        print '<div style="word-break: break-word;">'. $detail . DIV_E;
                                     }
 
                                     print '</td>';
@@ -376,33 +378,33 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
                                 if ($record['rec_URL']) {print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.htmlspecialchars($record['rec_URL']).'</a></td></tr>';}
 
-                                if ($record['rec_Added']) {print '<tr><td>Added</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';}
-                                if ($record['rec_Modified']) {print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';}
+                                if ($record['rec_Added']) {print '<tr><td>Added</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).TR_E;}
+                                if ($record['rec_Modified']) {print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).TR_E;}
 
 
                                 print '</table></td><td>';
 
-                                print '<table>';
+                                print TABLE_S;
 
                                 if (array_key_exists("refs",$record)) {
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
-                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.($i++).'</a> ';
+                                        print edit_link(ref, ($i++));
                                     }
-                                    print '</td></tr>';
+                                    print TR_E;
                                 }
 
                                 $bkmk_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
 
-                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';}
+                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.TR_E;}
 
                                 $kwd_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
                                     .'on rtl_RecID=bkm_recID where bkm_RecID='.$rec_ID.' and rtl_ID is not null'));
 
-                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';}
+                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.TR_E;}
 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '
                                 .'rem_Freq, rem_StartDate from usrReminders left join sysUGrps on ugr_ID=rem_OwnerUGrpID '
@@ -416,12 +418,12 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $res2->close();
 
                                 if (count($rems)){
-                                    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+                                    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . TR_E;
                                 }
 
                                 print '</table>';
 
-                                print '</td></tr>';
+                                print TR_E;
                                 print '<tr><td colspan=3><br><hr></td></tr>';
                                 print "</tr>\n\n";
                             }
@@ -447,8 +449,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 if ($is_master) {print '<td><div><b>MASTER</b></div></td>';}
                                 else {print '<td><div><b>Duplicate</b></div></td>';}
                                 print '<td style="width: 500px;">';
-                                print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($rec_ID).'">'.intval($rec_ID). ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></div>';
-                                print '<table>';
+                                print '<div style="font-size: 120%;">'
+                                        .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>')
+                                .' - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></div>';
+                                print TABLE_S;
                                 if ($is_master) {
                                     $master_details = $record['details'];
                                 }
@@ -503,14 +507,14 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     if (is_array($detail)) {
                                         if ($repeatCount != 1){//repeatable
                                             foreach ($detail as $val) {
-                                                print '<div>'. $val . '</div>';
+                                                print DIV. $val . DIV_E;
                                             }
                                         } else{
-                                            print '<div>'. $detail[0] . '</div>';
+                                            print DIV. $detail[0] . DIV_E;
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div>'. $detail . '</div>';
+                                        print DIV. $detail . DIV_E;
                                     }
 
                                     print '</td>';
@@ -522,33 +526,33 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     ' title="'.($is_master?"Click to keep URL with Master record":"Click to replace URL in Master record (overwrite)").
                                     '" value="'.$record['rec_URL'].
                                     '" id="URL'.$record['rec_ID'].
-                                    '"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
+                                    '"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a>'.TR_S;
                                 }
-                                if ($record['rec_Added']) {print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';}
-                                if ($record['rec_Modified']) {print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';}
+                                if ($record['rec_Added']) {print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).TR_E;}
+                                if ($record['rec_Modified']) {print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).TR_E;}
 
 
                                 print '</table></td><td>';
 
-                                print '<table>';
+                                print TABLE_S;
 
                                 if (array_key_exists("refs",$record)) {
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $ref) {
-                                        print '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($ref).'">'.$i++.'</a> ';
+                                        print edit_link(ref, ($i++));
                                     }
-                                    print '</td></tr>';
+                                    print TR_E;
                                 }
 
                                 $bkmk_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
-                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';}
+                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.TR_E;}
 
                                 $kwd_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
                                     .'on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
-                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';}
+                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.TR_E;}
 
 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '
@@ -562,12 +566,12 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 }
                                 $res2->close();
                                 if (count($rems)){
-                                    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+                                    print '<tr><td>Reminders</td><td>' . join(', ', $rems) . TR_E;
                                 }
 
                                 print '</table>';
 
-                                print '</td></tr>';
+                                print TR_E;
                                 print '<tr><td colspan=3><br><hr></td></tr>';
                                 print "</tr>\n\n";
                             }
@@ -647,6 +651,10 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
     return $rv;
 }
 
+function edit_link($rec_id, $label){
+    return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$val.'">'.$label.'</a>';
+}
+
 //
 // $rd_type - detail type id or term id
 //
@@ -659,15 +667,13 @@ function detail_str($rd_type, $rd_val)
             $titles = mysql__select_assoc2($mysqli, 'select rec_ID, rec_Title from Records where rec_ID in ('
                     .implode(',',$rd_val).')');
             foreach ($rd_val as $val){
-                $rv[] = '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$val.'">'
-                    .$titles[$val].'</a>';
+                $rv[] = edit_link($val, $titles[$val]);
             }
             return $rv;
         }
         elseif($rd_val>0) {
             $title =  mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID ='.$rd_val);
-            return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rd_val
-                .'">'.$title.'</a>';
+            return edit_link($rd_val, $title);
         }
     }
     /*

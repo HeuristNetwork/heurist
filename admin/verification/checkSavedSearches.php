@@ -209,7 +209,7 @@ foreach($databases as $db){
                                         . "ID: <strong style='padding-right: 15px;'>$svs_ID</strong> "
                                         . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>"
                                         . implode("<br>", $results[$db][$svs_ID])
-                                    ."</div>";
+                                    .DIV_E;
         }elseif(array_key_exists($svs_ID, $results[$db])){
             unset($results[$db][$svs_ID]);
         }

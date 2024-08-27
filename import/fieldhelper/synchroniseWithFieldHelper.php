@@ -136,7 +136,7 @@ $failed_exts = array();
 
             function update_counts(divid, processed, added, total) {
                 document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "
-                    +processed+" of "+total+". Added records: "+added+"</div>");
+                    +processed+" of "+total+". Added records: "+added+'</div>');
             }
 
             function sysIdentificationPopup() {
@@ -262,7 +262,7 @@ $failed_exts = array();
             }
 
             print "<div>Synchronisation completed</div>";
-            print '<div style="color:green">Total files processed:'.intval($rep_counter).'</div>';
+            print '<div style="color:green">Total files processed:'.intval($rep_counter).DIV_E;
 
             if($rep_counter > 0){
                 print '<script type="text/javascript">if(window.hWin.HEURIST4.dbs) { window.hWin.HEURIST4.dbs.get_record_counts(null);}</script>';
@@ -330,7 +330,7 @@ $failed_exts = array();
 
                 if(in_array($dir, $system_folders)){
 
-                    print '<div style="color:red">Files are not scanned in system folder '.htmlspecialchars($dir).'</div>';
+                    print '<div style="color:red">Files are not scanned in system folder '.htmlspecialchars($dir).DIV_E;
 
                 }elseif($dir && file_exists($dir) && is_dir($dir))
                 {
@@ -352,7 +352,7 @@ $failed_exts = array();
                                 }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                                     $isfirst = false;
                                     if($dir == HEURIST_FILESTORE_DIR){
-                                        print '<div style="color:red">Files are not scanned in root upload folder '.htmlspecialchars($dir).'</div>';
+                                        print '<div style="color:red">Files are not scanned in root upload folder '.htmlspecialchars($dir).DIV_E;
                                     }else{
                                         $rep_counter = $rep_counter + doHarvestInDir($dir);
                                     }
@@ -366,7 +366,7 @@ $failed_exts = array();
                         }
                     }
                 }elseif($dir) {
-                    print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).'</div>';
+                    print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).DIV_E;
                 }
             }
         }
@@ -790,9 +790,9 @@ XML;
                             $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath);//getRelativePath2($targetPath);
                             $details["t:".$key] = array("1"=>  $rel_path);
 
-                            /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
-                            print "<div>file path :".$targetPath."</div>";
-                            print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path."</div>";
+                            /*print "<div>".HEURIST_FILESTORE_DIR.DIV_E;
+                            print "<div>file path :".$targetPath.DIV_E;
+                            print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path.DIV_E;
                             print "<div>relative path old :".getRelativePath(HEURIST_FILESTORE_DIR, $targetPath)."<br><br></div>";*/
 
 

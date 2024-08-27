@@ -101,15 +101,15 @@ public static function encodeAndGetPreview($upload_file_name, $params){
 
     $original_filename =  basename($upload_file_name);
     $upload_file_name = HEURIST_SCRATCH_DIR.$upload_file_name;
+    
+    $contact_team = ' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
 
     $s = null;
     if($upload_file_name==null){
-        $s = 'File parameter is not defined<br><br>'
-        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
+        $s = error_WrongParam('File').'<br><br>'.$contact_team;
     }elseif (! file_exists($upload_file_name)) {
         $s = ' does not exist.<br><br>'
-        .'Please clear your browser cache and try again. '
-        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
+        .'Please clear your browser cache and try again. '.$contact_team;
     }elseif (! is_readable($upload_file_name)) {$s = ' is not readable';}
 
     if($s){

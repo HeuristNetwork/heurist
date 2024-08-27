@@ -190,7 +190,7 @@ if($fh_data==null || is_string($fh_data)){
         // ."&mode=properties2\"Database > Prxoperties</a>";
 
 
-        //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
+        //print "<div>Orignal ID detail:".$dt_SourceRecordID.DIV_E;
 
 
         $lib_keys = explode("|", $HEURIST_ZOTEROSYNC);
@@ -315,16 +315,16 @@ if($step=="1"){  // info about current status
 
         if(count($mapping_errors)>0){
             print "<strong>Data not mapped</strong><br>";
-            print "<em>The following data has not been mapped for transfer from Zotero to Heurist.<br>If you require these record types or fields to be mapped,<br>please email a list to the Heurist team (support at HeuristNetwork.org).</em><br>";
-            print "<br><table>".implode("",$mapping_errors)."</table><br>";
+            print "<em>The following data has not been mapped for transfer from Zotero to Heurist.<br>If you require these record types or fields to be mapped,<br>please email a list to the Heurist team (support at HeuristNetwork.org).</em><br><br>";
+            print TABLE_S.implode("",$mapping_errors).TABLE_E."<br>";
         }
         if(count($transfer_errors)>0){
             print "<strong>Data not transfered</strong><br>";
             print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>"
                 . "not be saved as the record type does not contain a field to hold them. If you feel that<br>"
                 . "any of these fields are needed, you may add the indicated base field to the record<br>"
-                . "type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br>";
-            print "<br><table>".implode("", $transfer_errors)."</table><br>";
+                . "type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br><br>";
+            print TABLE_S.implode("", $transfer_errors).TABLE_E."<br>";
         }
         if(count($mapping_rt_errors2)>0){
             print "<p style='color:red'><br>No proper field mapping found for record types:";
@@ -337,7 +337,7 @@ if($step=="1"){  // info about current status
     if(count($successful_rows)>0){
 
         print "<div id='success-accordion'><h3><strong>Data mapped for transfer</strong></h3>";
-        print "<div><table>".implode("", $successful_rows)."</table></div></div><br><br>";
+        print DIV.TABLE_S.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
 
         // Make this section an accordion (jQuery UI)
         print '<script> $("#success-accordion").accordion({collapsible: true, heightStyle: "content", active: false});';
@@ -347,7 +347,7 @@ if($step=="1"){  // info about current status
     }
 }
 
-print '</div>';
+print DIV_E;
 
 if($is_verbose){
     print '<div>Mapping check completed. '.$warning_count.' warnings';
@@ -410,7 +410,7 @@ if($step=="1"){  //first step - info about current status
         }elseif($code==407 ){
             $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
         }
-        print $msg."</div>";
+        print $msg.DIV_E;
     }elseif(!$items){
         print "<div class='ui-state-error' style='padding:20px'>Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
         if($code==0){
@@ -785,9 +785,9 @@ if($step=="1"){  //first step - info about current status
     print 'Synching Completed, Printing Report<br>';
 
 //fclose($fd);
-    print '<table><tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
+    print TABLE_S.'<tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
     foreach ($cnt_report as $rty_ID=>$cnt){
-        print '<tr><td>'.htmlspecialchars($rectypes['names'][$rty_ID])
+        print TR_S.htmlspecialchars($rectypes['names'][$rty_ID])
             .'</td><td align="center">'.(count($cnt['added'])>0?'<a target="_blank" href="'
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt['added'])).'&nometadatadisplay=true">'
@@ -795,19 +795,19 @@ if($step=="1"){  //first step - info about current status
             .'</td><td align="center">'.(count($cnt['updated'])>0?'<a target="_blank" href="'
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt['updated'])).'&nometadatadisplay=true">'
-                    .count($cnt['updated']).'</a>':'0').'</td></tr>';
+                    .count($cnt['updated']).'</a>':'0').TR_E;
 
 
     }
 
-    print '</table><div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
+    print TABLE_E.'<div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt_added)).'&nometadatadisplay=true">'
-                    .count($cnt_added).'</a>':'0').'</div>';
+                    .count($cnt_added).'</a>':'0').DIV_E;
     print '<div>Records updated : '.(count($cnt_updated)>0?'<a  target="_blank" href="'
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt_updated)).'&nometadatadisplay=true">'
-                    .count($cnt_updated).'</a>':'0').'</div>';
+                    .count($cnt_updated).'</a>':'0').DIV_E;
 
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
 
@@ -816,9 +816,9 @@ if($step=="1"){  //first step - info about current status
     if($tot_erros>0){
         print '<div style="color:red">';
         if($cnt_ignored>0){
-            print '<br>Zotero entries that are not mapped to Heurist record types: '.intval($cnt_ignored).'<table>';
+            print '<br>Zotero entries that are not mapped to Heurist record types: '.intval($cnt_ignored).TABLE_S;
             foreach ($arr_ignored_by_type as $itemtype => $cnt){
-                print '<tr><td>'.htmlspecialchars($itemtype).'</td><td>'.intval($cnt).'</td></tr>';
+                print TR_S.htmlspecialchars($itemtype).TD.intval($cnt).TR_E;
             }
             print '</table>';
 
@@ -826,26 +826,26 @@ if($step=="1"){  //first step - info about current status
         }
         if($cnt_empty>0){
             print '<br>Zotero entries ignored because there are no properly mapped keys: '.$cnt_empty;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).'</div>';
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).DIV_E;
 
 			$err_msg = $err_msg . '\nZotero entries ignored because there are no properly mapped key: '.$cnt_empty;
         }
         if($cnt_notfound>0){
             print '<br>Zotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).'</div>';
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).DIV_E;
 
 			$err_msg = $err_msg . '\nZotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
         }
-        print '</div>';
+        print DIV_E;
 
         print '<div style="color:black">';
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
-            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
+            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).DIV_E;
 
             $err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
         }
-        print '</div>';
+        print DIV_E;
 
         $system->addError('Zotero Synchronisation Warnings',
                     'Zotero Synchronisation has reported ' . $tot_erros . ' warnings',
@@ -945,11 +945,11 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
             // Resource, NOT FOUND
             if(array_key_exists($dt_code, $mapping_errors)){
 
-                $mapping_errors[$dt_code] = str_replace("</td></tr>", "", $mapping_errors[$zType]).", ".$res."</td></tr>";
+                $mapping_errors[$dt_code] = str_replace(TR_E, "", $mapping_errors[$zType]).", ".$res.TR_E;
                 $warning_count ++;
 
             }else{
-                $mapping_errors[$dt_code] = "<tr><td colspan='3'><strong>".$zType." (".$org_rt_id."):</strong></td><td colspan='4'>".$res."</td></tr>";
+                $mapping_errors[$dt_code] = "<tr><td colspan='3'><strong>".$zType." (".$org_rt_id."):</strong></td><td colspan='4'>".$res.TR_E;
                 $warning_count ++;
             }
         }
@@ -1047,17 +1047,17 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
                 if(array_key_exists($extra_info[1], $mapping_errors)){ // NOT FOUND
 
                     if(strpos($mapping_errors[$extra_info[1]], $dt_str) === false){ // Check if field is already listed
-                        $mapping_errors[$extra_info[1]] = str_replace("</td></tr>", "", $mapping_errors[$extra_info[1]]).", ".$dt_str."</td></tr>";
+                        $mapping_errors[$extra_info[1]] = str_replace(TR_E, "", $mapping_errors[$extra_info[1]]).", ".$dt_str.TR_E;
                         $warning_count ++;
                     }
                 }else{
-                    $mapping_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>unmapped fields: ".$dt_str."</td></tr>";
+                    $mapping_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>unmapped fields: ".$dt_str.TR_E;
                     $warning_count ++;
                 }
             }
         }else{
             if(@$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id]){
-                $successful_rows[] = "<tr class='tbl-row'><td></td><td>".$label."</td><td>".$code."</td><td>&rArr;".$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0]."</td><td>".$dt_id."</td></tr>";
+                $successful_rows[] = "<tr class='tbl-row'><td></td><td>".$label.TD.$code."</td><td>&rArr;".$rectypes['typedefs'][$rt_id]['dtFields'][$dt_id][0].TD.$dt_id.TR_E;
             }else{ // NOT IN RECORD TYPE STRUCTURE
 
                 if($extra_info != null){
@@ -1065,11 +1065,11 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
                     if(array_key_exists($extra_info[1], $transfer_errors)){
 
                         if(strpos($transfer_errors[$extra_info[1]], $dt_str) === false){
-                            $transfer_errors[$extra_info[1]] = str_replace("</td></tr>", "", $transfer_errors[$extra_info[1]]).", ".$dt_str."</td></tr>";
+                            $transfer_errors[$extra_info[1]] = str_replace(TR_E, "", $transfer_errors[$extra_info[1]]).", ".$dt_str.TR_E;
                             $warning_count ++;
                         }
                     }else{
-                        $transfer_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>".$dt_str."</td></tr>";
+                        $transfer_errors[$extra_info[1]] = "<tr class='tbl-row'><td colspan='3'><strong>".$extra_info[1]." (".$extra_info[0]."):</strong></td><td colspan='4'>".$dt_str.TR_E;
                         $warning_count ++;
                     }
                 }
@@ -1400,7 +1400,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $out = recordSave($system, $record, true, false, 0, $record_count);//see recordModify.php
 
     if ( @$out['status'] != HEURIST_OK ) {
-           print "<div style='color:red'> Error: ".htmlspecialchars($out["message"])."</div>";
+           print "<div style='color:red'> Error: ".htmlspecialchars($out["message"]).DIV_E;
     }else{
 
             $new_recid = intval($out['data']);
@@ -1412,7 +1412,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
             if(!$rep_errors_only){
                 if (@$out['warning']) {
-                    print "<div style='color:red'>Warning: ".htmlspecialchars(implode(";",$out["warning"]))."</div>";
+                    print "<div style='color:red'>Warning: ".htmlspecialchars(implode(";",$out["warning"])).DIV_E;
                 }
             }
 

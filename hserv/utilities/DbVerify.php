@@ -272,7 +272,7 @@ class DbVerify {
         else
         {
             $resStatus = false;
-            $resMsg .= '<div>';
+            $resMsg .= DIV;
             if($wrongUser_Add>0){
                 $resMsg .= "<h3> $wrongUser_Add records are owned by non-existent users</h3>";
             }
@@ -326,7 +326,7 @@ class DbVerify {
                         $wasassigned1 = mysql__exec_param_query($this->mysqli, $query, null, true );
                         if(is_string($wasassigned1))
                         {
-                            $resMsg = '<div class="error">Cannot delete invalid pointers to parent terms. Error:'.$wasassigned1.'</div>';
+                            $resMsg = '<div class="error">Cannot delete invalid pointers to parent terms. Error:'.$wasassigned1.DIV_E;
                             $resStatus = false;
                         }else{
                             $trmWithWrongParents = array();//reset
@@ -345,7 +345,7 @@ class DbVerify {
                     $wasassigned2 = mysql__exec_param_query($this->mysqli, $query, null, true );
                     if(is_string($wasassigned2))
                     {
-                        $resMsg = '<div class="error">Cannot clear missing inverse terms ids. Error:'.$wasassigned2.'</div>';
+                        $resMsg = '<div class="error">Cannot clear missing inverse terms ids. Error:'.$wasassigned2.DIV_E;
                         $resStatus = false;
                     }else{
                         $trmWithWrongInverse = array();//reset
@@ -369,7 +369,7 @@ class DbVerify {
             else
             {
 
-                $resMsg .= '<div>';
+                $resMsg .= DIV;
                 if(count($trmWithWrongParents)>0){
 
                     $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
@@ -409,10 +409,10 @@ class DbVerify {
             .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
             foreach ($trmDuplicates as $parent_ID=>$dupes) {
                 $resMsg .= '<div style="padding-top:10px;font-style:italic">parent '.intval($parent_ID).'  '
-                    .htmlspecialchars($TL[$parent_ID]['trm_Label']).'</div>';
+                    .htmlspecialchars($TL[$parent_ID]['trm_Label']).DIV_E;
                 foreach ($dupes as $trm_ID) {
                     $resMsg .= '<div style="padding-left:60px">'.intval($trm_ID).'  '
-                    .htmlspecialchars($TL[$trm_ID]['trm_Label']).'</div>';
+                    .htmlspecialchars($TL[$trm_ID]['trm_Label']).DIV_E;
                 }
             }
         }
@@ -495,7 +495,7 @@ class DbVerify {
                     }}
 
                     if($err!=null){
-                        $resMsg = '<div class="error">SQL error updating field type '.$err.'</div>';
+                        $resMsg = '<div class="error">SQL error updating field type '.$err.DIV_E;
                         $resStatus = false;
                     }else{
                         $resMsg = $k.' field'.($k>1?'s have':' has')
@@ -543,7 +543,7 @@ class DbVerify {
         }
 
         if($resStatus){
-            $resMsg = '<div>'.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
+            $resMsg = DIV.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
         }
 
         return array('status'=>$resStatus,'message'=>$resMsg);
@@ -1093,7 +1093,7 @@ HEADER;
             if(! $res )
             {
                 $resStatus = false;
-                $resMsg = '<div class="error">Cannot delete invalid term values from Records. SQL error: '.$mysqli->error.'</div>';
+                $resMsg = '<div class="error">Cannot delete invalid term values from Records. SQL error: '.$mysqli->error.DIV_E;
             }else{
                 $wasdeleted = $mysqli->affected_rows;
             }
@@ -1516,14 +1516,14 @@ HEADER;
 
 
                 $resMsg .= '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'
-                        .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
+                        .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').DIV_E;
 
                 if($missed_relationships>0){
                     $resMsg .='<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b></div>';
                 }
 
                 $resMsg .= '<br><div style="padding:5px">Total count of links/resources:&nbsp;<b>'.$cnt_links.'</b>'
-                        .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').'</div>';
+                        .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').DIV_E;
 
                 if($missed_links>0){
                     $resMsg .= '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b></div>';
@@ -1829,7 +1829,7 @@ HEADER;
                                 list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
                                 if($r_type===false){
                                     $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.'</div>';
+                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.DIV_E;
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -1839,7 +1839,7 @@ HEADER;
                                 if(! $res33 )
                                 {
                                     $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.'</div>';
+                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.DIV_E;
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -2264,7 +2264,7 @@ HEADER;
                                 {
                                     $resStatus = false;
                                     $resMsg = '<div class="error" style="color:red">Cannot replace terms in record details. Query :'
-                                            .$update_query.'  SQL error: '.$mysqli->error.'</div>';
+                                            .$update_query.'  SQL error: '.$mysqli->error.DIV_E;
                                     $mysqli->rollback();
                                     fclose($this->out);
                                     $this->out = null;

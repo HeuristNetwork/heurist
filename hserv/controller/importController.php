@@ -174,7 +174,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
 
             if($table_name==null || $table_name==''){
-                $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');
+                $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('"table"'));
                 $res = false;
 
             }else

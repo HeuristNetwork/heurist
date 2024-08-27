@@ -136,8 +136,8 @@ $mysqli = $system->get_mysqli();
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
             if(count($det_types)>0){
@@ -145,16 +145,16 @@ $mysqli = $system->get_mysqli();
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
             if(count($terms)>0){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
             print '</table>';

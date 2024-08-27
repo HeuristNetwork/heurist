@@ -24,7 +24,6 @@ use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
-require_once dirname(__FILE__).'/../../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -934,7 +933,7 @@ function sendSystemEmail($data) {
 
 			echo '<div style="color:red">An error occurred with preparing and sending the system emails.<br>'
                     .$email_obj->get_error()
-			        .$email_obj->get_log().'</div>';
+			        .$email_obj->get_log().DIV_E;
 			$rtn_value = -1;
 		}
 
@@ -945,7 +944,7 @@ function sendSystemEmail($data) {
 	} else {
 
 		echo '<div style="color:red">An error occurred with processing the form\'s data.<br>'
-		        .$email_obj->get_error().'</div>';
+		        .$email_obj->get_error().DIV_E;
 		return -1;
 	}
 }

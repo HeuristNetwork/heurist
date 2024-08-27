@@ -37,12 +37,13 @@ if(!@$heuristReferenceServer){
     //$heuristReferenceServer = 'https://HeuristRef.Net';
 }
 
+define('HEURIST_DEF_DIR', '/heurist/'); //default Heurist folder
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
-define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/');//central index and template databases url
+define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.HEURIST_DEF_DIR);//central index and template databases url
 define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
 define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
-define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
+define('HEURIST_HELP', $heuristReferenceServer.HEURIST_DEF_DIR.'help');
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));//always use proxy for CURL
@@ -174,6 +175,7 @@ define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
 define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
+define('CONTACT_HEURIST_TEAM_PLEASE', ' Please '.CONTACT_HEURIST_TEAM);
 define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
 
 define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
@@ -197,6 +199,16 @@ define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
 define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
 define('CONTENT_LENGTH', 'Content-Length: ');
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
+
+//common separators
+define('TABLE_S','<table>');
+define('TR_S','<tr><td>');
+define('TD','</td><td>');
+define('TR_E','</td></tr>');
+define('TABLE_E','</table>');
+define('DIV','<div>');
+define('DIV_E','</div>');
+
 
 global $glb_lang_codes;
 $glb_lang_codes = null;
@@ -461,4 +473,9 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             }
     }
 }
+
+function error_WrongParam($param){
+    return $param.' parameter is not defined or wrong';
+}
+
 ?>

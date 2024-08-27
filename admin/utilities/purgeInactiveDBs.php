@@ -132,7 +132,7 @@ if (@$argv) {
 
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
     //exit('This function must be run from the shell');
 }
 
@@ -375,7 +375,7 @@ if($need_email){
                 $report .= (' ERROR: '.@$err['message']);
 
                 array_push($email_list_failed,
-                        "<tr><td>$db_name</td><td>".@$err['message']."</td></tr>");
+                        "<tr><td>$db_name</td><td>".@$err['message'].TR_E);
 
             }
         }
@@ -653,9 +653,9 @@ if(!$arg_no_action){
 
     if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;
-        $sMsg = $sTitle.' <table>'.implode("\n", $email_list_deleted).'</table>';
+        $sMsg = $sTitle.TABLE.implode("\n", $email_list_deleted).TABLE_E;
         if(count($email_list_failed)>0){
-             $sMsg = $sMsg.'<br>FAILED on database drop<table>'.implode("\n", $email_list_failed).'</table>';
+             $sMsg = $sMsg.'<br>FAILED on database drop'.TABLE.implode("\n", $email_list_failed).TABLE_E;
         }
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);
     }

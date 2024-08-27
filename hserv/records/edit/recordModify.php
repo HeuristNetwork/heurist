@@ -1453,7 +1453,7 @@ function deleteOneRecord($system, $id, $rectype){
     $id = intval($id);
 
     if(!($id>0)){
-        return array("error" => 'Record id parameter is not defined or wrong');
+        return array("error" => error_WrongParam('Record id'));
     }
 
     $bkmk_count = 0;
@@ -2751,7 +2751,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
 
                                 $err_msg = '<div style="padding-left:30px">'
                                 . _getRtConstraintNames($system, $dtyID, $rectype)
-                                . '<br>Target ID:'.$dtl_Value.'  '.USanitize::sanitizeString($rectype_tocheck[1], false).'</div>';
+                                . '<br>Target ID:'.$dtl_Value.'  '.USanitize::sanitizeString($rectype_tocheck[1], false).DIV_E;
 
 
                                 //$err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
@@ -2951,7 +2951,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
                 if($modeImport>0){
                     $errorValues[$dtyID] .= (' '.$err_msg);
                 }else{
-                    $errorValues[$dtyID] .= ('<div style="padding-left:20px">'.$err_msg.'</div>');
+                    $errorValues[$dtyID] .= ('<div style="padding-left:20px">'.$err_msg.DIV_E);
                 }
                 $cntErrors++;
             }
@@ -3009,7 +3009,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
             $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.($isMulti?'s':'')
                 .' missing value or '.
                 (count($det_required)>1?'have':'has')
-                .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>'
+                .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).DIV_E
                 .' <br>Please change '.($isMulti?'these fields':'this field')
                 .' in record type "'.htmlspecialchars($rty_Name)
                 .'" to "optional" or specify default value for the field');

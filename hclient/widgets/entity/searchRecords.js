@@ -517,15 +517,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
                         for(let id of recent){
 
-                            id = parseInt(id, 10);
-                            let cur_idx = order.indexOf(id);
+                            const rec_id = parseInt(id, 10);
+                            const cur_idx = order.indexOf(rec_id);
 
                             if(cur_idx === -1){
                                 continue;
                             }
 
                             order.splice(cur_idx, 1);
-                            order.unshift(id);
+                            order.unshift(rec_id);
 
                             changed_order = true;
                         }

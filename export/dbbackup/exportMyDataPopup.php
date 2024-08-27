@@ -789,7 +789,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
 
                 if(!$res){
-                    print '</div>';
+                    print DIV_E;
                     report_message("Sorry, unable to generate MySQL database dump. ".$system->getError()['message'].'  '.$please_advise, true, true);
                 }
 

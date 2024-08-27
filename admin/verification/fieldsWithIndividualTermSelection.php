@@ -117,7 +117,7 @@ $is_csv = (@$_REQUEST['html']!=1);
                 }
             }
             /*if($row[3]==197){
-                print '<tr><td colspan=5>'.print_r($vocabs,true).'</td></tr>';
+                print '<tr><td colspan=5>'.print_r($vocabs,true).TR_E;
             }*/
 
             $vocab_count = count(array_keys($vocabs));
@@ -139,8 +139,8 @@ $is_csv = (@$_REQUEST['html']!=1);
             }
 
             if(!$is_csv){
-                print '<tr><td>'.htmlspecialchars($row[0]).'</td><td>'.htmlspecialchars($row[3]).'</td><td>'.htmlspecialchars($row[4]).'</td>'
-                    .'<td>'.$vocab_count.'</td><td>'.count($terms).'</td><td>'.($is_idis?count($nonTerms):'').'</td><td>'.intval($rec_usage).'</td></tr>';
+                print TR_S.htmlspecialchars($row[0]).TD.htmlspecialchars($row[3]).TD.htmlspecialchars($row[4]).'</td>'
+                    .'<td>'.$vocab_count.TD.count($terms).TD.($is_idis?count($nonTerms):'').TD.intval($rec_usage).TR_E;
             }else {
                 //'",'.$row[3]. ($is_vocab?'1':'').','.($is_vocab?'':'1').
                 //print $db_name.',"'.$row[0].'",'.$row[3].','.($is_idis?'1':'').PHP_EOL;
@@ -153,7 +153,7 @@ $is_csv = (@$_REQUEST['html']!=1);
         //if($cnt4>20) {break;}
     }//while  databases
     if(!$is_csv){
-        //  print '<tr><td colspan="2"></td><td>'.$cnt2.'</td><td>'.$cnt3.'</td></tr>';
+        //  print '<tr><td colspan="2"></td><td>'.$cnt2.TD.$cnt3.TR_E;
         print '</table>';
         print '[end report]';
     }else{

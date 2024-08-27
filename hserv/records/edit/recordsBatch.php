@@ -978,7 +978,9 @@ class RecordsBatch
                 
                 if($replace_all_occurences || $is_multiline){
 
-                    if($is_multiline && $dtlID > 0) array_push($valuesToBeDeleted, intval($dtlID));
+                    if($is_multiline && $dtlID > 0){
+                        array_push($valuesToBeDeleted, intval($dtlID));  
+                    } 
 
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){

@@ -73,7 +73,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
         }else{
             $sMsg = "<p style='font-weight:bold'>Cannot find the database upgrade script '$filename'</p>";
             if($verbose){
-                print $sMsg.' Please '.CONTACT_HEURIST_TEAM;
+                print $sMsg.CONTACT_HEURIST_TEAM_PLEASE;
             }else{
                 $system->addError(HEURIST_SYSTEM_CONFIG, $sMsg);
             }

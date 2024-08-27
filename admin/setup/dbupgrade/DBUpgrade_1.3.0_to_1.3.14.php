@@ -125,9 +125,13 @@ EXP;
 
        if($dbVerSubSub<5){
 
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_PreferredSource', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled') "
-                ."NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'", true);             
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_PreferredSource',
+<<<EXP
+ALTER TABLE `recUploadedFiles` 
+ADD COLUMN `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled') 
+NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'
+EXP
+            , true);          
            
 
             $query = <<<EXP
@@ -194,24 +198,45 @@ EXP;
             
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'usr_ExternalAuthentication', "ALTER TABLE `sysUGrps` ADD COLUMN `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'");
 
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Caption', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`");             
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_Copyright` varchar(255) COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`");  
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Caption',
+<<<EXP
+ALTER TABLE `recUploadedFiles` 
+ADD COLUMN `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`
+EXP
+            );             
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright', 
+<<<EXP
+ALTER TABLE `recUploadedFiles` 
+ADD COLUMN `ulf_Copyright` varchar(255) 
+COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`
+EXP
+            );  
 
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyowner', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`");  
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyowner',
+<<<EXP
+ALTER TABLE `recUploadedFiles` ADD COLUMN `ulf_Copyowner` varchar(255) 
+COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`
+EXP
+            );  
             
             $report[] = 'Upgraded to 1.3.15';
             
        }
        if($dbVerSubSub<16){
 
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_WhoCanView', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_WhoCanView` enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all'", true);             
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_WhoCanView', <<<EXP
+ALTER TABLE `recUploadedFiles` 
+ADD COLUMN `ulf_WhoCanView` enum('viewable','loginrequired') NULL 
+COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all'
+EXP
+            , true);             
 
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_MD5Checksum', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_MD5Checksum` text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates'", true);             
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_MD5Checksum', <<<EXP
+ALTER TABLE `recUploadedFiles` 
+ADD COLUMN `ulf_MD5Checksum` text(32) NULL 
+COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates'
+EXP
+            , true);             
        
             $report[] = 'Upgraded to 1.3.16';
        }

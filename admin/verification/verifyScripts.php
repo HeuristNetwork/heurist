@@ -155,7 +155,7 @@ function __checkVersionDatabase(){
             }
 
             if($is_old_version || $has_missed){            
-                print '<div>'.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
+                print DIV.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
             
                 if($has_missed){
                     print '<br>Missed: '.implode(', ',$missed);
@@ -188,9 +188,9 @@ function __checkVersionDatabase(){
                 
                 
             
-                print '</div>';
+                print DIV_E;
             }else{
-                //print '<div>'.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].'</div>';
+                //print DIV.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].DIV_E;
             }
         }
     }
@@ -341,7 +341,7 @@ function findMissedTermLinks() {
                         $query = "UPDATE `$db_name`.defDetailTypes SET dty_JsonTermIDTree='' WHERE (dty_Type='relationtype')";
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.'</div>';
+                            print '<div style="color:red">'.$mysqli->error.DIV_E;
                             exit;
                         }
                     }
@@ -452,7 +452,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             $vocab = mysql__select_row($mysqli, $query);
             if($vocab){
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
-                    print '<div>'.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).'</div>';
+                    print DIV.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).DIV_E;
 
                     if(@$_REQUEST["fix"]==1){
                         $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.intval($v_code[0])
@@ -460,7 +460,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                             .' where trm_ID='.intval($fields[2]);
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.'</div>';
+                            print '<div style="color:red">'.$mysqli->error.DIV_E;
                             exit;
                         }
                     }
@@ -472,8 +472,8 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 $terms = mysql__select_all($mysqli, $query);
                 print '<table style="font-size:smaller">';
                 foreach($terms as $term){
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$term)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$term)));
+                    print TR_S.$list.TR_E;
                 }
                 print '</table>';
             }else{
@@ -484,7 +484,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
-                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';
+                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).DIV_E;
             }
         }
 }
@@ -522,7 +522,7 @@ function __findWrongChars(){
                     }catch(Exception $exception) {
                         $isOK = false;
                         $wrong_string = $exception->getMessage();
-                        print '<div style="color:red">'.$db_name.' rtyID='.$id.'. invalid: '.$wrong_string.'</div>';
+                        print '<div style="color:red">'.$db_name.' rtyID='.$id.'. invalid: '.$wrong_string.DIV_E;
                     }
                 }//foreach
 
@@ -566,7 +566,7 @@ function __findLongTermLabels(){
                 print htmlspecialchars($db_name).'<br>';
                 foreach($list as $id=>$row){
                     print '<div style="padding-left:100px">'.$id.'&nbsp;'.intval($row['chars']).'&nbsp;'.intval($row['len'])
-                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).'</div>';
+                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).DIV_E;
                 }
 
             }
@@ -949,8 +949,9 @@ function __correctGetEstDate(){
 
             }
 
-            if($cnt>0 || $is_invalid)
+            if($cnt>0 || $is_invalid){
                 print htmlspecialchars($db_name.'  '.$cnt).'<br>';
+            }
         }
 
     }//for
@@ -1657,7 +1658,7 @@ $tustep_to_html = array(
             if(! $res33 )
             {
                 $isOk = false;
-                print '<div class="error" style="color:red">Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error.'</div>';
+                print '<div class="error" style="color:red">Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error.DIV_E;
                 $mysqli->rollback();
                 break;
             }

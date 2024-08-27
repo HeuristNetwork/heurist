@@ -36,6 +36,9 @@ $tabs0 = '';
 $is_command_line = false;
 $is_shell = true;
 
+define('PURGE','-purge');
+define('REPORT','-report');
+
 if (@$argv) {
 
 // example:
@@ -50,10 +53,10 @@ if (@$argv) {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
             } else {
-                if(strpos($argv[$i],'-purge')===0){
-                    $ARGV['-purge'] = true;
-                }elseif(strpos($argv[$i],'-report')===0){
-                    $ARGV['-report'] = true;
+                if(strpos($argv[$i],PURGE)===0){
+                    $ARGV[PURGE] = true;
+                }elseif(strpos($argv[$i],REPORT)===0){
+                    $ARGV[REPORT] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;
                 }
@@ -65,8 +68,8 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-purge']) {$arg_need_action = true;}
-    if (@$ARGV['-report']) {$arg_need_report = true;}
+    if (@$ARGV[PURGE]) {$arg_need_action = true;}
+    if (@$ARGV[REPORT]) {$arg_need_report = true;}
 
     $is_command_line = true;
 
@@ -78,7 +81,7 @@ if (@$argv) {
 
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;text-align:left">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
     //exit('This function must be run from the shell');
 
     $arg_need_report = true;
@@ -360,7 +363,7 @@ if($arg_need_action){
     /*
     if(count($email_list_deleted)>0){
         $sTitle = 'Cleanup databases on '.HEURIST_SERVER_NAME;
-        sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.' <table>'.implode("\n",$email_list_deleted).'</table>',true);
+        sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.TABLE_S.implode("\n",$email_list_deleted).TABLE_E,true);
     }
     */
 }else{
@@ -382,12 +385,12 @@ sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER
 function listFolderContent($dir){
 
     $size = 0;
-    $list = '<div>'.substr($dir, strrpos($dir, '/',-2)).'</div><table style="min-width:500px;border:1px solid red"><tr><th align="left">file</th><th align="right">size</th></tr>';
+    $list = DIV.substr($dir, strrpos($dir, '/',-2)).'</div><table style="min-width:500px;border:1px solid red"><tr><th align="left">file</th><th align="right">size</th></tr>';
     $content = folderContent($dir);
 
     foreach ($content['records'] as $object) {
         if ($object[1] != '.' && $object[1] != '..') {
-            $list = $list.'<tr><td>'.$object[1].'</td><td align="right">'.$object[4].'</td></tr>';//(intdiv($object[4], 1024))
+            $list = $list.TR_S.$object[1].'</td><td align="right">'.$object[4].TR_E;//(intdiv($object[4], 1024))
             $size += intval($object[4]);
         }
     }

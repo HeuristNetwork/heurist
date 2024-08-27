@@ -18,7 +18,7 @@ function getMediaFolders($mysqli) {
     $row1 = mysql__select_row($mysqli, $query1);
     if (!$row1) {
         return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
-            .'. Possibly wrong database format, please '.CONTACT_HEURIST_TEAM);
+            .'. Possibly wrong database format.'.CONTACT_HEURIST_TEAM_PLEASE);
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
@@ -66,7 +66,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
     $system_folders = $system->getSystemFolders();
 
     if(@$dirs_and_exts['error']){
-        print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
+        print "<div style=\"color:red\">".$dirs_and_exts['error'].DIV_E;
         return;
     }
 

@@ -36,7 +36,7 @@ $system = new hserv\System();
 $sysadmin_pwd = USanitize::getAdminPwd();
 
 if($sysadmin_pwd==null){
-    $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
+    $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('Password'));
 }else{
 
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
@@ -70,7 +70,7 @@ if($sysadmin_pwd==null){
             if($isSystemInited){
 
 //if(!$database_to_delete){
-//    $system->addError(HEURIST_INVALID_REQUEST, 'Database parameter is not defined');
+//    $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('Database'));
 //}
 
                     $allow_deletion = true;

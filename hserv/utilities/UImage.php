@@ -828,7 +828,7 @@ class UImage {
             echo "<img src=\"img.gif\" width=\"".$barwidth."\"
             height=\"".$h."\" border=\"0\">";
             }
-            echo "</div>";
+            echo DIV_E;
             */
         }else{
             return '#FFFFFF';

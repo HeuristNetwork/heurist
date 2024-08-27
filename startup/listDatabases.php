@@ -88,7 +88,7 @@ if($is_json){
             if(isset($error_msg) && $error_msg!=''){
                 echo '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">';
                 echo '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>';
-                echo $error_msg.'</div>';
+                echo $error_msg.DIV_E;
                 $list_top = '12em';
             }else{
                 $list_top = '6em';

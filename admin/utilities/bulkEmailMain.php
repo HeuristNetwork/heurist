@@ -59,7 +59,7 @@ if ( !isset($_REQUEST['db']) || $system->verifyActionPassword($sysadmin_pwd, $pa
 
         if ($rtn["status"] == "ok") {
             echo "<br><br><div>A receipt of the process has been saved as a Notes Record<br><br>Record ID => "
-                    . $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] ."</div>";
+                    . $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] .DIV_E;
         }
 
         //echo "<script>window.close();</script>";
@@ -433,7 +433,7 @@ if(!$has_emails || empty($emails)) {
                         "<div class='label non-selectable' title='"+ name +"'> "
                         + '<label><input type="checkbox" class="dbListCB" id="'+value+'" value="'+ value +'"><span class="truncate">' + name + "</span></label>"
                         + '<label data-id="'+value+'"></label>'
-                      + "</div>"
+                      + '</div>'
                     );
                 });
 

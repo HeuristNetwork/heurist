@@ -358,7 +358,7 @@ if($is_csv){
                 { title: "Owner", searchable:false, width:200,  //data: "owner",
                     render: function(data, type) {
                         if (type === 'display') {
-                            return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+"</div>";
+                            return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+'</div>';
                         }else{
                             return data;
                         }
@@ -527,7 +527,7 @@ if($is_csv){
                                             {position: { my: "left top", at: "left+150 top+150", of: window }});
 
                                         $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
-                                                    +databases[current_index]+' '+msg +"</div>");
+                                                    +databases[current_index]+' '+msg +'</div>');
 
                                     }
                                 }
