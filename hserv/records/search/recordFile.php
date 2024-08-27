@@ -1312,7 +1312,7 @@ function filestoreGetUsageByDb($system){
 }
 
 
-function filestoreReplaceDuplicatesInDetails($ulf_id, $ulf_ids_replaced){
+function filestoreReplaceDuplicatesInDetails($mysqli, $ulf_id, $ulf_ids_replaced){
     
     $ulf_ids_replaced = prepareIds($ulf_ids_replaced);//for snyk
     

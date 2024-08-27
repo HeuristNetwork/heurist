@@ -175,7 +175,7 @@ $mysqli = $system->get_mysqli();
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
                 
-                filestoreReplaceDuplicatesInDetails($max_ulf_id, $dups_ids);
+                filestoreReplaceDuplicatesInDetails($mysqli, $max_ulf_id, $dups_ids);
                 
                 $fix_dupes = $fix_dupes + count($dups_ids);
             }
@@ -218,7 +218,7 @@ $mysqli = $system->get_mysqli();
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
                 
-                filestoreReplaceDuplicatesInDetails($max_ulf_id, $dups_ids);
+                filestoreReplaceDuplicatesInDetails($mysqli, $max_ulf_id, $dups_ids);
                 
                 $fix_dupes = $fix_dupes + count($dups_ids);
                 $fix_url++;
@@ -298,7 +298,7 @@ $mysqli = $system->get_mysqli();
 
                         $dup_ids = array_keys($file_a['dupes']);
                         
-                        filestoreReplaceDuplicatesInDetails($ulf_ID, $dup_ids);
+                        filestoreReplaceDuplicatesInDetails($mysqli, $ulf_ID, $dup_ids);
                         
                         $cnt_dupes = $cnt_dupes + count($dup_ids);
                         $cnt_unique++;
