@@ -652,7 +652,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
 }
 
 function edit_link($rec_id, $label){
-    return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$val.'">'.$label.'</a>';
+    return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'">'.$label.'</a>';
 }
 
 //

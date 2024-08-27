@@ -164,12 +164,13 @@ $.widget( "heurist.buttonsMenu", {
 
                 this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
 
+                /*
                 if(false && competency_level>=0){
                     this.menuBtns[menuName].addClass('heurist-competency'+competency_level);    
                     if(usr_exp_level>competency_level){
                         this.menuBtns[menuName].hide();    
                     }
-                }
+                }*/
                 
                 if(top_level.find('li').length==0){ //without children
                     
