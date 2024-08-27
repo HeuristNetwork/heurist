@@ -1251,7 +1251,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             missed.push(rty_ID);
                         }
                     });
-
+/*
                     for (let i = 0; i < rty_IDs.length; i++) {
                         let local_id = $Db.getLocalID('rty', rty_IDs[i]);
                         if (!(local_id > 0)) {
@@ -1259,6 +1259,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             missed.push(rty_IDs[i]);
                         }
                     }
+*/                    
                 }
 
                 //all record types are in this database
@@ -2275,7 +2276,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             let isChanged = (that.currentUser != user);
 
-            if (user && user['ugr_Permissions'] && !user['ugr_Permissions']['disabled']) {
+            if (user?.['ugr_Permissions']?.['disabled']===false) {
                 that.currentUser = user;
             } else {
                 that.currentUser = _guestUser;
@@ -2286,9 +2287,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 if (that.currentUser['ugr_ID'] > 0) {
 
-                    if (!window.hWin.HAPI4.is_publish_mode) {
+                    if (!window.hWin.HAPI4.is_publish_mode && window.hWin.HEURIST4?.ui) 
+                    {
 
-                        if (window.hWin.HEURIST4 && window.hWin.HEURIST4.ui)
                             window.hWin.HEURIST4.ui.onInactiveStart(5000, function () {  //300000 5 minutes 
                                 //check that still logged in
                                 window.hWin.HAPI4.SystemMgr.verify_credentials(function () {
