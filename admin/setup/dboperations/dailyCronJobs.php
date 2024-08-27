@@ -65,14 +65,20 @@ if (@$argv) {
 
 //print print_r($ARGV,true)."\n";
 //exit;
+//sudo php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php -- -database camil_inthemarginofstone
+//camillaC_Pakistan_Villages
+    $arg_database = null;
+    if(@$ARGV['database']){ //limit scrit to the only database
+        $arg_database = $ARGV['database'];
+    }
 
-    if(@$ARGV['reminder']){
+    if(@$ARGV['reminder']){ //send reinders
         $do_reminders = true;
     }
-    if(@$ARGV['report']){
+    if(@$ARGV['report']){   //update scheduled reports
         $do_reports = true;
     }
-    if(@$ARGV['url']){
+    if(@$ARGV['url']){  //validate urls
         $do_url_check = true;
     }
     if(!$do_reminders && !$do_reports && !$do_url_check){
@@ -114,12 +120,17 @@ if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma
 print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);//list of all databases without hdb_ prefix
+
+if($arg_database){
+    echo "database: ".$arg_database."\n";
+    $databases = array($arg_database);
+}else{
+    $databases = mysql__getdatabases4($mysqli, false);//list of all databases without hdb_ prefix
+}
 
 $upload_root = $system->getFileStoreRootFolder();
 
 echo "root : ".$upload_root."\n";
-
 //define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list();//read databases_not_to_crons
@@ -256,14 +267,20 @@ foreach ($databases as $idx=>$db_name){
         }
     }
 
-    if($do_url_check){
+    $do_url_check = false; //DISABLED TEMP 2024-08-27
+    if($do_url_check){ 
 
         $perform_url_check = mysql__select_value($mysqli, 'SELECT sys_URLCheckFlag FROM sysIdentification');
         if(!$perform_url_check || $perform_url_check == 0){ // check for flag setting
             continue;
         }
+        
+        //echo $db_name."\n";
+        //continue;
 
         $url_results = checkURLs($system, true);// [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
+        
+        if(is_array($url_results)){
 
         $invalid_rec_urls = $url_results[0];
         $invalid_fb_urls = $url_results[1];
@@ -331,6 +348,12 @@ foreach ($databases as $idx=>$db_name){
                 }
             }
         }
+        
+        }else{
+            sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.' Check url fails.',
+                $url_results.' It stopped on '.$db_name);
+            
+        }
     }
 //echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
 
@@ -345,6 +368,7 @@ echo $eol.$tabs0.'finished'.$eol;
 
 if($mysql_gone_away_error){
     $text = ' dailyCronJobs failed. MySQL server has gone away';
+echo $text.' Db '.$last_processed_database.$eol;
     sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.$text,
                 $text.' It stopped on '.$last_processed_database);
 }
