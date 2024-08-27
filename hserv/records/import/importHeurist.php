@@ -23,6 +23,7 @@
 
 use hserv\utilities\DbUtils;
 use hserv\utilities\USanitize;
+use hserv\entity\DbRecUploadedFiles;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../edit/recordsBatch.php';

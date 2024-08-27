@@ -84,19 +84,17 @@ function editCMS_Manager( options ){
     
     options.is_open_in_new_tab = true;
     
+    //global variables
+    let isWebPage = false; //single page website/embed otherwise website with menu
+    let edit_dialog = null;
+    let web_link, tree_element = null;
+    let open_page_on_init = -1;
+    let home_page_record_title = '';
     
     if(home_page_record_id<0){
         _createNewWebContent();
         return;
     }
-    
-    
-    let edit_dialog = null;
-    let web_link, tree_element = null;
-    let open_page_on_init = -1;
-    let home_page_record_title = '';
-
-    let isWebPage = false; //single page website/embed otherwise website with menu
 
     _initWebSiteEditor();
     
