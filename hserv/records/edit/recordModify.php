@@ -1480,7 +1480,7 @@ function deleteOneRecord($system, $id, $rectype){
     }
 
     while(true){
-        $mysqli->query('SET foreign_key_checks = 0');
+        mysql__foreign_check($mysqli, false);
 
         $id = intval($id);
         //
@@ -1544,7 +1544,7 @@ function deleteOneRecord($system, $id, $rectype){
         $mysqli->query('delete from woots where woot_Title="record:'.$id.'"');
         if ($mysqli->error) {break;}
 
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         //remove special kind of record - relationship
         $refs_res = $mysqli->query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$id.' and rec_RecTypeID='.RT_RELATION);
@@ -1588,7 +1588,7 @@ function deleteOneRecord($system, $id, $rectype){
     }else{
         $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
     }
-    $mysqli->query('SET foreign_key_checks = 1');
+    mysql__foreign_check($mysqli, true);
     return $res;
 }
 
@@ -3118,7 +3118,7 @@ function recordDuplicate($system, $id){
 
     while (true) {
 
-        $mysqli->query('SET foreign_key_checks = 0');
+        mysql__foreign_check($mysqli, false);
 
         //duplicate record header
         $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
@@ -3241,7 +3241,7 @@ function recordDuplicate($system, $id){
         if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
         */
 
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         //add special kind of record - relationships
         $refs_res = mysql__select_list($mysqli, 'recLinks', 'rl_RelationID',
@@ -3287,7 +3287,7 @@ function recordDuplicate($system, $id){
     }else{
         $res = $system->addError(HEURIST_DB_ERROR, $error);
     }
-    $mysqli->query('SET foreign_key_checks = 1');
+    mysql__foreign_check($mysqli, true);
     return $res;
 
 }

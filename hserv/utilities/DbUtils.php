@@ -1325,7 +1325,7 @@ class DbUtils {
                 $tables = $mysqli->query("SHOW TABLES");//get all tables from target db
                 if($tables){
 
-                    $mysqli->query("SET foreign_key_checks = 0");//disable
+                    mysql__foreign_check( $mysqli, false );
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                     if($verbose) {
@@ -1394,8 +1394,7 @@ class DbUtils {
                         $mysqli->query('update recUploadedFiles set ulf_UploaderUGrpID=2 WHERE ulf_UploaderUGrpID NOT IN (0,1,2,3)');
                     }
 
-
-                    $mysqli->query("SET foreign_key_checks = 1");//restore/enable foreign indexes verification
+                    mysql__foreign_check( $mysqli, true );//restore/enable foreign indexes verification
 
                     //cleanup target database to avoid issues with addition of constraints
 

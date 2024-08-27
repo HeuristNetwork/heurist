@@ -621,7 +621,7 @@ abstract class DbEntityBase
         }
 
 
-        $mysqli->query('SET foreign_key_checks = 0');
+        mysql__foreign_check($mysqli, false);
         $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField
                 .$recids_compare;
         $ret = $mysqli->query($query);
@@ -638,7 +638,7 @@ abstract class DbEntityBase
                                 .$recids_compare);
         }
 
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR,

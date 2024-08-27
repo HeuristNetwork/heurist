@@ -12,6 +12,7 @@ use hserv\structure\ConceptCode;
     *  mysql__usedatabase
     *  mysql__create_database
     *  mysql__drop_database
+    *  mysql__foreign_check
     *
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
@@ -195,6 +196,14 @@ use hserv\structure\ConceptCode;
     function mysql__drop_database( $mysqli, $db_name ){
 
         return $mysqli->query('DROP DATABASE `'.$db_name.'`');
+    }
+    
+    //
+    // on / off foreign indexes verification    
+    //
+    function mysql__foreign_check( $mysqli, $is_on ){
+        
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = '.($is_on?'1':'0'));
     }
 
     //

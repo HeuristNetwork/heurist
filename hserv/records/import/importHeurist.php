@@ -814,7 +814,7 @@ EOD;
 
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);
-        $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
+        mysql__foreign_check($mysqli, false);
 
         self::$system->defineConstant('DT_PARENT_ENTITY');
 
@@ -1481,7 +1481,7 @@ EOD;
                     $res['exists'] = $ids_exist;
                 }
         }
-        $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+        mysql__foreign_check($mysqli, true);
 
     }//$data
 

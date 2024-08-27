@@ -87,7 +87,7 @@ function removeDuplicates($ids){
 
         $res = $mysqli->query($query);
 
-        $mysqli->query('SET foreign_key_checks = 0');
+        mysql__foreign_check($mysqli, false);
 
         //delete rest of districts
         $query = 'delete from recDetails where dtl_RecID in ('.$ids_todel.')';
@@ -104,7 +104,7 @@ function removeDuplicates($ids){
         $query = 'delete from recLinks where rl_SourceID in ('.$ids_todel.') or rl_TargetID in ('.$ids_todel.')';
         $res = $mysqli->query($query);
 
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         $removed = $removed + count($ids);
     }

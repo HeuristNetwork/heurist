@@ -1304,10 +1304,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
 
 
-        $mysqli->query('SET foreign_key_checks = 0');
+        mysql__foreign_check($mysqli, false);
         $ret = $mysqli->query('DELETE FROM '.$this->config['tableName']
                                .' WHERE '.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR,
@@ -1745,7 +1745,7 @@ if($is_verbose) {
 
                 if(!empty($to_delete_thumbs)){
                     
-                    $mysqli->query('SET foreign_key_checks = 0');
+                    mysql__foreign_check($mysqli, false);
                     
                     $total_cnt = count($to_delete_thumbs);
                     $offset = 0;
@@ -1817,7 +1817,7 @@ if($is_verbose) {
                         //break; //remove first 250 only                        
                     }//while
 
-                    $mysqli->query('SET foreign_key_checks = 1');
+                    mysql__foreign_check($mysqli, true);
                     
                     if($ret===false){
                         $mysqli->rollback();
