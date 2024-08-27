@@ -47,7 +47,7 @@
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         //$response = $system->getError();
-        header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
+        redirectURL(HEURIST_BASE_URL.'hclient/assets/notfound.png');
         exit;
     }
 
@@ -423,8 +423,8 @@
             }
         }
 
-		header('Location: '.$url);
+		redirectURL($url);
 	}else{
-		header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
+		redirectURL(HEURIST_BASE_URL.'hclient/assets/notfound.png');
 	}
 ?>

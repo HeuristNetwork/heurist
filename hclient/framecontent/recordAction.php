@@ -84,7 +84,7 @@ $allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
-    header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
+    redirectURL(ERROR_REDIR.'?msg=Action is not defined or not allowed');
     exit;
 }
 

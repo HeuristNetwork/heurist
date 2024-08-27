@@ -69,8 +69,7 @@ if(mysql__check_dbname($db)==null){
 
                     if(defined('HEURIST_THUMB_URL')){
                         //rawurlencode - required for security reports only
-                        $turl = HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png');
-                        header('Location: '.$turl);
+                        redirectURL( HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png') );
                     }else{
                         downloadFile('image/png', $thumbfile);
                     }
@@ -131,8 +130,7 @@ if(mysql__check_dbname($db)==null){
 
                 if($mode_3d_viewer!=''){
 
-                    $url = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid;
-                    header('Location: '.$url);
+                    redirectURL(HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid);
 
                 }else{
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.basename($db).'&file='.$fileid.'&size='.$size;
@@ -213,16 +211,14 @@ if(mysql__check_dbname($db)==null){
                             }
                         }
 
-                        header('Location: '.$direct_url);
+                        redirectURL($direct_url);
 
                     }elseif(!$is_download
                         && ($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'))
                     {
 
                         //for 3D viewer - direct url to file
-                        $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
-
-                        header('Location: '.$direct_url);
+                        redirectURL(HEURIST_FILESTORE_URL.$fileinfo['fullPath']);
 
                     }else {
                         //see recordFile.php
@@ -283,20 +279,18 @@ if(mysql__check_dbname($db)==null){
                         //}
 
 
-                        header('Location: '.$external_url);//redirect to URL (external)
+                        redirectURL($external_url);//redirect to URL (external)
                     }
 
 
                 }else{
                     //File not found
-                    $placeholder = '../../hclient/assets/200x200-missed2.png';
-                    header('Location: '.$placeholder);
+                    redirectURL('../../hclient/assets/200x200-missed2.png');
                 }
             }
         }else{
             //Filedata not found
-            $placeholder = '../../hclient/assets/200x200-missed.png';
-            header('Location: '.$placeholder);
+            redirectURL('../../hclient/assets/200x200-missed.png');
         }
 
         $system->dbclose();

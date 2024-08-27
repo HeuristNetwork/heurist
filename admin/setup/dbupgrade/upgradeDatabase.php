@@ -40,7 +40,7 @@ if(!defined('PDIR')){
     $trg_sub = intval($trg_ver[2]);
 
     if( $src_maj==$trg_maj && $src_min == $trg_min && $src_sub==$trg_sub){ //versions are ok redirect to main page
-        header('Location: ' . HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
+        redirectURL(HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
         exit;
     }
 ?>

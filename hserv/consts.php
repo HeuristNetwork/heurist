@@ -474,8 +474,15 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
     }
 }
 
+// 
+// Common functions
+//
 function error_WrongParam($param){
     return $param.' parameter is not defined or wrong';
+}
+
+function redirectURL($url){
+    header('xLocation: '.$url);   
 }
 
 ?>

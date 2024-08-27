@@ -102,7 +102,7 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
         .$hideImages;
 
 if(!@$_REQUEST['popup']){
-    header('Location: '.$record_renderer_url);
+    redirectURL($record_renderer_url);
     exit;
 }
 

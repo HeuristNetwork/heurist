@@ -190,7 +190,7 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
             //perform authorization
             $system->doLogin($user_id, null, 'remember', true, false);//skip pwd check
             //reload page
-            header('Location: ' . HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME);
+            redirectURL(HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME);
             //DEBUG $params = '&usr='.$attr_uid.'&usrid='.$user_id;
         }else{
             $try_login = true;

@@ -1217,7 +1217,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
     if(!$img){
         if($is_download){
-            header('Location: '.$placeholder);
+            redirectURL($placeholder);
         }
     }else{
         UImage::resizeImage($img, $thumbnail_file, 200, 200, $orientation);//$img will be destroyed inside this function
@@ -1226,7 +1226,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 header('Content-type: image/png');
                 echo file_get_contents($thumbnail_file);
             }else{
-                header('Location: '.$placeholder);
+                redirectURL($placeholder);
             }
         }
     }

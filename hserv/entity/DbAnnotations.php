@@ -92,7 +92,7 @@ class DbAnnotations extends DbEntityBase
 
             $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
 
-            header('Location: '.$redirect);
+            redirectURL($redirect);
             exit;
 
         }else{

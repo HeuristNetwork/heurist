@@ -1745,7 +1745,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             /* disabled 2024-02-23 to avoid Open Redirect security issue
             $redirect = stripslashes($this->get_post_param('redirect'));
             if ($redirect && preg_match($this->options['redirect_allow_target'], $redirect)) {
-                $this->header('Location: '.sprintf($redirect, rawurlencode($json)));
+                $this->redirectURL(sprintf($redirect, rawurlencode($json)));
                 return;
             }
             */

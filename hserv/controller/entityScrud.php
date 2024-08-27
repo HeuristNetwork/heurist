@@ -140,7 +140,7 @@ if (@$argv) {
 
                         //rawurlencode - required for security reports only
                         $url = $url.rawurlencode($dbname).'/entity/dbdef_cache.json';
-                        header('Location: '.$url);
+                        redirectURL($url);
 
                     }else{
                         downloadFile('application/json', $dbdef_cache);
