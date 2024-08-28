@@ -32,6 +32,7 @@ require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
+define('ERR_VALIDATION_QUERY','SQL error: Cannot perform validation query: ');
 
 /**
 * 3 public methods
@@ -79,6 +80,10 @@ private static function findDisambResolution($keyvalue, $disamb_resolv){
         }
     }
     return null;
+}
+
+private static function composeQuery($fields, $import_table){
+    return "SELECT imp_id, `".implode("`,`",$fields)."` FROM `$import_table` ";
 }
 
 /**
@@ -187,7 +192,7 @@ private static function findRecordIds($imp_session, $params){
     if($step>100) {$step = 100;}
     elseif($step<10) {$step=10;}
 
-    $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
+    $select_query = self::composeQuery($sel_fields, $import_table);
 
     $res = $mysqli->query($select_query);
     if($res){
@@ -662,8 +667,7 @@ public static function assignRecordIds($params){
                 }
 
                 //update
-                $updquery = "update ".$import_table." set ".$id_field."='".$ids
-                ."' where imp_id = ".$imp_id;
+                $updquery = "UPDATE `$import_table` SET `$id_field`='$ids' where imp_id=$imp_id";
                 if(!$mysqli->query($updquery)){
                     $is_error = $updquery;
                     break;
@@ -927,7 +931,7 @@ public static function validateImport($params) {
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];//all rows will be imported as new records
-            $select_query = "SELECT imp_id, `".implode("`,`",$sel_query)."` FROM ".$import_table." LIMIT 5000";//for peview only
+            $select_query = self::composeQuery($sel_fields, $import_table)." LIMIT 5000";//for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -943,8 +947,8 @@ public static function validateImport($params) {
         if(!@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
-            $query = "select imp_id, `".implode("`,`",$sel_query)."`, `$id_field`"
-            ." from `$import_table` "
+            $fields = array_merge($sel_query,array($id_field));
+            $query = self::composeQuery($fields, $import_table)
             ." left join Records on rec_ID=`$id_field`"
             ." where rec_RecTypeID<>".$recordType;
             // TPDO: I'm not sure whether message below has been correctly interpreted
@@ -1013,7 +1017,7 @@ public static function validateImport($params) {
                     $imp_session['validation']['count_insert_rows'] = $cnt;
 
                     //find first 5000 records to preview display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM `$import_table` "
+                    $select_query = self::composeQuery($sel_query, $import_table)
                             ." WHERE `$id_field`<0 or `$id_field` IS NULL LIMIT 5000";//for preview only
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
             }
@@ -1025,8 +1029,7 @@ public static function validateImport($params) {
             $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
             $imp_session['validation']['count_insert_rows'] = $imp_session['validation']['count_insert'];
 
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)
-            ." FROM `$import_table` "
+            $select_query = self::composeQuery($sel_query, $import_table)
             ." LEFT JOIN Records on rec_ID=`$id_field` "
             ." WHERE `$id_field`>0 and rec_ID is null LIMIT 5000";//for preview only
             $res = mysql__select_all($mysqli, $select_query);
@@ -1289,8 +1292,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
     $k=0;
     foreach ($query_reqs as $field){
-        $query = "select imp_id, ".implode(",",$sel_query)
-        ." from $import_table "
+        $query = self::composeQuery($sel_query, $import_table)
         .SQL_WHERE.$only_for_specified_id;
         if(@$query_reqs_where[$k]){
             $query = $query . ' ('.$query_reqs_where[$k].')';// implode(" or ",$query_reqs_where);
@@ -1358,8 +1360,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table  where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
@@ -1369,9 +1370,9 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         }else{
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
-            .SQL_WHERE.$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table)
+                ." left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
+                .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_enum_where[$k]){
                 $query = $query . ' ('.$query_enum_where[$k].')';// implode(" or ",$query_enum_where);
@@ -1402,8 +1403,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
          if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
@@ -1411,8 +1411,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                                         $field, $dt_mapping[$field], $idx, $recStruc, $recordType, $progress_session_id);
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
+            $query = self::composeQuery($sel_query, $import_table)." left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
             .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_res_where[$k]){
@@ -1446,17 +1445,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         if(in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateNumericField($mysqli, $query, $imp_session, $field, $idx, 'warning', $progress_session_id);
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            .SQL_WHERE.$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id;
 
             if(@$query_num_where[$k]){
                 $query = $query . '('.$query_num_where[$k].')';
@@ -1489,17 +1485,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateDateField($query, $imp_session, $field, $idx, 'warning');
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            .SQL_WHERE.$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id;
 
             if(@$query_date_where[$k]){
                 $query = $query . '('.$query_date_where[$k].')';
@@ -1682,7 +1675,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1798,7 +1791,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1878,7 +1871,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1949,7 +1942,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -2036,7 +2029,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -2163,9 +2156,7 @@ private static function updateRecIds($import_table, $imp_id, $id_field, $newids,
 
     $newids = "'".implode($csv_mvsep, $newids)."'";
 
-    $updquery = "UPDATE ".$import_table
-    ." SET ".$id_field."=".$newids
-    ." WHERE imp_id = ". $imp_id;
+    $updquery = "UPDATE `$import_table` SET `$id_field`=$newids WHERE imp_id=$imp_id";
 
     if(!self::$mysqli->query($updquery)){
         print "<div style='color:red'>Cannot update import table (set record id ".$newids.") for line:".$imp_id.".</div>";
@@ -2373,9 +2364,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
                 if($new_recordID>0){
 
-                    $updquery = "UPDATE ".$import_table
-                    ." SET ".$id_field."=".$new_recordID
-                    ." WHERE imp_id in ($imp_ids)";
+                    $updquery = "UPDATE `$import_table` SET `$id_field`=$new_recordID WHERE imp_id in ($imp_ids)";
 
                     if(!self::$mysqli->query($updquery) && $mode_output!='json'){
                         print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines: $imp_ids</div>";
@@ -2403,11 +2392,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                             return $v == $old_id_in_idfield ? $new_id : $v;
                         }, $ids);*/
 
-                        $new_ids = implode($csv_mvsep, $new_ids);
+                        $new_ids = "'".implode($csv_mvsep, $new_ids)."'";
 
-                        $updquery = 'UPDATE '.$import_table
-                            .' SET '.$id_field.'="'.$new_ids
-                            .'" WHERE imp_id='.intval($row[0]);
+                        $updquery = "UPDATE `$import_table` SET `$id_field`=$new_ids WHERE imp_id=".intval($row[0]);
 
                         self::$mysqli->query($updquery);
                     }//foreach

@@ -79,7 +79,7 @@ class DbVerify {
     //
     //
     private function _outStreamInit(){
-        $this->out = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+        $this->out = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     }
 
     //

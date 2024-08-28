@@ -159,7 +159,7 @@ protected function _outputPrepare($data, $params){
     $error_log[] = 'Total rec count '.count($this->records);
 
     $this->tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
-    //$this->fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+    //$this->fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     $this->fd = fopen($this->tmp_destination, 'w');//less than 1MB in memory otherwise as temp file
     if (false === $this->fd) {
         $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');

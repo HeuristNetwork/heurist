@@ -53,7 +53,7 @@ $is_csv = (@$_REQUEST['html']!=1);
         print '<table border=1>';
         print '<tr><td>Field</td><td>ID</td><td>Type</td><td>Vocab Cnt</td><td>Terms count</td><td>Exclusions Count</td><td>Records</td></tr>';
     }else{
-        $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+        $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
         if (false === $fd) {
             die('Failed to create temporary file');
         }

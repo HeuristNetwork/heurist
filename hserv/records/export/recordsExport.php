@@ -141,7 +141,7 @@ public static function output($data, $params){
     $error_log[] = 'Total rec count '.count($records);
 
     $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
-    //$fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+    //$fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     $fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file
     if (false === $fd) {
         self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
@@ -371,7 +371,7 @@ IIIF;
     }elseif($params['format']=='gephi'){ //xml
 
         $gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");
-        //$fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+        //$fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
         $fd_links = fopen($gephi_links_dest, 'w');//less than 1MB in memory otherwise as temp file
         if (false === $fd_links) {
             self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');

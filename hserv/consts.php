@@ -224,7 +224,8 @@ define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');
 
 //
-define('XML_SCHEMA','Xhttp://www.w3.org/2001/XMLSchema#string');
+define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
+define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');
 
 global $glb_lang_codes;
 $glb_lang_codes = null;

@@ -34,6 +34,10 @@ require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
 
 define('DEBUG_RUN', false);
+define('ERR_REC_MODDATE','Cannot update record modification date. ');
+define('ERR_REC_TITLE', 'Cannot update record title');
+define('R_ARROW',' &Rightarrow; ');
+define('FILE NO','File #');
 
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
@@ -594,11 +598,11 @@ class RecordsBatch
             $rec_update['rec_ID'] = $recID;
             $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
             if (!is_numeric($ret)) {
-                $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+                $sqlErrors[$recID] = ERR_REC_MODDATE.$ret;
             }else{
                 //update record title
                 if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){
-                    $sqlErrors[$recID] = 'Cannot update record title';
+                    $sqlErrors[$recID] = ERR_REC_TITLE;
                 }
             }
         }
@@ -762,16 +766,17 @@ class RecordsBatch
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
 
         }else{
+            
+            $searchClause = null;
+            $is_like = false;
 
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
                     if(@$this->data['subs']==1){
-                        $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
-                        $partialReplace = true;
-                    }else{
-                        $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                        $is_like = true;
                     }
+                    $searchClause = $mysqli->real_escape_string(@$this->data['sVal']);
 
                     break;
                 case "enum":
@@ -779,14 +784,15 @@ class RecordsBatch
                 case "float":
                 case "integer":
                 case "resource":
-                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                    $searchClause = $mysqli->real_escape_string(@$this->data['sVal']);
                     $partialReplace = false;
                     break;
                 case "date":
 
                     $dtl_Value = Temporal::getValueForRecDetails( @$this->data['sVal'], $useNewTemporalFormatInRecDetails );
 
-                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($dtl_Value)."\"";
+                    $searchClause = $mysqli->real_escape_string($dtl_Value);
+                    
                     $partialReplace = false;
                     break;
                 case "relmarker":
@@ -797,6 +803,15 @@ class RecordsBatch
                     $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
                     return false;
             }
+            
+            if($searchClause!=null){
+                if($is_like){
+                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';        
+                }else{
+                    $searchClause = 'dtl_Value = "'.$searchClause.'"';        
+                }
+            }
+            
 
             $replace_all_occurences = false;
         }
@@ -1016,7 +1031,7 @@ class RecordsBatch
         //update record title
         foreach ($processedRecIDs as $recID){
                 if(!recordUpdateTitle($this->system, $recID, null, null)){
-                    $sqlErrors[$recID] = 'Cannot update record title';
+                    $sqlErrors[$recID] = ERR_REC_TITLE;
                 }
         }
 
@@ -1055,16 +1070,19 @@ class RecordsBatch
             $searchClause = '1=1';
         }else{
 
+            $searchClause=null;
+            $is_like=false;
+            
             $basetype = $this->_getDetailType($dtyID);
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
                     if(@$this->data['subs']==1){
                         $unconditionally = true;
-                        $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string($this->data['sVal'])."%\"";
-                    }else {
-                        $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                        $is_like = true;
                     }
+                    $searchClause = $mysqli->real_escape_string($this->data['sVal']);
+                    
                     break;
                 case "enum":
                 case "relationtype":
@@ -1072,10 +1090,10 @@ class RecordsBatch
                 case "integer":
                 case "resource":
                 case "date":
-                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                    $searchClause = $mysqli->real_escape_string($this->data['sVal']);
+
                     break;
                 case "geo":
-                    $searchClause = '1';
                     $isDeleteAll = true;
                     break;
                 case "relmarker":
@@ -1085,6 +1103,16 @@ class RecordsBatch
                 default:
                     $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");
                     return false;
+            }
+            
+            if($searchClause!=null){
+                if($is_like){
+                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';        
+                }else{
+                    $searchClause = 'dtl_Value = "'.$searchClause.'"';        
+                }
+            }else{
+                $searchClause = "(1=1)";
             }
         }
 
@@ -1234,10 +1262,10 @@ class RecordsBatch
                $rec_update['rec_ID'] = $recID;
                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+                    $sqlErrors[$recID] = ERR_REC_MODDATE.$ret;
                }else{
                     if(!recordUpdateTitle($this->system, $recID, null, null)){
-                        $sqlErrors[$recID] = 'Cannot update record title';
+                        $sqlErrors[$recID] = ERR_REC_TITLE;
                     }
                }
 
@@ -1309,7 +1337,7 @@ class RecordsBatch
 
                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+                    $sqlErrors[$recID] = ERR_REC_MODDATE.$ret;
                }else{
                    array_push($processedRecIDs, $recID);
                    //update title
@@ -1595,7 +1623,7 @@ class RecordsBatch
         //1. find external urls for field values
         $query = 'SELECT dtl_ID, ulf_ID, ulf_ExternalFileReference, dtl_RecID FROM recUploadedFiles, recDetails '
         .'WHERE ulf_ID=dtl_UploadedFileID AND ulf_OrigFileName="_remote" AND dtl_DetailTypeID='.$dtyID
-        .' AND dtl_RecID in ('.implode(',',$this->recIDs).')';
+        .SQL_AND.predicateId('dtl_RecID', $this->recIDs);
 
         if($this->data['url_substring']){
             $query = $query.' AND ulf_ExternalFileReference LIKE "%'.$mysqli->real_escape_string($this->data['url_substring']).'%"';
@@ -1708,7 +1736,7 @@ class RecordsBatch
         //1. find external urls for field values
         $query = 'SELECT ulf_ObfuscatedFileID FROM recUploadedFiles, recDetails '
         .'WHERE ulf_ID=dtl_UploadedFileID '
-        .' AND dtl_RecID in ('.implode(',',$this->recIDs).')';
+        .SQL_AND.predicateId('dtl_RecID', $this->recIDs);
 
         $cnt = 0;
         $res = $mysqli->query($query);
@@ -2615,8 +2643,9 @@ public methods
         .'FROM recUploadedFiles, recDetails '
         .'WHERE ulf_ID=dtl_UploadedFileID AND '
         .'(NOT(ulf_OrigFileName="_remote" OR ulf_OrigFileName LIKE "'.ULF_IIIF.'%" OR ulf_OrigFileName LIKE "'.ULF_TILED_IMAGE.'%"))'
-        .' AND dtl_DetailTypeID='.$dtyID.' AND dtl_RecID in ('.implode(',',$this->recIDs).')'
-        .'ORDER BY ulf_ID';
+        .' AND dtl_DetailTypeID='.$dtyID
+        .SQL_AND.predicateId('dtl_RecID', $this->recIDs)
+        .' ORDER BY ulf_ID';
         $res = $mysqli->query($query);
         /** $row:
          * [0] => Rec Detail ID
@@ -2703,7 +2732,7 @@ public methods
                     .'WHERE ulf_ID=' . intval($row[1]) . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
                     $file_res = $mysqli->query($file_query);
                     if(!$file_res){ // another mysql error, skip
-                        $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
+                        $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
                         $failed_ids[] = $row[2];
                         continue;
                     }
@@ -2719,7 +2748,7 @@ public methods
                     $file_dtl = $file_res->fetch_row();
                     $file_path = resolveFilePath($file_dtl[1]);
                     if(!file_exists($file_path)){
-                        $uploadError[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; Unable to locate the local file for transfer';
+                        $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . 'Unable to locate the local file for transfer';
                         $failed_ids[] = $row[2];
                         continue;
                     }
@@ -2795,7 +2824,7 @@ public methods
 
                         $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields);// register nakala url
                         if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
-                            $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
+                            $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
                             $failed_ids[] = $row[2];
                         }
                     }else{
@@ -2805,7 +2834,7 @@ public methods
                         }else{
                             $err_msg = 'Unknown error occurred while uploading to Nakala';
                         }
-                        $uploadError[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $err_msg;
+                        $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $err_msg;
                         $failed_ids[] = $row[2];
                     }
                 }

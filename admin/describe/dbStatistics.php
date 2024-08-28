@@ -94,7 +94,7 @@ function dirsize($dir)
 }
 
 if($is_csv){
-    $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+    $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     if (false === $fd) {
         die('Failed to create temporary file');
     }

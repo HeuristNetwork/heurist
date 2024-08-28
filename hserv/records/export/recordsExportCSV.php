@@ -499,7 +499,7 @@ public static function output($data, $params){
         }else {
             if(!@$streams[$rty_ID]){
                 // create a temporary file
-                $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+                $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
                 if (false === $fd) {
                     self::$system->error_exit_api('Failed to create temporary file for csv output');
                 }
@@ -846,7 +846,7 @@ public static function output($data, $params){
     // Save data to streams.
     if ($has_advanced && !empty($csvData)) {
         foreach ($csvData as $recordTypeID => $rows) {
-            $streams[$recordTypeID] = fopen('php://temp/maxmemory:1048576', 'w');
+            $streams[$recordTypeID] = fopen(TEMP_MEMORY, 'w');
 
             if (is_array($rows) && count($rows) > 0) {
                 if ($csv_header) {
@@ -1121,7 +1121,7 @@ public static function output_header($data, $params)
                 }
             }
 
-            $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+            $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
             $streams[$rty_ID] = $fd;
 
             $header = $headers[$rty_ID];

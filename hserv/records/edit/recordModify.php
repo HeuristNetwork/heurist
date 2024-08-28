@@ -2865,7 +2865,8 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                 case "year":
                     $isValid = preg_match("/^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$/i", $dtl_Value);
                     if(!$isValid){
-                        $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid Year';
+                        $err_msg = htmlspecialchars($dtl_Value);
+                        $err_msg = "Value $err_msg is not valid Year";
                     }
                     break;
                 case "boolean":
@@ -2879,13 +2880,15 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                             $dtl_Value = "false";
                         }
                     }else{
-                        $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid boolean';
+                        $err_msg = htmlspecialchars($dtl_Value);
+                        $err_msg = "Value $err_msg is not valid boolean";
                     }
                     break;
                 case "integer":
                     $isValid = preg_match("/^\\s*-?\\d+\\s*$/", $dtl_Value);
                     if(!$isValid){
-                        $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid integer';
+                        $err_msg = htmlspecialchars($dtl_Value);
+                        $err_msg = "Value $err_msg is not valid integer";
                     }
                     break;
 
