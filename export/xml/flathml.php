@@ -115,7 +115,7 @@ if(@$_REQUEST['postdata']){
 
 define('REGEX_JSON_CHECK','/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/');
 
-define('ERR_INVALID_FILTER', 'Error: invalid json filters string')
+define('ERR_INVALID_FILTER', 'Error: invalid json filters string');
 
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
 
