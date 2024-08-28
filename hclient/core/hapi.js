@@ -2406,7 +2406,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     layout_language: 'en',
                     layout_theme: 'heurist',
                     search_result_pagesize: 100,
-                    search_detail_limit: 2000,
+                    search_detail_limit: 500,
                     userCompetencyLevel: 2, //'beginner',
                     userFontSize: 12, //px
                     deriveMapLocation: true,
@@ -2423,14 +2423,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(that.currentUser['ugr_Preferences'] && Object.hasOwn(that.currentUser['ugr_Preferences'], name)){
                     res = that.currentUser['ugr_Preferences'][name];
                 }
+                
+                let res2 = window.hWin.HEURIST4.util.isNumber(res)?res:0;
 
                 // TODO: redundancy: this duplicates same in System.php
                 if ('search_detail_limit' == name) {
-                    if (window.hWin.HEURIST4.util.isempty(res) || res < 500) res = 500
-                    else if (res > 5000) res = 5000;
+                    res = Math.min(Math.max(res2,500),5000);
                 } else if ('search_result_pagesize' == name) {
-                    if (window.hWin.HEURIST4.util.isempty(res) || res < 50) res = 100
-                    else if (res > 5000) res = 5000;
+                    res = Math.min(Math.max(res2,100),5000);
                 }
                 return res;
             }

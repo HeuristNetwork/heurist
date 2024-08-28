@@ -474,6 +474,12 @@ if ($system->has_access()) { //logged in
     }
 }
 
+//----------------------------------------------------------------------------//
+// Traversal functions
+// The aim here is to bundle all the queries for each level of relationships
+// into one query, rather than doing them all recursively.
+//----------------------------------------------------------------------------//
+
 //
 //
 //
@@ -484,16 +490,7 @@ function predicateRecordVisibility(){
             ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
             : '(') .
     (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-    
-    
-   
 }
-
-//----------------------------------------------------------------------------//
-// Traversal functions
-// The aim here is to bundle all the queries for each level of relationships
-// into one query, rather than doing them all recursively.
-//----------------------------------------------------------------------------//
 
 /**
 * findPointers - Helper function that finds recIDs of record pointer details for all records in a given set of recIDs
@@ -505,7 +502,7 @@ function predicateRecordVisibility(){
 * @return $ret a comma separated list of recIDs
 */
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
-    global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY;
+    global $system, $mysqli;
     //saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
     // find all detail values for resource type details which exist for any record with an id in $rec_ids
     // and also is of a type in rtyIDs if rtyIDs is set to non null
