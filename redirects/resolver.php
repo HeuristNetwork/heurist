@@ -81,7 +81,7 @@ if($is_own_domain){
 /*
 if(count($requestUri)==1){
    if($requestUri[0]==='heurist'){
-       redirectURL('../index.php');
+       redirectURL2('../index.php');
        exit;
    }else{
        $_SERVER["SCRIPT_NAME"] .= '/web/';
@@ -92,7 +92,7 @@ http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
 
-    redirectURL('/'.rawurlencode($requestUri[0]).'/index.php');
+    redirectURL2('/'.rawurlencode($requestUri[0]).'/index.php');
     exit;
 
 }else
@@ -104,11 +104,11 @@ if ((count($requestUri)==1)
     $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]);//to avoid "Open redirect" security report
 
     if($dbname=='startup'){
-        redirectURL('/'.rawurlencode($requestUri[0]).'/startup/index.php');
+        redirectURL2('/'.rawurlencode($requestUri[0]).'/startup/index.php');
         exit;
     }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
-        redirectURL('/'.rawurlencode($dbname).'/web/');
+        redirectURL2('/'.rawurlencode($dbname).'/web/');
         exit;
     }
 }
@@ -152,7 +152,7 @@ if(count($requestUri)==3 && $requestUri[0]=='db' && ($requestUri[1]=='record' ||
 
     $isMediaRequest = ($requestUri[1]=='file');
 
-    //redirectURL('/h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
+    //redirectURL2('/h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
 
 }else                            // dbname/action                               heurist/dbname/action
 if(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions)))
@@ -200,7 +200,7 @@ $requestUri:
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }elseif($database=='heurist' || $database=='h6-alpha'){
-            redirectURL('/'.rawurlencode($database).'/index.php');
+            redirectURL2('/'.rawurlencode($database).'/index.php');
             exit;
         }
 
@@ -344,7 +344,7 @@ $requestUri:
         exit;
     }
 
-    redirectURL($redirect);
+    redirectURL2($redirect);
     exit;
 
 }
@@ -352,7 +352,7 @@ elseif(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6
     //Redirects to index page for viewers plugins
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    redirectURL('/'.filter_var($requestUri[0]).'/'.$requestUri[1].'/'.$requestUri[2].'/index.php?'.$query_string);
+    redirectURL2('/'.filter_var($requestUri[0]).'/'.$requestUri[1].'/'.$requestUri[2].'/index.php?'.$query_string);
     exit;
 
 }
@@ -514,9 +514,9 @@ if($database_url!=null){ //redirect to resolver for another database
     $redirect = 'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg);
 }
 
-redirectURL($redirection_path.$redirect);
+redirectURL2($redirection_path.$redirect);
 
-function redirectURL($url){
+function redirectURL2($url){
     header('Location: '.$url);   
 }
 ?>
