@@ -37,7 +37,7 @@ define('DEBUG_RUN', false);
 define('ERR_REC_MODDATE','Cannot update record modification date. ');
 define('ERR_REC_TITLE', 'Cannot update record title');
 define('R_ARROW',' &Rightarrow; ');
-define('FILE NO','File #');
+define('FILE_NO','File #');
 
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
