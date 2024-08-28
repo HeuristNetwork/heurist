@@ -4413,9 +4413,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         
                         s = s + '<th style="color:red">'+colname
-                             + '<br><font style="font-size:10px;font-weight:normal">'
+                             + '<br><span style="font-size:10px;font-weight:normal">'
                              + (dt_id>0?$Db.baseFieldType[$Db.dty(dt_id, 'dty_Type')] :dt_id)
-                             + '</th>';
+                             + '</span></th>';
                              
                         err_col = i;
                         

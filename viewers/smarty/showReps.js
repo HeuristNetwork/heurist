@@ -218,7 +218,7 @@ function ShowReps( is_snippet_editor ) {
             if(_sQueryMode=="selected"){
                 _updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
             }else{
-                _updateReps("<b><font color='#ff0000'>Select saved search or apply a filter to see report output</font></b>");
+                _updateReps('<span style="color:#ff0000;font-weight:bold">Select saved search or apply a filter to see report output</span>');
             }
 
             return null;

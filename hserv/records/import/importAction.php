@@ -1760,7 +1760,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                     if (!$term_id)
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                         if(array_search($r_value, $wrong_values)===false){
                                 array_push($wrong_values, $r_value);
                         }
@@ -1844,7 +1844,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
                     if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1916,7 +1916,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 
                     if(!is_numeric($r_value)){
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1994,7 +1994,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                                 array_push($newvalue, $value);
                              } catch (Exception  $e){
                                 $is_error = true;
-                                array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                                array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                              }
                          }
 
@@ -2007,7 +2007,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                             array_push($newvalue, $value);
                         }else{
                             $is_error = true;
-                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                            array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                         }
                         */
 

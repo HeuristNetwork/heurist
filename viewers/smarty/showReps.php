@@ -239,10 +239,10 @@ function executeSmartyTemplate($system, $params){
             } else {
 
                 if($publishmode>0){
-                    $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
+                    $error = '<span style="color:#ff0000;font-weight:bold">Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</span>';
                 }else{
                     //message for UI
-                    $error = '<b><font color="#ff0000">Search or Select records to see template output</font></b>';
+                    $error = '<span style="color:#ff0000;font-weight:bold">Search or Select records to see template output</span>';
                 }
             }
 
@@ -265,7 +265,7 @@ function executeSmartyTemplate($system, $params){
         if(file_exists($system->getSysDir('smarty-templates').$template_file)){
             $content = file_get_contents($system->getSysDir('smarty-templates').$template_file);
         }else{
-            $error = '<b><font color="#ff0000">Template file '.htmlspecialchars($template_file).' does not exist</font></b>';
+            $error = '<span style="color:#ff0000;font-weight:bold">Template file '.htmlspecialchars($template_file).' does not exist</span>';
 
             smarty_error_output($system, $error);
             return false; //exit;
