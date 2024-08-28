@@ -90,7 +90,7 @@ CONTENT:
     This method replaces all div elements with attribute "data-heurist-app-id" to
     the appropriate Heurist widgets (search, map, result list etc)
 
-    There are 2 fields per menu/page record "target css" and "target element". They are reserved
+    There are 2 fields per menu/page record target css and target element. They are reserved
     for future use. At the moment page content is always loaded into #main-content and applied
     general Heurist color scheme unless the style is overdefined for particular
     widget.

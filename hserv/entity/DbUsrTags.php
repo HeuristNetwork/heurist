@@ -146,7 +146,7 @@ class DbUsrTags extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -219,7 +219,7 @@ class DbUsrTags extends DbEntityBase
     * 2. find wrong permission
     * 3. find in use
     *
-    * @returns  array of 'deleted', 'no enough right' and 'in use' ids
+    * @returns  array of 'deleted', 'no enough right'  and  'in use' ids
     */
     public function delete($disable_foreign_checks = false){
 

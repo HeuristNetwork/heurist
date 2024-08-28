@@ -243,7 +243,7 @@ private static function findRecordIds($imp_session, $params){
                         }elseif(is_numeric($field_type)){
 
                             $from = '';
-                            $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
+                            $where = "d".$index.".dtl_DetailTypeID=".$field_type.SQL_AND;
                             $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
 
                             if( $dt_type == "enum" ||  $dt_type == "relationtype") {
@@ -371,7 +371,7 @@ private static function findRecordIds($imp_session, $params){
                         //query to search record ids
                         $search_query = "SELECT rec_ID, rec_Title "
                         ." FROM ".implode(",",$a_from)
-                        ." WHERE ".implode(" and ",$a_where);
+                        ." WHERE ".implode(SQL_AND,$a_where);
 
                         $search_stmt = $mysqli->prepare($search_query);
                         //$search_stmt->bind_param('s', $field_value);

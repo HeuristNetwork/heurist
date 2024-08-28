@@ -155,7 +155,7 @@ class DbUsrReminders extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);

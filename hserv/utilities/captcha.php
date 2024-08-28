@@ -57,7 +57,7 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
-    // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
+    // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of $ran1 and $ran2";
     $value = $ran1." + ".$ran2." + 1 = ";
 
     if(array_key_exists('json',$_REQUEST)){ //returns both session id and value

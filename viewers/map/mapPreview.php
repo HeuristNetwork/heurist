@@ -283,10 +283,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
                 var is_sglr = (not_public.length==1);
 
-                var sMsg = '<p>The following '
-                +((cnt_dt>0)?('dataset registration'+(cnt_dt>1?'s':'')):'')
-                + ((cnt_dt>0 && cnt_ds>0)?' and ':'')
-                +((cnt_ds>0)?('data source record'+(cnt_ds>1?'s':'')):'')
+                var sMsg = '<p>The following'
+                +((cnt_dt>0)?(' dataset registration'+(cnt_dt>1?'s':'')):'')
+                + ((cnt_dt>0 && cnt_ds>0)?'and':'')
+                +((cnt_ds>0)?(' data source record'+(cnt_ds>1?'s':'')):'')
                 +(is_sglr?' is ':' are ')
 +' not marked as publicly visible and cannot therefore be included in your saved map. '
 +(is_sglr?'It is':'They are')+' visible to you as either the owner or because the owner has made '

@@ -457,7 +457,7 @@ public static function findDupes( $params ){
 
             //3. create search query    uss $compare_fields
             $search_query = 'SELECT rec_ID '.($compare_mode<3?(', '.$compare_fields):'').$main_query; //' FROM tmp_find_dupes WHERE ';
-            $search_query = $search_query.' AND ('. implode(' AND ', $search_where) .')';
+            $search_query = $search_query.' AND ('. implode(SQL_AND, $search_where) .')';
 
             /*
             if($startgroup>0){ //limit search query to records that starts with the same characters

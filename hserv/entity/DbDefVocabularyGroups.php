@@ -98,7 +98,7 @@ class DbDefVocabularyGroups extends DbEntityBase
         .' FROM '.$this->config['tableName'];
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          $query = $query.' ORDER BY vcg_Order '.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 

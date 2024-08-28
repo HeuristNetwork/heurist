@@ -1641,7 +1641,7 @@ function print_public_details($bib) {
         .' where d1.dtl_RecID = '. intval($bib['rec_ID']).' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" '
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
-        .' AND '.$ACCESS_CONDITION;
+        .SQL_AND.$ACCESS_CONDITION;
 
 //print $query;
         $allow_execute_this_complex_query = true;
@@ -2552,7 +2552,7 @@ function print_linked_details($bib, $link_cnt)
                 .'where rl_TargetID = '.intval($bib['rec_ID'])
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
                 .$ignored_ids
-    .' and '.$ACCESS_CONDITION
+    .SQL_AND.$ACCESS_CONDITION
     .' ORDER BY rec_RecTypeID, rec_Title';
 
     $res = $mysqli->query($query);

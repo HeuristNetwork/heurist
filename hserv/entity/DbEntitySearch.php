@@ -246,7 +246,7 @@ class DbEntitySearch
         .' FROM '.$this->config['tableName'];
 
         if(count($this->whereConditions)>0){
-            $query = $query.' WHERE '.implode(' AND ',$this->whereConditions);
+            $query = $query.' WHERE '.implode(SQL_AND,$this->whereConditions);
         }
          
         if($orderBy!=null){
@@ -378,7 +378,7 @@ class DbEntitySearch
             if ($data_type == 'integer' || $data_type == 'float' || $data_type == 'year') {
 
                 if($between){
-                    $res = $between.$values[0].' and '.$values[1];
+                    $res = $between.$values[0].SQL_AND.$values[1];
                 }else{
                     $res = " $eq ".($data_type == 'int'?intval($value):$value);//no quotes
                 }
@@ -388,7 +388,7 @@ class DbEntitySearch
                 //$datestamp = Temporal::dateToISO($this->value);
 
                 if($between){
-                    $res = $between." '".$values[0]."' and '".$values[1]."'";
+                    $res = $between." '".$values[0]."' ".SQL_AND." '".$values[1]."'";
                 }else{
 
                     if($eq=='=' && !$exact){
@@ -403,7 +403,7 @@ class DbEntitySearch
             } else {
 
                 if($between){
-                    $res = $between.$values[0].' and '.$values[1];
+                    $res = $between.$values[0].SQL_AND.$values[1];
                 }else{
 
                     if(($eq=='=' || $eq=='!=') && !$exact && ($data_type == 'freetext' || $data_type == 'url' || $data_type == 'blocktext') ){

@@ -244,12 +244,12 @@ if($issum){
      ." ,recDetails d3 "
     //20130517 ." where rec_RectypeID=".$params['rt']
     ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".intval($params['agg_field'])
-    ." and ".$where;
+    .SQL_AND.$where;
 
 }else{
     $query = $query." where ".$where; //20130517 rec_RectypeID=".$params['rt'];
 }
-//20130517 $query = $query." and ".$where_2;
+//20130517 $query = $query.SQL_AND.$where_2;
 
 $query = $query." group by d2.dtl_Value ";
 

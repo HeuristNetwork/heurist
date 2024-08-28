@@ -77,7 +77,7 @@ class DbSysGroups extends DbEntityBase
 
                 if(@$this->data['ugl_Join']){ //always search for role
 
-                    $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(' AND ',$where2);
+                    $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(SQL_AND,$where2);
 
                 }else{
                     $where = array_merge($where,$where2);
@@ -158,7 +158,7 @@ class DbSysGroups extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);

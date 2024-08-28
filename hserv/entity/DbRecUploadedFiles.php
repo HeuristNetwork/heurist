@@ -217,7 +217,7 @@ class DbRecUploadedFiles extends DbEntityBase
         .' FROM '.implode('', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -2264,10 +2264,10 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     $extra = 'missing the Digital media record type (2-5)';
                 }
                 if($dty_file <= 0){
-                    $extra .= (($extra == '' && $dty_title > 0) ? ', ': ($extra == '' ? ' and ' : '')) . 'missing the required file field (2-38)';
+                    $extra .= (($extra == '' && $dty_title > 0) ? ', ': ($extra == '' ? ' and' : '')) . ' missing the required file field (2-38)';
                 }
                 if($dty_title <= 0){
-                    $extra .= (($extra == '') ? ' and ': '') . 'missing the required title field (2-1)';
+                    $extra .= (($extra == '') ? ' and': '') . ' missing the required title field (2-1)';
                 }
 
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);

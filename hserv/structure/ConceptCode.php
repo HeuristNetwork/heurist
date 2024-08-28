@@ -159,7 +159,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
 
     } elseif (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
  $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix
-                . "OriginatingDBID=" . intval($ids[0]) . " and "
+                . "OriginatingDBID=" . intval($ids[0]) . SQL_AND
                 . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
 
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);

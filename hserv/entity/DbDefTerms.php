@@ -178,7 +178,7 @@ class DbDefTerms extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
@@ -934,7 +934,7 @@ class DbDefTerms extends DbEntityBase
                 $code_clause = 'trn_Code = ' . intval($trm_ids);
             }
 
-            $where_clause .= empty($code_clause) ? '' : ' AND ' . $code_clause;
+            $where_clause .= empty($code_clause) ? '' : SQL_AND . $code_clause;
         }
 
         $query = 'SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation '

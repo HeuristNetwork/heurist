@@ -660,7 +660,7 @@ function __setTermYesNo(){
             $yes_1 = intval($yes_1);
             $vocab = intval($vocab);
             if($yes_0>0){
-                $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
+                $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.SQL_AND.$enums;
                 $mysqli->query($query);
     //replace in term links
                 $query = 'UPDATE defTermsLinks trl_TermID='.$yes_0.' WHERE trl_TermID='.$yes_1;
@@ -694,7 +694,7 @@ function __setTermYesNo(){
             $vocab = intval($vocab);
 
             if($no_0>0){
-                $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.' AND '.$enums;
+                $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.SQL_AND.$enums;
                 $mysqli->query($query);
     //replace in term links
                 $query = 'UPDATE defTermsLinks trl_TermID='.$no_0.' WHERE trl_TermID='.$no_1;

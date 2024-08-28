@@ -310,7 +310,7 @@ class ReportRecord {
     // $rec - record id or record array - record to find records linked to or from this record
     // $rty_ID - record type or array of record type to filter output
     // $direction - linkedfrom or linkedto or null to return  both directions
-    // returns array of record IDs devided to 2 arrays "linkedto" and "linkedfrom"
+    // returns array of record IDs devided to 2 arrays linkedto and linkedfrom
     //
     public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
 
@@ -325,7 +325,7 @@ class ReportRecord {
             if($rty_ID!=null){
                 if(is_int($rty_ID) && $rty_ID>0)
                 {
-                    $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID='.$rty_ID.' AND ';
+                    $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID='.$rty_ID.SQL_AND;
                 }else{
                     if(!is_array($rty_ID)){
                         $ids = explode(',', $rty_ID);

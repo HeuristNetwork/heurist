@@ -185,13 +185,13 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     // 4a. SPECIAL CASE for _BROKEN_
     if($needbroken){
         $where_clause = ' (rec_URLErrorMessage is not null) '
-        . ($where_clause? ' and '.$where_clause :'');
+        . ($where_clause? SQL_AND.$where_clause :'');
         //'(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '
     }
     // 4b. SPECIAL CASE for _NOTLINKED_
     if($neednotlinked){
         $where_clause = '(not exists (select rl_ID from recLinks where rl_SourceID=TOPBIBLIO.rec_ID  or rl_TargetID=TOPBIBLIO.rec_ID )) '
-            . ($where_clause? ' and '.$where_clause :'');
+            . ($where_clause? SQL_AND.$where_clause :'');
     }
 
     // 4c. SPECIAL CASE for USER WORKSET
@@ -200,7 +200,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
         if(mysql__select_value($mysqli, $q2)>0){
             $where_clause = '(exists (select wss_RecID from usrWorkingSubsets where wss_RecID=TOPBIBLIO.rec_ID and wss_OwnerUGrpID='.$currUserID.'))'
-                . ($where_clause? ' and '.$where_clause :'');
+                . ($where_clause? SQL_AND.$where_clause :'');
         }
     }
 
@@ -244,10 +244,10 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
                 }
                 $where2 .= ')';
 
-                $where2_conj = ' and ';
+                $where2_conj = SQL_AND;
             }else{
                 $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';
-                $where2_conj = ' and ';
+                $where2_conj = SQL_AND;
             }
 
             if(is_array($wg_ids) && count($wg_ids)>0){
@@ -290,7 +290,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     }
 
     if($where2!=''){
-        $where_clause = $where_clause . ' and ' . $where2;
+        $where_clause = $where_clause . SQL_AND . $where2;
     }
 
     // 6. DEFINE LIMIT AND OFFSET ---------------------------------------------------------------------------------------
@@ -596,7 +596,7 @@ class Query {
         }
         }
         sort($and_clauses);
-        $this->where_clause = join(' and ', $and_clauses);
+        $this->where_clause = join(SQL_AND, $and_clauses);
 
 
         //SORT
@@ -697,7 +697,7 @@ class OrLimb {
             }
         }
         sort($and_clauses);
-        $sql = join(' and ', $and_clauses);
+        $sql = join(SQL_AND, $and_clauses);
 
         return $sql;
     }
@@ -1204,7 +1204,7 @@ class Predicate {
             $datestamp0 = Temporal::dateToISO($vals[0]);
             $datestamp1 = Temporal::dateToISO($vals[1]);
 
-            return "between '$datestamp0' and '$datestamp1'";
+            return "between '$datestamp0'".SQL_AND."'$datestamp1'";
 
         }else{
 
@@ -1705,7 +1705,7 @@ class FieldPredicate extends Predicate {
 
                         }
 
-                        //$nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID ';//STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
+                        //$nest_joins .= SQL_AND.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID ';//STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
 
                         if($field_type){
                             $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
@@ -1835,7 +1835,7 @@ class FieldPredicate extends Predicate {
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
             return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' left join Records link on rd.dtl_Value=link.rec_ID '
-            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).' and '
+            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).SQL_AND
             . ($isnumericvalue ? 'rd.dtl_Value ':' link.rec_Title ').$match_pred . '))';
 
         }elseif($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
@@ -1854,7 +1854,7 @@ class FieldPredicate extends Predicate {
 
             $dateindex_clause = $this->makeDateClause();
             if($dateindex_clause){
-                $res = $res.' AND '.$dateindex_clause.'))';
+                $res = $res.SQL_AND.$dateindex_clause.'))';
             }else{
                 $res = '';
             }
@@ -1903,7 +1903,7 @@ class FieldPredicate extends Predicate {
             return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
                 . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
                 . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-                . ' and ' . $fieldname . ' ' . $match_pred. '))';
+                . SQL_AND . $fieldname . ' ' . $match_pred. '))';
 
 
         }else{
@@ -2020,7 +2020,7 @@ class FieldPredicate extends Predicate {
         if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
             $vals = explode("<>", $this->value);
-            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
 
         }else {
 
@@ -2136,7 +2136,7 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
         if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
             $vals = explode("<>", $this->value);
-            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
 
         }else {
 
@@ -2321,7 +2321,7 @@ class BibIDPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $vals[0] = recordSearchReplacement($mysqli, $vals[0]);
             $vals[1] = recordSearchReplacement($mysqli, $vals[1]);
-            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
 
         }else{
 
@@ -2427,7 +2427,7 @@ class LinkedFromParentPredicate extends Predicate {
             if(count($rty_IDs)>1){
                 $add_where = 'rd.rec_RecTypeID in ('.implode(',',$rty_IDs).') and ';
             }elseif(count($rty_IDs)>0){
-                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].' and ';
+                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2459,7 +2459,7 @@ class LinkedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where
                         .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
@@ -2467,14 +2467,14 @@ class LinkedFromParentPredicate extends Predicate {
             if(count($rty_IDs)>1){
                 $add_where = 'rl.rl_SourceID in ('.implode(',',$rty_IDs).') and ';
             }elseif(count($rty_IDs)>0){
-                $add_where = 'rl.rl_SourceID = '.$rty_IDs[0].' and ';
+                $add_where = 'rl.rl_SourceID = '.$rty_IDs[0].SQL_AND;
             }else{
                 $add_where = '';
             }
 
             $add_where = $add_where.' rl.rl_TargetID=rd.rec_ID ';
             if($rty_ID!=1){
-                $add_where = $add_where . ' and ';
+                $add_where = $add_where . SQL_AND;
 
                 if(count($dty_IDs)>1){
                     $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
@@ -2548,7 +2548,7 @@ class LinkedToParentPredicate extends Predicate {
             if(count($rty_IDs)>1){
                 $add_where = 'rd.rec_RecTypeID in ('.implode(',',$rty_IDs).') and ';
             }elseif(count($rty_IDs)>0){
-                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].' and ';
+                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2580,21 +2580,21 @@ class LinkedToParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
 
             if(count($rty_IDs)>1){
                 $add_where = 'rl.rl_TargetID in ('.implode(',',$rty_IDs).') and ';
             }elseif(count($rty_IDs)>0){
-                $add_where = 'rl.rl_TargetID = '.$rty_IDs[0].' and ';
+                $add_where = 'rl.rl_TargetID = '.$rty_IDs[0].SQL_AND;
             }else{
                 $add_where = '';
             }
 
             $add_where = $add_where.' rl.rl_SourceID=rd.rec_ID ';
             if($rty_ID!=1){
-                $add_where = $add_where . ' and ';
+                $add_where = $add_where . SQL_AND;
 
                 if(count($dty_IDs)>1){
                     $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
@@ -2657,7 +2657,7 @@ class RelatedFromParentPredicate extends Predicate {
 
         //NEW  ---------------------------
         $add_from  = 'recLinks rl ';
-        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
         . ' rl.rl_SourceID=rd.rec_ID and '
         . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
 
@@ -2674,7 +2674,7 @@ class RelatedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{
@@ -2683,7 +2683,7 @@ class RelatedFromParentPredicate extends Predicate {
             if(count($ids)>1){
                 $add_where = 'rl.rl_SourceID in ('.implode(',',$ids).') and ';
             }elseif(count($ids)>0){
-                $add_where = 'rl.rl_SourceID = '.$ids[0].' and ';
+                $add_where = 'rl.rl_SourceID = '.$ids[0].SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2745,7 +2745,7 @@ class RelatedToParentPredicate extends Predicate {
 
         //NEW  ---------------------------
         $add_from  = 'recLinks rl ';
-        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
         . ' rl.rl_TargetID=rd.rec_ID and '
         . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
 
@@ -2763,7 +2763,7 @@ class RelatedToParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{
@@ -2772,7 +2772,7 @@ class RelatedToParentPredicate extends Predicate {
             if(count($ids)>1){
                 $add_where = 'rl.rl_TargetID in ('.implode(',',$ids).') and ';
             }elseif(count($ids)>0){
-                $add_where = 'rl.rl_TargetID = '.$ids[0].' and ';
+                $add_where = 'rl.rl_TargetID = '.$ids[0].SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2851,9 +2851,9 @@ class RelatedPredicate extends Predicate {
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
             $select = '(TOPBIBLIO.rec_ID in (select rl.rl_SourceID '.$query["from"].',recLinks rl '
-                      .' WHERE '.$query["where"].' and '.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
+                      .' WHERE '.$query["where"].SQL_AND.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
                       .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
-                      .' WHERE '.$query["where"].' and '.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
+                      .' WHERE '.$query["where"].SQL_AND.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
         }
 
 
@@ -2876,11 +2876,11 @@ class AllLinksPredicate  extends Predicate {
 
         //NEW
         $add_from1 = 'recLinks rl1 ';
-        $add_where1 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+        $add_where1 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
             . ' rl1.rl_TargetID=rd.rec_ID';
 
         $add_from2 = 'recLinks rl2 ';
-        $add_where2 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'')
+        $add_where2 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
             . ' rl2.rl_SourceID=rd.rec_ID';
 
 
@@ -2895,9 +2895,9 @@ class AllLinksPredicate  extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select1 = $add_select1.$query["from"].', '.$add_from1.' WHERE '.$query["where"].' and '.$add_where1.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select1 = $add_select1.$query["from"].', '.$add_from1.' WHERE '.$query["where"].SQL_AND.$add_where1.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
-            $select2 = $add_select2.$query["from"].', '.$add_from2.' WHERE '.$query["where"].' and '.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select2 = $add_select2.$query["from"].', '.$add_from2.' WHERE '.$query["where"].SQL_AND.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{
@@ -3179,7 +3179,7 @@ class LatitudePredicate extends Predicate {
 
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $match_pred = 'ST_Y( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+                $match_pred = 'ST_Y( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
             }else{
                 // see if this latitude passes through the bounding box
                 $match_pred = floatval($this->value)." between ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
@@ -3227,7 +3227,7 @@ class LongitudePredicate extends Predicate {
 
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $match_pred = 'ST_X( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+                $match_pred = 'ST_X( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
             }else{
                 // see if this longitude passes through the bounding box
                 $match_pred = floatval($this->value)." between ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )

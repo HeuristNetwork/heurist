@@ -101,7 +101,7 @@ class DbDefRecTypes extends DbEntityBase
             if(($usr_ID>0) || ($usr_ID===0)){
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $this->where_for_count[0] = $conds[0];
-                $this->where_for_count[1] =  ' AND '.$conds[1];
+                $this->where_for_count[1] =  SQL_AND.$conds[1];
             }else{
                 $this->where_for_count[0] = '';
                 $this->where_for_count[1] = 'AND (not r0.rec_FlagTemporary)';
@@ -193,7 +193,7 @@ class DbDefRecTypes extends DbEntityBase
             if(($usr_ID>0) || ($usr_ID===0)){
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $query2 = $query2 . $conds[0];
-                $where2 = $where2 . ' AND '.$conds[1];
+                $where2 = $where2 . SQL_AND.$conds[1];
             }else{
                 $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
             }
@@ -209,7 +209,7 @@ class DbDefRecTypes extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+            $query = $query.' WHERE '.implode(SQL_AND,$where);
         }
         if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -625,7 +625,7 @@ class DbDefRecTypes extends DbEntityBase
         if($ugr_ID>0 && is_array($wg_ids) && count($wg_ids)>0){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
-        return array($from, '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2);
+        return array($from, '(not r0.rec_FlagTemporary)'.($where2?SQL_AND:'').$where2);
     }
 
     //
@@ -675,7 +675,7 @@ WHERE
 
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
-                if(@$conds[1]) {$conds[1] = ' AND '.$conds[1];}
+                if(@$conds[1]) {$conds[1] = SQL_AND.$conds[1];}
             }else{
                 $conds = array('', ' AND (not r0.rec_FlagTemporary)');
             }

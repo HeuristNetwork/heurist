@@ -98,7 +98,7 @@ class UArchive {
 
                     $file = str_replace('\\', '/', $file);
 
-                    // Ignore "." and ".." folders
+                    // Ignore "."   and   ".." folders
                     if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) ) {continue;}
 
                     if( is_dir($file) && substr($file,-1)!='/' ){
@@ -379,7 +379,7 @@ class UArchive {
 
                     $file = str_replace('\\', '/', $file);
 
-                    // Ignore "." and ".." folders
+                    // Ignore "."  and  ".." folders
                     if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) ) {continue;}
 
                     if( is_dir($file) && substr($file,-1)!='/' ){

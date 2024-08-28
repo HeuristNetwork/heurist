@@ -211,6 +211,10 @@ define('DIV','<div>');
 define('DIV_E','</div>');
 define('BR','<br>');
 
+//common separators
+define('SQL_AND',' AND ');
+
+
 
 global $glb_lang_codes;
 $glb_lang_codes = null;

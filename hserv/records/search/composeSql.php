@@ -522,7 +522,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
         if(mysql__select_value($mysqli, $q2)>0){
             $query->where_clause = '(exists (select wss_RecID from usrWorkingSubsets where wss_RecID=r0.rec_ID and wss_OwnerUGrpID='.$currUserID.'))'
-                . ($query->where_clause && trim($query->where_clause)!=''? ' and '.$query->where_clause :'');
+                . ($query->where_clause && trim($query->where_clause)!=''? SQL_AND.$query->where_clause :'');
         }
     }
 
@@ -646,7 +646,7 @@ class HQuery {
                 $where2_conj = '';
                 if($recVisibilityType){ //hidden
                     $where2 = '(r0.rec_NonOwnerVisibility="hidden")';
-                    $where2_conj = ' and ';
+                    $where2_conj = SQL_AND;
                 }elseif($this->currUserID!=2){ //by default always exclude "hidden" for not database owner
                     //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
 
@@ -674,12 +674,12 @@ class HQuery {
             }
 
             if($this->search_domain!=EVERYTHING){
-                $where2 = '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2;
+                $where2 = '(not r0.rec_FlagTemporary)'.($where2?SQL_AND:'').$where2;
             }
 
             if(trim($where2)!=''){
                 if(trim($this->where_clause)!=''){
-                    $this->where_clause = $this->where_clause. ' and ' . $where2;
+                    $this->where_clause = $this->where_clause. SQL_AND . $where2;
                 }else{
                     $this->where_clause = $where2;
                 }
@@ -892,7 +892,7 @@ class HLimb {
     var $where_clause = "";
     var $error_message = null;
 
-    var $allowed = array("all"=>" AND ","any"=>" OR ","not"=>"NOT ");
+    var $allowed = array("all"=>SQL_AND,"any"=>" OR ","not"=>"NOT ");
 
     //besides  not,any
     //
@@ -1692,7 +1692,7 @@ class HPredicate {
 
                 if($this->fulltext){
                     //execute fulltext search query
-                    $res2 = $res.' AND '.($this->negate ? ' NOT ' : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
+                    $res2 = $res.SQL_AND.($this->negate ? ' NOT ' : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
                     $list_ids = mysql__select_list2($mysqli, $res2);
                     
                     if(is_array($list_ids) && count($list_ids)>0){
@@ -1705,7 +1705,7 @@ class HPredicate {
                     }
 
                 }else{
-                    $res = $res.' AND '.$field_name.$val.$field_condition.')';
+                    $res = $res.SQL_AND.$field_name.$val.$field_condition.')';
                 }
             }else{
                 //field id not defined - at the moment used for search via registered file
@@ -2357,7 +2357,7 @@ class HPredicate {
                 $this->relation_fields->setRelationPrefix($rl);
                 $w2 = $this->relation_fields->makeSQL();
                 if($w2 && trim($w2['where'])!=''){
-                    $where = $where.$w2['where'].' AND ';
+                    $where = $where.$w2['where'].SQL_AND;
                 }
            }
 
@@ -2446,7 +2446,7 @@ class HPredicate {
                         $rty_constraints = 'IN ('.implode(',',$rty_constraints).')';
                     }
 
-                    $rty_constraints = ', Records where '.$part2.'=rec_ID and rec_RecTypeID '.$rty_constraints.' AND ';
+                    $rty_constraints = ', Records where '.$part2.'=rec_ID and rec_RecTypeID '.$rty_constraints.SQL_AND;
                 }else{
                     $rty_constraints = ' where ';
                 }
@@ -2538,7 +2538,7 @@ class HPredicate {
                 $w2 = $this->relation_fields->makeSQL();
 //$res = array("from"=>$this->tables, "where"=>$where);
                 if($w2 && trim($w2['where'])!=''){
-                    $where = $where . ' AND ' . $w2['where'];
+                    $where = $where . SQL_AND . $w2['where'];
                 }
             }
             return array("from"=>"recLinks ".$rl, "where"=>$where);
@@ -2641,7 +2641,7 @@ class HPredicate {
             $datestamp0 = Temporal::dateToISO($vals[0]);
             $datestamp1 = Temporal::dateToISO($vals[1]);
 
-            $ret = ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
+            $ret = ($this->negate?'not ':'')."between '$datestamp0'".SQL_AND."'$datestamp1'";
             return $ret;
 
         }elseif($this->isEmptyValue()){ // {"f:10":"NULL"}
@@ -2860,7 +2860,7 @@ class HPredicate {
         }
 
 
-        if (strpos($stripped_value,'<>')===false && strpos($stripped_value,'><')===false) { //except "overlaps" and "between" operators
+        if (strpos($stripped_value,'<>')===false && strpos($stripped_value,'><')===false) { //except overlaps and between operators
 
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
@@ -3064,7 +3064,7 @@ class HPredicate {
                 $vals = explode("<>", $this->value);
                 $between = (($this->negate)?" not":"")." between ";
                 if(is_numeric($vals[0]) && is_numeric($vals[1])){
-                    $res = $between.$vals[0]." and ".$vals[1];
+                    $res = $between.$vals[0].SQL_AND.$vals[1];
                 }
             }elseif($this->field_type=="link"){
                 $res = " $eq ".intval($this->value);//no quotes
@@ -3134,9 +3134,9 @@ class HPredicate {
 
                     $between = (($this->negate)?" not":"")." between ";
                     if(is_numeric($vals[0]) && is_numeric($vals[1])){
-                        $res = $between.$vals[0]." and ".$vals[1];
+                        $res = $between.$vals[0].SQL_AND.$vals[1];
                     }else{
-                        $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
+                        $res = $between."'".$mysqli->real_escape_string($vals[0])."'".SQL_AND."'".$mysqli->real_escape_string($vals[1])."'";
                     }
 
                 }elseif($this->fulltext){ // && $this->field_type!='link'){

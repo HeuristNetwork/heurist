@@ -369,7 +369,7 @@ class DbRegis {
             }
             if(!empty($dbTitle)){
                 $record['rec_Title'] = $defRecTitle.' : '.$dbTitle;
-                $err_msg = $err_msg . (!empty($err_msg) ? ' and ' : '') . 'Title (database name)';
+                $err_msg = $err_msg . (!empty($err_msg) ? ' and' : '') . ' Title (database name)';
             }
             $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
 
