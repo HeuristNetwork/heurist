@@ -96,8 +96,10 @@ function recordSearchDistinctValue($system, $params){
                     if($search_unique){
 
                         $query = 'SELECT DISTINCT dtl_Value FROM Records, recDetails'
-                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
-                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND '
+                    .predicateId('rec_ID',$rec_IDs_chunk)
+                    .SQL_AND
+                    .predicateId('dtl_DetailTypeID',$params['dty_ID']);
 
                         $values = mysql__select_list2($mysqli, $query);
 
@@ -106,8 +108,11 @@ function recordSearchDistinctValue($system, $params){
                     }
                     if($search_all){
                         $query = 'SELECT count(dtl_ID) FROM Records, recDetails'
-                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
-                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND '
+                    .predicateId('rec_ID',$rec_IDs_chunk)
+                    .SQL_AND
+                    .predicateId('dtl_DetailTypeID',$params['dty_ID']);
+                    
                         $detail_count = $detail_count+mysql__select_value($mysqli, $query);
                     }
 
@@ -132,8 +137,11 @@ function recordSearchDistinctValue($system, $params){
 
             if($search_unique){
                 $query = 'SELECT COUNT(DISTINCT dtl_Value) FROM Records, recDetails'
-                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
-                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND '
+                    .predicateId('rec_RecTypeID',$params['rty_ID'])
+                    .SQL_AND
+                    .predicateId('dtl_DetailTypeID',$params['dty_ID']);
+                    
                 $res = mysql__select_value($mysqli, $query);
                 if ($res==null){
                     return $system->addError(HEURIST_DB_ERROR, 'Search query error on unique values count. Query '.$query, $mysqli->error);
@@ -142,8 +150,10 @@ function recordSearchDistinctValue($system, $params){
             }
             if($search_all){
                 $query = 'SELECT COUNT(dtl_ID) FROM Records, recDetails'
-                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
-                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND '
+                    .predicateId('rec_RecTypeID',$params['rty_ID'])
+                    .SQL_AND
+                    .predicateId('dtl_DetailTypeID',$params['dty_ID']);
                 $res = mysql__select_value($mysqli, $query);
                 if ($res==null){
                     return $system->addError(HEURIST_DB_ERROR, 'Search query error on details count. Query '.$query, $mysqli->error);
@@ -272,8 +282,11 @@ function recordSearchMinMax($system, $params){
         //$currentUser = $system->getCurrentUser();
 
         $query = 'SELECT MIN(CAST(dtl_Value as decimal)) as MIN, MAX(CAST(dtl_Value as decimal)) AS MAX FROM Records, recDetails';
-        $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='
-        .intval($params['rt']).' AND dtl_DetailTypeID='.intval($params['dt'])." AND dtl_Value is not null AND dtl_Value!=''";
+        $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND '
+                    .predicateId('rec_RecTypeID',$params['rt'])
+                    .SQL_AND
+                    .predicateId('dtl_DetailTypeID',$params['dt'])
+                    ." AND dtl_Value is not null AND dtl_Value!=''";
 
         $currUserID = $system->get_user_id();
         if( $currUserID > 0 ) {
@@ -2848,8 +2861,10 @@ function recordSearch($system, $params, $relation_query=null)
                             .$ulf_fields
                             .' FROM recDetails '
                             . ' left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID '
-                            . ' WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
-                            .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
+                            . SQL_WHERE
+                            .predicateId('dtl_RecID',$chunk_rec_ids)
+                            .SQL_AND
+                            .predicateId('dtl_DetailTypeID',$fieldtypes_ids);
 
 
                             if($find_places_for_geo){ //find location in linked Place records
@@ -2857,8 +2872,10 @@ function recordSearch($system, $params, $relation_query=null)
                                 .'SELECT dtl_ID, rl_SourceID,dtl_DetailTypeID,dtl_Value, ST_asWKT(dtl_Geo), rl_TargetID, 0, 0, 0 '
                                 .' FROM recDetails, recLinks, Records '
                                 .' WHERE (dtl_Geo IS NOT NULL) ' //'dtl_DetailTypeID='. DT_GEO_OBJECT
-                                .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
-                                .') AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
+                                .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND '
+                                .predicateId('rec_RecTypeID',$rectypes_as_place)
+                                .SQL_AND
+                                .predicateId('rl_SourceID',$chunk_rec_ids);
                             }
                         }else{
 
@@ -3433,14 +3450,9 @@ function recordSearchDetails($system, &$record, $detail_types) {
     if(is_array($detail_types) && count($detail_types)>0 ){
 
         if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
-            if(count($detail_types)==1){
-                $sw = ' AND dtl_DetailTypeID = '.$detail_types[0];
-                $sw2 = ' AND dty_ID = '.$detail_types[0];
-            }else{
-                $sw = ' AND dtl_DetailTypeID in ('.implode(',',$detail_types).')';
-                $sw2 = ' AND dty_ID in ('.implode(',',$detail_types).')';
-            }
-            $swhere .= $sw;
+        
+            $swhere .= SQL_AND.predicateId('dtl_DetailTypeID', $detail_types);
+            $sw2 = SQL_AND.predicateId('dty_ID', $detail_types);
 
             $qr = 'SELECT dty_ID, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
             .'FROM defDetailTypes WHERE dty_Type = "relmarker" '.$sw2;

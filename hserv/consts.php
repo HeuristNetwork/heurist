@@ -247,6 +247,7 @@ define('DIR_IMAGE','image/');
 define('DIR_SCRATCH','scratch/');
 define('DIR_BACKUP','backup/');
 define('DIR_THUMBS','thumbs/');
+define('DIR_ENTITY','entity/');
 
 
 /** RECORD TYPE DEFINITIONS */

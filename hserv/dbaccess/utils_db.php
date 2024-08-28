@@ -1367,12 +1367,6 @@ use hserv\structure\ConceptCode;
                 $res->close();
 
                 if($isok){
-
-                    if($json_for_record_details && $dbVerSubSub<14){
-                        //$mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
-                    }
-
-
                     if($cnt_dates<150000){
                         $mysqli->commit();
                     }

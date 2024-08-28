@@ -135,7 +135,7 @@ abstract class DbEntityBase
 
 
         //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hserv/entity/'.basename($this->entityName.'.json');
+        $entity_file = dirname(__FILE__).'/'.basename($this->entityName.'.json'); //HEURIST_DIR.'hserv/entity
 
         if(file_exists($entity_file)){
 
@@ -156,7 +156,8 @@ abstract class DbEntityBase
            }
 
         }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity']
+                    .' in '.dirname(__FILE__));
         }
     }
 
@@ -257,7 +258,7 @@ abstract class DbEntityBase
             $res = false;
         }else{
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':'');
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':'');
 
         if($operation=='list'){
 
@@ -773,7 +774,7 @@ abstract class DbEntityBase
     //
     private function _readConfigLocale( $locale='en' ){
 
-        $entity_file = HEURIST_DIR.'hserv/entity/'.lcfirst(@$this->data['entity'])
+        $entity_file = dirname(__FILE__).'/'.lcfirst(@$this->data['entity']) //HEURIST_DIR.'hserv/entity/'
             .($locale=='en'?'':('_'.$locale)).'.json';
 
         if(file_exists($entity_file)){
@@ -884,7 +885,7 @@ abstract class DbEntityBase
         }
         $lv = strlen($version);
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';//destination
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/';//destination
 
         if(strpos($tempfile,'~')===0){
             //temp file is in the same folder as destination
@@ -947,7 +948,7 @@ abstract class DbEntityBase
     protected function getTempEntityFile($tempfile){
         $entity_name = $this->config['entityName'];
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/';
 
         $directory = new \DirectoryIterator($path);//RecursiveDirectoryIterator
         $iterator = new \IteratorIterator($directory);//Recursive
@@ -976,49 +977,6 @@ abstract class DbEntityBase
             list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $version, $db_name, $extension);
 
             return $filename;
-/*
-            if($entity_name=='sysDatabases'){
-
-                $db_name = $recID;
-                if(strpos($recID,'hdb_')===0){
-                    $db_name = substr($recID,4);
-                }
-                $rec_id = 1;
-                $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';
-            }else{
-                if($db_name==null) {$db_name = HEURIST_DBNAME;}
-
-                $path = HEURIST_FILESTORE_ROOT.$db_name.'/entity/'.$entity_name.'/';
-                //$path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
-            }
-
-            if($recID>0){
-
-                if($version=='thumb' || $version=='thumbnail'){
-                    $filename = $path.'thumbnail/'.$recID.'.png';
-                }elseif($version=='icon'){
-                    $filename = $path.'icon/'.$recID.'.png';
-                }else{
-                    $filename = null;
-                    $exts = $extension?array($extension):array('png','jpg','jpeg','jpe','jfif','gif');
-                    foreach ($exts as $ext){
-                        $filename = $path.$recID.'.'.$ext;
-                        if(file_exists($filename)){
-                            if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
-                                $content_type = 'image/jpeg';
-                            }else{
-                                $content_type = 'image/'.$ext;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                return $filename;
-            }else{
-                return null;
-            }
-*/
     }
 
     //

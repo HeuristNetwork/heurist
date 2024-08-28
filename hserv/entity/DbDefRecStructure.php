@@ -224,8 +224,8 @@ class DbDefRecStructure extends DbEntityBase
 
             $row = mysql__select_row_assoc($mysqli,
                 'SELECT rst_ID, rst_OriginatingDBID FROM '.$this->config['tableName']
-                .' WHERE rst_DetailTypeID='.intval( $this->records[$idx]['rst_DetailTypeID'] )
-                .' AND rst_RecTypeID='.intval( $this->records[$idx]['rst_RecTypeID']) );
+                .SQL_WHERE.predicateId('rst_DetailTypeID',$this->records[$idx]['rst_DetailTypeID'])
+                .SQL_AND.predicateId('rst_RecTypeID',$this->records[$idx]['rst_RecTypeID']));
 
             $isInsert = !(@$row['rst_ID']>0);
 
@@ -279,8 +279,10 @@ class DbDefRecStructure extends DbEntityBase
             if(is_numeric($rty_ID) && $rty_ID>0 && is_numeric($dty_ID) && $dty_ID>0){
                 $this->recordIDs = mysql__select_value($mysqli,
                     'SELECT rst_ID FROM '.$this->config['tableName']
-                    .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $dty_ID )
-                    .' AND rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID  ));
+                    .SQL_WHERE
+                    .predicateId('rst_DetailTypeID', $dty_ID)
+                    .SQL_AND
+                    .predicateId('rst_RecTypeID', $rty_ID));
             }
             if(!($this->recordIDs>0)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for given record and field type');
@@ -295,7 +297,7 @@ class DbDefRecStructure extends DbEntityBase
             if(is_numeric($dty_ID) && $dty_ID > 0){
                 $this->recordIDs = mysql__select_list2($mysqli,
                     'SELECT rst_ID FROM '.$this->config['tableName']
-                    .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string($dty_ID));
+                    .SQL_WHERE.predicateId('rst_DetailTypeID',$dty_ID));
             }
             if(!$this->recordIDs || !is_array($this->recordIDs) || count($this->recordIDs) == 0){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for field ID ' . $dty_ID);
@@ -354,8 +356,11 @@ class DbDefRecStructure extends DbEntityBase
             $order = $orders[$idx];
 
             $query = 'UPDATE '.$this->config['tableName'].' SET rst_DisplayOrder='.$order
-                    .' WHERE rst_DetailTypeID='.intval( $dty_ID )
-                    .' AND rst_RecTypeID='.intval( $rty_ID  );
+                    .SQL_WHERE
+                    .predicateId('rst_DetailTypeID',$dty_ID)
+                    .SQL_AND
+                    .predicateId('rst_RecTypeID',$rty_ID);
+                    
             $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;

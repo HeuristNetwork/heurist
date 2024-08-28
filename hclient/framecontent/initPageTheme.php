@@ -448,13 +448,13 @@ span.fancytree-node:hover{
 
 .ui-heurist-design .ui-widget-content,
 .ui-heurist-design .ui-dialog-heurist{
-    background:<?php uout('design_fade_bg', CLR_DESIGN_BG;?>
+    background:<?php uout('design_fade_bg', CLR_DESIGN_BG);?>
 }
 /*
 .ui-heurist-design .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-design .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-design .ui-fade-color{
-    color:<?php uout('design_fade_bg', CLR_DESIGN_BG?> !important;
+    color:<?php uout('design_fade_bg', CLR_DESIGN_BG);?> !important;
 }
 */
 
@@ -466,7 +466,7 @@ span.fancytree-node:hover{
         background:<?php uout('design_active', '#A487B9');?> !important;
 }
 .ui-heurist-design .edit-form-tabs li.ui-tabs-active,
-.ui-heurist-design-fade{background:<?php uout('design_fade_bg', CLR_DESIGN_BG;?> !important;}
+.ui-heurist-design-fade{background:<?php uout('design_fade_bg', CLR_DESIGN_BG);?> !important;}
 
 /* SECTION SCHEME: EXPLORE */
 .ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header,
