@@ -195,8 +195,11 @@ define("HEURIST_UNITED_TERMS", true);
 define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
 define('DATE_8601', 'Y-m-d H:i:s');
 define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
+define('REGEX_EOL', '/[\r\n]/');
+
 define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
 define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
+define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');
 define('CONTENT_LENGTH', 'Content-Length: ');
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
 
@@ -215,6 +218,8 @@ define('BR','<br>');
 define('SQL_AND',' AND ');
 
 
+//
+define('XML_SCHEMA','Xhttp://www.w3.org/2001/XMLSchema#string');
 
 global $glb_lang_codes;
 $glb_lang_codes = null;
@@ -241,6 +246,7 @@ define('ULF_TILED_IMAGE','_tiled');
 define('DIR_IMAGE','image/');
 define('DIR_SCRATCH','scratch/');
 define('DIR_BACKUP','backup/');
+define('DIR_THUMBS','thumbs/');
 
 
 /** RECORD TYPE DEFINITIONS */

@@ -204,8 +204,8 @@ if($response!=null){
                         ),
                     'thumbnail'=>array(
                         'auto_orient' => true,
-                        'upload_dir' => HEURIST_SCRATCH_DIR.'thumbs/',//'filethumbs/',
-                        'upload_url' => HEURIST_FILESTORE_URL.'scratch/thumbs/',
+                        'upload_dir' => HEURIST_SCRATCH_DIR.DIR_THUMBS,
+                        'upload_url' => HEURIST_FILESTORE_URL.DIR_SCRATCH.DIR_THUMBS,
                         'max_width' => 200,
                         'max_height' => 200,
                         'scale_to_png' => true
@@ -215,7 +215,7 @@ if($response!=null){
                 //'print_response ' => false
         );
 
-        allowWebAccessForForlder(HEURIST_SCRATCH_DIR.'thumbs/');
+        allowWebAccessForForlder(HEURIST_SCRATCH_DIR.DIR_THUMBS);
 
     }else{
 
@@ -322,11 +322,11 @@ if($response!=null){
                     }
                 }elseif(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
 
-                    $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
+                    $thumb_file = HEURIST_SCRATCH_DIR.DIR_THUMBS.$new_file_name;
                     $img = UImage::createFromString($file->type?$file->type:'XXX!');
                     imagepng($img, $thumb_file);//save into file
                     imagedestroy($img);
-                    $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
+                    $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.DIR_SCRATCH.DIR_THUMBS.$new_file_name;
                 }
 
             }

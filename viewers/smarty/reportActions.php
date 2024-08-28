@@ -129,7 +129,7 @@ class ReportActions {
         }
 
         if($filename && file_exists($filename)){
-            header('Content-type: text/html; charset=utf-8');
+            header(CTYPE_HTML);
             readfile($filename);
         }else{
             header("Content-type: text/javascript");

@@ -533,7 +533,7 @@ class SystemEmailExt {
 
                 $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
                 //."\r\nReply-To: ".
-                ."\r\nContent-Type: text/html;charset=utf-8\r\n";
+                ."\r\n".CTYPE_HTML."\r\n";
 
                 $title = '=?utf-8?B?'.base64_encode($title).'?=';
 

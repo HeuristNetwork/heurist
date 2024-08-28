@@ -967,8 +967,8 @@ class System {
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
             //3. write error into current error log
-            $Title = 'db: '.preg_replace("/[\r\n]/", ' ', $this->dbname())
-                    ."\nerr-type: ".preg_replace("/[\r\n]/", ' ', $status)
+            $Title = 'db: '.preg_replace(REGEX_EOL, ' ', $this->dbname())
+                    ."\nerr-type: ".preg_replace(REGEX_EOL, ' ', $status)
                     ."\nuser: ".$this->get_user_id()
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
@@ -981,7 +981,7 @@ class System {
                 }
             });
 
-            $sMsg = "\nMessage: ".preg_replace("/[\r\n]/", ' ', $message)."\n"
+            $sMsg = "\nMessage: ".preg_replace(REGEX_EOL, ' ', $message)."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
                     .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n\n"

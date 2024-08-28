@@ -72,7 +72,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
     $mysqli = $system->get_mysqli();
 
     if($update_mode==3){
-        header("Content-type: text/html;charset=UTF-8");
+        header(CTYPE_HTML);
     }
 
 

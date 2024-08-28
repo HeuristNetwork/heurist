@@ -973,7 +973,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $params['meta']['title'] = array(
                             'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
                             'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'typeUri' => XML_SCHEMA,
                             'propertyUri' => NAKALA_REPO.'terms#title'
                         );
 
@@ -982,7 +982,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             $params['meta']['creator'] = array(
                                 'value' => $usr['ugr_FullName'],
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'typeUri' => XML_SCHEMA,
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             );
                         }
@@ -990,7 +990,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $params['meta']['created'] = array(
                             'value' => $date,
                             'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'typeUri' => XML_SCHEMA,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         );
 
@@ -1005,7 +1005,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             $params['meta']['license'] = array(
                                 'value' => $_REQUEST['license'],
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'typeUri' => XML_SCHEMA,
                                 'propertyUri' => NAKALA_REPO.'terms#license'
                             );
                         }

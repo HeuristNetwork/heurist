@@ -461,7 +461,7 @@ function executeSmartyTemplate($system, $params){
 
         //if $outputfile is not defined - define content type
         if($outputfile==null && !$is_included){
-            //header("Content-type: text/html;charset=UTF-8");
+            //header(CTYPE_HTML);
 
             if($outputmode=='js'){
                 header("Content-type: text/javascript");
@@ -1100,7 +1100,7 @@ function save_report_into_file($tpl_source){
         }elseif($publishmode==1){ //info about success of saving into file and where to get it
 
             if($errors!=null){
-                header("Content-type: text/html;charset=UTF-8");
+                header(CTYPE_HTML);
                 echo htmlspecialchars($errors);
             }else{
 

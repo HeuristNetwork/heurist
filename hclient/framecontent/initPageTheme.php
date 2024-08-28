@@ -73,7 +73,16 @@ define('CLR_DARKGRAY', '#333333');
 define('CLR_BG_DARKGRAY', '#e0dfe0');
 define('CLR_INPUT', '#F4F2F4');
 define('CLR_HOVER_COLOR', '#2b2b2b');
-define('CLR_SP_BORDER', '#003eff');
+define('CLR_SP_BORDER', '#003eff'); //clickable pressed
+define('CLR_SD_BG', '#f2f2f2'); //disabled bg
+
+define('CLR_DESIGN_BG', '#DAD0E4'); 
+define('CLR_EXPLORE_BG', '#D4DBEA'); 
+define('CLR_IMPORT_BG', '#307D96');
+define('CLR_IMPORT_FADE_BG', '#e3f0f0');
+define('CLR_PUBLISH_BG', '#627E5D');
+define('CLR_PUBLISH_FASE_BG', '#CCEAC5');
+define('CLR_ADMIN_BG', '#676E80');
 
 if(!isset($ut) || !is_array($ut)){
     $ut = array();
@@ -101,7 +110,7 @@ $def_ut = array(
 'cd_corner'=>'0',
 
 'sd_color' =>CLR_GRAY,
-'sd_bg'    =>'#f2f2f2',
+'sd_bg'    =>CLR_SD_BG,
 
 //clickable hover
 'sh_border' =>CLR_LIGHTGRAY,
@@ -274,8 +283,8 @@ works properly when clicked or hovered */
 html .ui-button.ui-state-disabled:hover,
 html .ui-button.ui-state-disabled:active {
     /*heurist*/
-    border: 1px solid <?php uout('sd_bg', '#f2f2f2');?>;
-    background: <?php uout('sd_bg', '#f2f2f2');?>;
+    border: 1px solid <?php uout('sd_bg', CLR_SD_BG);?>;
+    background: <?php uout('sd_bg', CLR_SD_BG);?>;
     font-weight: normal;
     color: <?php uout('sd_color', CLR_GRAY);?>;
 }
@@ -439,13 +448,13 @@ span.fancytree-node:hover{
 
 .ui-heurist-design .ui-widget-content,
 .ui-heurist-design .ui-dialog-heurist{
-    background:<?php uout('design_fade_bg', '#DAD0E4');?>
+    background:<?php uout('design_fade_bg', CLR_DESIGN_BG;?>
 }
 /*
 .ui-heurist-design .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-design .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-design .ui-fade-color{
-    color:<?php uout('design_fade_bg', '#DAD0E4')?> !important;
+    color:<?php uout('design_fade_bg', CLR_DESIGN_BG?> !important;
 }
 */
 
@@ -457,7 +466,7 @@ span.fancytree-node:hover{
         background:<?php uout('design_active', '#A487B9');?> !important;
 }
 .ui-heurist-design .edit-form-tabs li.ui-tabs-active,
-.ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#DAD0E4');?> !important;}
+.ui-heurist-design-fade{background:<?php uout('design_fade_bg', CLR_DESIGN_BG;?> !important;}
 
 /* SECTION SCHEME: EXPLORE */
 .ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header,
@@ -467,10 +476,10 @@ span.fancytree-node:hover{
     background-color: <?php uout('explore_bg', '#305586');?> !important;
     color: white;
 }
-.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;}
+.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>}
 .ui-heurist-explore .ui-widget-content{
-    background:<?php uout('explore_fade_bg', '#D4DBEA');?>
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?>
 }
 /* button within menu section */
 .ui-heurist-explore .ui-heurist-btn-header1{
@@ -492,7 +501,7 @@ span.fancytree-node:hover{
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
 .ui-heurist-explore .ui-tabs-tab.ui-state-active{
-    background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?> !important;
 }
 .ui-heurist-explore .ui-heurist-button.ui-state-active{
     background:<?php uout('explore_bg', '#4477B9')?> !important;
@@ -509,36 +518,36 @@ span.fancytree-node:hover{
 .ui-heurist-populate .ui-dialog-titlebar,
 .ui-heurist-populate .ui-dialog-buttonpane
 {
-    background:<?php uout('import_bg', '#307D96');?> !important;
+    background:<?php uout('import_bg', CLR_IMPORT_BG);?> !important;
     color: white;
 }
 .ui-heurist-populate .edit-form-tabs li.ui-tabs-active,
-.ui-heurist-populate-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
+.ui-heurist-populate-fade{background:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG);?> !important;}
 
-.ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
+.ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', CLR_IMPORT_BG);?>}
 .ui-heurist-populate .ui-widget-content{
-    background:<?php uout('import_fade_bg', '#e3f0f0');?>
+    background:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG);?>
 }
 
 /* button within menu section */
 .ui-heurist-populate .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
-    color:<?php uout('import_bg', '#307D96')?> !important;
+    border:1px solid <?php uout('import_bg', CLR_IMPORT_BG)?> !important;
+    color:<?php uout('import_bg', CLR_IMPORT_BG)?> !important;
 }
 .ui-heurist-populate .ui-button-icon-only{
     background: none;
-    color:<?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('import_bg', CLR_IMPORT_BG)?> !important;
 }
 .ui-heurist-populate .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-populate .ui-fade-color{
-    color:<?php uout('import_fade_bg', '#e3f0f0')?> !important;
+    color:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG)?> !important;
 }
 
 .ui-menu6 .ui-menu6-container.ui-heurist-populate, .ui-heurist-populate .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('import_bg', '#307D96');?> !important;
+    border-color:<?php uout('import_bg', CLR_IMPORT_BG);?> !important;
 }
 .ui-heurist-populate .ui-state-active,
 .ui-heurist-populate .fancytree-active,
@@ -551,33 +560,33 @@ span.fancytree-node:hover{
 .ui-heurist-publish.ui-heurist-header, .ui-heurist-publish .ui-heurist-header,
 .ui-heurist-publish .ui-dialog-titlebar,
 .ui-heurist-publish .ui-dialog-buttonpane{
-    background:<?php uout('publish_bg', '#627E5D');?> !important;
+    background:<?php uout('publish_bg', CLR_PUBLISH_BG);?> !important;
     color: white;
 }
-.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> !important;}
-.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', '#627E5D');?>}
+.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG);?> !important;}
+.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', CLR_PUBLISH_BG);?>}
 .ui-heurist-publish .ui-widget-content{
-    background:<?php uout('publish_fade_bg', '#CCEAC5');?>
+    background:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG);?>
 }
 /* button within menu section */
 .ui-heurist-publish .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
-    color:<?php uout('publish_bg', '#627E5D')?> !important;
+    border:1px solid <?php uout('import_bg', CLR_IMPORT_BG)?> !important;
+    color:<?php uout('publish_bg', CLR_PUBLISH_BG)?> !important;
 }
 .ui-heurist-publish .ui-button-icon-only{
     background: none;
-    color:<?php uout('publish_bg', '#627E5D')?> !important;
+    color:<?php uout('publish_bg', CLR_PUBLISH_BG)?> !important;
 }
 .ui-heurist-publish .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-publish .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-publish  .ui-fade-color{
-    color:<?php uout('publish_fade_bg', '#CCEAC5')?> !important;
+    color:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG)?> !important;
 }
 
 .ui-menu6 .ui-menu6-container.ui-heurist-publish, .ui-heurist-publish .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('publish_bg', '#627E5D');?> !important;
+    border-color:<?php uout('publish_bg', CLR_PUBLISH_BG);?> !important;
 }
 
 .ui-heurist-publish .ui-state-active,
@@ -593,31 +602,31 @@ span.fancytree-node:hover{
 .ui-heurist-admin .ui-dialog-titlebar,
 .ui-heurist-admin .ui-dialog-buttonpane
 {
-    background:<?php uout('admin_bg', '#676E80');?> !important;
+    background:<?php uout('admin_bg', CLR_ADMIN_BG);?> !important;
     color: white;
 }
-.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', '#D4DBEA');?> !important;}
-.ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', '#676E80');?>}
+.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', CLR_EXPLORE_BG);?> !important;}
+.ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', CLR_ADMIN_BG);?>}
 .ui-heurist-admin .ui-widget-content{
-    background:<?php uout('admin_fade_bg', '#D4DBEA');?>
+    background:<?php uout('admin_fade_bg', CLR_EXPLORE_BG);?>
 }
 
 /* button within menu section */
 .ui-heurist-admin .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('admin_bg', '#676E80')?> !important;
-    color:<?php uout('admin_bg', '#676E80')?> !important;
+    border:1px solid <?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
+    color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
 }
 .ui-heurist-admin .ui-button-icon-only{
     background: none;
-    color:<?php uout('admin_bg', '#676E80')?> !important;
+    color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
 }
 .ui-heurist-admin .ui-heurist-header .ui-button-icon-only, .ui-heurist-admin .ui-dialog-titlebar .ui-button-icon-only{
-    color:<?php uout('admin_fade_bg', '#D4DBEA')?> !important;
+    color:<?php uout('admin_fade_bg', CLR_EXPLORE_BG)?> !important;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-admin, .ui-heurist-admin .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('admin_bg', '#676E80');?> !important;
+    border-color:<?php uout('admin_bg', CLR_ADMIN_BG);?> !important;
 }
 
 <?php } ?>

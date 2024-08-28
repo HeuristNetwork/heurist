@@ -343,9 +343,7 @@ class USanitize {
     * @param mixed $message
     */
     public static function errorLog($message){
-        //$regex = '/\R/';
-        $regex = "/[\r\n]/";
-        $safe_message = preg_replace($regex, ' ', $message);
+        $safe_message = preg_replace(REGEX_EOL, ' ', $message);
         error_log($safe_message);
     }
 

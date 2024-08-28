@@ -311,7 +311,7 @@ public function output($data, $params){
     if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
         $mimeType = CTYPE_JSON;
     }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
-        $mimeType = 'Content-Type: text/html';
+        $mimeType = CTYPE_HTML;
     }else {
         $mimeType = 'Content-Type: text/xml';
     }

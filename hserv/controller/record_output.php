@@ -326,7 +326,7 @@ function downloadFileReferences($system, $ids){
 
     if(empty($ids)){
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo 'No file ids have been provided';
         exit;
     }
@@ -341,7 +341,7 @@ function downloadFileReferences($system, $ids){
     $fd = fopen('php://output', 'w');
     if(!$fd){
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
         exit;
     }
@@ -371,7 +371,7 @@ function downloadFileReferences($system, $ids){
     if($err_message!=null){
         fclose($fd);
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo $err_message;
         exit;
     }

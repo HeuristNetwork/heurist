@@ -755,7 +755,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                         //copy thumbnail
                         if(@$record['ulf_TempFileThumb']){
-                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
+                            $thumb_name = HEURIST_SCRATCH_DIR.DIR_THUMBS.$record['ulf_TempFileThumb'];
                             if(file_exists($thumb_name)){
                                 $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                                 copy($thumb_name, $new_name);

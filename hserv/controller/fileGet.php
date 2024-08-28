@@ -54,6 +54,8 @@ if($error==null){
 
 if($filename){ //download from scratch (for csv import)
 
+        $msgTempFile = 'Temporary file (uploaded csv data) ';
+
         //remove slashes - prevents Local file disclosure
         $filename = USanitize::sanitizeFileName($filename, false);
 
@@ -63,7 +65,7 @@ if($filename){ //download from scratch (for csv import)
 
         if(!$file_read || is_dir($file_read))
         {
-            print 'Temporary file (uploaded csv data) '.htmlspecialchars($filename). ' not found';
+            print $msgTempFile.htmlspecialchars($filename). ' not found';
             exit;
         }
 
@@ -87,7 +89,7 @@ if($filename){ //download from scratch (for csv import)
                 }
 
                 if($s){
-                    print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read). $s;
+                    print $msgTempFile.htmlspecialchars($file_read). $s;
                     exit;
                 }
             }
@@ -102,7 +104,7 @@ if($filename){ //download from scratch (for csv import)
                $line = mb_convert_encoding( $line, 'UTF-8');
             }
             if(!$line){
-                print 'Temporary file (uploaded csv data) '.$file_read
+                print $msgTempFile.$file_read
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
                 exit;
             }
@@ -110,7 +112,7 @@ if($filename){ //download from scratch (for csv import)
             $content = file_get_contents($file_read);
             $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
             if(!$content){
-                print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read)
+                print $msgTempFile.htmlspecialchars($file_read)
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
                 exit;
             }

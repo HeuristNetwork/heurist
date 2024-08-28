@@ -35,6 +35,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php';
 
+define('PARAM_WELCOME','?welcome=1&db=');
+
 $system = new hserv\System();
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
@@ -155,7 +157,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                             //add url to new database
                             $res = array(
                                 'newdbname'  => $database_name,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1',
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$database_name,
                                 'newusername'=> $usr_owner['ugr_Name'],
                                 'warnings'   => $res);
                         }
@@ -185,7 +187,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                         //add url to new database
                         $res = array(
                             'newdbname'  => $database_name,
-                            'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1'
+                            'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$database_name
                         );
                     }
                 }
@@ -344,7 +346,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     if($res!==false){
                         $res = array(
                                 'newdbname'  => $db_target,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1',
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$db_target,
                                 'warning'    => $system->getErrorMsg());
                     }
 
@@ -364,7 +366,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                         $res = array(
                                 'newdbname'  => $db_target,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$db_target);
 
                     }
 

@@ -2659,7 +2659,7 @@ public methods
             $meta_values['license'] = array(
                 'value' => $this->data['license'],
                 'lang' => null,
-                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                'typeUri' => XML_SCHEMA,
                 'propertyUri' => NAKALA_REPO.'terms#license'
             );
 
@@ -2718,7 +2718,7 @@ public methods
                     $meta_values['title'] = array(
                         'value' => $file_dtl[0],
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
@@ -2754,7 +2754,7 @@ public methods
                     $meta_values['alt_creator'] = array(
                         'value' => $file_dtl[4],
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => 'http://purl.org/dc/terms/creator'
                     );
 
@@ -2762,7 +2762,7 @@ public methods
                     $meta_values['created'] = array(
                         'value' => $file_dtl[5],//date('Y-m-d', $file_dtl[5]),
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#created'
                     );
 

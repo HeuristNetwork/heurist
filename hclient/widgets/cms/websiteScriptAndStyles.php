@@ -44,7 +44,8 @@
     _openCMSeditor - opens/hides side panel with CMS editor (listener of #btnOpenCMSeditor)
     */
 
-
+ define('APOSTROPHE','&#039;');
+    
 if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')&& !@$_REQUEST['embed'])  {
 ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -1319,14 +1320,14 @@ $website_languages_links ->#main-languages
     <?php } ?>
     }
     if($('#main-title-alt').length>0){
-        $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
+        $('#main-title-alt').html('<?php print str_replace("'",APOSTROPHE, $title_alt);?>');
     }
     if($('#main-title-alt2').length>0){
-        $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
+        $('#main-title-alt2').html('<?php print str_replace("'",APOSTROPHE, $title_alt2);?>');
     }
 
     if($('#main-languages').length>0){
-        $('#main-languages').html('<?php print str_replace("'",'&#039;', $website_languages_links);?>');
+        $('#main-languages').html('<?php print str_replace("'",APOSTROPHE, $website_languages_links);?>');
     }
 
     // Setup login button, if needed

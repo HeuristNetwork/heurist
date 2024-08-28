@@ -494,9 +494,9 @@
                       }elseif($folders[strtolower($new_name)]){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
                       }elseif(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, "Folder with name '$new_name' already exists");
                       }elseif(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, "Folder with name '$f_name' does not exist");
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);
                           if(!$res){
@@ -759,7 +759,7 @@
                     $params['meta']['title'] = array(
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
@@ -785,7 +785,7 @@
                             $params['meta']['alt_creator'] = array(
                                 'value' => $fullname,
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'typeUri' => XML_SCHEMA,
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             );
                         }
@@ -800,7 +800,7 @@
                         $params['meta']['created'] = array(
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'typeUri' => XML_SCHEMA,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }else{
@@ -822,7 +822,7 @@
                     $params['meta']['license'] = array(
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#license'
                     );
 
