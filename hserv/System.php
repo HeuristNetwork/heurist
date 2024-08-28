@@ -1471,8 +1471,6 @@ class System {
 
             } else {   //session does not exist - create new one and save on cookies
                 @session_start();
-                //$session_id = session_id();
-                //setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https );//create new session - REM
             }
         }
 
@@ -1489,7 +1487,7 @@ class System {
                         'domain' => '',
                         'secure' => $is_https,
                         'httponly' => true,
-                        'samesite' => 'Lax'
+                        'SameSite' => 'Strict' //'Lax'
                     ]);
                 }else{
                     //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
@@ -1770,7 +1768,7 @@ class System {
                 'domain' => '',
                 'secure' => $is_https,
                 'httponly' => true,
-                'samesite' => 'Lax'
+                'SameSite' => 'Strict'  //Lax
             ]);
 
         }else{
