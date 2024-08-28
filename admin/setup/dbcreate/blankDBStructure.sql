@@ -20,6 +20,7 @@
 --    * Database structure version: 1.2.0  @ 14/9/2017, 
 --    * Database structure version: 1.3.6  @ 20/10/2022, 
 --    * Database structure version: 1.3.10  @ 05/04/2023, 
+--    * Database structure version: 1.3.16  @ 27/08/2024, 
 
 --    * THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
 --    * DO NOT DELETE THEM
