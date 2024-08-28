@@ -484,7 +484,7 @@ if ($system->has_access()) { //logged in
 //
 //
 function predicateRecordVisibility(){
-    global $ACCESSABLE_OWNER_IDS, $PUBONLY;
+    global $system, $ACCESSABLE_OWNER_IDS, $PUBONLY;
     
     return  (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
             ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
