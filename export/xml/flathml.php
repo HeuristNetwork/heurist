@@ -114,7 +114,7 @@ if(@$_REQUEST['postdata']){
 }
 
 define('REGEX_JSON_CHECK','/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/');
-
+define('REGEX_SPLIT_DATE', "![-\/]!");
 define('ERR_INVALID_FILTER', 'Error: invalid json filters string');
 
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
@@ -483,14 +483,27 @@ if ($system->has_access()) { //logged in
 //
 //
 //
-function predicateRecordVisibility(){
+function predicateRecordVisibility($dst='trg'){
     global $system, $ACCESSABLE_OWNER_IDS, $PUBONLY;
     
+    
     return  (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
+            ? '('.$dst.'.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
             : '(') .
-    (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    (($system->has_access() && !$PUBONLY) ? 'NOT '.$dst.'.rec_NonOwnerVisibility = "hidden")' : $dst.'.rec_NonOwnerVisibility = "public")');
+    
 }
+
+//
+//
+//
+function predicateRtyDtyFilters($rtyIDs, $dtyIDs, $dt_field='dty_ID')
+{
+    return (is_array($rtyIDs) && !empty($rtyIDs) ? 'AND trg.rec_RecTypeID in (' .join(',', prepareIds($rtyIDs)) . ') ' : '') 
+         . (is_array($dtyIDs) && !empty($dtyIDs) > 0 ? 'AND '.$dt_field.' in (' .join(',', prepareIds($dtyIDs)) . ') ' : '');
+    
+}
+
 
 /**
 * findPointers - Helper function that finds recIDs of record pointer details for all records in a given set of recIDs
@@ -514,9 +527,8 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' .
     'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' .
     'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' .
-    'WHERE dtl_RecID in (' . join(',', prepareIds($qrec_ids)) . ') AND (trg.rec_FlagTemporary=0) ' .
-    (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
-    (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', prepareIds($dtyIDs)) . ') ' : '')
+    'WHERE dtl_RecID in (' . join(',', prepareIds($qrec_ids)) . ') AND (trg.rec_FlagTemporary=0) ' 
+    . predicateRtyDtyFilters($rtyIDs, $dtyIDs)
     . 'AND dty_Type = "resource" AND '
         .predicateRecordVisibility();
 
@@ -599,10 +611,9 @@ function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     .' LEFT JOIN Records src on src.rec_ID = dtl_Value '
     .' WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' .
         join(',', prepareIds($qrec_ids)) . ') ) AND (trg.rec_FlagTemporary=0) '
-    . (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
-        join(',', prepareIds($rtyIDs)) . ') ' : '') . (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
-        join(',', prepareIds($dtyIDs)) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
-        predicateRecordVisibility();
+    . predicateRtyDtyFilters($rtyIDs, $dtyIDs)
+    . "AND trg.rec_RecTypeID != $relRT AND " 
+    . predicateRecordVisibility();
 
     $res = $mysqli->query($query);
     if($res){
@@ -681,15 +692,13 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' .
     'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' .
     'WHERE rel.rec_RecTypeID = ' . intval($relRT) . ' AND (rel.rec_FlagTemporary=0) '
-        . 'AND (f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') '.
-    (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
-    ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') ' .
+        . 'AND (f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') '
+    .predicateRtyDtyFilters($rtyIDs, null)
+    .($REVERSE ? 'OR t.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') ' .
         (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' .
-            join(',', prepareIds($rtyIDs)) . ') ' : '') : '') . ')' .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
-        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (') .
-    (($system->has_access() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
-    predicateRecordVisibility()
+            join(',', prepareIds($rtyIDs)) . ') ' : '') : '') . ')' 
+    .predicateRecordVisibility('src')
+    .predicateRecordVisibility()
     (is_array($relTermIDs) && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
         join(',', prepareIds($relTermIDs)) . ') OR trm.trm_InverseTermID in (' . join(',', prepareIds($relTermIDs)) . ')) ' : '');
 
@@ -828,10 +837,7 @@ function _getReversePointers($rec_id, $depth){
     .'  and (src.rec_ID = rl_SourceID) and (src.rec_FlagTemporary=0) '
     . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
     . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .' AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
+    .predicateRecordVisibility('src');
 
     $resout = array();
 
@@ -865,8 +871,7 @@ function _getForwardPointers_for_relRT($rec_id, $depth){
     $query = 'SELECT dtl_RecID, dtl_Value, trg.rec_RecTypeID, dtl_DetailTypeID FROM recDetails, Records trg '
     .' where dtl_RecID='.intval($rec_id).' and (dtl_DetailTypeID='.intval($relSrcDT).' OR dtl_DetailTypeID='.intval($relTrgDT).') '
     .'  and (trg.rec_ID = dtl_Value)  and (trg.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
+    .predicateRtyDtyFilters($rtfilter, $ptrfilter, 'dtl_DetailTypeID')
     .predicateRecordVisibility();
 
 
@@ -904,8 +909,7 @@ function _getForwardPointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, trg.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records trg '
     .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (trg.rec_ID = rl_TargetID)  and (trg.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
+    .predicateRtyDtyFilters($rtfilter, $ptrfilter, 'rl_DetailTypeID')
     .predicateRecordVisibility();
 
     $resout = array();
@@ -945,8 +949,7 @@ function _getRelations($rec_id, $depth){
     .' left join Records rel on rel.rec_ID=rl_RelationID'
     .' where rl_SourceID='.intval($rec_id).' and rl_RelationTypeID>0 '
     .'  and trg.rec_ID = rl_TargetID  and (trg.rec_FlagTemporary=0) and (rel.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
+    .predicateRtyDtyFilters($rtfilter, $relfilter, 'rl_RelationTypeID')
     .predicateRecordVisibility();
 
     $resout = array();
@@ -969,10 +972,7 @@ function _getRelations($rec_id, $depth){
     .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
     . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
     . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
+    .predicateRecordVisibility('src');
 
 
     $res = $mysqli->query($query);
@@ -1739,12 +1739,12 @@ function outputDateDetail($attrs, $value) {
                 makeTag('month', null, intval($matches[2]));
             } else {
                 @list($date, $time) = preg_split("![ T]!", $value);
-                @list($y, $m, $d) = array_map("intval", preg_split("![-\/]!", $date));
+                @list($y, $m, $d) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 if (!(1 <= $m && $m <= 12 && 1 <= $d && $d <= 31)) {
-                    @list($d, $m, $y) = array_map("intval", preg_split("![-\/]!", $date));
+                    @list($d, $m, $y) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 }
                 if (!(1 <= $m && $m <= 12 && 1 <= $d && $d <= 31)) {
-                    @list($m, $d, $y) = array_map("intval", preg_split("![-\/]!", $date));
+                    @list($m, $d, $y) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 }
                 if (1 <= $m && $m <= 12 && 1 <= $d && $d <= 31) {
                     makeTag('year', null, $y);
@@ -1785,7 +1785,10 @@ function outputTDateDetail($attrs, $value) {
         }
         if ($time) {
                          // hours                                 minutes                   seconds
-            preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
+            //preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
+            
+            preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
+            
             if (@$matches[1]) {makeTag('hour', null, $matches[1]);}
             if (@$matches[2]) {makeTag('minutes', null, $matches[2]);}
             if (@$matches[3]) {makeTag('seconds', null, $matches[3]);}
@@ -1814,7 +1817,8 @@ function outputDurationDetail($attrs, $value) {
             if (preg_match('/[HMS]/', $time)) { //char separated version 6H5M8S
                 preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/', $time, $matches);
             } else { //delimited version  23:59:59
-                preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
+                //preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
+                preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
             }
             if (@$matches[1]) {makeTag('hour', null, intval($matches[1]));}
             if (@$matches[2]) {makeTag('minutes', null, intval($matches[2]));}

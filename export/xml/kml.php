@@ -150,13 +150,14 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             if($limit>0){
                 $rec_ids = array_slice($rec_ids,0,$limit);
             }
-
-            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere;
-            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere2;
+            
+            $squery = _composeQuery($squery, $detTable, $rec_ids, $ourwhere);
+            $squery2 = _composeQuery($squery2, $detTable2, $rec_ids, $ourwhere2);
 
     }else{
-        $squery = $squery." from Records ".$detTable." where rec_ID=".intval($_REQUEST["id"]).$ourwhere;
-        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".intval($_REQUEST["id"]).$ourwhere2;
+        
+        $squery = _composeQuery($squery, $detTable, $_REQUEST["id"], $ourwhere);
+        $squery2 = _composeQuery($squery2, $detTable2, $_REQUEST["id"], $ourwhere2);
     }
 
     $wkt_reccount=0;
@@ -257,4 +258,19 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 print '</Document>';
 print '</kml>';
 
+//
+//
+//
+function _composeQuery($select,$from,$rec_ids,$where){
+    
+   if(is_array($rec_ids)){
+        $where_ids = 'in ('.implode(',', prepareIds($rec_ids)).')';
+   }else{
+        $where_ids = '='.intval($rec_ids);
+   }
+    
+   $squery = "$select from Records $from WHERE rec_ID $where_ids $where"; 
+    
+   return $squery;
+}
 ?>
