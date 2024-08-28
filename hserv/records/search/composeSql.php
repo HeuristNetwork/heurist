@@ -1258,13 +1258,6 @@ class HPredicate {
 
         global $mysqli, $top_query;
 
-        /*if(false && $this->query){
-
-        $this->query->makeSQL();
-        $query = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
-        //return array("from"=>"", "where"=>$this->pred_type.$query);
-        }*/
-
         switch (strtolower($this->pred_type)) {
             case 'plain':            //query in old plain text format
                 //[{"t":"12"},{"plain":"0"},{"sortby":"t"}]
@@ -1844,7 +1837,7 @@ class HPredicate {
                     $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                     $top_query->top_limb->addTable($this->query->from_clause);
                 }else{
-                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause.SQL_WHERE.$this->query->where_clause.")";
                 }
             }else{
                 return null;
@@ -2060,7 +2053,7 @@ class HPredicate {
                         $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                         $top_query->top_limb->addTable($this->query->from_clause);
                     }else{
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
                         if(is_array($ids) && count($ids)>0){
                             //if(count($ids)>2000)
@@ -2068,8 +2061,6 @@ class HPredicate {
                         }else{
                             $val = ' =0';
                         }
-
-                        //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
                     }
 
                 }else{
@@ -2180,7 +2171,7 @@ class HPredicate {
                         $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                         $top_query->top_limb->addTable($this->query->from_clause);
                     }else{
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
                         if(is_array($ids) && count($ids)>0){
                             //if(count($ids)>2000)
@@ -2189,7 +2180,6 @@ class HPredicate {
                             $val = ' =0';
                         }
 
-                        //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
                     }
                 }else{
                     return null;
@@ -2270,7 +2260,7 @@ class HPredicate {
                     $top_query->top_limb->addTable($this->query->from_clause);
                 }else{
 
-                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                     $ids = mysql__select_list2($mysqli, $sub_query);
                     if(is_array($ids) && count($ids)>0){
                         //if(count($ids)>2000)
@@ -2279,7 +2269,6 @@ class HPredicate {
                         $val = ' =0';//not found
                     }
 
-                    //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
                 }
             }else{
                 return null;
@@ -2448,7 +2437,7 @@ class HPredicate {
 
                     $rty_constraints = ', Records where '.$part2.'=rec_ID and rec_RecTypeID '.$rty_constraints.SQL_AND;
                 }else{
-                    $rty_constraints = ' where ';
+                    $rty_constraints = SQL_WHERE;
                 }
 
                 if($reltypes!=null && count($reltypes)>0){
@@ -2486,9 +2475,8 @@ class HPredicate {
                         $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                         $top_query->top_limb->addTable($this->query->from_clause);
                     }else{
-                        //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
 
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
                         if(is_array($ids) && count($ids)>0){
                             //if(count($ids)>2000)
@@ -2565,8 +2553,7 @@ class HPredicate {
                     $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
                     $top_query->top_limb->addTable($this->query->from_clause);
                 }else{
-                    //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
-                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                     $ids = mysql__select_list2($mysqli, $sub_query);
                     if(is_array($ids) && count($ids)>0){
                         //if(count($ids)>2000)

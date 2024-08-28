@@ -94,7 +94,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
         $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
 
     }else{
-        $query = $query." WHERE ";
+        $query = $query.SQL_WHERE;
     }
     $query = $query.
     "(dty_Type in ('enum','relationtype','relmarker','resource')".

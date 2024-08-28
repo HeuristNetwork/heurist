@@ -185,7 +185,7 @@ class DbSysUsers extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$where);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);

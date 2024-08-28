@@ -622,7 +622,7 @@ abstract class DbEntityBase
 
 
         mysql__foreign_check($mysqli, false);
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField
+        $query = 'DELETE FROM '.$this->config['tableName'].SQL_WHERE.$this->primaryField
                 .$recids_compare;
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;

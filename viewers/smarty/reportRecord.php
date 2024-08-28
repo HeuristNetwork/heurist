@@ -320,7 +320,7 @@ class ReportRecord {
                 $rec_ID = $rec;
             }
 
-            $where = ' WHERE ';
+            $where = SQL_WHERE;
 
             if($rty_ID!=null){
                 if(is_int($rty_ID) && $rty_ID>0)

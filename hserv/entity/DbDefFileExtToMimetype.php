@@ -121,7 +121,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
                 .' FROM defFileExtToMimetype';
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$where);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
 
          $query = $query.' ORDER BY fxm_Extension ';
@@ -181,7 +181,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
 
         $rec_ID = $this->data[$this->primaryField];
         if($rec_ID!=null){
-            $query = "DELETE from ".$this->config['tableName']." WHERE ".$this->primaryField." = '".$rec_ID."'";
+            $query = "DELETE from ".$this->config['tableName'].SQL_WHERE.$this->primaryField." = '".$rec_ID."'";
 
             $mysqli = $this->system->get_mysqli();
             $res = $mysqli->query($query);

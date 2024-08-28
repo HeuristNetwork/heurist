@@ -209,7 +209,7 @@ class DbDefRecTypes extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
         if(count($where)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$where);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
         }
         if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -660,7 +660,7 @@ WHERE
                 $where = $where . ' AND (r0.rec_RecTypeID='.$this->data['rty_ID'].')';
             }
 
-            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
+            $query = $query . SQL_WHERE.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
 
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
 

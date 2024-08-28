@@ -84,7 +84,7 @@ function getRecordByID($system, $id) {
     $record = new stdClass();
 
     // Select the record
-    $query = $recordQuery." WHERE ".$recordWhere." and r.rec_ID=".intval($id);
+    $query = $recordQuery.SQL_WHERE.$recordWhere." and r.rec_ID=".intval($id);
     $res = $system->get_mysqli()->query($query);
 
     if ($res) {
@@ -362,7 +362,7 @@ function getMapDocuments($system, $recId) {
 
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
-        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT);//InOriginatingDB
+        $query = $recordQuery.SQL_WHERE.$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT);//InOriginatingDB
 
         if($recId>0){
             $query = $query . ' and rec_ID='.intval($recId);

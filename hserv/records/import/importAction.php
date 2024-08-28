@@ -371,7 +371,7 @@ private static function findRecordIds($imp_session, $params){
                         //query to search record ids
                         $search_query = "SELECT rec_ID, rec_Title "
                         ." FROM ".implode(",",$a_from)
-                        ." WHERE ".implode(SQL_AND,$a_where);
+                        .SQL_WHERE.implode(SQL_AND,$a_where);
 
                         $search_stmt = $mysqli->prepare($search_query);
                         //$search_stmt->bind_param('s', $field_value);
@@ -694,7 +694,7 @@ public static function assignRecordIds($params){
 
         // find records to be ignored
         /* they already found in findRecordsIds
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
+        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field."=''";
         $cnt_ignored = mysql__select_value($mysqli, $select_query);
         $imp_session['validation']['count_ignore_rows'] = $cnt_ignored;
         */
@@ -716,11 +716,11 @@ public static function assignRecordIds($params){
         } */
 
         // find records to insert
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0";
+        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table.SQL_WHERE.$id_field."<0";
         $cnt = mysql__select_value($mysqli, $select_query);
 
         // id field not defined -  it records to insert as well
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL";
+        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field." IS NULL";
         $cnt2 = mysql__select_value($mysqli, $select_query);
 
         // record ids for none existing records
@@ -732,7 +732,7 @@ public static function assignRecordIds($params){
         $cnt_insert = (($cnt>0) ? intval($cnt) : 0) + (($cnt2>0) ? intval($cnt2) : 0) + (($cnt3>0) ? intval($cnt3) : 0);
 
         // find records to be ignored
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
+        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field."=''";
         $cnt_ignore = mysql__select_value($mysqli, $select_query);
 
         $imp_session['validation'] = array(
@@ -1291,7 +1291,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     foreach ($query_reqs as $field){
         $query = "select imp_id, ".implode(",",$sel_query)
         ." from $import_table "
-        ." where ".$only_for_specified_id;
+        .SQL_WHERE.$only_for_specified_id;
         if(@$query_reqs_where[$k]){
             $query = $query . ' ('.$query_reqs_where[$k].')';// implode(" or ",$query_reqs_where);
         }else{
@@ -1371,7 +1371,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
-            ." where ".$only_for_specified_id;
+            .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_enum_where[$k]){
                 $query = $query . ' ('.$query_enum_where[$k].')';// implode(" or ",$query_enum_where);
@@ -1413,7 +1413,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
-            ." where ".$only_for_specified_id;
+            .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_res_where[$k]){
                 $query = $query . ' ('.$query_res_where[$k].')';// implode(" or ",$query_res_where);
@@ -1456,7 +1456,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
-            ." where ".$only_for_specified_id;
+            .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_num_where[$k]){
                 $query = $query . '('.$query_num_where[$k].')';
@@ -1499,7 +1499,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table "
-            ." where ".$only_for_specified_id;
+            .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_date_where[$k]){
                 $query = $query . '('.$query_date_where[$k].')';

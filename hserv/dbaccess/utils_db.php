@@ -33,6 +33,7 @@ use hserv\structure\ConceptCode;
     *  mysql__delete
     *  mysql__begin_transaction
     *  mysql__script - executes sql script file
+    * 
     *
     *  getSysValues - Returns values from sysIdentification
     *  isFunctionExists - verifies that mysql stored function exists
@@ -41,6 +42,9 @@ use hserv\structure\ConceptCode;
     *  trim_item
     *  stripAccents
     *  prepareIds
+    * prepareStrIds
+    *  predicateId - prepare field compare with one or more ids
+    * 
     *  checkMaxLength - check max length for TEXT field
     *  getDefinitionsModTime - returns timestamp of last update of db denitions
     *
@@ -577,7 +581,7 @@ use hserv\structure\ConceptCode;
                 $table_prefix = $table_prefix.'_';
             }
 
-            $query = "DELETE from $table_name WHERE ".$table_prefix.'ID in ('.implode(',', $rec_ID).')';
+            $query = "DELETE from $table_name WHERE ".predicateId($table_prefix.'ID', $rec_ID);
 
             $res = $mysqli->query($query);
 
@@ -713,7 +717,7 @@ use hserv\structure\ConceptCode;
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $query = $query.' where '.$primary_field.'=?';
+            $query = $query.SQL_WHERE.$primary_field.'=?';
 
             if($primary_field_type=='integer'){
                 $params[0] = $params[0].'i';
@@ -1157,8 +1161,8 @@ use hserv\structure\ConceptCode;
             //1. find all date values in recDetails
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
-            $fld_dates = implode(',',prepareIds($fld_dates));
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
+
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE '.predicateId('dtl_DetailTypeID',$fld_dates);//' AND dtl_Value!=""';
             $cnt_dates = mysql__select_value($mysqli, $query);
             if($offset>0){
                 $cnt_dates = $cnt_dates - $offset;
@@ -1553,6 +1557,9 @@ use hserv\structure\ConceptCode;
         }
     }
 
+    //
+    //
+    //
     function prepareStrIds($ids){
 
         if(!is_array($ids)){
@@ -1565,6 +1572,15 @@ use hserv\structure\ConceptCode;
 
         return $ids;
 
+    }
+    
+    //
+    //
+    //
+    function predicateId($field, $ids)
+    {
+        $ids = prepareIds($ids);
+        return '('.$field.(count($ids)==1?'='.$ids[0]:' IN ('.implode(',',$ids).')').')';
     }
 
 

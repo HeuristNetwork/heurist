@@ -214,9 +214,9 @@ define('DIV','<div>');
 define('DIV_E','</div>');
 define('BR','<br>');
 
-//common separators
+//common sql reserved words
 define('SQL_AND',' AND ');
-
+define('SQL_WHERE',' WHERE ');
 
 //
 define('XML_SCHEMA','Xhttp://www.w3.org/2001/XMLSchema#string');

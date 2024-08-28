@@ -217,7 +217,7 @@ class DbRecUploadedFiles extends DbEntityBase
         .' FROM '.implode('', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$where);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -1306,7 +1306,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         mysql__foreign_check($mysqli, false);
         $ret = $mysqli->query('DELETE FROM '.$this->config['tableName']
-                               .' WHERE '.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
+                               .SQL_WHERE.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
         mysql__foreign_check($mysqli, true);
 
         if(!$ret){
@@ -2345,7 +2345,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             }
            
             $query = 'SELECT DISTINCT ulf_ID, ulf_ObfuscatedFileID  FROM ' 
-                        . $this->config['tableName'] . ' WHERE '.$where_clause;
+                        . $this->config['tableName'] . SQL_WHERE.$where_clause;
             $to_check = mysql__select_assoc2($mysqli, $query);
 
             if(count($to_check) > 0){
@@ -2442,7 +2442,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             
             if(!empty($ids)){
 
-                $where_clause = ' WHERE ';
+                $where_clause = SQL_WHERE;
                 if(count($ids) > 1){ // multiple
                     $where_clause .= ' ulf_ID IN (' . implode(',', $ids) . ')';
                 }elseif(!empty($ids)){ // single

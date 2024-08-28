@@ -569,11 +569,11 @@ function recordSearchFacets($system, $params){
                     $params_enum['q'] = __assignFacetValue($count_query, implode(',', $vocab) );
 
                     $qclauses2 = get_sql_query_clauses_NEW($mysqli, $params_enum, $currentUser);
-                    $query =  $select_clause.$qclauses2['from'].' WHERE '.$qclauses2['where'];
+                    $query =  $select_clause.$qclauses2['from'].SQL_WHERE.$qclauses2['where'];
                 }else{
                     $d_where = $details_where.' AND ('.$select_field.' IN ('.implode(',', $vocab).'))';
                     //count query
-                    $query =  $select_clause.$qclauses['from'].$detail_link.' WHERE '.$qclauses['where'].$d_where;
+                    $query =  $select_clause.$qclauses['from'].$detail_link.SQL_WHERE.$qclauses['where'].$d_where;
                 }
 
                 /*if($limit>0){
@@ -659,7 +659,7 @@ function recordSearchFacets($system, $params){
             $grouporder_clause = substr($grouporder_clause,0,strpos($grouporder_clause,'ORDER BY')-1);
         }
 
-        $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
+        $query =  $select_clause.$qclauses["from"].$detail_link.SQL_WHERE.$qclauses["where"].$details_where.$grouporder_clause;
         $rec_query = !empty($rec_query) ? "{$rec_query}{$qclauses["from"]}{$detail_link} WHERE {$qclauses["where"]}{$details_where}" : '';
 
         /*
@@ -725,7 +725,7 @@ function recordSearchFacets($system, $params){
             if($missingIds){
 
 				$recid_query = "SELECT DISTINCT rec_ID " . $qclauses["from"] . $detail_link .
-                        " WHERE " . $qclauses["where"] . $details_where . $grouporder_clause;
+                        SQL_WHERE . $qclauses["where"] . $details_where . $grouporder_clause;
 
                 $recid_res = $mysqli->query($recid_query);
                 if($recid_res){
@@ -2579,7 +2579,7 @@ function recordSearch($system, $params, $relation_query=null)
             $aquery['sort'] = ' GROUP BY rec_RecTypeID';
         }
 
-        $query =  $select_clause.$aquery['from'].' WHERE '.$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
+        $query =  $select_clause.$aquery['from'].SQL_WHERE.$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
     }
 

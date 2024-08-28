@@ -83,7 +83,7 @@ function compose_sql_query($db, $select_clause, $params, $currentUser=null) {
 
     $query = get_sql_query_clauses($db, $params, $currentUser=null);
 
-    $res_query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+    $res_query =  $select_clause.$query["from"].SQL_WHERE.$query["where"].$query["sort"].$query["limit"].$query["offset"];
     return $res_query;
 }
 /**
@@ -2459,7 +2459,7 @@ class LinkedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where
+            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where
                         .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
@@ -2485,7 +2485,7 @@ class LinkedFromParentPredicate extends Predicate {
                 }
             }
 
-            $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
         }
 
         return $select;
@@ -2580,7 +2580,7 @@ class LinkedToParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
 
@@ -2606,7 +2606,7 @@ class LinkedToParentPredicate extends Predicate {
             }
 
 
-            $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
 
         }
 
@@ -2674,7 +2674,7 @@ class RelatedFromParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{
@@ -2692,7 +2692,7 @@ class RelatedFromParentPredicate extends Predicate {
                 . ' rl.rl_TargetID=rd.rec_ID and '
                 . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
 
-            $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
         }
 
         if($select_relto!=null){
@@ -2763,7 +2763,7 @@ class RelatedToParentPredicate extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{
@@ -2781,7 +2781,7 @@ class RelatedToParentPredicate extends Predicate {
                 . ' rl.rl_SourceID=rd.rec_ID and '
                 . (($relation_type_ID) ?'rl.rl_RelationID='.$relation_type_ID :'rl.rl_RelationID is not null' );
 
-            $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
         }
 
         if($select_relto!=null){
@@ -2851,9 +2851,9 @@ class RelatedPredicate extends Predicate {
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
             $select = '(TOPBIBLIO.rec_ID in (select rl.rl_SourceID '.$query["from"].',recLinks rl '
-                      .' WHERE '.$query["where"].SQL_AND.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
                       .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
-                      .' WHERE '.$query["where"].SQL_AND.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
         }
 
 
@@ -2895,9 +2895,9 @@ class AllLinksPredicate  extends Predicate {
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select1 = $add_select1.$query["from"].', '.$add_from1.' WHERE '.$query["where"].SQL_AND.$add_where1.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select1 = $add_select1.$query["from"].', '.$add_from1.SQL_WHERE.$query["where"].SQL_AND.$add_where1.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
-            $select2 = $add_select2.$query["from"].', '.$add_from2.' WHERE '.$query["where"].SQL_AND.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
+            $select2 = $add_select2.$query["from"].', '.$add_from2.SQL_WHERE.$query["where"].SQL_AND.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
 
         }else{

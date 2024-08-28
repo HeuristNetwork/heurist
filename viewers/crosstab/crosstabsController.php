@@ -247,7 +247,7 @@ if($issum){
     .SQL_AND.$where;
 
 }else{
-    $query = $query." where ".$where; //20130517 rec_RectypeID=".$params['rt'];
+    $query = $query.SQL_WHERE.$where; //20130517 rec_RectypeID=".$params['rt'];
 }
 //20130517 $query = $query.SQL_AND.$where_2;
 

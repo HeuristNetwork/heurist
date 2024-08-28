@@ -2066,7 +2066,7 @@ function updateRelConstraint($srcID, $trgID, $terms){
         $terms[2] = "null";
     }
 
-    $where = " where ";
+    $where = SQL_WHERE;
 
     if(intval($srcID)<1){
         $srcID = "null";

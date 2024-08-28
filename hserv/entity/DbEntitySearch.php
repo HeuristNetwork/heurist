@@ -246,7 +246,7 @@ class DbEntitySearch
         .' FROM '.$this->config['tableName'];
 
         if(count($this->whereConditions)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$this->whereConditions);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$this->whereConditions);
         }
          
         if($orderBy!=null){

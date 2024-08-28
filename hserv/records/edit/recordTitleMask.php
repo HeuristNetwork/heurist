@@ -448,7 +448,7 @@ private static function __get_rec_detail_types($rt) {
         .' dty_Type, if(rst_PtrFilteredIDs,rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs,'
         .' dty_OriginatingDBID, dty_IDInOriginatingDB, dty_ID, rst_RequirementType '
         .' from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID '
-        .' where '//since 2017-11-25 rst_RequirementType in ("required", "recommended", "optional") and '
+        .SQL_WHERE//since 2017-11-25 rst_RequirementType in ("required", "recommended", "optional") and '
         .' rst_RecTypeID='.intval($rt)
         .' order by rst_DisplayOrder';
 

@@ -92,7 +92,7 @@ class DbUsrBookmarks extends DbEntityBase
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
-            $query = $query.' WHERE '.implode(SQL_AND,$where);
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
@@ -212,7 +212,7 @@ class DbUsrBookmarks extends DbEntityBase
             if($rec_RecTypeID>0){
                 $query = ', Records where (rec_RecTypeID='.$rec_RecTypeID.') and (rec_ID=bkm_RecID) and '.$query;
             }else{
-                $query = ' where '.$query;
+                $query = SQL_WHERE.$query;
             }
 
             //get bookmarks
@@ -280,7 +280,7 @@ class DbUsrBookmarks extends DbEntityBase
             if(count($bkm_IDs)>0){
                 $query =  'bkm_ID in (' . join(',', $bkm_IDs).')';
 
-                $query =  'update usrBookmarks set bkm_Rating = ' . $rating . ' where '.$query
+                $query =  'update usrBookmarks set bkm_Rating = ' . $rating . SQL_WHERE.$query
                         .' and bkm_UGrpID = ' . $this->system->get_user_id();
 
                 $res = $mysqli->query($query);

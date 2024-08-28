@@ -1394,7 +1394,7 @@ function dbs_GetRectypeConstraint($system) {
 
             $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes';
             if($where_exp!=null && $where_exp != ''){
-                $query = $query.' WHERE '.$where_exp;
+                $query = $query.SQL_WHERE.$where_exp;
             }
 
             $res = mysql__select_assoc2($mysqli, $query);
@@ -1412,7 +1412,7 @@ function dbs_GetRectypeConstraint($system) {
             }
             $query.= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID";
             if($where_exp!=null){
-                $query = $query.' where '.$where_exp;
+                $query = $query.SQL_WHERE.$where_exp;
             }
             $query = $query . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
         }

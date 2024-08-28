@@ -748,15 +748,17 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
+                    
+                    $script = '<script type="text/javascript" src="'.HEURIST_BASE_URL;
 
-                    $head =
-                            '<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.js"></script>'
-                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
-                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
-                            .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-                            .'<script>'
-                            .'var rec_Files=[];</script>';
+                    $head = <<<EXP
+{$script}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+{$script}external/jquery-ui-1.12.1/jquery-ui.js"></script>
+{$script}external/jquery.fancybox/jquery.fancybox.js"></script>
+{$script}hclient/core/detectHeurist.js"></script>
+{$script}hclient/widgets/viewers/mediaViewer.js"></script>
+<script>var rec_Files=[];</script>
+EXP;
 
                     $head .= (
                         '<script>$(document).ready(function() {'
