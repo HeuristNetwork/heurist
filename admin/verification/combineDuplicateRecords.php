@@ -360,16 +360,18 @@ EXP;
                                         $repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
                                         if ($repeatCount==0){
                                             foreach ($detail as $val) {
-                                                print '<div style="word-break: break-word;">'. htmlspecialchars($val) . DIV_E;
+                                                $val = htmlspecialchars($val);
+                                                print "<div style=\"word-break: break-word;\">$val</div>";
                                             }
                                         } else{
                                             for ($i = 0; $i < $repeatCount; $i++) {
-                                                print '<div style="word-break: break-word;">'. htmlspecialchars($detail[$i]) . DIV_E;
+                                                $val = htmlspecialchars($detail[$i]);
+                                                print "<div style=\"word-break: break-word;\">$val</div>";
                                             }
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div style="word-break: break-word;">'. $detail . DIV_E;
+                                        print "<div style=\"word-break: break-word;\">$detail</div>";
                                     }
 
                                     print TD_E;

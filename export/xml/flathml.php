@@ -113,6 +113,10 @@ if(@$_REQUEST['postdata']){
     $_REQUEST = json_decode($_REQUEST['postdata'], true);
 }
 
+define('REGEX_JSON_CHECK','/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/');
+
+define('ERR_INVALID_FILTER', 'Error: invalid json filters string')
+
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
 
 $rectype_templates = array_key_exists('rectype_templates', $_REQUEST) && !empty($_REQUEST['rectype_templates']);//flag to produce rectype templates instead of real records
@@ -380,8 +384,8 @@ $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
 $PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!$system->has_access() ? true : false));
 
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json record type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -390,8 +394,8 @@ if (!isset($RECTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['relfilters'] ? $_REQUEST['relfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json relation type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $RELTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -400,8 +404,8 @@ if (!isset($RELTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['ptrfilters'] ? $_REQUEST['ptrfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json pointer type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $PTRTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -410,8 +414,8 @@ if (!isset($PTRTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['selids'] ? $_REQUEST['selids'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json record type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -470,6 +474,20 @@ if ($system->has_access()) { //logged in
     }
 }
 
+//
+//
+//
+function predicateRecordVisibility(){
+    global $ACCESSABLE_OWNER_IDS, $PUBONLY;
+    
+    return  (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
+            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
+            : '(') .
+    (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    
+    
+   
+}
 
 //----------------------------------------------------------------------------//
 // Traversal functions
@@ -503,10 +521,8 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
     (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', prepareIds($dtyIDs)) . ') ' : '')
     . 'AND dty_Type = "resource" AND '
-        . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '(') .
-    (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+        .predicateRecordVisibility();
+
 
     $res = $mysqli->query($query);
     if($res){
@@ -589,10 +605,7 @@ function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     . (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
         join(',', prepareIds($rtyIDs)) . ') ' : '') . (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
         join(',', prepareIds($dtyIDs)) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '(') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+        predicateRecordVisibility();
 
     $res = $mysqli->query($query);
     if($res){
@@ -679,9 +692,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
         join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (') .
     (($system->has_access() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' .
-        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (').
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")').
+    predicateRecordVisibility()
     (is_array($relTermIDs) && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
         join(',', prepareIds($relTermIDs)) . ') OR trm.trm_InverseTermID in (' . join(',', prepareIds($relTermIDs)) . ')) ' : '');
 
@@ -859,10 +870,7 @@ function _getForwardPointers_for_relRT($rec_id, $depth){
     .'  and (trg.rec_ID = dtl_Value)  and (trg.rec_FlagTemporary=0) '
     . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
     . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS,true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    .predicateRecordVisibility();
 
 
     $resout = array();
@@ -901,11 +909,7 @@ function _getForwardPointers($rec_id, $depth){
     .'  and (trg.rec_ID = rl_TargetID)  and (trg.rec_FlagTemporary=0) '
     . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
     . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-
+    .predicateRecordVisibility();
 
     $resout = array();
 
@@ -946,10 +950,7 @@ function _getRelations($rec_id, $depth){
     .'  and trg.rec_ID = rl_TargetID  and (trg.rec_FlagTemporary=0) and (rel.rec_FlagTemporary=0) '
     . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
     . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    .predicateRecordVisibility();
 
     $resout = array();
 
