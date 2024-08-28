@@ -2632,7 +2632,7 @@ class HPredicate {
             return $ret;
 
         }elseif($this->isEmptyValue()){ // {"f:10":"NULL"}
-            return 'NULL';
+            return SQL_NULL;
         }else{
 
             $datestamp = Temporal::dateToISO($this->value);
@@ -2690,7 +2690,7 @@ class HPredicate {
     private function makeDateClause() {
 
         if($this->isEmptyValue()){ // {"f:10":"NULL"}
-            return 'NULL';
+            return SQL_NULL;
         }
 
 

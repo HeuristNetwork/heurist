@@ -165,7 +165,7 @@ class DbEntitySearch
 
                 $is_ids = ($data_role=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
 
-                if($value=='NULL' || $value=='-NULL'){
+                if($value==SQL_NULL || $value=='-'.SQL_NULL){
                     $res = true;
                 }elseif($is_ids=='ids'){
                     
@@ -278,7 +278,7 @@ class DbEntitySearch
         //special case for ids - several values can be used in IN operator
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
 
-            if($value == 'NULL'){
+            if($value == SQL_NULL){
                 return '(NOT ('.$fieldname.'>0))';
             }elseif($value == '-NULL'){
                 return '('.$fieldname.'>0)';
@@ -321,7 +321,7 @@ class DbEntitySearch
 
         foreach($or_values as $value){
 
-            if($value == 'NULL'){
+            if($value == SQL_NULL){
                 array_push($or_predicates, $fieldname.' IS NULL');
                 continue;
             }elseif($value == '-NULL'){

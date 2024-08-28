@@ -520,7 +520,7 @@ exit;
                     $query = 'INSERT INTO usrRemindersBlockList VALUES ('.$rem_ID.','.$this->data['u'].')';
                 }else{
                     //remove reminder
-                    $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID'];
+                    $query = SQL_DELETE.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID'];
                 }
                 $res = $mysqli->query($query);
             }

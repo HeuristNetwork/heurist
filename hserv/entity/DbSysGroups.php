@@ -311,12 +311,13 @@ class DbSysGroups extends DbEntityBase
 
         //find affected users
         $query = 'SELECT ugl_UserID FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs);
+            
         $affectedUserIds = mysql__select_list2($mysqli, $query);
 
         //remove from roles table
         $query = 'DELETE FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs);
 
         $res = $mysqli->query($query);
         if(!$res){
@@ -428,8 +429,8 @@ class DbSysGroups extends DbEntityBase
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         $query2 = 'DELETE FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')'
-            . ' AND ugl_UserID in (' . implode(',', $assignIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs)
+            . SQL_AND . predicateId('ugl_UserID',$assignIDs);
 
         $res = $mysqli->query($query2);
         if(!$res){

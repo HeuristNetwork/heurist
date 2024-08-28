@@ -660,7 +660,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $keep_autocommit = mysql__begin_transaction($mysqli);
         }
 
-        if(!$modeImport) {$mysqli->query('set @suppress_update_trigger=1');}
+        if(!$modeImport) {
+            mysql__supress_trigger($mysqli, true);
+        }
 
         $query = 'UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,rec_FlagTemporary=? ';
 
@@ -712,7 +714,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                 //set current user for stored procedures (log purposes)
                 $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
             }
-            $mysqli->query('set @suppress_update_trigger=NULL');
+            mysql__supress_trigger($mysqli, false);
         }
 
         //delete ALL existing details
@@ -732,8 +734,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $addedByImport = ($modeImport?1:0);
 
 
-    $query = 'INSERT INTO recDetails '.
-    '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
+    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
     "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
     $stmt = $mysqli->prepare($query);
 
@@ -850,7 +851,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
     if(!$is_insert && !$modeImport)
     {
-        $mysqli->query('set @suppress_update_trigger=1');
+        mysql__supress_trigger($mysqli, true);
 
         recordUpdateCalcFields( $system, $recID, $rectype );//update calculated fields in this record
 
@@ -896,7 +897,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                 $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null);
             }
         }
-        $mysqli->query('set @suppress_update_trigger=NULL');
+        mysql__supress_trigger($mysqli, false);
 
     }//update flagtemporary and title for related,linked records
 
@@ -1043,8 +1044,7 @@ function recordDelete($system, $recids, $need_transaction=true,
             //set current user for stored procedures (log purposes)
             $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
         }
-        $mysqli->query('set @suppress_update_trigger=NULL');
-
+        mysql__supress_trigger($mysqli, false);
 
         $tot_count = count($allowed_recids);
 
@@ -1137,10 +1137,10 @@ function recordGetIncrementedValue($system, $params){
             //2. get max value for numeric and last value for non numeric
             if($isNumeric){
                 $res = mysql__select_value($mysqli, 'select max(CAST(dtl_Value as SIGNED)) FROM recDetails, Records'
-                    .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID);
+                    ." WHERE dtl_RecID=rec_ID and rec_RecTypeID=$rt_ID and dtl_DetailTypeID=$dt_ID)");
             }else{
                 $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
-                    .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID
+                    ." WHERE dtl_RecID=rec_ID and rec_RecTypeID=$rt_ID and dtl_DetailTypeID=$dt_ID"
                     .' ORDER BY rec_ID DESC LIMIT 1');
             }
 
@@ -1451,6 +1451,7 @@ function deleteOneRecord($system, $id, $rectype){
 
 
     $id = intval($id);
+    $rectype = intval($rectype);
 
     if(!($id>0)){
         return array("error" => error_WrongParam('Record id'));
@@ -1463,11 +1464,12 @@ function deleteOneRecord($system, $id, $rectype){
     $mysqli = $system->get_mysqli();
 
     //get list if child records
-    $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
-    .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.intval($rectype);
+    $query = 'SELECT dtl_Value FROM recDetails, defRecStructure '
+    ." WHERE dtl_RecID=$id AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=$rectype";
+    
     $child_records = mysql__select_list2($mysqli, $query);
-    if(is_array($child_records) && count($child_records)>0){
-        $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';
+    if(is_array($child_records) && !empty($child_records)){
+        $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE '.predicateId('rec_ID',$child_records);
         $child_records = mysql__select_assoc2($mysqli, $query);
     }
 
@@ -1606,8 +1608,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
         $child_id  = intval($child_id);
         $dtl_ID = -1;
 
-        $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
-        .$child_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
+        $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID=$child_id AND dtl_DetailTypeID=".DT_PARENT_ENTITY;
         $res = $mysqli->query($query);
         if ($res){
             $matches = array();
@@ -1628,8 +1629,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
                 'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));
             if($mysqli->error) {$res = -1; }//($mysqli->affected_rows>0);
         }else{
-            $mysqli->query('INSERT INTO recDetails '.
-                "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
+            $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
             if(!($mysqli->insert_id>0)) {$res=-1;}
         }
@@ -1647,14 +1647,14 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
     if($system->defineConstant('DT_PARENT_ENTITY')){
         //get list of valid record
-        $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
-        .$parent_id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+        $query = 'SELECT dtl_Value FROM recDetails, defRecStructure '
+        ." WHERE dtl_RecID=$parent_id AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=$rectype";
 
         $mysqli = $system->get_mysqli();
 
         $recids = mysql__select_list2($mysqli, $query, 'intval');
 
-        $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
+        $query = "DELETE FROM recDetails WHERE dtl_Value=$parent_id AND dtl_DetailTypeID=".DT_PARENT_ENTITY;
 
         if(is_array($recids) && count($recids)>0){
             $recids = prepareIds($recids);//redundant for snyk
@@ -1705,8 +1705,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
         }
 
         //check if already exists
-        $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
-        .$parent_id.' AND dtl_DetailTypeID='.$detailTypeId;
+        $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID=$parent_id AND dtl_DetailTypeID=$detailTypeId";
         $res = $mysqli->query($query);
         if ($res){
             $matches = array();
@@ -1719,8 +1718,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             $res->close();
         }
 
-        $mysqli->query('INSERT INTO recDetails '.
-            "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
+        $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
             "VALUES ($parent_id, ".$detailTypeId.", $child_id, $addedByImport )");
 
         $res = 1;
@@ -2112,14 +2110,13 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         $errors[$rty_ID.'.'.$dty_ID] = $new_value[1];
                         break;
                     }
-                }elseif($new_value == 'NAN' || $new_value == 'INF' || $new_value == 'NULL'){
+                }elseif($new_value == 'NAN' || $new_value == 'INF' || $new_value == SQL_NULL){
                     // relpace not a number, infinite, and null with an empty string
                     $new_value = '';
                 }
 
                 $current_value = mysql__select_value($mysqli,
-                    'SELECT dtl_Value FROM recDetails '
-                    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID);
+                    "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=$dty_ID");
 
                 if($new_value!=null) {$new_value = trim($new_value);}
 
@@ -2128,13 +2125,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 }else{
 
                     if($current_value!=null && $current_value!=''){
-                        $query = 'DELETE FROM recDetails '
-                            .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
+                        $query = "DELETE FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=$dty_ID";
                         $mysqli->query($query);
                     }
-
-                    //$query = 'UPDATE recDetails SET dtl_Value=? '
-                    //    .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID;
 
                     if($new_value!=null && $new_value!=''){
                         $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) '
@@ -2637,10 +2630,11 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         //(\w+)
                         $allowed = array('src','class','style','href');
                         $allowed2 = implode('=|',$allowed).'=';
+                        $regex = ')[^>]))*((?:';
                         $allowed = implode('|',$allowed);
-$dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
-                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
-                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
+$dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
+                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
+                     .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.$regex.$allowed
                      .')=[\'"][^\'"]*[\'"]\s*)?)[^>]*>#si','<$1$2$3$4$5>',$dtl_Value);
                         }
 
@@ -3115,6 +3109,8 @@ function recordDuplicate($system, $id){
 
     $system->defineConstant('DT_TARGET_RESOURCE');
     $system->defineConstant('DT_PRIMARY_RESOURCE');
+    
+    $prefixDbErrorMsg = 'database error - ';
 
     while (true) {
 
@@ -3135,7 +3131,7 @@ function recordDuplicate($system, $id){
         $query = $query.' where rec_ID='.$new_id;
         $res = $mysqli->query($query);
         if(!$res){
-            $error = 'database error - ' .$mysqli->error;
+            $error = $prefixDbErrorMsg .$mysqli->error;
             break;
         }
 
@@ -3166,16 +3162,14 @@ function recordDuplicate($system, $id){
                     $new_val = $res['result'];
 
                     $query = 'UPDATE recDetails set dtl_Value=?'
-                    .' where dtl_RecID='.$new_id
-                    //.' and dtl_Value='.$id   //old record id
-                    .' and dtl_DetailTypeID='.$dty_ID;
+                    ." where dtl_RecID=$new_id and dtl_DetailTypeID=$dty_ID";
 
                     $res = mysql__exec_param_query($mysqli, $query, array('s', $new_val));
 
                     // .$mysqli->real_escape_string( $new_val )
                     // $res = $mysqli->query($query);
                     if(!$res){
-                        $error = 'database error - ' .$mysqli->error;
+                        $error = $prefixDbErrorMsg .$mysqli->error;
                         break;
                     }
                 }else{
@@ -3191,7 +3185,7 @@ function recordDuplicate($system, $id){
         .'(SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID='.$recTypeID.' AND rst_CreateChildIfRecPtr=1)';
         $res = $mysqli->query($query);
         if(!$res){
-            $error = 'database error - ' .$mysqli->error;
+            $error = $prefixDbErrorMsg .$mysqli->error;
             break;
         }
 
@@ -3266,7 +3260,7 @@ function recordDuplicate($system, $id){
 
                     $res = $mysqli->query($query);
                     if(!$res){
-                        $error = 'database error - ' .$mysqli->error;
+                        $error = $prefixDbErrorMsg .$mysqli->error;
                         break;
                     }else{
                         $rels_count++;
@@ -3486,7 +3480,7 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
         if(!$is_insert){
             //find current stage
-            $query = 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.DT_WORKFLOW_STAGE;
+            $query = "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=".DT_WORKFLOW_STAGE;
             $current_value = mysql__select_value($mysqli, $query);
         }
 

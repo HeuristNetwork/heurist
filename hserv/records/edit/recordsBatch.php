@@ -267,6 +267,23 @@ class RecordsBatch
         return true;
     }
 
+    //
+    //
+    //    
+    private function _getDetailType($dty_ID){
+        return mysql__select_value($this->system->get_mysqli(),
+                 'select dty_Type from defDetailTypes where dty_ID = '.$dty_ID);
+    }
+    
+    
+    //
+    //
+    //    
+    private function _removeScriptTag($value){
+        $value = trim($value);
+        return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $value);
+    }
+
 
     /**
     * Converts existing records to child record for given rectype/detailtype
@@ -480,7 +497,7 @@ class RecordsBatch
 
         $basetype = null;
         if(@$this->data['geo']==null){
-            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+            $basetype = $this->_getDetailType($dtyID);
             if($basetype=='geo'){
                 $this->data['geo'] = $this->data['val'];
             }
@@ -517,8 +534,7 @@ class RecordsBatch
             if(!in_array($dtyID, $this->not_purify)){
 
                 //remove html script tags
-                $s = trim($this->data['val']);
-                $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                $dtl['dtl_Value'] = $this->_removeScriptTag($this->data['val']);
 
                 //$s = $this->purifier->purify( $this->data['val']);
                 //$dtl['dtl_Value'] = htmlspecialchars_decode( $this->data['val'] );
@@ -710,9 +726,8 @@ class RecordsBatch
                if($lim>0){
                     $dtl_Value = $this->data['rVal'];
 
-                    $s = trim($dtl_Value);
-                    $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
-
+                    $dtl_Value = $this->_removeScriptTag($dtl_Value);
+                    
                     //$dtl_Value =  $this->purifier->purify($dtl_Value);
                     //$dtl_Value = htmlspecialchars_decode( $dtl_Value );
 
@@ -731,7 +746,7 @@ class RecordsBatch
             }
         }
 
-        $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+        $basetype = $this->_getDetailType($dtyID);
 
         $partialReplace = false;
 
@@ -929,8 +944,7 @@ class RecordsBatch
                         && !in_array($dtyID, $this->not_purify))
                     {
                             //remove html script tags
-                            $s = trim($newVal);
-                            $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                            $dtl['dtl_Value'] = $this->_removeScriptTag($newVal);
 
                             //$s = $this->purifier->purify( $newVal );
                             //$dtl['dtl_Value'] = htmlspecialchars_decode( $dtl['dtl_Value'] );
@@ -1041,7 +1055,7 @@ class RecordsBatch
             $searchClause = '1=1';
         }else{
 
-            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+            $basetype = $this->_getDetailType($dtyID);
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
@@ -2274,7 +2288,7 @@ public methods
         $baseTag = "~replace case convert $dtyName $date_mode";
 
         // Check field is freetext or blocktext
-        $fld_type = mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ' . $dtyID);
+        $fld_type = $this->_getDetailType($dtyID);
         if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Case conversion only works on valid freetext and blocktext fields');
             return false;
@@ -2426,7 +2440,7 @@ public methods
         $baseTag = "~translation $dtyName $date_mode";
 
         // Check field is freetext or blocktext
-        $fld_type = mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ' . $dtyID);
+        $fld_type = $this->_getDetailType($dtyID);
         if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Translation only works on valid freetext and blocktext fields');
             return false;
@@ -2885,7 +2899,7 @@ public methods
 
         //check that this is resouce filed
         if($dty_ID>0){
-            if('resource' != mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID='.$dty_ID)){
+            if('resource' != $this->_getDetailType($dtyID)){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not type "resource"');
                 return false;
             }

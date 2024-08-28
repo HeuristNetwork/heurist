@@ -23,6 +23,8 @@ use hserv\entity\DbEntityBase;
     */
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
+define('DT_FILE','type:2-38');
+
 class DbSysBugreport extends DbEntityBase
 {
 
@@ -160,7 +162,7 @@ class DbSysBugreport extends DbEntityBase
             if(is_array($attachment_temp_name)){
 
                 $filename = array();
-                $message['type:2-38'] = array();
+                $message[DT_FILE] = array();
                 foreach ($attachment_temp_name as $file) {
 
                     $info = parent::getTempEntityFile($file);
@@ -172,7 +174,7 @@ class DbSysBugreport extends DbEntityBase
                     $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
                     $filename[] = $info->getPathname();
 
-                    $message['type:2-38'][] = array($info->getFilename(), $extension);
+                    $message[DT_FILE][] = array($info->getFilename(), $extension);
                 }
             }else{
 
@@ -182,7 +184,7 @@ class DbSysBugreport extends DbEntityBase
                     $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
                     $filename = $info->getPathname();
 
-                    $message['type:2-38'] = array($info->getFilename(), $extension);
+                    $message[DT_FILE] = array($info->getFilename(), $extension);
                 }
             }
         }

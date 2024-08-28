@@ -289,7 +289,7 @@ class DbRegis {
         }
 
         //recordDelete(self:$system,$dbID);
-        $mysqli->query('set @suppress_update_trigger=NULL');
+        mysql__supress_trigger($mysqli, false);        
         ConceptCode::setSystem(self::$system);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 

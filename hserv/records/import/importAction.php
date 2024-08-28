@@ -2663,7 +2663,7 @@ public static function performImport($params, $mode_output){
         $pairs_id_value = array();//for multivalue rec_id     new_rec_id => value of mapped field
 
 
-        self::$mysqli->query('set @suppress_update_trigger=1');
+        mysql__supress_trigger(self::$mysqli, true);
 
         // start transaction
         $use_transaction = true;
@@ -3220,7 +3220,7 @@ public static function performImport($params, $mode_output){
             if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
         }
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-        self::$mysqli->query('set @suppress_update_trigger=NULL');
+        mysql__supress_trigger(self::$mysqli, false);        
 
         /*
                 if($use_transaction){

@@ -688,7 +688,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $this->system->addError(HEURIST_INVALID_REQUEST,
                                     "Upload file: $new_name couldn't be saved to upload path definied for db = "
                                 . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
-                                .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                                .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                         }
 
                     }else{
@@ -738,7 +738,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $this->system->addError(HEURIST_ERROR,
                                     'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
                                 . $this->system->dbname().' ('.$dest
-                                .'). Please ask your system administrator to correct the path and/or permissions for this directory', $unzip_error);
+                                .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS, $unzip_error);
                             return false;
                         }
 
@@ -768,7 +768,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         $this->system->addError(HEURIST_INVALID_REQUEST,
                                 "Upload file: $new_name couldn't be saved to upload path definied for db = "
                             . $this->system->dbname().' ('.HEURIST_FILES_DIR
-                            .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                            .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                     }
                 }
             }
@@ -1305,8 +1305,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
 
         mysql__foreign_check($mysqli, false);
-        $ret = $mysqli->query('DELETE FROM '.$this->config['tableName']
-                               .SQL_WHERE.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
+        $ret = $mysqli->query(SQL_DELETE.$this->config['tableName']
+                               .SQL_WHERE.predicateId($this->primaryField,$this->recordIDs));
         mysql__foreign_check($mysqli, true);
 
         if(!$ret){
@@ -1423,8 +1423,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $errorMsg = 'Cant find file to be registred : '.$tmp_name
                            .' for db = ' . $this->system->dbname();
 
-            $errorMsg = $errorMsg
-                    .'. Please ask your system administrator to correct the path and/or permissions for this directory';
+            $errorMsg = $errorMsg.'. '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS;
 
             $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
 
@@ -1724,7 +1723,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $to_delete = array();
 
             if(is_array($ids) && count($ids) > 1){ // multiple
-                $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
+                $where_ids .= SQL_AND.predicateId('ulf_ID',$ids);
                 //elseif(is_int($ids) && $ids > 0){ 
                 // single
                 //$where_ids .= ' AND ulf_ID = ' . intval($ids);
@@ -2308,12 +2307,6 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
 
         if($search_mode!='text_fields'){
         
-            if(count($ids) > 1){ // multiple
-                $where_clause = ' AND dtl_UploadedFileID IN (' . implode(',', $ids) . ')';
-            }elseif(!empty($ids)){ // single
-                $where_clause = ' AND dtl_UploadedFileID = ' . $ids[0];
-            }
-            
             if($return_mode=='file_ids'){
                 $fieldName = 'DISTINCT dtl_UploadedFileID';
             }elseif($return_mode=='rec_cnt'){
@@ -2326,7 +2319,8 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
 
             $query = 'SELECT '.$fieldName
                             . ' FROM Records, recDetails '
-                            . ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 '.$where_clause;
+                            . ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 '
+                            . SQL_AND . predicateId('dtl_UploadedFileID', $ids);
                             
             if($return_mode=='rec_full'){
                 $ret = mysql__select_assoc($mysqli, $query, 0);
@@ -2338,14 +2332,11 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
         }
         if($search_mode!='file_fields'){
 
-            if(count($ids) > 1){ // multiple
-                $where_clause = ' ulf_ID IN (' . implode(',', $ids) . ')';
-            }elseif(!empty($ids)){ // single
-                $where_clause = ' ulf_ID = ' . $ids[0];
-            }
-           
             $query = 'SELECT DISTINCT ulf_ID, ulf_ObfuscatedFileID  FROM ' 
-                        . $this->config['tableName'] . SQL_WHERE.$where_clause;
+                        . $this->config['tableName'] 
+                        . SQL_WHERE
+                        . predicateId('ulf_ID', $ids);
+                        
             $to_check = mysql__select_assoc2($mysqli, $query);
 
             if(count($to_check) > 0){
@@ -2442,18 +2433,14 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             
             if(!empty($ids)){
 
-                $where_clause = SQL_WHERE;
-                if(count($ids) > 1){ // multiple
-                    $where_clause .= ' ulf_ID IN (' . implode(',', $ids) . ')';
-                }elseif(!empty($ids)){ // single
-                    $where_clause .= ' ulf_ID = ' . array_values($ids)[0];
-                }// else use all
-
                 $mysqli = $this->system->get_mysqli();
                 
                 //, ulf_ObfuscatedFileID 
                 $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM ' 
-                            . $this->config['tableName'] . $where_clause;
+                            . $this->config['tableName'] 
+                            . SQL_WHERE
+                            . predicateId('ulf_ID',$ids);
+                            
                 $to_delete = mysql__select_assoc($mysqli, $query);
 
                 if(!empty($to_delete)){

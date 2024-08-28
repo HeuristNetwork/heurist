@@ -171,7 +171,7 @@ class DbSysArchive extends DbEntityBase
 
                 $arc = $arcrow[$idx_data];
                 //$arc = substr(str_replace('","', "\t", $arc),1);
-                $arc = str_replace('NULL','""', $arc);
+                $arc = str_replace(SQL_NULL,'""', $arc);
                 $arc = str_replace('","', "|\t|", $arc);
                 /*
                 $arc = str_replace('",NULL', "@\tNULL", $arc);

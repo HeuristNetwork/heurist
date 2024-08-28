@@ -184,6 +184,9 @@ define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
             .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
             .'<br><br>We apologise for any inconvenience');
 
+define('CONTACT_SYSADMIN_ABOUT_PERMISSIONS',
+        'Please ask your system administrator to correct the path and/or permissions for this directory');
+            
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 
@@ -217,6 +220,8 @@ define('BR','<br>');
 //common sql reserved words
 define('SQL_AND',' AND ');
 define('SQL_WHERE',' WHERE ');
+define('SQL_NULL', 'NULL');
+define('SQL_DELETE', 'DELETE FROM ');
 
 //
 define('XML_SCHEMA','Xhttp://www.w3.org/2001/XMLSchema#string');

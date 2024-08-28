@@ -13,6 +13,7 @@ use hserv\structure\ConceptCode;
     *  mysql__create_database
     *  mysql__drop_database
     *  mysql__foreign_check
+    *  mysql__supress_trigger
     *
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
@@ -206,8 +207,14 @@ use hserv\structure\ConceptCode;
     // on / off foreign indexes verification    
     //
     function mysql__foreign_check( $mysqli, $is_on ){
-        
         $mysqli->query('SET FOREIGN_KEY_CHECKS = '.($is_on?'1':'0'));
+    }
+    
+    //
+    //
+    //
+    function mysql__supress_trigger($mysqli, $is_on ){
+        $mysqli->query('SET @SUPPRESS_UPDATE_TRIGGER='.($is_on?'1':'NULL'));
     }
 
     //
@@ -581,7 +588,7 @@ use hserv\structure\ConceptCode;
                 $table_prefix = $table_prefix.'_';
             }
 
-            $query = "DELETE from $table_name WHERE ".predicateId($table_prefix.'ID', $rec_ID);
+            $query = SQL_DELETE."`$table_name`".SQL_WHERE.predicateId($table_prefix.'ID', $rec_ID);
 
             $res = $mysqli->query($query);
 
@@ -1574,7 +1581,17 @@ use hserv\structure\ConceptCode;
     function predicateId($field, $ids)
     {
         $ids = prepareIds($ids);
-        return '('.$field.(count($ids)==1?'='.$ids[0]:' IN ('.implode(',',$ids).')').')';
+        
+        $cnt = count($ids);
+        if($cnt==1){
+            $q = '='.$ids[0];
+        }elseif($cnt>1){
+            $q = ' IN ('.implode(',',$ids).')';
+        }else{
+            $q = '(1=0)'; //none
+        }
+        
+        return '('.$field.$q.')';
     }
 
 

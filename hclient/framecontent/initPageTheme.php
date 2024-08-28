@@ -77,12 +77,13 @@ define('CLR_SP_BORDER', '#003eff'); //clickable pressed
 define('CLR_SD_BG', '#f2f2f2'); //disabled bg
 
 define('CLR_DESIGN_BG', '#DAD0E4'); 
-define('CLR_EXPLORE_BG', '#D4DBEA'); 
 define('CLR_IMPORT_BG', '#307D96');
 define('CLR_IMPORT_FADE_BG', '#e3f0f0');
 define('CLR_PUBLISH_BG', '#627E5D');
 define('CLR_PUBLISH_FASE_BG', '#CCEAC5');
 define('CLR_ADMIN_BG', '#676E80');
+define('CLR_EXPLORE_FADE_BG', '#D4DBEA'); 
+define('CLR_EXPLORE_BG', '#4477B9');
 
 if(!isset($ut) || !is_array($ut)){
     $ut = array();
@@ -476,22 +477,22 @@ span.fancytree-node:hover{
     background-color: <?php uout('explore_bg', '#305586');?> !important;
     color: white;
 }
-.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?> !important;}
-.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>}
+.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
+.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', CLR_EXPLORE_BG);?>}
 .ui-heurist-explore .ui-widget-content{
-    background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?>
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?>
 }
 /* button within menu section */
 .ui-heurist-explore .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('explore_bg', '#4477B9')?> !important;
-    color:<?php uout('explore_bg', '#4477B9')?> !important;
+    border:1px solid <?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
+    color:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
 }
 .ui-heurist-explore .ui-button-icon-only,
 .ui-heurist-explore .ui-main-color
 {
     background: none;
-    color:<?php uout('explore_bg', '#4477B9')?> !important;
+    color:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
 }
 .ui-heurist-explore .ui-state-active,
 .ui-heurist-explore .fancytree-active,
@@ -501,10 +502,10 @@ span.fancytree-node:hover{
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
 .ui-heurist-explore .ui-tabs-tab.ui-state-active{
-    background:<?php uout('explore_fade_bg', CLR_EXPLORE_BG);?> !important;
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;
 }
 .ui-heurist-explore .ui-heurist-button.ui-state-active{
-    background:<?php uout('explore_bg', '#4477B9')?> !important;
+    background:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
     color: #ffffff;
 }
 
@@ -605,10 +606,10 @@ span.fancytree-node:hover{
     background:<?php uout('admin_bg', CLR_ADMIN_BG);?> !important;
     color: white;
 }
-.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', CLR_EXPLORE_BG);?> !important;}
+.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
 .ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', CLR_ADMIN_BG);?>}
 .ui-heurist-admin .ui-widget-content{
-    background:<?php uout('admin_fade_bg', CLR_EXPLORE_BG);?>
+    background:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG);?>
 }
 
 /* button within menu section */
@@ -622,7 +623,7 @@ span.fancytree-node:hover{
     color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
 }
 .ui-heurist-admin .ui-heurist-header .ui-button-icon-only, .ui-heurist-admin .ui-dialog-titlebar .ui-button-icon-only{
-    color:<?php uout('admin_fade_bg', CLR_EXPLORE_BG)?> !important;
+    color:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG)?> !important;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-admin, .ui-heurist-admin .ui-helper-popup{
     border-width: 2px !important;

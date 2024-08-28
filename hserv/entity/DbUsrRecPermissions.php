@@ -154,8 +154,11 @@ class DbUsrRecPermissions extends DbEntityBase
             $grp_ids = $this->system->get_user_group_ids();//current user groups ids + itself
 
             //verify that current owner is "everyone" or current user is member of owner group
-            $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE rec_ID in ('.implode(',',$recids)
-                .') AND rec_OwnerUGrpID==0 || rec_OwnerUGrpID in ('.implode(',',$grp_ids).')';
+            $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE '
+                .predicateId('rec_ID',$recids)
+                .SQL_AND
+                .'(rec_OwnerUGrpID=0 OR '
+                .predicateId('rec_OwnerUGrpID',$grp_ids).')';
 
             $cnt = mysql__select_value($this->system->get_mysqli(), $query);
             if($cnt<count($recids)){
@@ -222,7 +225,9 @@ class DbUsrRecPermissions extends DbEntityBase
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         //remove all current permissions
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
+        $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_RecID',$recids);
         $res = $mysqli->query( $query );
         if(!$res){
              $this->system->addError(HEURIST_DB_ERROR,
@@ -280,7 +285,10 @@ class DbUsrRecPermissions extends DbEntityBase
                 return false;
             }
 
-            $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
+            $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_RecID',$recids);
+
             $res = $mysqli->query( $query );
             if(!$res){
                  $this->system->addError(HEURIST_DB_ERROR,
@@ -304,7 +312,10 @@ class DbUsrRecPermissions extends DbEntityBase
                 }
             }
 
-            $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_UGrpID in ('.implode(',', $group_ids_to_delete).')';
+            $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_UGrpID',$group_ids_to_delete);
+                
             $res = $mysqli->query( $query );
             if(!$res){
                  $this->system->addError(HEURIST_DB_ERROR,

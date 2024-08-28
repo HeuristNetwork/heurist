@@ -615,16 +615,9 @@ abstract class DbEntityBase
 
         $mysqli = $this->system->get_mysqli();
 
-        if(count($this->recordIDs)>1){
-            $recids_compare = ' in ('.implode(',', $this->recordIDs).')';
-        }else{
-            $recids_compare = ' = '.$this->recordIDs[0];
-        }
-
-
         mysql__foreign_check($mysqli, false);
-        $query = 'DELETE FROM '.$this->config['tableName'].SQL_WHERE.$this->primaryField
-                .$recids_compare;
+        $query = SQL_DELETE.$this->config['tableName'].SQL_WHERE.predicateId($this->primaryField, $this->recordIDs);
+                
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;
 
@@ -634,9 +627,10 @@ abstract class DbEntityBase
         //
         if(count($this->multilangFields)>0)
         {
-            $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
-                                .$this->config['tablePrefix'].'%" AND trn_Code '
-                                .$recids_compare);
+            $mysqli->query(SQL_DELETE.'defTranslations where trn_Source LIKE "'
+                                .$this->config['tablePrefix'].'%" AND '
+                                .predicateId('trn_Code', $this->recordIDs));
+            
         }
 
         mysql__foreign_check($mysqli, true);

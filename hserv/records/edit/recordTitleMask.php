@@ -331,12 +331,15 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
 
             $puncts = '-:;,.@#|+=&(){}';// These are stripped from begining and end of title
             $puncts2 = '-:;,@#|+=&';// same less period
+            
+            $regex_ = '/\\s]*(.*?)[';
+            $regex_2 = '!\\([';
 
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $title = preg_replace($regex_2.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace($regex_2.$puncts.$regex_.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
+            $title = preg_replace($regex_2.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
             $title = preg_replace('!,\\s*,+!s', ',', $title);// replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
             $title = preg_replace('!\\s+,!s', ',', $title);// remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
 
