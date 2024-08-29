@@ -1413,7 +1413,8 @@ TDate.parse = function () {
     //		temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?|(?:jan|febr?)(?:uary)?|(?:(?:(?:sept?|nov|dec)(?:em)?)|octo?)(?:ber)?|marc?h?|apri?l?|may|june?|july?|aug(?:ust)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
                                 
     //parses date iso8601   (?:(?:        was (?:d|m)   
-    temp = temp.match(/^\s*(((\-?\d+(d|m)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+    //(((\-?\d+(d|m)?)[\/\-\s]?){0,3})?
+    temp = temp.match(/^\s*(((\-?\d+(d|m)?)[\/\-\s]?){1,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
     if (periodDesignator){ // period format doesn't have time or timezone  TODO:check this is correct
         temp[2] = temp[3] = null;
     }
