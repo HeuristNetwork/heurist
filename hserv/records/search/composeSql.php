@@ -1477,7 +1477,7 @@ class HPredicate {
         $field_id_filter = '='.$this->field_id;
         if(is_array($several_ids) && count($several_ids)>0){
             $field_id_filter = (count($several_ids)>1
-                    ?' IN ('.implode(',',$several_ids).')'
+                    ?SQL_IN.implode(',',$several_ids).')'
                     :'='.$several_ids[0]);
         }
 
@@ -1642,7 +1642,7 @@ class HPredicate {
                 $field_name = $p."dtl_Value ";
                 $ignoreApostrophe = ((strpos($val, 'LIKE')==1) && (strpos($val,"'")===false));
                 if($ignoreApostrophe){
-                    $field_name = 'replace('.$field_name.", \"'\", \"\") ";
+                    $field_name = "replace($field_name,".'"\'", "") ';
                 }
             }
 
@@ -1745,8 +1745,8 @@ class HPredicate {
 
         $ignoreApostrophe = (strpos($val, 'LIKE')==1);
         if($ignoreApostrophe){
-            $field_name1 = 'replace('.$field_name1.", \"'\", \"\") ";
-            $field_name2 = 'replace('.$field_name2.", \"'\", \"\") ";
+            $field_name1 = "replace($field_name1,".'"\'", "") ';
+            $field_name2 = "replace($field_name2,".'"\'", "") ';
         }
 
         $field_condition = '';
@@ -1779,8 +1779,8 @@ class HPredicate {
             . ' left join defRecStructure on dtl_DetailTypeID=rst_DetailTypeID '
             .' where if(dty_Type != "resource", '
                 .' if(dty_Type="enum", dtl_Value'.$val_enum
-                    .', '. ($this->negate ? SQL_NOT : '') .'MATCH(dtl_Value) '.$val
-                    .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'
+                    .', '. ($this->negate ? SQL_NOT : '') 
+                    ."MATCH(dtl_Value) $val), $field_name2 LIKE '%{$val_wo_prefixes}%')"
                 .$field_condition;
 
             $list_ids = mysql__select_list2($mysqli, $res);
@@ -1873,7 +1873,7 @@ class HPredicate {
                 if(strpos($cs_ids, ',')>0){  //more than one
 
                     $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where '
-                            . 'bkm_UGrpID '.($this->negate?SQL_NOT:'').' IN ('.$cs_ids.'))';
+                            . 'bkm_UGrpID '.($this->negate?SQL_NOT:'').SQL_IN.$cs_ids.'))';
 
                 }else{
                     $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where bkm_UGrpID '.($this->negate?'!=':'=').$cs_ids.')';
@@ -1987,14 +1987,38 @@ class HPredicate {
     related_to:
     links: recordtype
     */
+    
+    //
+    //
+    //
+    private function getDistinctRecIds()
+    {
+        global $mysqli, $params_global, $top_query;
+        
+        $not_nested = (@$params_global['nested']===false);
+        
+        if($not_nested){
+            $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
+            $top_query->top_limb->addTable($this->query->from_clause);
+        }else{
+            $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
+            $ids = mysql__select_list2($mysqli, $sub_query);
+            if(is_array($ids) && count($ids)>0){
+                //if(count($ids)>2000)
+                $val = SQL_IN.implode(',',$ids).')';
+            }else{
+                $val = ' =0';
+            }
+        }
+
+        return $val;
+    }
+    
 
     /**
     * find records that have pointers to specified records
     */
     private function predicateLinkedTo(){
-
-        global $top_query, $params_global, $mysqli;
-        $not_nested = (@$params_global['nested']===false);
 
         $this->field_type = "link";
         $p = $this->qlevel;
@@ -2024,30 +2048,13 @@ class HPredicate {
 
         }else{
 
-//$top_query->top_limb->addTable tables
-//$top_query->top_limb->$where_clause
-
             $rl = "rl".$p."x".$this->index_of_predicate;
 
             if($this->query){
                 $this->query->makeSQL();
 
                 if($this->query->where_clause && trim($this->query->where_clause)!=""){
-
-                    if($not_nested){
-                        $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                        $top_query->top_limb->addTable($this->query->from_clause);
-                    }else{
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
-                        $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && count($ids)>0){ //rl_TargetID
-                            //if(count($ids)>2000)
-                            $val = ' IN ('.implode(',',$ids).')';
-                        }else{
-                            $val = ' =0';
-                        }
-                    }
-
+                    $val = $this->getDistinctRecIds();
                 }else{
                     return null;
                 }
@@ -2099,9 +2106,6 @@ class HPredicate {
     */
     private function predicateLinkedFrom(){
 
-        global $top_query, $params_global, $mysqli;
-        $not_nested = (@$params_global['nested']===false);
-
         $this->field_type = "link";
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
@@ -2139,21 +2143,7 @@ class HPredicate {
                 $this->query->makeSQL();
 
                 if($this->query->where_clause && trim($this->query->where_clause)!=""){
-
-                    if($not_nested){
-                        $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                        $top_query->top_limb->addTable($this->query->from_clause);
-                    }else{
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
-                        $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && !empty($ids)){
-                            //if(count($ids)>2000)
-                            $val = ' IN ('.implode(',',$ids).')';
-                        }else{
-                            $val = ' =0';
-                        }
-
-                    }
+                    $val = $this->getDistinctRecIds();
                 }else{
                     return null;
                 }
@@ -2211,8 +2201,7 @@ class HPredicate {
     */
     private function predicateRelated(){
 
-        global $top_query, $params_global, $mysqli;
-        $not_nested = (@$params_global['nested']===false);
+        global $mysqli;
 
         $this->field_type = "link";
         $p = $this->qlevel;
@@ -2221,22 +2210,7 @@ class HPredicate {
         if($this->query){
             $this->query->makeSQL();
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
-
-                if($not_nested){
-                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                    $top_query->top_limb->addTable($this->query->from_clause);
-                }else{
-
-                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
-                    $ids = mysql__select_list2($mysqli, $sub_query);
-                    if(is_array($ids) && !empty($ids)){
-                        //if(count($ids)>2000)
-                        $val = ' IN ('.implode(',',$ids).')';
-                    }else{
-                        $val = ' =0';//not found
-                    }
-
-                }
+                $val = $this->getDistinctRecIds();
             }else{
                 return null;
             }
@@ -2346,9 +2320,8 @@ class HPredicate {
     */
     private function predicateRelatedDirect($is_reverse){
 
-        global $top_query, $params_global, $mysqli;
-        $not_nested = (@$params_global['nested']===false);
-
+        global $mysqli;
+        
         if($is_reverse){
             $part1 = 'rl_TargetID';
             $part2 = 'rl_SourceID';
@@ -2412,27 +2385,12 @@ class HPredicate {
 
             return array("where"=>$where);
 
-        }else{
+       }else{
 
             if($this->query){
                 $this->query->makeSQL();
                 if($this->query->where_clause && trim($this->query->where_clause)!=""){
-
-                    if($not_nested){
-                        $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                        $top_query->top_limb->addTable($this->query->from_clause);
-                    }else{
-
-                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
-                        $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && !empty($ids)){
-                            //if(count($ids)>2000)
-                            $val = ' IN ('.implode(',',$ids).')';
-                        }else{
-                            $val = ' =0';
-                        }
-
-                    }
+                    $val = $this->getDistinctRecIds();
                 }else{
                     return null;
                 }
@@ -2476,15 +2434,12 @@ class HPredicate {
             return array("from"=>"recLinks ".$rl, "where"=>$where);
         }
     }
+    
 
     /**
     * find records that any links (both pointers and relations) to specified records
     */
     private function predicateLinks(){
-
-        global $top_query, $params_global, $mysqli;
-        $not_nested = (@$params_global['nested']===false);
-
 
         $this->field_type = "link";
         $p = $this->qlevel;
@@ -2493,19 +2448,7 @@ class HPredicate {
         if($this->query){
             $this->query->makeSQL();
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
-                if($not_nested){
-                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                    $top_query->top_limb->addTable($this->query->from_clause);
-                }else{
-                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
-                    $ids = mysql__select_list2($mysqli, $sub_query);
-                    if(is_array($ids) && count($ids)>0){
-                        //if(count($ids)>2000)
-                        $val = ' IN ('.implode(',',$ids).')';
-                    }else{
-                        $val = ' =0';
-                    }
-                }
+                $val = $this->getDistinctRecIds();
             }else{
                 return null;
             }
@@ -2868,7 +2811,7 @@ class HPredicate {
                 if(count($all_terms)==1){
                     $res = ($this->negate?'<>':'=').$all_terms[0];
                 }else{
-                    $res = ($this->negate?SQL_NOT:'').' IN ('.implode(',',$all_terms).')';
+                    $res = ($this->negate?SQL_NOT:'').SQL_IN.implode(',',$all_terms).')';
                 }
 
 
@@ -2941,7 +2884,7 @@ class HPredicate {
                 }elseif(count($ids)==1){
                     $res = ($this->negate?'<>':'=').$ids[0];
                 }else{
-                    $res = ($this->negate?SQL_NOT:'').' IN ('.implode(',',$ids).')';
+                    $res = ($this->negate?SQL_NOT:'').SQL_IN.implode(',',$ids).')';
                 }
 
 

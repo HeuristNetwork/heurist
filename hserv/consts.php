@@ -223,6 +223,7 @@ define('SQL_NOT',' NOT ');
 define('SQL_WHERE',' WHERE ');
 define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');
+define('SQL_IN',' IN (');
 
 //
 define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
