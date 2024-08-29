@@ -245,7 +245,8 @@ function parse_query_to_json($query){
     $res = array();
     $subres = array();//parsed subqueries
     
-    $regex_get_subquery = '/\(([^[\)]|(?R))*\)*/'; // extracts (aaaa) from string
+                    //     /\(([^[\)]|(?R))*\)/'
+    $regex_get_subquery = '/\(([^[\)]|(?R))*\)/'; // extracts (aaaa) from string
     $regex_remove_parenthesis = '/(?:^[\s\(]+)|(?:[\s\)]+$)/';
 
     if($query!=null && $query!=''){
