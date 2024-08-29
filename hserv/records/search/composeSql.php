@@ -2096,7 +2096,7 @@ class HPredicate {
                 ." AND $rl.rl_TargetID".$val;
             }
 
-            return array("from"=>"recLinks $r1", "where"=>$where);
+            return array("from"=>"recLinks $rl", "where"=>$where);
 
         }
     }
@@ -2187,7 +2187,7 @@ class HPredicate {
                 ." AND $rl.rl_SourceID".$val;
             }
 
-            return array("from"=>"recLinks $r1", "where"=>$where);
+            return array("from"=>"recLinks $rl", "where"=>$where);
         }
     }
 
@@ -2282,7 +2282,7 @@ class HPredicate {
          ." (($where_direct_reltypes r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val                   //direct
             .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';//reverse
 
-        return array("from"=>"recLinks $r1", "where"=>$where);
+        return array("from"=>"recLinks $rl", "where"=>$where);
     }
 
     /**
@@ -2431,7 +2431,7 @@ class HPredicate {
                     $where = $where . SQL_AND . $w2['where'];
                 }
             }
-            return array("from"=>"recLinks $r1", "where"=>$where);
+            return array("from"=>"recLinks $rl", "where"=>$where);
         }
     }
     
@@ -2467,7 +2467,7 @@ class HPredicate {
         $where = "((r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val."))";
 
 
-        return array("from"=>"recLinks $r1", "where"=>$where);
+        return array("from"=>"recLinks $rl", "where"=>$where);
     }
 
     /// not used
