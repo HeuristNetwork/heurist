@@ -32,8 +32,15 @@ if (session_status() != PHP_SESSION_ACTIVE) {
 
     } else {   //session does not exist - create new one and save on cookies
         @session_start();
-        //$session_id = session_id();
-        setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https, true );//create new session - REM
+        
+        $cres = setcookie('heurist-sessionid', session_id(), [
+            'expires' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $is_https,
+            'httponly' => true,
+            'SameSite' => 'Strict' //'Lax'
+        ]);        
     }
 }
 

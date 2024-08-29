@@ -2375,8 +2375,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             }else{
 
                 $oldvals = mysql__select_all( self::$mysqli,
-                            'SELECT imp_id, '.$id_field.' FROM '.$import_table
-                                ." WHERE imp_id in ($imp_ids)");
+                            "SELECT `imp_id`, `$id_field` FROM `$import_table` WHERE `imp_id` in ($imp_ids)");
                 if(is_array($oldvals))
                 {
                     foreach($oldvals as $idx=>$row){

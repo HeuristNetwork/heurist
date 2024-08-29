@@ -98,6 +98,10 @@ public static function output($data, $params){
         print print_r($data, true);//print out error array
         return;
     }
+    
+    if(!defined('H_ID')){
+        define(H_ID,' H-ID');   
+    }
 
     $data = $data['data'];
 
@@ -274,7 +278,7 @@ public static function output($data, $params){
                             ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' Record Title';
 
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' H-ID';
+                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
                     }else{
                         $field_name_title = $field_name.' Record Title';
                     }
@@ -289,7 +293,7 @@ public static function output($data, $params){
 
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].' H-ID';
+                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;
@@ -999,7 +1003,7 @@ public static function output_header($data, $params)
                                                 //.($rectypename_is_in_fieldname?'':(self::$defRecTypes['names'][$constr_rt_id].' '))
                                                 .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' H-ID';
+                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
                     }else{
                         $field_name_title = $field_name.' RecordTitle';
                     }
@@ -1015,7 +1019,7 @@ public static function output_header($data, $params)
 
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].' H-ID';
+                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;

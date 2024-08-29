@@ -1455,18 +1455,16 @@ class System {
 
         $cookie_session_id = @$_COOKIE['heurist-sessionid'];
         if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
 
         //if(session_id() == '' || !isset($_SESSION)) {
         if (session_status() != PHP_SESSION_ACTIVE) {
-
-            $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+            
             session_name('heurist-sessionid');//set session name
-            //update cookie - to keep it alive for next 30 days
-            session_set_cookie_params(time() + 30*24*60*60);
             session_cache_limiter('none');
 
             if ($cookie_session_id) { //get session id from cookes
-                session_id($cookie_session_id);
+                session_id(@$_COOKIE['heurist-sessionid']);  //$cookie_session_id
                 @session_start();
 
             } else {   //session does not exist - create new one and save on cookies
@@ -1476,6 +1474,8 @@ class System {
 
         if (session_status() == PHP_SESSION_ACTIVE) {
 
+            $cres = false;
+            
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $lifetime = time() + 30*24*60*60;
