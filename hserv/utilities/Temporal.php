@@ -260,7 +260,7 @@ class Temporal {
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                     }else{
-                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|[-|\w+|\s]+$/i', $value, $matches);
+                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|(?:[-|\w+|\s]+$)/i', $value, $matches);
                     }
 
 

@@ -949,8 +949,8 @@ function removeHeadAndBodyTags($content){
             $body = $dom->getElementsByTagName('body');
             if($body){
                 $content = $dom->saveHtml($body[0]);//outer html
-                $content = preg_replace( '@^<body[^>]*>|</body>$@', '', $content );
-                $content = preg_replace( '@^<p[^>]*>|</p>$@', '', $content );
+                $content = preg_replace( '@(?:^<body[^>]*>)|(?:</body>$)@g', '', $content );
+                $content = preg_replace( '@(?:^<p[^>]*>)|(?:</p>$)@g', '', $content );
             }
 
             return $content;

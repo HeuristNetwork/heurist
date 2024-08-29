@@ -234,7 +234,9 @@ $dty_id_relation_type = 6;//$system->defineConstant('DT_RELATION_TYPE');
 */
 
 /**
-* Parses siplified heurist query and returns it in  json format
+* Parses simplified heurist query and returns it in  json format
+* 
+* (t 10 Peter) => [{"t":10},{"title":"Peter"}]
 *
 * @param String $query - heurist query in simplified notation
 */
@@ -242,11 +244,14 @@ function parse_query_to_json($query){
 
     $res = array();
     $subres = array();//parsed subqueries
+    
+    $regex_get_subquery = '/(?:\(([^[\)]|(?R))*\))/'; // extracts (aaaa) from string
+    $regex_remove_parenthesis = '/(?:^[\s\(]+)|(?:[\s\)]+$)/';
 
     if($query!=null && $query!=''){
 
-    //1) get subqueries        /\[([^[\]]|(?R))*\]/
-        $cnt = preg_match_all('/\(([^[\)]|(?R))*\)/', $query, $subqueries);
+        //1) get subqueries   
+        $cnt = preg_match_all($regex_get_subquery, $query, $subqueries);
 
 
         if($cnt>0){
@@ -255,15 +260,13 @@ function parse_query_to_json($query){
             foreach($subqueries as $subq){
 
                  //trim parenthesis in begining and end of string
-                 $subq = preg_replace_callback('/^\(|\)$/', function($m) {return '';}, $subq);
+                 $subq = preg_replace_callback($regex_remove_parenthesis, function($m) {return '';}, $subq);
 
                  $r = parse_query_to_json($subq);
                  $subres[] = ($r)?$r:array();
             }
 
-            //for square brackets '/\[([^[\]]|(?R))*\]/'
-
-            $query = preg_replace_callback('/\(([^[\)]|(?R))*\)/',
+            $query = preg_replace_callback($regex_get_subquery,
                 function($m) {
                     return ' [subquery] ';
                 }, $query);

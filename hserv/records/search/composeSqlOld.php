@@ -346,7 +346,7 @@ function parse_query($search_domain, $text, $sort_order, $parentquery, $currUser
     if($sort_order==null) {$sort_order = '';}
 
     // remove any  lone dashes outside matched quotes.
-    $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
+    $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|(?:-\s*$)/', ' ', $text);
     // divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
     preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
     $preProcessedQuery = "";

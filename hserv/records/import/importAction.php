@@ -947,10 +947,11 @@ public static function validateImport($params) {
         if(!@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
-            $fields = array_merge($sel_query,array($id_field));
-            $query = self::composeQuery($fields, $import_table)
-            ." left join Records on rec_ID=`$id_field`"
-            ." where rec_RecTypeID<>".$recordType;
+            $fields = implode("`,`",$sel_query);
+            $query = "SELECT imp_id, `$fields`, `$id_field` FROM `$import_table` "
+            ." LEFT JOIN Records on rec_ID=`$id_field`"
+            ." WHERE rec_RecTypeID<>".$recordType;
+            
             // TPDO: I'm not sure whether message below has been correctly interpreted
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".

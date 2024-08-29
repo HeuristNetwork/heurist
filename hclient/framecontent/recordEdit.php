@@ -121,8 +121,10 @@ if(@$_REQUEST['u']){
             $description = preg_replace('/ +/', ' ', $description);
 
         // trim() each line
-            $description = preg_replace('/^[ \t\v\f]+|[ \t\v\f]+$/m', '', $description);
-            $description = preg_replace('/^\s+|\s+$/s', '', $description);
+            $regex_trim_all_spaces_except_eol = '/(?:^[ \t\v\f]+)|(?:[ \t\v\f]+$)/m';  //except \r\n
+            $description = preg_replace($regex_trim_all_spaces_except_eol, '', $description);
+            //single line - remove \r\n at the begin and end
+            $description = preg_replace('/(?:^\s+)|(?:\s+$)/s', '', $description);
 
         // reduce anything more than two newlines in a row
             $description = preg_replace("/\n\n\n+/s", "\n\n", $description);
