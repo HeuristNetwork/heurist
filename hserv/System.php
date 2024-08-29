@@ -1454,7 +1454,7 @@ class System {
         }
 
         $cookie_session_id = @$_COOKIE['heurist-sessionid'];
-        if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
+        //NOT USED if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
 
         //if(session_id() == '' || !isset($_SESSION)) {
@@ -1462,14 +1462,17 @@ class System {
             
             session_name('heurist-sessionid');//set session name
             session_cache_limiter('none');
+            @session_start();
 
+            /*
             if ($cookie_session_id) { //get session id from cookes
-                session_id(@$_COOKIE['heurist-sessionid']);  //$cookie_session_id
+                session_id($cookie_session_id);  //$cookie_session_id
                 @session_start();
 
             } else {   //session does not exist - create new one and save on cookies
                 @session_start();
             }
+            */
         }
 
         if (session_status() == PHP_SESSION_ACTIVE) {
@@ -1479,7 +1482,7 @@ class System {
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $lifetime = time() + 30*24*60*60;
-                $session_id = $cookie_session_id;
+                $session_id = session_id();//ID of current sessiin $cookie_session_id;
                 if (strnatcmp(phpversion(), '7.3') >= 0) {
                     $cres = setcookie('heurist-sessionid', $session_id, [
                         'expires' => $lifetime,
@@ -1759,7 +1762,8 @@ class System {
 
         //update cookie expire time
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        $session_id = session_id();//session_regenerate_id()
+        //$session_id = session_id();//session_regenerate_id();
+        $session_id = session_id();
 
         if (strnatcmp(phpversion(), '7.3') >= 0) {
             $cres = setcookie('heurist-sessionid', $session_id, [
