@@ -35,7 +35,7 @@ define('SORT_MODIFIED', 'm');
 define('SORT_ADDED', 'a');
 define('SORT_TITLE', 't');
 define('SORT_ID', 'id');
-
+define('REGEX_CSV', '/^\d+(?:,\d*)+$/');
 
 //defined in const.php define('DT_RELATION_TYPE', 6);
 global $mysqli, $currUserID, $sortType;
@@ -197,7 +197,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     // 4c. SPECIAL CASE for USER WORKSET
     if(@$params['use_user_wss']===true && $currUserID>0){
 
-        $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
+        $q2 = "select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID=$currUserID LIMIT 1";
         if(mysql__select_value($mysqli, $q2)>0){
             $where_clause = '(exists (select wss_RecID from usrWorkingSubsets where wss_RecID=TOPBIBLIO.rec_ID and wss_OwnerUGrpID='.$currUserID.'))'
                 . ($where_clause? SQL_AND.$where_clause :'');
@@ -384,7 +384,7 @@ function parse_query($search_domain, $text, $sort_order, $parentquery, $currUser
             switch ($sort_order) {
                 case SORT_FIXED:
                     if($query->fixed_sortorder){
-                        $q = 'FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$query->fixed_sortorder.'\')';
+                        $q = "FIND_IN_SET(TOPBIBLIO.rec_ID, '{$query->fixed_sortorder})";
                     }else{
                         $q = null;
                     }
@@ -408,7 +408,7 @@ function parse_query($search_domain, $text, $sort_order, $parentquery, $currUser
             switch ($sort_order) {
                 case SORT_FIXED:
                     if($query->fixed_sortorder){
-                        $q = 'FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$query->fixed_sortorder.'\')';
+                        $q = "FIND_IN_SET(TOPBIBLIO.rec_ID, '{$query->fixed_sortorder}')";
                     }else{
                         $q = null;
                     }
@@ -1022,7 +1022,7 @@ class SortPhrase {
         switch (strtolower($subtext)) {
             case 'set': case 'fixed': //sort as defined in ids predicate
                 if($this->parent->fixed_sortorder){
-                    return array('FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$this->parent->fixed_sortorder.'\')', 'rec_ID', NULL);
+                    return array("FIND_IN_SET(TOPBIBLIO.rec_ID, '{$this->parent->fixed_sortorder}')", 'rec_ID', NULL);
                 }else{
                     return array(NULL, NULL, NULL);
                 }
@@ -1296,7 +1296,7 @@ class Predicate {
         }
 
         //if($this->negate){
-        //    $res = ' NOT '.$res;
+        //    $res = SQL_NOT.$res;
         //}
 
         return $res;
@@ -1326,7 +1326,7 @@ class TitlePredicate extends Predicate {
     public function makeSQL($isTopRec=true) {
         global $mysqli;
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
 
         $query = &$this->getQuery();//not used
         $evalue = $mysqli->real_escape_string($this->value);
@@ -1344,9 +1344,9 @@ class TitlePredicate extends Predicate {
         }elseif($this->parent->greaterthan){
                 return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
         }elseif(strpos($this->value,"%")===false){
-                return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
+                return $topbiblio."rec_Title $not like '%$evalue%'";
         }else{
-                return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';
+                return $topbiblio."rec_Title $not like '$evalue'";
         }
 
     }
@@ -1367,13 +1367,14 @@ class TypePredicate extends Predicate {
         if (is_numeric($this->value)) {
             $res = "rec_RecTypeID $eq ".intval($this->value);
         }
-        elseif (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        elseif (preg_match(REGEX_CSV, $this->value)) {
             // comma-separated list of defRecTypes ids
             $in = ($this->parent->negate)? 'not in' : 'in';
             $res = "rec_RecTypeID $in (" . $this->value . ")";
         }
         else {
-            $res = "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".$mysqli->real_escape_string($this->value)."' limit 1)";
+            $name = $mysqli->real_escape_string($this->value);
+            $res = "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '$name' limit 1)";
         }
 
         if($isTopRec){
@@ -1394,10 +1395,11 @@ class URLPredicate extends Predicate {
     public function makeSQL() {
         global $mysqli;
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
 
         $query = &$this->getQuery();
-        return 'TOPBIBLIO.rec_URL ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
+        $val = $mysqli->real_escape_string($this->value);
+        return "TOPBIBLIO.rec_URL $not like '%$val%'";
     }
 }
 
@@ -1412,13 +1414,14 @@ class NotesPredicate extends Predicate {
     public function makeSQL() {
         global $mysqli;
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
 
         $query = &$this->getQuery();
         if ($query->search_domain == BOOKMARK){    // saw TODO change this to check for woot match or full text search
             return '';
         }else{
-            return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
+            $val = $mysqli->real_escape_string($this->value);
+            return "TOPBIBLIO.rec_ScratchPad $not like '%$val%'";
         }
     }
 }
@@ -1434,12 +1437,12 @@ class UserPredicate extends Predicate {
     public function makeSQL() {
         global $mysqli;
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
         if (is_numeric($this->value)) {
             return '('.$not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . '))';
         }
-        elseif (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        elseif (preg_match(REGEX_CSV, $this->value)) {
             return '('.$not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
             . ' and bkmk.bkm_UGrpID in (' . $this->value . ')))';
         }
@@ -1472,7 +1475,7 @@ class AddedByPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_AddedByUGrpID $eq " . intval($this->value);
         }
-        elseif (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        elseif (preg_match(REGEX_CSV, $this->value)) {
             $not = ($this->parent->negate)? "not" : "";
             return "TOPBIBLIO.rec_AddedByUGrpID $not in (" . $this->value . ")";
         }
@@ -1528,11 +1531,8 @@ class AnyPredicate extends Predicate {
 
                 $list_ids = mysql__select_list2($mysqli, $res);
 
-                if($list_ids && count($list_ids)>0){
-                    $res = '(TOPBIBLIO.rec_ID'
-                        .(count($list_ids)>1
-                            ?' IN ('.implode(',',$list_ids).')'
-                            :'='.$list_ids[0]).') OR ';
+                if($list_ids && !empty($list_ids)){
+                    $res = predicateId('TOPBIBLIO.rec_ID',$list_ids).' OR ';
                 }else{
                     $res = '';//nothing found
                 }
@@ -1542,7 +1542,7 @@ class AnyPredicate extends Predicate {
         }
 
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
         . 'left join defDetailTypes on rd.dtl_DetailTypeID=dty_ID '
         . 'left join Records link on rd.dtl_Value=link.rec_ID '
@@ -1632,7 +1632,7 @@ class FieldPredicate extends Predicate {
     public function makeSQL() {
         global $mysqli;
 
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
 
         if($this->nests){  //special case nested query for resources
 
@@ -1678,7 +1678,7 @@ class FieldPredicate extends Predicate {
 
                                 $field_type = $limbs[$j]->pred->get_field_type_clause();
                                 if(strpos($field_type,"like")!==false){
-                                    $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$field_type." limit 1)";
+                                    $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $field_type limit 1)";
                                 }
                                 if($limbs[$j]->pred->value){
                                     $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value();
@@ -1732,7 +1732,7 @@ class FieldPredicate extends Predicate {
                     if(strpos($rd_type_clause,"like")===false){
                         $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
                     }else{
-                        $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
+                        $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $rd_type_clause limit 1)";
                     }
 
                     $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '.$relation_second_level
@@ -1756,7 +1756,7 @@ class FieldPredicate extends Predicate {
                         }elseif($cn == 'FieldPredicate'){
                             $field_type = $limbs[$j]->pred->get_field_type_clause();
                             if(strpos($field_type,"like")!==false){
-                                $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$field_type." limit 1)";
+                                $field_type = " in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $field_type limit 1)";
                             }
                             if($limbs[$j]->pred->value){
                                 $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value();
@@ -1784,7 +1784,7 @@ class FieldPredicate extends Predicate {
                 if(strpos($rd_type_clause,"like")===false){
                     $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
                 }else{
-                    $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
+                    $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $rd_type_clause limit 1)";
                 }
 
                 $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
@@ -1812,7 +1812,7 @@ class FieldPredicate extends Predicate {
             $cs_ids = getCommaSepIds($this->value);
 
             if ($cs_ids) {
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
+            //if (preg_match(REGEX_CSV, $this->value)) { it does not work for more than 500 entries
                 $isnumericvalue = false;
                 $isin = true;
             }else{
@@ -1885,14 +1885,7 @@ class FieldPredicate extends Predicate {
 
                 $list_ids = mysql__select_list2($mysqli, $res);
 
-                if($list_ids && count($list_ids)>0){
-                    $res = '(TOPBIBLIO.rec_ID'
-                        .(count($list_ids)>1
-                            ?' IN ('.implode(',',$list_ids).')'
-                            :'='.$list_ids[0]).')';
-                }else{
-                    $res = '(1=0)';//nothing found
-                }
+                $res = predicateId('TOPBIBLIO.rec_ID',$list_ids);
 
                 return $res;
 
@@ -1931,14 +1924,7 @@ class FieldPredicate extends Predicate {
 
                 $list_ids = mysql__select_list2($mysqli, $res);
 
-                if($list_ids && count($list_ids)>0){
-                    $res = 'TOPBIBLIO.rec_ID'
-                        .(count($list_ids)>1
-                            ?' IN ('.implode(',',$list_ids).')'
-                            :'='.$list_ids[0]);
-                }else{
-                    $res = '(1=0)';//nothing found
-                }
+                $res = predicateId('TOPBIBLIO.rec_ID',$list_ids);
 
                 return $res;
             }
@@ -1974,7 +1960,7 @@ class FieldPredicate extends Predicate {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = '= ' . intval($this->field_type);
         }
-        elseif (preg_match('/^\d+(?:,\d*)+$/', $this->field_type)) {
+        elseif (preg_match(REGEX_CSV, $this->field_type)) {
             /* user has specified a list of numeric types ... match any of them */
             $rd_type_clause = 'in (' . $this->field_type . ')';
         }
@@ -1996,7 +1982,7 @@ class FieldPredicate extends Predicate {
 
         }elseif($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
 
-            if(preg_match('/^\d+(?:,\d*)+$/', $this->value)){
+            if(preg_match(REGEX_CSV, $this->value)){
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }elseif(intval($this->value)>0){
@@ -2009,7 +1995,7 @@ class FieldPredicate extends Predicate {
                 if($this->parent->exact){
                     $match_pred  =  $match_pred.'="'.$value.'"';
                 } else {
-                    $match_pred  =  $match_pred.'like "%'.$value.'%"';
+                    $match_pred  =  $match_pred." like '%$value%'";
                 }
                 $match_pred  =  $match_pred.' or trm_Code="'.$value.'")';
 
@@ -2030,7 +2016,7 @@ class FieldPredicate extends Predicate {
             }
 
             if ($cs_ids) {
-            //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
+            //  if (preg_match(REGEX_CSV, $this->value)) {  not work for >500 entries
                 // comma-separated list of ids
                 $match_pred = ' in ('.$cs_ids.')';
 
@@ -2199,7 +2185,7 @@ class TagPredicate extends Predicate {
         global $mysqli;
 
         $pquery = &$this->getQuery();
-        $not = ($this->parent->negate)? 'not ' : '';
+        $not = ($this->parent->negate)? SQL_NOT : '';
         if ($pquery->search_domain == BOOKMARK) {
             if (is_numeric(join('', $this->value))) {    // if all tag specs are numeric then don't need a join
                 return '('.$not . 'exists (select * from usrRecTagLinks where rtl_RecID=bkm_RecID and rtl_TagID in ('.join(',', $this->value).')))';
@@ -2338,7 +2324,7 @@ class BibIDPredicate extends Predicate {
                     $cs_ids = implode(',',$rsvd);
                 }
 
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - regex does not work for >500 entries
+            //if (preg_match(REGEX_CSV, $this->value)) { - regex does not work for >500 entries
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';
@@ -2424,10 +2410,8 @@ class LinkedFromParentPredicate extends Predicate {
             $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
         }else{
 
-            if(count($rty_IDs)>1){
-                $add_where = 'rd.rec_RecTypeID in ('.implode(',',$rty_IDs).') and ';
-            }elseif(count($rty_IDs)>0){
-                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].SQL_AND;
+            if(!empty($rty_IDs)){
+                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2435,10 +2419,8 @@ class LinkedFromParentPredicate extends Predicate {
             $add_where = $add_where
             . ' rl.rl_SourceID=rd.rec_ID and ';
 
-            if(count($dty_IDs)>1){
-                $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
-            }elseif(count($dty_IDs)>0){
-                $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+            if(!empty($dty_IDs)){
+                $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
             }else{
                 $add_where = $add_where.'rl.rl_RelationID is null';
             }
@@ -2464,10 +2446,8 @@ class LinkedFromParentPredicate extends Predicate {
 
         }else{
 
-            if(count($rty_IDs)>1){
-                $add_where = 'rl.rl_SourceID in ('.implode(',',$rty_IDs).') and ';
-            }elseif(count($rty_IDs)>0){
-                $add_where = 'rl.rl_SourceID = '.$rty_IDs[0].SQL_AND;
+            if(!empty($rty_IDs)){
+                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND; //??? was rl.rl_SourceID
             }else{
                 $add_where = '';
             }
@@ -2476,10 +2456,8 @@ class LinkedFromParentPredicate extends Predicate {
             if($rty_ID!=1){
                 $add_where = $add_where . SQL_AND;
 
-                if(count($dty_IDs)>1){
-                    $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
-                }elseif(count($dty_IDs)>0){
-                    $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+                if(!empty($dty_IDs)){
+                    $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
                 }else{
                     $add_where = $add_where.'rl.rl_RelationID is null';
                 }
@@ -2545,10 +2523,8 @@ class LinkedToParentPredicate extends Predicate {
             $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
         }else{
 
-            if(count($rty_IDs)>1){
-                $add_where = 'rd.rec_RecTypeID in ('.implode(',',$rty_IDs).') and ';
-            }elseif(count($rty_IDs)>0){
-                $add_where = 'rd.rec_RecTypeID = '.$rty_IDs[0].SQL_AND;
+            if(!empty($rty_IDs)){
+                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2557,9 +2533,7 @@ class LinkedToParentPredicate extends Predicate {
                 . ' rl.rl_TargetID=rd.rec_ID and ';
 
             if(count($dty_IDs)>1){
-                $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
-            }elseif(count($dty_IDs)>0){
-                $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+                $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
             }else{
                 $add_where = $add_where.'rl.rl_RelationID is null';
             }
@@ -2584,10 +2558,8 @@ class LinkedToParentPredicate extends Predicate {
 
         }else{
 
-            if(count($rty_IDs)>1){
-                $add_where = 'rl.rl_TargetID in ('.implode(',',$rty_IDs).') and ';
-            }elseif(count($rty_IDs)>0){
-                $add_where = 'rl.rl_TargetID = '.$rty_IDs[0].SQL_AND;
+            if(!empty($rty_IDs)){
+                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND; //??? was rl.rl_TargetID
             }else{
                 $add_where = '';
             }
@@ -2596,13 +2568,12 @@ class LinkedToParentPredicate extends Predicate {
             if($rty_ID!=1){
                 $add_where = $add_where . SQL_AND;
 
-                if(count($dty_IDs)>1){
-                    $add_where = $add_where.'rl.rl_DetailTypeID in ('.implode(',',$dty_IDs).')';
-                }elseif(count($dty_IDs)>0){
-                    $add_where = $add_where.'rl.rl_DetailTypeID = '.$dty_IDs[0];
+                if(!empty($dty_IDs)){
+                    $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
                 }else{
                     $add_where = $add_where.'rl.rl_RelationID is null';
                 }
+
             }
 
 
@@ -3123,12 +3094,13 @@ class WorkgroupPredicate extends Predicate {
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
         }
-        elseif (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+        elseif (preg_match(REGEX_CSV, $this->value)) {
             $in = ($this->parent->negate)? 'not in' : 'in';
             return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
         }
         else {
-            return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '".$mysqli->real_escape_string($this->value)."' limit 1)";
+            $val = $mysqli->real_escape_string($this->value);
+            return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '$val' limit 1)";
         }
     }
 }
@@ -3138,7 +3110,7 @@ class SpatialPredicate extends Predicate {
     public function makeSQL() {
         return "(exists (select dtl_ID from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1))";//MBRContains
+            and ST_Contains(ST_GeomFromText('{$this->value}'), bd.dtl_Geo) limit 1))";//MBRContains
     }
 }
 
@@ -3152,18 +3124,20 @@ class LatitudePredicate extends Predicate {
         } elseif($this->parent->greaterthan) {
             $op = ($this->parent->negate)? '<=' : '>';
         }
+        
+        $val = floatval($this->value);
 
         if ($op!='' && $op[0] == '<') {
             // see if the northernmost point of the bounding box lies south of the given latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1))";
+            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
         }
         elseif($op!='' && $op[0] == '>') {
             // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1))";
+            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
 
         }
         elseif($this->parent->exact) {
@@ -3171,7 +3145,7 @@ class LatitudePredicate extends Predicate {
             // see if there is a Point with this exact latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_Y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1))";
+            and ST_Y(bd.dtl_Geo) $op $val limit 1))";
         }
         else {
             //Envelope - Bounding rect
@@ -3188,7 +3162,7 @@ class LatitudePredicate extends Predicate {
 
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".$match_pred." limit 1))";
+            and $match_pred limit 1))";
         }
     }
 }
@@ -3202,18 +3176,20 @@ class LongitudePredicate extends Predicate {
         } elseif($this->parent->greaterthan) {
             $op = ($this->parent->negate)? '<=' : '>';
         }
+        
+        $val = floatval($this->value);
 
         if ($op!='' && $op[0] == '<') {
             // see if the westernmost point of the bounding box lies east of the given longitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1))";
+            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
         }
         elseif($op!='' && $op[0] == '>') {
             // see if the EASTERNmost point of the bounding box lies west of the given longitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1))";
+            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
 
         }
         elseif($this->parent->exact) {
@@ -3221,7 +3197,7 @@ class LongitudePredicate extends Predicate {
             // see if there is a Point with this exact longitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_X(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1))";
+            and ST_X(bd.dtl_Geo) $op $val limit 1))";
         }
         else {
 
@@ -3236,7 +3212,7 @@ class LongitudePredicate extends Predicate {
 
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".$match_pred." limit 1))";
+            and $match_pred limit 1))";
         }
     }
 }

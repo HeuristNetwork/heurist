@@ -712,8 +712,7 @@ public static function assignRecordIds($params){
         $cnt_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table`";
 
         // find records to update
-        $select_query = $cnt_query
-        ." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
+        $select_query = $cnt_query." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
         $cnt_update = mysql__select_value($mysqli, $select_query);
         /*if( $cnt_insert>0 ){
 
@@ -732,8 +731,7 @@ public static function assignRecordIds($params){
         $cnt2 = mysql__select_value($mysqli, $select_query);
 
         // record ids for none existing records
-        $select_query = $cnt_query.
-        ." left join Records on rec_ID=`$id_field` WHERE rec_ID is null and `$id_field`>0";
+        $select_query = $cnt_query." left join Records on rec_ID=`$id_field` WHERE rec_ID is null and `$id_field`>0";
         $cnt3 = mysql__select_value($mysqli, $select_query);
 
         // insert count

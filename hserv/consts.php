@@ -225,6 +225,10 @@ define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');
 define('SQL_IN',' IN (');
 
+define('MT_VIMEO','video/vimeo');
+define('MT_YOUTUBE','video/youtube');
+define('MT_SOUNDCLOUD','audio/soundcloud');
+
 //
 define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
 define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');

@@ -734,7 +734,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             //$style = 'style="width:640px !important; height:480px !important"';
         }
 
-        if ($mimeType=='video/youtube' || $mimeType=='video/vimeo'
+        if ($mimeType==MT_YOUTUBE || $mimeType==MT_VIMEO
         || strpos($external_url, 'vimeo.com')>0
         || strpos($external_url, 'youtu.be')>0
         || strpos($external_url, 'youtube.com')>0)
@@ -742,8 +742,8 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
             $playerURL = getPlayerURL($mimeType, $external_url);
 
-            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0" '
-            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+            $result = "<iframe $size $style src=\"$playerURL\" "
+            . ' frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
 
         }else{
 
@@ -753,12 +753,14 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             }
 
             //preload="none"
-            $result = '<video '.$autoplay.$size.$style.' controls="controls">'
-            .'<source type="'.$mimeType.'" src="'.$filepath.'"'
-                .($external_url?'':' data-id="'.$fileid.'"')
-                .'/>'
-            .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
-            .'</video>';
+            $f_id = $external_url?'':$fileid;
+            
+            $result = <<<EXP
+<video $autoplay $size $style controls="controls">
+    <source type="$mimeType" src="$filepath" data-id="$f_id"/>
+    <img src="$thumb_url" width="320" height="240" title="No video playback capabilities" />
+</video>
+EXP;
 
         }
 
@@ -766,7 +768,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
     elseif ( $is_audio )
     {
 
-        if ($mimeType=='audio/soundcloud'
+        if ($mimeType==MT_SOUNDCLOUD
         || strpos($external_url, 'soundcloud.com')>0)
         {
 
@@ -777,7 +779,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
             $playerURL = getPlayerURL($mimeType, $external_url, $params);
 
-            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0"></iframe>';
+            $result = "<iframe $size $style src=\"$playerURL\" frameborder=\"0\"></iframe>";
 
         }else{
 
@@ -786,10 +788,16 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
                 $autoplay = ' autoplay="autoplay"';
             }
 
-            $result = '<audio controls="controls"'.$autoplay.'>'
-                .'<source src="'.$filepath.'" type="'.$mimeType.'"'
-                .($external_url?'':' data-id="'.$fileid.'"')
-                .'/>Your browser does not support the audio element.</audio>';
+            $f_id = $external_url?'':$fileid;
+            
+            $result = <<<EXP
+<audio controls="controls" $autoplay>
+    <source type="$mimeType" src="$filepath" data-id="$f_id"/>
+    Your browser does not support the audio element
+</audio>
+EXP;
+                
+                
         }
 
     }else
@@ -810,8 +818,8 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
         }
 
-        $result = '<iframe '.$size.$style.' src="'.$miradorViewer.'" frameborder="0"></iframe>';
-
+        $result = "<iframe $size $style src=\"$miradorViewer\" frameborder=\"0\"></iframe>";
+        
     }else
     if($is_image){
 
@@ -825,8 +833,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
                 $fancybox =' data-id="'.$fileid.'" ';
             }
             $result = '<img '.$size.$style.' src="'.$filepath.'"'
-                .$fancybox
-                .'/>';
+                .$fancybox.'/>';
 
 
 
@@ -836,11 +843,10 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $style = 'style="width:80% !important; height:90% !important"';
         }
 
-        $result = '<embed width="100%" height="100%" name="plugin" src="'
-        .$filepath.'&embedplayer=1'
-        .'"'
-        .($external_url?'':' data-id="'.$fileid.'"')
-        .' type="application/pdf" internalinstanceid="9">';
+        $f_id = $external_url?'':$fileid;
+        $result = <<<EXP
+<embed width="100%" height="100%" name="plugin" src="$filepath&embedplayer=1" data-id="$f_id" type="application/pdf" internalinstanceid="9">
+EXP;
 
     }else{
         //not media - show thumb with download link
@@ -868,20 +874,20 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 //
 function getPlayerURL($mimeType, $url, $params=null){
 
-    if( $mimeType == 'video/youtube'
+    if( $mimeType == MT_YOUTUBE
             || strpos($url, 'youtu.be')>0
             || strpos($url, 'youtube.com')>0){ //match('https://(www.)?youtube|youtu\.be')
 
         $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
 
-    }elseif( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
+    }elseif( $mimeType == MT_VIMEO || strpos($url, 'viemo.com')>0){
 
         $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);//get vimeo video id
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;
         }
-    }elseif( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
+    }elseif( $mimeType == MT_SOUNDCLOUD || strpos($url, 'soundcloud.com')>0){
 
         $autoplay = '&amp;auto_play=';
         $show_artwork = '&amp;show_artwork=';
@@ -1158,7 +1164,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 $img = UImage::getRemoteImage($file['ulf_ExternalFileReference'], $orientation);
 
             }else
-            if( @$file['fxm_MimeType'] == 'video/youtube'
+            if( @$file['fxm_MimeType'] == MT_YOUTUBE
                 || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
                 || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('https://(www.)?youtube|youtu\.be')
 
@@ -1173,7 +1179,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
                 //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");//get thumbnail
-            }elseif($file['fxm_MimeType'] == 'video/vimeo'){
+            }elseif($file['fxm_MimeType'] == MT_VIMEO){
 
                 $url = $file['ulf_ExternalFileReference'];
 
@@ -1192,7 +1198,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     $img = UImage::getRemoteImage($thumb_url);
                 }
                 */
-            }elseif($file['fxm_MimeType'] == 'audio/soundcloud'){
+            }elseif($file['fxm_MimeType'] == MT_SOUNDCLOUD){
 
                 $url = $file['ulf_ExternalFileReference'];
 

@@ -1196,17 +1196,17 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
         $mimeType = null;
 
         if(strpos($url, 'soundcloud.com')!==false){
-            $mimeType  = 'audio/soundcloud';
+            $mimeType  = MT_SOUNDCLOUD;
             $extension = 'soundcloud';
-            $force_add = "('soundcloud','audio/soundcloud', '0','','Soundcloud','')";
+            $force_add = "('soundcloud','".MT_SOUNDCLOUD."', '0','','Soundcloud','')";
         }elseif(strpos($url, 'vimeo.com')!==false){
-            $mimeType  = 'video/vimeo';
+            $mimeType  = MT_VIMEO;
             $extension = 'vimeo';
-            $force_add = "('vimeo','video/vimeo', '0','','Vimeo Video','')";
+            $force_add = "('vimeo','".MT_VIMEO."', '0','','Vimeo Video','')";
         }else  if(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
-            $mimeType  = 'video/youtube';
+            $mimeType  = MT_YOUTUBE;
             $extension = 'youtube';
-            $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
+            $force_add = "('youtube','".MT_YOUTUBE."', '0','','Youtube Video','')";
         }else{
             //get extension from url - unreliable
             //$f_extension = getURLExtension($url)
