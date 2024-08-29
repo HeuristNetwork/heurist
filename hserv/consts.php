@@ -224,6 +224,7 @@ define('SQL_WHERE',' WHERE ');
 define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');
 define('SQL_IN',' IN (');
+define('SQL_FALSE','(1=0)');
 
 define('MT_VIMEO','video/vimeo');
 define('MT_YOUTUBE','video/youtube');

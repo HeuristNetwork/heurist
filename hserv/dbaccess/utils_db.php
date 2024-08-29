@@ -1588,7 +1588,7 @@ use hserv\structure\ConceptCode;
         }elseif($cnt>1){
             $q = SQL_IN.implode(',',$ids).')';
         }else{
-            $q = '(1=0)'; //none
+            $q = SQL_FALSE; // (1=0) none
         }
         
         return '('.$field.$q.')';

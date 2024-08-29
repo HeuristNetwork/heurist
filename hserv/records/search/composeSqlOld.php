@@ -37,6 +37,13 @@ define('SORT_TITLE', 't');
 define('SORT_ID', 'id');
 define('REGEX_CSV', '/^\d+(?:,\d*)+$/');
 
+define('SQL_RL_SOURCE_LINK',' rl.rl_SourceID=rd.rec_ID ');
+define('SQL_RL_TARGET_LINK',' rl.rl_TargetID=rd.rec_ID ');
+define('SQL_RELATION_IS_NULL',' rl.rl_RelationID IS NULL ');
+define('SQL_RELATION_IS_NOT_NULL',' rl.rl_RelationID IS NOT NULL ');
+define('SQL_RECLINK',' recLinks rl ');
+define('SQL_RECORDS',' FROM Records rd ');
+
 //defined in const.php define('DT_RELATION_TYPE', 6);
 global $mysqli, $currUserID, $sortType;
 
@@ -1633,6 +1640,11 @@ class FieldPredicate extends Predicate {
         global $mysqli;
 
         $not = ($this->parent->negate)? SQL_NOT : '';
+        
+        $and_link = ' and link';
+        $sql_detail_exists = 'exists (select rd.dtl_ID from recDetails rd ';
+        $sql_recdetail_link = ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ';
+        $sql_and_detailtype = ' and rd.dtl_DetailTypeID=';
 
         if($this->nests){  //special case nested query for resources
 
@@ -1686,9 +1698,9 @@ class FieldPredicate extends Predicate {
 
                             }
                         }elseif($cn == 'TitlePredicate'){
-                            $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
+                            $field_value .= $and_link.$i.'.'.$limbs[$j]->pred->makeSQL(false);
                         }elseif($cn == 'DateModifiedPredicate'){
-                            $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                            $field_value .= $and_link.$i.'.'.$limbs[$j]->pred->makeSQL();
                             $field_value = str_replace("TOPBIBLIO.","",$field_value);
                         }
                     }//for predicates
@@ -1730,14 +1742,14 @@ class FieldPredicate extends Predicate {
                     $rd_type_clause = '';
                     $rd_type_clause = $this->get_field_type_clause();
                     if(strpos($rd_type_clause,"like")===false){
-                        $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
+                        $rd_type_clause = " and rd.dtl_DetailTypeID $rd_type_clause";
                     }else{
                         $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $rd_type_clause limit 1)";
                     }
 
-                    $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '.$relation_second_level
+                    $resq = '('.$not . $sql_detail_exists.$relation_second_level
                     .$nest_joins
-                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ' . $relation_second_level_where . $field_value . $rd_type_clause.'))';
+                    . $sql_recdetail_link . $relation_second_level_where . $field_value . $rd_type_clause.'))';
                 }
 
             }else{  //working copy!!!!
@@ -1762,9 +1774,9 @@ class FieldPredicate extends Predicate {
                                 $field_value .= ' and linkdt'.$i.'.dtl_Value '.$limbs[$j]->pred->get_field_value();
                             }
                         }elseif($cn == 'TitlePredicate'){
-                            $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL(false);
+                            $field_value .= $and_link.$i.'.'.$limbs[$j]->pred->makeSQL(false);
                         }elseif($cn == 'DateModifiedPredicate'){
-                            $field_value .= ' and link'.$i.'.'.$limbs[$j]->pred->makeSQL();
+                            $field_value .= $and_link.$i.'.'.$limbs[$j]->pred->makeSQL();
                             $field_value = str_replace("TOPBIBLIO.","",$field_value);
                         }
                     }//for predicates
@@ -1782,14 +1794,14 @@ class FieldPredicate extends Predicate {
                 $rd_type_clause = '';
                 $rd_type_clause = $this->get_field_type_clause();
                 if(strpos($rd_type_clause,"like")===false){
-                    $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
+                    $rd_type_clause = " and rd.dtl_DetailTypeID $rd_type_clause";
                 }else{
                     $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name $rd_type_clause limit 1)";
                 }
 
-                $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
+                $resq = '('.$not . $sql_detail_exists
                 .$nest_joins
-                . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.'))';
+                . $sql_recdetail_link. $field_value . $rd_type_clause.'))';
 
             }
 
@@ -1833,18 +1845,17 @@ class FieldPredicate extends Predicate {
         $timestamp = $isin?false:true; //numeric values $this->isDateTime();
 
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
-            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . $sql_detail_exists
             . ' left join Records link on rd.dtl_Value=link.rec_ID '
-            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).SQL_AND
+            . $sql_recdetail_link . $sql_and_detailtype . intval($this->field_type).SQL_AND
             . ($isnumericvalue ? 'rd.dtl_Value ':' link.rec_Title ').$match_pred . '))';
 
         }elseif($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
 
-            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . $sql_detail_exists
             //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred )
-            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and rd.dtl_Value '.$match_pred. '))';
+            . $sql_recdetail_link . $sql_and_detailtype . intval($this->field_type)
+            . " and rd.dtl_Value $match_pred))";
 
         }elseif($this->field_type_value=='date'){
 
@@ -1868,8 +1879,8 @@ class FieldPredicate extends Predicate {
 
                 if(!($isnumericvalue || $isin)){
                     $q = 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
-                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rf.ulf_ID=rd.dtl_UploadedFileID'
-                    . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+                    . $sql_recdetail_link . ' and rf.ulf_ID=rd.dtl_UploadedFileID'
+                    . $sql_and_detailtype . intval($this->field_type)
                     . ' and (rf.ulf_OrigFileName ' . $match_pred. ' or rf.ulf_MimeExt '. $match_pred.'))';
 
                     if($not){
@@ -1893,9 +1904,8 @@ class FieldPredicate extends Predicate {
                 $fieldname = 'rd.dtl_Value';
             }
 
-            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
-                . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-                . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+            return '('.$not . $sql_detail_exists
+                . $sql_recdetail_link . $sql_and_detailtype . intval($this->field_type)
                 . SQL_AND . $fieldname . ' ' . $match_pred. '))';
 
 
@@ -1903,7 +1913,7 @@ class FieldPredicate extends Predicate {
 
             $rd_type_clause = $this->get_field_type_clause();
             if(strpos($rd_type_clause,"like")===false){ //several field type
-                $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
+                $rd_type_clause = " and rd.dtl_DetailTypeID $rd_type_clause";
             }else{
                 if($rd_type_clause=='like "%"'){ //any field type
                     $rd_type_clause = '';
@@ -1932,7 +1942,7 @@ class FieldPredicate extends Predicate {
 
             $dateindex_clause = $this->makeDateClause();
 
-            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . $sql_detail_exists
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
             .' left join recDetailsDateIndex on rd.dtl_ID=rdi_DetailID '
@@ -1941,9 +1951,11 @@ class FieldPredicate extends Predicate {
             . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
             .'link.rec_Title ' . $match_pred . ', '     //THEN
 //see 1377            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
-            . ($dateindex_clause!=null ? 'if(rdt.dty_Type = "date", (rdi_DetailTypeID=rd.dtl_DetailTypeID AND '.$dateindex_clause.') , '
-                .'rd.dtl_Value ' . $match_pred . ')'
-                : 'rd.dtl_Value ' . $match_pred ) . ')'
+            . ($dateindex_clause!=null 
+                ? 'if(rdt.dty_Type = "date", (rdi_DetailTypeID=rd.dtl_DetailTypeID AND '.$dateindex_clause.') , '
+                . "rd.dtl_Value $match_pred)"
+                : "rd.dtl_Value $match_pred" 
+              ) . ')'
             . $rd_type_clause . '))';
         }
 
@@ -2183,6 +2195,10 @@ class TagPredicate extends Predicate {
 
     public function makeSQL() {
         global $mysqli;
+        
+        $sql_where = 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+        $sql_tag_eq = 'kwd.tag_Text = "';
+        $sql_tag_like = 'kwd.tag_Text like "';
 
         $pquery = &$this->getQuery();
         $not = ($this->parent->negate)? SQL_NOT : '';
@@ -2192,7 +2208,7 @@ class TagPredicate extends Predicate {
             } elseif (! $this->wg_value) {
                 // this runs faster (like TEN TIMES FASTER) - think it's to do with the join
                 $query='('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+                . $sql_where;
                 $first_value = true;
                 foreach ($this->value as $value) {
                     if (! $first_value) {$query .= 'or ';}
@@ -2200,8 +2216,8 @@ class TagPredicate extends Predicate {
                         $query .= 'rtl_TagID='.intval($value).' ';
                     } else {
                         $query .=     ($this->parent->exact
-                            ? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                            ? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }
@@ -2217,12 +2233,12 @@ class TagPredicate extends Predicate {
 
                     if ($wg_value) {
                         $query .= '(';
-                        $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                         $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                     } else {
-                        $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     }
                 }
                 $query .= '))) ';
@@ -2230,22 +2246,22 @@ class TagPredicate extends Predicate {
         } else {
             if (! $this->wg_value) {
                 $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+                . $sql_where;
                 $first_value = true;
                 foreach ($this->value as $value) {
                     if (! $first_value) {$query .= 'or ';}
                     if (is_numeric($value)) {
                         $query .= "kwd.tag_ID=$value ";
                     } else {
-                        $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }
                 $query .= '))) ';
             } else {
                 $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
-                . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+                . $sql_where;
                 for ($i=0; $i < count($this->value);++$i) {
                     if ($i > 0) {$query .= 'or ';}
 
@@ -2254,16 +2270,16 @@ class TagPredicate extends Predicate {
 
                     if ($wg_value) {
                         $query .= '(';
-                        $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                         $query .= ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                     } else {
                         if (is_numeric($value)) {
                             $query .= "kwd.tag_ID=$value ";
                         } else {
                             $query .= '(';
-                            $query .=      ($this->parent->exact? 'kwd.tag_Text = "'.$mysqli->real_escape_string($value).'" '
-                                : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                            $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                                : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                             $query .= ' and ugr_ID is null) ';
                         }
                     }
@@ -2407,7 +2423,7 @@ class LinkedFromParentPredicate extends Predicate {
         //NEW  ---------------------------
 
         if($rty_ID==1){ //special case for relationship records
-            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+            $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID ";
         }else{
 
             if(!empty($rty_IDs)){
@@ -2416,17 +2432,16 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = '';
             }
 
-            $add_where = $add_where
-            . ' rl.rl_SourceID=rd.rec_ID and ';
+            $add_where = $add_where . SQL_RL_SOURCE_LINK.SQL_AND;
 
             if(!empty($dty_IDs)){
                 $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
             }else{
-                $add_where = $add_where.'rl.rl_RelationID is null';
+                $add_where = $add_where.SQL_RELATION_IS_NULL;
             }
         }
 
-        $add_from  = 'recLinks rl ';
+        $add_from  = SQL_RECLINK;
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
 
@@ -2452,18 +2467,18 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = '';
             }
 
-            $add_where = $add_where.' rl.rl_TargetID=rd.rec_ID ';
+            $add_where = $add_where.SQL_RL_TARGET_LINK;
             if($rty_ID!=1){
                 $add_where = $add_where . SQL_AND;
 
                 if(!empty($dty_IDs)){
                     $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
                 }else{
-                    $add_where = $add_where.'rl.rl_RelationID is null';
+                    $add_where = $add_where.SQL_RELATION_IS_NULL;
                 }
             }
 
-            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
+            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
         }
 
         return $select;
@@ -2520,7 +2535,7 @@ class LinkedToParentPredicate extends Predicate {
 
         //NEW  ---------------------------
         if($rty_ID==1){ //special case for relationship records
-            $add_where = 'rd.rec_RecTypeID='.$rty_ID.' and rl.rl_RelationID=rd.rec_ID';
+            $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID";
         }else{
 
             if(!empty($rty_IDs)){
@@ -2529,16 +2544,15 @@ class LinkedToParentPredicate extends Predicate {
                 $add_where = '';
             }
 
-            $add_where = $add_where
-                . ' rl.rl_TargetID=rd.rec_ID and ';
+            $add_where = $add_where . SQL_RL_TARGET_LINK . SQL_AND;
 
             if(count($dty_IDs)>1){
                 $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
             }else{
-                $add_where = $add_where.'rl.rl_RelationID is null';
+                $add_where = $add_where.SQL_RELATION_IS_NULL;
             }
         }
-        $add_from  = 'recLinks rl ';
+        $add_from  = SQL_RECLINK;
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
 
@@ -2564,20 +2578,20 @@ class LinkedToParentPredicate extends Predicate {
                 $add_where = '';
             }
 
-            $add_where = $add_where.' rl.rl_SourceID=rd.rec_ID ';
+            $add_where = $add_where.SQL_RL_SOURCE_LINK;
             if($rty_ID!=1){
                 $add_where = $add_where . SQL_AND;
 
                 if(!empty($dty_IDs)){
                     $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
                 }else{
-                    $add_where = $add_where.'rl.rl_RelationID is null';
+                    $add_where = $add_where.SQL_RELATION_IS_NULL;
                 }
 
             }
 
 
-            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
+            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
 
         }
 
@@ -2627,10 +2641,10 @@ class RelatedFromParentPredicate extends Predicate {
         }
 
         //NEW  ---------------------------
-        $add_from  = 'recLinks rl ';
-        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
-        . ' rl.rl_SourceID=rd.rec_ID and '
-        . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+        $add_from  = SQL_RECLINK;
+        $add_where = (($source_rty_ID) ?"rd.rec_RecTypeID=$source_rty_ID".SQL_AND:'')
+        . SQL_RL_SOURCE_LINK . SQL_AND
+        . (($relation_type_ID) ?"rl.rl_RelationTypeID=$relation_type_ID" :SQL_RELATION_IS_NOT_NULL );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
 
@@ -2650,20 +2664,16 @@ class RelatedFromParentPredicate extends Predicate {
 
         }else{
 
+            $add_where = '';
             $ids = prepareIds($source_rty_ID);
-            if(count($ids)>1){
-                $add_where = 'rl.rl_SourceID in ('.implode(',',$ids).') and ';
-            }elseif(count($ids)>0){
-                $add_where = 'rl.rl_SourceID = '.$ids[0].SQL_AND;
-            }else{
-                $add_where = '';
+            if(!empty($ids)){
+                $add_where = predicateId('rl.rl_SourceID',$ids).SQL_AND; //why rty_ID compared with rec_Id ???
             }
 
-            $add_where = $add_where
-                . ' rl.rl_TargetID=rd.rec_ID and '
-                . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+            $add_where = $add_where . SQL_RL_TARGET_LINK . SQL_AND
+                . (($relation_type_ID) ?"rl.rl_RelationTypeID=$relation_type_ID" :SQL_RELATION_IS_NOT_NULL );
 
-            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
+            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
         }
 
         if($select_relto!=null){
@@ -2715,10 +2725,10 @@ class RelatedToParentPredicate extends Predicate {
 
 
         //NEW  ---------------------------
-        $add_from  = 'recLinks rl ';
-        $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
-        . ' rl.rl_TargetID=rd.rec_ID and '
-        . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+        $add_from  = SQL_RECLINK;
+        $add_where = (($source_rty_ID) ?"rd.rec_RecTypeID=$source_rty_ID".SQL_AND:'')
+        . SQL_RL_TARGET_LINK . SQL_AND
+        . (($relation_type_ID) ?"rl.rl_RelationTypeID=$relation_type_ID" :SQL_RELATION_IS_NOT_NULL );
 
         $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
 
@@ -2739,20 +2749,16 @@ class RelatedToParentPredicate extends Predicate {
 
         }else{
 
+            $add_where = '';
             $ids = prepareIds($source_rty_ID);
-            if(count($ids)>1){
-                $add_where = 'rl.rl_TargetID in ('.implode(',',$ids).') and ';
-            }elseif(count($ids)>0){
-                $add_where = 'rl.rl_TargetID = '.$ids[0].SQL_AND;
-            }else{
-                $add_where = '';
+            if(!empty($ids)){
+                $add_where = predicateId('rl.rl_TargetID',$ids).SQL_AND; //why rty_ID compared with rec_Id ???
             }
 
-            $add_where = $add_where
-                . ' rl.rl_SourceID=rd.rec_ID and '
-                . (($relation_type_ID) ?'rl.rl_RelationID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+            $add_where = $add_where . SQL_RL_SOURCE_LINK . SQL_AND
+                . (($relation_type_ID) ?'rl.rl_RelationID='.$relation_type_ID :SQL_RELATION_IS_NOT_NULL );
 
-            $select = $select.' FROM Records rd,'.$add_from.SQL_WHERE.$add_where.')';
+            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
         }
 
         if($select_relto!=null){
@@ -2798,16 +2804,16 @@ class RelatedPredicate extends Predicate {
         if(!($related_rty_ID>0)) {return false;}
 
         //NEW  ---------------------------
-        $add_from  = 'recLinks rl ';
+        $add_from  = SQL_RECLINK;
         $add_where = '(rd.rec_RecTypeID='.$related_rty_ID.') and ';
         if($relation_type_ID>0){
             $add_where = $add_where.'(';
             if($inverseTermId>0){
-                $add_where = $add_where.'(rl.rl_RelationTypeID='.$inverseTermId.') OR ';
+                $add_where = $add_where."(rl.rl_RelationTypeID=$inverseTermId) OR ";
             }
-            $add_where = $add_where.'(rl.rl_RelationTypeID='.$relation_type_ID.'))';
+            $add_where = $add_where."(rl.rl_RelationTypeID=$relation_type_ID))";
         }else{
-            $add_where = $add_where.' (rl.rl_RelationID is not null)';
+            $add_where = $add_where. SQL_RELATION_IS_NOT_NULL;
         }
 
         $pquery = &$this->getQuery();
@@ -2822,9 +2828,9 @@ class RelatedPredicate extends Predicate {
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
             $select = '(TOPBIBLIO.rec_ID in (select rl.rl_SourceID '.$query["from"].',recLinks rl '
-                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_TARGET_LINK.'))) OR '
                       .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
-                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_SOURCE_LINK.')))';
         }
 
 
@@ -2847,11 +2853,11 @@ class AllLinksPredicate  extends Predicate {
 
         //NEW
         $add_from1 = 'recLinks rl1 ';
-        $add_where1 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
+        $add_where1 = ((false && $source_rty_ID) ?"rd.rec_RecTypeID=$source_rty_ID".SQL_AND:'')
             . ' rl1.rl_TargetID=rd.rec_ID';
 
         $add_from2 = 'recLinks rl2 ';
-        $add_where2 = ((false && $source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.SQL_AND:'')
+        $add_where2 = ((false && $source_rty_ID) ?"rd.rec_RecTypeID=$source_rty_ID".SQL_AND:'')
             . ' rl2.rl_SourceID=rd.rec_ID';
 
 
@@ -2881,11 +2887,11 @@ class AllLinksPredicate  extends Predicate {
                 $add_where1 = $add_where1.' and rl1.rl_TargetID = '.$ids[0];
                 $add_where2 = $add_where2.' and rl2.rl_SourceID = '.$ids[0];
             }else{
-                return '(1=0)';
+                return SQL_FALSE;
             }
 
-            $select1 = $add_select1.' FROM Records rd, recLinks rl1 WHERE '.$add_where1.')';
-            $select2 = $add_select2.' FROM Records rd, recLinks rl2 WHERE '.$add_where2.')';
+            $select1 = $add_select1.SQL_RECORDS.', recLinks rl1 WHERE '.$add_where1.')';
+            $select2 = $add_select2.SQL_RECORDS.', recLinks rl2 WHERE '.$add_where2.')';
 
         }
 
@@ -2895,6 +2901,8 @@ class AllLinksPredicate  extends Predicate {
     }
 }
 
+define('SQL_LINKED_EXISTS', '(exists (select dtl_ID from defDetailTypes, recDetails bd '
+            .'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" LIMIT 1))');
 //
 // find records that have pointed records
 //
@@ -2903,17 +2911,14 @@ class LinkToPredicate extends Predicate {
         if ($this->value) {
 
             $ids = prepareIds($this->value);
-            if(count($ids)>1){
-                return '(1=0)';
+            if(count($ids)>1){   //??? seems wrong
+                return SQL_FALSE;
             }else{
-                return '(exists (select * from defDetailTypes, recDetails bd '
-                . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
-                . '  and bd.dtl_Value in (' . join(',', $ids) . ')))';
+                return str_replace('LIMIT',' and bd.dtl_Value in (' . join(',', $ids) . ') LIMIT',SQL_LINKED_EXISTS);
             }
         }
         else {
-            return '(exists (select * from defDetailTypes, recDetails bd '
-            . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource"))';
+            return SQL_LINKED_EXISTS;;
         }
     }
 }
@@ -2927,17 +2932,14 @@ class LinkedToPredicate extends Predicate {
         if ($this->value) {
 
             $ids = prepareIds($this->value);
-            if(count($ids)>1){
-                return '(1=0)';
+            if(count($ids)>1){  //??? seems wrong
+                return SQL_FALSE;
             }else{
-                return '(exists (select * from defDetailTypes, recDetails bd '
-                . 'where bd.dtl_RecID in (' . implode(',', $ids) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
-                . '  and bd.dtl_Value=TOPBIBLIO.rec_ID))';
+                return str_replace('LIMIT',' and bd.dtl_RecID in (' . join(',', $ids) . ') LIMIT',SQL_LINKED_EXISTS);
             }
         }
         else {
-            return '(exists (select * from defDetailTypes, recDetails bd '
-            . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource"))';
+            return SQL_LINKED_EXISTS;
         }
     }
 }
