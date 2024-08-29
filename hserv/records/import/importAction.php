@@ -33,6 +33,8 @@ require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 define('ERR_VALIDATION_QUERY','SQL error: Cannot perform validation query: ');
+define('MSG_VALIDATION_1','validation of numeric fields');
+define('MSG_VALIDATION_2','validation of resource fields');
 
 /**
 * 3 public methods
@@ -706,10 +708,12 @@ public static function assignRecordIds($params){
 
     }elseif($match_mode==1){
         //find records to insert and update if matching is skipped AND WE USE current key field
+        
+        $cnt_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table`";
 
         // find records to update
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
+        $select_query = $cnt_query
+        ." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
         $cnt_update = mysql__select_value($mysqli, $select_query);
         /*if( $cnt_insert>0 ){
 
@@ -720,16 +724,16 @@ public static function assignRecordIds($params){
         } */
 
         // find records to insert
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table.SQL_WHERE.$id_field."<0";
+        $select_query = $cnt_query." WHERE `$id_field`<0";
         $cnt = mysql__select_value($mysqli, $select_query);
 
         // id field not defined -  it records to insert as well
-        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field." IS NULL";
+        $select_query = "SELECT count(*) FROM `$import_table` WHERE `$id_field` IS NULL";
         $cnt2 = mysql__select_value($mysqli, $select_query);
 
         // record ids for none existing records
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is null and ".$id_field.">0";
+        $select_query = $cnt_query.
+        ." left join Records on rec_ID=`$id_field` WHERE rec_ID is null and `$id_field`>0";
         $cnt3 = mysql__select_value($mysqli, $select_query);
 
         // insert count
@@ -1397,7 +1401,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
     }
     //4. In DB: Verify resource fields ==================================================
-    mysql__update_progress(null, $progress_session_id, false, '4,7,validation of resource fields');
+    mysql__update_progress(null, $progress_session_id, false, '4,7,'.MSG_VALIDATION_2);
 
     $k=0;
     foreach ($query_res as $field){
@@ -1439,7 +1443,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //5. Verify numeric fields
-    mysql__update_progress(null, $progress_session_id, false, '5,7,validation of numeric fields');
+    mysql__update_progress(null, $progress_session_id, false, '5,7,'.MSG_VALIDATION_1);
 
     $k=0;
     foreach ($query_num as $field){
@@ -1715,7 +1719,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of enumeration fields');
         }
 
         $wrong_records = array();
@@ -1771,7 +1775,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_2);
             }
         }
         $res->close();
@@ -1822,7 +1826,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of resource fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.','.MSG_VALIDATION_2);
         }
 
         $wrong_records = array();
@@ -1852,7 +1856,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_2);
             }
         }
         $res->close();
@@ -1896,7 +1900,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.','.MSG_VALIDATION_1);
         }
 
         $wrong_records = array();
@@ -1924,7 +1928,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of numeric fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_1);
             }
         }
         $res->close();

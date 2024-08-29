@@ -219,6 +219,7 @@ define('BR','<br>');
 
 //common sql reserved words
 define('SQL_AND',' AND ');
+define('SQL_NOT',' NOT ');
 define('SQL_WHERE',' WHERE ');
 define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');

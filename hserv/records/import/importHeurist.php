@@ -31,6 +31,8 @@ require_once dirname(__FILE__).'/../../structure/import/dbsImport.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 
+define('ERR_XML_IMPORT','XML import error');
+
 /*
 main methods
 
@@ -146,11 +148,11 @@ private static function hmlToJson($filename){
 
         libxml_clear_errors();
 
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml is corrupted.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml is corrupted.', null, ERR_XML_IMPORT);
         return null;
     }
     if(!$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.', null, ERR_XML_IMPORT);
         return null;
     }
 
@@ -302,13 +304,13 @@ private static function hmlToJson($filename){
 
         }//records
     }else{
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be within "records" elements.<br>You might be trying to load a template file without data.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be within "records" elements.<br>You might be trying to load a template file without data.', null, ERR_XML_IMPORT);
         return null;
     }
 
     if($hasValidIdCount == 0){
         $extra_details = "<br><br>If this occurs when Heurist says it is doing an automatic update,<br>please advise the Heurist team (Bug Report in the Help menu at the top right) so that we can fix this problem.<br>" . (count($invalidIds) > 0) ? "The list of invalid ids: " . implode(',', $invalidIds) : "";
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may be trying to upload an xml data template rather than actual data.' . $extra_details, null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may be trying to upload an xml data template rather than actual data.' . $extra_details, null, ERR_XML_IMPORT);
         return null;
     }
 
@@ -912,8 +914,7 @@ EOD;
 
                     if($record_src_original_id){
 
-                        $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
-                                    .' AND dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$record_src_original_id.'"';
+$query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$record_src_original_id.'"';
 
                         $target_RecID = mysql__select_value($mysqli, $query3);
 
@@ -1355,15 +1356,11 @@ EOD;
                             $term_id = @$new_terms[$uid];
 
                             if($term_id>0){
-                                $query = 'UPDATE recDetails SET dtl_Value='.$term_id
-                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value=\''.$uid.'\'';
+$query = "UPDATE recDetails SET dtl_Value=$term_id WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value='$uid'";
 
                             }else{
                                 //new terms was not added
-                                $query = 'DELETE FROM recDetails '
-                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value=\''.$uid.'\'';
+$query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value='$uid'";
                             }
 
                             $ret = mysql__exec_param_query($mysqli, $query, null);
@@ -1396,15 +1393,11 @@ EOD;
                                 $query = null;
                                 $new_value = @$records_corr[$old_value];
                                 if($new_value>0){
-                                    $query = 'UPDATE recDetails SET dtl_Value='.$new_value
-                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                            .' AND dtl_Value='.$old_value;
+$query = "UPDATE recDetails SET dtl_Value=$new_value WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value=$old_value";
 
                                 }elseif($old_value>0){
                                     //target record not found
-                                    $query = 'DELETE FROM recDetails '
-                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                            .' AND dtl_Value='.$old_value;
+$query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value=$old_value";
 
                                     $resource_notfound[] = array($trg_recid, $src_recid,
                                             $def_dts[$fieldtype_id]['commonFields'][$idx_name], $old_value);

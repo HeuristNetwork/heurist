@@ -30,6 +30,8 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\UArchive;
 
+define('ERR_MSG_NOT_READABLE',' is not readable');
+
 class ImportParser {
 
     private static $system = null;
@@ -110,7 +112,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     }elseif (! file_exists($upload_file_name)) {
         $s = ' does not exist.<br><br>'
         .'Please clear your browser cache and try again. '.$contact_team;
-    }elseif (! is_readable($upload_file_name)) {$s = ' is not readable';}
+    }elseif (! is_readable($upload_file_name)) {$s = ERR_MSG_NOT_READABLE;}
 
     if($s){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);
@@ -234,7 +236,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $encoded_filename = '';
             $s = ' not defined';
         }elseif (! file_exists($encoded_filename)) {$s = ' does not exist';}
-        elseif (! is_readable($encoded_filename)) {$s = ' is not readable';}
+        elseif (! is_readable($encoded_filename)) {$s = ERR_MSG_NOT_READABLE;}
         if($s){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename. $s);
             return false;
@@ -887,9 +889,12 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 //
 private static function parseKMLPlacemark($placemark, &$geom_types){
 
+        $nodeText = '#text';
+        $regex_space = '//\n\s+/';
+    
         $wkt = new WKT();
         $properties = array();
-        $textnodes = array('#text', 'lookat', 'style', 'styleurl');
+        $textnodes = array($nodeText, 'lookat', 'style', 'styleurl');
 
         foreach ($placemark->childNodes as $child) {
           // Node names are all the same, except for MultiGeometry, which maps to GeometryCollection
@@ -906,12 +911,12 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
           {
 
             foreach ($child->childNodes as $data) {
-              if ($data->nodeName != '#text') {
+              if ($data->nodeName != $nodeText) {
                 if ($data->nodeName == 'data') {
                   $items = $data->getElementsByTagName('value');//DOMNodeList
                   if($items->length>0){
                         //$items->item(0);
-                        $value = preg_replace('/\n\s+/',' ',trim($items[0]->textContent));
+                        $value = preg_replace($regex_space,' ',trim($items[0]->textContent));
                   }else{
                         $value = '';
                   }
@@ -920,8 +925,8 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
                 elseif ($data->nodeName == 'schemadata')
                 {
                   foreach ($data->childNodes as $schemadata) {
-                    if ($schemadata->nodeName != '#text') {
-                      $properties[$schemadata->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($schemadata->textContent));
+                    if ($schemadata->nodeName != $nodeText) {
+                      $properties[$schemadata->getAttribute('name')] = preg_replace($regex_space,' ',trim($schemadata->textContent));
                     }
                   }
                 }
@@ -932,15 +937,15 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
           elseif ($node_name == 'timespan'){
             foreach ($child->childNodes as $timedata) {
                 if ($timedata->nodeName == 'begin') {
-                    $properties['timespan_begin'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                    $properties['timespan_begin'] = preg_replace($regex_space,' ',trim($timedata->textContent));
                 }elseif($timedata->nodeName == 'end') {
-                    $properties['timespan_end'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                    $properties['timespan_end'] = preg_replace($regex_space,' ',trim($timedata->textContent));
                 }
             }
           }
           elseif (!in_array($node_name, $textnodes))
           {
-            $properties[$child->nodeName] = preg_replace('/\n\s+/',' ',trim($child->textContent));
+            $properties[$child->nodeName] = preg_replace($regex_space,' ',trim($child->textContent));
           }
 
         }
@@ -959,7 +964,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
     $s = null;
     if (! file_exists($filename)) {$s = ' does not exist';}
-    elseif (! is_readable($filename)) {$s = ' is not readable';}
+    elseif (! is_readable($filename)) {$s = ERR_MSG_NOT_READABLE;}
 
     if($s){
         self::$system->addError(HEURIST_UNKNOWN_ERROR, 'Source file '.$filename. $s);

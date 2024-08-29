@@ -589,6 +589,8 @@ class HQuery {
         global $publicOnly, $wg_ids, $is_admin; //, $mysqli, $use_user_wss;
 
         $res = $this->top_limb->makeSQL();//it creates where_clause and fill tables array
+        
+        $from_records = 'Records r'.$this->level.' ';
 
         if($this->top_limb->error_message){
              $this->error_message = $this->top_limb->error_message;
@@ -596,15 +598,15 @@ class HQuery {
         }elseif($this->search_domain!=null){
 
             if ($this->search_domain == NO_BOOKMARK){
-                $this->from_clause = 'Records r'.$this->level.' ';
+                $this->from_clause = $from_records;
             }elseif($this->search_domain == BOOKMARK) {
-                $this->from_clause = 'usrBookmarks b LEFT JOIN Records r'.$this->level.' ON b.bkm_recID=r'.$this->level.'.rec_ID ';
+                $this->from_clause = 'usrBookmarks b LEFT JOIN '.$from_records.' ON b.bkm_recID=r'.$this->level.'.rec_ID ';
             }else{
-                $this->from_clause = 'Records r'.$this->level.' LEFT JOIN usrBookmarks b ON b.bkm_recID=r'.$this->level.'.rec_ID and b.bkm_UGrpID='.$this->currUserID.' ';
+                $this->from_clause = $from_records.' LEFT JOIN usrBookmarks b ON b.bkm_recID=r'.$this->level.'.rec_ID and b.bkm_UGrpID='.$this->currUserID.' ';
             }
 
         }else{
-            $this->from_clause =  "Records r".$this->level;
+            $this->from_clause =  $from_records;
         }
 
         if(!$is_admin){
@@ -840,19 +842,21 @@ class HQuery {
 
                         if($field_type!=null){ //field type found
 
+                            $where_exp = ' WHERE dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID;
+                        
                             if($field_type=='enum'){
-                                $sortby = 'ifnull((select trm_OrderInBranch from recDetails left join defTerms on trm_ID=dtl_Value where dtl_RecID=r'
-                                    .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
+                                $sortby = 'ifnull((select trm_OrderInBranch from recDetails left join defTerms on trm_ID=dtl_Value '
+                                    . $where_exp
                                     .' ORDER BY trm_Label limit 1), ' // attempt sortby Order in Branch first
-                                      . 'ifnull((select trm_Label from recDetails left join defTerms on trm_ID=dtl_Value where dtl_RecID=r'
-                                        .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
+                                      . 'ifnull((select trm_Label from recDetails left join defTerms on trm_ID=dtl_Value '
+                                        . $where_exp
                                         .' ORDER BY trm_Label limit 1), "~~")) ';// then by term label
                             }else{
 
                                 $fld = $field_type != 'date' ? 'dtl_Value' : 'getEstDate(dtl_Value,0)';//for sort
 
-                                $sortby = 'ifnull((select '.$fld.' from recDetails where dtl_RecID=r'
-                                        .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
+                                $sortby = 'ifnull((select '.$fld.' from recDetails '
+                                        . $where_exp
                                         .' ORDER BY dtl_Value limit 1), "~~") ';
                             }
 
@@ -896,7 +900,7 @@ class HLimb {
     var $where_clause = "";
     var $error_message = null;
 
-    var $allowed = array("all"=>SQL_AND,"any"=>" OR ","not"=>"NOT ");
+    var $allowed = array("all"=>SQL_AND,"any"=>" OR ","not"=>SQL_NOT);
 
     //besides  not,any
     //
@@ -1154,7 +1158,8 @@ class HPredicate {
 
                     $this->relation_fields = array();
                     $this->value = array();
-
+                    
+                    $REL_FLD = 'relf:'; //old predicate for relationship record field
 
                     // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
                     // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
@@ -1178,17 +1183,17 @@ class HPredicate {
                             //break;
 
                         //for fields in relation record
-                        }elseif(strpos($idx,'r:')===0 || strpos($idx,'relf:')===0){  //that's for {"r:10":10,,}
+                        }elseif(strpos($idx,'r:')===0 || strpos($idx,$REL_FLD)===0){  //that's for {"r:10":10,,}
                                //fields in relationship record
                                //{"r:10":">2010"}
                                $rel_field = $idx;
                                $rel_field = strpos($rel_field,'r:')===0
                                                     ?str_replace('r:','f:',$rel_field)
-                                                    :str_replace('relf:','f:',$rel_field);
+                                                    :str_replace($REL_FLD,'f:',$rel_field);
                                $this->relation_fields[$rel_field] = $val;
 
                         }elseif(is_array($val) &&
-                                    (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],'relf:')===0)){  //that's for [{"r:10":10},{}]
+                                    (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],$REL_FLD)===0)){  //that's for [{"r:10":10},{}]
                             //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
                                $rel_field = array_keys($val)[0];
                                if($rel_field=='r:'.$dty_id_relation_type){
@@ -1200,7 +1205,7 @@ class HPredicate {
                                }else{
                                    $rel_field2 = strpos($rel_field,'r:')===0
                                                         ?str_replace('r:','f:',$rel_field)
-                                                        :str_replace('relf:','f:',$rel_field);
+                                                        :str_replace($REL_FLD,'f:',$rel_field);
 
                                    $this->relation_fields[$rel_field2] = $val[$rel_field];
                                }
@@ -1432,14 +1437,13 @@ class HPredicate {
     //
     private function predicateSpatial(){
 
-        $p = "rd".$this->qlevel.".";
-        $p = "";
+        $p = "rd".$this->qlevel.'.';
+        $p = '';
 
-        $res = "exists (select dtl_ID from recDetails $p "
-            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND ';
+        $res = "exists (select dtl_ID from recDetails $p where r{$this->qlevel}.rec_ID={$p}dtl_RecID AND ";
 
         if($this->isEmptyValue()){
-            $res = ' NOT '.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
+            $res = SQL_NOT.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
         }elseif($this->value==''){
             $res = $res.$p.'dtl_Geo IS NOT NULL)';//any not null value
         }else {
@@ -1457,8 +1461,11 @@ class HPredicate {
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
 
-        $p = "rd".$this->qlevel.".";
-        $p = "";
+        //not used 
+        //$p_alias = "rd".$this->qlevel;
+        //$p = $p_alias.".";
+        $p_alias = '';
+        $p = '';
 
         $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
         if(is_array($several_ids) && count($several_ids)>0){
@@ -1590,7 +1597,7 @@ class HPredicate {
 
                     if($sHeaderField=='rec_Title'){
                         //execute fulltext search query
-                        $res = '('. ($this->negate ? 'NOT ' : '') .'MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
+                        $res = '('. ($this->negate ? SQL_NOT : '') .'MATCH(r'.$this->qlevel.'.'.$sHeaderField.') '.$val.')';
                     }else{
                         $this->error_message = 'Full text search is allowed for rec_Title only';
                         return null;
@@ -1606,8 +1613,7 @@ class HPredicate {
 
         }elseif( $is_empty ){ //search for records where field value is not defined
 
-            $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p.' dtl_DetailTypeID';
+            $res = "NOT exists (select dtl_ID from recDetails $p_alias where r{$this->qlevel}.rec_ID={$p}dtl_RecID AND {$p}dtl_DetailTypeID";
 
             $res .= $field_id_filter . $field_condition .')';
 
@@ -1618,8 +1624,7 @@ class HPredicate {
 
         }elseif($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){ //search for records where field occurs N times (repeatable values)
 
-            $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p.'dtl_DetailTypeID';
+            $res = "(select count(dtl_ID) from recDetails $p_alias where r{$this->qlevel}.rec_ID={$p}dtl_RecID AND {$p}dtl_DetailTypeID";
 
             $res .= $field_id_filter . $field_condition . ')';
 
@@ -1682,24 +1687,17 @@ class HPredicate {
 
                     if($this->negate){
                         $val = $this->getFieldValue();//this time it returns without negate
-                        $res = ' NOT '.$res;
+                        $res = SQL_NOT.$res;
                     }
                     $res .= $field_id_filter;
                 }
 
                 if($this->fulltext){
                     //execute fulltext search query
-                    $res2 = $res.SQL_AND.($this->negate ? ' NOT ' : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
+                    $res2 = $res.SQL_AND.($this->negate ? SQL_NOT : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
                     $list_ids = mysql__select_list2($mysqli, $res2);
                     
-                    if(is_array($list_ids) && count($list_ids)>0){
-                        $res = $recordID
-                            .(count($list_ids)>1
-                                ?' IN ('.implode(',',$list_ids).')'
-                                :'='.$list_ids[0]);
-                    }else{
-                        $res = '(1=0)';//nothing found
-                    }
+                    $res = predicateId($recordID,$list_ids);
 
                 }else{
                     $res = $res.SQL_AND.$field_name.$val.$field_condition.')';
@@ -1709,14 +1707,7 @@ class HPredicate {
                 $res = 'select dtl_RecID from recDetails where '.$field_name.$val.$field_condition;
                 $list_ids = mysql__select_list2($mysqli, $res);
 
-                if(is_array($list_ids) && count($list_ids)>0){
-                    $res = $recordID
-                        .(count($list_ids)>1
-                            ?' IN ('.implode(',',$list_ids).')'
-                            :'='.$list_ids[0]);
-                }else{
-                    $res = '(1=0)';//nothing found
-                }
+                $res = predicateId($recordID,$list_ids);
 
             }
 
@@ -1733,8 +1724,10 @@ class HPredicate {
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
 
-        $p = "rd".$this->qlevel.".";
-        $p = "";
+        //$p_alias = "rd".$this->qlevel;
+        //$p = $p_alias.'.';
+        $p_alias = '';
+        $p = '';
 
         $keep_val = $this->value;
 
@@ -1770,12 +1763,7 @@ class HPredicate {
                 $field_condition .= ' AND (rst_NonOwnerVisibility != "hidden"';
 
                 if(is_array($wg_ids) && !empty($wg_ids)){
-                    $field_condition .= ' OR r'.$this->qlevel.'.rec_OwnerUGrpID ';
-                    if(count($wg_ids)>1){
-                        $field_condition .= 'IN (' . join(',', $wg_ids).')';
-                    }else{
-                        $field_condition .= '= '.$wg_ids[0];
-                    }
+                    $field_condition .= ' OR '.predicateId('r'.$this->qlevel.'.rec_OwnerUGrpID',$wg_ids);
                 }
 
                 $field_condition .= ')';
@@ -1791,20 +1779,13 @@ class HPredicate {
             . ' left join defRecStructure on dtl_DetailTypeID=rst_DetailTypeID '
             .' where if(dty_Type != "resource", '
                 .' if(dty_Type="enum", dtl_Value'.$val_enum
-                    .', '. ($this->negate ? 'NOT ' : '') .'MATCH(dtl_Value) '.$val
+                    .', '. ($this->negate ? SQL_NOT : '') .'MATCH(dtl_Value) '.$val
                     .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'
                 .$field_condition;
 
             $list_ids = mysql__select_list2($mysqli, $res);
-
-            if(is_array($list_ids) && count($list_ids)>0){
-                $res = 'r'.$this->qlevel.'.rec_ID'
-                    .(count($list_ids)>1
-                        ?' IN ('.implode(',',$list_ids).')'
-                        :'='.$list_ids[0]);
-            }else{
-                $res = '(1=0)';//nothing found
-            }
+            
+            $res = predicateId('r'.$this->qlevel.'.rec_ID',$list_ids);
 
         }else{
 
@@ -1892,7 +1873,7 @@ class HPredicate {
                 if(strpos($cs_ids, ',')>0){  //more than one
 
                     $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where '
-                            . 'bkm_UGrpID '.($this->negate?'NOT':'').' IN ('.$cs_ids.'))';
+                            . 'bkm_UGrpID '.($this->negate?SQL_NOT:'').' IN ('.$cs_ids.'))';
 
                 }else{
                     $where = ' IN (SELECT bkm_RecID FROM usrBookmarks where bkm_UGrpID '.($this->negate?'!=':'=').$cs_ids.')';
@@ -1943,7 +1924,7 @@ class HPredicate {
 
                 if(strpos($cs_ids, ',')>0){  //more than one
 
-                    $where = (($this->negate)?'NOT':'')
+                    $where = (($this->negate)?SQL_NOT:'')
                             . ' IN (SELECT rtl_RecID FROM usrRecTagLinks where '
                             . 'rtl_TagID in ('.$cs_ids.')';
                     if($isAll){
@@ -1953,7 +1934,7 @@ class HPredicate {
                     $where = $where.')';
 
                 }else{
-                    $where = (($this->negate)?'NOT':'')
+                    $where = (($this->negate)?SQL_NOT:'')
                         . ' IN (SELECT rtl_RecID FROM usrRecTagLinks where rtl_TagID = '.$cs_ids.')';
                 }
 
@@ -2030,12 +2011,12 @@ class HPredicate {
 
             if($this->field_id){
                 //no pointer field exists among record details
-                $where = (($this->negate)?'':'NOT')." EXISTS (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
+                $where = (($this->negate)?'':SQL_NOT)." EXISTS (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
             ."$rd.dtl_DetailTypeID=".$this->field_id.")";
 
             }else{
                 //no links at all or any link
-                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
                     ." IN (select rl_SourceID from recLinks $rl where $rl.rl_RelationID IS NULL)";
             }
 
@@ -2059,7 +2040,7 @@ class HPredicate {
                     }else{
                         $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && count($ids)>0){
+                        if(is_array($ids) && count($ids)>0){ //rl_TargetID
                             //if(count($ids)>2000)
                             $val = ' IN ('.implode(',',$ids).')';
                         }else{
@@ -2097,16 +2078,10 @@ class HPredicate {
             }else{
 
                 $field_compare = "$rl.rl_RelationID IS NULL";
-                if($this->field_id){
-                    $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
-                    if(is_array($several_ids) && count($several_ids)>0){
 
-                        if(count($several_ids)>1){
-                            $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
-                        }else{
-                            $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
-                        }
-                    }
+                $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+                if(is_array($several_ids) && !empty($several_ids)){
+                    $field_compare .= SQL_AND.predicateId("$rl.rl_DetailTypeID", $several_ids);
                 }
 
                 $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
@@ -2144,19 +2119,13 @@ class HPredicate {
 
             //no pointer field exists among record details
             $field_compare = "$rl.rl_RelationID IS NULL";
-            if($this->field_id){
-                $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
-                if(is_array($several_ids) && count($several_ids)>0){
 
-                    if(count($several_ids)>1){
-                        $field_compare .= " AND $rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
-                    }else{
-                        $field_compare .= " AND $rl.rl_DetailTypeID = ".$this->field_id;
-                    }
-                }
+            $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+            if(is_array($several_ids) && !empty($several_ids)){
+                $field_compare .= SQL_AND.predicateId("$rl.rl_DetailTypeID", $several_ids);
             }
             
-            $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+            $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
             ." IN (select rl_TargetID from recLinks $rl where $field_compare)";
                 
 
@@ -2177,7 +2146,7 @@ class HPredicate {
                     }else{
                         $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && count($ids)>0){
+                        if(is_array($ids) && !empty($ids)){
                             //if(count($ids)>2000)
                             $val = ' IN ('.implode(',',$ids).')';
                         }else{
@@ -2216,16 +2185,10 @@ class HPredicate {
             }else{
 
                 $field_compare = "$rl.rl_RelationID IS NULL";
-                if($this->field_id){
-                    $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
-                    if(is_array($several_ids) && count($several_ids)>0){
-
-                        if(count($several_ids)>1){
-                            $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
-                        }else{
-                            $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
-                        }
-                    }
+                
+                $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+                if(is_array($several_ids) && !empty($several_ids)){
+                    $field_compare .= SQL_AND.predicateId("$rl.rl_DetailTypeID", $several_ids);
                 }
 
                 $where = "r$p.rec_ID=$rl.rl_TargetID AND "
@@ -2266,7 +2229,7 @@ class HPredicate {
 
                     $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                     $ids = mysql__select_list2($mysqli, $sub_query);
-                    if(is_array($ids) && count($ids)>0){
+                    if(is_array($ids) && !empty($ids)){
                         //if(count($ids)>2000)
                         $val = ' IN ('.implode(',',$ids).')';
                     }else{
@@ -2303,23 +2266,15 @@ class HPredicate {
 
             //reverse
             $inverse_reltype_ids = getTermInverseAll($mysqli, $this->relation_types );
-            if(count($inverse_reltype_ids)>0){
-
-                $where_reverce_reltypes = "($rl.rl_RelationTypeID " .(count($inverse_reltype_ids)>1
-                            ?' IN ('.implode(',',$inverse_reltype_ids).')'
-                            :'='.$inverse_reltype_ids[0])
-                            .') AND ';
-
+            if(!empty($inverse_reltype_ids)){
+                $where_reverce_reltypes = predicateId("$rl.rl_RelationTypeID", $inverse_reltype_ids).SQL_AND;
             }
 
             //direct
             $this->relation_types = array_merge($this->relation_types,
                             getTermChildrenAll($mysqli, $this->relation_types));
 
-            $where_direct_reltypes = "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
-                        ?' IN ('.implode(',',$this->relation_types).')'
-                        :'='.$this->relation_types[0])
-                        .') AND ';
+            $where_direct_reltypes = predicateId("$rl.rl_RelationTypeID", $this->relation_types).SQL_AND;
 
             if($where_reverce_reltypes==''){
                 $where = $where_direct_reltypes;
@@ -2332,18 +2287,12 @@ class HPredicate {
 
             list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
 
-            if($reltypes!=null && count($reltypes)>0){
-                if(count($reltypes)==1){
-                    $reltypes = '='.$reltypes[0];
-                }else{
-                    $reltypes = 'IN ('.implode(',',$reltypes).')';
-                }
+            if($reltypes!=null && !empty($reltypes)>0){
+                $reltypes = predicateId("$rl.rl_RelationTypeID", $reltypes);
             }else{
-                $reltypes = 'IS NOT NULL';
+                $reltypes = "$rl.rl_RelationTypeID IS NOT NULL";
             }
-            //@todo add $rty_constraints
-
-            $where = $where . "$rl.rl_RelationTypeID $reltypes AND";
+            $where = $where . $reltypes . SQL_AND;
         }
 
         if($this->relation_fields!=null){
@@ -2432,30 +2381,24 @@ class HPredicate {
                 */
                 list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
 
-                if($rty_constraints!=null && count($rty_constraints)>0){
-                    if(count($rty_constraints)==1){
-                        $rty_constraints = '='.$rty_constraints[0];
-                    }else{
-                        $rty_constraints = 'IN ('.implode(',',$rty_constraints).')';
-                    }
+                if($rty_constraints!=null && !empty($rty_constraints)){
+                    
+                    $rty_constraints = predicateId('rec_RecTypeID', $rty_constraints);
 
-                    $rty_constraints = ', Records where '.$part2.'=rec_ID and rec_RecTypeID '.$rty_constraints.SQL_AND;
+                    $rty_constraints = ', Records where '.$rty_constraints.SQL_AND;
                 }else{
                     $rty_constraints = SQL_WHERE;
                 }
 
-                if($reltypes!=null && count($reltypes)>0){
-                    if(count($reltypes)==1){
-                        $reltypes = '='.$reltypes[0];
-                    }else{
-                        $reltypes = 'IN ('.implode(',',$reltypes).')';
-                    }
-                    $reltypes = ' rl_RelationTypeID '.$reltypes;
+                if($reltypes!=null && !empty($reltypes)){
+
+                    $reltypes = predicateId('rl_RelationTypeID', $reltypes);
+
                 }else{
                     $reltypes = 'rl_RelationTypeID IS NOT NULL';
                 }
 
-                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
                     ." IN (select $part1 from recLinks"
                                 .$rty_constraints
                                 .$reltypes.')';
@@ -2463,7 +2406,7 @@ class HPredicate {
             }else{
                 //relmarker field not defined
                 //no relation at all or any relation with specified reltypes (term) and record types
-                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
                         ." IN (select $part1 from recLinks where rl_RelationID IS NOT NULL)";
             }
 
@@ -2482,7 +2425,7 @@ class HPredicate {
 
                         $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
                         $ids = mysql__select_list2($mysqli, $sub_query);
-                        if(is_array($ids) && count($ids)>0){
+                        if(is_array($ids) && !empty($ids)){
                             //if(count($ids)>2000)
                             $val = ' IN ('.implode(',',$ids).')';
                         }else{
@@ -2511,15 +2454,12 @@ class HPredicate {
                 $where = $where . "AND $rl.$part2".$val;
             }
 
-            if(is_array($this->relation_types)&& count($this->relation_types)>0){
+            if(is_array($this->relation_types)&& !empty($this->relation_types)){
 
                 $this->relation_types = array_merge($this->relation_types,
                                 getTermChildrenAll($mysqli, $this->relation_types));
 
-                $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
-                            ?' IN ('.implode(',',$this->relation_types).')'
-                            :'='.$this->relation_types[0])
-                            .')';
+                $where = $where . SQL_AND. predicateId("$rl.rl_RelationTypeID", $this->relation_types);
 
             }else{
                 $where = $where . " AND $rl.rl_RelationID is not null";
@@ -2760,7 +2700,7 @@ class HPredicate {
         }
 
         if($this->negate){
-            $res = ' NOT '.$res;
+            $res = SQL_NOT.$res;
         }
 
         return $res;
@@ -2928,7 +2868,7 @@ class HPredicate {
                 if(count($all_terms)==1){
                     $res = ($this->negate?'<>':'=').$all_terms[0];
                 }else{
-                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$all_terms).')';
+                    $res = ($this->negate?SQL_NOT:'').' IN ('.implode(',',$all_terms).')';
                 }
 
 
@@ -3001,7 +2941,7 @@ class HPredicate {
                 }elseif(count($ids)==1){
                     $res = ($this->negate?'<>':'=').$ids[0];
                 }else{
-                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';
+                    $res = ($this->negate?SQL_NOT:'').' IN ('.implode(',',$ids).')';
                 }
 
 
@@ -3183,7 +3123,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                 if(!$this->fulltext){
 
                     if(!$this->exact){ //$eq=='=' &&
-                        $eq = ($this->negate?'NOT ':'').'LIKE';
+                        $eq = ($this->negate?SQL_NOT:'').'LIKE';
                         $k = strpos($this->value,"%");//if begin or end
                         if($k===false || ($k>0 && $k+1<strlen($this->value))){
                             $this->value = '%'.$this->value.'%';
