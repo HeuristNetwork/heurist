@@ -33,7 +33,7 @@ $.widget( "heurist.ruleBuilder", {
     },
 
     _selection: null,     // current set of selected records
-    _arr_fields:[],       // all direct and reverse resource and relation fields
+    _arr_fields:[],       // all direct and reverse resource (record pointer) and relation fields
     
     _arr_rectypes:[],          //list of all target rectypes for current selected source rt
 

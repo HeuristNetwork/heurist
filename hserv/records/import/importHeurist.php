@@ -943,7 +943,7 @@ $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dt
             }
 
             // prepare records - replace all fields, terms, record types to local ones
-            // keep record IDs in resource fields to replace them later
+            // keep record IDs in resource (record pointer)) fields to replace them later
             $record = array();
             $record['ID'] = $target_RecID; //0 - add new
             $record['RecTypeID'] = $recTypeID;
@@ -1381,7 +1381,7 @@ $query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID
                     $resource_notfound[$idx][0] = @$records_corr[$item[1]];
                 }
 
-                //update resource fields with new record ids
+                //update resource (record pointer) fields with new record ids
                 foreach ($resource_fields as $src_recid=>$fields){  //src recid => dty ids
 
                     //get new id in target db
@@ -1405,7 +1405,7 @@ $query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID
                                 if($query!=null){
                                     $ret = mysql__exec_param_query($mysqli, $query, null);
                                     if($ret!==true){
-                                        self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', 'Query:'.$query.'. '.$ret);
+                                        self::$system->addError(HEURIST_DB_ERROR, 'Cannot update record pointer fields', 'Query:'.$query.'. '.$ret);
                                         $is_rollback = true;
                                         break;
                                     }

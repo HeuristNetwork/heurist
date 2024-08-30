@@ -153,7 +153,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 }
 
 //
-// Finds and clear wrong default values for resource and enum fields
+// Finds and clear wrong default values for record pointer and enum (term) fields
 //
 function getInvalidDefaultValues($mysqli, $rectype_id=null){
 
@@ -186,7 +186,7 @@ function getInvalidDefaultValues($mysqli, $rectype_id=null){
             if(is_numeric($row['rst_DefaultValue']) && $row['rst_DefaultValue']>0){
                 if($row['dty_Type']=='resource'){
 
-                        //check that record for resource field exists
+                        //check that record for record pointer field exists
                         $res2 = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$row['rst_DefaultValue']);
                         if($res2>0){
                             //record exists - check that it fits constraints

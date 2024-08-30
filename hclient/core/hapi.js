@@ -1910,13 +1910,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             //
             // 1) index   rty_ID[dty_ID] = rst_ID
-            // 2) reverse links rty <- dty_ID - list of resource and relmarker fields that refers this rectype
+            // 2) reverse links rty <- dty_ID - list of record pointer and relmarker fields that refers this rectype
             // 3) direct links  rty -> rty_IDs - linked to 
             // 4) reverse links rty <- rty_IDs - linked from
             //
             createRstIndex: function () {
                 let rst_index = {};
-                let rst_references = {}; //list of resource and relmarker fields that refers this rectype
+                let rst_references = {}; //list of record pointer and relmarker fields that refers this rectype
                 let rst_reverse = {};    //linked FROM rectypes
                 let rst_direct = {};     //linked TO rectypes
 

@@ -14,7 +14,7 @@
     */
 
     /**
-    * Order resource fields by rec_Title
+    * Order record pointer fields by rec_Title
     *
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney

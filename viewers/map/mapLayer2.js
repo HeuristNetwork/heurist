@@ -515,7 +515,7 @@ function HMapLayer2( _options ) {
                     if(item.geofield){
                         //geo field can be 2 types
                         //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
-                        //2. dty_ID - pointer/resource field 
+                        //2. dty_ID - record pointer/resource field 
                         let geofields = item.geofield.split(',');
                         for(let k=0; k<geofields.length; k++){
                             let geofield = geofields[k];

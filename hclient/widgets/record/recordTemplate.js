@@ -93,7 +93,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     
                     selectedFields[rtid].push(dtid);    
                     
-                    //add resource field for parent recordtype
+                    //add resource (record pointer) field for parent recordtype
                     __addSelectedField(ids, lvl+2, rtid);
                 }
             }

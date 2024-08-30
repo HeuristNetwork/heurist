@@ -989,7 +989,7 @@ function printMappingReport_rt($arr, $rt_id){
             $rt_id = strval($code);
 
             if($zType == '->'){
-                return; // will get covered during resource field handling
+                return; // will get covered during resource (record type) field handling
             }else{
                 $mapping_errors[$zType] = "<tr class='".$table_class."'><td colspan='3'><strong>".$zType." (".$rt_id."):</strong></td><td colspan='4'>no field mappings available</td></tr>";
                 $warning_count ++;
@@ -1116,7 +1116,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 
     if($res_dt_id == null){
         printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id, $extra_info);
-        return "Detail type for resource not recognised for id: ".$resource_dt_id;
+        return "Detail type for resource (record pointer) not recognised for id: ".$resource_dt_id;
     }
 
     if(count($arrdt)>1){
@@ -1219,7 +1219,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
                     $recdata = array(DT_NAME=>$recdata);
                     $value = createResourceRecord($mysqli, $record_type_2, $recdata, $missing_pointers_count);
                 }else{
-                    $report_log = $report_log."<br> resource record type unconstrained for detail type: ".$dt_id;
+                    $report_log = $report_log."<br> resource (record pointer) record type unconstrained for detail type: ".$dt_id;
                     continue;
                 }
 
@@ -1345,7 +1345,7 @@ function resolveTermValue($dt_type, $value)
 }
 
 /**
-* get record type for resource detail type
+* get record type for resource (record pointer) detail type
 *
 * @param mixed $resource_dt_id
 */

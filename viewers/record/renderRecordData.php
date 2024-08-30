@@ -2789,7 +2789,7 @@ function orderComments($cmts) {
     return $ret;
 }
 
-//sort array by order_by_date for resource (pointer) details
+//sort array by order_by_date for resource (record pointer) details
 function __sortResourcesByDate($a, $b)
 {
     if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){

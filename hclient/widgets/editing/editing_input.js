@@ -61,7 +61,7 @@ $.widget( "heurist.editing_input", {
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
-    configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
+    configMode:null, //configuration settings, mostly for enum (terms) and resouc=rce (record pointer) types (from field rst_FieldConfig)
     customClasses:null, //custom classes to manipulate visibility and styles in editing
        
     isFileForRecord:false,
@@ -145,7 +145,7 @@ $.widget( "heurist.editing_input", {
             this.element.addClass(this.customClasses);
         }
         
-        //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
+        //configuration settings, mostly for enum (terms) and resource (record pointer) types (from field rst_FieldConfig)
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
             this.configMode = window.hWin.HEURIST4.util.isJSON(this.configMode);
@@ -5720,7 +5720,7 @@ $.widget( "heurist.editing_input", {
             this._findAndAssignTitle($inputdiv, value);
             return;
 
-        } else if(this.detailType=="relmarker"){  //combination of enum and resource
+        } else if(this.detailType=="relmarker"){  //combination of enum (terms) and resource (record pointer)
 
             disp_value = ''; //not used 
 

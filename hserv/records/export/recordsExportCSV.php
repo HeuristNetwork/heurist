@@ -87,7 +87,7 @@ if parameter prefs.fields is defined it creates separate file for every record t
 
 fields {rtid:{id, url, title, dt1, dt2, ....  dt4:resource_rt1, dt4:resource_rt2  } }
 
-for constrained resource fields we use "dt#:rt#"
+for constrained resource (record pointer) fields we use "dt#:rt#"
 @todo for enum fields use dt#:code,dt#:id,dt#:label
 
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
@@ -254,7 +254,7 @@ public static function output($data, $params){
                 $fieldFullID = $dt_id;
 
                 $constr_rt_id = 0;
-                if(strpos($dt_id,':')>0){ //for constrained resource fields
+                if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                     //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
@@ -402,7 +402,7 @@ public static function output($data, $params){
                     }
                 }
 
-                //add title for resource fields
+                //add title for resource (record pointer) fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
 
                     array_push($headers[$rt], $field_name_title);
@@ -541,7 +541,7 @@ public static function output($data, $params){
         $record_row = array();
         foreach($fields[$rty_ID] as $dt_id){
 
-            //suppl.fields for enum and resource fields
+            //suppl.fields for enum (terms) and resource (record pointer) fields
             $date_temporals = array();
             $enum_label = array();
             $enum_code = array();
@@ -553,7 +553,7 @@ public static function output($data, $params){
             $file_paths = array();
 
             $constr_rt_id = 0;
-            if(strpos($dt_id,':')>0){ //for constrained resource fields
+            if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                 list($dt_id, $constr_rt_id) = explode(':', $dt_id);
             }
 
@@ -979,7 +979,7 @@ public static function output_header($data, $params)
             foreach($flds as $dt_id){
 
                 $constr_rt_id = 0;
-                if(strpos($dt_id,':')>0){ //for constrained resource fields
+                if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                     //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
@@ -1076,7 +1076,7 @@ public static function output_header($data, $params)
                     }
                 }
 
-                //add title for resource fields
+                //add title for resource (record pointer) fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
                     array_push($headers[$rt], $field_name_title);
                 }

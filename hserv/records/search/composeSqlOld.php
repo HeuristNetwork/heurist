@@ -1087,7 +1087,7 @@ class SortPhrase {
                             "left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
                     } else {
                         // have to introduce a defDetailTypes join to ensure that we only use the linked resource's
-                        // title if this is in fact a resource type (previously any integer, e.g. a date, could potentially
+                        // title if this is in fact a resource (record pointer)) type (previously any integer, e.g. a date, could potentially
                         // index another records record)
                         return array(" ifnull((select if(dty_Type='resource', link.rec_Title, ".
                             "if(dty_Type='date',getEstDate(dtl_Value,0),dtl_Value)) ".
@@ -2375,7 +2375,7 @@ class BibIDPredicate extends Predicate {
 
 //
 // this is special case
-// find records that are linked from parent/top query         (resource field in parent record = record ID)
+// find records that are linked from parent/top query (resource (record pointer) field in parent record = record ID)
 //
 // 1. take parent query from parent object
 //
@@ -2489,7 +2489,7 @@ class LinkedFromParentPredicate extends Predicate {
 //
 // find records that are linked (have pointers) to  parent/top query
 
-//  resource detail value of parent query equals to record id
+//  resource (record pointer) detail value of parent query equals to record id
 //
 class LinkedToParentPredicate extends Predicate {
     public function makeSQL() {

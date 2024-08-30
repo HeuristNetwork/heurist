@@ -932,7 +932,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 let rectypes = response.data;
                 uniq_fieldnames = [];
                 let rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{} }, 0);    
-                //rt_fields - resource fields
+                //rt_fields - resource (record pointer) fields
                 //depend - only required dependencies 
 
                 let i, j, rt_resource, field_keys = Object.keys(rtOrder['levels']),
@@ -1421,7 +1421,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // returns list of field/rectypes 
     
     //  with level (depth) 
-    //    list of resource fields
+    //    list of resource (record pointer) fields
     //    list of dependent rectype     
     //
     //  rtOrder 
@@ -1470,7 +1470,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          }  
          
                         
-         //list all resource fields
+         //list all resource (record pointer) fields
          if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeTree.children)){
              
              for (j=0;j<rectypeTree.children.length;j++){
@@ -3893,7 +3893,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         if (imp_result['skipped']>0){
                             
                             let suggestions = 'If you see "missing data" message you may need to make fields optional.<br>'
-                            +'If record cannot be updated due wrong resource or parent links run Verify integrity to fix problems with records<br><br>';
+                            +'If record cannot be updated due to an incorrect resource or parent links, run Verify integrity to fix problems with records<br><br>';
                             
                             msg = msg 
                             +'</td></tr><tr><td colspan="2" style="color:red"><br><a href="#" onclick="'
