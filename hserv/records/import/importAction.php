@@ -34,7 +34,7 @@ require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 define('ERR_VALIDATION_QUERY','SQL error: Cannot perform validation query: ');
 define('MSG_VALIDATION_1','validation of numeric fields');
-define('MSG_VALIDATION_2','validation of resource fields');
+define('MSG_VALIDATION_2','validation of record pointer fields');
 
 /**
 * 3 public methods
@@ -1167,7 +1167,7 @@ public static function validateImport($params) {
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){ //required field is not mapped - error
                 //$ft_vals[$idx_fieldtype] == "file" ||
-                if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
+                if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource (record pointer)
                     array_push($missed, $ft_vals[0]);
                 }
 
@@ -1398,7 +1398,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             return false;
         }
     }
-    //4. In DB: Verify resource fields ==================================================
+
+    //4. In DB: Verify resource (record pointer) fields ==================================================
     mysql__update_progress(null, $progress_session_id, false, '4,7,'.MSG_VALIDATION_2);
 
     $k=0;
@@ -1774,6 +1775,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
                 mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_2);
+
             }
         }
         $res->close();

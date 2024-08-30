@@ -2895,11 +2895,11 @@ public methods
 
 
     /**
-     * Creates links (resource field) or Adds relationship records between records
+     * Creates links (resource/record pointer field) or Adds relationship records between records
      * based on certain fields values matching
      *
      * $data parameters
-     *          dty_ID - resource field id or  trm_ID - relationtype ID
+     *          dty_ID - resource (record pointer) field id or  trm_ID - relationtype ID
      *          rty_src or recids_src, dty_src, rty_trg, dty_trg - matching conditions
      *          repalce - 1 replace existing, otherwise add new link
      *
@@ -2918,7 +2918,7 @@ public methods
 
         $data = $this->data;
 
-        //dty_ID - resource field id or  trm_ID - relationtype ID
+        //dty_ID - resource (record pointer) field id or  trm_ID - relationtype ID
         //recIDs or rty_src, dty_src, rty_trg, dty_trg - matching conditions
 
         //1. Validate dty_ID or trm_ID from parameters
@@ -2928,8 +2928,10 @@ public methods
 
         //check that this is resouce filed
         if($dty_ID>0){
+
             if('resource' != $this->_getDetailType($dtyID)){
-                $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not type "resource"');
+                $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not a record pointer ("resource") field');
+
                 return false;
             }
         }elseif($trm_ID>0){
