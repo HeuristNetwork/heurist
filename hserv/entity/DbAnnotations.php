@@ -71,8 +71,8 @@ class DbAnnotations extends DbEntityBase
         if($this->data['recID']=='pages'){
             $sjson['items'] = array();
 
-            if($this->data['uri']){
-                $this->data['uri'] = substr($_SERVER['QUERY_STRING'],4);
+            if(!@$this->data['uri']){
+                $this->data['uri'] = filter_var(substr($_SERVER['QUERY_STRING'],4), FILTER_SANITIZE_URL);  //remove "uri="
             }
             $uri = $this->data['uri'];//.(@$this->data['file']?'&file='.$this->data['file']:'');
             $items = $this->findItems_by_Canvas($uri);
