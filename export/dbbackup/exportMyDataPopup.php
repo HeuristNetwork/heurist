@@ -510,7 +510,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR,
                     array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs',
                           'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons',
-                          'term-images', 'webimagecache'));//except these folders - some of them may exist in old databases only
+                          'term-images', 'webimagecache', 'blurredimagescache'));//except these folders - some of them may exist in old databases only
 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );

@@ -1330,6 +1330,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $webcache_file = HEURIST_FILESTORE_DIR . 'webimagecache/'.$webimage_name['filename'];
                 fileDelete($webcache_file.'.jpg');
                 fileDelete($webcache_file.'.png');
+
+                // remove blurred cached image
+                $blurimage_name = pathinfo($file['name']);
+                $blurcache_file = HEURIST_FILESTORE_DIR . "blurredimagescache/{$blurimage_name['filename']}.png";
+                fileDelete($blurcache_file);
             }
         }
 

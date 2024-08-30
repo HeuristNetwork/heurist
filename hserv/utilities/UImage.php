@@ -921,6 +921,11 @@ class UImage {
             //}
             //save into file
             if(!$scale_type || $scale_type == 'png'){
+
+                // retain transparent backgrounds
+                imagealphablending($src_img, false);
+                imagesavealpha($src_img, true);
+
                 imagepng($src_img, $scaled_file);
             }elseif($scale_type == 'jpg'){
                 imagejpeg($src_img, $scaled_file);
