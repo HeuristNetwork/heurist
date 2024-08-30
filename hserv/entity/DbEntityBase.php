@@ -98,7 +98,7 @@ abstract class DbEntityBase
 
        $this->init();//recreate table is it does not exist
 
-       $this->entityName = lcfirst(substr(get_class($this),2));
+       $this->entityName = lcfirst(substr(basename(get_class($this)),2));
 
        if($data){
            $this->setData($data);
@@ -156,8 +156,8 @@ abstract class DbEntityBase
            }
 
         }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity']
-                    .' in '.dirname(__FILE__));
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '
+                        .$this->entityName.' in '.dirname(__FILE__));
         }
     }
 

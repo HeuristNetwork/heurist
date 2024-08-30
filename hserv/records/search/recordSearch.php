@@ -299,8 +299,7 @@ function recordSearchMinMax($system, $params){
             $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
             if(mysql__select_value($mysqli, $q2)>0){
                 $query = $query.', usrWorkingSubsets ';
-                $where_clause = $where_clause.' AND wss_RecID=rec_ID AND wss_OwnerUGrpID='
-                .$currUserID;
+                $where_clause = $where_clause.' AND wss_RecID=rec_ID AND wss_OwnerUGrpID='.$currUserID;
             }
 
         }
@@ -1347,13 +1346,11 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.(defined('DT_END_DATE')?DT_END_DATE:0)
     .SQL_WHERE;
 
-    $swhere = predicateId('rec_ID', $ids);
-
     if($direction>=0){
 
         //find all target related records
         $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-        .'where rl_SourceID'.$swhere.$sRelCond.' order by rl_SourceID';
+        .SQL_WHERE.predicateId('rl_SourceID', $ids).$sRelCond.' order by rl_SourceID';
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -1391,7 +1388,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
         //find all reverse related records
         $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-        .'where rl_TargetID'.$swhere.$sRelCond.' order by rl_TargetID';
+        .SQL_WHERE.predicateId('rl_TargetID', $ids).$sRelCond.' order by rl_TargetID';
 
 
         $res = $mysqli->query($query);

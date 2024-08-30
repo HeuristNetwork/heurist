@@ -177,7 +177,7 @@ if(!($is_map_popup || $without_header)){
 
 $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 ?>
-<!DOCTYPE>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>HEURIST - View record</title>

@@ -4701,7 +4701,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             let error = ``;
             if(response.data.error.length > 0){
-                error = '<strong>The following errors occurred:</strong><br><br>';
+                error = '<br><br><strong>The following errors occurred:</strong><br><br>';
 
                 for(const fld_idx in response.data.error){
 
