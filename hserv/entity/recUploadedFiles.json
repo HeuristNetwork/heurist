@@ -128,6 +128,19 @@
                     }
                 },
                 {
+                    "dtID": "ulf_WhoCanView",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Visibility:",
+                        "rst_DisplayHelpText": "Sets whether the file's visibility, if set to 'login required' the image will be blurred for public users.",
+                        "rst_DefaultValue":"viewable",
+                        "rst_FieldConfig":[
+                            {"key":"viewable", "title":"Public"},
+                            {"key":"loginrequired", "title":"Login required"}
+                        ]
+                    }
+                },
+                {
                     "dtID": "ulf_FileSizeKB",
                     "dtFields":{
                         "dty_Type":"integer",

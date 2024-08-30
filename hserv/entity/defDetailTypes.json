@@ -97,7 +97,6 @@
                         "rst_Class":"newFieldForRtyID",
                         "rst_DisplayName":"Repeatability:",
                         "rst_DisplayHelpText": "Determines whether field can contain more than one value at a time",
-                        "rst_DefaultValue":"single",
                         "rst_Display":"hidden",
                         "rst_DefaultValue":"1",
                         "rst_FieldConfig":[
@@ -248,7 +247,6 @@
                     "dtID": "dty_PtrTargetRectypeIDs",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_Display":"hidden",
                         "rst_Class":"resource relmarker",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Target record type(s):",

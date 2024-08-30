@@ -362,9 +362,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                 }, true);
                 }//for
             }
-            
-            
+
             isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
+
+            if(window.hWin.HEURIST4.util.isempty(this._editing.getValue('ulf_WhoCanView')[0])){
+                // force option to public, without changes
+                let ele = this._editing.getFieldByName('ulf_WhoCanView');
+                ele.editing_input('setValue', 'viewable', true);
+            }
         }else{
             //new record
             isLocal = (this._additionMode=='local');
