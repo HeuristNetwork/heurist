@@ -193,7 +193,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             function(){ 
 
             
-            let iWidth = 450;
+            let iWidth = 600; //was 450 if only Heurist login visible
             
             let show_guest_login = (typeof prepared_params !== 'undefined' && prepared_params['guest_data']);
             
@@ -215,7 +215,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                         //$dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
                         //window.hWin.HEURIST4.ui.addoption(sel[0],0,'Heurist');
                     }
-                    iWidth = 600;    
                     
                     for(let id of sp_keys){
                         window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
@@ -226,8 +225,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     $dlg.find('#login_saml').show(); //css({'display':'inline-block'});
                     //$dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
                 }
-            }else{
-                $dlg.find('#login_saml').hide();
             }
             
             if(show_guest_login){
