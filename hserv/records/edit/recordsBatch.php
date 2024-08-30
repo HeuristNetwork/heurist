@@ -274,7 +274,7 @@ class RecordsBatch
     //
     //
     //    
-    private function _getDetailType($dty_ID){
+    private function getDetailType($dty_ID){
         return mysql__select_value($this->system->get_mysqli(),
                  'select dty_Type from defDetailTypes where dty_ID = '.$dty_ID);
     }
@@ -501,7 +501,7 @@ class RecordsBatch
 
         $basetype = null;
         if(@$this->data['geo']==null){
-            $basetype = $this->_getDetailType($dtyID);
+            $basetype = $this->getDetailType($dtyID);
             if($basetype=='geo'){
                 $this->data['geo'] = $this->data['val'];
             }
@@ -750,7 +750,7 @@ class RecordsBatch
             }
         }
 
-        $basetype = $this->_getDetailType($dtyID);
+        $basetype = $this->getDetailType($dtyID);
 
         $partialReplace = false;
 
@@ -1073,7 +1073,7 @@ class RecordsBatch
             $searchClause=null;
             $is_like=false;
             
-            $basetype = $this->_getDetailType($dtyID);
+            $basetype = $this->getDetailType($dtyID);
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
@@ -2316,7 +2316,7 @@ public methods
         $baseTag = "~replace case convert $dtyName $date_mode";
 
         // Check field is freetext or blocktext
-        $fld_type = $this->_getDetailType($dtyID);
+        $fld_type = $this->getDetailType($dtyID);
         if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Case conversion only works on valid freetext and blocktext fields');
             return false;
@@ -2468,7 +2468,7 @@ public methods
         $baseTag = "~translation $dtyName $date_mode";
 
         // Check field is freetext or blocktext
-        $fld_type = $this->_getDetailType($dtyID);
+        $fld_type = $this->getDetailType($dtyID);
         if($dtyID < 1 || ($fld_type != 'freetext' && $fld_type != 'blocktext')){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Translation only works on valid freetext and blocktext fields');
             return false;
@@ -2928,7 +2928,7 @@ public methods
 
         //check that this is resouce filed
         if($dty_ID>0){
-            if('resource' != $this->_getDetailType($dtyID)){
+            if('resource' != $this->getDetailType($dty_ID)){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not type "resource"');
                 return false;
             }
