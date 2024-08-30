@@ -1656,7 +1656,7 @@ $.widget( "heurist.app_storymap", {
     
     //
     // Every place is separate object on map - animate sequence - begin, transition, end places
-    // 1. find all resource fields that points to places
+    // 1. find all resource (record pointer) fields that points to places
     // 2. retrieve all places from server side as geojson
     // 3. create links between points
     // 4. update map
@@ -1687,7 +1687,7 @@ $.widget( "heurist.app_storymap", {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     //recID = parseInt(recID);
-                    // 1. find all resource fields that points to places               
+                    // 1. find all resource (record pointer) fields that points to places               
                     that._cache_story_places[recID] = {};
                     that._cache_story_places[recID]['places'] = [];
                     const RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];

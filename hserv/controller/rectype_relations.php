@@ -83,7 +83,7 @@
     /**
     * Retrieve all detail types of a record type that point to other records
     *
-    * Find all constrined resource and relmarker fields
+    * Find all constrained resource (record pointer) and relmarker fields
     *
     * @param mixed $system   System reference
     * @param mixed $rectype  Record type

@@ -1220,7 +1220,7 @@ function ShowReps( is_snippet_editor ) {
                     $(data.node.span.childNodes[1]).hide(); //checkbox for separators
                 }else if(node.data.type!='enum' && node.data.is_rec_fields == null && node.data.is_generic_fields == null){
                     let op = '';
-                    if(node.data.type=='resource' || node.title=='Relationship'){ //resource
+                    if(node.data.type=='resource' || node.title=='Relationship'){ //resource (record pointer)
                         op = 'repeat';
                     }else if(node.children){
                         op = 'if';

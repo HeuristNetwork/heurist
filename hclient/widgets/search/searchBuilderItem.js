@@ -637,7 +637,7 @@ Whole value = EQUAL
         
         if(field_type=='relmarker'){
             // for this type we create two elements 
-            // relation type selector and resource record selector
+            // relation type selector and resource (record pointer) record selector
             ed_options['detailtype'] = 'relationtype';
             ed_options['dtID'] = 'r';
             let dtFields = {dty_Type:'relationtype', 

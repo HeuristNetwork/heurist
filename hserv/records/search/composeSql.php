@@ -168,7 +168,7 @@ Base field counts:    count|cnt|fc
 Search location dtl_Geo:   geo : WKT
 Search record by tags:     tag|keyword|kwd
 
-Search by resource/link:  linked_to|linkedto|linkto|link_to|lt
+Search by resource (record pointer/link):  linked_to|linkedto|linkto|link_to|lt
                                          linked_from|linkedfrom|linkfrom|link_from|lf
 Search by relationships:  related_to|relatedto|rt
                                          related_from|relatedfrom|rf

@@ -1063,7 +1063,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype_cc = '';//concept code
         $multi_constraint = false;
 
-        if(count($matches)>3){ //this is resource field  [Places referenced..Media..Media item title]
+        if(count($matches)>3){ //this is resource (record pointer) field  [Places referenced..Media..Media item title]
 
             $ishift = 0;
             $pos = mb_strpos($inner_field_name, '{');//{Organization}..Name - name of target rectype is defined
@@ -1155,7 +1155,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 //[Note title]  [Author(s).{PersonBig}.Family Name] ,  [Author(s).{Organisation}.Full name of organisation]
 // [2-1]  [2-15.{2-10}.2-1] ,  [2-15.{2-4}.2-1]
 
-            //get values for resource field
+            //get values for resource (record pointer) field
             $pointer_ids = self::__get_field_value( $rdt_id, $rt, $mode, $rec_id);
             $pointer_ids = prepareIds($pointer_ids);
             $res = array();
@@ -1163,7 +1163,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 $rec_value = self::__get_record_value($rec_id);
                 if($rec_value){
-                    $res_rt = $rec_value['rec_RecTypeID'];//resource rt
+                    $res_rt = $rec_value['rec_RecTypeID'];//resource (linked record) type rt
 
                     if($inner_rectype>0 && $inner_rectype!=$res_rt) {continue;}
 

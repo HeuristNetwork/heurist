@@ -365,7 +365,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
 
-            if(is_array($value)){ //geo,file,resource
+            if(is_array($value)){ //geo,file,resource (record pointer)
                 if(@$value['file']){
                     //remove some fields
                     $val = $value['file'];
@@ -373,7 +373,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     unset($val['fullPath']);
                     unset($val['ulf_Parameters']);
 
-                }elseif(@$value['id']){ //resource
+                }elseif(@$value['id']){ //resource (record pointer)
                     $val = $value['id'];
                 }elseif(@$value['geo']){
 
@@ -432,7 +432,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
-            if(is_array($value) && @$value['id']>0){ //resource
+            if(is_array($value) && @$value['id']>0){ //resource (record poitner)
                 $val['resourceTitle']     = @$value['title'];
                 $val['resourceRecTypeID'] = @$value['type'];
             }

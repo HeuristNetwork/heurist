@@ -214,7 +214,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             let parentcode = '';
             
             if(ids.length==4){
-                //include parent resource field
+                //include parent resource (record pointer) field
                 let parent_rtid = ids[0];
                 let parent_dtid = ids[1];
                 let linktype = parent_dtid.substr(0,2); //remove link type lt ot rt  10:lt34

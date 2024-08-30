@@ -1473,7 +1473,7 @@ function deleteOneRecord($system, $id, $rectype){
         $child_records = mysql__select_assoc2($mysqli, $query);
     }
 
-    //find target records where resource field points to record to be deleted
+    //find target records where resource (record pointer) field points to record to be deleted
     $links = recordSearchRelated($system, array($id), -1, false, 1);
     if($links['status']==HEURIST_OK && count(@$links['data']['reverse'])>0){
         $links = $links['data']['reverse'];
@@ -1774,7 +1774,7 @@ function addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace){
 
         $res = 1;
         if(!($mysqli->insert_id>0)){
-            $system->addError(HEURIST_DB_ERROR, 'Can not add resource field', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Can not add record pointer field', $mysqli->error);
             $res=-1;
         }
 
@@ -2759,7 +2759,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                             $err_msg = 'Record ID '.htmlspecialchars($dtl_Value).' is not valid integer';
                         }
                     }
-                    //this is parent-child resource
+                    //this is parent-child resource (record pointer)
                     if($isValid && in_array($dtyID, $det_childpointers)){
                         $dval['dtl_ParentChild'] = true;
                     }

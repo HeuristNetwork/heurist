@@ -54,7 +54,7 @@ ENTITY
 
 openRecordEdit  - open add/edit record form/dialog
 openRecordInPopup - open viewer or add/edit record form
-createRecordLinkInfo - creates ui for resource or relationship record
+createRecordLinkInfo - creates ui for record pointer or relationship record
 
 createEntitySelector - get id-name selector for specified entity
 showEntityDialog - entity editor/selector dialog

@@ -254,7 +254,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      * For multi-values, [dty_ID: [value1, value2, ...], ...]
      * It is preferable to return the values as an array, as that's how they are handled by editing_inputs
      * 
-     * Additional processing for terms (enum), record pointer (resource), file and relationship markers are handled in manageRecords.js
+     * Additional processing for terms, record pointers, file and relationship markers are handled in manageRecords.js
      *  For terms return one of the following: 
      *      an existing term id or label (the set vocabulary will be searched using these values), 
      *      a single value that will act as the term's label, or 

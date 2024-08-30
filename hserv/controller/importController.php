@@ -33,7 +33,7 @@
     action
 
     set_primary_rectype
-        set main rectype for given session and returns list of dependencies (resource field->rectype)
+        set main rectype for given session and returns list of dependencies (resource/record pointer field->rectype)
 
 
     1) step0

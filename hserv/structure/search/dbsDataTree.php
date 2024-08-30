@@ -77,7 +77,7 @@
         //create hierarchy tree
         foreach ($rectypeids as $rectypeID){
 
-                //find all parent recordtypes and modify fieldstype (add fake resource fields)
+                //find all parent recordtypes and modify fieldstype (add fake resource (record pointer) fields)
                 __addParentResourceFields($rectypeID);
 
                 $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
@@ -121,7 +121,7 @@
     }
 
     //
-    // adds resource fields to parent
+    // adds resource (record pointer) fields to parent
     //
     function __addParentResourceFields($recTypeId){
 
@@ -268,7 +268,7 @@
                     }
                 }//for
 
-                //add resource and relation at the end of result array
+                //add resource (record pointer) and relation at the end of result array
                 $children = array_merge($children, $children_links);
 
                 //find all reverse links and relations

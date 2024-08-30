@@ -517,7 +517,7 @@ function predicateRtyDtyFilters($rtyIDs, $dtyIDs, $dt_field='dty_ID')
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     global $system, $mysqli;
     //saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
-    // find all detail values for resource type details which exist for any record with an id in $rec_ids
+    // find all detail values for record pointer type details which exist for any record with an id in $rec_ids
     // and also is of a type in rtyIDs if rtyIDs is set to non null
     $nlrIDs = array();// new linked record IDs
     $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, '

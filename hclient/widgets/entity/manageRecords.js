@@ -3280,7 +3280,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             
             let exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             
-            //2. Popup for resource field
+            //2. Popup for resource (record pointer) field
             let dlged = that._getEditDialog();
             if(dlged && (no_access || (this.options.edit_obstacle && exp_level!=0 ) )){ 
                 

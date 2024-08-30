@@ -369,7 +369,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         let ele = this.element.find('input[type="radio"][name="link_field"]:checked');
         let dty_ID = ele.val();
         let trm_ID = 0;
-        let data_type = ele.attr('data-type');   //resource or relmarker
+        let data_type = ele.attr('data-type');   //resource (record pointer) or relmarker
         if(data_type!='resource'){
             trm_ID = this.getFieldValue('rt_source_sel_'+dty_ID);
         }*/

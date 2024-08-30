@@ -598,7 +598,7 @@ window.hWin.HEURIST4.dbs = {
 
                     }
                     
-                    //add resource and relation at the end of result array
+                    //add record pointer and relation at the end of result array
                     $dtl_fields = $dtl_fields.concat($children_links);
 
                     $dtl_fields.sort(function(a,b){
@@ -724,7 +724,7 @@ window.hWin.HEURIST4.dbs = {
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
                     
-                    //add resource and relation at the end of result array
+                    //add record pointer and relation at the end of result array
                     $children = $children.concat($children_links);                    
                     
                 }*/

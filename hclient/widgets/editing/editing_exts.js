@@ -2,7 +2,7 @@
 * editng_exts.js - additional functions for editing_input
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
-*  3) browseRecords - browse records for resource fields 
+*  3) browseRecords - browse records for record type fields 
 *     browseTerms
 *       3a) openSearchMenu
 *  4) translationSupport - opens popup dialog with ability to define translations for field values

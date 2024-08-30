@@ -833,7 +833,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
 
-            //find resource fields and its values
+            //find record pointer fields and its values
             
             for (let i=0; i<dty_ids.length; i++) {
                 let dtype = $Db.dty(dty_ids[i], 'dty_Type');

@@ -9,7 +9,7 @@ New and existing service mapping is found at hserv/controller/record_lookup_conf
 All lookups are extenstions of the recordAction widget (hclient/widget/record/recordAction.js)
 
 lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, 
-    this also includes how to prepare data for terms (enum), record pointer (resource), files and relationship marker fields.
+    this also includes how to prepare data for terms, record pointer, files and relationship marker fields.
 (This template is based off of the BnF_bib lookup with some specifics stripped out)
 
 Current Services:
@@ -39,8 +39,8 @@ Both the MPCE and LRC18C lookups contain examples of record searching.
 
 Result Lists (widget found at hclient/widget/viewers/resultList.js) can be used to display the retrieved data as records in a list format for the user to select from.
 
-For resource (record pointer) and term fields, an id is needed to assign the corresponding value (record id and term id, respectively), or an array of ids.
-If any other value is returned, as necessary, the user will be prompted to create new terms and select/create new records for resource fields.
+For record pointer and term fields, an id is needed to assign the corresponding value (record id and term id, respectively), or an array of ids.
+If any other value is returned, as necessary, the user will be prompted to create new terms and select/create new records for record pointer fields.
 
 Updated: 13 Mar 2022
 
