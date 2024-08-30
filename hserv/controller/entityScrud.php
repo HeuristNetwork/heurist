@@ -51,8 +51,12 @@ if (@$argv) {
     require_once dirname(__FILE__).'/../../autoload.php';
 
     require_once 'entityScrudSrv.php';
-
-    $req_params = USanitize::sanitizeInputArray();
+    
+    if(isset($use_request) && $use_request===true){
+        $req_params = $_REQUEST; //array has been modified in api.php
+    }else{
+        $req_params = USanitize::sanitizeInputArray();
+    }
     
     $dbname = @$req_params['db'];
 

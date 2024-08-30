@@ -98,7 +98,7 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
     }
 
 }elseif(@$requestUri[2]!=null){
-    $_REQUEST['db'] = $requestUri[2];
+    assignRequest('db', $requestUri[2]);
 }
 
 
@@ -187,6 +187,8 @@ if (@$requestUri[3]=='iiif') {
 }
 else
 {
+    $use_request = true;
+    
     //action
     $_REQUEST['entity'] = @$entities[@$requestUri[3]];
     $_REQUEST['a'] = $method;
@@ -210,6 +212,22 @@ exit;
 //header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
 //echo json_encode($data);
 
+//
+//
+//
+function assignRequest($key, $value){
+    /*
+    if(@$_SERVER['REQUEST_METHOD']=='POST'){
+        $_POST[$key] = $value;
+    }else{
+        $_GET[$key] = $value;
+    }*/
+    $_REQUEST[$key] = $value;
+}
+
+//
+//
+//
 function exitWithError($message, $code){
 
     header(HEADER_CORS_POLICY);
