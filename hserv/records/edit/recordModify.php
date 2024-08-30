@@ -3301,8 +3301,8 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
         $access_grps = prepareIds($access_grps);
         $owner_grps = prepareIds($owner_grps, true);
 
-        $has_access_values = is_array($access_grps) && count($access_grps)>0;
-        $has_owner_values = is_array($owner_grps) && count($owner_grps)>0;
+        $has_access_values = is_array($access_grps) && !empty($access_grps);
+        $has_owner_values = is_array($owner_grps) && !empty($owner_grps);
 
         if($has_access_values){
             $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).') AND rcp_Level = "view"';
@@ -3319,12 +3319,12 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
             foreach($recIDs as $recID){
                 if(is_array($owner_grps)){
                     foreach ($owner_grps as $grp_id){
-                        array_push($values,'('.$grp_id.','.$recID.',"edit")');
+                        array_push($values,'('.intval($grp_id).','.$recID.',"edit")');
                     }
                 }
                 if(is_array($access_grps)){
                     foreach ($access_grps as $grp_id){
-                        array_push($values,'('.$grp_id.','.$recID.',"view")');
+                        array_push($values,'('.intval($grp_id).','.$recID.',"view")');
                     }
                 }
             }
