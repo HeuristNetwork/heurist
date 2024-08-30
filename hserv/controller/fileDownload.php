@@ -117,6 +117,7 @@ if(mysql__check_dbname($db)==null){
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
             $fileParams = $fileinfo['ulf_Parameters'];// external repository service id
+            $all_can_view = empty($fileinfo['ulf_WhoCanView']) || $fileinfo['ulf_WhoCanView'] == 'public';
             if($fileParams!=null && !empty($fileParams)){
                 $fileParams = json_decode($fileParams, true);
             }
@@ -202,12 +203,21 @@ if(mysql__check_dbname($db)==null){
 
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
+                        $get_blurred_image = !$all_can_view && !$system->has_access();
+                        $get_cached_image = @$_REQUEST['fullres'] === '0';
 
-                        if(@$req_params['fullres'] === '0'){ // get web cached version
+                        if($get_blurred_image){ //!$all_can_view
 
-                            $cache_url = getWebImageCache($system, $fileinfo);
+                            $blurred_url = getBlurredImage($system, $fileinfo);
+                            $direct_url = !$blurred_url ? HEURIST_BASE_URL . 'hclient/assets/100x100-login-required.png' : $blurred_url;
+
+                            $get_cached_image = false;
+                        }
+                        if($get_cached_image){ // get web cached version
+
+                            $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
                             if($cache_url){
-                                $direct_url = $cache_url;
+                                $direct_url = $cache_url;    
                             }
                         }
 

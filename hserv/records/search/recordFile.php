@@ -276,7 +276,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
         .'fxm_MimeType, ulf_PreferredSource, ulf_OrigFileName, ulf_FileSizeKB,'
         .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added, ulf_MimeExt,'
-        .' ulf_Caption, ulf_Copyright, ulf_Copyowner, ulf_Parameters'
+        .' ulf_Caption, ulf_Copyright, ulf_Copyowner, ulf_Parameters, ulf_WhoCanView'
         //.($all_fields?', ulf_Thumbnail':'') we don't store thumbnail in database anymore
         .' from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
@@ -972,6 +972,120 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
     }
 }
 
+/**
+ * Create a blurred png version of an image that is not for public view
+ *  Also overlays hclient/assests/100x100-login-required.png
+ * 
+ * @param hserv\System $system - initialised Heurist system object
+ * @param array $file_info - data obtained by fileGetFullInfo
+ * @param bool $return_url - return url to file instead of file path 
+ * @return bool | string - false on failure, otherwise either the url or pathway to the image
+ */
+function getBlurredImage($system, $file_info, $return_url = true){
+
+    $skip_combine = strpos(@$file_info['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
+                    strpos(@$file_info['ulf_OrigFileName'], '_iiif') === 0 ||
+                    strpos(@$file_info['ulf_OrigFileName'], '_tiled') === 0;
+
+    $is_public = @$file_info['ulf_WhoCanView'] !== 'loginrequired';
+
+    $message_path = __DIR__."/../../../hclient/assets/100x100-login-required.png";
+
+    if($is_public || $skip_combine || !file_exists($message_path)){
+        return false;
+    }
+
+    $file_path = resolveFilePath(@$file_info['fullPath']);
+    if(!file_exists($file_path)){
+        $system->addError(HEURIST_ACTION_BLOCKED, 'Unable to determine file location');
+        return false;
+    }
+
+    $file_path_info = pathinfo($file_path);
+
+    $blur_file_dir = HEURIST_FILESTORE_DIR . 'blurredimagescache';
+    $res = folderCreate2($blur_file_dir, '(for blurred due to visibility settings)', true);
+    if(!empty($res)){
+        $system->addError(HEURIST_ERROR, $res);
+        return false;
+    }
+
+    $blur_file_name = "{$file_path_info['filename']}.png";
+    $blur_file_path = "{$blur_file_dir}/{$blur_file_name}";
+    $blur_file_url = HEURIST_FILESTORE_URL . "blurredimagescache/{$blur_file_name}";
+    $scaled_message = "{$blur_file_dir}/scaled_msg.png";
+
+    $_cleanup_files = function() use ($blur_file_path, $scaled_message){
+        fileDelete($blur_file_path);
+        fileDelete($scaled_message);
+    };
+
+    if(file_exists($blur_file_path)){
+        //return $return_url ? $blur_file_url : $blur_file_path;
+        fileDelete($blur_file_path);
+    }
+
+    // Scale down to 800x800
+    $res = UImage::createScaledImageFile($file_path, $blur_file_path, 800, 800, false);
+    if($res !== true){
+        return false;
+    }
+
+    $blur_png = UImage::safeLoadImage($blur_file_path, 'image/png');
+    if(!$blur_png){
+        return false;
+    }
+    imagealphablending($blur_png, false);
+    imagesavealpha($blur_png, true);
+
+    // Add blur effect, needs to only be slightly blurry
+    for($i = 0; $i < 50; $i++){
+        imagefilter($blur_png, IMG_FILTER_GAUSSIAN_BLUR);
+    }
+
+    // Get dimensions
+    $width = imagesx($blur_png);
+    $height = imagesy($blur_png);
+
+    // Scale message
+    $res = UImage::createScaledImageFile($message_path, $scaled_message, $width, $height, false);
+    if($res !== true){
+        $_cleanup_files();
+        return false;
+    }
+
+    $message_png = UImage::safeLoadImage($scaled_message, 'image/png');
+    if(!$message_png){
+        $_cleanup_files();
+        return false;
+    }
+    imagealphablending($message_png, false);
+    imagesavealpha($message_png, true);
+
+    // Add and enlarge overlay, w/ opacity
+    $src_width = imagesx($message_png);
+    $src_height = imagesy($message_png);
+    $res = imagecopymerge($blur_png, $message_png, 0, 0, 0, 0, $src_width, $src_height, 85);
+    //$res = imagecopyresampled($blur_png, $message_png, 0, 0, 0, 0, 100, 100, 100, 100); much slower
+    fileDelete($scaled_message);
+
+    if(!$res){
+        $_cleanup_files();
+        return false;
+    }
+
+    $res = imagepng($blur_png, $blur_file_path); // save image
+    if(!$res){
+        $_cleanup_files();
+        return false;
+    }
+
+    // Free memory
+    imagedestroy($message_png);
+    imagedestroy($blur_png);
+
+    return $return_url ? $blur_file_url : $blur_file_path;
+}
 
 function youtube_id_from_url($url) {
 /*

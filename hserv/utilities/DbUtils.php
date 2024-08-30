@@ -244,7 +244,7 @@ class DbUtils {
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
             $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates',
             //'uploaded_files', 'uploaded_tilestacks',
-            'rectype-icons','term-images','webimagecache'));
+            'rectype-icons','term-images','webimagecache','blurredimagescache'));
             foreach($folders_to_copy as $idx=>$folder_name){
                 $folder_name = realpath($folder_name);
                 if($folder_name!==false){
