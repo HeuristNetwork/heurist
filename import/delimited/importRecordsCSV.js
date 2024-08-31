@@ -3718,7 +3718,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         if(res['count_error']>0){
                             
-                            $('#mrr_error').text('Unrecognised terms: '+res['count_error']);
+                            $('#mrr_error').text('Rows with unrecognised terms: '+res['count_error']);
                             $('#prepareErrors').show();//.css('display','inline-block');
                             
                             window.hWin.HEURIST4.msg.showMsgErr({
