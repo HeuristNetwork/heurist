@@ -890,7 +890,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 private static function parseKMLPlacemark($placemark, &$geom_types){
 
         $nodeText = '#text';
-        $regex_space = '//\n\s+/';
+        $regex_space = '/\n\s+/';
     
         $wkt = new WKT();
         $properties = array();

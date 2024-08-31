@@ -456,7 +456,7 @@
     * @param mixed $ugr_ID - user ID
     */
     function user_updateLoginTime($mysqli, $ugr_ID){
-        $query = 'update sysUGrps set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1 where ugr_ID='.$ugr_ID;
+        $query = 'update sysUGrps set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1 where ugr_ID='.intval($ugr_ID);
         $mysqli->query($query);
 
         $cnt = $mysqli->affected_rows;

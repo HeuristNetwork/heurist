@@ -486,9 +486,9 @@ use hserv\structure\ConceptCode;
     function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
         $result = null;
         if($mysqli){
+            $result = array();
             $res = $mysqli->query($query);
             if ($res){
-                $result = array();
                 while ($row = $res->fetch_row()){
 
                     if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
@@ -502,7 +502,8 @@ use hserv\structure\ConceptCode;
                 }
                 $res->close();
 
-            }else{
+            }elseif($mysqli->error){
+                return null;
             }
         }
         return $result;
