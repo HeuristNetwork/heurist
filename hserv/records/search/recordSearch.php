@@ -204,6 +204,9 @@ function recordSearchMatchedValues($system, $params){
             }else{
                 $result = 0;
             }
+            
+            $iteration = 1;
+            $is_completed_without_error = true;
 
             while ($offset<$total_cnt){
 
@@ -244,21 +247,35 @@ function recordSearchMatchedValues($system, $params){
                 }else{
                     $res = mysql__select_value($mysqli, $query);
                 }
-                if ($res==null){
-                    $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. Query '.$query, $mysqli->error);
-                    break;
+                
+                if ($res == null) {
+                    if(is_array($res)){
+                        //error_log('Empty array on interation '.$iteration);                        
+                    }else{
+                        $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. '
+                        .'<br> Records given: '.$total_cnt
+                        .'<br> Iteration: '.$iteration
+                        .'<br> Found so far '.(is_array($result)?count($result):$result)
+                        //.'<br>Res: '.print_r($res,true)
+                        .'<br>Query '.$query, $mysqli->error);
+                        $is_completed_without_error = false;
+                        break;
+                    }
                 }else{
                     if($need_nonmatches || $need_ids){
-                        $result = array_merge($result, $res);
+                        if(!empty($res)){
+                            $result = array_merge($result, $res);    
+                        }
                     }else{
                         $result = $result + $res;
                     }
                 }
 
                 $offset = $offset+500;
+                $iteration++;
             }//wile
 
-            if ($res!=null){
+            if ($is_completed_without_error){
                 $response = array('status'=>HEURIST_OK, 'data'=> $result);
             }
 
