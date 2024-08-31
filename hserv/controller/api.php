@@ -79,26 +79,28 @@ if(count($requestUri)>0){
     $requestUri = $params;
 }
 
-if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
-    //takes all parameters from $_REQUEST
+$req_params = USanitize::sanitizeInputArray();
+
+if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
+    //takes all parameters from $req_params
 
     //try to detect entity as parameter
-    if(@$entities[$_REQUEST['ent']] != null ){
-        $requestUri = array(0, 'api', $_REQUEST['db'], $_REQUEST['ent'], @$_REQUEST['id']);
+    if(@$entities[$req_params['ent']] != null ){
+        $requestUri = array(0, 'api', $req_params['db'], $req_params['ent'], @$req_params['id']);
     }else{
         exitWithError('API Not Found', 400);
     }
 
-}elseif(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
+}elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is parameter
 
     if(@$entities[$requestUri[2]]!=null){
-        $requestUri = array(0, 'api', $_REQUEST['db'], $requestUri[2], @$requestUri[3]);
+        $requestUri = array(0, 'api', $req_params['db'], $requestUri[2], @$requestUri[3]);
     }else{
         exitWithError('API Not Found', 400);
     }
 
 }elseif(@$requestUri[2]!=null){
-    assignRequest('db', $requestUri[2]);
+    $req_params['db'] = $requestUri[2];
 }
 
 
@@ -111,23 +113,23 @@ if($method == null || !in_array($method, $allowed_methods)){
 
 if($method=='save' || $method=='add'){
     //get request body
-    if(!@$_REQUEST['fields']){
+    if(!@$req_params['fields']){
         $data = json_decode(file_get_contents('php://input'), true);
         if($data){
             //request body
-            $_REQUEST['fields'] = $data;
+            $req_params['fields'] = $data;
         }else{
-            $_REQUEST['fields'] = $_REQUEST;
+            $req_params['fields'] = $req_params;
         }
     }
-    if(@$_REQUEST['fields']['db']){ //may contain db
-        $_REQUEST['db'] = $_REQUEST['fields']['db'];
-        unset($_REQUEST['fields']['db']);
+    if(@$req_params['fields']['db']){ //may contain db
+        $req_params['db'] = $req_params['fields']['db'];
+        unset($req_params['fields']['db']);
     }
 }else{
 
-    if(@$_REQUEST['limit']==null || $_REQUEST['limit']>100 || $_REQUEST['limit']<1){
-        $_REQUEST['limit']=100;
+    if(@$req_params['limit']==null || $req_params['limit']>100 || $req_params['limit']<1){
+        $req_params['limit']=100;
     }
 
 }
@@ -136,9 +138,9 @@ if($method=='save' || $method=='add'){
 if (@$requestUri[3]=='iiif') {
 
     if($method=='search'){
-        $_REQUEST['resource'] = @$requestUri[4];
-        $_REQUEST['id'] = @$requestUri[5];
-        $_REQUEST['restapi'] = 1; //set http response code
+        $req_params['resource'] = @$requestUri[4];
+        $req_params['id'] = @$requestUri[5];
+        $req_params['restapi'] = 1; //set http response code
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
@@ -152,15 +154,15 @@ if (@$requestUri[3]=='iiif') {
     include_once '../autoload.php';
 
     $system = new hserv\System();
-    if( ! $system->init($_REQUEST['db']) ){
+    if( ! $system->init($req_params['db']) ){
         //get error and response
         $system->error_exit_api();//exit from script
     }
 
     if($requestUri[3]==='login'){
 
-        if(!$system->doLogin(filter_var(@$_REQUEST['fields']['login'], FILTER_SANITIZE_STRING),
-                             @$_REQUEST['fields']['password'], 'shared'))
+        if(!$system->doLogin(filter_var(@$req_params['fields']['login'], FILTER_SANITIZE_STRING),
+                             @$req_params['fields']['password'], 'shared'))
         {
             $system->error_exit_api();
         }else{
@@ -187,18 +189,16 @@ if (@$requestUri[3]=='iiif') {
 }
 else
 {
-    $use_request = true;
-    
     //action
-    $_REQUEST['entity'] = @$entities[@$requestUri[3]];
-    $_REQUEST['a'] = $method;
-    $_REQUEST['restapi'] = 1; //set http response code
+    $req_params['entity'] = @$entities[@$requestUri[3]];
+    $req_params['a'] = $method;
+    $req_params['restapi'] = 1; //set http response code
 
     if(@$requestUri[4]!=null){
-      $_REQUEST['recID'] = $requestUri[4];
+      $req_params['recID'] = $requestUri[4];
     }
 
-    if($_REQUEST['entity']=='Records'){
+    if($req_params['entity']=='Records'){
         if($method=='search'){
             include_once '../../hserv/controller/record_output.php';
         }else{
@@ -211,19 +211,6 @@ else
 exit;
 //header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
 //echo json_encode($data);
-
-//
-//
-//
-function assignRequest($key, $value){
-    /*
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $_POST[$key] = $value;
-    }else{
-        $_GET[$key] = $value;
-    }*/
-    $_REQUEST[$key] = $value;
-}
 
 //
 //

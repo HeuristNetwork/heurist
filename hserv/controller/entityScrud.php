@@ -52,9 +52,7 @@ if (@$argv) {
 
     require_once 'entityScrudSrv.php';
     
-    if(isset($use_request) && $use_request===true){
-        $req_params = $_REQUEST; //array has been modified in api.php
-    }else{
+    if(!isset($req_params)){ //if set array has been already modified in api.php
         $req_params = USanitize::sanitizeInputArray();
     }
     

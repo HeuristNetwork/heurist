@@ -2,6 +2,7 @@
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\entity\DbRecUploadedFiles;
+use hserv\utilities\USanitize;
 
     /**
     * dbAnnotations
@@ -72,7 +73,8 @@ class DbAnnotations extends DbEntityBase
             $sjson['items'] = array();
 
             if(!@$this->data['uri']){
-                $this->data['uri'] = filter_var(substr($_SERVER['QUERY_STRING'],4), FILTER_SANITIZE_URL);  //remove "uri="
+                $params = USanitize::sanitizeInputArray();
+                $this->data['uri'] = $params['uri']; //filter_var(substr($_SERVER['QUERY_STRING'],4), FILTER_SANITIZE_URL);  //remove "uri="
             }
             $uri = $this->data['uri'];//.(@$this->data['file']?'&file='.$this->data['file']:'');
             $items = $this->findItems_by_Canvas($uri);

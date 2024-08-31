@@ -79,11 +79,15 @@
 
     $response = array();
 
-    if(@$_REQUEST['postdata']){
-        //in export csv all parameters send as json array in postdata
-        $params = json_decode($_REQUEST['postdata'], true);
+    if(isset($req_params)){ //if set array has been already modified in api.php
+        $params = $req_params;
     }else{
-        $params = $_REQUEST;
+        $params = USanitize::sanitizeInputArray();
+    }
+    
+    if(@$params['postdata']){
+        //in export csv all parameters send as json array in postdata
+        $params = json_decode($params['postdata'], true);
     }
 
     if(!isset($system) || $system==null){
