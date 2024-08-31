@@ -564,7 +564,7 @@ if(!$format){ $format='csv';}
                                         <td rowspan="3">
                                             <div id="prepareErrors"
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
-                                                <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Unrecognised terms: 0</h2>
+                                                <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Rows with unrecognised terms: 0</h2>
                                                 <div id="btnShowErrors"></div>
                                             </div>
                                         </td>
