@@ -163,6 +163,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
             //timeout 10 seconds (default 30)
             if($list_only){
+                $rec_url = htmlentities($rec_url);
                 print intval($rec_id)
                 ." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a><br>";
                 continue;
@@ -322,7 +323,8 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                     }
                     
                     if($list_only){
-                        print intval($rec_id).' : '.$dty_id
+                        $rec_url = htmlentities($rec_url);
+                        print intval($rec_id).' : '.intval($dty_id)
                         ." : <a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a><br>";
                         continue;
                     }
@@ -398,7 +400,8 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
             }*/
 
             if($list_only){
-                print intval($rec_id).' : '.$dty_id
+                $rec_url = htmlentities($rec_url);
+                print intval($rec_id).' : '.intval($dty_id)
                 ." <a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a><br>";
                 continue;
             }

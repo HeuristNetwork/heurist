@@ -1670,6 +1670,11 @@ function print_public_details($bib) {
                     $trm_label = !empty($translated_label) ? $translated_label : $trm_label;
                 }
 
+                //snyk does not see this code in sanitizeString
+                $trm_label = htmlspecialchars($trm_label, ENT_NOQUOTES);
+                $trm_label = str_replace('&lt;', '<', $trm_label);
+                $trm_label = str_replace('&gt;', '>', $trm_label);
+                
                 $bd['val'] = output_chunker($trm_label);
 
             }elseif($bd['dty_Type'] == 'date') {

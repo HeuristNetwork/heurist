@@ -1338,7 +1338,7 @@ function browseRecords(_editing_input, $input){
                                     let inputs = edit_ele.editing_input('getInputs');
                                     for (let idx in inputs) {
                                         //$(edit_ele.editing_input('getInputs')[idx])
-                                        if($(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
+                                        if($(inputs[idx]) && $(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
                                             $inputdiv = $(inputs[idx]).parent();
                                             $input = inputs[idx];
                                             break;
