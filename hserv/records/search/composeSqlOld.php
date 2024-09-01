@@ -2462,7 +2462,7 @@ class LinkedFromParentPredicate extends Predicate {
         }else{
 
             if(!empty($rty_IDs)){
-                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND; //??? was rl.rl_SourceID
+                $add_where = predicateId('rl.rl_SourceID',$rty_IDs).SQL_AND;
             }else{
                 $add_where = '';
             }
@@ -2573,7 +2573,7 @@ class LinkedToParentPredicate extends Predicate {
         }else{
 
             if(!empty($rty_IDs)){
-                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND; //??? was rl.rl_TargetID
+                $add_where = predicateId('rl.rl_TargetID',$rty_IDs).SQL_AND;  
             }else{
                 $add_where = '';
             }
