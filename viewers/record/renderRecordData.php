@@ -449,24 +449,32 @@ if($isLocalHost){
             //
             //
             function showHidePrivateInfo( event ){
+                
+             
 
-                if($('#link_showhide_private').length == 0){
-                    return;
+                let ele = $('#link_showhide_private');
+
+                if(ele.length == 0){
+                    return false;
                 }
 
-                var prefVal = 0;
-                if(window.hWin && window.hWin.HAPI4){
-                    prefVal = window.hWin.HAPI4.get_prefs('recordData_PrivateInfo');
-                }
+                let prefVal = 1;
+                
                 if(event!=null){
+                    prefVal = ele.attr('data-expand')>=0?ele.attr('data-expand'):prefVal;
                     prefVal = (prefVal!=1)?1:0;
-                }else{
-                    prefVal = $('#link_showhide_private').attr('data-expand') !== null ?
-                                    $('#link_showhide_private').attr('data-expand') : prefVal;
-                }
 
-                if(prefVal==1){
-                    $('#link_showhide_private').text('less...');
+                    //save in prefs                    
+                    if(event!=null && window.hWin && window.hWin.HAPI4){
+                        window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
+                    }
+                }else if(window.hWin && window.hWin.HAPI4){
+                    prefVal = window.hWin.HAPI4.get_prefs_def('recordData_PrivateInfo',1);
+                }
+                ele.attr('data-expand',prefVal);
+                
+                if(prefVal==0){
+                    ele.text('less...');
                     $('.morePrivateInfo').show();
                     if(event!=null){
                         setTimeout(function(){
@@ -474,13 +482,12 @@ if($isLocalHost){
                             },200);
                     }
                 }else{
-                    $('#link_showhide_private').text('more...');
+                    ele.text('more...');
                     $('.morePrivateInfo').hide();
                 }
-                //$(event.target).parents('.detailRowHeader').hide();
-                if(event!=null && window.hWin && window.hWin.HAPI4){
-                    window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
-                }
+                
+                
+                return false;
             }
 
             //
@@ -1175,7 +1182,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                             .'<div style="display:table-cell;padding-right:4px">'
                                 .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
                                 .'" src="'.ICON_PLACEHOLDER.DIV_E
-                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '
+                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a '
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
@@ -1189,8 +1196,9 @@ if ($bkm_ID>0 || $rec_id>0) {
                 if($cnt>3){
                     ?>
                     <div class="detailRow"><div class="detailType">
-                        <a href="#" oncontextmenu="return false;" onClick="$('.placeRow').show();$(event.target).hide
-                            ()" style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
+                        <a href="#more" oncontextmenu="return false;"
+                            onClick="$('.placeRow').show();$(event.target).hide();return false;" 
+                            style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
                         <div class="detail"></div>
                     </div>
                     <?php
@@ -1246,8 +1254,8 @@ function print_details($bib) {
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
-            <a href="#" oncontextmenu="return false;"
-                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);' style="color:blue">
+            <a href="#more" oncontextmenu="return false;"
+                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);return false;' style="color:blue">
                 more...
             </a>
             </div><div class="detail"></div></div></div>
@@ -1303,7 +1311,7 @@ function print_header_line($bib) {
             <span class="link"><a id=edit-link class="normal"
                 onClick="return sane_link_opener(this);"
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: top"></a>
+                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
 
         <?php }
@@ -1370,11 +1378,13 @@ function print_private_details($bib) {
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
-    //show or hide private details depends on preferences
+    //show or hide private details depends on preferences 
+    //0 collapsed 1 show
     ?>
     <div class="detailRowHeader" style="float:left;padding:10px">
-        <a href="#" oncontextmenu="return false;" id="link_showhide_private"
+        <a href="#more"  id="link_showhide_private"
             data-expand="<?php echo $show_private_details -= 1; ?>"
+            oncontextmenu="return false;"
             onClick="showHidePrivateInfo(event)">more...</a>
     </div>
     <div class="detailRowHeader morePrivateInfo" style="float:left;padding:0 0 20px 0;display:none;border:none;">
