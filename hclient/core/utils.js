@@ -1226,7 +1226,7 @@ window.hWin.HEURIST4.util = {
     _GRPID: 2
 }//end util
 
-var Hul = window.hWin.HEURIST4.util;
+window.Hul = window.hWin.HEURIST4.util;
 
 //-------------------------------------------------------------
 

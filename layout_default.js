@@ -37,7 +37,7 @@
 * @type Array
 */
 
-var cfg_widgets = [
+window.cfg_widgets = [
 
     {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js', minh:80, minw:150},
     {id:'heurist_SearchInput', name:'Filter', widgetname:'searchInput', script:'hclient/widgets/search/searchInput.js', minh:27, minw:150},
@@ -88,7 +88,7 @@ options - parameters to init application
 
 */
 
-var cfg_layouts = [
+window.cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
     // TODO: change the id and name to jsut HeuristDefault and Heurist Default - h4 and h3 are hangovers from old versions

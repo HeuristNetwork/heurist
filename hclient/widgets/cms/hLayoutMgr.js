@@ -18,7 +18,7 @@
 */
 /* global cfg_widgets, prepareTemplateBlog */
 
-var layoutMgr;  
+window.layoutMgr = null;  
 
 function hLayoutMgr(){
 
@@ -1165,7 +1165,7 @@ function hLayoutMgr(){
     
     //
     //public members
-    layoutMgr = {
+    window.layoutMgr = {
 
         getClass: function () {
             return _className;

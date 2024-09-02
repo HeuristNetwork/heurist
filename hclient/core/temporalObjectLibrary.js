@@ -951,7 +951,7 @@ Temporal.getFieldsForString = function (type,str) {
 }
 
 // Temporal Date object extend by date.js
-var TDate = function (strDate) {
+window.TDate = function (strDate) {
     //private members
     const _className = "TemporalDate";
     let _origString = strDate && strDate.toString ? strDate.toString() : "";
@@ -1414,7 +1414,11 @@ TDate.parse = function () {
                                 
     //parses date iso8601   (?:(?:        was (?:d|m)   
     //(((\-?\d+(d|m)?)[\/\-\s]?){0,3})?
-    temp = temp.match(/^\s*(((\-?\d+(d|m)?)[\/\-\s]?){1,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+    //temp = temp.match(/^\s*(((\-?\d+(d|m)?)[\/\-\s]?){1,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+
+    //parses date iso8601
+    temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?)[\/\-\s]?){0,3}){0,1}\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+        
     if (periodDesignator){ // period format doesn't have time or timezone  TODO:check this is correct
         temp[2] = temp[3] = null;
     }
