@@ -122,10 +122,12 @@ class USystem {
                 $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
             }
 
+            $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
+            
             $matches = array();
-            preg_match("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", @$_SERVER["SCRIPT_NAME"], $matches);
+            preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
             if($matches){
-                $installDir = preg_replace("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
+                $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
             }else{
 
                 // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij

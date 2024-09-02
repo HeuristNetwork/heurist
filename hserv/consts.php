@@ -218,6 +218,7 @@ define('TABLE_E','</table>');
 define('DIV','<div>');
 define('DIV_E','</div>');
 define('BR','<br>');
+define('BR2','<br><br>');
 
 //common sql reserved words
 define('SQL_AND',' AND ');

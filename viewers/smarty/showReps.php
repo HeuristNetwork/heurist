@@ -106,6 +106,8 @@ if(!$is_included){
 require_once dirname(__FILE__).'/smartyInit.php';
 require_once dirname(__FILE__).'/reportRecord.php';
 
+define('HEAD_E','</head>');
+
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 {
@@ -655,11 +657,13 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
             $font_styles = "<style> $font_styles </style>";
         }
         if(!empty($import_webfonts)){
-            $font_styles = '<style>'.$import_webfonts.'</style>'.$font_styles;
+            $font_styles = "<style>$import_webfonts</style>".$font_styles;
         }
 
 
         if($is_jsallowed){
+            
+            $script_tag = '<script type="text/javascript" src="'.HEURIST_BASE_URL;
 
             if(!$is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
 
@@ -711,14 +715,15 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
 
-                    $head .=
-                        ('<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery-ui-1.12.1/jquery-ui.min.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
-                        .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
-                        .'<link rel="stylesheet" href="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css" />');
-
+                    $baseURL = HEURIST_BASE_URL;
+                    $head .= <<<EXP
+                        {$script_tag}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+                        {$script_tag}external/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+                        {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
+                        {$script_tag}hclient/core/detectHeurist.js"></script>
+                        {$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>
+                        <link rel="stylesheet" href="{$baseURL}external/jquery.fancybox/jquery.fancybox.css" />
+                    EXP;
                     //init mediaviewer after page load
                     $head .=  ('<script>'
                     .'var rec_Files=[];'
@@ -736,7 +741,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
                 $tpl_source = str_replace('<body>','<body class="smarty-report">', $tpl_source);
                 if($head!=''){
-                    $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
+                    $tpl_source = str_replace(HEAD_E,$head.HEAD_E, $tpl_source);
                 }
 
 
@@ -749,14 +754,12 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
                     
-                    $script = '<script type="text/javascript" src="'.HEURIST_BASE_URL;
-
                     $head = <<<EXP
-{$script}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-{$script}external/jquery-ui-1.12.1/jquery-ui.js"></script>
-{$script}external/jquery.fancybox/jquery.fancybox.js"></script>
-{$script}hclient/core/detectHeurist.js"></script>
-{$script}hclient/widgets/viewers/mediaViewer.js"></script>
+{$script_tag}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+{$script_tag}external/jquery-ui-1.12.1/jquery-ui.js"></script>
+{$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
+{$script_tag}hclient/core/detectHeurist.js"></script>
+{$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>
 <script>var rec_Files=[];</script>
 EXP;
 
@@ -831,7 +834,7 @@ EXP;
                     //$tpl_source = removeHeadAndBodyTags($tpl_source);
 
                     if(strpos($tpl_source, '<head>')>0){
-                        $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
+                        $tpl_source = str_replace(HEAD_E,$head.HEAD_E, $tpl_source);
                     }else{
                         $tpl_source = removeHeadAndBodyTags($tpl_source);
                         $tpl_source = $head.$tpl_source;
@@ -898,7 +901,7 @@ EXP;
 
             if(!empty($font_styles)){
                 if(strpos($tpl_source, '<head>')>0){
-                    $tpl_source = str_replace('</head>',$font_styles.'</head>', $tpl_source);
+                    $tpl_source = str_replace(HEAD_E,$font_styles.HEAD_E, $tpl_source);
                 }else{
                     $tpl_source = $font_styles.$tpl_source;
                 }
@@ -1328,7 +1331,7 @@ function smarty_function_wrap($params, &$smarty)
 
         if($dt=="url"){
 
-            return "<a href='".$params['var']."' target=_blank rel=noopener $style>".$params['var']."</a>";
+            return "<a href='{$params['var']}' target=_blank rel=noopener $style>{$params['var']}</a>";
 
         }elseif($dt=="file"){
             //insert image or link
@@ -1363,9 +1366,9 @@ function smarty_function_wrap($params, &$smarty)
 
                     if(@$params['fancybox']){
                         $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
-                            .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
+                            .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>$sname</a>";
                     }else{
-                        $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
+                        $sres = $sres."<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
                     }
 
                 }else
@@ -1374,7 +1377,7 @@ function smarty_function_wrap($params, &$smarty)
                     if(@$params['fancybox']){
                         $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                     }else{
-                        $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener>".
+                        $sres = $sres."<a href='$file_URL' target=_blank rel=noopener>".
                         "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                     }
 

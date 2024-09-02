@@ -1658,13 +1658,14 @@ HEADER;
         $mysqli = $this->mysqli;
         
         $div_valid = '<div><h3 class="res-valid">';
+        $div_found = '<div><h3 class="error">Found ';
 
         // record types =========================
         $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' record types that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' record types that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
@@ -1687,7 +1688,7 @@ HEADER;
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' base field types that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' base field types that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
@@ -1710,7 +1711,7 @@ HEADER;
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' vocabularies that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' vocabularies that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
