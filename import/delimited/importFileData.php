@@ -91,9 +91,10 @@
 
     				<p><b>Step 1</b></p>
     				<p>
-    					Paste content in area below (each line MUST contain an ID), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br><br>
+    					Paste content in area below (each line MUST contain an ID), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br>
+    					The visibility field can only have one value, the newest value will be used (except when retaining existing values).<br><br>
 
-						It is recommend to download the CSV file reference (Found at Admin > Manage files) and then use the values under the ID column (first column) here.
+    					It is recommend to download the CSV file reference (Found at Admin > Manage files) and then use the values under the ID column (first column) here.
     				</p>
     				<input type="file" id="uploadFile" style="display:none">
     				<div style="padding-top:4px">
@@ -192,6 +193,13 @@
 						<span>Copy owner</span><br>
 						<select id="file_owner" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
+					</div>
+					<div>
+						<span>Visibility</span><br>
+						<select id="file_vis" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+						</select>
+						<br>
+						<span class="heurist-helper1">Allowed values: <strong>public</strong> or <strong>private</strong></span>
 					</div>
 
 				</fieldset>

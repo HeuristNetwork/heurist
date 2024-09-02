@@ -193,6 +193,7 @@ function hImportFileData() {
             opt.clone().appendTo($('#file_cap'));
             opt.clone().appendTo($('#file_rights'));
             opt.clone().appendTo($('#file_owner'));
+            opt.clone().appendTo($('#file_vis'));
         }
         if(maxcol>0){
             $('#file_id').val(0);
@@ -210,6 +211,8 @@ function hImportFileData() {
                     $('#file_rights').val(j);
                 }else if(s.indexOf('owner')>=0 || s.indexOf('copyowner')>=0){
                     $('#file_owner').val(j);
+                }else if(e.indexOf('vis')>=0 || s.indexOf('whocanview')>=0){
+                    $('#file_vis').val(j);
                 }
             }
 
@@ -290,8 +293,9 @@ function hImportFileData() {
             let file_cap = $('#file_cap').val();
             let file_rights = $('#file_rights').val();
             let file_owner = $('#file_owner').val();
+            let file_vis = $('#file_vis').val();
 
-            if(file_id < 0 || (file_desc < 0 && file_cap < 0 && file_rights < 0 && file_owner < 0)){
+            if(file_id < 0 || (file_desc < 0 && file_cap < 0 && file_rights < 0 && file_owner < 0 && file_vis < 0)){
                 msg = '<span style="color:red">' + (file_id < 0 ? 'The ID field must be defined' : 'A data field needs to be mapped') + '</span>';
             }else{
 
@@ -325,6 +329,9 @@ function hImportFileData() {
                     }
                     if(file_owner>-1 && file_owner<_parseddata[i].length){
                         record['ulf_Copyowner'] = _parseddata[i][file_owner];
+                    }
+                    if(file_vis>-1 && file_vis<_parseddata[i].length){
+                        record['ulf_WhoCanView'] = _parseddata[i][file_vis];
                     }
                    
                     _prepareddata.push(record);

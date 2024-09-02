@@ -156,6 +156,7 @@
 #menu-files-csv#Upload media from URLs
 #menu-files-upload-hint#Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files
 #menu-files-index-hint#Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)
+#menu-files-data#Import file data from CSV
 #Website#
 #menu-cms-create#Create
 #menu-cms-edit#Edit

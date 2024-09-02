@@ -1134,14 +1134,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 foreach($this->data['fields'] as $file_details){
 
                     if(!is_array($file_details) || count($file_details) < 2){ // invalid row | no details
-                        array_push($ret, (!is_array($file_details) ? 'Data is in invalid format' : 'No details provided'));
+                        $ret[] = (!is_array($file_details) ? 'Data is in invalid format' : 'No details provided');
                         continue;
                     }
 
                     $id = array_shift($file_details);
 
                     if(empty($file_details)){ // nothing to process
-                        array_push($ret, 'No details to import');
+                        $ret[] = 'No details to import';
                         continue;
                     }
 
@@ -1149,10 +1149,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     if($id_type == 'ulf_ID' || $id_type == 'ulf_ObfuscatedFileID'){
 
                         if($id_type == 'ulf_ID' && (!is_numeric($id) || intval($id) <= 0)){
-                            array_push($ret, "Invalid File ID provided");
+                            $ret[] = 'Invalid File ID provided';
                             continue;
                         }elseif($id_type == 'ulf_ObfuscatedFileID' && !preg_match('/^[a-z0-9]+$/', $id)){
-                            array_push($ret, "Invalid Obfuscated ID provided");
+                            $ret[] = 'Invalid Obfuscated ID provided';
                             continue;
                         }
 
@@ -1161,7 +1161,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }elseif($id_type == 'ulf_FullPath'){
 
                         if(is_numeric($id)){
-                            array_push($ret, "Invalid path provided " . htmlspecialchars($id));
+                            $ret[] = "Invalid path provided " . htmlspecialchars($id);
                             continue;
                         }
 
@@ -1177,11 +1177,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         break;
                     }
 
-                    $file_query = "SELECT ulf_ID, ulf_Description, ulf_Caption, ulf_Copyright, ulf_Copyowner FROM recUploadedFiles WHERE $where_clause";
+                    $file_query = "SELECT ulf_ID, ulf_Description, ulf_Caption, ulf_Copyright, ulf_Copyowner, ulf_WhoCanSee FROM recUploadedFiles WHERE $where_clause";
                     $ulf_row = mysql__select_row_assoc($mysqli, $file_query);
 
                     if(!$ulf_row){
-                        array_push($ret, 'An error occurred while trying to retrieve the existing file');
+                        $ret[] = 'An error occurred while trying to retrieve the existing file';
                         continue;
                     }
 
@@ -1197,26 +1197,46 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     continue;
                                 }else{ // 2 - append value
 
-                                    $file_details[$field] = $ulf_row[$field] . " ;" . $value;
+                                    $file_details[$field] = $field == 'ulf_WhoCanSee' ? $value : $ulf_row[$field] . " ;" . $value;
                                 }
                             }
                         }
                     } //else 3 - replace all values
 
                     if(empty($file_details)){
-                        array_push($ret, 'No new details to import');
+                        $ret[] = 'No new details to import';
                         continue;
+                    }
+
+                    // Validate WhoCanSee value
+                    if(array_key_exists('ulf_WhoCanSee', $file_details)){
+
+                        switch($file_details['ulf_WhoCanSee']){
+                            case 'public':
+                            case 'anyone':
+                            case 'visible':
+                            case 'viewable':
+                                $file_details['ulf_WhoCanSee'] = 'viewable';
+                                break;
+                            case 'hidden':
+                            case 'private':
+                            case 'loginonly':
+                            case 'loginrequired':
+                                $file_details['ulf_WhoCanSee'] = 'loginrequired';
+                                break;
+                            default:
+                                $ret[] = 'Invalid visibility setting, please use either public or private';
+                                continue;
+                        }
                     }
 
                     $file_details['ulf_ID'] = $ulf_row['ulf_ID'];
 
                     $res = mysql__insertupdate($this->system->get_mysqli(), 'recUploadedFiles', 'ulf', $file_details);
 
-                    if($res != $ulf_row['ulf_ID']){
-                        array_push($ret, 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID']));
-                    }else{
-                        array_push($ret, 'File details updated');
-                    }
+                    $res = $res != $ulf_row['ulf_ID'] ? 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID'])
+                                                      : 'File details updated';
+                    $ret[] = $res;
                 }
             }else{
                 $this->system->addError(HEURIST_ERROR, 'Data is in invalid format, ' . json_last_error_msg());
