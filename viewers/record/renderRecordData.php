@@ -978,7 +978,7 @@ if(!empty($import_webfonts)){
         }
 
         .external-link {
-            background-image: url(<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif);
+            background-image: url(<?php echo ICON_EXTLINK;?>);
             background-repeat: no-repeat;
             padding-left: 16px;
             padding-top: 4px;
@@ -1174,7 +1174,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                         .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
                             .'<div style="display:table-cell;padding-right:4px">'
                                 .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
-                                .'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
+                                .'" src="'.ICON_PLACEHOLDER.DIV_E
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
@@ -1314,7 +1314,7 @@ function print_header_line($bib) {
 
             <span style="cursor: default; padding-left: 20px;">
                 Workflow stage: <?php echo htmlspecialchars($wfs_details[1]);?>
-                <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
+                <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo ICON_PLACEHOLDER;?>"></span>
             </span>
 
         <?php } ?>
@@ -2411,7 +2411,7 @@ function print_relation_details($bib) {
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
 
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                             .'" onclick="return link_open(this);">'
@@ -2499,7 +2499,7 @@ function print_relation_details($bib) {
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
 
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                         .'" onclick="return link_open(this);">'
@@ -2596,7 +2596,7 @@ function print_linked_details($bib, $link_cnt)
         $link_cnt++;
 
             print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
+                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'"></div>';
 
             print '<div style="display: table-cell;vertical-align:top;'
             .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_popup href="'

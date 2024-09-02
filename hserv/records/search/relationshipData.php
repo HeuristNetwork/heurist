@@ -41,7 +41,7 @@ function fetch_relation_details($recID, $i_am_primary) {
     $startDT = ($system->defineConstant('DT_START_DATE')?DT_START_DATE:0);
     $endDT = ($system->defineConstant('DT_END_DATE')?DT_END_DATE:0);
     $titleDT = ($system->defineConstant('DT_NAME')?DT_NAME:0);
-
+    
     //global $system, $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
 
     /* get recDetails for the given linked resource and extract all the necessary values */
@@ -50,6 +50,9 @@ function fetch_relation_details($recID, $i_am_primary) {
 
     $bd = array('recID' => $recID);
     if($res){
+        
+        $query_select = 'select rec_ID, rec_Title, rec_RecTypeID, rec_URL from Records where rec_ID = ';
+        
         while ($row = $res->fetch_assoc()) {
 
         switch ($row['dtl_DetailTypeID']) {
@@ -73,22 +76,19 @@ function fetch_relation_details($recID, $i_am_primary) {
                 if (!$i_am_primary) {break;}
 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
-                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                                    $query_select.intval($row['dtl_Value']) );
                 break;
             case $relSrcDT:
                 if ($i_am_primary) {break;}
 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
-                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                                    $query_select.intval($row['dtl_Value']) );
 
                 break;
             case $intrpDT:
 
                 $bd['InterpRecID'] = mysql__select_row_assoc($mysqli,
-                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
-                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                                    $query_select.intval($row['dtl_Value']) );
 
                 break;
             case $notesDT:

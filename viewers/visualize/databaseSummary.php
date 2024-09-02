@@ -34,7 +34,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 text-decoration: none;
             }
             .external-link{
-                background-image: url('<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif');
+                background-image: url('<?php echo ICON_EXTLINK;?>');
                 background-repeat: no-repeat;
                 padding-left: 12px;
                 padding-top: 1px;
@@ -221,7 +221,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                 //HAPI4.iconBaseURL
                                 // Image
                                 $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
-                                $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                                $img = "<img src='".ICON_PLACEHOLDER."' title='$title' $rectypeImg class='rft' />";
                                 echo "<td align='center'>$img</td>";
 
                                 // Type

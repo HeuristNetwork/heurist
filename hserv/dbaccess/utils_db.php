@@ -14,6 +14,8 @@ use hserv\structure\ConceptCode;
     *  mysql__drop_database
     *  mysql__foreign_check
     *  mysql__supress_trigger
+    *  mysql__safe_updatess
+    *  mysql__found_rows
     *
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
@@ -215,6 +217,20 @@ use hserv\structure\ConceptCode;
     //
     function mysql__supress_trigger($mysqli, $is_on ){
         $mysqli->query('SET @SUPPRESS_UPDATE_TRIGGER='.($is_on?'1':'NULL'));
+    }
+    
+    //
+    //
+    //
+    function mysql__safe_updatess($mysqli, $is_on ){
+        $mysqli->query('SET SQL_SAFE_UPDATES='.($is_on?'1':'0'));
+    }
+    
+    //
+    // FOUND_ROWS function are deprecated; expect them to be removed in a future version of MySQL
+    //
+    function mysql__found_rows($mysqli){
+        return mysql__select_value($mysqli, 'SELECT FOUND_ROWS()');
     }
 
     //

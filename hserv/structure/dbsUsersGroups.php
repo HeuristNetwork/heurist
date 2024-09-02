@@ -188,7 +188,7 @@
                 "Your username is: ".$user['ugr_Name']."\n".
                 "Your new password is: ".$new_passwd."\n\n".
                 "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.\n\n"
-                ."Database Owner: ".$dbowner_Email;
+                ."Database Owner: $dbowner_Email";
 
 
                 $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text);
@@ -352,7 +352,7 @@
             "Your username is: ".$user['ugr_Name']."\n".
             "Your reset pin is: ".$new_pin."\n\n".
             "This pin will expire in 5 minutes. Please enter it in the popup to reset your password.\n\n"
-            ."Database Owner: ".$dbowner_Email;
+                ."Database Owner: $dbowner_Email";
 
             $res = sendEmail($user['ugr_eMail'], $email_title, $email_body);
             if($res){
@@ -1084,7 +1084,8 @@
 
             $email_text = $email_text."\n\nWe recommend visiting https://HeuristNetwork.org and the online documentation ".
             "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.\n\n".
-            "Database Owner: ".$dbowner_Email;
+                            "Database Owner: $dbowner_Email";
+
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 

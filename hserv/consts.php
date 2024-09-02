@@ -225,12 +225,15 @@ define('SQL_NULL', 'NULL');
 define('SQL_DELETE', 'DELETE FROM ');
 define('SQL_IN',' IN (');
 define('SQL_FALSE','(1=0)');
+define('SQL_BETWEEN',' BETWEEN ');
 
 define('MT_VIMEO','video/vimeo');
 define('MT_YOUTUBE','video/youtube');
 define('MT_SOUNDCLOUD','audio/soundcloud');
 
 //
+define('HTTP_SCHEMA','http://');
+define('HTTPS_SCHEMA','https://');
 define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
 define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');
 
@@ -262,6 +265,9 @@ define('DIR_BACKUP','backup/');
 define('DIR_THUMBS','thumbs/');
 define('DIR_ENTITY','entity/');
 
+
+define('ICON_PLACEHOLDER', HEURIST_BASE_URL.'hclient/assets/16x16.gif');
+define('ICON_EXTLINK', HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif');
 
 /** RECORD TYPE DEFINITIONS */
 $rtDefines = array(

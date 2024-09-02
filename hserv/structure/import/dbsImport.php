@@ -563,9 +563,9 @@ foreach ($this->imp_recordtypes as $recId){
     $rt_name = @$this->source_defs['rectypes']['names'][$recId];//get rectype in source
     if(!@$def_rts[$recId]){
         if(!$rt_name){
-            $this->error_exit2("Can't find record type #'".$recId."'. in source database");
+            $this->error_exit2("Can't find record type #'$recId' in source database");
         }else{
-            $this->error_exit2("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");
+            $this->error_exit2("Can't find definitions for record type #'$recId'. \"$rt_name\" in source database");
         }
         return false;
     }
@@ -574,7 +574,7 @@ foreach ($this->imp_recordtypes as $recId){
     $grp_name = null;
 
     if(!$grp_id){
-        $this->error_exit2("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");
+        $this->error_exit2("Group ID is not defined for record type #'$recId'. \"$rt_name\" in source database");
         return false;
     }
 
@@ -594,11 +594,11 @@ foreach ($this->imp_recordtypes as $recId){
     }
 
     if($src_group==null){
-        $this->error_exit2("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
+        $this->error_exit2("Can't find group #$grp_id for record type #'$recId'. \"$rt_name\" in source database");
         return false;
     }
     if(!$grp_name){
-        $this->error_exit2("Name of group is empty. Can't add group #".$grp_id." for record type #'"
+        $this->error_exit2("Name of group is empty. Can't add group #$grp_id for record type #'"
                                     .$recId."'. \"$rt_name\" in source database");
         return false;
     }
@@ -874,8 +874,8 @@ foreach ($this->imp_fieldtypes as $ftId){
         //$ftId
         $this->error_exit2('Can\'t add base field "'.$def_field[$idx_name-1]
             .'" (global code '.$def_field[$idx_ccode-1]
-            .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. '
-            .'<br><br>'.CONTACT_HEURIST_TEAM_PLEASE.' for advice'
+            .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. <br><br>'
+            .CONTACT_HEURIST_TEAM_PLEASE.' for advice'
             .'<br><br>MySQL message:'.$res);
         return false;
     }
@@ -1152,9 +1152,9 @@ $mysqli->commit();
 
         if(!$remote_dbname || !$remote_url){
             $this->system->addError(HEURIST_ERROR,
-                "Heurist Reference Index returns incorrect data for registered database # ".$database_id."<br>"
+                "Heurist Reference Index returns incorrect data for registered database # $database_id<br>"
                 ."The page may contain an invalid database reference<br>"
-                ."URL requested: ".$database_url."<br><br>");
+                ."URL requested: $database_url<br><br>");
             return false;
         }
 
@@ -1202,7 +1202,7 @@ $mysqli->commit();
 
                 $this->system->addError(HEURIST_ERROR, "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
                     . $error_code . "<br>"
-                    ."a) URL requested: " . $remoteURL . "<br><br>");//$database_url
+                    ."a) URL requested: $remoteURL<br><br>");//$database_url
             }
 
             $defs = json_decode(gzdecode($defs), true);
@@ -1906,7 +1906,7 @@ $mysqli->commit();
             $grp_id = @$rt[$idx_vcg_grp];
 
             if(!$grp_id){
-                $this->error_exit2("Vocabulary Group ID is not defined for vocabulary #'".$term_id."'. in source database");
+                $this->error_exit2("Vocabulary Group ID is not defined for vocabulary #'$term_id'. in source database");
                 return false;
             }
 
@@ -1920,13 +1920,12 @@ $mysqli->commit();
             $src_group = @$this->source_defs['terms']['groups'][$grp_id];
 
             if($src_group==null){
-                $this->error_exit2("Can't find vocabulary group #".$grp_id." for vocabulary #'".$term_id."'. in source database");
+                $this->error_exit2("Can't find vocabulary group #$grp_id for vocabulary #'$term_id'. in source database");
                 return false;
             }
             $grp_name = @$src_group['vcg_Name'];
             if(!$grp_name){
-                $this->error_exit2("Name of group is empty. Can't add group #".$grp_id." for vocabulary #'"
-                    .$term_id."'. in source database");
+                $this->error_exit2("Name of group is empty. Can't add group #$grp_id for vocabulary #'$term_id'. in source database");
                 return false;
             }
 
@@ -2385,7 +2384,7 @@ $mysqli->commit();
 
                 $this->translations_report = "Unable to connect remote server containing the registered database, possibly due to timeout or proxy setting<br>"
                     . $error_code . "<br>"
-                    ."URL requested: " . $remoteURL . "<br><br>";
+                    ."URL requested: $remoteURL<br><br>";
 
                 return;
             }

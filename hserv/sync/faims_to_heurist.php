@@ -134,7 +134,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $query2 =  "SELECT AEntTypeID, AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".intval($row[0]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
-                        echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2].DIV_E;
+                        echo "<div style='padding-left:30px'>{$row2[1]}  {$row2[2]}</div>";
                     }
                 }
 
@@ -156,7 +156,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $query2 =  "SELECT * FROM AEntValue where uuid=".intval($row[0])." and VersionNum=".intval($row[7]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
-                        echo "<div style='padding-left:30px'>".$row2[3]."  ".$row2[5]."  ".$row2[2].DIV_E;
+                        echo "<div style='padding-left:30px'>{$row2[3]}  {$row2[5]}  {$row2[2]}</div>";
                     }
                 }
 
@@ -203,7 +203,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $detailMap[$attrID] = $dtyId;
 
-                    print  "DT added ".intval($dtyId)."  based on ".htmlspecialchars($attrID." ".$row1[1]." ".$row1[3])."<br>";
+                    $dtyId = intval($dtyId);
+                    print  "DT added $dtyId based on ".htmlspecialchars($attrID." ".$row1[1]." ".$row1[3])."<br>";
                 }
 
 
@@ -249,8 +250,9 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         $stmt->close();
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
-
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".intval($trm_ID)."  based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
+                        
+                        $trm_ID = intval($trm_ID);
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added $trm_ID based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
                     }//add terms
 
                 }
@@ -377,7 +379,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 foreach ($dbfaims->query($query2) as $row2)
                 {
                     //attr id, freetext, measure, certainity, vocabid
-                    echo "<div style='padding-left:30px'>".$row2[3]."  ".$row2[5]."  ".$row2[4]."  ".$row2[6]."  ".$row2[2].DIV_E;
+                    echo "<div style='padding-left:30px'>{$row2[3]}  {$row2[5]} {$row2[4]}  {$row2[6]}  {$row2[2]}</div>";
 
                     //detail type
                     $key = intval(@$detailMap[$row2[3]]);

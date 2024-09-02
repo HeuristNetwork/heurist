@@ -37,6 +37,8 @@ if( !$system->init(@$_REQUEST['db']) ){
     die("Cannot connect to database");
 }
 
+define('KML_CLOSE','</Document></kml>');
+
 $islist = array_key_exists("q", $_REQUEST);
 
 if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
@@ -92,7 +94,7 @@ if(!$islist){
                 fwrite($kml_file_stream, $kml);
             }
 
-            fwrite($kml_file_stream, '</Document></kml>');
+            fwrite($kml_file_stream, KML_CLOSE);
             fclose($kml_file_stream);
         }
         
@@ -150,7 +152,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                 $error_msg = $system->getError();
                 $error_msg = $error_msg[0]['message'];
                 fwrite($kml_file_stream, $error_msg);
-                fwrite($kml_file_stream, '</Document></kml>');
+                fwrite($kml_file_stream, KML_CLOSE);
                 fclose($kml_file_stream);
                 print file_get_contents($kml_file);
                 return;
@@ -178,7 +180,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
         $res = $mysqli->query($squery);
         if($res===false){
-            fwrite($kml_file_stream, '</Document></kml>');
+            fwrite($kml_file_stream, KML_CLOSE);
             return;
         }
         $wkt_reccount = $res->num_rows;
@@ -258,8 +260,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     }
 }
-fwrite($kml_file_stream, '</Document>');
-fwrite($kml_file_stream, '</kml>');
+fwrite($kml_file_stream, KML_CLOSE);
 fclose($kml_file_stream);
 print file_get_contents($kml_file);
 

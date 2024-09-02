@@ -154,12 +154,12 @@ class DbRegis {
             $serverURL_lc = strtolower($params["serverURL"]);
 
             //add default scheme
-            if(!(strpos($serverURL_lc,'http://')===0 || strpos($serverURL_lc,'https://')===0)){
-                $serverURL = 'https://'.$serverURL;  //https by default
+            if(!(strpos($serverURL_lc,HTTP_SCHEMA)===0 || strpos($serverURL_lc,HTTPS_SCHEMA)===0)){
+                $serverURL = HTTPS_SCHEMA.$serverURL;  //https by default
                 $serverURL_lc = strtolower($serverURL);
             }
 
-            if(!(strpos(strtolower($serverURL_lc),'https://')===0 || strpos(strtolower($serverURL_lc),'http://')===0)){
+            if(!(strpos(strtolower($serverURL_lc),HTTPS_SCHEMA)===0 || strpos(strtolower($serverURL_lc),HTTP_SCHEMA)===0)){
                 self::addError(HEURIST_ACTION_BLOCKED,
                         'Database url does not have a trusted scheme');
                 return false;

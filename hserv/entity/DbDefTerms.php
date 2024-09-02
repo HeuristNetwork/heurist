@@ -1245,20 +1245,16 @@ class DbDefTerms extends DbEntityBase
         $records = array();
         $res = $mysqli->query($query);
         if ($res){
-            $fres = $mysqli->query('select found_rows()');
-            if ($fres)     {
-                $total_count_rows = $fres->fetch_row();
-                $total_count_rows = $total_count_rows[0];
-                $fres->close();
+            $total_count_rows = mysql__found_rows($mysqli);
 
-                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
+            if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
 
-                    $records = array();
-                    while ($row = $res->fetch_row())  {
-                        array_push($records, (int)$row[0]);
-                    }
+                $records = array();
+                while ($row = $res->fetch_row())  {
+                    array_push($records, (int)$row[0]);
                 }
             }
+
             $res->close();
         }
         if($mysqli->error){

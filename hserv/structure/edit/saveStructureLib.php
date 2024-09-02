@@ -1774,13 +1774,14 @@ function checkDtPtr($rty_IDs, $dty_ID){
                     array_push($links, $row[0]);
                 }
             }
-            $ret_message = $ret_message.'<br><br>'
-            ."<a href='#' onclick='window.open(\""
-            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
+            
+            $recIDs_list = implode(',',$recIDs);
+            $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
+            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
-                $ret_message = $ret_message.' (limited to first 250)';
+                $ret_message = "$ret_message (limited to first 250)";
             }
 
             $system->addError(HEURIST_ACTION_BLOCKED, $ret_message);
@@ -1864,13 +1865,14 @@ function checkTerms($termID){
                                 array_push($rtyIDs, $row[1]);
                             }
                         }
-                        $ret_message = $ret_message.'<br><br>'
-                        ."<a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
+                        
+                        $recIDs_list = implode(',',$recIDs);
+                        $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
+                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
-                            $ret_message = $ret_message.' (limited to first 250)';
+                            $ret_message = "$ret_message (limited to first 250)";
                         }
 
                         $ret_message = $ret_message.'<br><div style="padding:10px 30px;text-align:left">'
@@ -1878,7 +1880,7 @@ function checkTerms($termID){
                         $labels = dbs_GetRectypeNames( $mysqli, $rtyIDs );
 
                         foreach  ($labels as $rty_ID=>$rty_Name)  {
-                            $ret_message = $ret_message.'<li>'.$rty_Name.'</li>';
+                            $ret_message = $ret_message."<li>$rty_Name</li>";
                         }
 
                         $ret_message = $ret_message."</ul></div>";
@@ -1935,7 +1937,7 @@ function isTermInUse($trmID, $infield, $indetails){
                     $ret['dtyIDs'] = array();
                     while ($row = $res->fetch_row()) {
                         //array_push($ret['dtyIDs'], $row[0]);
-                        $errMessage = $errMessage.("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                        $errMessage = $errMessage.("<li>{$row[0]}&nbsp;{$row[1]}</li>");
                     }
                     $errMessage = $errMessage.'</ul>'
                     .'<br>Please note the field(s) listed below, then '
@@ -1985,11 +1987,12 @@ function isTermInUse($trmID, $infield, $indetails){
                     }
 
                 }
-                $errMessage = $errMessage."<br><br>"
-                ."<a href='#' onclick='window.open(\""
-                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
+                $links = implode(',',$links);
+                $errMessage = "$errMessage<br><br><a href='#' onclick='window.open(\""
+                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                ."&q=ids:$links&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
                 if(count($links)<$recCount){
-                    $errMessage = $errMessage.' (limited to first 250)';
+                    $errMessage = "$errMessage (limited to first 250)";
                 }
 
                 $system->addError(HEURIST_ACTION_BLOCKED, $errMessage);

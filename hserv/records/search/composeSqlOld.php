@@ -44,6 +44,8 @@ define('SQL_RELATION_IS_NOT_NULL',' rl.rl_RelationID IS NOT NULL ');
 define('SQL_RECLINK',' recLinks rl ');
 define('SQL_RECORDS',' FROM Records rd ');
 
+define('REC_MODIFIED','f:modified');
+
 //defined in const.php define('DT_RELATION_TYPE', 6);
 global $mysqli, $currUserID, $sortType;
 
@@ -2018,7 +2020,7 @@ class FieldPredicate extends Predicate {
         if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
             $vals = explode("<>", $this->value);
-            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
+            $match_pred = SQL_BETWEEN.$vals[0].SQL_AND.$vals[1].' ';
 
         }else {
 
@@ -2134,7 +2136,7 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
         if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
             $vals = explode("<>", $this->value);
-            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
+            $match_pred = SQL_BETWEEN.$vals[0].SQL_AND.$vals[1].' ';
 
         }else {
 
@@ -2323,7 +2325,7 @@ class BibIDPredicate extends Predicate {
             $vals = explode("<>", $this->value);
             $vals[0] = recordSearchReplacement($mysqli, $vals[0]);
             $vals[1] = recordSearchReplacement($mysqli, $vals[1]);
-            $match_pred = ' between '.$vals[0].SQL_AND.$vals[1].' ';
+            $match_pred = SQL_BETWEEN.$vals[0].SQL_AND.$vals[1].' ';
 
         }else{
 
@@ -2996,7 +2998,7 @@ class AfterPredicate extends Predicate {
 
     public function makeJSON(){
             $not = ($this->parent->negate)? '-' : '';
-            return array('f:modified'=>(($this->parent->negate)?'<':'>').$this->value);
+            return array(REC_MODIFIED=>(($this->parent->negate)?'<':'>').$this->value);
     }
 
     public function makeSQL() {
@@ -3021,7 +3023,7 @@ class BeforePredicate extends Predicate {
 
     public function makeJSON(){
             $not = ($this->parent->negate)? '-' : '';
-            return array('f:modified'=>(($this->parent->negate)?'>':'<').$this->value);
+            return array(REC_MODIFIED=>(($this->parent->negate)?'>':'<').$this->value);
     }
 
     public function makeSQL() {
@@ -3052,7 +3054,7 @@ class DatePredicate extends Predicate {
 
     public function makeJSON(){
             $not = ($this->parent->negate)? '-' : '';
-            return array('f:modified'=>$not.$this->value);
+            return array(REC_MODIFIED=>$not.$this->value);
     }
 
     public function makeSQL() {

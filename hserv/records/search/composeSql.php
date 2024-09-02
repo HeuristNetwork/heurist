@@ -900,7 +900,7 @@ class HLimb {
     var $where_clause = "";
     var $error_message = null;
 
-    var $allowed = array("all"=>SQL_AND,"any"=>" OR ","not"=>SQL_NOT);
+    var $allowed = array('all'=>SQL_AND,'any'=>" OR ",'not'=>SQL_NOT);
 
     //besides  not,any
     //
@@ -918,6 +918,8 @@ class HLimb {
                 $key = $key[0];
                 $value = $value[$key];
             }
+            
+            $key = strtolower($key);
 
             if( array_key_exists($key, $this->allowed) ){ //this is limb
                 $limb = new HLimb($this->parent, $key, $value);
@@ -1113,7 +1115,7 @@ class HPredicate {
         $this->qlevel = $this->parent->level; //
         $this->index_of_predicate = $index_of_predicate;
 
-        $key = explode(":", $key);
+        $key = explode(":", strtolower($key));
         $this->pred_type  = $key[0];
         $ll = count($key);
         if($ll>1){ //get field ids "f:5" -> 5
@@ -2515,7 +2517,7 @@ class HPredicate {
             $datestamp0 = Temporal::dateToISO($vals[0]);
             $datestamp1 = Temporal::dateToISO($vals[1]);
 
-            $ret = ($this->negate?'not ':'')."between '$datestamp0'".SQL_AND."'$datestamp1'";
+            $ret = ($this->negate?SQL_NOT:'').SQL_BETWEEN." '$datestamp0'".SQL_AND."'$datestamp1'";
             return $ret;
 
         }elseif($this->isEmptyValue()){ // {"f:10":"NULL"}
@@ -2936,7 +2938,7 @@ class HPredicate {
 
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $between = (($this->negate)?" not":"")." between ";
+                $between = (($this->negate)?" not":"").SQL_BETWEEN;
                 if(is_numeric($vals[0]) && is_numeric($vals[1])){
                     $res = $between.$vals[0].SQL_AND.$vals[1];
                 }
@@ -3006,7 +3008,7 @@ class HPredicate {
                 if (strpos($this->value,"<>")>0) {
                     $vals = explode("<>", $this->value);
 
-                    $between = (($this->negate)?" not":"")." between ";
+                    $between = (($this->negate)?SQL_NOT:'').SQL_BETWEEN;
                     if(is_numeric($vals[0]) && is_numeric($vals[1])){
                         $res = $between.$vals[0].SQL_AND.$vals[1];
                     }else{

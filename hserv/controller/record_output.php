@@ -366,7 +366,7 @@ function downloadFileReferences($system, $ids){
         $err_message = 'File record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
         if($total_count_rows==0){
             $err_message = 'Empty result set';
         }

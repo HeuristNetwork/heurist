@@ -366,7 +366,7 @@ class DbEntitySearch
 
             if($between){
                 $values = explode('<>', $value);
-                $between = ((negate)?' not':'').' between ';
+                $between = ((negate)?' not':'').SQL_BETWEEN;
                 $values[0] = $mysqli->real_escape_string($values[0]);
                 $values[1] = $mysqli->real_escape_string($values[1]);
             }else{
@@ -476,15 +476,7 @@ class DbEntitySearch
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
         }
-
-        $fres = $mysqli->query('select found_rows()');
-        if (!$fres)     {
-            $this->system->addError(HEURIST_DB_ERROR, 'Search error (retrieving number of records)', $mysqli->error);
-            return false;
-        }
-        $total_count_rows = $fres->fetch_row();
-        $total_count_rows = $total_count_rows[0];
-        $fres->close();
+        $total_count_rows = mysql__found_rows($mysqli);
         
         if($entityName==null){
             $entityName = $this->config['entityName'];

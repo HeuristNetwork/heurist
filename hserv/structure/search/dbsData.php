@@ -63,6 +63,7 @@
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
     require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
 
+    define('DATABASE','DATABASE: ');
 
     /**
     * @return    object iformation describing all the rectypes defined in the database
@@ -205,7 +206,7 @@
                 }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
 
@@ -250,7 +251,7 @@
             }
             $rectypeids = prepareIds($rectypeids);
 
-            $querywhere = ' where rty_ID '.(count($rectypeids)>1?(' IN ('.implode(',', $rectypeids).')') :('='.intval($rectypeids[0])));
+            $querywhere = ' where rty_ID '.(count($rectypeids)>1?(SQL_IN.implode(',', $rectypeids).')') :('='.intval($rectypeids[0])));
         } else {
             $querywhere = "";
         }
@@ -295,7 +296,7 @@
             }
             $res->close();
         }else{
-            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+            USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
         }
 
 
@@ -658,7 +659,7 @@ function dbs_GetRectypeConstraint($system) {
 
             $res->close();
         }else{
-            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
+            USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($system, "relation", "exact"),
@@ -701,7 +702,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
             }
 
 
@@ -720,7 +721,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
 
         }//$dbVer==1 && $dbVerSub>2
@@ -844,7 +845,7 @@ function dbs_GetRectypeConstraint($system) {
 
         if(is_array($parent_ids) && count($parent_ids)>1)
         {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';
+            $query = $query .SQL_IN.implode(',',$parent_ids).')';
         }else{
             if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
             $query = $query . ' = '.$parent_ids;
@@ -869,7 +870,7 @@ function dbs_GetRectypeConstraint($system) {
 
         if(is_array($parent_ids) && count($parent_ids)>1)
         {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';
+            $query = $query .SQL_IN.implode(',',$parent_ids).')';
         }else{
             if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
             $query = $query . ' = '.$parent_ids;

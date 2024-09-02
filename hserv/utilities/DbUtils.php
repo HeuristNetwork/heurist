@@ -1160,7 +1160,7 @@ class DbUtils {
 
             self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg, $mysqli->error);
             if($verbose) {
-                echo "<br><p>Warning: $error_msg - SQL error: ".$mysqli->error."</p>";
+                echo "<br><p>Warning: $error_msg - SQL error: {$mysqli->error}</p>";
             }
             return false;
         }else{
@@ -1214,8 +1214,7 @@ class DbUtils {
             $system->addError(HEURIST_ACTION_BLOCKED, 'Unable to set parent IDs to null for Comments');
             $res = false;
             if($verbose) {
-                echo "<br><p>Warning: Unable to set parent IDs to null for Comments".
-                    " - SQL error: ".$mysqli->error."</p>";
+                echo "<br><p>Warning: Unable to set parent IDs to null for Comments - SQL error: {$mysqli->error}</p>";
             }
         }
 
@@ -1362,10 +1361,10 @@ class DbUtils {
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>";
+                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: {$mysqli->error}</p>";
                                     }
                                 }else{
-                                    $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
+                                    $message = "Unable to add records into $table - SQL error: ".$mysqli->error;
                                     if($verbose) {
                                         $message = "<br><p class=\"error\">Error: $message</p>";
                                     }

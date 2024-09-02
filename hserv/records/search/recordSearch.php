@@ -2667,15 +2667,7 @@ function recordSearch($system, $params, $relation_query=null)
 
     }else{
 
-        $fres = $mysqli->query('select found_rows()');
-        if (!$fres)     {
-            $response = $system->addError(HEURIST_DB_ERROR,
-                $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
-        }else{
-
-            $total_count_rows = $fres->fetch_row();
-            $total_count_rows = $total_count_rows[0];
-            $fres->close();
+            $total_count_rows = mysql__found_rows($mysqli);
 
             if($total_count_rows*10>$memory_limit){
                 return $system->addError(HEURIST_ACTION_BLOCKED,
@@ -3179,7 +3171,7 @@ function recordSearch($system, $params, $relation_query=null)
 
 
 
-        }
+        
     }
 
     return $response;
