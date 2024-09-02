@@ -1211,6 +1211,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     // Validate WhoCanSee value
                     if(array_key_exists('ulf_WhoCanSee', $file_details)){
 
+                        $file_details['ulf_WhoCanSee'] = empty($file_details['ulf_WhoCanSee']) ? 'public' : $file_details['ulf_WhoCanSee'];
+
                         switch($file_details['ulf_WhoCanSee']){
                             case 'public':
                             case 'anyone':
