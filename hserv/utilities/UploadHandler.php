@@ -28,6 +28,9 @@ use hserv\utilities\UImage;
     imagemagick_create_scaled_image - DISABLED DUE SECURITY REASONS
 
 */
+define('HEADER_403','HTTP/1.1 403 Forbidden');
+define('AMP','&amp;');
+
 
 class UploadHandler
 {
@@ -77,7 +80,7 @@ class UploadHandler
         $error = mysql__check_dbname($heurist_db);
         if($error!=null){
             //database not defined
-            $this->header('HTTP/1.1 403 Forbidden');
+            $this->header(HEADER_403);
             return;
         }
 
@@ -85,7 +88,7 @@ class UploadHandler
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
             //not logged in
-            $this->header('HTTP/1.1 403 Forbidden');
+            $this->header(HEADER_403);
             return;
         }
 
@@ -359,7 +362,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             if ($version_dir) {
                 //$thi->secure_file_name($file_name)
                 $file_name = htmlspecialchars(basename($file_name));
-                $file_name = str_replace('&amp;','&',$file_name);
+                $file_name = str_replace(AMP,'&',$file_name);
 
                 return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name);//realpath
             }
@@ -374,7 +377,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
         //$thi->secure_file_name($filename)
         $file_name = htmlspecialchars(basename($file_name));
-        $file_name = str_replace('&amp;','&',$file_name);
+        $file_name = str_replace(AMP,'&',$file_name);
 
         return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
@@ -1620,7 +1623,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     //
     private function secure_file_name($filename){
         $filename = htmlspecialchars(basename($filename));//stripslashes()
-        $filename = str_replace('&amp;','&',$filename);
+        $filename = str_replace(AMP,'&',$filename);
         return $filename;
     }
 
@@ -1628,7 +1631,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $name = $this->get_singular_param_name();
         $filename = $this->get_query_param($name);
         $filename = htmlspecialchars(basename($filename));//stripslashes()
-        $filename = str_replace('&amp;','&',$filename);
+        $filename = str_replace(AMP,'&',$filename);
         //$filename = $this->secure_file_name($filename);
         return $filename;
     }
@@ -1646,7 +1649,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $params2 = array();
         foreach ($params as $key => $value) {
             $filename = htmlspecialchars(basename($value));//stripslashes()
-            $filename = str_replace('&amp;','&',$filename);
+            $filename = str_replace(AMP,'&',$filename);
             if($filename){
                 $params2[$key] = $filename; //secure_file_name($value);
             }
@@ -1682,7 +1685,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $redirect_header = 'X-Accel-Redirect';
                 break;
             default:
-                $this->header('HTTP/1.1 403 Forbidden');
+                $this->header(HEADER_403);
                 return;
         }
         $file_name = $this->get_file_name_param();

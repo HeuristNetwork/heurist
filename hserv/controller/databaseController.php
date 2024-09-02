@@ -456,7 +456,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
    }
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 
 

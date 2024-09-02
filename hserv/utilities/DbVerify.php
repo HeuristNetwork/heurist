@@ -1486,7 +1486,7 @@ HEADER;
                 $resMsg = '<div><h3 class="res-valid">Relationship cache has been successfully recreated</h3></div>';
             }else{
                 $response = $this->system->getError();
-                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resMsg = "<div><h3 class=\"error\">{$response['message']}</h3></div>";
                 $resStatus = false;
             }
         }
@@ -1575,7 +1575,7 @@ HEADER;
             if(is_bool($rep) && $rep==false){
 
                 $response = $this->system->getError();
-                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resMsg = "<div><h3 class=\"error\">{$response['message']}</h3></div>";
                 $resStatus = false;
             }else{
                 $resMsg = '<div><h3 class="res-valid">Record Details Date Index has been successfully recreated</h3></div>';
@@ -1656,6 +1656,8 @@ HEADER;
         $resMsg = '';
 
         $mysqli = $this->mysqli;
+        
+        $div_valid = '<div><h3 class="res-valid">';
 
         // record types =========================
         $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
@@ -1672,7 +1674,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' record types have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';
             }
@@ -1695,7 +1697,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' field types have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';
             }
@@ -1717,7 +1719,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';
             }
@@ -2281,11 +2283,11 @@ HEADER;
                                     break 2;
                                 }
 
-                                $row['dtl_Value'] .= ' <span style="color:green">changed to '.$suggested_term_id.'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:green\">changed to $suggested_term_id</span>";
                                 $fix_count++;
 
                             }else{
-                                $row['dtl_Value'] .= ' <span style="color:green">suggestion: '.$suggested_term_id.'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:green\">suggestion: $suggested_term_id</span>";
                                 $suggest_cnt++;
                             }
                         }
@@ -2488,7 +2490,7 @@ FIXMSG
                             $query = 'update recDetails set dtl_Value=? where dtl_ID='.intval($row['dtl_ID']);
                             mysql__exec_param_query($mysqli, $query, array('s',$row['new_value']), false );
 
-                            $row['dtl_Value'] .= ' <span style="color:green">changed to '.$row['new_value'].'</span>';
+                            $row['dtl_Value'] .= " <span style=\"color:green\">changed to {$row['new_value']}</span>";
                         }else{
                             $mysqli->query('delete from recDetails where dtl_ID='.intval($row['dtl_ID']));
 
@@ -2506,13 +2508,13 @@ FIXMSG
                         if($row['new_value']==null || $row['new_value']==''){
                             //manual fix
                             if($row['is_ambig']!==true){
-                                $row['dtl_Value'] .= ' <span style="color:red">'.$row['is_ambig'].'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:red\">{$row['is_ambig']}</span>";
                             }
                             $bibs_manualfix[] = $row;
 
                         } else { //if ($row['is_ambig']===true)
                             //suggestion
-                            $row['dtl_Value'] .= ' <span style="color:green">suggestion to '.$row['new_value'].'</span>';
+                            $row['dtl_Value'] .= " <span style=\"color:green\">suggestion to {$row['new_value']}</span>";
                             $bibs_suggested[] = $row;
                         }
 

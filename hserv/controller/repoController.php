@@ -147,6 +147,6 @@ if(!$system->init(@$_REQUEST['db'])){
         }
    }
 }
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 ?>

@@ -47,6 +47,15 @@ function exist_similar($mysqli, $url) {
 //
 //
 //
+function get_matches($mysqli, $url){
+    return mysql__select_list($mysqli, 'Records', 'rec_ID',
+                'rec_URL like "http://'.$mysqli->real_escape_string($url).'%" '
+                .' or rec_URL like "http://www.'.$mysqli->real_escape_string($url).'%"');
+}
+
+//
+//
+//
 function similar_urls($mysqli, $url) {
 	/* return an array of (rec_ID)s ranked in order of similarity to the URL; up to "about ten" are returned */
 
@@ -54,9 +63,7 @@ function similar_urls($mysqli, $url) {
 
 	$noproto_url = preg_replace('!^http://(?:www[.])?!', '', $url);	// URL minus the protocol + possibly www.
 
-	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
-                'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
-	            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
+	$new_matches = get_matches($mysqli, $noproto_url);
 	if (count($new_matches) >= 10) {return $new_matches;}
 
 	$matches = array();
@@ -65,9 +72,7 @@ function similar_urls($mysqli, $url) {
 	$qpos = strpos($noproto_url, '?');
 	if ($qpos) {
 		$noproto_url = substr($noproto_url, 0, $qpos);
-		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
-                    'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
-		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
+        $new_matches = get_matches($mysqli, $noproto_url);
 		if (count($new_matches) >= 20) {return $matches;}
 
 		foreach ($new_matches as $match){
@@ -77,9 +82,7 @@ function similar_urls($mysqli, $url) {
 	}
 	while (($spos = strrpos($noproto_url, '/'))) {
 		$noproto_url = substr($noproto_url, 0, $spos);
-		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
-                    'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'/%" '
-		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'/%"');
+        $new_matches = get_matches($mysqli, $noproto_url);
 		if (count($new_matches) >= 20) {
 			if ($matches) {return $matches;}
 
@@ -97,9 +100,7 @@ function similar_urls($mysqli, $url) {
 	}
 
 	/* try it without the trailing slash */
-	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
-                    'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
-                    .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
+    $new_matches = get_matches($mysqli, $noproto_url);
 	if (count($new_matches) >= 20) {return $matches;}
 
 	foreach ($new_matches as $match){

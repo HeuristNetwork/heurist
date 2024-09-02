@@ -238,7 +238,7 @@ $requestUri:
             if($action=='view' || $action=='edit'){
 
                 if(@$requestUri[3] && ctype_digit($requestUri[3]) && $requestUri[3]>0){
-                    $redirect .= ('viewers/record/viewRecord.php?db='.$database.'&recID='.intval($requestUri[3]));
+                    $redirect .= ("viewers/record/viewRecord.php?db=$database&recID=".intval($requestUri[3]));
                     $params['recID'] = intval($requestUri[3]);
 
                     if($action=='view'){
@@ -398,13 +398,13 @@ if($recid!=null){
 
 if($isMediaRequest){
     if($recid==null){
-        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=File ID is not defined');
+        redirectURL2($redirection_path.'hclient/framecontent/infoPage.php?error=File ID is not defined');
         exit;
     }
 }else{
     $recid = intval($recid);
     if(!($recid>0)){
-        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
+        redirectURL2($redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
         exit;
     }
 }
@@ -422,7 +422,7 @@ if ($database_id>0) {
     if(!$database_url){
         $err = $system->getError();
         $error_msg = @$err['message'];
-        header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
+        redirectURL2($redirection_path.'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
         exit;
     }
 }
@@ -439,6 +439,7 @@ if ($database_id>0) {
 //      html
 //      json
 //      rdf
+$database = @$_REQUEST['db'];
 
 if($database_url!=null){ //redirect to resolver for another database
     if($entity!=null){
@@ -453,30 +454,29 @@ if($database_url!=null){ //redirect to resolver for another database
         }
 
     }else{
-        $redirect = $database_url.'&recID='.$recid.'&fmt='.$format;
+        $redirect = "$database_url&recID=$recid&fmt=$format";
     }
     $redirection_path = '';
 }elseif($entity!=null){
 
-    $redirect = 'hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+    $redirect = "hserv/structure/export/getDBStructureAsXML.php?db=$database&$entity=$recid";
 
 }elseif($isMediaRequest){
 
-    $redirect = '?db='.$_REQUEST['db'].'&mode=page&file='.$recid;
+    $redirect = "?db=$database&mode=page&file=$recid";
 
 }elseif($format=='html'){ //recirect to recordView
 
     if(@$_REQUEST['noheader']){
-        $redirect = 'viewers/record/renderRecordData.php?db='
-            .$_REQUEST['db'].'&noheader=1&recID='.$recid;
+        $redirect = "viewers/record/renderRecordData.php?db=$database&noheader=1&recID=$recid";
     }else{
-        $redirect = 'viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+        $redirect = "viewers/record/viewRecord.php?db=$database&recID=$recid";
     }
 
 
 }elseif($format=='web' || $format=='website'){ //redirect to website
 
-    $redirect = 'hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    $redirect = "hclient/widgets/cms/websiteRecord.php?db=$database&recID=$recid";
     if(@$_REQUEST['field']>0){
         $redirect = $redirect.'&field='.$_REQUEST['field'];
     }

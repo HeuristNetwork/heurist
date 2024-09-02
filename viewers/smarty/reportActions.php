@@ -112,7 +112,7 @@ class ReportActions {
                 }
             }
         }
-        header("Content-type: text/javascript");
+        header(CTYPE_JS);
         print json_encode( $results, true );
     }
 
@@ -132,7 +132,7 @@ class ReportActions {
             header(CTYPE_HTML);
             readfile($filename);
         }else{
-            header("Content-type: text/javascript");
+            header(CTYPE_JS);
             print json_encode(array("error"=>"file not found"));
         }
     }
@@ -355,7 +355,7 @@ class ReportActions {
         }
 
         if(is_array($res)){
-            header("Content-type: text/javascript");
+            header(CTYPE_JS);
             print json_encode($res);
         }else{
             header('Content-type: html/text');
@@ -425,7 +425,7 @@ class ReportActions {
             }
         }
 
-        //header("Content-type: text/javascript");
+        //header(CTYPE_JS);
         header('Content-type: application/json');
         print json_encode($res);
         //print json_encode($res);

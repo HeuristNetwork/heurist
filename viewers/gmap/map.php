@@ -375,13 +375,15 @@ $system->defineConstants();
                 }
             }
 
+            
+            $pref_li = '<li rtid="';
 
             $items = '';
-            $items = $items.'<li rtid="'.checkRt('RT_KML_SOURCE').'"><a href="#">KML</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_SHP_SOURCE').'"><a href="#">SHP</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
+            $items = $items.$pref_li.checkRt('RT_KML_SOURCE').'"><a href="#">KML</a></li>';
+            $items = $items.$pref_li.checkRt('RT_SHP_SOURCE').'"><a href="#">SHP</a></li>';
+            $items = $items.$pref_li.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
+            $items = $items.$pref_li.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
+            $items = $items.$pref_li.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
         ?>
             $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
             .click( refreshMapDocument );

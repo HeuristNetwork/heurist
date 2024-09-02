@@ -326,12 +326,12 @@
                         $encodedPoints = dpEncode($points_to_encode);
 
                         if($geoObject['type']=="polygon" || $geoObject['type']=="pl"){
-                            $poly_all = $poly_all."&path=".$style_poly."|enc:".$encodedPoints[0];
+                            $poly_all = "$poly_all&path=$style_poly|enc:".$encodedPoints[0];
                             if(strlen($poly_all)>1900){
                                 break; //total length of url is too long
                             }
                         }else{
-                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];
+                            $path_all = "$path_all&path=$style_path|enc:".$encodedPoints[0];
                             if(strlen($path_all)>1900){
                                 break; //total length of url is too long
                             }

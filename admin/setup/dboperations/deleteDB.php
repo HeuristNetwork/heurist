@@ -145,6 +145,6 @@ if(is_bool($res) && !$res){
     $response = array("status"=>HEURIST_OK, "data"=> $res);
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JS);
 print json_encode($response);
 ?>

@@ -103,7 +103,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     }
 
     if(@$_REQUEST['remote']) {
-        header('Content-type: text/javascript');
+        header(CTYPE_JS);
 
         if(isset($error_msg)){
             $res = array('error_msg'=>$error_msg);

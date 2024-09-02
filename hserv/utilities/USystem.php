@@ -39,13 +39,15 @@ class USystem {
 
         $host_params = array();
 
+        $localhost = '127.0.0.1';
+        
         $installDir = '';
         $codeFolders = array('heurist','h6-alpha','h6-ao');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
             if(!isset($serverName) || !$serverName){
-                $serverName = '127.0.0.1';
+                $serverName = $localhost;
             }
 
             $k = strpos($serverName,":");
@@ -92,8 +94,8 @@ class USystem {
                         ? ":" . $_SERVER["SERVER_PORT"] : "");
                     $host_params['domain'] = $_SERVER["SERVER_NAME"];
                 }else{
-                    $host_params['server_name'] = '127.0.0.1';
-                    $host_params['domain'] = '127.0.0.1';
+                    $host_params['server_name'] = $localhost;
+                    $host_params['domain'] = $localhost;
                 }
             }else{
                 $k = strpos($serverName,":");

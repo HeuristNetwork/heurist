@@ -87,6 +87,6 @@ if($res){
     $response = $system->getError();
 }
 
-header('Content-type: text/javascript; charset=utf-8');
+header(CTYPE_JSON);
 print json_encode( $response );
 ?>

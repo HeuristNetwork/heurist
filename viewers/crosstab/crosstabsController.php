@@ -47,7 +47,7 @@ ini_set('max_execution_time', '0');
     }
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 exit;
 

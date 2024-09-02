@@ -1535,6 +1535,8 @@ function uploadFileToNakala($system, $params) {
     $missing_key = '<br><br>Your Nakala API key is either missing or invalid, please ';
     $missing_key .= $system->is_admin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
     $missing_key .= ' Database properties';
+    
+    $unknow_error_msg = 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.';
 
     if(!function_exists("curl_init"))  {
 
@@ -1665,7 +1667,7 @@ function uploadFileToNakala($system, $params) {
 
         if(JSON_ERROR_NONE != json_last_error() || !is_array($file_details)){ // json error occurred | is not array | is missing information
             curl_close($ch);
-            $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+            $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
             return false;
         }
@@ -1745,7 +1747,7 @@ function uploadFileToNakala($system, $params) {
 
     if(JSON_ERROR_NONE != json_last_error() || !is_array($result)){ // json error occurred | is not array | is missing information
         curl_close($ch);
-        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+        $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
     }
@@ -1788,7 +1790,7 @@ function uploadFileToNakala($system, $params) {
         return false;
     }else{
         curl_close($ch);
-        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+        $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
     }

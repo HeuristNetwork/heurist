@@ -28,7 +28,7 @@
 */
 require_once dirname(__FILE__).'/../../autoload.php';
 
-header('Content-type: text/javascript');
+header(CTYPE_JS);
 
 $db = @$_REQUEST['db'];
 if(!$db) {exit;}

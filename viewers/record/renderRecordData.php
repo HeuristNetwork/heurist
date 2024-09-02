@@ -45,6 +45,9 @@ require_once dirname(__FILE__).'/../../hserv/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 
+define('CSS_HIDDEN', ' style="display:none"');
+define('NBSP','&nbsp; ');
+
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
@@ -1178,9 +1181,10 @@ if ($bkm_ID>0 || $rec_id>0) {
                     $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
 
                     $list = $list  //$id==$rec_id || $cnt>3
-                        .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
-                            .'<div style="display:table-cell;padding-right:4px">'
-                                .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
+                        .'<div class="detailRow placeRow"'.($cnt>2?CSS_HIDDEN:'').'>'
+                            .'<div style="display:table-cell;padding-right:4px"><img class="rft" style="background-image:url('
+                                .HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'
+                                .strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
                                 .'" src="'.ICON_PLACEHOLDER.DIV_E
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a '
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
@@ -1407,7 +1411,7 @@ function print_private_details($bib) {
     <?php
     }
     ?>
-    <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+    <div class="detailRow fieldRow"<?php echo $is_map_popup?CSS_HIDDEN:''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
                 href="<?= HEURIST_SERVER_URL.HEURIST_DEF_DIR ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
@@ -1442,7 +1446,7 @@ function print_private_details($bib) {
     }
     if($add_date){
         ?>
-        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+        <div class="detailRow fieldRow"<?php echo $is_map_popup?CSS_HIDDEN:''?>>
             <div class=detailType>Added</div><div class=detail>
                 <?php print $add_date.'  '.$add_date_local; ?>
             </div>
@@ -1451,7 +1455,7 @@ function print_private_details($bib) {
     }
     if($mod_date){
         ?>
-        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+        <div class="detailRow fieldRow"<?php echo $is_map_popup?CSS_HIDDEN:''?>>
             <div class=detailType>Updated</div><div class=detail>
                 <?php print $mod_date.' '.$mod_date_local; ?>
             </div>
@@ -1509,7 +1513,7 @@ function print_private_details($bib) {
                             for ($i=0; $i < count($kwds);++$i) {
                                 $grp = $kwds[$i][0];
                                 $kwd = $kwds[$i][1];
-                                if ($i > 0) {print '&nbsp; ';}
+                                if ($i > 0) {print NBSP;}
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
@@ -1547,7 +1551,7 @@ function print_personal_details($bkmk) {
             <?php
             if ($tags) {
                 for ($i=0; $i < count($tags);++$i) {
-                    if ($i > 0) {print '&nbsp; ';}
+                    if ($i > 0) {print NBSP;}
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
                     if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
@@ -1702,7 +1706,7 @@ function print_public_details($bib) {
 
                 $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
                 list($lang, $value) = output_chunker($bd['val'], true);
-                $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', $value));
+                $bd['val'] = nl2br(str_replace('  ', NBSP, $value));
 
                 if(!empty($primary_language)){
 
@@ -2175,8 +2179,7 @@ function print_public_details($bib) {
             .'<span class="link">'
                 .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
                 .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
-            .'</span>'
-            .'</div></div>';
+            .'</span></div></div>';
     }
 
     $always_visible_dt = array(DT_SHORT_SUMMARY);
@@ -2421,7 +2424,7 @@ function print_relation_details($bib) {
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
+					print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID'], $rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']]);
 
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                             .'" onclick="return link_open(this);">'
@@ -2509,8 +2512,8 @@ function print_relation_details($bib) {
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
-
+					print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID'], $rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']]);
+                    
 					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
                         .'" onclick="return link_open(this);">'
 						.USanitize::sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
@@ -2606,7 +2609,7 @@ function print_linked_details($bib, $link_cnt)
         $link_cnt++;
 
             print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'"></div>';
+                .composeRecTypeIcon($row['rec_RecTypeID'], $rectypesStructure['names'][$row['rec_RecTypeID']]).DIV_E;
 
             print '<div style="display: table-cell;vertical-align:top;'
             .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_popup href="'
@@ -2855,5 +2858,21 @@ function linkifyValue($value){
 
     return $new_value;
 }
+
+//
+//
+//
+function composeRecTypeIcon($rty_ID, $rty_Name){
+    return '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON
+                            .$rty_ID.')" title="'
+                            .$rty_Name.'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
+                            
+//'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.
+//$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
+
+//'<img class="rft" style="background-image:url('
+//.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']]
+//.'" src="'.ICON_PLACEHOLDER.'"></div>';
+}                            
 
 ?>

@@ -464,7 +464,7 @@ function executeSmartyTemplate($system, $params){
             //header(CTYPE_HTML);
 
             if($outputmode=='js'){
-                header("Content-type: text/javascript");
+                header(CTYPE_JS);
             }elseif($publishmode>0 && $publishmode<4){
 
                 if($outputmode=='txt'){
@@ -1067,7 +1067,7 @@ function save_report_into_file($tpl_source){
             }
 
             if($outputmode=='js'){
-                header("Content-type: text/javascript");
+                header(CTYPE_JS);
                 $tpl_res = add_javascript_wrap4($tpl_source);
             }else{
 

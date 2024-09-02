@@ -74,7 +74,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
                         throw new Exception("Template file does not exist");
                     }
 
-                    header("Content-type: text/javascript");
+                    header(CTYPE_JS);
                     print json_encode(array("ok"=>$mode));
 
                     break;
@@ -108,7 +108,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
                 case 'check':
                     // check if the template exists
                     if($template_file && file_exists($dir.$template_file)){
-                        header("Content-type: text/javascript");
+                        header(CTYPE_JS);
                         print json_encode(array("ok"=>"Template file exists"));
                     }else{
                         throw new Exception("Template file does not exist");
@@ -120,7 +120,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
         }
         catch(Exception $e)
         {
-            header("Content-type: text/javascript");
+            header(CTYPE_JS);
             print json_encode(array("error"=>$e->getMessage()));
         }
 

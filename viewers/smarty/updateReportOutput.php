@@ -184,7 +184,7 @@ function doReport($system, $update_mode, $format, $row){
                 if($update_mode==3){
 
                     if($ext=='js'){
-                        header("Content-type: text/javascript");
+                        header(CTYPE_JS);
                     }else{
 
                         if($ext=='txt'){

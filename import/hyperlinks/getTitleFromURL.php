@@ -32,7 +32,7 @@
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
-header('Content-type: text/javascript; charset=utf-8');
+header(CTYPE_JSON);
 
 $title = '';
 

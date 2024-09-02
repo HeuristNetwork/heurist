@@ -653,9 +653,11 @@ $failed_exts = array();
                                     if($new_md5==null){
                                         $new_md5 = md5_file($filename);
                                     }
+                                    $fname = htmlspecialchars($filename_base);
+
                                     //update xml
                                     if($old_md5!=$new_md5){
-                                        print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
+                                        print "<div>File: <i>$fname</i> <span  style=\"color:#ff8844\">".
                                         "Warning: Checksum differs from value in manifest; ".
                                         "data file may have been changed</span></div>";
                                     }
@@ -664,8 +666,7 @@ $failed_exts = array();
                                     $f_item->addChild("filesize", filesize($filename));
 
                                     if (@$out['warning']) {
-                                        print '<div>File: <i>'.htmlspecialchars($filename_base).
-                                        '</i> <span  style="color:#ff8844">Warning: '.
+                                        print "<div>File: <i>$fname</i> <span  style=\"color:#ff8844\">Warning: ".
                                         htmlspecialchars(implode(";",$out["warning"]))."</span></div>";
                                     }
                                 }
@@ -679,8 +680,7 @@ $failed_exts = array();
                             $cnt_files++;
                             if ($cnt_files % 5 == 0) {
                                 ob_start();
-                                print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files
-                                .','.$rep_processed.','.$tot_files.')</script>'."\n";
+                                print "<script type=\"text/javascript\">update_counts($progress_divid,$cnt_files,$rep_processed,$tot_files)</script>\n";
                                 ob_flush();
                                 flush();
                             }
@@ -862,7 +862,7 @@ XML;
 
                     if ($cnt_files % 5 == 0) {
                         ob_start();
-                        print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.','.$tot_files.')</script>'."\n";
+                        print "<script type=\"text/javascript\">update_counts($progress_divid,$cnt_files,$cnt_added,$tot_files)</script>\n";
                         ob_flush();
                         flush();
                     }
@@ -873,7 +873,7 @@ XML;
             if($rep_processed_dir>0){
                 print "<div style=\"color:green\">$rep_processed_dir processed. $cnt_added records created (new entries added to manifests)</div>";
             }
-            print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.',0)</script>'."\n";
+            print "<script type=\"text/javascript\">update_counts($progress_divid,$cnt_files,$cnt_added,0)</script>\n";
             ob_flush();
             flush();
 

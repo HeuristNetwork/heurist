@@ -29,7 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-header("Content-type: text/javascript");
+header(CTYPE_JS);
 
 if (! @$_REQUEST["url"]) {return;}
 

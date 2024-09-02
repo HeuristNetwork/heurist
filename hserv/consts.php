@@ -197,12 +197,14 @@ define("HEURIST_UNITED_TERMS", true);
 //common constants
 define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
 define('DATE_8601', 'Y-m-d H:i:s');
+define('REGEX_YEARONLY', '/^-?\d+$/');
 define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
 define('REGEX_EOL', '/[\r\n]/');
 
 define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
 define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
-define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');
+define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');     
+define('CTYPE_JS', 'Content-type: text/javascript');
 define('CONTENT_LENGTH', 'Content-Length: ');
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
 

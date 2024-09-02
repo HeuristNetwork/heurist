@@ -162,7 +162,7 @@ if(!($max_size>0)) {$max_size = 0;}
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                                 // Folder must be in heurist filestore directory
 
-                                print 'Folder "'.$dir.'" is not in heurist filestore directory<br>';
+                                print "Folder '$dir' is not in heurist filestore directory<br>";
 
                                 continue;
                             }
@@ -173,9 +173,9 @@ if(!($max_size>0)) {$max_size = 0;}
                             array_push($dirs_checked, $dir_original);
                         }else{
                             if(in_array($dir, $system_folders)){
-                                print 'Folder "'.$dir.'" is system one and cannot be used for file upload<br>';
+                                print "Folder '$dir' is system one and cannot be used for file upload<br>";
                             }else{
-                                print 'Folder "'.$dir.'" does not exist<br>';
+                                print "Folder '$dir' does not exist<br>";
                                 if (!mkdir($dir, 0777, true)) {
                                     print 'Unable to create or wtite into folder '.$dir;
                                 }else{

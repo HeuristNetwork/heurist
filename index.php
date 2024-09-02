@@ -153,14 +153,16 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         $locale = '';
     }
+    
+    $help_folder = 'context_help/';
 
-    $asset = 'context_help/'.$locale.'/'.urlencode($name);
-    if(!file_exists('context_help/'.$locale.'/'.$name)){
+    $asset = $help_folder.$locale.'/'.urlencode($name);
+    if(!file_exists($help_folder.$locale.'/'.$name)){
         //without locale - default is English
-        $asset = 'context_help/'.urlencode($name);
+        $asset = $help_folder.urlencode($name);
     }
 
-    if(file_exists('context_help/'.$name)){
+    if(file_exists($help_folder.$name)){
         //download
         header( 'Location: '.$asset );
         return;

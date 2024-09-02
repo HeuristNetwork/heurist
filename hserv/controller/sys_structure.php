@@ -240,7 +240,7 @@ ini_set('max_execution_time', 0);
 /*
     ini_set("zlib.output_compression", '4096');
     ini_set("zlib.output_compression_level", '6');
-    header('Content-type: text/javascript');
+    header(CTYPE_JS);
     print json_encode($response);
 */
 

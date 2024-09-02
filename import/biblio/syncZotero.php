@@ -788,30 +788,20 @@ if($step=="1"){  //first step - info about current status
     print TABLE_S.'<tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
     foreach ($cnt_report as $rty_ID=>$cnt){
         print TR_S.htmlspecialchars($rectypes['names'][$rty_ID])
-            .'</td><td align="center">'.(count($cnt['added'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
-                            .htmlspecialchars(implode(',',$cnt['added'])).'&nometadatadisplay=true">'
-                    .count($cnt['added']).'</a>':'0')
-            .'</td><td align="center">'.(count($cnt['updated'])>0?'<a target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
-                            .htmlspecialchars(implode(',',$cnt['updated'])).'&nometadatadisplay=true">'
-                    .count($cnt['updated']).'</a>':'0').TR_E;
+            .'</td><td align="center">'.composeLinkForAllIds($cnt['added'])
+            .'</td><td align="center">'.composeLinkForAllIds($cnt['updated']).TR_E;
 
 
     }
 
-    print TABLE_E.'<div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
-                            .htmlspecialchars(implode(',',$cnt_added)).'&nometadatadisplay=true">'
-                    .count($cnt_added).'</a>':'0').DIV_E;
-    print '<div>Records updated : '.(count($cnt_updated)>0?'<a  target="_blank" href="'
-                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
-                            .htmlspecialchars(implode(',',$cnt_updated)).'&nometadatadisplay=true">'
-                    .count($cnt_updated).'</a>':'0').DIV_E;
+    print TABLE_E.'<div><br>Records added : '.composeLinkForAllIds($cnt_added).DIV_E;
+
+    print '<div>Records updated : '.composeLinkForAllIds($cnt_updated).DIV_E;
 
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
 
 	$err_msg = 'Zotero Synching has encountered issues in Database: ' . HEURIST_DBNAME;
+    $line_sep = '<br>- ';
 
     if($tot_erros>0){
         print '<div style="color:red">';
@@ -826,13 +816,13 @@ if($step=="1"){  //first step - info about current status
         }
         if($cnt_empty>0){
             print '<br>Zotero entries ignored because there are no properly mapped keys: '.$cnt_empty;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).DIV_E;
+            print "<div style ='color:red; padding-left:20px'>- ".implode($line_sep,$arr_empty).DIV_E;
 
 			$err_msg = $err_msg . '\nZotero entries ignored because there are no properly mapped key: '.$cnt_empty;
         }
         if($cnt_notfound>0){
             print '<br>Zotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).DIV_E;
+            print "<div style ='color:red; padding-left:20px'>- ".implode($line_sep,$arr_notfound).DIV_E;
 
 			$err_msg = $err_msg . '\nZotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
         }
@@ -841,7 +831,7 @@ if($step=="1"){  //first step - info about current status
         print '<div style="color:black">';
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
-            print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).DIV_E;
+            print "<div style ='padding-left:20px'>- ".implode($line_sep,$arr_notmapped).DIV_E;
 
             $err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
         }
@@ -914,6 +904,17 @@ if($step=="1"){  //first step - info about current status
 
     #print "<br>Sync done";
 
+}
+
+function composeLinkForAllIds($ids){
+    if(empty($ids)){
+        return '0';
+    }else{
+        return '<a target="_blank" href="'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+                            .htmlspecialchars(implode(',',$ids)).'&nometadatadisplay=true">'
+                    .count($ids).'</a>';
+    }
 }
 
 /**
