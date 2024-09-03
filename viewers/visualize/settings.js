@@ -128,9 +128,9 @@ function handleSettingsInUI() {
     //-------------------------------
     
     $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
-        .click( function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
+        .click( function(){ window.selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
     $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
-        .click( function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
+        .click( function(){ window.selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
     $('#selectMode').controlgroup();
         
     $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
@@ -301,7 +301,7 @@ function handleSettingsInUI() {
         let newval = $(event.target).is(':checked')?'on':'off';
         putSetting('setting_labels', newval);
 
-        if(currentMode=='icons'){
+        if(window.currentMode=='icons'){
             let isLabelVisible = (newval=='on');
             //window.d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
             if(isLabelVisible) {
@@ -317,7 +317,7 @@ function handleSettingsInUI() {
     $('#textLength').val(textLength).on('change', function(){
         let newval = $(event.target).val();
         putSetting('setting_textlength', newval);
-        let isLabelVisible = (currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
+        let isLabelVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
         if(isLabelVisible) visualizeData();    
     });
     
@@ -330,7 +330,7 @@ function handleSettingsInUI() {
     function(){
         let newval = $(event.target).val();
         putSetting('setting_fontsize', newval);
-        let isLabelVisible = (currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
+        let isLabelVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
         if(isLabelVisible) visualizeData();    
     });
 
@@ -393,8 +393,8 @@ function initRecTypeSelector(){
 function _syncUI(){
     $('#toolbar').find('button').removeClass('ui-heurist-btn-header1');
     
-    $('#toolbar').find('button[value="'+selectionMode+'"]').addClass('ui-heurist-btn-header1');
-    $('#toolbar').find('button[value="'+currentMode+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button[value="'+window.selectionMode+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button[value="'+window.currentMode+'"]').addClass('ui-heurist-btn-header1');
 
     let grv = getSetting('setting_gravity','off');
     if(grv=='agressive') grv = 'touch';
@@ -413,9 +413,9 @@ function _syncUI(){
 
 function changeViewMode(mode){
     $(".offset_line").remove();
-    if(mode!=currentMode){
-        if(mode=='infoboxes'){ // && currentMode=='icons'
-            currentMode = 'infoboxes';
+    if(mode!=window.currentMode){
+        if(mode=='infoboxes'){ // && window.currentMode=='icons'
+            window.currentMode = 'infoboxes';
             //window.d3.selectAll(".icon-mode").style('display', 'none');
             window.d3.selectAll(".info-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode-full").style('display', 'none');
@@ -429,7 +429,7 @@ function changeViewMode(mode){
             window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
         }else if(mode=='infoboxes_full'){
             
-            currentMode = 'infoboxes_full';
+            window.currentMode = 'infoboxes_full';
             window.d3.selectAll(".info-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode-full").style('display', 'initial');
             window.d3.selectAll("line.inner_divider").style('display', 'initial');
@@ -442,7 +442,7 @@ function changeViewMode(mode){
             window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
         }else{
             
-            currentMode = 'icons';
+            window.currentMode = 'icons';
             //window.d3.selectAll(".icon-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode").style('display', 'none');
             window.d3.selectAll(".info-mode-full").style('display', 'none');
@@ -452,7 +452,7 @@ function changeViewMode(mode){
 
             window.d3.selectAll("text.nodelabel.namelabel").attr("x", 29);
         }
-        let isLabelVisible = (currentMode != 'icons') || (getSetting('setting_labels')=='on');
+        let isLabelVisible = (window.currentMode != 'icons') || (getSetting('setting_labels')=='on');
         window.d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
 
         $.each(window.d3.selectAll("image.menu-open")[0], function(idx, ele){

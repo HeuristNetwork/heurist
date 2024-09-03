@@ -93,13 +93,13 @@ let maxCountForNodes, maxCountForLinks;
     $.fn.visualize = function( options ) {
         
         // Select and clear SVG.
-        svg = window.d3.select("#d3svg");
+        window.svg = window.d3.select("#d3svg");
         svg.selectAll("*").remove();
         svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25");   
         
         
         // Default plugin settings
-        settings = $.extend({
+        window.settings = $.extend({
             // Custom functions
             getData: $.noop(), // Needs to be overriden with custom function
             getLineLength: function() { return getSetting('setting_linelength',200); },
@@ -385,7 +385,7 @@ function visualizeData() {
     // Container with zoom and force
     let container = addContainer();
     svg.call(zoomBehaviour); 
-    force = addForce();
+    window.force = addForce();
 
     // Markers
     addMarkerDefinitions(); // all marker/arrow types on lines

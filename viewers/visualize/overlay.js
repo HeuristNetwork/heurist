@@ -367,15 +367,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     clearTimeout(drag_link_timer);
                     drag_link_timer = 0;
                 }
-                drag_link_target_id = d.id;
-                drag_link_line.attr("stroke","#00ff00");
+                window.drag_link_target_id = d.id;
+                window.drag_link_line.attr("stroke","#00ff00");
             }            
         })
         .on("mouseout", function(d) {
             if(drag_link_source_id!=null){
                 drag_link_timer = setTimeout(function(){
-                    drag_link_target_id = null;
-                    if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+                    window.drag_link_target_id = null;
+                    if(window.drag_link_line) window.drag_link_line.attr("stroke","#ff0000");
                 },300);
             }            
         });
@@ -645,9 +645,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
             })
             .on("dragend", function(){
-                if(drag_link_source_id!=null && drag_link_target_id!=null){
-                        _addNewLinkField(drag_link_source_id, drag_link_target_id);  
-                        setTimeout(function(){drag_link_line.attr("stroke","#00ff00");}, 500);
+                if(window.drag_link_source_id!=null && window.drag_link_target_id!=null){
+                        _addNewLinkField(window.drag_link_source_id, window.drag_link_target_id);  
+                        setTimeout(function(){window.drag_link_line.attr("stroke","#00ff00");}, 500);
                 }else{
                     drag_link_source_id = null;
                     if(drag_link_line) drag_link_line.remove();

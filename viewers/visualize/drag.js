@@ -119,15 +119,15 @@ function addNodes() {
             .attr("width", iconSize)
             .on("mouseover", function(d) {
                 if(drag_link_source_id!=null){
-                    drag_link_target_id = d.id;
-                    drag_link_line.attr("stroke","#00ff00");  //green
+                    window.drag_link_target_id = d.id;
+                    window.drag_link_line.attr("stroke","#00ff00");  //green
                 }
             })
             .on("mouseout", function(d) {
                 if(drag_link_source_id!=null){
                 setTimeout(function(){
-                    drag_link_target_id = null;
-                    if(drag_link_line) drag_link_line.attr("stroke","#ff0000");  //red
+                    window.drag_link_target_id = null;
+                    if(window.drag_link_line) window.drag_link_line.attr("stroke","#ff0000");  //red
                 },200);
                 }
             })
