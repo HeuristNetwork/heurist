@@ -539,6 +539,7 @@ if($website_custom_css!=null){
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                $('body').find('#main-content').css('min-height', '');// remove min height                
 
                 if(!window.hWin.HAPI4.is_admin()){
                     isCMS_active = false;
@@ -1478,21 +1479,22 @@ var prepared_params = {guest_data:true};//allow guest login
 //
 $(document).ready(function() {
 
-        var ele = $('body').find('#main-content');
-        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
-        ele.show();
+    let ele = $('body').find('#main-content');
+    ele.css('min-height', '70px');// set min height to ensure the coverall is some what viewable
+    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    ele.show();
 
-        $('body').find('#main-menu').hide();//will be visible after menu init
+    $('body').find('#main-menu').hide();//will be visible after menu init
 
-        // Standalone check
-        if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>',
-                        onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
-        }else{
-            // Not standalone, use HAPI from parent window
-            initHeaderElements();
-            onPageInit( true );
-        }
+    // Standalone check
+    if(!window.hWin.HAPI4){
+        window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>',
+                    onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
+    }else{
+        // Not standalone, use HAPI from parent window
+        initHeaderElements();
+        onPageInit( true );
+    }
 });
 </script>
 
