@@ -509,8 +509,8 @@ $home_page_record_id = $rec_id;
 
 $websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndStyles.php';
 
-$template = __getTemplate($custom_website_php_template);
-if(!$template && $default_CMS_Template){
+$template = __getTemplate($custom_website_php_template); //defined CMS Home in field DT_CMS_TEMPLATE
+if(!$template && $default_CMS_Template){  //defined in heuristConfigIni
     $template = __getTemplate($default_CMS_Template);
 }
 
@@ -518,7 +518,7 @@ if($template!==false){
     //use custom template for website
     include_once $template;
 }else{
-    //use default template for this folder
+    //use default template in this folder
     $template = HEURIST_DIR.'hclient/widgets/cms/cmsTemplate.php';
     if(!file_exists($template)){
             $message = 'Sorry, it is not possible to load default cms template. '
@@ -540,6 +540,7 @@ function __getTemplate($template){
         if(substr( $template, -4 ) !== '.php'){
                 $template = $template.'.php';
         }
+        $template = basename($template);
         if($template!='cmsTemplate.php'){
             $template = HEURIST_DIR.'hclient/widgets/cms/templates/'.$template;
             if(!file_exists($template)) {return false;}

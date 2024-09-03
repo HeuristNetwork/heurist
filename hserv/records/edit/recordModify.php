@@ -181,95 +181,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }
 
     $mysqli = $system->get_mysqli();
-/*
-    $addRecDefaults = $system->user_GetPreference('record-add-defaults');
-    if ($addRecDefaults){
-        if (@$addRecDefaults[0]){
-            $userDefaultRectype = intval($addRecDefaults[0]);
-        }
-        if (@$addRecDefaults[1]){ //default ownership
-            if(is_string($addRecDefaults[1])){
-                $userDefaultOwnerGroupID = explode(',', $addRecDefaults[1]);
-            }elseif($addRecDefaults[1]!=''){
-                $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
-            }
-        }
-        if (@$addRecDefaults[2]){
-            $userDefaultAccess = $addRecDefaults[2];
-        }
-        if (@$addRecDefaults[4]){
-            $userDefaultAccessGroups = $addRecDefaults[4];
-        }
-    }
 
-    $sysvals = $system->get_system();
-
-    if($record){
-
-        //it is allowed with prefix rec_ and without
-        foreach ($record as $key=>$val){
-            if(strpos($key,'rec_')===0){
-                $record[substr($key,4)] = $val;
-                unset($record[$key]);
-            }
-        }
-
-        $rectype = @$record['RecTypeID'];
-        $access = @$record['NonOwnerVisibility'];
-        $access_grps = @$record['NonOwnerVisibilityGroups'];
-        $owner_grps = prepareIds(@$record['OwnerUGrpID'], true);
-
-        $rectype = ConceptCode::getRecTypeLocalID($rectype);
-    }else{
-        $rectype = null;
-        $access = null;
-        $access_grps = null;
-        $owner_grps = array();
-    }
-
-    // RECTYPE
-    $rectype = intval($rectype);
-    if(!$rectype && isset($userDefaultRectype)){
-        $rectype = $userDefaultRectype;
-    }
-
-    // OWNER -----------
-    if(count($owner_grps)==0 || !($owner_grps[0]>=0)){
-        $ownerid = -1;
-        if(isset($userDefaultOwnerGroupID)){ //from user preferences
-            $ownerid = $userDefaultOwnerGroupID;
-        }
-        if(!is_array($ownerid) || !($ownerid>=0)){
-            $ownerid = @$sysvals['sys_NewRecOwnerGrpID'];//from database properties
-        }
-        if(!is_array($ownerid) || !($ownerid>=0)){
-            $ownerid = $system->get_user_id();//by default current user
-        }
-        if(is_array($ownerid)){
-            $owner_grps = $ownerid;
-        }elseif($ownerid>=0){
-            $owner_grps = array($ownerid);
-        }
-    }
-
-    // ACCESS -------------
-
-    if(!$access && isset($userDefaultAccess)) {//from user prefs
-        $access = $userDefaultAccess;
-    }
-    if(!$access){
-        $access = @$sysvals['sys_NewRecAccess'];//from db prefs
-    }
-    if(!$access){
-        $access = 'viewable';
-    }
-    //access groups
-    if($access!='viewable'){
-        $access_grps = null;
-    }elseif($access_grps==null && isset($userDefaultAccessGroups)){
-        $access_grps = $userDefaultAccessGroups;
-    }
-*/
     $def_params = recordAddDefaultValues($system, $record);
 
     $rectype = $def_params['rectype'];
@@ -288,7 +200,6 @@ function recordAdd($system, $record, $return_id_only=false){
         $owner_grps = array(1);//database manager group
     }
 
-    //@todo correct for multi owners !!!!!!
     //$record['swf'] - ownership is set from swf rules
     if (!(@$record['swf'] || $system->is_admin() || $system->is_member($owner_grps) || $system->is_guest_user() )){
         $system->addError(HEURIST_REQUEST_DENIED,
@@ -364,7 +275,7 @@ function recordAdd($system, $record, $return_id_only=false){
     }else {
 
         array_shift( $owner_grps );//remove first
-        if($access_grps!=null || (is_array($owner_grps) && count($owner_grps)>0)){
+        if($access_grps!=null || (is_array($owner_grps) && !empty($owner_grps))){
             updateUsrRecPermissions($mysqli, $newId, $access_grps, $owner_grps);
         }
 
