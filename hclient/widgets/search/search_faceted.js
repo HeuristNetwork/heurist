@@ -2225,7 +2225,7 @@ $.widget( "heurist.search_faceted", {
                     if(dty_ID.indexOf('r.')==0){
                         dty_ID = dty_ID.substr(2);    
                     }
-                    
+
                     if((field['type']=='enum' || field['type']=='reltype') && field['groupby']!='firstlevel'){
                         
                         let is_first_level = false;
@@ -2464,7 +2464,6 @@ $.widget( "heurist.search_faceted", {
                         }else{
                             needsDropdown = true;
                         }
-
                         // Add dropdown 
                         if(needsDropdown){
                             
@@ -2493,7 +2492,6 @@ $.widget( "heurist.search_faceted", {
                                     
                                 need_small_dropdown = false; //!(field.selectedvalue && field.selectedvalue.value);
                             }
-console.log(term, term?.count);
                             if(term && Object.hasOwn(term, 'count') && term.count == 0){
                                 this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_no_values'), value:null, count:0} ).appendTo($sel);
                                 this.no_value_facets.push(facet_index);
@@ -3528,12 +3526,17 @@ console.log(term, term?.count);
                                 $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0"}).appendTo($facet_values) );
                             }
 
-                            this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_select'), value:null, count:0} ).appendTo($sel);
-                            this.__drawData(response.data, 0, $sel, facet_index, field);
+                            if(response.data.length==0){
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_no_values'), value:null, count:0} ).appendTo($sel);
+                                this.no_value_facets.push(facet_index);
+                            }else{
+                                this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_select'), value:null, count:0} ).appendTo($sel);
+                                this.__drawData(response.data, 0, $sel, facet_index, field);
 
-                            if(field.selectedvalue && field.selectedvalue.value){
-                                let $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
-                                $opt.attr('selected',true);
+                                if(field.selectedvalue && field.selectedvalue.value){
+                                    let $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                    $opt.attr('selected',true);
+                                }
                             }
 
                             //needsDropdown = true;
