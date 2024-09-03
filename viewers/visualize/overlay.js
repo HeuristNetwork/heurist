@@ -19,11 +19,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global svg, settings, currentMode, 
+drag_link_source_id, drag_link_target_id, drag_link_line,
+getSetting, tick, filterData */
+
 //global variables
-var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
+window.drag_link_source_id = null;
+window.drag_link_target_id = null;
+window.drag_link_line = null;
+
+let drag_link_timer = null;
 
 // Functions to handle node and relationship overlays
- 
+
+//common function 
 /**
 * Truncates text after 80 characaters
 * @param text The text to truncate
@@ -38,10 +47,11 @@ function truncateText(text, maxLength) {
     return "[no name]"; 
 }
 
+// called from selection - may be private
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
 
-    let maxLength = getSetting(setting_textlength);
+    let maxLength = getSetting('setting_textlength');
     let rectypeLength = 20;
     let array = [];
 
@@ -55,7 +65,7 @@ function getRecordOverlayData(record) {
     }
     array.push(header);
 
-    let fontSize = getSetting(setting_fontsize, 12);
+    let fontSize = getSetting('setting_fontsize', 12);
     let xpos = 17;
 
     // Going through the current displayed data
@@ -74,7 +84,7 @@ function getRecordOverlayData(record) {
             // Does our record point to this link?
             if(link.source.id == record.id) {
                 // New name?
-                if(!map.hasOwnProperty(link.relation.name)) {
+                if(!Object.hasOwn(map, link.relation.name)) {
                     map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id, weight: (isRequired == 'y') ? 'bold' : 'normal'};
                 }
 
@@ -96,7 +106,7 @@ function getRecordOverlayData(record) {
             // Is our record a relation?
             if(link.relation.id == record.id && link.relation.name == record.name) {
                 // New name?
-                if(!map.hasOwnProperty(link.relation.name)) {
+                if(!Object.hasOwn(map, link.relation.name)) {
                     map[link.relation.name] = {require_type: isRequired, dtyid: link.relation.id, weight: (isRequired == 'y') ? 'bold' : 'normal'};
                 }
                
@@ -146,6 +156,7 @@ function getRecordOverlayData(record) {
     return array;
 }
 
+// public from visualize
 /** get info about particular relation */
 function getRelationOverlayData(line) {
     let array = [];
@@ -221,6 +232,7 @@ function getRelationOverlayData(line) {
     return array;
 }
 
+//private 
 /**
  * Get all record pointers (fields) that point towards a rectypes not shown yet
  * 
@@ -242,8 +254,8 @@ function addMissingFields(node_info){
 
     //additional settings
     let xpos = 17;
-    let maxLength = getSetting(setting_textlength);
-    let fontSize = getSetting(setting_fontsize, 12);
+    let maxLength = getSetting('setting_textlength');
+    let fontSize = getSetting('setting_fontsize', 12);
 
     let new_fields = [];
 
@@ -288,6 +300,7 @@ function addMissingFields(node_info){
     return node_info;
 }
 
+//public 
 /**
 * Creates an overlay over the node / on the location that the user has clicked on.
 * 
@@ -301,16 +314,18 @@ function addMissingFields(node_info){
 */
 function createOverlay(x, y, type, selector, node_obj, parent_node) {
     
+    let info = node_obj;
     if(type=='record'){
         info = getRecordOverlayData(node_obj);
-    }else{
-        info = node_obj;
     }
     
     const iconSize = 16;
-    let is_admin = window.hWin.HAPI4.is_admin();
+    const is_admin = window.hWin.HAPI4.is_admin();
     
-    var overlay = null;
+    let overlay = null;
+    let field_dividers = null;
+    let divider = null;
+
 
     // Add overlay container    
     if(parent_node){
@@ -322,16 +337,16 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                      .attr("transform", "translate(" +x +','+y+')');
     }
     
-    var rty_ID = '', rec_ID = '';
+    let rty_ID = '', rec_ID = '';
     
     // Title
     info[0].text = window.hWin.HEURIST4.util.stripTags(info[0].text);
-    var rollover = info[0].text;
+    let rollover = info[0].text;
     
     if(type=='record'){
         if(settings.isDatabaseStructure){
             rty_ID = selector.substr(2);
-            var desc = $Db.rty(rty_ID, 'rty_Description');
+            const desc = $Db.rty(rty_ID, 'rty_Description');
             if(desc!=null){
                 rollover = rollover + ' ' + desc;
             }else{
@@ -366,12 +381,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         });
     }
 
-    var outline_colour = (type == 'record') ? '#666' : '#ff0000';
+    const outline_colour = (type == 'record') ? '#666' : '#ff0000';
     
-    var nodecolor = getSetting(setting_entitycolor);
+    const nodecolor = getSetting('setting_entitycolor');
 
     // Draw a semi transparant rectangle       
-    var rect_full = overlay.append("rect")
+    let rect_full = overlay.append("rect")
                            .attr("class", "semi-transparant info-mode-full rect-info-full")              
                            .attr("x", 0)
                            .attr("y", 0)
@@ -382,7 +397,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .style('stroke', outline_colour)
                            .style("stroke-width", 0.75);
 
-    var rect_info = overlay.append("rect")
+    let rect_info = overlay.append("rect")
                            .attr("class", "semi-transparant info-mode rect-info")              
                            .attr("x", 0)
                            .attr("y", 0)
@@ -394,18 +409,18 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                            .style("stroke-width", 0.75);
         
     /* TEXT SECTION */                
-    var fontSize = getSetting(setting_fontsize, 12);
-    var textLength = getSetting(setting_textlength, 200);    
-    var fontColor = getSetting(setting_textcolor, '#000000');
+    const fontSize = getSetting('setting_fontsize', 12);
+    const textLength = getSetting('setting_textlength', 200);    
+    const fontColor = getSetting('setting_textcolor', '#000000');
 
-    var offset = (type=='record')?10:6;
+    let offset = (type=='record')?10:6;
     if (currentMode == 'icons'){
         offset = (type=='record')?29:25; 
     }
-    var position = 16;
+    let position = 16;
 
     // Adding text
-    var text;
+    let text = [[]];
     if(type=='record'){ // Nodes
 
         if(settings.isDatabaseStructure){
@@ -472,7 +487,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 			// Display rectypes used by selected fields
             overlay.selectAll("text.info-mode-full, text.nodelabel").on("click", function(event){
 
-                if(d3.event.defaultPrevented){
+                if(window.d3.event.defaultPrevented){
                     return;
                 }
 
@@ -504,12 +519,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     }else{ // link information, onhover
 
         position = 0;
-        var k, text = [[]];
+        text = [[]];
         // Prepare icon + label combo prepare
-        for(k = 0; k < info.length; k++){
+        for(let k = 0; k < info.length; k++){
 
             /* ICON */
-            var linkicon = overlay
+            let linkicon = overlay
                 .append("svg:image")
                 .attr("class", 'icon info-mode')
                 .attr("xlink:href", function(d) { // pick relation icon
@@ -541,7 +556,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             text[0].push(linkicon[0][0]);
 
             /* LABEL */
-            var linkline = overlay.append("text")
+            let linkline = overlay.append("text")
                 .text(info[k].text)
                 .attr("class", 'info-mode')
                 .attr("x", iconSize+2)
@@ -556,18 +571,18 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 .style("font-size", info[k].size, "important");
 
             text[0].push(linkline[0][0]);
-        }
+        }//for
     }
         
     // Calculate Box sizes
-    var maxWidth = 1;
-    var maxHeight = 10;                              
-    var widthTitle = 1;
-    for(var i = 0; i < text[0].length; i++) {
-        var bbox = text[0][i].getBBox(); // get bounding box
+    let maxWidth = 1;
+    let maxHeight = 10;                              
+    let widthTitle = 1;
+    for(let i = 0; i < text[0].length; i++) {
+        let bbox = text[0][i].getBBox(); // get bounding box
 
         // Width
-        var width = bbox.width;
+        const width = bbox.width;
         if(width > maxWidth) {
             maxWidth = width;
         }
@@ -575,7 +590,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         if(i==0) widthTitle = maxWidth;
         
         // Height
-        var y = bbox.y*1.1;
+        const y = bbox.y*1.1;
         if(y > maxHeight) {
             maxHeight = y;
         }
@@ -591,19 +606,19 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     //drag and edit icons and actions for records
     if(type=='record'){
 
-        var drag2 = d3.behavior.drag()
+        let drag2 = window.d3.behavior.drag()
             .on("dragstart", function(d, i){
-                d3.event.sourceEvent.stopPropagation();
+                window.d3.event.sourceEvent.stopPropagation();
 
                 drag_link_source_id = d.id;
 
-                var node = $(".node.id"+d.id);
-                var x = node.offset().left - 5;
-                var y = node.offset().top - 55;
+                let node = $(".node.id"+d.id);
+                const x = node.offset().left - 5;
+                const y = node.offset().top - 55;
 
-                var svgPos = $("svg").position();
-                var dx = (x < (event.clientX - svgPos.left))?-2:2;
-                var dy = (y < (event.clientY - svgPos.top))?-2:2;
+                let svgPos = $("svg").position();
+                const dx = (x < (event.clientX - svgPos.left))?-2:2;
+                const dy = (y < (event.clientY - svgPos.top))?-2:2;
 
                 drag_link_line = svg.append("svg:line")
                 .attr("stroke","#ff0000")
@@ -615,12 +630,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             .on("drag", function(){
                 if(drag_link_line){
                     //drag_link_line
-                    //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
-                    //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
-                    var svgPos = $("svg").position();
+                    //.attr("x2", Number(drag_link_line.attr("x2"))+window.d3.event.dx)
+                    //.attr("y2", Number(drag_link_line.attr("y2"))+window.d3.event.dy); //scale is not used
+                    let svgPos = $("svg").position();
 
-                    var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
-                    var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
+                    const dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
+                    const dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
 
                     drag_link_line
                         .attr("x2", event.clientX - svgPos.left+dx)
@@ -640,13 +655,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 }
             });
 
-        var icons_cnt = settings.isDatabaseStructure?4:3;
+        const icons_cnt = settings.isDatabaseStructure?4:3;
 
         widthTitle = widthTitle+(iconSize+3)*2;
         if(widthTitle>maxWidth) maxWidth = widthTitle;
 
-        var menuarrow_transform = "translate("+(maxWidth-iconSize)+",3)";
-        var divider, field_dividers;
+        let menuarrow_transform = "translate("+(maxWidth-iconSize)+",3)";
 
         if(!settings.isDatabaseStructure || is_admin){
 
@@ -661,13 +675,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     .style('cursor', 'pointer')
                     .on("mouseup", function(d) {
 
-                        var $icon = $(this);
-                        var dem = this.getBBox();
-
+                        let $icon = $(this);
+                        
                         if($icon.hasClass('menu-close')){
 
-                            var x = dem.x + dem.width / 2;
-                            var y = dem.y + dem.height / 2;
+                            let dem = this.getBBox();
+                            const x = dem.x + dem.width / 2;
+                            const y = dem.y + dem.height / 2;
 
                             let box_width = maxWidth + icons_cnt * iconSize - (settings.isDatabaseStructure ? 3 : 12);
 
@@ -701,10 +715,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     });
         }
 
+        let btnAddLink = null;
+
         if(!settings.isDatabaseStructure || settings.onRefreshData){
 
             //link button      
-            var btnAddLink = overlay
+            btnAddLink = overlay
                         .append("svg:image")
                         .attr("class", "icon node-action addLink")
                         .attr("xlink:href", function(d) {
@@ -717,15 +733,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         .style('cursor', 'pointer')
                         .on("mousedown", function(d) {
 
-                            var svgPos = $("svg").position();
-                            var x = event.clientX - svgPos.left;
-                            var y = event.clientY + 26 - svgPos.top;
+                            let svgPos = $("svg").position();
+                            const x = event.clientX - svgPos.left;
+                            const y = event.clientY + 26 - svgPos.top;
 
-                            var hintoverlay = svg.append("g")
+                            let hintoverlay = svg.append("g")
                                                 .attr("class", "hintoverlay")
                                                 .attr("transform", "translate(" +x +','+y+')');
                             
-                            var hintrect = hintoverlay.append("rect")
+                            let hintrect = hintoverlay.append("rect")
                                                     .attr("class", "semi-transparant")              
                                                     .attr("x", 0)
                                                     .attr("y", 0)
@@ -734,7 +750,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                                                     .style('stroke','#000000')
                                                     .style("stroke-width", 0.5);
                             
-                            var hinttext = hintoverlay.append("text")
+                            let hinttext = hintoverlay.append("text")
                                                     .text('drag me to another node …')
                                                     .attr('x',3)                
                                                     .attr('y',10)
@@ -742,7 +758,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                                                     .style("font-style", 'italic', "important")
                                                     .style("font-size", 10, "important");
 
-                            var bbox = hinttext[0][0].getBBox();
+                            let bbox = hinttext[0][0].getBBox();
 
                             hintrect.attr("width", bbox.width+6)
                                     .attr("height", bbox.height+4);
@@ -760,7 +776,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
 
         //edit button
-        var btnEdit = overlay
+        let btnEdit = overlay
                 .append("svg:image")
                 .attr("class", "icon node-action editBtn")
                 .attr("xlink:href", function(d) {
@@ -795,7 +811,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }else{ // disabled buttons
 
                 btnEdit.style('display', 'none');
-                btnAddLink.style('display', 'none');
+                if(btnAddLink != null){
+                    btnAddLink.style('display', 'none');
+                }
             }
         }else{ // add edit button
             
@@ -811,7 +829,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             let x_pos = is_admin ? maxWidth + (icons_cnt - 1) * iconSize - 3 : maxWidth - 13;
 
             // Close button
-            var close = overlay.append("g")
+            let closeBtn = overlay.append("g")
                             .attr("class", "close node-action")
                             .attr("transform", `translate(${x_pos}, 7)`)
                             .on("mouseup", function(d) {
@@ -819,18 +837,18 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                             });
 
             // Close rectangle                                              
-            close.append("rect")
+            closeBtn.append("rect")
                 .attr("class", "close-button");
 
             // Close text
-            close.append("text")
+            closeBtn.append("text")
                 .attr("class", "close-text")
                 .text("x")
                 .attr("x", iconSize/4-3)
                 .attr("y", 7);
                 
             if(is_admin){
-                close.style('display', 'none');
+                closeBtn.style('display', 'none');
             }
         }
                 
@@ -864,9 +882,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
             if(info.length > 2){
 
-                var rectype_details = info.shift(); // ignore rectangle "title" (rectype name)
-                var last_field = info.pop(); // ignore last field
-                var position1 = 26, position2 = 26; // for y1 and y2 values
+                let rectype_details = info.shift(); // ignore rectangle "title" (rectype name)
+                let last_field = info.pop(); // ignore last field
+                let position1 = 26, position2 = 26; // for y1 and y2 values
 
                 field_dividers = overlay.selectAll("line")
                                         .data(info)
@@ -917,7 +935,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 }
 
 
-//
+// public (call here and from drag) - move to top
 // edit strcuture (from image link in table)
 //
 function _editRecStructure(rty_ID) {
@@ -928,6 +946,7 @@ function _editRecStructure(rty_ID) {
     
 }
 
+// public  - from visualize
 /** Removes the overlay with the given ID */
 function removeOverlay(selector, delay) {
     if(!(delay>=0)) delay = 1000;
@@ -936,6 +955,8 @@ function removeOverlay(selector, delay) {
    }); 
 }
 
+
+// not used
 /** Removes all overlays */
 function removeOverlays() {
     $(".overlay").each(function() {
@@ -945,18 +966,18 @@ function removeOverlays() {
     });
 }
 
-//
+// private
 // open popup dialog to define new link or relationship
 //
 function _addNewLinkField(source_ID, target_ID){
 
-    var body = $(this.document).find('body');
-    var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
+    let body = $(this.document).find('body');
+    let dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
 
     //ar target_ID = 10;
 
-    var url = window.hWin.HAPI4.baseURL;
-    var dlg_title = '';
+    let url = window.hWin.HAPI4.baseURL;
+    let dlg_title = '';
 
     if(settings.isDatabaseStructure){
 
@@ -975,7 +996,7 @@ function _addNewLinkField(source_ID, target_ID){
         url = url +'&target_ID='+target_ID;
     }
 
-    var hWin = window.hWin?window.hWin:top;
+    let hWin = window.hWin?window.hWin:top;
 
     hWin.HEURIST4.msg.showDialog(url, 
         {
@@ -992,7 +1013,7 @@ function _addNewLinkField(source_ID, target_ID){
             callback: function(context) {
                 
                 if(context!="" && context!=undefined) {
-                    var sMsg = (context==true)?'Link created...':context;
+                    const sMsg = (context==true)?'Link created...':context;
                     hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
                     if(settings.isDatabaseStructure){
                         getDataFromServer();    
@@ -1008,6 +1029,8 @@ function _addNewLinkField(source_ID, target_ID){
 
 }
 
+// private
+// 
 function _linkTwoRecords(source_ID, target_ID){
 
     function __onCloseAddLink(context){
@@ -1021,7 +1044,7 @@ function _linkTwoRecords(source_ID, target_ID){
         drag_link_line = null;
     }                            
 
-    var opts = {
+    let opts = {
         source_ID: source_ID,
         onClose: __onCloseAddLink 
     };
@@ -1031,3 +1054,24 @@ function _linkTwoRecords(source_ID, target_ID){
 
     window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);    
 }
+
+function getDataFromServer(){
+
+    const url = window.hWin.HAPI4.baseURL+"hserv/controller/rectype_relations.php" + window.location.search;
+    window.d3.json(url, function(error, json_data) {
+        // Error check
+        if(error) {
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Error loading JSON data: ${error.message}`,
+                error_title: 'Unable to load diagram',
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
+        }
+        
+        settings.data = json_data; //all data
+        filterData(json_data);
+        
+    });
+    
+}
+

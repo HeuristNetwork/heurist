@@ -19,18 +19,28 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global svg, currentMode, settings, getEntityRadius, getRecordOverlayData, createOverlay
+   getSetting, zoomBehaviour, selectionColor, selectionMode */
+
 // Functions to select nodes in the visualisation
 
 /*************************************** NODE SELECTION ******************************/
-var foregroundColor = '#fff';
-var selectionColor = "#bee4f8";
+
+window.selectionColor = "#bee4f8";
+window.selectionMode = 'single'; 
+
+let foregroundColor = '#fff';
+let rightClicked = false;
+let selectionBox = {};
+let positions = {};
+
 
 /**
 * Adds a selectionBox to the svg
 */
 function addSelectionBox() {
     // Selection element
-    var selector = svg.append("g")
+    let selector = svg.append("g")
                       .attr("class", "selector"); 
                              
     selectionBox = selector.append("rect")
@@ -39,7 +49,7 @@ function addSelectionBox() {
                            .attr("y", 0);
     
     // Mouse listeners
-    svg.on("contextmenu", function() { d3.event.preventDefault(); });
+    svg.on("contextmenu", function() { window.d3.event.preventDefault(); });
     svg.on("mousedown", onMouseDown);
     svg.on("mousemove", onMouseMove);
     svg.on("mouseup", onMouseUp);
@@ -51,7 +61,10 @@ function addSelectionBox() {
 * @param bgColor New background color
 */
 function updateCircles(selector, fgColor, bgColor) {
-    var nodes = d3.selectAll(selector);
+    if(!fgColor){
+        fgColor = foregroundColor; 
+    }
+    let nodes = window.d3.selectAll(selector);
     nodes.select(".foreground").style("fill", fgColor);
     nodes.select(".background").style("fill", bgColor);
 }
@@ -82,7 +95,7 @@ function determineColour(dataColour) {
 * @param bgColor New background color
 */
 function updateRectangles(selector, colour) {
-    var nodes = d3.selectAll(selector);
+    let nodes = window.d3.selectAll(selector);
     nodes.select('rect.info-mode-full').style('fill', colour);
     nodes.select('rect.info-mode').style('fill', colour);
 }
@@ -94,8 +107,8 @@ function updateRectangles(selector, colour) {
 * @param node  Clicked node
 */
 function onRecordNodeClick(event, data, node) {
-    var needSelect = true;
-    var recID = ""+data.id;
+    let needSelect = true;
+    let recID = ""+data.id;
     
     // Selected node id's
     if(settings.selectedNodeIds == null) {
@@ -103,10 +116,10 @@ function onRecordNodeClick(event, data, node) {
     }
 
     // Clicked with ctrl key?
-    var bgColor = getSetting(setting_entitycolor);
+    let bgColor = getSetting('setting_entitycolor');
     if(event.ctrlKey){
         // Select multiple
-        var idx = settings.selectedNodeIds.indexOf(recID);
+        let idx = settings.selectedNodeIds.indexOf(recID);
         if (idx > -1) {
             // Deslect all others
             needSelect = false;
@@ -129,12 +142,12 @@ function onRecordNodeClick(event, data, node) {
         //was shown on mouse click event.offsetX, event.offsetY, now in center of node
         //was createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
         
-        var nodePos = $(node).offset();
+        let nodePos = $(node).offset();
         
-        var r = getEntityRadius(data.count);
+        const r = getEntityRadius(data.count);
         
-        var dx = event.x - event.offsetX; 
-        var dy = event.y - event.offsetY; 
+        const dx = event.x - event.offsetX; 
+        const dy = event.y - event.offsetY; 
 
         createOverlay(Math.round(nodePos.left-dx+r), Math.round(nodePos.top-dy+r), "record", "id"+recID, getRecordOverlayData(data));    }
     
@@ -153,17 +166,17 @@ function visualizeSelection(selectedNodeIds) {
     settings.selectedNodeIds = selectedNodeIds; // Update settings object
 
     if(currentMode == 'icons'){
-        updateCircles(".node", foregroundColor, getSetting(setting_entitycolor)); // Deselect all
+        updateCircles(".node", foregroundColor, getSetting('setting_entitycolor')); // Deselect all
     }else if(selectedNodeIds && selectedNodeIds.length>0){
-        updateRectangles(".node", getSetting(setting_entitycolor));
+        updateRectangles(".node", getSetting('setting_entitycolor'));
     }else{
         updateRectangles(".node", foregroundColor);
     }
 
     // Select new nodes
     if(selectedNodeIds && selectedNodeIds.length>0){
-        for(var i=0; i<selectedNodeIds.length; i++){
-            var selector = ".id"+selectedNodeIds[i];
+        for(let i=0; i<selectedNodeIds.length; i++){
+            let selector = ".id"+selectedNodeIds[i];
 
             if(currentMode == 'icons'){
                 updateCircles(selector, selectionColor, selectionColor);
@@ -175,10 +188,6 @@ function visualizeSelection(selectedNodeIds) {
 }
 
 /************************************** SELECTION BOX **********************************/
-var rightClicked = false;
-var selectionBox = {};
-var positions = {};
-var selectionMode = 'single';
 
 /** Prevents the context menu from showing on right click */
 function preventMenu(event) {
@@ -201,19 +210,19 @@ function onMouseDown() {
 
     rightClicked = (selectionMode=='multi');
     if(rightClicked) {
-        d3.event.preventDefault();
+        window.d3.event.preventDefault();
         svg.on(".zoom", null);
 
         // X-position
-        positions.x1 = d3.event.offsetX; 
-        positions.clickX1 = d3.event.x;
+        positions.x1 = window.d3.event.offsetX; 
+        positions.clickX1 = window.d3.event.x;
        
         // Y-position 
-        positions.y1 = d3.event.offsetY; 
-        positions.clickY1 = d3.event.y;
+        positions.y1 = window.d3.event.offsetY; 
+        positions.clickY1 = window.d3.event.y;
         
         // Deselect all nodes
-        var bgColor = getSetting(setting_entitycolor);
+        const bgColor = getSetting('setting_entitycolor');
         updateCircles(".node", foregroundColor, bgColor);
     }
 }
@@ -226,8 +235,8 @@ function onMouseDown() {
 function onMouseMove() {
     if(rightClicked) {
         // X-positions
-        positions.x2 = d3.event.offsetX;
-        positions.clickX2 = d3.event.x;
+        positions.x2 = window.d3.event.offsetX;
+        positions.clickX2 = window.d3.event.x;
 
         if(positions.x1 < positions.x2) {
             selectionBox.attr("x", positions.x1);   
@@ -238,8 +247,8 @@ function onMouseMove() {
         
         
         // Y-positions
-        positions.y2 = d3.event.offsetY;
-        positions.clickY2 = d3.event.y;
+        positions.y2 = window.d3.event.offsetY;
+        positions.clickY2 = window.d3.event.y;
         
         if(positions.y1 < positions.y2) {
             selectionBox.attr("y", positions.y1);   
@@ -262,9 +271,9 @@ function onMouseUp() {
         selectionBox.style("display", "none"); 
 
         // Calculate which nodes are in the selection box
-        d3.selectAll(".node").each(function(d, i) {
-            var selector = ".node.id"+d.id;
-            var nodePos = $(selector).offset();
+        window.d3.selectAll(".node").each(function(d, i) {
+            let selector = ".node.id"+d.id;
+            let nodePos = $(selector).offset();
             
             // X in selection box?
             if((nodePos.left >= positions.clickX1 && nodePos.left <= positions.clickX2) ||
@@ -280,7 +289,7 @@ function onMouseUp() {
         });
     }else{
         // Remove all selections
-        var bgColor = getSetting(setting_entitycolor);
+        const bgColor = getSetting('setting_entitycolor');
         updateCircles(".node", foregroundColor, bgColor);
     }
     svg.call(zoomBehaviour);

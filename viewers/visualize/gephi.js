@@ -18,29 +18,17 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global settings */
 
  // Functions to download the displayed nodes in GEPHI format.
-
-/*  to remove
-function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
-function getDatabaseName() {
-    return getParameterByName("db");
-}
-*/
 
 /** Transforms the visualisation into Gephi format */
 function getGephiFormat() {
     // Get data
-    var data = settings.getData.call(this, settings.data);
+    let data = settings.getData.call(this, settings.data);
                                                              
     // META
-    var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
+    let gexf = '<?xml version="1.0" encoding="UTF-8"?>';
     
     gexf += '<gexf xmlns="http://www.gexf.net/1.2draft"';
 gexf += ' xmlns:xsi="http://www.w3.org/2001/XMLSchema−instance"';
@@ -71,16 +59,15 @@ gexf += ' version="1.2">';
      
     // NODES
     gexf += '<nodes>';
-    for(var key in data.nodes) {
-        var node = data.nodes[key];
+    for(let key in data.nodes) {
+        let node = data.nodes[key];
         
-        //var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'');
-        var name = window.hWin.HEURIST4.util.htmlEscape(node.name);
-        var rectype = '';
+        const name = window.hWin.HEURIST4.util.htmlEscape(node.name);
+        let rectype = '';
         if(node.image && node.image.indexOf('&icon=')>0){
              rectype = parseInt(node.image.substring(node.image.indexOf('&icon=')+6));
         }
-        var image_url = window.hWin.HEURIST4.util.htmlEscape(node.image);
+        const image_url = window.hWin.HEURIST4.util.htmlEscape(node.image);
         
         
         gexf += '<node id="'+node.id+'" label="'+name+'">';
@@ -98,10 +85,9 @@ gexf += ' version="1.2">';
     
     // EDGES
     gexf += '<edges>';
-    for(var i = 0; i < data.links.length; i++) {
-        var edge = data.links[i]; 
-        //var name = (edge.relation.name?edge.relation.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'')
-        var name = window.hWin.HEURIST4.util.htmlEscape(edge.relation.name);
+    for(let i = 0; i < data.links.length; i++) {
+        let edge = data.links[i]; 
+        const name = window.hWin.HEURIST4.util.htmlEscape(edge.relation.name);
         
         gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'
                     +(edge.targetcount>0?edge.targetcount:1)+'">';
@@ -124,11 +110,11 @@ gexf += ' version="1.2">';
     
     // DOWNLOAD 
     //that's duplication of  window.hWin.HEURIST4.util.downloadData(getDatabaseName()+".gexf", gexf);
-    var filename = window.hWin.HAPI4.database+".gexf"; //getDatabaseName()
-    var mimeType = 'text/plain';
-    var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(gexf);
+    const filename = window.hWin.HAPI4.database+".gexf"; //getDatabaseName()
+    const mimeType = 'text/plain';
+    const content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(gexf);
 
-    var link = document.createElement("a");
+    let link = document.createElement("a");
     link.setAttribute('download', filename);
     link.setAttribute('href', content);
     if (window.webkitURL != null)
