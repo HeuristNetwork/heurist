@@ -1636,7 +1636,7 @@ $.widget( "heurist.manageEntity", {
         
         let mode = 'hidden';
         if(force_hide!==true){
-            let isChanged = this._editing.isModified();
+            let isChanged = this._editing ? this._editing.isModified() : false;
             mode = isChanged?'visible':'hidden';
         }
 
