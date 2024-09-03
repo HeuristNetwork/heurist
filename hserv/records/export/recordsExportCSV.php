@@ -30,6 +30,10 @@ require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
+if(!defined('H_ID')){
+    define('H_ID',' H-ID');   
+}
+
 /**
 *
 *  setSession - work with different database
@@ -99,10 +103,6 @@ public static function output($data, $params){
         return;
     }
     
-    if(!defined('H_ID')){
-        define(H_ID,' H-ID');   
-    }
-
     $data = $data['data'];
 
     if(!(@$data['reccount']>0)){

@@ -182,7 +182,7 @@
 
                 if($search_params['q']==null){
                     //query was removed
-                    header( CTYPE_JSON);
+                    header(CTYPE_JSON);
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
@@ -236,7 +236,7 @@
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
-                header( CTYPE_JSON);
+                header(CTYPE_JSON);
                 echo json_encode(array('status'=>HEURIST_OK));
                 exit;
             }

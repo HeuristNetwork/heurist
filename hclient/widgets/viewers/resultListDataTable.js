@@ -223,9 +223,8 @@ that._dout('myOnShowEvent');
 
                 if(recIds_list.length>0){
 
-                    let queryURL = window.hWin.HAPI4.baseURL
-                    +'hserv/controller/record_output.php?format=json'
-                    +'&db=' + window.hWin.HAPI4.database;
+                    let queryURL = window.hWin.HAPI4.baseURL+'hserv/controller/record_output.php';
+
                     let queryStr = '';
                     let rec_total_count = recIds_list.length;
                     
@@ -346,14 +345,19 @@ this._dout('reload datatable '+this.options.serverSide);
                         //to avoid passs thousands of recids for each page request 
                         //pass and save query on server side 
                         window.hWin.HEURIST4.util.sendRequest(queryURL,
-                            {q:queryStr, datatable:datatable_id}, null, 
+                            {q:queryStr, datatable:datatable_id, format:'json', db:window.hWin.HAPI4.database}, null, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     that.options.dataTableParams['ajax'] = {
                                             "type": "POST",
-                                            "url": queryURL 
-                                            + '&recordsTotal='+rec_total_count
-                                            + '&datatable='+datatable_id};
+                                            "url": queryURL,
+                                            "data":{
+                                                "db": window.hWin.HAPI4.database,
+                                                "format": 'json',
+                                                "recordsTotal":rec_total_count,
+                                                "datatable": datatable_id
+                                            }
+                                    };
 
                                     that._dataTable = that.div_datatable.DataTable( that.options.dataTableParams );
                                 }else{
@@ -368,7 +372,14 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['serverSide'] = false;                    
                         this.options.dataTableParams['ajax'] = {
                                             "type": "POST",
-                                            "url": queryURL + '&datatable=1&q=' + queryStr};
+                                            "url": queryURL,  
+                                            "data":{
+                                                "db": window.hWin.HAPI4.database,
+                                                "format": 'json',
+                                                "q":queryStr,
+                                                "datatable": 1
+                                            }
+                                            };
                         this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );
                     }
 
