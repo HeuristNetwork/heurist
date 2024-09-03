@@ -2493,7 +2493,7 @@ $.widget( "heurist.search_faceted", {
                                     
                                 need_small_dropdown = false; //!(field.selectedvalue && field.selectedvalue.value);
                             }
-
+console.log(term, term?.count);
                             if(term && Object.hasOwn(term, 'count') && term.count == 0){
                                 this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_no_values'), value:null, count:0} ).appendTo($sel);
                                 this.no_value_facets.push(facet_index);

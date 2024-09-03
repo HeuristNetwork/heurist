@@ -327,11 +327,11 @@ class DbSysGroups extends DbEntityBase
             $ret = false;
         }
         $query = 'DELETE FROM usrSavedSearches  WHERE svs_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrTags  WHERE tag_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrRecPermissions  WHERE rcp_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
 
         if($ret){
             $ret = parent::delete();
