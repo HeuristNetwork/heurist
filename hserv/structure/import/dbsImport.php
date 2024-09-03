@@ -211,7 +211,6 @@ class DbsImport {
             $this->source_db_reg_id = $db_reg_id;
 
             // 1. get database url by database id
-            require_once dirname(__FILE__).'/../../utilities/dbRegis.php';
             $database_url = DbRegis::registrationGet(array('dbID'=>$db_reg_id));
             if(!$database_url){
                 $this->system->addErrorMsg('Can not obtain database url. ');

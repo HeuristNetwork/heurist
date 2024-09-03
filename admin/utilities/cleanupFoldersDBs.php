@@ -385,7 +385,7 @@ sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER
 function listFolderContent($dir){
 
     $size = 0;
-    $list = DIV.substr($dir, strrpos($dir, '/',-2)).'</div><table style="min-width:500px;border:1px solid red"><tr><th align="left">file</th><th align="right">size</th></tr>';
+    $list = DIV_S.substr($dir, strrpos($dir, '/',-2)).'</div><table style="min-width:500px;border:1px solid red"><tr><th align="left">file</th><th align="right">size</th></tr>';
     $content = folderContent($dir);
 
     foreach ($content['records'] as $object) {

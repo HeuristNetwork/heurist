@@ -283,7 +283,7 @@ class DbVerify {
         else
         {
             $resStatus = false;
-            $resMsg .= DIV;
+            $resMsg .= DIV_S;
             if($wrongUser_Add>0){
                 $resMsg .= "<h3> $wrongUser_Add records are owned by non-existent users</h3>";
             }
@@ -380,7 +380,7 @@ class DbVerify {
             else
             {
 
-                $resMsg .= DIV;
+                $resMsg .= DIV_S;
                 if(count($trmWithWrongParents)>0){
 
                     $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
@@ -548,7 +548,7 @@ class DbVerify {
         }
 
         if($resStatus){
-            $resMsg = DIV.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
+            $resMsg = DIV_S.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
         }
 
         return array('status'=>$resStatus,'message'=>$resMsg);

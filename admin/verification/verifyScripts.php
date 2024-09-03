@@ -154,7 +154,7 @@ function __checkVersionDatabase(){
             }
 
             if($is_old_version || $has_missed){            
-                print DIV.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
+                print DIV_S.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
             
                 if($has_missed){
                     print '<br>Missed: '.implode(', ',$missed);
@@ -187,7 +187,7 @@ function __checkVersionDatabase(){
             
                 print DIV_E;
             }else{
-                //print DIV.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].DIV_E;
+                //print DIV_S.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].DIV_E;
             }
         }
     }
@@ -445,7 +445,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             $vocab = mysql__select_row($mysqli, $query);
             if($vocab){
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
-                    print DIV.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).DIV_E;
+                    print DIV_S.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).DIV_E;
 
                     if(@$_REQUEST["fix"]==1){
                         $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.intval($v_code[0])

@@ -291,7 +291,7 @@ $mysqli->query($query);
     print '[end report]</div>';
 
 /*
-    print DIV.TABLE;
+    print DIV_S.TABLE_S;
     foreach($all_rty_regs as $k=>$rty)
     {
         print TR_S.$rty[1].TD.$rty[2].TD.$rty[3].TR_E;

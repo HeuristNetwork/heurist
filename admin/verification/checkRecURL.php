@@ -223,7 +223,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
                     $rec_url = htmlspecialchars($rec_url);
 
-                    print DIV.intval($rec_id)." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a> "
+                    print DIV_S.intval($rec_id)." : <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a> "
                         .(isset($glb_curl_error)?$glb_curl_error:'').DIV_E;
                 }
                 if($return_output){
@@ -432,7 +432,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                 }
 
                 $broken_cnt ++;
-                $broken_field_urls[$rec_id][$dty_id] .= DIV.$url.' '.$glb_curl_error.DIV_E;
+                $broken_field_urls[$rec_id][$dty_id] .= DIV_S.$url.' '.$glb_curl_error.DIV_E;
 
                 if($return_output){
                     if(!array_key_exists($rec_id, $results[2])){
@@ -470,7 +470,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                      $fld_names = mysql__select_list2($mysqli, str_replace(array('DTYID'), array($dtyids), $def_name_query));
                 }
 
-                print DIV . $recid . ': ' . implode(' ;', array_values($flds))
+                print DIV_S.$recid . ': ' . implode(' ;', array_values($flds))
                         . '[found in field(s): ' . htmlspecialchars( implode(',', $fld_names) ). ']<br>';
             }
 

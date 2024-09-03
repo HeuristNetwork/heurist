@@ -305,7 +305,7 @@ $mysqli = $system->get_mysqli();
 
                         /* report
                         foreach($file_a['dupes'] as $id=>$path){
-                            print DIV.$id.' '.$path.DIV_E;
+                            print DIV_S.$id.' '.$path.DIV_E;
                         }
                         print '<div style="padding:0 0 10px 60px">removed in favour of '.$ulf_ID.' '.$file_a['path'].DIV_E;
                         */

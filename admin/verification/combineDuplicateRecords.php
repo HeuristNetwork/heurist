@@ -508,14 +508,14 @@ EXP;
                                     if (is_array($detail)) {
                                         if ($repeatCount != 1){//repeatable
                                             foreach ($detail as $val) {
-                                                print DIV. $val . DIV_E;
+                                                print "<div>$val</div>";
                                             }
                                         } else{
-                                            print DIV. $detail[0] . DIV_E;
+                                            print "<div>{$detail[0]}</div>";
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print DIV. $detail . DIV_E;
+                                        print "<div>$detail</div>";
                                     }
 
                                     print TD_E;

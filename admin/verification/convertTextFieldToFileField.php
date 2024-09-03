@@ -100,7 +100,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
         }
     }
 
-    print DIV;
+    print DIV_S;
     $k = 1;
 
     //$entity = new DbRecUploadedFiles($system);

@@ -337,7 +337,7 @@ if($step=="1"){  // info about current status
     if(count($successful_rows)>0){
 
         print "<div id='success-accordion'><h3><strong>Data mapped for transfer</strong></h3>";
-        print DIV.TABLE_S.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
+        print DIV_S.TABLE_S.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
 
         // Make this section an accordion (jQuery UI)
         print '<script> $("#success-accordion").accordion({collapsible: true, heightStyle: "content", active: false});';

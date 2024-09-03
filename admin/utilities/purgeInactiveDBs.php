@@ -653,9 +653,9 @@ if(!$arg_no_action){
 
     if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;
-        $sMsg = $sTitle.TABLE.implode("\n", $email_list_deleted).TABLE_E;
+        $sMsg = $sTitle.TABLE_S.implode("\n", $email_list_deleted).TABLE_E;
         if(count($email_list_failed)>0){
-             $sMsg = $sMsg.'<br>FAILED on database drop'.TABLE.implode("\n", $email_list_failed).TABLE_E;
+             $sMsg = $sMsg.'<br>FAILED on database drop'.TABLE_S.implode("\n", $email_list_failed).TABLE_E;
         }
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);
     }

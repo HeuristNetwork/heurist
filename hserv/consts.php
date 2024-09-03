@@ -215,7 +215,7 @@ define('TD','</td><td>');
 define('TD_E','</td>');
 define('TR_E','</td></tr>');
 define('TABLE_E','</table>');
-define('DIV','<div>');
+define('DIV_S','<div>');
 define('DIV_E','</div>');
 define('BR','<br>');
 define('BR2','<br><br>');
