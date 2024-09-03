@@ -56,9 +56,9 @@ if (!@$defaultRootFileUploadPath) {$defaultRootFileUploadPath = "/var/www/html/H
 
 // [EMAIL]
 
-if (!@$sysAdminEmail) {$sysAdminEmail = "info@HeuristNetwork.org";}
+if (!@$sysAdminEmail) {$sysAdminEmail = "admin@example.org";}
 // REQUIRED, please set to email of the system administrator or mailing group
-if (!@$infoEmail) {$infoEmail = "info@HeuristNetwork.org";}
+if (!@$infoEmail) {$infoEmail = "info@example.org";}
 // recommended, please set to the email of whoever provides user assistance
 if (!@$bugEmail) {$bugEmail = "info@HeuristNetwork.org";}
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation

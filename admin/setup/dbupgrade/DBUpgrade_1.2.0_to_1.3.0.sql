@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS usrWorkingSubsets (
    wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',
    wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',
    PRIMARY KEY  (wss_ID),
-  .'KEY wss_RecID (wss_RecID),
-  .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)
+   KEY wss_RecID (wss_RecID),
+   KEY wss_OwnerUGrpID (wss_OwnerUGrpID)
  ) ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
  
 --
@@ -92,7 +92,7 @@ INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography");
-INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
+INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags");
 INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal");
@@ -100,14 +100,14 @@ INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","r
 
 --
 
-ALTER TABLE `defTerms` ADD COLUMN  IF NOT EXISTS trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)';
+ALTER TABLE `defTerms` ADD COLUMN  IF NOT EXISTS trm_VocabularyGroupID smallint(5) unsigned NULL default 1 COMMENT "Vocabulary group to which this term belongs, if a top level term (vocabulary)";
 
 --
 
 CREATE TABLE defTermsLinks (
-  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
-  trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
-  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
+  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT "Primary key for vocablary-terms hierarchy",
+  trl_ParentID smallint(5) unsigned NOT NULL COMMENT "The ID of the parent/owner term in the hierarchy",
+  trl_TermID smallint(5) unsigned NOT NULL COMMENT "Term identificator",
   PRIMARY KEY  (trl_ID),
   UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
 ) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms';

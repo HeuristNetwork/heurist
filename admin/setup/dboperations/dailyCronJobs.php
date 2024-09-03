@@ -90,11 +90,6 @@ if (@$argv) {
 
 }else{
     exit('This function must be run from the shell');
-    /*
-        $do_reminders = true;
-        $do_reports = false;
-        $eol = "<br>";
-    */
 }
 
 use hserv\entity\DbUsrReminders;
@@ -131,7 +126,6 @@ if($arg_database){
 $upload_root = $system->getFileStoreRootFolder();
 
 echo "root : ".$upload_root."\n";
-//define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list();//read databases_not_to_crons
 
@@ -146,7 +140,6 @@ $url_list = array();
 $reminders = null;
 
 if($do_reminders){
-//echo ">>>>>".spl_object_id($system)."\n";
     $reminders = new DbUsrReminders($system, $params);
 }
 
@@ -154,9 +147,6 @@ print 'HEURIST_SERVER_NAME='.HEURIST_SERVER_NAME."\n";
 print 'HEURIST_BASE_URL='.HEURIST_BASE_URL."\n";
 print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
 
-//print $do_reports.'  '.$do_reminders;
-//print print_r($databases,true);
-//print print_r($exclusion_list,true);
 
 // HEURIST_SERVER_NAME
 // HEURIST_MAIL_TO_INFO
@@ -164,8 +154,6 @@ print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
 // HEURIST_SMARTY_TEMPLATES_DIR  $system->getSysDir('smarty-templates')
 // HEURIST_SCRATCHSPACE_DIR      $system->getSysDir('scratch')
 // HEURIST_DBNAME                $system->dbname()
-
-//$databases = array(0=>'osmak_1');
 
 // For sending an email to the sysadmin about reports that take longer than 10 seconds to generate
 $long_reports = array();
@@ -192,7 +180,6 @@ foreach ($databases as $idx=>$db_name){
 
     $system->set_mysqli($mysqli);
     $system->set_dbname_full($db_name);
-//echo spl_object_id($system).'    >>>'.isset($mysqli)."<<<<\n";
 
     if($do_reports){
         $report = array(0=>0,1=>0,2=>0,3=>0);
@@ -205,13 +192,11 @@ foreach ($databases as $idx=>$db_name){
             $smarty = null; //reset
 
             while ($row = $res->fetch_assoc()) {
-//echo print_r($row,true);
                 if($smarty==null){ //init smarty for new db if there is at least one entry in schedule table
                     initSmarty($system->getSysDir('smarty-templates'));//reinit global smarty object for new database
                     if(!isset($smarty) || $smarty==null){
                         echo 'Cannot init Smarty report engine for database '.htmlspecialchars($db_name).$eol;
                         break;
-                        //continue;
                     }
                 }
 
@@ -241,7 +226,7 @@ foreach ($databases as $idx=>$db_name){
 
         if($is_ok){
             $report_list[$db_name] = $report;
-            //echo $tabs0.$db_name;
+            
             echo $eol.htmlspecialchars($db_name).$tabs;
             echo ' reports errors:'.$report[0].' created:'.$report[1].' updated:'.$report[2].' unchanged:'.$report[3].$eol;
         }
@@ -275,9 +260,6 @@ foreach ($databases as $idx=>$db_name){
             continue;
         }
         
-        //echo $db_name."\n";
-        //continue;
-
         $url_results = checkURLs($system, true);// [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
         
         if(is_array($url_results)){
@@ -285,11 +267,6 @@ foreach ($databases as $idx=>$db_name){
         $invalid_rec_urls = $url_results[0];
         $invalid_fb_urls = $url_results[1];
         $invalid_file_urls = $url_results[2];
-
-        /*if(!empty($invalid_rec_urls[0]) || !empty($invalid_fb_urls) || !empty($invalid_file_urls)){
-            echo $eol.$tabs0.$db_name;
-            echo $eol.$tabs.' url checks: '.$eol;
-        }*/
 
         if(!empty($invalid_rec_urls[0])){
             if(!is_array($invalid_rec_urls[0])){ // error
@@ -355,12 +332,6 @@ foreach ($databases as $idx=>$db_name){
             
         }
     }
-//echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
-
-
-    //echo "   ".$db_name." OK \n";//.'  in '.$folder
-    //if($db_name=='catts_medieval_cookbook') {break;}
-
 }//foreach database
 
 
@@ -449,7 +420,6 @@ function exclusion_list(){
     $res = array();
     $fname = realpath(dirname(__FILE__)."/../../../../databases_exclude_cronjobs.txt");
     if($fname!==false && file_exists($fname)){
-        //ini_set('auto_detect_line_endings', 'true');
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));

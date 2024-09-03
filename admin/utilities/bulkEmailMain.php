@@ -62,8 +62,6 @@ if ( !isset($_REQUEST['db']) || $system->verifyActionPassword($sysadmin_pwd, $pa
                     . $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] .DIV_E;
         }
 
-        //echo "<script>window.close();</script>";
-
         exit;
     }
 }

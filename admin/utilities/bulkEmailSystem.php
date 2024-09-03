@@ -303,8 +303,6 @@ class SystemEmailExt {
 				if (!$res) {
 
 					continue;
-					//$this->set_error("Query Error: Unable to retrieve the list of users to email<br>Error => " .$mysqli->error);
-					//return -2;
 				}
 
 				while ($row = $res->fetch_row()) {
@@ -800,14 +798,6 @@ class SystemEmailExt {
 			} else { // Save this part in chunks
 
 				$main_t = mb_convert_encoding($main, "UTF-8", "auto");
-				/*$main_s = mb_strlen($main_t);
-				while ($main_s) {
-					$this->receipt[] = mb_substr($main_t, 0, $max_chars, "UTF-8");// Get chunk
-
-					$main_t = mb_substr($main_t, $max_chars, $main_s, "UTF-8");// Remove chunk from main string
-
-					$main_s = mb_strlen($main_t);// Get length of new string
-				}*/
 
 				if ($main_t) {
 					$start = 0;
@@ -823,14 +813,6 @@ class SystemEmailExt {
 			} else { // Save this part in chunks
 
 				$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
-				/*$user_list_s = mb_strlen($user_list_t);
-				while ($user_list_s) {
-					$this->receipt[] = mb_substr($user_list_t, 0, $max_chars, "UTF-8");// Get chunk
-
-					$user_list_t = mb_substr($user_list_t, $max_chars, $user_list_s, "UTF-8");// Remove chunk from main string
-
-					$user_list_s = mb_strlen($user_list_t);// Get length of new string
-				}*/
 
 				if ($user_list_t) {
 					$start = 0;

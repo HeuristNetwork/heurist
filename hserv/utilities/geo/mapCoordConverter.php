@@ -26,6 +26,8 @@
  * @link http://www.phpclasses.org/browse/file/10671.html
  * @link https://gist.github.com/840476#file_gpointconverter.class.php
  */
+define('WGS_84','WGS 84');
+ 
 class GpointConverter
 {
 
@@ -91,7 +93,7 @@ class GpointConverter
      *
      * @param string $datum
      */
-    public function __construct($datum='WGS 84')            // Default datum is WGS 84
+    public function __construct($datum=WGS_84)            // Default datum is WGS 84
     {
         $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
@@ -103,7 +105,7 @@ class GpointConverter
      *
      * @param string $datum
      */
-    public function setDatum($datum='WGS 84')
+    public function setDatum($datum=WGS_84)
     {
         $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity

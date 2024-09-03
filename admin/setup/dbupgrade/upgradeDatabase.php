@@ -27,9 +27,6 @@ if(!defined('PDIR')){
     require_once dirname(__FILE__).'/../../../hserv/utilities/utils_db_load_script.php';
     require_once dirname(__FILE__).'/../../../hserv/structure/import/dbsImport.php';
 
-    /*if(isForAdminOnly("to upgrade database structure")){
-    return;
-    }*/
     $src_maj = intval( $system->get_system('sys_dbVersion') );
     $src_min = intval( $system->get_system('sys_dbSubVersion') );
     $src_sub = intval( $system->get_system('sys_dbSubSubVersion') );
@@ -233,7 +230,6 @@ if(!defined('PDIR')){
                                     $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
                                     if( file_exists($dir.$filename) ){
 
-                                        //$content = file_get_contents($dir.$filename);
                                         $safety = "";
                                         $description = "";
 

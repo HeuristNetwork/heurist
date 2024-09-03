@@ -69,10 +69,6 @@ if($sysadmin_pwd==null){
             /** Db check */
             if($isSystemInited){
 
-//if(!$database_to_delete){
-//    $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('Database'));
-//}
-
                     $allow_deletion = true;
 
 

@@ -38,15 +38,6 @@ $dbs = mysql__getdatabases4($mysqli, true, $starts_with);
 
 $sysadmin = $system->is_system_admin();
 
-// Force system admin rights
-/*
-if($sysadmin){
-    startMySession();
-    $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
-    session_write_close();
-}
-*/
-
 /**
 * Selects the value after a query
 * @param mixed $query Query to execute
@@ -166,7 +157,7 @@ foreach ($dbs as $db){
             $record_row[] = $record_row[0];//add dbname to the end
 
             $record_row = array_map($aitem_quote, $record_row);
-            $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
+            $arr_databases[] = implode(',',$record_row);
         }
 
         $i++;
@@ -175,19 +166,6 @@ foreach ($dbs as $db){
 }//foreach
 
 if($is_csv){
-
-        /*
-        $filename = 'ServerUsageStatistics.csv';
-
-        rewind($fd);
-        $out = stream_get_contents($fd);
-        fclose($fd);
-
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.$filename);
-        header(CONTENT_LENGTH . strlen($out));
-        exit($out);
-        */
 
         $zipname = 'ServerUsageStatistics.zip';
         $destination = tempnam("tmp", "zip");
