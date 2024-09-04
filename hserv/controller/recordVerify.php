@@ -50,6 +50,8 @@
 
             if( @$_REQUEST['ignore'] ){
                 $response = RecordsDupes::setIgnoring( $_REQUEST );
+            }elseif(@$_REQUEST['export']){
+                $response = RecordsDupes::exportList($_REQUEST);
             }else{
                 $response = RecordsDupes::findDupes( $_REQUEST );
             }

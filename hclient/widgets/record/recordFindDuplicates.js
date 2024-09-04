@@ -519,100 +519,190 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _renderDuplicates: function(){
         
-            let dupes = this.dupes;
-            
-            let s = '<div style="padding:10px;">' + this.summary['scope'] + ' records have been checked.'
-                    + '<p>There are '+this.summary['cnt_records']
-                            + ' potential duplicates grouped in '
-                            +  this.summary['cnt_groups'] +' groups</b></p>';
-            
-            if(this.summary['cnt_records']>this.summary['limit']){
-                s = s + '<p>Operation has been terminated since the number of possible duplicaions is more than limit in '
-                        +this.summary['limit']+' records. Reduce the distance or add additional search field</p>';   
-            }else if(this.summary['is_terminated']){
+        let dupes = this.dupes;
 
-                s = s + '<p>Operation has been terminated by user</p>';
-            }
-            
-            s = s +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p>'
-                + '</div>'
-            
-//onsole.log(dupes);            
+        let s = `<div style="padding:10px;">${this.summary['scope']} records have been checked.`
+                    + '<p>'
+                        + `There are ${this.summary['cnt_records']} potential duplicates grouped in ${this.summary['cnt_groups']} groups`
+                        + `<span style="display: inline-block;padding-left: 10px;text-decoration: underline; cursor: pointer;" id="download_list">Download list as spreadsheet (TSV) file</span>`
+                    + '</p>';
 
-            
-            let grp_cnt = Object.keys(dupes).length;
-            for(let i=0; i<grp_cnt; i++) {
+        if(this.summary['cnt_records']>this.summary['limit']){
+            s = s + '<p>Operation has been terminated since the number of possible duplicaions is more than limit in '
+                    +this.summary['limit']+' records. Reduce the distance or add additional search field</p>';   
+        }else if(this.summary['is_terminated']){
 
-                let rec_ids = Object.keys(dupes[i]);
+            s = s + '<p>Operation has been terminated by user</p>';
+        }
         
-                s = s + '<div style="padding: 10px 20px;" class="group group_'+i+'">';
-                
-                s = s + '<a href="#" data-action-merge="'+i+'">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;'
-                    
-                    +'<a target="_new" href="'+window.hWin.HAPI4.baseURL+'?db='
-                        +window.hWin.HAPI4.database
-                        +'&w=all&nometadatadisplay=1&q=ids:' + rec_ids.join(',') + '">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;'
+        s = s +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p>'
+            + '</div>'
 
-                    +'<a href="#" data-action-ignore="'+i+ '">ignore in future</a>';
-                        
-                        
-                //list of records    
-                s = s + '<ul style="padding: 10px 30px;" class="group_'+i+'">';
-                for(let j=0; j<rec_ids.length; j++) {
-                    
-                    s = s + '<li>'
-                    + '<a target="_new" href="'+window.hWin.HAPI4.baseURL+'viewers/record/viewRecord.php?db='
-                    + window.hWin.HAPI4.database
-                    + '&recID='+rec_ids[j]+'">'+rec_ids[j]
-                    + ': '+ window.hWin.HEURIST4.util.stripTags(dupes[i][rec_ids[j]])+'</a></li>';
-                    
-                }
-                s = s + '</ul></div>';
+        let grp_cnt = Object.keys(dupes).length;
+        for(let i=0; i<grp_cnt; i++) {
+
+            let rec_ids = Object.keys(dupes[i]);
+
+            s += `<div style="padding: 10px 20px;" class="group group_${i}">`;
+
+            s += `<a href="#" data-action-merge="${i}">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;`
+
+                +`<a target="_new" href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}`
+                    +`&w=all&q=ids:${rec_ids.join(',')}">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;`
+
+                +`<a href="#" data-action-ignore="${i}">ignore in future</a>&nbsp;&nbsp;&nbsp;&nbsp;`
+
+                +`<input type="checkbox" class="enable_instant_merge" title="This function retains data ONLY from the record you select,&#013;and redirects pointers from the other records to that record" value="${i}"> `
+                +`<a href="#" class="instant_merge_records" style="cursor: pointer; text-decoration: underline;" data-action-instant="${i}">instant merge</a>`
+                +`<span data-msg-idx="${i}" style="display: none;color: red;font-size: 10px;padding-left: 10px;vertical-align: top;">Warning: Instant merge only conserves values<br>from the selected record</span>`;
+
+            //list of records
+            s += `<ul style="padding: 10px 30px;" class="group_${i}">`;
+            for(let j=0; j<rec_ids.length; j++) {
+
+                s += '<li>'
+                + `<input type="radio" name="instant_merge_${i}" value="${rec_ids[j]}" style="display: none;">`
+                + `<a target="_new" href="${window.hWin.HAPI4.baseURL}viewers/record/viewRecord.php?db=${window.hWin.HAPI4.database}`
+                + `&recID=${rec_ids[j]}">${rec_ids[j]}`
+                + `: ${window.hWin.HEURIST4.util.stripTags(dupes[i][rec_ids[j]])}</a></li>`;
+
             }
+            s = s + '</ul></div>';
+        }
 
-            this._off(
-                this.element.find('#div_result').find('a[data-action-merge]'),'click');
+        this._off(
+            this.element.find('#div_result').find('a[data-action-merge]'),'click');
 
-            
-            this.element.find('#div_result').html(s);
-           
-            this._on(
-                this.element.find('#div_result').find('a[data-action-merge]'),
-                {click: this._fixDuplicatesPopup });
+        
+        this.element.find('#div_result').html(s);
+        
+        this._on(
+            this.element.find('#div_result').find('a[data-action-merge]'),
+            {click: this._fixDuplicatesPopup });
 
-            this._on(
-                this.element.find('#div_result').find('a[data-action-ignore]'),
-                {click: this._ignoreGroup });
+        this._on(
+            this.element.find('#div_result').find('a[data-action-ignore]'),
+            {click: this._ignoreGroup });
 
-                
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('.instant_merge_records'), true);
+        this._on(this.element.find('.enable_instant_merge'), {
+            change: (e) => {
+
+                let idx = $(e.target).val();
+                let enable = !$(e.target).is(':checked');
+
+                window.hWin.HEURIST4.util.setDisabled(this.element.find(`a[data-action-instant="${idx}"]`), enable);
+
+                !enable ? this.element.find(`span[data-msg-idx="${idx}"]`).css('display', 'inline-block') : this.element.find(`span[data-msg-idx="${idx}"]`).hide();
+                !enable ? this.element.find(`input[name="instant_merge_${idx}"]`).show() : this.element.find(`input[name="instant_merge_${idx}"]`).hide();
+            }
+        });
+
+        this._on(this.element.find('.instant_merge_records'), {
+            click: this._instantMergeRecords
+        });
+
+        this._on(this.element.find('#download_list'), {
+            click: this._downloadList
+        });
     },
 
     _fillSortField: function(){
         
-                    let tree = this.element.find('.rtt-tree').fancytree("getTree");
-                    let fieldIds = tree.getSelectedNodes(false);
-                    let k, len = fieldIds.length;
-                    
-                    let sel = this.element.find('#sort_field');
-                    let keep_val = sel.val();
-                    sel.empty();
-                    
-                    for (k=0;k<len;k++){
-                        let node =  fieldIds[k];
-                        if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-                        
-                        if(node.data.type=='freetext' || node.data.type=='blocktext'){
-                            let key = node.key.split(':');
-                            key = key[key.length-1];
-                            window.hWin.HEURIST4.ui.addoption(sel[0], key, node.data.name);
-                        }
-                    }
-                    sel.val(keep_val);
-                    if(!(sel[0].selectedIndex>0)) sel[0].selectedIndex = 0;
+        let tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let fieldIds = tree.getSelectedNodes(false);
+        let k, len = fieldIds.length;
+        
+        let sel = this.element.find('#sort_field');
+        let keep_val = sel.val();
+        sel.empty();
+        
+        for (k=0;k<len;k++){
+            let node =  fieldIds[k];
+            if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+            
+            if(node.data.type=='freetext' || node.data.type=='blocktext'){
+                let key = node.key.split(':');
+                key = key[key.length-1];
+                window.hWin.HEURIST4.ui.addoption(sel[0], key, node.data.name);
+            }
+        }
+        sel.val(keep_val);
+        if(!(sel[0].selectedIndex>0)) sel[0].selectedIndex = 0;
 
+    },
+
+    _instantMergeRecords: function(event){
+
+        let that = this;
+
+        let $link = $(event.target);
+        let group_idx = $link.attr('data-action-instant');
+        let $parent_record = this.element.find(`input[name="instant_merge_${group_idx}"]:checked`);
+
+        if($link.hasClass('ui-state-disabled') || $parent_record.length == 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('Select the record to keep...', 3000);
+            return;
+        }
+
+        // Get parent record id
+        let rec_id = $parent_record.val();
+        if(rec_id < 1){
+            return;
+        }
+
+        let params = new URLSearchParams({
+            db: window.hWin.HAPI4.database,
+            commit: 1,
+            instant_merge: 1,
+            master_rec_id: rec_id,
+            bib_ids: Object.keys(this.dupes[group_idx]).join(',')
+        });
+
+        let url = `${window.hWin.HAPI4.baseURL}admin/verification/combineDuplicateRecords.php?${params.toString()}`;
+
+        window.hWin.HEURIST4.msg.showDialog(url, {
+            title: 'Quick merging records',
+            afterclose: () => {
+
+                that.element.find(`.group_${group_idx}`).hide();
+
+                let cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
+                cur_query.id = null;
+                cur_query.source = null;
+                cur_query.no_menu_switch = 1;
+
+                window.hWin.HAPI4.RecordSearch.doSearch(that, cur_query);
+            }
+        });
+
+    },
+
+    _downloadList: function(){
+
+        let rty_ID = this.selectRecordScope.val();
+        let settings = this.getSettings(true);
+        if(rty_ID < 1 || !settings){
+            return;
+        }
+
+        settings.fields = settings.fields[rty_ID];
+
+        let params = new URLSearchParams({
+            a: 'dupes',
+            export: 1,
+            db: window.hWin.HAPI4.database,
+            rty_ID: rty_ID,
+            session: window.hWin.HEURIST4.util.random(),
+            fields: settings.fields,
+            startgroup: settings.startgroup,
+            sort_field: settings.sort_field,
+            distance : settings.distance
+        });
+
+        let url = `${window.hWin.HAPI4.baseURL}hserv/controller/recordVerify.php?${params.toString()}`;
+
+        window.open(url, '_blank');
     }
-                        
-
-
 });
 

@@ -724,5 +724,75 @@ private static function _searchInCache(){
     return 0;
 }
 
+public static function exportList($params){
+
+    if(!array_key_exists('export', $params)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Invalid request to export duplicates list');
+        return false;
+    }
+    if(!defined('HEURIST_SCRATCH_DIR')){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Unable to write to temporary space');
+        return false;
+    }
+
+    $duplicates = self::findDupes($params);
+    if(!$duplicates){
+        return false;
+    }elseif($duplicates['summary']['cnt_records'] == 0){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'No duplicate records found for exporting');
+        return false;
+    }
+
+    $filename = HEURIST_DBNAME . '_Duplicate_Records.tsv';
+    $fd = fopen('php://output', 'w');
+    if(!$fd){
+        header(CTYPE_HTML);
+        echo 'Unable to open temporary output for writing TSV.<br>Please contact the Heurist team.';
+        return false;
+    }
+
+    header('Content-Type: text/tab-separated-values');
+    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    header("Pragma: no-cache;");
+    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+
+    // Add headers
+    fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group'], "\t");
+
+    unset($duplicates['summary']);
+
+    foreach($duplicates as $records){
+
+        $all_group_IDs = implode(',', array_keys($records));
+
+        $merge_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&db=" . HEURIST_DBNAME;
+        $search_URL = HEURIST_BASE_URL . "?w=all&q=ids:{$all_group_IDs}&db=" . HEURIST_DBNAME;
+        $ignore_URL = HEURIST_BASE_URL . "hserv/controller/recordVerify.php?a=dupes&ignore={$all_group_IDs}&db=" . HEURIST_DBNAME;
+
+        foreach($records as $rec_ID => $rec_Title) {
+            
+            $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . HEURIST_DBNAME;
+            fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL], "\t");
+
+            $merge_URL = '';
+            $search_URL = '';
+            $ignore_URL = '';
+        }
+
+        fwrite($fd, "\n\n");
+    }
+
+    // Get content, length and close resource
+    rewind($fd);
+    $output = stream_get_contents($fd);
+    $length = strlen($output);
+    fclose($fd);
+
+    if($length > 0){
+        header(CONTENT_LENGTH . $length);
+    }
+    exit($output);
+}
+
 } //end class
 ?>
