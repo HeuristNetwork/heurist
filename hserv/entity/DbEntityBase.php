@@ -98,8 +98,9 @@ abstract class DbEntityBase
 
        $this->init();//recreate table is it does not exist
 
-       $this->entityName = lcfirst(substr(basename(get_class($this)),2));
-
+       $reflect = new \ReflectionClass($this);
+       
+       $this->entityName = lcfirst(substr($reflect->getShortName(),2));
        if($data){
            $this->setData($data);
        }else{
