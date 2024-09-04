@@ -37,8 +37,8 @@ if (session_status() != PHP_SESSION_ACTIVE) {
             'expires' => 0,
             'path' => '/',
             'domain' => '',
-            'secure' => $is_https,
-            'httponly' => true,
+            'Secure' => $is_https,
+            'HttpOnly' => true,
             'SameSite' => 'Strict' //'Lax'
         ]);        
     }

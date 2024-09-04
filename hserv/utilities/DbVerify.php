@@ -2011,9 +2011,9 @@ HEADER;
 
                     if($new_val != $org_val){ // update existing value
 
-                        $upd_query = 'UPDATE recDetails SET dtl_Value = "' . $new_val . '" WHERE dtl_ID = ' . intval($row['dtl_ID']);
-                        $mysqli->query($upd_query);
-
+                        $upd_query = 'UPDATE recDetails SET dtl_Value = ? WHERE dtl_ID = ' . intval($row['dtl_ID']);
+                        mysql__exec_param_query($mysqli,$upd_query,array('s',$new_val));
+                        
                         if($fixed_multi && !in_array($rec_id, $fixed2)){
                             $fixed2[] = $rec_id;
                         }elseif(!in_array($rec_id, $ids1)){

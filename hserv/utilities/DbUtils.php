@@ -1637,11 +1637,11 @@ class DbUtils {
 
             if($dbID>0){
                 //update concept codes
-                $res = self::updateOriginatingDB( $dbID );
+                self::updateOriginatingDB( $dbID );
 
                 //update sysIndentificatons
-                $res = self::$mysqli->query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
-                        "`sys_dbDescription`='".self::$mysqli->real_escape_string($dbDescription)."' where 1");
+                $upd_query = 'update sysIdentification set `sys_dbRegisteredID`=?, `sys_dbDescription`=? where 1';
+                mysql__exec_param_query(self::$mysqli, $upd_query, array('is', $dbID, $dbDescription));
             }
         }
 

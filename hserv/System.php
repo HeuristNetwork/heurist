@@ -1488,8 +1488,8 @@ class System {
                         'expires' => $lifetime,
                         'path' => '/',
                         'domain' => '',
-                        'secure' => $is_https,
-                        'httponly' => true,
+                        'Secure' => $is_https,
+                        'HttpOnly' => true,
                         'SameSite' => 'Strict' //'Lax'
                     ]);
                 }else{
@@ -1770,8 +1770,8 @@ class System {
                 'expires' => $lifetime,
                 'path' => '/',
                 'domain' => '',
-                'secure' => $is_https,
-                'httponly' => true,
+                'Secure' => $is_https,
+                'HttpOnly' => true,
                 'SameSite' => 'Strict'  //Lax
             ]);
 
