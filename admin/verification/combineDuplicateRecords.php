@@ -47,6 +47,7 @@ $mysqli = $system->get_mysqli();
 
 $do_merge_details = false;
 $finished_merge = false;
+$instant_merge = false;
 
 if (@$_REQUEST['finished_merge']==1){
     $finished_merge = true;
@@ -56,6 +57,10 @@ if (@$_REQUEST['keep'])  {
     $master_rec_id = intval($_REQUEST['keep']);
 }else{
     $master_rec_id = intval(@$_REQUEST['master_rec_id']);
+}
+
+if(@$_REQUEST['instant_merge']){
+    $instant_merge = true;
 }
 
 //get all enumeration fields - global
@@ -712,7 +717,7 @@ function detail_str($rd_type, $rd_val)
 // function to actually fix stuff on form submission
 function do_fix_dupe()
 {
-    global $mysqli, $master_rec_id, $finished_merge, $enum_bdts, $bib_ids_list, $bib_ids;
+    global $mysqli, $master_rec_id, $finished_merge, $enum_bdts, $bib_ids_list, $bib_ids, $instant_merge;
 
     $finished_merge = true;
 
@@ -946,6 +951,13 @@ function do_fix_dupe()
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';
         $mysqli->query('delete from recDetails where dtl_ID in '.$master_detail_delete_list);//FIXME add error code
     }
+
+    if($instant_merge){
+        // Transfer all record pointer to master first
+        $mysqli->query("UPDATE recDetails LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID SET dtl_Value = {$master_rec_id} "
+                        ."WHERE dtl_Value IN {$dup_rec_list} AND dty_Type = 'resource'");
+    }
+
     //delete dup details
     $mysqli->query('delete from recDetails where dtl_RecID in '.$dup_rec_list);
     //delete dup usrBookmarks
