@@ -30,13 +30,6 @@ function HSvsEdit(args) {
     callback_method,
     _menu_locked;
 
-    /**
-    * Initialization
-    */
-    function _init(args) {
-       
-    }
-
     //
     //
     //
@@ -749,7 +742,6 @@ function HSvsEdit(args) {
         
     }
 
-    _init(args);
     return that;  //returns object
 }
 

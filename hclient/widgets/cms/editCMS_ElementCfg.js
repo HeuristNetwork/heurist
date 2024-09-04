@@ -740,13 +740,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     
    
-    //
+    // NOT USED
     // from UI to element properties/css
     //
     function _getValues(){
-        
-
-       
+        return '';
     }//_getValues
 
 

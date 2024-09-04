@@ -5901,7 +5901,7 @@ $.widget( "heurist.editing_input", {
                                 "width": "200px",
                                 "background": "rgb(209, 231, 231)",
                                 "font-size": "1.1em"
-                            }
+                            });
                         }
                     });
                     if(!that.tooltips) that.tooltips = {};
