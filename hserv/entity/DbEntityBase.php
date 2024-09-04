@@ -592,7 +592,7 @@ abstract class DbEntityBase
             $this->_cleanDbDefCache();
         }
         return $results;
-    }
+    }//save
 
     //
     // @todo multirecords and transaction

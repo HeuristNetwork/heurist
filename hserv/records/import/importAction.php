@@ -3304,7 +3304,9 @@ public static function performImport($params, $mode_output){
     return $res;
 } //end performImport
 
+//
 // Imports all missing terms
+//
 public static function importTerms($params){
 
     self::initialize();
@@ -3339,6 +3341,7 @@ public static function importTerms($params){
 
     $total = 0;
 
+    // $fields -  array(field id in import table, $dty_ID, vocabulary ID) 
     foreach($fields as $idx => $field){
 
         $tab_num = $idx + 1;
@@ -3363,11 +3366,13 @@ public static function importTerms($params){
             continue;
         }
 
+        //find all not empty terms from import table
         $query = "SELECT imp_ID, $field_id FROM $import_table WHERE $field_id <> '' GROUP BY $field_id";
 
         $terms = mysql__select_assoc2(self::$mysqli, $query);
 
         $results['success'][$idx] = [];
+        
         if(empty($terms)){
             continue;
         }
@@ -3390,7 +3395,7 @@ public static function importTerms($params){
             $row_count ++;
 
             if(mb_strlen($term) > 200){
-                $results['error'][$idx] = "Row $row => Invalid term label";
+                $results['error'][$idx] = "Row $row => Invalid term label (more than 200 characters)";
                 continue;
             }
 

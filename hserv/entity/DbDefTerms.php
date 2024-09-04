@@ -230,7 +230,7 @@ class DbDefTerms extends DbEntityBase
     private function _importTerms(){
 
         //extract records from $_REQUEST data
-        if(!$this->prepareRecords()){
+        if(!$this->prepareRecords(true)){
                 return false;
         }
 
@@ -408,9 +408,11 @@ class DbDefTerms extends DbEntityBase
     //
     // Validates values before save and sets default values
     //
-    protected function prepareRecords(){
+    protected function prepareRecords($ignore_duplications=false){
 
         $ret = parent::prepareRecords();
+        
+        $duplications = [];
 
         //add specific field values
         foreach($this->records as $idx=>$record){
@@ -447,12 +449,19 @@ class DbDefTerms extends DbEntityBase
                                     if(@$this->records[$idx]['trm_Label'] &&
                                         strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
                                         $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                                        break;
                                     }elseif (@$this->records[$idx]['trm_Code'] &&
                                         strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
                                     {
                                         $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
-                                        break;
+                                    }
+                                    
+                                    if($s2!==null){ //duplication
+                                         if($ignore_duplications){
+                                            $duplications[] = $idx;    
+                                            $s2 = null;
+                                         }else{
+                                             break;
+                                         }
                                     }
                                 }
                             }
@@ -512,6 +521,12 @@ class DbDefTerms extends DbEntityBase
             if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) {$this->records[$idx]['trm_OrderInBranch'] = null;}
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
+        }//foreach
+        
+        if(!empty($duplications)){
+            foreach($duplications as $idx){
+                unset($this->records[$idx]);
+            }
         }
 
         return $ret;
@@ -1179,23 +1194,17 @@ class DbDefTerms extends DbEntityBase
     }
 
     //
-    // get flat array of trm_ID=>trm_Label fro given parent
+    // get flat array of trm_ID=>trm_Label for given parent
     //
     private function getLabelsAndCodes($parent_id, $all_levels=true){
 
         //get first level children
         $children = $this->getChildren($parent_id, $all_levels);
-        if(is_array($children) && count($children)>0){
+        if(is_array($children) && !empty($children)){
 
             $query = 'SELECT trm_ID, trm_Label, trm_Code FROM '
-                .$this->config['tableName'].' WHERE trm_ID';//defTerms
+                .$this->config['tableName'].SQL_WHERE.predicateId('trm_ID', $children);
             //finds labels and codes
-            if(count($children)>1)
-            {
-                $query = $query .' IN ('.implode(',',$children).')';
-            }else{
-                $query = $query . ' = '.$children[0];
-            }
             return mysql__select_assoc($this->system->get_mysqli(), $query);
         }
         return null;
