@@ -178,12 +178,12 @@ if (@$argv) {
                 $req_params['entity'] = 'all';
                 //remove cache
                 if($dbdef_cache!=null){
-                    $system->cleanDefCache();//fileDelete($dbdef_cache);
+                    $system->cleanDefCache();
                 }
             }elseif(@$req_params['entity']=='relevance'){
                 $req_params['entity'] = 'all';
             }
-            $res = entityRefreshDefs($system, @$req_params['entity'], true);//, @$req_params['recID']);
+            $res = entityRefreshDefs($system, @$req_params['entity'], true);
 
             //update dbdef cache
             if(@$req_params['entity']=='all' && $res!==false && $dbdef_cache!=null){
@@ -302,7 +302,7 @@ if (@$argv) {
 
     function find_invalid_string($val){
         if(is_string($val)){
-            $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
+            $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);/* important */
             if($stripped_val!=$val){
                 throw new Exception(mb_convert_encoding($val,'UTF-8'));
             }

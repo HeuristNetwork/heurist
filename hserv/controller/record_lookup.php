@@ -877,7 +877,7 @@
 
         foreach($records as $key => $details){
             $record = $details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record;
-            $results['record'] = $record->asXML();//json_encode($record, JSON_PRETTY_PRINT);
+            $results['record'] = $record->asXML();
             break;
         }
 

@@ -1569,11 +1569,11 @@ class RecordsBatch
 
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
-        $this->_assignTagsAndReport('undefined', $skippedNoPDF, null);//no pdf assigned
-        $this->_assignTagsAndReport('limited',   $skippedRecIDs, null);//value already defined
+        $this->_assignTagsAndReport('undefined', $skippedNoPDF, null); //no pdf assigned
+        $this->_assignTagsAndReport('limited',   $skippedRecIDs, null); //value already defined
         $this->_assignTagsAndReport('parseexception', $skippedParseEx, null);
         $this->_assignTagsAndReport('parseempty', $skippedEmpty, null);
-        $this->_assignTagsAndReport('errors',  $sqlErrors, null);//$baseTag);
+        $this->_assignTagsAndReport('errors',  $sqlErrors, null);
 
         return $this->result_data;
     }
@@ -2701,7 +2701,7 @@ public methods
                 'propertyUri' => NAKALA_REPO.'terms#license'
             );
 
-            $api_key = $credentials[$service_id]['params']['writeApiKey'];//$this->system->get_system('sys_NakalaKey');
+            $api_key = $credentials[$service_id]['params']['writeApiKey'];  //$this->system->get_system('sys_NakalaKey')
             $use_test_url = @$this->data['use_test_url'] == 1 || strpos($service_id,'nakala')===1 ? 1 : 0;
 
             while($row = $res->fetch_row()){

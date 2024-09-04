@@ -119,7 +119,7 @@ class DbUsrBookmarks extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
 
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField,
-                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID);//' not in ('.implode(',',$ugrs).')');
+                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID);
 
 
             $cnt = count($recIDs_norights);

@@ -41,7 +41,7 @@
 
         }else{
 
-            $action = @$_REQUEST['a'];// || @$_REQUEST['action'];
+            $action = @$_REQUEST['a'];
 
             // call function from db_record library
             // these function returns standard response: status and data
@@ -135,7 +135,7 @@ if($response==false){
 }
 
 // Return the response object as JSON
-//header(CTYPE_JSON);
+// header(CTYPE_JSON)
 $system->setResponseHeader();
 print json_encode($response);
 ?>

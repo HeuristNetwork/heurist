@@ -105,7 +105,7 @@
             $relation = new stdClass();
             $relation->id = intval($row["id"]);//detail type id
             $relation->name = $row["name"];
-            $relation->count = 0;//intval($row["count"]);
+            $relation->count = 0;
             $relation->type = $row["reltype"];
             $relation->ids = $row["ids"];
 

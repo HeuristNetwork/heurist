@@ -136,7 +136,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     $mysqli = $db;
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
-    if (! $params) {$params = array();}//$_REQUEST;
+    if (! $params) {$params = array();} // $_REQUEST
     if(@$params['stype']) {$sortType = @$params['stype'];}
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------

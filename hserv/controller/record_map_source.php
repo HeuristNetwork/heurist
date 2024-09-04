@@ -221,9 +221,9 @@
                 if($input_format == 'kml'){
                     $parser_parms['kmldata'] = true;
                     $mapping[DT_GEO_OBJECT] = 'geometry';
-                    if(!@$mapping[DT_START_DATE]) {$mapping[DT_START_DATE] = 'timespan_begin';}//'timespan';
-                    if(!@$mapping[DT_END_DATE]) {$mapping[DT_END_DATE] = 'timespan_end';}//'timespan';
-                    if(!@$mapping[DT_DATE]) {$mapping[DT_DATE] = 'timestamp';}//'when';
+                    if(!@$mapping[DT_START_DATE]) {$mapping[DT_START_DATE] = 'timespan_begin';}
+                    if(!@$mapping[DT_END_DATE]) {$mapping[DT_END_DATE] = 'timespan_end';}
+                    if(!@$mapping[DT_DATE]) {$mapping[DT_DATE] = 'timestamp';}
 
                 }else{
                     $parser_parms['csvdata'] = true;

@@ -30,12 +30,12 @@
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
 
-    $response = array();//"status"=>"fatal", "message"=>"OBLOM");
+    $response = array();
     $res = false;
 
     $req_params = USanitize::sanitizeInputArray();
     
-    $action = @$req_params['a'];//$system->getError();
+    $action = @$req_params['a'];
 
     $system = new hserv\System();
     $dbname = @$req_params['db'];

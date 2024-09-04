@@ -105,7 +105,7 @@ if(!$system->init(@$_REQUEST['db'])){
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["a"];
         $res = false;
-        $ugr_ID = $system->get_user_id();//intval(@$_REQUEST["ugr_ID"]);
+        $ugr_ID = $system->get_user_id();
 
         if($action=='list'){
             //get list of available repositories for given user (including for database and groups)

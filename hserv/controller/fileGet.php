@@ -69,7 +69,7 @@ if($filename){ //download from scratch (for csv import)
             exit;
         }
 
-        $content_type = null;//'image/'.$file_ext;
+        $content_type = null;
 
         $csv_encoding = @$req_params['encoding'];
 

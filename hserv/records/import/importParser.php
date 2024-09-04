@@ -155,7 +155,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
 
         if($csv_encoding==null || $csv_encoding==''){
             //detect encoding automatically - IT DOES NOT WORK
-            $csv_encoding = mb_detect_encoding($content);//,['ISO-8859-1','ISO-8859-15','CP1251','CP1252','BIG-5','UTF-8']);
+            $csv_encoding = mb_detect_encoding($content); //['ISO-8859-1','ISO-8859-15','CP1251','CP1252','BIG-5','UTF-8'])
         }
 
         /* try to convert ONE line only - to check is it possible
@@ -786,7 +786,7 @@ private static function _saveEncodedFilename($encoded_filename){
         //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
         //$res = $mysqli->query($query);
         if(is_numeric($res) && intval($res)>0){
-                return $res; //$mysqli->insert_id;
+                return $res;
         }else{
                 self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);
                 return false;
@@ -1213,7 +1213,7 @@ public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=
     $fields = $parsed['fields'];
     $values = $parsed['values'];
     if($rec_RecTypeID==null){
-      $rec_RecTypeID = 12;//RT_PLACE;
+      $rec_RecTypeID = 12; //RT_PLACE
     }
     $records = array();
 

@@ -454,7 +454,7 @@ private function _setResourceProps($record, &$resource){
                     list($lang, $value) = extractLangPrefix($value);
                     $dtype = 'xsd:string';
                     if($lang!=null) {
-                        $lang = 'fr';//strtolower($lang);
+                        $lang = 'fr'; 
                     }
                     */
                 }

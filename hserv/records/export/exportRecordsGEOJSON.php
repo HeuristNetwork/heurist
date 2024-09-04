@@ -40,13 +40,13 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $search_all_geofields = true;
 
     // variables for leaflet
-    private $geojson_ids = array();//simplify array('all'=>array());
-    private $geojson_dty_ids = array();//unique list of all geofields
+    private $geojson_ids = array();
+    private $geojson_dty_ids = array(); //unique list of all geofields
     private $geojson_rty_ids = array();
-    private $timeline_dty_ids = array();//unique list of all date fields
+    private $timeline_dty_ids = array(); //unique list of all date fields
 
     private $timeline_data = array();
-    private $layers_record_ids = array();//list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
+    private $layers_record_ids = array(); //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
 
     private $simplify_wkt = true;
     private $detail_mode = 0;

@@ -114,7 +114,7 @@ define('HEURIST_DB_PORT', $dbPort);
 //---------------------------------
 $date = new DateTime();
 
-define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);//.' '.$date->format('d M Y @ H:i') );
+define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js

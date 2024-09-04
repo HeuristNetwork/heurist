@@ -47,7 +47,6 @@ require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.php';
-//require_once dirname(__FILE__).'/../../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
 require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
 require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
@@ -769,7 +768,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         //check that this record my affect other records with calculated fields
         //1. cfn_RecTypeIDs -> cfn_ID
         //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID
-        //it may consume waste of time findAndUpdateAffectedCalcFields( $system, $rectype );
+        //it may consume waste of time findAndUpdateAffectedCalcFields( $system, $rectype )
 
         removeReverseChildToParentPointer($system, $recID, $rectype);
 
@@ -1538,7 +1537,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
                 'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));
-            if($mysqli->error) {$res = -1; }//($mysqli->affected_rows>0);
+            if($mysqli->error) {$res = -1; }
         }else{
             $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
@@ -2524,7 +2523,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                 case "freetext":
                 case "blocktext":
                     $len  = strlen(super_trim($dtl_Value));
-                    $isValid = ($len > 0);//preg_match("/\\S/", $dtl_Value);
+                    $isValid = ($len > 0);
                     if(!$isValid ){
                         $err_msg = 'Value is empty';
                     }elseif(!in_array($dtyID, $not_purify)){
@@ -2552,7 +2551,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                         $isValid = count($dtl_Value)>1 && (@$dtl_Value['timestamp'] || @$dtl_Value['start']);
                     }else{
                         $len  = strlen(super_trim($dtl_Value));
-                        $isValid = ($len > 0);//preg_match("/\\S/", $dtl_Value);
+                        $isValid = ($len > 0);
                     }
 
                     if(!$isValid ){
@@ -3026,7 +3025,6 @@ function recordDuplicate($system, $id){
 
         //duplicate record header
         $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
-        //@todo addRecordIndexEntry(DATABASE, $recTypeID, $id);
 
         $query = 'UPDATE Records set rec_Modified=NOW(), rec_Added=NOW(), rec_AddedByUGrpID='.$currentUserId;
         if(is_numeric($new_owner) && intval($new_owner)>=0){

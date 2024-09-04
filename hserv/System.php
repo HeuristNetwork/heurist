@@ -513,7 +513,7 @@ class System {
 
         }else{
 
-            $install_path = 'HEURIST/';//$this->getInstallPath();
+            $install_path = 'HEURIST/';
             $dir_Filestore = "HEURIST_FILESTORE/";
 
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
@@ -656,7 +656,7 @@ class System {
         if (!(isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="")) {
 
             //path is not configured in ini - set dafault values
-            $install_path = 'HEURIST/';//$this->getInstallPath();
+            $install_path = 'HEURIST/';
             $dir_Filestore = "HEURIST_FILESTORE/";
 
             $defaultRootFileUploadURL = HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore;
@@ -1166,7 +1166,7 @@ class System {
             if($this->current_User && @$this->current_User['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
 
-                    $user_id = @$_SESSION[$db]['ugr_ID'];// ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
+                    $user_id = @$_SESSION[$db]['ugr_ID'];
                     if($user_id == $this->current_User['ugr_ID']){
                         if(strpos($db, HEURIST_DB_PREFIX)===0){
                             $db = substr($db,strlen(HEURIST_DB_PREFIX));
@@ -1476,7 +1476,7 @@ class System {
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $lifetime = time() + 30*24*60*60;
-                $session_id = session_id();//ID of current sessiin $cookie_session_id;
+                $session_id = session_id(); //ID of current session $cookie_session_id
                 if (strnatcmp(phpversion(), '7.3') >= 0) {
                     $cres = setcookie('heurist-sessionid', $session_id, array(
                         'expires' => $lifetime,
@@ -1487,7 +1487,7 @@ class System {
                         'SameSite' => 'Strict' //'Lax'
                     ));
                 }else{
-                    //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
+                    //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
                     $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
                 }
 
@@ -2096,7 +2096,7 @@ class System {
                     $is_NOT_allowed = false;
                 }else{
                     // Invalid password
-                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');//'Invalid password');
+                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
                 }
             }else{
                 $this->addError(HEURIST_ACTION_BLOCKED,
@@ -2104,7 +2104,7 @@ class System {
             }
         }else{
             //password not defined
-            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');//'Password not specified');
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');
         }
 
         return $is_NOT_allowed;
@@ -2175,7 +2175,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     private function _sendDailyErrorReport(){
 
             $now = $this->getNow();
-            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
+            $root_folder = HEURIST_FILESTORE_ROOT;
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
             $archiveFolder = $root_folder."AAA_LOGS/";
             $logs_to_be_emailed = array();

@@ -369,7 +369,6 @@ private static function findRecordIds($imp_session, $params){
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
 
                             $is_update = true;
-//return 'termination';
                         }
                         array_push($ids, $pairs[$keyvalue]);
 
@@ -554,7 +553,7 @@ public static function assignRecordIds($params){
 
         if(count($disambiguation)>0){
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-            return $imp_session; //"It is not possible to proceed because of disambiguation";
+            return $imp_session; //It is not possible to proceed because of disambiguation
         }
 
 
@@ -562,7 +561,7 @@ public static function assignRecordIds($params){
 
     $import_table = $imp_session['import_table'];
 
-    $mysqli = self::$mysqli; //$system->get_mysqli();
+    $mysqli = self::$mysqli;
 
     $id_fieldname = @$params['idfield'];
     $id_field = null;
@@ -1076,7 +1075,7 @@ public static function validateImport($params) {
     $query_date_nam = array();
     $query_date_where = array();
 
-    $numeric_regex = "'^([+-]?[0-9]+\.*)+'";// "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
+    $numeric_regex = "'^([+-]?[0-9]+\.*)+'";
 
     if($sequence){
         $mapping_prev_session = @$sequence['mapping_keys'];//OR mapping_flds???
@@ -1086,11 +1085,7 @@ public static function validateImport($params) {
 
 
     $geo_fields = null;
-    /*
-    if($mapping['latitude'] && $mapping['longitude']){ //not used
-        // northing, easting
-        $geo_fields = array($mapping['latitude'],$mapping['longitude']);
-    }*/
+
 
     //loop for all fields in record type structure
     foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
@@ -1200,7 +1195,7 @@ public static function validateImport($params) {
         if($field_name){  //mapping exists
 
             foreach($field_name as $f_name){
-                $dt_mapping[$f_name] = $ft_id; //$ft_vals[$idx_fieldtype];
+                $dt_mapping[$f_name] = $ft_id;
             }
 
             if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
@@ -1283,7 +1278,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             if($ignore_update){
                 $only_for_specified_id = " (NOT(`$id_field` > 0 OR `$id_field`='')) AND ";
             }else{
-                $only_for_specified_id = " (`$id_field`!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+                $only_for_specified_id = " (`$id_field`!='') AND "; //otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND "
             }
         }
     }else{
@@ -1298,14 +1293,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         $query = self::composeQuery($sel_query, $import_table)
         .SQL_WHERE.$only_for_specified_id;
         if(@$query_reqs_where[$k]){
-            $query = $query . ' ('.$query_reqs_where[$k].')';// implode(" or ",$query_reqs_where);
+            $query = $query . ' ('.$query_reqs_where[$k].')'; // implode(" or ",$query_reqs_where);
         }else{
             $query = $query . ' 1';
         }
 
         $k++;
 
-        $field = preg_replace(REGEX_ALPHANUM, "", $field);//for snyk
+        $field = preg_replace(REGEX_ALPHANUM, "", $field); //for snyk
 
         $wrong_records = self::getWrongRecords($query, $imp_session,
             "This field is required. It is recommended that a value must be supplied for every record. "
@@ -1378,7 +1373,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_enum_where[$k]){
-                $query = $query . ' ('.$query_enum_where[$k].')';// implode(" or ",$query_enum_where);
+                $query = $query . ' ('.$query_enum_where[$k].')'; // implode(" or ",$query_enum_where)
             }else{
                 $query = $query . ' 1';
             }
@@ -1418,7 +1413,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_res_where[$k]){
-                $query = $query . ' ('.$query_res_where[$k].')';// implode(" or ",$query_res_where);
+                $query = $query . ' ('.$query_res_where[$k].')'; // implode(" or ",$query_res_where)
             }else{
                 $query = $query . ' 1';
             }

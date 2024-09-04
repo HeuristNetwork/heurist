@@ -76,7 +76,7 @@ class DbAnnotations extends DbEntityBase
                 $params = USanitize::sanitizeInputArray();
                 $this->data['uri'] = $params['uri']; //filter_var(substr($_SERVER['QUERY_STRING'],4), FILTER_SANITIZE_URL);  //remove "uri="
             }
-            $uri = $this->data['uri'];//.(@$this->data['file']?'&file='.$this->data['file']:'');
+            $uri = $this->data['uri'];
             $items = $this->findItems_by_Canvas($uri);
             if(is_array($items) && count($items)>0){
 

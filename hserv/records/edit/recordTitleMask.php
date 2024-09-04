@@ -215,7 +215,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
                 return $value;
             }else{
                 $replacements[$matches[1][$i]] = "";
-                $fields_err++;//return "";
+                $fields_err++;
             }
         }elseif (null==$value || trim($value)==""){
             $replacements[$matches[1][$i]] = "";
@@ -1130,7 +1130,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if(is_array($s2)){
                     $res = $s2; //error
                 } else {
-                    $res = $s1. $fullstop_concat .$s2; //recursion;
+                    $res = $s1. $fullstop_concat .$s2; //recursion
                 }
             }
 
@@ -1184,7 +1184,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             if($inner_rectype>0){
                 $inner_rec_type = array($inner_rectype);
             }else{
-                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');//$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
                 $inner_rec_type = explode(",", $inner_rec_type);
             }
             if(count($inner_rec_type)>0){ //constrained

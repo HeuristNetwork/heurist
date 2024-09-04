@@ -176,7 +176,7 @@ if($response!=null){
         if($max_file_size>0){
 // it does not work
 //            file_put_contents(HEURIST_FILESTORE_DIR.DIR_SCRATCH.'.htaccess',
-//                "php_value post_max_size $max_file_size\nphp_value upload_max_filesize $max_file_size");
+//                "php_value post_max_size $max_file_size\nphp_value upload_max_filesize $max_file_size")
         }
 
         $options = array(
@@ -262,7 +262,7 @@ if($response!=null){
             }
         }
         */
-        $options['accept_file_types'] = 'zip|mbtiles';//$params['acceptFileTypes'];
+        $options['accept_file_types'] = 'zip|mbtiles';
     }else{
         $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
         $options['accept_file_types'] = implode('|', $allowed_exts);

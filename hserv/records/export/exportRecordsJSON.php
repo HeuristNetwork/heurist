@@ -391,7 +391,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
             if(!in_array($dty_ID, $columns[$rt_id])) {continue;}
 
-            $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
+            $col_name = $dty_ID;
 
             $res[$col_name] = array();
 

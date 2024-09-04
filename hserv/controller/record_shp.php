@@ -358,7 +358,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
     if(file_exists($filepath)){
 
         if($isArchive){ //$need_ext!==null){
-            $destination = HEURIST_SCRATCH_DIR;//.$system->get_user_id().'/';
+            $destination = HEURIST_SCRATCH_DIR;
 
             $files = UArchive::unzipFlat($filepath, $destination);
 

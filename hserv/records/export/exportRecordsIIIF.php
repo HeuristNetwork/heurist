@@ -337,7 +337,7 @@ SERVICE3;
         }
 
 
-        $canvas_uri = self::gen_uuid();//uniqid('',true);
+        $canvas_uri = self::gen_uuid();
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;

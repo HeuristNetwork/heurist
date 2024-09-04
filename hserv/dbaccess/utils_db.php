@@ -333,13 +333,14 @@ use hserv\structure\ConceptCode;
             $res = $mysqli->query($query);
             if (!$res){
                 error_log($mysqli->errno.'****'.$mysqli->error);
-//remarked to avoid security report alert      error_log($query);
+//remarked to avoid security report alert  error_log($query)
                 return null;
 
-/* determine our thread id */
-//$thread_id = $mysqli->thread_id;
-/* Kill connection */
-//$mysqli->kill($thread_id);
+/*
+determine our thread id and kill connection
+$thread_id = $mysqli->thread_id;
+$mysqli->kill($thread_id);
+*/
             }
         }
 
@@ -1095,7 +1096,7 @@ use hserv\structure\ConceptCode;
         $isok = true;
         $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');
 
-        $err_prefix = '';//'Update date index: ';
+        $err_prefix = '';
         $cnt = 0;
         $cnt_all = 0;
         $cnt_to_json = 0;
@@ -1151,14 +1152,14 @@ use hserv\structure\ConceptCode;
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
 
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE '.predicateId('dtl_DetailTypeID',$fld_dates);//' AND dtl_Value!=""';
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE '.predicateId('dtl_DetailTypeID',$fld_dates);
             $cnt_dates = mysql__select_value($mysqli, $query);
             if($offset>0){
                 $cnt_dates = $cnt_dates - $offset;
             }
 
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
-            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
+            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';
             if($offset>0){
                 $query = $query.' LIMIT '.$offset.', 18446744073709551615';
             }
@@ -1318,7 +1319,7 @@ use hserv\structure\ConceptCode;
 
                     //keep log
                     if(!$is_date_simple || $error){
-//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );
+                        // file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND )
                         if(!$is_date_simple) {$cnt_to_json++;}
                         if($error){
                             $error = error_Div($error);
@@ -1949,10 +1950,9 @@ use hserv\structure\ConceptCode;
     function hasColumn($mysqli, $table_name, $column_name, $db_name=null, $given_type=null){
 
         if($db_name==null){
-            //$db_name = HEURIST_DBNAME_FULL;
-            $db_name = '';//$query = ;
+            $db_name = '';
         }else{
-            $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
+            $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name); //for snyk
             $db_name = "`$db_name`.";
         }
 

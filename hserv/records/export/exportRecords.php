@@ -465,7 +465,6 @@ public function output($data, $params){
             fileDelete($this->tmp_destination);
 
             return true;
-//            exit($content);
         }
     }
 

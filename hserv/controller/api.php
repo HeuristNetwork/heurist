@@ -62,10 +62,6 @@ $entities = array(
 //auth
     //usr_info
 
-//echo print_r($requestUri,true);
-//echo '<br>'.$method;
-// hserv/controller/api.php?ent=
-
 if(count($requestUri)>0){
     $params = array();
     foreach($requestUri as $prm){
@@ -209,8 +205,6 @@ else
     }
 }
 exit;
-//header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
-//echo json_encode($data);
 
 //
 //
@@ -218,7 +212,7 @@ exit;
 function exitWithError($message, $code){
 
     header(HEADER_CORS_POLICY);
-    header(CTYPE_JSON);//'text/javascript');
+    header(CTYPE_JSON);
 
     http_response_code($code);
     print json_encode(array("status"=>'invalid', "message"=>$message));

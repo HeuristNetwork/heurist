@@ -175,10 +175,10 @@ public static function output($data, $params){
     if(count($find_timefields)==0) {$find_timefields = null;}
 
     $find_geo_by_pointer_rty = false;
-    $geojson_ids = array();//simplify array('all'=>array());
-    $geojson_dty_ids = array();//unique list of all geofields
+    $geojson_ids = array(); //simplify array('all'=>array())
+    $geojson_dty_ids = array(); //unique list of all geofields
     $geojson_rty_ids = array();
-    $timeline_dty_ids = array();//unique list of all date fields
+    $timeline_dty_ids = array(); //unique list of all date fields
 
     //
     // HEADER ------------------------------------------------------------
@@ -1184,7 +1184,6 @@ XML;
             fileDelete($tmp_destination);
 
             return true;
-//            exit($content);
         }
     }
 
@@ -1928,7 +1927,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
 
             if(!in_array($dty_ID, $columns[$rt_id])) {continue;}
 
-            $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
+            $col_name = $dty_ID;
 
             $res[$col_name] = array();
 
@@ -2353,7 +2352,7 @@ SERVICE3;
         }
 
 
-        $canvas_uri = self::gen_uuid();//uniqid('',true);
+        $canvas_uri = self::gen_uuid();
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;

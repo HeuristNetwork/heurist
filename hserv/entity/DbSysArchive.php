@@ -150,7 +150,7 @@ class DbSysArchive extends DbEntityBase
             $records = array();
             $order = array();
             $csv_delimiter = "\t";
-            $csv_enclosure = '|';//'@';
+            $csv_enclosure = '|';
 
             if($details=='records_list'){ //returns fields suitable for list only
                 //0,1,2,3,4,6,11,12

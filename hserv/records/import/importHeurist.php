@@ -463,7 +463,7 @@ public static function importDefintions($filename, $session_id){
             }*/
         }else{
             //need to call refresh client side defintions
-            $res = 'ok';//$importDef->getReport(false);
+            $res = 'ok';
         }
     }
 
@@ -479,7 +479,7 @@ public static function importRecordsFromDatabase($params){
 
 //1. saves import file into scratch folder - see record_output
     $remote_path = HEURIST_BASE_URL.'hserv/controller/record_output.php?format=json&depth=0&db='
-            .$params['source_db'];//.'&q='.$query;
+            .$params['source_db'];
 
     $search_params = array();
     if(@$params['recID']>0){
@@ -505,7 +505,7 @@ public static function importRecordsFromDatabase($params){
     }
 
     // save file that produced with record_output.php from source to temp file
-    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");// . $file_id;
+    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
 
     $filesize = saveURLasFile($remote_path, $heurist_path);//save json import from remote db to tempfile in scratch folder
 
@@ -615,7 +615,6 @@ public static function importRecords($filename, $params){
     $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
     $owner_id = @$params['onwer_id']>0 ?$params['onwer_id'] :1;
     $mapping_defs = @$params['mapping_defs'];
-//    $allow_import_unregistered = (@$params['allow_unregistered']===true || @$params['allow_unregistered']==1);
 
     $unique_field_id = @$params['unique_field_id'];
     $allow_insert = true;

@@ -168,7 +168,7 @@ class DbEntitySearch
                     $res = true;
                 }elseif($is_ids=='ids'){
                     
-                    $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
+                    $res = $this->_validateIds($fieldname, $data_type);
 
                 }elseif($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);

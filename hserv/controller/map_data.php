@@ -295,7 +295,7 @@ function getRecordDetails($system, $record) {
 
             }elseif(defined('DT_KML') && $type == DT_KML) {
                 // KML snippet
-                $record->kmlSnippet = 1;//$value;
+                $record->kmlSnippet = 1;
 
 
                 /* FILES */

@@ -1,5 +1,5 @@
 <?php
-//declare(strict_types=1);
+// declare(strict_types=1)
 /**
 * composeSql.php - translates heurist JSON query to SQL query
 *                  or
@@ -209,14 +209,13 @@ $wg_ids = null; //groups current user is member
 $publicOnly = false;
 $currUserID = 0;
 $is_admin = false;
-//$use_user_wss = false;
 
 //keep params for debug only!
 $params_global;
 $top_query;
 
-$rty_id_relation = 1;//$system->defineConstant('RT_RELATION');
-$dty_id_relation_type = 6;//$system->defineConstant('DT_RELATION_TYPE');
+$rty_id_relation = 1; // $system->defineConstant('RT_RELATION')
+$dty_id_relation_type = 6; // $system->defineConstant('DT_RELATION_TYPE')
 
 
 /*
@@ -431,7 +430,7 @@ function parse_query_to_json($query){
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query
-        , $rty_id_relation, $dty_id_relation_type, $is_admin;//, $use_user_wss;
+        , $rty_id_relation, $dty_id_relation_type, $is_admin;
 
 
     if(defined('RT_RELATION')){
@@ -445,7 +444,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     $mysqli = $db;
 
-    if(!$params){ $params = array();}//$_REQUEST;
+    if(!$params){ $params = array();} // request
 
     if(is_array(@$params['q'])){
         $query_json = $params['q'];
@@ -473,7 +472,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     $publicOnly = (@$params['publiconly'] == 1);//@todo change to vt - visibility type parameter of query
 
     // set is_admin
-    $is_admin = true; //2023-11-28 TEMPORARY DISABLE field visibility check  $is_admin = $currUserID == 2;
+    $is_admin = true; //2023-11-28 TEMPORARY DISABLE field visibility check  $is_admin = $currUserID == 2
     if(!$is_admin && $currUserID > 0){
         //$system->is_admin()
 
@@ -584,7 +583,7 @@ class HQuery {
 
     public function makeSQL(){
 
-        global $publicOnly, $wg_ids, $is_admin; //, $mysqli, $use_user_wss;
+        global $publicOnly, $wg_ids, $is_admin;
 
         $res = $this->top_limb->makeSQL();//it creates where_clause and fill tables array
         
@@ -2422,7 +2421,6 @@ class HPredicate {
             if($this->relation_fields!=null){
                 $this->relation_fields->setRelationPrefix($rl);
                 $w2 = $this->relation_fields->makeSQL();
-//$res = array("from"=>$this->tables, "where"=>$where);
                 if($w2 && trim($w2['where'])!=''){
                     $where = $where . SQL_AND . $w2['where'];
                 }
@@ -2939,7 +2937,7 @@ class HPredicate {
             }elseif($this->field_type=="link"){
                 $res = " $eq ".intval($this->value);//no quotes
             }else{
-                $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));//."'";
+                $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));
             }
             $this->field_list = true;
         }

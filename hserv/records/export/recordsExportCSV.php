@@ -106,7 +106,7 @@ public static function output($data, $params){
     $data = $data['data'];
 
     if(!(@$data['reccount']>0)){
-        print 'EMPTY RESULT SET';//'empty result set';
+        print 'EMPTY RESULT SET';
         return;
     }
 
@@ -1110,10 +1110,10 @@ public static function output_header($data, $params)
             if(is_array(@$terms_pickup[$rty_ID])){  //there are enum fields for this rt
 
                 $max_count = 0;
-                $placeholders = array();//array_fill(0, $cnt_cols, '');
+                $placeholders = array();
 
                 foreach($terms_pickup[$rty_ID] as $dtid => $field){
-                    //$headers[$rty_ID][] = $field['name'].': Lookup list';
+                    
                     $placeholders[] = strtoupper($field['name']);
                     $ph_help[] = '<Use to create value control lists>';
                     //get list of terms
@@ -1177,7 +1177,7 @@ public static function output_header($data, $params)
                 $k = 0;
                 while ($k<$max_count){
 
-                    $placeholders = array();//no need to create empty columns: array_fill(0, $cnt_cols, '');
+                    $placeholders = array(); //no need to create empty columns: array_fill(0, $cnt_cols, '')
 
                     foreach($terms_pickup[$rty_ID] as $dtid => $field){
 

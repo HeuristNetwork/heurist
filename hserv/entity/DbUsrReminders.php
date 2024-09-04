@@ -96,7 +96,7 @@ class DbUsrReminders extends DbEntityBase
 
             $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
 
-            $needRecords = true;//($this->data['details']=='list');
+            $needRecords = true;
 
             $from_table[0] = $from_table[0]
                     .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
