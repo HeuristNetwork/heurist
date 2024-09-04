@@ -161,9 +161,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         that.dbSettings = {};
 
-        /*if(_currentUser){
-        that.currentUser = _currentUser;
-        }else{}*/
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
         if (that.database) {
@@ -204,16 +201,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
         return _key_count;
     }
-    /*    
-    function _getKeyCount2(o, l, r) {
-        l = l || 0; //level            
-        return Object.keys(o).reduce(function (r, k) {
-            r[l] = (r[l] || 0) + 1;
-            typeof o[k] === 'object' && _getKeyCount(o[k], l + 1, r);
-            return r;
-        }, r || []);
-    }    
-    */
     /**
      * Signature for _callserver callback
      * 
@@ -248,20 +235,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
             && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
-            
-            /*
-            function __is_Not_Active_StrutureEditor(name){
-                let editors = $('div.'+name);
-                if(editors.length>0){
-                    return !editors.is('visible');
-                }else{
-                    return true;                    
-                }
-            }
-                __is_Not_Active_StrutureEditor('defRecStructure')
-                && __checkStrutureEditors('defVocabularyGroups') 
-                && __checkStrutureEditors('defRecTypes')            
-            */
             
             //ignore if record structure editor is opened
             if($('div.defRecStructure').length==0)
@@ -559,7 +532,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         (response)=>{
                                             if (response.status == window.hWin.ResponseStatus.OK && response.data == 'ok') {
                                                 callback(password_entered);
-                                                //window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null,password_entered);
                                             } else {
                                                 window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
                                             }
@@ -1251,15 +1223,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             missed.push(rty_ID);
                         }
                     });
-/*
-                    for (let i = 0; i < rty_IDs.length; i++) {
-                        let local_id = $Db.getLocalID('rty', rty_IDs[i]);
-                        if (!(local_id > 0)) {
-                            //not found
-                            missed.push(rty_IDs[i]);
-                        }
-                    }
-*/                    
                 }
 
                 //all record types are in this database
@@ -1760,7 +1723,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // rt - record type
             // dt - detailtyep
             , get_aggregations: function (request, callback) {
-                //if (request) request.a = 'minmax';
                 _callserver('record_search', request, callback);
             }
 
@@ -1932,37 +1894,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         record['rst_ID'] = dty_ID;
                         rst_index[rty_ID][dty_ID] = record;
                     }
-
-                    /*links
-                    var dty_Type = $Db.dty(dty_ID, 'dty_Type');
-                    if((dty_Type=='resource' || dty_Type=='relmarker') 
-                        && record['rst_RequirementType']!='forbidden')
-                    {
-                        var ptr = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
-                        if(ptr){
-                           ptr = ptr.split(',');
-                           if(ptr.length>0){
-                               //direct links
-                               if(!rst_direct[rty_ID]) rst_direct[rty_ID] = [];  
-                               rst_direct[rty_ID] = rst_direct[rty_ID].concat(ptr);
-                               
-                               for(var i=0; i<ptr.length; i++){
-                                   var target_rty = ptr[i];
-                                   if(rst_references[target_rty]){
-                                       if(rst_references[target_rty].indexOf(dty_ID)<0){
-                                           rst_references[target_rty].push(dty_ID);
-                                       }
-                                       if(rst_reverse[target_rty].indexOf(rty_ID)<0){
-                                           rst_reverse[target_rty].push(rty_ID);
-                                       }
-                                   }else{
-                                        rst_reverse[target_rty] = [rty_ID];
-                                        rst_references[target_rty] = [dty_ID];
-                                   }
-                               }
-                           }
-                        }
-                    }*/
                 });
 
                 //create separate recordset for every rectype
@@ -2008,15 +1939,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 params['entity'] = entityName;
                 params['timestamp'] = entity_timestamp; //db defitions time on client side
 
-                /*
-                if($.isPlainObject(opts) && opts['recID']>0){ 
-                    //special case - loads defs for particular record only
-                    params['entity'] = 'all';
-                    params['recID'] = opts['recID'];
-                }else{
-                    params['entity'] = opts; //entityName
-                }*/
-                
                 let s_time = new Date().getTime() / 1000;
                 if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
                 _msgOnRefreshEntityData = setTimeout(function(){
@@ -2346,9 +2268,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         * @param ug
         */
         is_member: function (ugs) {
-            //return (ug==0 || that.currentUser['ugr_ID']==ug ||
-            //    (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug]));
-
 
             if (ugs == 0 || ugs == null) {
                 return true;
@@ -2451,8 +2370,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // limit - to save limited list of ids - for example: last selected tags
         //
         save_pref: function (name, value, limit) {
-
-            //window.hWin.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
 
             if (Array.isArray(value) && limit > 0) {
                 value = value.slice(0, limit);

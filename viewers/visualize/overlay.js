@@ -610,7 +610,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             .on("dragstart", function(d, i){
                 window.d3.event.sourceEvent.stopPropagation();
 
-                drag_link_source_id = d.id;
+                window.drag_link_source_id = d.id;
 
                 let node = $(".node.id"+d.id);
                 const x = node.offset().left - 5;

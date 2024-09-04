@@ -1754,6 +1754,8 @@ function print_public_details($bib) {
                                     ($system->has_access() &&  //logged in
                                     ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS)));//viewable or owner
 
+                                    
+                    $rec_title = USanitize::sanitizeString($rec_title,ALLOWED_TAGS);                                    
 
                     if($hasAccess){
 
@@ -1761,7 +1763,7 @@ function print_public_details($bib) {
                     }else{
 
                         $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
-                            .USanitize::sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
+                            .$rec_title.'</a>';
 
                     }
 

@@ -146,10 +146,3 @@ if(!window.hWin.entityRecordCfg){
     };
 
 }
-/*if (window.top != window.self) {
-//this is frame
-} else {
-//top most window
-window.h4win = window.top;
-}*/
-
