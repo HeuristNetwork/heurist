@@ -4679,6 +4679,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         window.hWin.HAPI4.doImportAction(request, (response) => {
 
+            window.hWin.HEURIST4.msg.hideProgress();
+            
             _showStep(RETURN_STEP);
 
             if(response.status !== window.hWin.ResponseStatus.OK){
