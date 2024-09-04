@@ -152,7 +152,11 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 
 		// Ensure that the Heurist db has the required tables, ignore if they don't
-        $query = "SHOW TABLES IN ".$db[0]." WHERE Tables_in_".$db[0]." = 'Records' OR Tables_in_".$db[0]." = 'recDetails' OR Tables_in_".$db[0]." = 'sysUGrps' OR Tables_in_".$db[0]." = 'sysUsrGrpLinks'";
+        $dbname = $db[0];
+        if(mysql__check_dbname($dbname)!=null){ //invalid dbname
+            continue;
+        }
+        $query = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'Records' OR Tables_in_$dbname = 'recDetails' OR Tables_in_$dbname = 'sysUGrps' OR Tables_in_$dbname = 'sysUsrGrpLinks'";
 
         $table_listing = $mysqli->query($query);
         if (!$table_listing || mysqli_num_rows($table_listing) != 4) { // Skip, missing required tables

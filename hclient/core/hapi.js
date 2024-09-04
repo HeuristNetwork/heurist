@@ -528,15 +528,20 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 + '</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                 (password_entered)=>{
 
-                                    window.hWin.HAPI4.SystemMgr.action_password({ action: password_protected, password: password_entered },
+
+                                    let on_passwordcheck = 
                                         (response)=>{
                                             if (response.status == window.hWin.ResponseStatus.OK && response.data == 'ok') {
                                                 callback(password_entered);
                                             } else {
                                                 window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
                                             }
-                                        }
-                                    );
+                                        };
+                                                            
+                                    
+                                    window.hWin.HAPI4.SystemMgr.action_password(
+                                            { action: password_protected, password: password_entered },
+                                            on_passwordcheck);
 
                                 },
                                 { title: 'Sysadmin override password required', yes: 'OK', no: 'Cancel' }, { password: true });

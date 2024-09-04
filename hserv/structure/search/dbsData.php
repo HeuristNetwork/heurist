@@ -245,13 +245,7 @@
         }
 
         if($rectypeids){
-
-            if(!is_array($rectypeids)){
-                $rectypeids = array($rectypeids);
-            }
-            $rectypeids = prepareIds($rectypeids);
-
-            $querywhere = ' where rty_ID '.(count($rectypeids)>1?(SQL_IN.implode(',', $rectypeids).')') :('='.intval($rectypeids[0])));
+            $querywhere = SQL_WHERE.predicateId('rty_ID', $rectypeids);
         } else {
             $querywhere = "";
         }
@@ -839,20 +833,13 @@ function dbs_GetRectypeConstraint($system) {
     // get inverse term and all its children terms
     //
     function getTermInverseAll($mysqli, $parent_ids, $all_levels=true){
-
+    
         //compose query
-        $query = 'SELECT trm_InverseTermID FROM defTerms WHERE trm_ID';
-
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .SQL_IN.implode(',',$parent_ids).')';
-        }else{
-            if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
-            $query = $query . ' = '.$parent_ids;
-        }
+        $query = 'SELECT trm_InverseTermID FROM defTerms WHERE '
+            .predicateId('trm_ID', $parent_ids);
 
         $ids = mysql__select_list2($mysqli, $query, 'intval');
-        if(is_array($ids) && count($ids)>0){
+        if(is_array($ids) && !empty($ids)){
             return array_merge($ids, getTermChildrenAll($mysqli, $ids, $all_levels));
         }else{
             return array();
@@ -866,15 +853,8 @@ function dbs_GetRectypeConstraint($system) {
     function getTermChildrenAll($mysqli, $parent_ids, $all_levels=true){
 
         //compose query
-        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID';
-
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .SQL_IN.implode(',',$parent_ids).')';
-        }else{
-            if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
-            $query = $query . ' = '.$parent_ids;
-        }
+        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE '
+                .predicateId('trl_ParentID', $parent_ids);
 
         $ids = mysql__select_list2($mysqli, $query, 'intval');
         if(!is_array($ids)){

@@ -1773,7 +1773,7 @@ function print_public_details($bib) {
                             .' WHERE rdi_RecID='.$rec_id .' AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')');
 
                     if($row){
-                        $bd['order_by_date'] = $row[0];
+                        $bd['order_by_date'] = htmlspecialchars($row[0]);
                     }
 
 
