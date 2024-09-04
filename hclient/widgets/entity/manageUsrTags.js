@@ -32,7 +32,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         if(!Array.isArray(this.options.selection_ids)) this.options.selection_ids = [];
         
-        //this.options.layout_mode = 'basic';
+       
         this.options.use_cache = true;
         if(this.options.list_mode!='compact') this.options.list_mode = 'accordions';
         this.options.edit_mode = 'inline'; //inline only
@@ -73,7 +73,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 this._on( this.btn_show_usage, {"click": this.showHideUsage});
             */
             
-                //this.searchForm.find('.heurist-helper1').hide();
+               
                 
                 this._initInlineEditorControls();
                 
@@ -201,7 +201,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     //
     //
     filterRecordList: function(event, request){
-        //this._super();
+       
         
         if(this._cachedRecordset && this.options.use_cache){
             this._keepRequest = request;
@@ -469,7 +469,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                             }
                             else if(this.options.select_mode=='select_single'){
 
-                                //this.selectedRecords([recid]);
+                               
                                 this.options.selection_ids.push(recid);
                                 this._selectAndClose();
                                 
@@ -484,7 +484,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                     let sURL = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=tag:"${recid}"`;
                                     window.open(sURL)                                    
                                 } else{
-                                    //this._onActionListener(event, {action:'edit'});
+                                   
                                     //replace label with input element to edit/replace
                                     this._showInlineEditorControls(item);
                                 }
@@ -497,7 +497,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             let isNewRecord = (this._currentEditID<0);
             
             if(isNewRecord){
-                //added in manageEntity this._cachedRecordset.addRecord(recID, fields);
+               
                 
                 this._currentEditID = null;
                 this.addEditRecord(null);//clear edit form
@@ -591,7 +591,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
        let idx, panel = this.recordList, pnl_picked;
        
-       panel.empty();//.css({'font-size': '0.9em'});
+       panel.empty();
        
        if(that.options.show_top_n_recent){
             $('<div class="header header-label"><label><b>Tags to assign:</b></label></div>')
@@ -622,7 +622,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     .attr('data-id', window.hWin.HAPI4.user_id())
                     .appendTo(dele);        
             }else{
-                $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
+                $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>')
                     .css({'padding':'3px 0px'})
                     .attr('data-id', window.hWin.HAPI4.user_id())
                     .hide().appendTo(pnl_picked);
@@ -653,7 +653,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                             .attr('data-id', groupID)
                             .appendTo(dele);        
                     }else{
-                        $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>') //width:110px;text-align:right;
+                        $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>')
                             .css({'padding':'3px 0px'})
                             .attr('data-id', groupID).hide().appendTo(pnl_picked);
                     }
@@ -707,9 +707,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
               let groupid = sel_group.val(); 
 
-              //that.recordList.find('div[data-id!='+groupid+']').hide();
+             
               //show assigned
-              //that.recordList.find('div[data-id='+groupid+']').show();
+             
               
               //show top and recent lists
               top_n_recent.empty();
@@ -800,7 +800,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         }
 
                         that.list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:input_tag})
-                        //.css({'max-width':(maxw+'px')});
+                       
                         .css({'max-width':input_tag.width()+60});
                         
                     }else if(input_tag.val().length>2){
@@ -1072,7 +1072,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
                         that.list_div.show()
                         .position({my:'left top', at:'left bottom', of:that.edit_replace_input})
-                        //.css({'max-width':(maxw+'px')});
+                       
                         .css({'max-width':that.edit_replace_input.width()+60});
 
                     }else if(that.edit_replace_input.val().length>2){

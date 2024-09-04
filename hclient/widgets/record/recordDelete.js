@@ -45,7 +45,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         this.header_div = this.element.find('#div_header').css({'line-height':'21px'});
 
         //search for linked counts        
-        //this._onLinkedCount();
+       
             
         if(cnt_selected > 8){
             this.element.find('#div_1').show();
@@ -148,7 +148,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             
             if(RT_TLCMAP_DATASET>0){
-                    //request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id}]};
+                   
                     request['rules'] = [{"query":"t:"+RT_MAP_LAYER+","+RT_TLCMAP_DATASET+" linkedfrom:"+RT_MAP_DOCUMENT+"-"+DT_MAP_LAYER
                                         ,"levels":[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE},
                                                    {"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE}]}];
@@ -189,7 +189,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             let cnt_source = 0;
             let merged_ids = this._currentRecordsetSelIds;
             
-        //$merged_ids = array_unique(array_merge($res['reverse']['target'], $res['reverse']['source']), SORT_NUMERIC);
+       
         
         if(cnt_source>0){
 
@@ -283,7 +283,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             
             if(scope_val == 'selected'){
-                scope = this._currentRecordsetSelIds; //this.recordList.resultList('getRecordSet').getIds();
+                scope = this._currentRecordsetSelIds;
             }else {
                 scope = this._currentRecordset.getIds();
                 if(scope_val  >0 ){ //filter by record type

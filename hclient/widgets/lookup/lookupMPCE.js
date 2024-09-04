@@ -269,7 +269,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Update Record');
-        //res[1].disabled = null;
+       
         return res;
     },
 
@@ -719,7 +719,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         this.assoc_selected = [];
 
         $('#assoc_prev').hide();
-        //$('#assoc_start').hide();
+       
         $('#assoc_next').hide(); 
 
         list.html('<div style="font-size:1.5em">Loading List...</div>');
@@ -921,19 +921,19 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
         if(this.assoc_startindex-jump < 0 && this.assoc_endindex+13 > keywords.length && this.assoc_endindex <= keywords.length ) {
             $('#assoc_prev').hide();
-            //$('#assoc_start').hide();
+           
             $('#assoc_next').hide();             
         } else if(this.assoc_startindex-jump < 0) { 
             $('#assoc_next').show();
-            //$('#assoc_start').hide();
+           
             $('#assoc_prev').hide(); 
         } else if(this.assoc_endindex+jump > keywords.length && this.assoc_endindex == keywords.length) { 
             $('#assoc_prev').show();
-            //$('#assoc_start').show();
+           
             $('#assoc_next').hide(); 
         } else {
             $('#assoc_prev').show();
-            //$('#assoc_start').show();
+           
             $('#assoc_next').show(); 
         }
 

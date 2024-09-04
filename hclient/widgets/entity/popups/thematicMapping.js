@@ -308,9 +308,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             if(rtyID>0){
                 //reload treeview
                 this._loadRecordTypesTreeView( rtyID );
-                //$('.rtt-tree').parent().show();
+               
             }else{
-                //$('.rtt-tree').parent().hide();
+               
             }
         }
         
@@ -424,7 +424,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                 }
                                 if(! ($(node).hasClass('fancytree-loading') )){
                                     let ele = $(node).find('.svs-contextmenu3');
-                                    ele.css({'display':'inline-block'});//.css('visibility','visible');
+                                    ele.css({'display':'inline-block'});
                                 }
                             }
                         );               
@@ -468,11 +468,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             select: function(e, data) {
-                //that._addThemeField();
+               
             },
             click: function(e, data){
 
@@ -533,8 +533,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             let themes_list = this.element.find('#thematic_maps_list');
             window.hWin.HEURIST4.ui.addoption(themes_list[0], last_idx, newname);
-            //ele.value = $(ele).uniqueId();
-            //this.options.thematic_mapping[last_idx].uid = ele.value;
+           
+           
             
             themes_list[0].selectedIndex = last_idx;
             themes_list.trigger('change');
@@ -1104,7 +1104,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             let query;
             if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 //replace with list of ids
-                query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
+                query = this.options.maplayer_query;
 
             }else{
                 if(!this.maplayer_ids && !window.hWin.HEURIST4.util.isJSON(this.options.maplayer_query)){
@@ -1221,7 +1221,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }else{
                 //all available enums 
                 let vocab_id = $Db.dty(this.fieldSelected['id'],'dty_JsonTermIDTree');
-                //$Db.rst(this.fieldSelected['rtid'],this.fieldSelected['id'],'rst_FilteredJsonTermIDTree');
+               
                 ranges = $Db.trm_TreeData(vocab_id, 'set');
             }
 
@@ -1250,7 +1250,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             function __rnd(original){
                 if(dty_Type=='float' && int_round<10){
-                    //let multiplier = Math.pow(10, int_round);
+                   
                     //return Math.round(original*multiplier)/multiplier;   
                     return int_round==0?Math.round(original): parseFloat( original.toFixed(int_round) );
                 }else if(int_round>=10){

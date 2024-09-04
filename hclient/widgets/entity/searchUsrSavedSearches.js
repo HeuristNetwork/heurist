@@ -118,7 +118,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
             }
             if(this.element.find('#cb_modified').is(':checked')){
                 var d = new Date(); 
-                //d = d.setDate(d.getDate()-7);
+               
                 d.setTime(d.getTime()-7*24*60*60*1000);
                 request['ugr_Modified'] = '>'+d.toISOString();
             }
@@ -128,7 +128,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
     
             request['a']          = 'search'; //action
             request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
+            request['details']    = 'id';
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
             //we may search users in any database

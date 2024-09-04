@@ -46,7 +46,8 @@ if($res){
     $res->close();
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Check Wysiwyg Texts</title>
@@ -59,7 +60,7 @@ if($res){
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr></div>
 
-            <table class="wysiwygCheckTable">
+            <table class="wysiwygCheckTable" role="presentation">
                 <?php
 
                 foreach ($woots as $woot) {

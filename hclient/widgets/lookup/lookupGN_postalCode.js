@@ -185,7 +185,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         let recID = fld('rec_ID');
         let rectypeID = fld('rec_RecTypeID'); 
 
-        let recTitle = fld('postalcode', 10) + fld('placeName', 40) + fld('adminName2', 30) + fld('adminName1', 30) + fld('countryCode', 6);// + fld('googleMapLink', 12);
+        let recTitle = fld('postalcode', 10) + fld('placeName', 40) + fld('adminName2', 30) + fld('adminName1', 30) + fld('countryCode', 6);
 
         let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
@@ -209,7 +209,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
-        //res[1].disabled = null;
+       
         return res;
     },
 

@@ -62,7 +62,7 @@ $.widget( "heurist.resultListDataTable", {
 
         let that = this;
 
-        //this.element.css({'overflow':'hidden'});
+       
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
         this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);
@@ -131,7 +131,7 @@ $.widget( "heurist.resultListDataTable", {
                         that.options.selection = sel;
                         that._refresh();
                 }
-                //that._refresh();
+               
             });
         
         }
@@ -188,7 +188,7 @@ that._dout('myOnShowEvent');
     
     _dout: function(msg){
         //if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
-        //    console.log(msg);
+       
         //}
     },
     
@@ -409,7 +409,7 @@ this._dout('reload datatable '+this.options.serverSide);
         this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
         let lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
         this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
-        //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
+       
         this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
         this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
         this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});

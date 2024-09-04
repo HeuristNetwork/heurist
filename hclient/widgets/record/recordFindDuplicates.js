@@ -380,7 +380,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        //that._assignSelectedFields();
+                       
                     },500);
                 },
                 */
@@ -390,11 +390,11 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 click: function(e, data){
                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                        data.node.setExpanded(!data.node.isExpanded());
-                       //treediv.find('.fancytree-expander').hide();
+                      
                        
                    }
                    //else if( false && data.node.lazy  ) { 
-                   //    data.node.setExpanded( true );
+                  
                    //}
                 },
                 

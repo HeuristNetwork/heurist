@@ -120,7 +120,7 @@ $.widget( "heurist.searchEntity", {
             this.element.find('#div-table-right-padding').css('min-width',right_padding);
         
         
-            //EXTEND this.startSearch();
+           
             window.hWin.HEURIST4.ui.disableAutoFill( this.element.find( 'input' ) );
             
     },  

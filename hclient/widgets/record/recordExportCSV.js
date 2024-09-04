@@ -92,7 +92,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         // Initialize field advanced pane.
         this._resetAdvancedControls();
-        //this.hideAdvancedPane();
+       
         
         if(!this.options.isdialog && this.options.is_h6style){
             let fele = this.element.find('.ent_wrapper:first');
@@ -677,7 +677,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        //that._assignSelectedFields( data.node );
+                       
                     },500);
                 },
                 select: function(e, data) {

@@ -76,7 +76,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             empty_remark: 'No vocabulary groups. Add new group',
             onSortStop: function(){
                 that._onActionListener(null, 'save-order');
-                //that._toolbar.find('#btnApplyOrder').show();
+               
             },
             droppable: function(){
                 
@@ -119,7 +119,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
 
         this._toolbar = this.searchForm;
         this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px'}).empty();
-        //this._defineActionButton2(btn_array[1], this.searchForm);
+       
         
         $('<h3 style="margin:0;padding:0 8px;vertical-align: middle;width:100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">Vocabularies editor</h3>'
             +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
@@ -166,9 +166,9 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         
         let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';
         }else{
-            //html = html + '<div>';
+           
         }
         
         if(recName=='Trash'){

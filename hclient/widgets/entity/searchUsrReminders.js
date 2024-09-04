@@ -35,7 +35,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
         this._on(this.input_sort_sdate,  { change:this.startSearch });
         this._on(this.input_sort_recent,  { change:this.startSearch });
         this._on(this.input_search_group,  { change:this.startSearch });
-        //this._on( this.input_search, { keyup: this.startSearch });
+       
         
         this.startSearch();            
     },  

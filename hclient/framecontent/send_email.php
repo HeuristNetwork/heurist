@@ -240,7 +240,7 @@ if(isset($_POST['data'])) {
             $("#selected-records").html("# of records selected: " + ids.length);
 
             // Determine record type of first record
-            //this.record = records.getFirstRecord();// Reference to first record;
+           
             var rectype = recordset.fld(first_record, 'rec_RecTypeID');// Record type of first record
             definitions = $Db.rst(rectype);
 

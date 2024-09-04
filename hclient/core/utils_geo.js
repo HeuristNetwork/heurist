@@ -60,7 +60,7 @@ window.hWin.HEURIST4.geo = {
             }
         }
         if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
-            //alert('Incorrect GeoJSON provided');
+           
             return {};            
         }
 
@@ -102,7 +102,7 @@ window.hWin.HEURIST4.geo = {
                         function _isvalid_pnt(pnt){
                                 let isValid = (Array.isArray(pnt) && pnt.length==2 && 
                                     window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
-                                    //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
+                                   
                                 if(isValid && resdata._extent){
                                     if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
                                     if(pnt[0]>resdata._extent.xmax) resdata._extent.xmax = pnt[0];
@@ -194,7 +194,7 @@ window.hWin.HEURIST4.geo = {
                                     for (let n=0; n<shapes.length; n++){
                                         resdata['Point'].push( [shapes[n]] );
                                     }
-                                    //resdata['Point'] = resdata['Point'].concat( shapes );
+                                   
                                 }else if(geometry.type=="LineString" ||
                                     geometry.type=="MultiLineString")
                                 {   
@@ -321,7 +321,7 @@ window.hWin.HEURIST4.geo = {
                         setstartMarker(centre);
                         createcircle(oncircle);
 
-                        //bounds = circle.getBounds();
+                       
                         */
                     }
 
@@ -537,7 +537,7 @@ window.hWin.HEURIST4.geo = {
                         setstartMarker(centre);
                         createcircle(oncircle);
 
-                        //bounds = circle.getBounds();
+                       
                         */
                     }
 
@@ -585,7 +585,7 @@ window.hWin.HEURIST4.geo = {
         }
         
         if(format==0){
-            return shape; //{bounds:bounds, shape:shape};
+            return shape;
         }else{
             return {bounds:bounds, points:points};
         }
@@ -628,7 +628,7 @@ window.hWin.HEURIST4.geo = {
             
             let isValid = (Array.isArray(item) && item.length==2 && 
                 window.hWin.HEURIST4.util.isNumber(item[0][0]) && window.hWin.HEURIST4.util.isNumber(item[0][1]));
-                //Math.abs(item[0][1])<=360.0 && Math.abs(item[0][0])<=90.0);
+               
             
             if(isValid){
                 if (item[0][0] < minLat) minLat = item[0][0];

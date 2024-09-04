@@ -80,7 +80,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 
                 that._cachedRecordset = response;
                 
-                //that.filterRecordList(null, {});
+               
                 that.recordList.resultList('updateResultSet', response);
             };
             
@@ -116,7 +116,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 that._cachedRecordset = response;
                 
                 that.filterRecordList(null, {});
-                //that.recordList.resultList('updateResultSet', response);
+               
             });
         */    
             
@@ -188,7 +188,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     },
 
     updateRecordList: function( event, data ){
-        //this._super(event, data);
+       
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;

@@ -91,7 +91,7 @@ $.widget( "heurist.recordListExt", {
             this.div_content.css({width:'100%', height:'100%'}); 
         }
         
-        //this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
+       
         
         if(this.options.css){
             this.div_content.css( this.options.css );
@@ -277,12 +277,12 @@ $.widget( "heurist.recordListExt", {
                 //selection happened somewhere else
                 if((that.options.is_single_selection || that.options.is_multi_selection) && that._isSameRealm(data) && data.source!=that.element.attr('id')){
                     if(data.reset){
-                        //that.option("selection",  null);
+                       
                         that.options.selection = null;
                     }else{
                         let sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
                         that.options.selection = sel;
-                        //that.option("selection", sel);
+                       
                     }
 
                     let smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
@@ -332,10 +332,10 @@ $.widget( "heurist.recordListExt", {
                     }
                 }
             }
-            //that._refresh();
+           
         });
 
-        //this._refresh();
+       
 
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
@@ -538,7 +538,7 @@ $.widget( "heurist.recordListExt", {
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
-        //this._refresh();
+       
     },
     
     _setOption:function(key, value){
@@ -561,7 +561,7 @@ $.widget( "heurist.recordListExt", {
 
         if(this.placeholder_ele != null){
             this.placeholder_ele.hide();
-            //this.div_content.css('visibility','visibile');
+           
         }
 
         //refesh if element is visible only - otherwise it costs much resources

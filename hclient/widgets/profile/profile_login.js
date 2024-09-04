@@ -92,7 +92,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             
             afterclose: function(context) {
                 //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                //                                                [window.hWin.HAPI4.currentUser]);
+               
                 /*
                 if(!window.hWin.HAPI4.has_access() ){
                     //redirects to startup page - list of all databases
@@ -205,14 +205,14 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     
                     //hide standard login
                     if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
-                        //$dlg.find('#login_saml > label:first').html('Select: ');
-                        //$dlg.find('#login_saml').css({'margin-left':'14%'});
+                       
+                       
                         
                         $dlg.find('#login_guest').hide();
                         $dlg.find('.login_heurist').hide();
                         show_guest_login = false;
                     }else{
-                        //$dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
+                       
                         
                     }
                     
@@ -222,8 +222,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     
                     sel.on({change:function(event){$(event.target).val()==0?$dlg.find('.login_heurist').show():$dlg.find('.login_heurist').hide();}})
                     
-                    $dlg.find('#login_saml').show(); //css({'display':'inline-block'});
-                    //$dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
+                    $dlg.find('#login_saml').show();
+                   
                 }
             }
             
@@ -292,7 +292,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
 
                 allFields.removeClass( "ui-state-error" );
-                //let message = login_dialog.find('.messages');
+               
 
                 let mode = $dlg.attr('data-mode');
 
@@ -823,7 +823,7 @@ function doAuthentication(login_data, login_dialog)
                 }
                 */
                 
-                //that._refresh();
+               
             }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                 if(login_dialog){
                     updateStatus(login_dialog, false, response.message);
@@ -866,7 +866,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
         
         afterclose: function(context) {
             //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-            //                                                [window.hWin.HAPI4.currentUser]);
+           
             /*
             if(!window.hWin.HAPI4.has_access() ){
                 //redirects to startup page - list of all databases

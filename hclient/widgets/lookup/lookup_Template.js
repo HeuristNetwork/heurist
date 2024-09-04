@@ -314,7 +314,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
 
                     // Convert to array
                     if(window.hWin.HEURIST4.util.isObject(val)){
-                        //obj_keys = Object.keys(val);
+                       
                         val = Object.values(val);
                     }else if(!Array.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;

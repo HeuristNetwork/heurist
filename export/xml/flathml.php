@@ -181,7 +181,7 @@ if(!$intofile){
             }
 
             header('Content-Disposition: attachment; filename='.$filename);
-            //header(CONTENT_LENGTH . strlen($content));
+           
         }
 
     }
@@ -370,7 +370,6 @@ $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == - 1
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0 ? false : true);// default to supress loopbacks or gives oneside of a relationship record  ARTEM:NOT USED ANYMORE
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
 //$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
-//			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
 $PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!$system->has_access() ? true : false));
 
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
@@ -434,7 +433,7 @@ if(@$_REQUEST['depth']=='all'){
 // handle special case for collection where ids are stored in the session.
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
-        //@todo check if (!session_id()) session_start();
+       
         $collection =  &$_SESSION[HEURIST_DBNAME_FULL]['record-collection'];
         if (count($collection) > 0) {
             $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
@@ -574,7 +573,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
         $res->close();
     }
     return array_keys($nlrIDs);
-    //	return $rv;
+   
 }
 
 
@@ -698,7 +697,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
             if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
                 continue;
             }
-            //echo "row is ".print_r($row,true);
+           
             // if source is not in the result
             if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth, 'recID' => $row['srcRecID']);
@@ -1024,7 +1023,7 @@ function outputRecords($result) {
     $already_out = array();//result - array of all printed out records recID => recTypeID
 
     if(!$intofile){
-        openTag('records');//, array('count' => $recSet['count']));
+        openTag('records');
     }
 
     $relations_rec_ids = array();//list of all relationship records
@@ -1128,7 +1127,7 @@ function outputRecords($result) {
     }
 
     if($res){
-    $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
+    $resout[$recID] = $res;
     }elseif($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
     unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
     }
@@ -1172,7 +1171,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         if ($record['rec_RecTypeID'] != $relRT) { //not a relationship rectype
             if ($depth > 0) {
                 //				if ($USEXINCLUDELEVEL){
-                //					outputXInclude($record);
+               
                 //				}else
                 if ($outputStub) {
                     outputRecordStub($record);
@@ -1276,7 +1275,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             if(!$outputStub){
                 outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
             }
-            //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
+           
         }
     }
     /* woot is disabled
@@ -1331,7 +1330,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         if(!$NO_RELATIONSHIPS){
 
             $relations = _getRelations($recID, $depth+1);
-            //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+           
             foreach ($relations as $relRec_id => $attrs) {
 
                 $trmID = $attrs['termID'];
@@ -1475,7 +1474,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                 openTag('detail', $attrs);
 
                 $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
-                outputRecordStub($recinfo);//$recInfos[$value['id']]['record']);
+                outputRecordStub($recinfo);
                 closeTag('detail');
             } else {
                 makeTag('detail', $attrs, $value['id']);
@@ -1501,16 +1500,16 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                     //if path is relative then we copy file
                     if(@$file['ulf_FilePath']==null || $file['ulf_FilePath']=='' || substr($file['ulf_FilePath'],1)!='/'){
 
-                        //$path_parts = pathinfo($file['fullpath']);
-                        //$dirname = $path_parts['dirname'].'/';
+                       
+                       
                         //copy file and create required folders
                         chdir(HEURIST_FILESTORE_DIR);// relatively db root
                         $fpath = realpath($file['fullPath']);
-                        //$fpath = str_replace('\\','/',$fpath);
+                       
 
                         //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
                         //moreover it is already done in exportMyDataPopup
-                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
+                       
 
                     }else{
                         //otherwise skip copy and use downloadURL
@@ -1626,7 +1625,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         if ($MAX_DEPTH == 0 && $outputStub) {
             openTag('detail', $attrs);
             $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
-            outputRecordStub($recinfo);//$recInfos[$value['id']]['record']);
+            outputRecordStub($recinfo);
             closeTag('detail');
         } else {
             makeTag('detail', $attrs, $value['id']);
@@ -1775,7 +1774,7 @@ function outputTDateDetail($attrs, $value) {
         }
         if ($time) {
                          // hours                                 minutes                   seconds
-            //preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
+           
             
             preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
             
@@ -1807,7 +1806,7 @@ function outputDurationDetail($attrs, $value) {
             if (preg_match('/[HMS]/', $time)) { //char separated version 6H5M8S
                 preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/', $time, $matches);
             } else { //delimited version  23:59:59
-                //preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
+               
                 preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
             }
             if (@$matches[1]) {makeTag('hour', null, intval($matches[1]));}
@@ -1830,7 +1829,7 @@ function replaceIllegalChars($text) {
 function check($text) {
     global $invalidChars;
     foreach ($invalidChars as $charCode) {
-        //$pattern = "". chr($charCode);
+       
         if (strpos($text, $charCode)) {
             return false;
         }
@@ -2012,7 +2011,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
             fwrite( $huni_resources, "</resources>");
             fclose( $huni_resources );
 
-            //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
+           
             print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
             print '</body></html>';
         }
@@ -2105,7 +2104,7 @@ else{ // single output stream
 
 
     }
-    //makeTag('raw',null, $response2 );
+   
 
     /*  TODO: The schema locations are clearly rubbish
     openTag('hml', array(

@@ -135,7 +135,7 @@ title: "Overview"
                     dragEnter: function(node, data) {
                         //data.otherNode - dragging node
                         //node - target node
-                        return true; //node.folder ?['over'] :["before", "after"];
+                        return true;
                     },
                     dragDrop: function(node, data) {
                         //data.otherNode - dragging node
@@ -161,7 +161,7 @@ title: "Overview"
                                     sVal:data.otherNode.data.page_id}); 
 
                         }
-                        //return;
+                       
                         //change order in target
                         
                         //at first - remove all current children
@@ -437,7 +437,7 @@ title: "Overview"
                             }
                             if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
                                 let ele = $(node).find('.svs-contextmenu3');
-                                ele.css({'display':'inline-block'});//.css('visibility','visible');
+                                ele.css({'display':'inline-block'});
                             }
                         }
                     );               

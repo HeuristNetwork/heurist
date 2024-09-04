@@ -260,7 +260,7 @@ function editCMS_Manager( options ){
                         //open: onDialogInit, 
                         width:'95%', height:'95%', isPopupDlg:true, 
                         close:function(){
-                            edit_dialog.empty();//dialog('destroy');
+                            edit_dialog.empty();
                         },
                         beforeClose: beforeCloseCMSEditor
                 });

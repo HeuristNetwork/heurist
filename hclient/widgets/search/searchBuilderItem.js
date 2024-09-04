@@ -129,7 +129,7 @@ $.widget( "heurist.searchBuilderItem", {
             if(window.hWin.HEURIST4.util.isFunction(this.options.onselect_field)){
                 window.hWin.HEURIST4.util.stopEvent(event);
                 this.options.onselect_field.call(this);
-                //this._onSelectField();
+               
             }
         }});
 
@@ -414,7 +414,7 @@ $.widget( "heurist.searchBuilderItem", {
                 }else  if (dty_ID=='access' || 
                            dty_ID=='tag'){
                         
-                        field_type = 'enum';//dty_ID;
+                        field_type = 'enum';
                         ed_options['dtID'] = dty_ID;
                 }
             }
@@ -574,7 +574,7 @@ Whole value = EQUAL
                 this._predicate_input_ele.css('visibility', 'visible');
                 this._predicate_input_ele.find('.editint-inout-repeat-button').parent().css('visibility', 'visible');
                 this._manageConjunction();
-                //this.cb_negate.show();
+               
             }
             if(cval=='@' 
                 || field_type=='geo' || field_type=='float' || field_type=='integer'){
@@ -600,7 +600,7 @@ Whole value = EQUAL
                     need_select && this._predicate_input_ele.find('.input-div > select').length == 0){ 
                     // check that input is correct version (text input or dropdown)
 
-                    this._onSelectField(); //this._refresh();
+                    this._onSelectField();
                 }
             }
             
@@ -708,7 +708,7 @@ Whole value = EQUAL
         codes[codes.length-1] = this.options.dty_ID
         
         if(this.options.enum_field!=null){
-            //codes.push(this.options.enum_field);
+           
         }
         
         return codes.join(':');

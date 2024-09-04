@@ -73,7 +73,7 @@ $.widget( "heurist.app_timemap", {
 
         let that = this;
 
-        //???? this.element.hide();
+       
 
         this.framecontent = $('<div>').addClass('frame_container')
         //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
@@ -166,7 +166,7 @@ $.widget( "heurist.app_timemap", {
                         that.recordset_changed = true;
                         that._refresh();
                     }
-                    //???? that._refresh();
+                   
 
                     // Record selection
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
@@ -209,7 +209,7 @@ $.widget( "heurist.app_timemap", {
             
             });
         }
-        // (this.mapframe).load(that._initmap);
+       
         // init map on frame load
         this._on( this.mapframe, {
                 load: function(){
@@ -612,9 +612,9 @@ $.widget( "heurist.app_timemap", {
        
         if(show){
             this.mapframe.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
-            //this.mapframe.css('cursor', 'progress');
+           
         }else{
-            //this.framecontent.css('cursor', 'auto');
+           
             this.mapframe.css('background','none');
         }
     }

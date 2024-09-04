@@ -89,7 +89,7 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
         
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
-                request['details']    = 'list'; //'id';
+                request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 let that = this;                                                

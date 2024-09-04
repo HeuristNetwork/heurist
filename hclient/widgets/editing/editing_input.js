@@ -277,7 +277,7 @@ $.widget( "heurist.editing_input", {
                     this.btn_add.css({'margin-top':'3px'});    
                 }
                 
-                //this.btn_add.find('span.ui-icon').css({'font-size':'2em'});
+               
                 
                 // bind click events
                 this._on( this.btn_add, {
@@ -504,7 +504,7 @@ $.widget( "heurist.editing_input", {
                 values_to_set = [''];        
             }else if(Array.isArray(def_value)){
                 //exclude duplication
-                values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);//.unique();
+                values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);
             }else{
                 values_to_set = [def_value];
             }
@@ -616,7 +616,7 @@ $.widget( "heurist.editing_input", {
     
         if(this.options.show_header){
             if(this.header.css('display')=='none'){
-                this.header.css('display','table-cell');//show();
+                this.header.css('display','table-cell');
             }
         }else{
             this.header.hide();
@@ -937,7 +937,7 @@ $.widget( "heurist.editing_input", {
         let that = this;
 
         let $input = null;
-        //@todo check faceted search!!!!! inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
+       
         //repalce to uniqueId() if need
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
 
@@ -1369,7 +1369,7 @@ $.widget( "heurist.editing_input", {
                                     tinymce.activeEditor.execCommand('mceAutoResize');
                                 }
 
-                                //$input.val( ed.getContent() );
+                               
                                 that.onChange();
                             });
 
@@ -1510,7 +1510,7 @@ $.widget( "heurist.editing_input", {
                     let $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
                     if($cms_dialog.find('.main_cms').length>0){ 
                         //opened from cms editor
-                        //$btn_edit_switcher.hide();
+                       
                     }else{
                         //see manageRecords for event handler
                         cms_div_prompt.find('span')
@@ -1668,7 +1668,7 @@ $.widget( "heurist.editing_input", {
                                 let u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
                                 u_tags.each2(function(id, val){ // Get User Tags first
                                     const tag_name = val['tag_Text'];
-                                    //let tag_group = val['tag_UGrpID'];
+                                   
 
                                     let values = {};
                                     values['key'] = tag_name;
@@ -1975,7 +1975,7 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='relmarker'){ //---------------------------------------------------- 
             
                 this.options.showclear_button = false;
-                //$inputdiv.css({'display':'inline-block','vertical-align':'middle'});
+               
                 $inputdiv.css({'display': 'table','vertical-align': 'middle', 'border-spacing': '0px'}); //was '0px 4px'
             
                 if(this.inputs.length==0){ //show current relations
@@ -2176,10 +2176,6 @@ $.widget( "heurist.editing_input", {
                                         {
                                             if(!isSubHeaderAdded){
                                                 isSubHeaderAdded = true;
-//Removed 30 Jan 2021: not relevant to distinguish relationships on the basis of which side is source and which side is target           //                                                $('<div>Referenced by</div>') //Reverse relationships
-//                                                        .css('padding-top','4px')
-//                                                        .addClass('header reverse-relation-header')
-//                                                        .appendTo($inputdiv);
                                             }
                                             
                                             let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
@@ -2240,7 +2236,7 @@ $.widget( "heurist.editing_input", {
                    }
                         
                    this._on($btn_add_rel_dialog,{click:__show_addlink_dialog});
-                   //$btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
+                  
                    
                    __onRelRemove();                   
                    /*if( this.element.find('.link-div').length>0){ //hide this button if there are links
@@ -2251,7 +2247,7 @@ $.widget( "heurist.editing_input", {
                 }else{
                     //this is second call - some links are already defined
                     //show popup dialog at once
-                    //IJ ASKS to disbale it __show_addlink_dialog();
+                   
                     if(this.element.find('.rel_link').is(':visible')){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another', 2000);                        
                     }
@@ -2334,7 +2330,7 @@ $.widget( "heurist.editing_input", {
                 if(that.is_disabled) return;
                 event.preventDefault();
                 
-                let sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
+                let sels = that.newvalues[$input.attr('id')];
                 
                 let rg_options = {
                     select_mode: (this.configMode.csv!==false?'select_multi':'select_single'),
@@ -2392,7 +2388,7 @@ $.widget( "heurist.editing_input", {
             $input.hide();
             that._findAndAssignTitle($input, value);
 
-            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+           
             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
@@ -2483,10 +2479,7 @@ $.widget( "heurist.editing_input", {
         
                     popup_options.width = usrPreferences.width;
                     popup_options.height = usrPreferences.height;
-                    let sels = this.newvalues[$input.attr('id')];//$(event.target).attr('id')];
-                    /*if(!sels && this.options.values && this.options.values[0]){
-                         sels = this.options.values[0];
-                    }*/ 
+                    let sels = this.newvalues[$input.attr('id')];
                     
                     if(!window.hWin.HEURIST4.util.isempty(sels)){
                         popup_options.selection_on_init = sels.split(',');
@@ -2510,7 +2503,7 @@ $.widget( "heurist.editing_input", {
             }
             
             
-            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+           
             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
@@ -2558,8 +2551,8 @@ $.widget( "heurist.editing_input", {
                             that._off( $input, 'click');
                             if(!window.hWin.HEURIST4.util.isnull( $btn_extlink)){
                                 
-                                //$btn_editlink.remove();
-                                //$btn_extlink = null;
+                               
+                               
                                 if($btn_editlink!=null){
                                     $btn_editlink.remove();
                                     $btn_editlink = null;
@@ -2578,7 +2571,7 @@ $.widget( "heurist.editing_input", {
                             $btn_editlink = $( '<span>', {title: 'Edit URL'})
                                 .addClass('smallicon ui-icon ui-icon-pencil')
                                 .appendTo( $inputdiv );
-                                //.button({icons:{primary: 'ui-icon-pencil'},text:false});
+                               
                         
                             that._on( $btn_editlink, { click: function(){ __url_input_state(true) }} );
                         }
@@ -2650,7 +2643,7 @@ $.widget( "heurist.editing_input", {
             if(this.detailType=="float"){//----------------------------------------------------
 
                 $input.keypress(function (e) {
-                    let code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
+                    let code = e.charCode || e.keyCode;
                     let charValue = String.fromCharCode(code);
                     let valid = false;
 
@@ -3153,7 +3146,7 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 if(__show_select_dialog!=null){
-                    //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                   
                     this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
                     this._on( $gicon, { click: __show_select_dialog } );
                 }
@@ -3294,7 +3287,7 @@ $.widget( "heurist.editing_input", {
                                     fileHandle.abort();
                                 }
 
-                                //fileHandle = true;
+                               
                             }
                         });
                         
@@ -3445,7 +3438,7 @@ $.widget( "heurist.editing_input", {
     },
     progressall: function (e, data) { //@todo to implement
         let progress = parseInt(data.loaded / data.total * 100, 10);
-        //$('#progress .bar').css('width',progress + '%');
+       
         $progress_bar.progressbar( "value", progress );        
     }                            
                         };      
@@ -3469,7 +3462,7 @@ $.widget( "heurist.editing_input", {
                         $input.fileupload( fileupload_opts );
                 
                         //init click handlers
-                        //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
+                       
                         $input_img.on({click: function(e){ //find('a')
                             $input.click(); //open file browse
                         }});
@@ -3627,8 +3620,8 @@ $.widget( "heurist.editing_input", {
                         } );
                 };
 
-                //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
-                //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
+               
+               
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
                 this._on( $gicon, { click: __show_mapdigit_dialog } );
 
@@ -4004,7 +3997,7 @@ $.widget( "heurist.editing_input", {
               let nw = (this.detailType=='integer' || this.detailType=='float')?40:120;
               if (parseFloat( dwidth ) > 0){ 
                   nw = Math.round( 3+Number(dwidth) );
-                    //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
+                   
               }
               $input.css({'min-width':nw+'ex','width':nw+'ex'}); //was *4/3
 
@@ -4039,7 +4032,7 @@ $.widget( "heurist.editing_input", {
                 .attr('title', 'Clear entered value')
                 .attr('data-input-id', $input.attr('id'))
                 .appendTo( $inputdiv )
-                //.button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+               
                 .css({'margin-top': '3px', position: 'absolute',
                      cursor:'pointer',             //'font-size':'2em',
     //outline_suppress does not work - so list all these props here explicitely                
@@ -4094,9 +4087,6 @@ $.widget( "heurist.editing_input", {
                                 "bottom": ""
                             });						
     						
-//!!!!                            that._on($input, {mouseout:__hideImagePreview});
-//!!!!                            that._on($input_img, {mouseout:__hideImagePreview});
-//!!!!                            isClicked = 0;
                         }
     					
                         if(that.detailType=="resource" && that.configMode.entity=='records' 
@@ -4682,7 +4672,7 @@ $.widget( "heurist.editing_input", {
                                        ele.parent().find('.sel_link2').hide(); //hide big button to select new link
                                                  
                                     }else{
-                                        //it was that._removeInput( ele.attr('id') );
+                                       
                                         window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                                 {rec_ID: value, 
                                                  rec_Title: 'Target record '+value+' does not exist', 
@@ -4876,7 +4866,7 @@ $.widget( "heurist.editing_input", {
                         allTerms = options;
                     }
                     //add empty value as a first option
-                    //allTerms.unshift({key:'', title:''});
+                   
                     
                     //array of key:title objects
                     let selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
@@ -4885,7 +4875,7 @@ $.widget( "heurist.editing_input", {
                     // move menuWidget to current dialog/document 
                     // (sometimes, within CMS pages for example, it places it before the current dialog thus hiding it)
                     let $menu = $input.hSelect('menuWidget');
-                    let $parent_ele = this.element.closest('div[role="dialog"]'); //$input_div.parents('[role="dialog"]');
+                    let $parent_ele = this.element.closest('div[role="dialog"]');
                     $parent_ele = $parent_ele.length == 0 ? document : $parent_ele;
 
                     if($parent_ele.length > 0) $menu.parent().appendTo($parent_ele);
@@ -4996,10 +4986,10 @@ $.widget( "heurist.editing_input", {
                         });
                     
                 
-                    //this.showErrorMsg(sMsg);
+                   
                     
 
-                    //this._on(this.error_message.find('.term-move'),{click:function(){}});
+                   
                     if(window.hWin.HAPI4.is_admin()){  
 
                         //
@@ -5211,7 +5201,7 @@ $.widget( "heurist.editing_input", {
         if(values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }else{
-            //this.showErrorMsg(null);
+           
         }
         
         this._setAutoWidth();            
@@ -5292,7 +5282,7 @@ $.widget( "heurist.editing_input", {
         this.btn_cancel_reorder.hide();
         
         if(this.isReadonly()) return;
-        let idx, ele_after = this.firstdiv; //this.error_message;
+        let idx, ele_after = this.firstdiv;
         for (idx in this.inputs) {
             let ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
@@ -5428,7 +5418,7 @@ $.widget( "heurist.editing_input", {
                     let k = ele.index();
                     
                     ress[k] = res;
-                    //ress2.push(res);
+                   
                 }
             }
             
@@ -5464,7 +5454,7 @@ $.widget( "heurist.editing_input", {
     //
     //
     setDisabled: function(is_disabled){
-        //return;
+       
         if(!this.isReadonly()){
             
             let check_ind_visibility = this.options.showedit_button 
@@ -5590,7 +5580,7 @@ $.widget( "heurist.editing_input", {
                     }
 
                 }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
-                    //errorMessage = 'Field is required';
+                   
                 }
             }
         }
@@ -5911,7 +5901,7 @@ $.widget( "heurist.editing_input", {
                                 "width": "200px",
                                 "background": "rgb(209, 231, 231)",
                                 "font-size": "1.1em"
-                            })//.addClass('ui-heurist-populate');
+                            }
                         }
                     });
                     if(!that.tooltips) that.tooltips = {};
@@ -6239,7 +6229,7 @@ $.widget( "heurist.editing_input", {
                     }
                 });
 
-                //.button({icons:{primary: 'ui-icon-calendar'},text:false});
+               
                
                 
                 this._on( $btn_datepicker, { click: function(){

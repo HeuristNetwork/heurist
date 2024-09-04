@@ -77,7 +77,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                                 window.hWin.HEURIST4.util.getUrlParameter('template', location.search))))
 					{
 						_keepParameters = location.search;
-						//auto open _onAddEditRecord(_keepParameters);
+					
 					}
 				}
 
@@ -168,7 +168,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_ID', title: "<div style='font-size:10;'>Exec</div>", sortable:false, width:16, //resizeable:false,
                 render: function(data, type) {
                     if (type === 'display') {
-                        let status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{
@@ -186,7 +186,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_ID', title: "<div style='font-size:10;min-width:30px;'>HTML</div>", sortable:false, width:18, //resizeable:false,
                 render: function(data, type) {
                     if (type === 'display') {
-                        let status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{
@@ -204,7 +204,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_URL', title: "<div style='font-size:10;'>Raw</div>", sortable:false, width:16,  //resizeable:false,width:7,
                 render: function(data, type, row) {
                     if (type === 'display') {
-                        let status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{

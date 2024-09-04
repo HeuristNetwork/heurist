@@ -118,7 +118,7 @@ function hLayoutMgr(){
             pnl_counter = 1;
             
             if(_supp_options.page_name){
-                layout[0].name  = 'Page'; //_supp_options.page_name;
+                layout[0].name  = 'Page';
             }
             if(_supp_options.keep_top_config && isEditMode){
                 _main_layout_cfg = layout;
@@ -290,7 +290,7 @@ function hLayoutMgr(){
         }                         
         
         $d.attr('id', layout.dom_id)
-          .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
+          .attr('data-hid', layout.key);
           
         if(classes){
             $d.addClass(classes);
@@ -320,7 +320,7 @@ function hLayoutMgr(){
         
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+           
         }
 
         if(layout.css && !$.isEmptyObject(layout.css)){
@@ -343,7 +343,7 @@ function hLayoutMgr(){
             
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+           
         }
             
         if(layout.css && !$.isEmptyObject(layout)){
@@ -408,7 +408,7 @@ function hLayoutMgr(){
         if(!layout.css){
             layout.css  = {};    
             layout.css['minHeight'] = '100px';
-            //layout.css['position'] = 'relative';
+           
         } 
         if(!layout.css['position']) layout.css['position'] = 'relative';
         
@@ -420,14 +420,14 @@ function hLayoutMgr(){
         
         if(layout.appid=='heurist_Search'){
             if(layout.css['display']!='flex'){
-                //layout.css['display'] = 'table';
+               
             }
             if(!layout.css['width']){
-                //layout.css['width'] = '100%';
+               
             }
         }else if(layout.appid=='heurist_Map'){
             if(!layout.css['height']){
-                //layout.css['height'] = '100%';
+               
             }
         }*/
 
@@ -442,7 +442,7 @@ function hLayoutMgr(){
         }
 
         if(isEditMode) {
-            //$d.css('border','2px dashed red');
+           
         }
         
         if(layout.css && !$.isEmptyObject(layout)){
@@ -629,7 +629,7 @@ function hLayoutMgr(){
             $parent.layout( layout_opts );
         }
         
-        //$parent.find('.ui-layout-content2').css('padding','0px !important');
+       
     }
     
     //
@@ -921,7 +921,7 @@ function hLayoutMgr(){
     //
     //
     //
-    // container.html(layout);
+   
     function _convertOldCmsFormat(container, lvl){
 
 
@@ -957,7 +957,7 @@ function hLayoutMgr(){
 
                     if(ele[0].nodeName=='TABLE'){
                         
-                        //return false;
+                       
                     }
 
                     //there are widgets among children
@@ -1079,7 +1079,7 @@ function hLayoutMgr(){
                 }
             }
             if(ele.attr('class')){
-                res['classes'] = ele.attr('class'); //ele[0].classList;
+                res['classes'] = ele.attr('class');
             }
                    
             if(res.type == 'app'){

@@ -59,7 +59,7 @@ $.widget( "heurist.embedDialog", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -313,7 +313,7 @@ $.widget( "heurist.embedDialog", {
             this._as_dialog = $dlg; 
             
             if(this.options.cms_popup_dialog_options.container){
-                //$dlg.addClass('ui-heurist-bg-light');
+               
                 $dlg.parent().addClass('ui-dialog-heurist ui-heurist-publish');
             }
             
@@ -438,7 +438,7 @@ $.widget( "heurist.embedDialog", {
                                 let record = records[idx];
                                 window.hWin.HEURIST4.ui.addoption(selScope,
                                     resdata.fld(record, 'rec_ID'),
-                                    //resdata.fld(record, 'rec_Title') );
+                                   
                                     window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title')) );
                                     //window.hWin.HEURIST4.util.htmlEscape(resdata.fld(record, 'rec_Title')) ); 
                             }

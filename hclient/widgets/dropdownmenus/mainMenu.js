@@ -240,7 +240,7 @@ $.widget( "heurist.mainMenu", {
         if(__include('Website')) this._initMenu('Website', 0);
         if(__include('Export')) {
             this._initMenu('Export', 2, null, 3); //invisible in main menu   
-            //this.menues['btn_Export'].hide();
+           
         }
             
         if(__include('Management')) this._initMenu('Management', 0);
@@ -549,7 +549,7 @@ $.widget( "heurist.mainMenu", {
             }
         }
 
-        //that._dashboardVisibility( false );
+       
     },
 
 
@@ -567,7 +567,7 @@ $.widget( "heurist.mainMenu", {
         this.btn_Admin.remove();
         this.btn_Profile.remove();
         this.menu_Profile.remove();
-        //this.menu_Profile3.remove();
+       
         this.btn_Database.remove();
         this.menu_Database.remove();
         this.btn_Import.remove();
@@ -601,7 +601,7 @@ $.widget( "heurist.mainMenu", {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 800);
-            //$( ele ).delay(800).hide();
+           
         },
         _show = function(ele, parent) {
             clearTimeout(myTimeoutId);
@@ -1249,7 +1249,7 @@ $.widget( "heurist.mainMenu", {
             
         }
         else if(action == "menu-export-hml-multifile"){
-            //that._exportRecords({format:'hml', multifile:true});
+           
         }
         else if(action == "menu-export-json"){ 
             
@@ -1538,7 +1538,7 @@ $.widget( "heurist.mainMenu", {
                     href = window.hWin.HAPI4.baseURL + href;// + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
                 }
                 
-                //popup_options.entered_password = '1234567';
+               
                 /*
                 if(!window.hWin.HEURIST4.util.isempty(popup_options.entered_password)){
                          href =  href + '&pwd=' + popup_options.entered_password;
@@ -1761,8 +1761,7 @@ $.widget( "heurist.mainMenu", {
                 });
                 request['mapcontrols'] = map_controls.length==0?'none':map_controls.join(',');
                 
-                request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
-                //$('#layout_theme').themeswitcher.
+                request.layout_theme = currentTheme;
                 
                 //save preferences in session
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
@@ -2204,7 +2203,7 @@ $.widget( "heurist.mainMenu", {
                     that._initial_search_already_executed = false;
                     window.hWin.HAPI4.setCurrentUser(null);
                     $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-                    //that._refresh();
+                   
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
@@ -2356,7 +2355,7 @@ $.widget( "heurist.mainMenu", {
                } 
                
                let that = this;
-               //this._adjustHeight();
+              
                setTimeout( function(){ that._adjustHeight(); },is_startup?1000:10)
                
         }
@@ -2370,7 +2369,7 @@ $.widget( "heurist.mainMenu", {
 
         let ele = this.element.parents('#layout_panes');
         if(ele){
-            let h = 50; //3em;
+            let h = 50;
             
             if(this.divMainMenu.is(':visible')) h = h + 22;
             if(this.divShortcuts){
@@ -2384,7 +2383,7 @@ $.widget( "heurist.mainMenu", {
             ele.children('#center_pane').css({top: h});
             
             if($('.ui-layout-container').length>0){
-                //$('.ui-layout-pane').css({'height':'auto'});
+               
                 let layout = $('.ui-layout-container').layout();
                 layout.resizeAll();
             }

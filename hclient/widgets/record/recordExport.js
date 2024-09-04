@@ -154,7 +154,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                     request['rec_RecTypeID'] = rec_RecTypeID;
                 }
             }
-            //request['file'] = 1;
+           
             
             let url = window.hWin.HAPI4.baseURL;
                            

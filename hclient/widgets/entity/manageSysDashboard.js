@@ -38,7 +38,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 600;
         this.options.width = 1200;
@@ -47,7 +47,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this.options.title = 'Shortcuts';
         
-        //this.options.isViewMode = true;
+       
         
         this.options.no_bottom_button_bar = true;
     
@@ -91,19 +91,19 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 "searchsysdashboardoninit": function(){
 
         /* this feature is disabled
-        //this.show_longer_description = this.searchForm.find('#show_longer_description');
+       
         this.show_on_startup = this.searchForm.find('#show_on_startup');
         this.show_as_ribbon = this.searchForm.find('#show_as_ribbon');
-        //this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
+       
         this._on(this.show_on_startup, {change:this.saveUiPreferences});
         this._on(this.show_as_ribbon, {change:this.saveUiPreferences});
-        //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
+       
         */
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
             .on('change', function(){
                 that.recordList.resultList('option','view_mode', 'thumbs');
-                    //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
+                   
                 that.saveUiPreferences();
         });*/
         
@@ -118,7 +118,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 });
                 
         //this.recordList.resultList('setHeaderText','<h3>Dashboard</h3><span class="heurist-helper1">A shortcuts to commonly used functions for this particuar database (al functions are available at any time via the menues and filter fields)</span>',
-        //    {height:'4em'});
+       
         this.recordList.resultList('option','multiselect', false);
         this.recordList.resultList('option','select_mode', 'select_single');
         
@@ -232,13 +232,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         if(newmode){
              // view mode
-             //this.searchForm.hide();
-             //this.recordList.css({'top': 0});
+            
+            
             this.searchForm.css({'height': '7.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
-            //this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
+           
             
             this.recordList.resultList('option', 'sortable', false);
             
@@ -285,13 +285,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }else{
             // edit mode
             
-            //this.searchForm.show();
+           
             this.searchForm.css({'height': '2.4em'});
             this.recordList.css({'top': '2.8em'});
 
             this.searchForm.find('#view_mode').hide();
             this.searchForm.find('#edit_mode').show();
-            //this._as_dialog.parent().find('.ui-dialog-titlebar').show();
+           
             
             this.recordList.resultList('option','view_mode','list');
             
@@ -299,7 +299,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             this.recordList.resultList('option', 'sortable', true);
             this.recordList.resultList('option', 'onSortStop', function(){
                 that.saveNewOrder(); //auto save order
-                //that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
+               
             });
             
             /* this feature is disabled
@@ -633,7 +633,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 };
 
                 let that = this;                                                
-                //that.loadanimation(true);
+               
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

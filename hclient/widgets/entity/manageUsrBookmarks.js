@@ -57,7 +57,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
                 let request = {};
                 request['bkm_RecID']  = this.options.bkm_RecID;
                 request['a']          = 'search'; //action
-                request['entity']     = this._entityName;//options.entity.entityName;
+                request['entity']     = this._entityName;
                 request['details']    = 'full';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
@@ -127,7 +127,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         let ele2 = this._editing.getFieldByName('bkm_RecID');
         ele2.editing_input('setValue', this.options.bkm_RecID );
         
-        this._super();// null, afteraction );
+        this._super();
     },
     
     

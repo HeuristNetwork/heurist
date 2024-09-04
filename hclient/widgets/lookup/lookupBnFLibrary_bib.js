@@ -177,7 +177,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         if(!window.hWin.HEURIST4.util.isempty(options['author_codes'])){
             this.element.find('#author-codes').text(options['author_codes']);
-            //this.element.find('#contributor-codes').text(options['contributor_codes']);
+           
         }
 
         if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
@@ -539,7 +539,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                     // Convert to array
                     if(window.hWin.HEURIST4.util.isObject(val)){
-                        //obj_keys = Object.keys(val);
+                       
                         val = Object.values(val);
                     }else if(!Array.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
@@ -909,7 +909,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
             if(res_orders.length>0){
 
-                //res_records = this.removeDupAuthors(fields.indexOf('author'), res_records);
+               
 
                 // Create the record set for the resultList
                 let res_recordset = new HRecordSet({

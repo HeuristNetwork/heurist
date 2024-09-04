@@ -472,7 +472,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             select: function(e, data) {

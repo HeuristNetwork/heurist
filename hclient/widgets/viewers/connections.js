@@ -72,8 +72,8 @@ $.widget( "heurist.connections", {
                 //accept events from the same realm only
                 if(!that._isSameRealm(data)) return;
                 
-                //that.recordset_changed = true;
-                //that._getRelations( data );
+               
+               
                 
                 
                 //find all relation within given result set
@@ -211,11 +211,11 @@ $.widget( "heurist.connections", {
     
     loadanimation: function(show){
         if(show){
-            //this.graphframe.hide();
+           
             this.framecontent.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
-            //this.graphframe.show();
+           
         }
     },
     

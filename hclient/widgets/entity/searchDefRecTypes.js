@@ -24,7 +24,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
         let that = this;
         
-        //this.widgetEventPrefix = 'searchDefRecTypes';
+       
         
         this._super();
         
@@ -42,8 +42,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
         if(this.options.edit_mode=='none' || this.options.import_structure){
             this.btn_add_record.parent().hide();
-            //this.btn_find_record.hide();
-            //this.element.find('#inner_title').hide();
+           
+           
             
             let ele = this.element.find('#div_show_all_groups');
             ele.parent().css('float','left');
@@ -177,7 +177,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         if(key == 'rtg_ID'){
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
                 this.startSearch();
-                //this.element.find('#input_search_group').val(value).trigger('change');
+               
                 
                 if(value==$Db.getTrashGroupId('rtg')){
                     this.btn_add_record.hide();
@@ -374,7 +374,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
+                request['details']    = 'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //we may search users in any database

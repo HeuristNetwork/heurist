@@ -218,7 +218,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
                 sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
                 if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
-                    let dtg_id = this.options.dtg_ID; //this.input_search_group.val();
+                    let dtg_id = this.options.dtg_ID;
                     request['dty_DetailTypeGroupID'] = dtg_id;
                     sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
                                         +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
@@ -251,7 +251,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
+                request['details']    = 'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //we may search users in any database

@@ -282,7 +282,7 @@ function ReportScheduleEditor() {
         if(!error){
             let ss = (_recID < 0)?"added":"updated";
 
-            // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
+           
             window.close(response); //send back new HEURIST strcuture
         }
         

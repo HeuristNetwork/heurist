@@ -58,7 +58,7 @@ $.widget( "heurist.staticPage", {
         if(this.options.init_at_once){
             that._refresh();  
         }        
-        //$(this.document).on(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
+       
 
     }, //end _create
 
@@ -116,7 +116,7 @@ $.widget( "heurist.staticPage", {
                 this.loadanimation(true);
                 this.dosframe.attr('src', this.options.url);
             }else{
-                $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
+                $(this.div_content).load(this.options.url);
             }
             this._loaded_url = this.options.url;
         }

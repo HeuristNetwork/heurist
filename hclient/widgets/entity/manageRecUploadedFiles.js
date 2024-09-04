@@ -51,7 +51,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 700;
         this.options.edit_width = 950;
@@ -148,7 +148,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 //$(that.recordList.find('.ent_content_full'))
                 let ele = $(that.recordList.find('.ent_content_full')); //.find('a')
                 
-//@todo repalce with fancybox                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             });
         }
 
@@ -524,7 +523,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._external_repositories[repo_name] = [ repo_details ];
 
                             window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                        }); //DEBUG console.log(that._external_repositories, response.data);
+                        });
 
                         if($select.hSelect('instance') !== undefined){
                             $select.hSelect('refresh');
@@ -591,7 +590,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                onselect:function(newsel){
                                     if(newsel){
                                         if(that.options.edit_addrecordfirst){
-                                            //that.options.edit_addrecordfirst = false;
+                                           
                                             that._initControls();
                                              
                                             that._currentEditID = null;
@@ -600,7 +599,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                             let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
-                                            //that.onEditFormChange();
+                                           
                                             let interval = setInterval(function(){
                                                 if(!window.hWin.HAPI4.is_callserver_in_progress()){
                                                     clearInterval(interval);
@@ -642,7 +641,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                     if(res){
                                         
                                         if(that.options.edit_addrecordfirst){
-                                            //that.options.edit_addrecordfirst = false;
+                                           
                                             that._initControls();
                                              
                                             that._currentEditID = null;
@@ -651,7 +650,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                             let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
-                                            //that.onEditFormChange();
+                                           
                                             let interval = setInterval(function(){
                                                 if(!window.hWin.HAPI4.is_callserver_in_progress()){
                                                     clearInterval(interval);
@@ -795,7 +794,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 // if(ext=='bin'){
                 // ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
                 // +' or mimetype was not found among allowed types.'
-                //    +' Generic mimetype has been selected. Please select or add mimetype manually.');
+               
 
                 /*
                 window.hWin.HEURIST4.msg.showMsgDlg();
@@ -899,7 +898,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         let recID   = fld('ulf_ID');
         
         let rectype = fld('ulf_ExternalFileReference')?'external':'local';
-        //let isEnabled = (fld('ugr_Enabled')=='y');
+       
         
         let recTitle;
         let recTitleHint;
@@ -1050,8 +1049,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             fields['ulf_ID'] = (''+ulf_ID);
                             that._afterSaveEventHandler(ulf_ID, fields ); //trigger onselect
                             
-                            //that.editFormPopup.dialog('close');
-                            //that._trigger( "onselect", null, {selection:[ulf_ID]});
+                           
+                           
                         }else{
                             that._currentEditID = null;//to prevent warn about save
                             that.addEditRecord(ulf_ID, true);
@@ -1146,7 +1145,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     
                 this._currentEditID = null; //to avoid warning
                 this.editFormPopup.dialog('close');
-                //this._trigger( "onselect", null, {selection:[this._currentEditID]});
+               
             }
             if(this.options.edit_addrecordfirst || this._additionMode=='local'){ //close dialog after save
             

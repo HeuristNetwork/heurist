@@ -387,7 +387,7 @@ function onPageInit(success)
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 
         var itop = $('#main-header').height();
-        //MOVED to top right corner $('#btn_editor').css({top:itop-70, right:20});
+       
 
     },300);
 
@@ -527,13 +527,6 @@ function loadPageContent(pageid, eventdata){
             supp_options['heurist_SearchTree'] = {suppress_default_search:true};
             supp_options['heurist_SearchInput'] = {suppress_default_search:true};
         }
-
-<?php
-//style from field DT_CMS_CSS of home record
-if($website_custom_css!=null){
-//        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'.htmlspecialchars(str_replace("\n",' ',$website_custom_css)).'"}};';
-}
-?>
 
             //after load event listener
             function __loadPageContent(){
@@ -995,7 +988,7 @@ function afterPageLoad(document, pageid, eventdata){
                             }
                         }
 
-                        eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
+                        eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
                         loadPageContent(new_pageid, eventdata);//on link or selection - execute search on different page
 
                     }else{
@@ -1057,7 +1050,7 @@ function initLinksAndImages($container, search_data){
         if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 ||
 
                 var query = $(link).attr('data-query');
-                        //? $(link).attr('data-query'): href.substring(2);
+                       
 
                 var current_template = '__def';
                 var request = {detail:'ids', neadall:1, w:'a', q:query};
@@ -1073,7 +1066,7 @@ function initLinksAndImages($container, search_data){
 
                 if(!href || href=='#' || href.indexOf('q=')===0){
                     //change href for right click - to open this link in new tab
-                    //href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
+                   
                     href = [window.hWin.HAPI4.baseURL,window.hWin.HAPI4.database,'web',
                             home_page_record_id, current_page_id,encodeURIComponent(query)];
                     href = href.join('/');
@@ -1229,7 +1222,7 @@ function onHapiInit(success){
 
             if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
 
-                //background: white;
+               
                 $('<div><a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
                             +'<label>at: </label>'
@@ -1237,7 +1230,7 @@ function onHapiInit(success){
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
-            //setTimeout(function(){window.hWin.HAPI4.EntityMgr.refreshEntityData('rst,trm');},1000);
+           
 
 
 <?php
@@ -1444,7 +1437,7 @@ function _openCMSeditor(event){
             //close
             isCMS_active = false;
             editCMS_instance2.closeCMS();
-            //btn.show();
+           
         }else{
             $('#main-recordview').hide();
             $('#main-content').show();
@@ -1566,7 +1559,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                 if(in_array($page_id, $ids_was_added)){
                     //already was included - recursion
-                    //ids_recurred.push(menuitems[i]);
+                   
                 }else{
 
                     $record = recordSearchByID($system,$page_id,$fields,'rec_ID,rec_RecTypeID');
@@ -1577,10 +1570,10 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                     //target and position
                     $pageTarget = _getFld($record,DT_CMS_TARGET);
-                    //$pageStyle = _getFld($record,DT_CMS_CSS);
+                   
                     $showTitle = _getFld($record,DT_CMS_PAGETITLE);
 
-                    $showTitle = true; //($showTitle!==TERM_NO && $showTitle!==TERM_NO_old);
+                    $showTitle = true;
 
                     $hasContent = (_getFld($record,DT_EXTENDED_DESCRIPTION)!=null);
 

@@ -149,7 +149,7 @@ $.widget( "heurist.mediaViewer", {
                         mode_3d_viewer = file.mode_3d_viewer; //3dhop or 3d or ''
                     }else{
                         obf_recID = file[0];
-                        mimeType = file[1]; //(Array.isArray(file) ?file[2] :file ) ;
+                        mimeType = file[1];
                     }
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
@@ -289,7 +289,7 @@ $.widget( "heurist.mediaViewer", {
                                 
                                 if(rec_ID>0){
                                     //param = 'q'; //it adds format=iiif in miradorViewer.php
-                                    //obf_recID = 'ids:'+rec_ID;
+                                   
                                     //$alink.attr('data-id', obf_recID);  
                                     param = 'q=ids:'+rec_ID;
                                 }else{
@@ -311,7 +311,7 @@ $.widget( "heurist.mediaViewer", {
                             external_url =  that.options.baseURL 
                                      + 'hclient/widgets/viewers/miradorViewer.php?db='
                                      +  that.options.database
-                                     + '&' + param; // + '='+obf_recID;
+                                     + '&' + param;
                                      
                             if(rec_ID>0){
                                 external_url =  external_url + '&recID='+rec_ID;    
@@ -342,7 +342,7 @@ $.widget( "heurist.mediaViewer", {
                                 let url =  that.options.baseURL 
                                 + 'hclient/widgets/viewers/miradorViewer.php?db='
                                 +  that.options.database
-                                + '&' + param;// + '='+obf_recID;
+                                + '&' + param;
 
                                 if(rec_ID>0){
                                     url =  url + '&recID='+rec_ID;    
@@ -401,8 +401,8 @@ $.widget( "heurist.mediaViewer", {
                                              width:'90%',height:'95%',
                                              allowfullscreen:true,'padding-content':'0px'});   
                                              
-                                        //$dlg = $(window.hWin?window.hWin.document:document).find('body #3dhop-viewer');
-                                        //$dlg.parent().css('top','50px');
+                                       
+                                       
                                   }else{
                                         window.open(url, '_blank');        
                                   }
@@ -426,13 +426,13 @@ $.widget( "heurist.mediaViewer", {
                         if(mimeType=='application/pdf' || mimeType.indexOf('audio/')===0 || mimeType.indexOf('video/')===0){
 
                             external_url = fileURL  + '&mode=page';
-                            //fileURL = fileURL  + '&mode=tag&fancybox=1';
+                           
                             
                             if(that.options.selector || (that.options.openInPopup && mimeType.indexOf('audio/')!==0)){
                                 
                                 fileURL = fileURL  + '&mode=tag&fancybox=1';
                                 
-                                $alink.attr('data-href','{}') //javascript:;
+                                $alink.attr('data-href','{}')
                                     .attr('data-src', fileURL)
                                     .attr('data-type', 'ajax')
                                     .attr('data-myfancybox','fb-images')
@@ -459,7 +459,7 @@ $.widget( "heurist.mediaViewer", {
                             selector : '[data-myfancybox="fb-images"]', 
                             loop:true};
         $('body').unbind('click.fb-start');
-        //this.mediacontent.off("click.fb-start", '[data-myfancybox="fb-images"]');
+       
         
         if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );

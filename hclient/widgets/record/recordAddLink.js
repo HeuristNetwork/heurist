@@ -469,7 +469,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         let dtFields = {};
         dtFields['dt_ID'] = 9999999;    
         dtFields['rst_PtrFilteredIDs'] = rt_constraints;    
-        dtFields['rst_DisplayName'] = '';//input_label;
+        dtFields['rst_DisplayName'] = ''; //input_label
         dtFields['rst_RequirementType'] = 'optional';
         dtFields['rst_MaxValues'] = 1;
         dtFields['dty_Type'] = 'resource';
@@ -496,8 +496,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     that.options.target_ID = rec_id;    
                 }
                 
-                //getRecordValue(rec_id, party);
-                //_enableActionButton();
+               
+               
             }    
         };
 
@@ -524,7 +524,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         let rectypeID = this.source_RecTypeID; //selectRecordScope.val(); 
         //typedefs[rectypeID].dtFields[dtID
-        //_createInputElement_step2(rectypeID, dtID, $fieldset);
+       
         
         let ptr_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
@@ -596,14 +596,14 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             trm_id = $Db.rst(rectypeID, dtID, 'rst_DefaultValue');
         }
         
-        //let dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
+       
         let dtFields = {};
-        dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
+        dtFields['rst_DisplayName'] = 'Relationship type:'; //input_label
         dtFields['rst_RequirementType'] = 'optional';
         dtFields['rst_MaxValues'] = 1;
         dtFields['rst_DisplayWidth'] = '25ex';
         dtFields['dty_Type'] = 'relationtype';
-        dtFields['rst_PtrFilteredIDs'] = '';//dt['dty_PtrTargetRectypeIDs'];
+        dtFields['rst_PtrFilteredIDs'] = '';
         dtFields['rst_FilteredJsonTermIDTree'] = vocab_id;
         dtFields['rst_DefaultValue'] = trm_id;
         dtFields['dtID'] = dtID;
@@ -889,7 +889,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                         {relmarker_field: this.options.relmarker_dty_ID, relmarker_is_inward: false});   
                 }
                 this._as_dialog.dialog('close');
-                //)window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
+               
             }
         }
     }

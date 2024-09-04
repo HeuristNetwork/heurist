@@ -59,7 +59,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
-        //this.element.find('#btn_container').position({my: 'left top', at: 'right top', of: '#search_container'});
+       
 
         // Action button styling
         this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch, #btnRdfSearch').addClass("ui-button-action");

@@ -49,7 +49,7 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
         $params = array('recID'=>intval($res[0]));
     }else{
         //annotation not found
-        //exit;
+       
     }
 
 
@@ -75,7 +75,7 @@ if(@$_REQUEST['u']){
 
     if ($res && $res[1] > 0) { //already bookmarked
         $params = array('recID'=>$res[1]);
-        //print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
+       
     }elseif (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
 //----- 2. find similar url - show disambiguation dialog -----------------------------------------
 
@@ -106,7 +106,7 @@ if(@$_REQUEST['u']){
             $params['u'] = $url;
         }
         if(@$_REQUEST['f']){ //favicon
-            //$params['rec_title'] = $_REQUEST['f'];
+           
         }
 
         // preprocess any description
@@ -337,14 +337,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                                                 needall: 1, //it means return all recors - no limits
                                                 detail: 'ids'},
                                 function( response ){
-                                    //that.loadanimation(false);
+                                   
                                     if(response.status == window.hWin.ResponseStatus.OK){
 
                                         var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
                                             $container.manageRecords('addEditRecord', recset.getOrder()[0]);
-                                            //since recID may be resolved via recForwarding  (recID>0)?recID:recset.getOrder()[0]);
+                                           
                                         }else{ // if(isPopup){
 
                                             var sMsg = ' does not exist in database or has status "hidden" for non owners';

@@ -256,7 +256,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
-        let url = that.baseURL + "hserv/controller/" + action + ".php"; //+(new Date().getTime());
+        let url = that.baseURL + "hserv/controller/" + action + ".php";
         
         //@todo - count keys in request to avoid "Input variables exceeded 1000" on server side
         let cnt = _getKeyCount(request);
@@ -293,7 +293,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
                 }
-                //message:'Error connecting server '+textStatus});
+               
             },
             success: function (response, textStatus, jqXHR) {
 
@@ -614,7 +614,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if (response.status == window.hWin.ResponseStatus.OK) {
                         if (response.data.sysinfo) {
                             window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-                            //!!!!  assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                           
                         }
 
                         let is_expired = false;
@@ -699,7 +699,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             }
                             if (response.data.sysinfo) {
                                 window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-                                //!!!! assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                               
                             }
                         } else {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1907,7 +1907,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 entity_data['rst_Index'] = rst_index;
 
                 // see $Db.rst_links
-                //entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
+               
             },
 
             //
@@ -2817,6 +2817,6 @@ Automatic translation
 
     }
 
-    _init(_db, _oninit, _baseURL); //, _currentUser);
+    _init(_db, _oninit, _baseURL);
     return that;  //returns object
 }

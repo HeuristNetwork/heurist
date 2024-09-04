@@ -333,11 +333,11 @@ function HLayout(args) {
             onopen_end: function(pane_name, pane_element){
                 if(pane_name=='west'){
                     var tog = pane_element.parent().find('.ui-layout-toggler-west');
-                    //tog.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-w');
-                    //tog.find('.content-open').addClass('ui_icon ui-icon-triangle-1-e');
-                    //tog.find('.content-closed').addClass('ui_icon ui-icon-triangle-1-w');
-                    //tog.removeClass('ui_icon ui-icon-triangle-1-e');
-                    //tog.addClass('ui_icon ui-icon-triangle-1-w');
+                   
+                   
+                   
+                   
+                   
                     
                 }
             },
@@ -354,7 +354,7 @@ function HLayout(args) {
 
         if(!layout.center){
             layout_opts.center__minWidth = 200;
-            //$pane.addClass('pane_dropable');
+           
             layout['center'].dropable = true;
         }else{
             if(layout.center.minsize){
@@ -398,7 +398,7 @@ function HLayout(args) {
         // 3) add tabs/apps to panes
 
         let bg_color = window.hWin.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
-        //$('.ui-widget-content:first').css('background-color');
+       
         $('body').css('background-color', bg_color);
 
         layoutInitPane(layout, $container, 'north', bg_color);
@@ -457,7 +457,7 @@ function HLayout(args) {
             }
         });
     */
-        //temp appAdjustContainer();
+       
     }
 
     //
@@ -465,7 +465,7 @@ function HLayout(args) {
     //
     function __toogleIcons($container, pane, closed, opened){
         let tog = $container.find('.ui-layout-toggler-'+pane);
-        //tog.addClass('ui-heurist-btn-header1');
+       
         
         let togc = tog.find('.content-closed'); togc.empty();
         $('<div>').addClass('ui-icon ui-icon-carat-2-'+closed).appendTo(togc);
@@ -482,7 +482,7 @@ function HLayout(args) {
     */
     function _initLayoutFree(layout, $container){
 
-        //$container.hide();
+       
 
         //find main container and load template
         if(layout['template']){
@@ -549,7 +549,7 @@ function HLayout(args) {
 
         initDragDropListener();
         
-        //setTimeout(function(){$container.show();},1000);
+       
     }
 
     
@@ -825,7 +825,7 @@ console.error('Cardinal layout widget does not have proper options');
 
             }
         });
-        //temp appAdjustContainer();
+       
     }
 
 
@@ -843,7 +843,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         let $d;
         
-        //is_cardinal_layout = true;
+       
         
         if(!_is_container_layout ){
             $d = $(document.createElement('div'));
@@ -877,8 +877,8 @@ console.error('Cardinal layout widget does not have proper options');
             appAddContent($d, application, app);
 
             $d.addClass('ui-widget-content');
-            //.addClass('ui-corner-all');
-            //.css('padding','0.2em');
+           
+           
         }
 
         if(app.css){
@@ -1063,7 +1063,7 @@ console.error('Cardinal layout widget does not have proper options');
         
         if(tabcfg && tabcfg.style){    //@todo!!!!!
             if(tabcfg.style['background-header']){
-                //$tab_ctrl.attr('background-header', tabcfg.style['background-header']+' !important');
+               
                 //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
             }
         }
@@ -1116,7 +1116,7 @@ console.error('Cardinal layout widget does not have proper options');
             start: function(event, ui){
                 $('.tab_ctrl').css('z-index', '0');
                 $( this ).parent().css('z-index', '1');
-                //ui.helper.css('z-index', '999999');
+               
             }
         });
 
@@ -1184,7 +1184,7 @@ console.error('Cardinal layout widget does not have proper options');
             containment: containment_selector //'.ui-layout-content'
         });
 
-        //to destrot use 'destroy' to disable $( '.ui-tabs-nav li' ).draggable('disable');
+       
         
         
         $( '.tab_ctrl ul' ).disableSelection();
@@ -1225,7 +1225,7 @@ console.error('Cardinal layout widget does not have proper options');
                     return false;
 
                 }
-                //$("#lblhover").html("xxxx");
+               
 
         });
 
@@ -1321,7 +1321,7 @@ console.error('Cardinal layout widget does not have proper options');
                 lis.each(function(idx,item){
                     
                    if(idx == lis.length-1) $(item).css({width:'300px'});
-                   //$(item).css({width:((idx+1)*100+'px')});
+                  
                    $(item).css({'z-index': count_lis - idx});
                    $(item).attr('data-zkeep', count_lis - idx);
                    $(item).attr('data-zmax', count_lis+1);
@@ -1342,7 +1342,7 @@ console.error('Cardinal layout widget does not have proper options');
                        })
                        .appendTo($(item));
                        
-                       //$(item).attr('admintab',1);
+                      
                    }
                    
                 });
@@ -1420,7 +1420,7 @@ console.error('Cardinal layout widget does not have proper options');
             }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
                 console.log('widget '+widgetname+' not loaded');
             //}else {
-            //    console.error('widget '+widgetname+' not inited');
+           
             }
         },
     

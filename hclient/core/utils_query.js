@@ -254,7 +254,7 @@ window.hWin.HEURIST4.query = {
         if(jQuery.type(query2) === "string"){
             var notJson = true;
             try{
-                //query2 = JSON.parse(query2);
+               
                 var query2a = window.hWin.HEURIST4.util.isJSON(query2);
                 if( query2a ){
                     if(query2a['q']){
@@ -342,7 +342,7 @@ window.hWin.HEURIST4.query = {
                 if(r!==false){
                     
                     if(Array.isArray(r.rectypes)){
-                        r.type = 3; //'faceted';
+                        r.type = 3; // faceted
                         r.w = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
                         r.domain = r.w;
                         return r;
@@ -409,7 +409,7 @@ window.hWin.HEURIST4.query = {
             let r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
-                res['q'] = r; //JSON.stringify(r);
+                res['q'] = r;
             }else{
                 res['q'] = request.q;
             }
@@ -424,7 +424,7 @@ window.hWin.HEURIST4.query = {
                 let r = window.hWin.HEURIST4.util.isJSON(request.rules);
                 if(r!==false){
                     if(r.facets) return ''; //faceted search not allowed for map queries
-                    res['rules'] = r; //JSON.stringify(r);
+                    res['rules'] = r;
                 }else{
                     res['rules'] = request.rules;
                 }
@@ -555,7 +555,7 @@ window.hWin.HEURIST4.query = {
                     qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
                     res.push(qp);
                 }else{ //this is simple field
-                    res = '$IDS'; //{'ids':'$IDS}'};
+                    res = '$IDS';
                 }
                 return res;
             }

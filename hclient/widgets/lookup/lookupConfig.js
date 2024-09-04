@@ -67,7 +67,7 @@ $.widget( "heurist.lookupConfig", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -644,7 +644,7 @@ $.widget( "heurist.lookupConfig", {
                 this.saveConfigrations();
             }else{
                 if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
-                    this._as_dialog.dialog('close'); // this.closeDialog(true);
+                    this._as_dialog.dialog('close');
                 }else{
                     this.element.empty().hide();
                 }
@@ -808,7 +808,7 @@ $.widget( "heurist.lookupConfig", {
                         let dty_ID = $(ele).val();
 
                         if(dty_ID == ""){
-                            //dty_ID = null;
+                           
                         }
                         
                         if(that._current_cfg.fields[field]!=dty_ID){

@@ -175,7 +175,7 @@ $.widget( "heurist.search", {
             'position':'absolute', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
-            this.input_search_prompt2.css({visibility:'hidden'});//hide();
+            this.input_search_prompt2.css({visibility:'hidden'});
             this._setFocus();
         }} );
 
@@ -274,9 +274,9 @@ $.widget( "heurist.search", {
         this.input_search.mouseup(function () {
             let $this = $(this);
             if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
-                //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
+               
                 if($this.outerHeight()<25){
-                    //aaa  that.div_search.css('padding-top','1.8em');
+                   
                     $this.height(23);
                 }else{
                     let pt;
@@ -287,7 +287,7 @@ $.widget( "heurist.search", {
                         //parseFloat(that.div_search.css('padding-top'))
                         pt =  (that.element.height() - $this.height())/2 - menu_h;
                     }
-                    //aaa that.div_search.css('padding-top', pt );
+                   
                 }
             }
             // set new height/width
@@ -412,11 +412,11 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' heurist-bookmark-search')
         .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
-        //.height( this.btn_search_as_user.height() );
+       
 
-        //btn_search_domain is hidden this.div_search_as_user.controlgroup();
+       
 
-        let dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
+        let dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');
         let smenu = "";
         $.each(dset, function(index, value){
             let lbl = that._getSearchDomainLabel(value);
@@ -430,7 +430,7 @@ $.widget( "heurist.search", {
         .appendTo( this.document.find('body') )
         .menu({
             select: function( event, ui ) {
-                let mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
+                let mode =  ui.item.attr('id').substr(14); 
                 that.option("search_domain", mode);
                 that._refresh();
         }})
@@ -507,7 +507,7 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end',
                 title:'Ownership and access rights for new record'}).hide();
-            //.addClass('truncate');
+           
             this.btn_select_owner.find('.ui-button-icon').css('vertical-align','baseline');
 
             this._on( this.btn_select_rt, {
@@ -572,7 +572,7 @@ $.widget( "heurist.search", {
         // bind click events
         this._on( this.btn_search_as_user, {
             click:  function(){
-                //that.option("search_domain", "a");
+               
                 that._doSearch(true);}
         });
         /* AAAA */        
@@ -709,8 +709,8 @@ $.widget( "heurist.search", {
             $(this.element).find('.logged-out-only').hide();
         }else{
             $(this.element).find('.logged-in-only').hide();
-            //$(this.element).find('.logged-in-only').css('visibility','hidden');
-            //$(this.element).find('.logged-out-only').css('visibility','visible');
+           
+           
 
             $(this.element).find('.logged-out-only').show();
             if(this.options.is_h6style){
@@ -793,12 +793,12 @@ $.widget( "heurist.search", {
 
                     showing_label = false;
                 }else{
-                    //this.div_buttons.css('min-width',70);
+                   
                     this.div_buttons.find('.btn-aux :nth-child(2)').show();
                     this.div_buttons.find('.btn-aux').width('auto');
-                    //this.btn_save_filter.width(70);
-                    //this.btn_faceted_wiz.width(90);
-                    //this.btn_filter_wiz.width(90);
+                   
+                   
+                   
                     this.btn_search_as_user.button('option','showLabel',true);
                     this.btn_search_as_user.css('min-width',90);
                 }
@@ -906,7 +906,7 @@ $.widget( "heurist.search", {
                 }
 
 
-            //ART that.div_search.css('display','none');
+           
         }else 
             if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
@@ -1006,7 +1006,7 @@ $.widget( "heurist.search", {
             let request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             request.w  = this.options.search_domain;
-            request.detail = 'ids'; //'detail';
+            request.detail = 'ids';
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;
             request.search_page = this.options.search_page;

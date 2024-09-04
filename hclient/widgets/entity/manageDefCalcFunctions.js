@@ -112,7 +112,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             this.recordList.resultList('option','rendererHeader','');
             this.recordList.resultList('option','show_toolbar',false);
             this.recordList.resultList('option','view_mode','list');
-            //this.recordList.resultList('option','recordview_onselect','none');
+           
 
             
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});

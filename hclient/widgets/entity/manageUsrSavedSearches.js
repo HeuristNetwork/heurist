@@ -29,9 +29,9 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.edit_mode = 'popup';
+       
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
         this.options.height = 640;
@@ -41,7 +41,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            //this.options.height = 640;
+           
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -114,7 +114,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
                 if(window.hWin.HAPI4.is_admin()){
                     title = 'Manage All Filters as Database Administrator';    
                 }else{                    
-                    //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                   
                     title = 'Manage Saved Filters';    
                 }
             }
@@ -284,7 +284,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(!window.hWin.HAPI4.is_admin()){
             var input_ele = this._editing.getFieldByName('ugr_Enabled');
             input_ele.hide();
-            //input_ele.editing_input('f', 'rst_Display', 'hidden');
+           
         }
         */
     },    
@@ -297,7 +297,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
                 this._selection = new HRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
+               
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;        

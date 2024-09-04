@@ -66,7 +66,7 @@ if(defined('IS_INDEX_PAGE')){
 
     if($subsubVer===null){
         $message = $system->getErrorMsg();
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        include_once ERROR_REDIR;
         exit;
     }
 
@@ -94,7 +94,7 @@ if(defined('IS_INDEX_PAGE')){
             $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
                     .' is missing the following tables: '.implode(', ',$missed));
 
-            include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+            include_once ERROR_REDIR;
             exit;
         }
     }else{
@@ -102,7 +102,7 @@ if(defined('IS_INDEX_PAGE')){
 
         $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
 
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        include_once ERROR_REDIR;
         exit;
     }
 }
@@ -155,12 +155,11 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once '/initPage.php';
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
-    //include_once ERROR_REDIR;
+   
     exit;
 }elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
@@ -200,7 +199,6 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-//header("Content-Security-Policy: frame-ancestors 'self'");
 ?>
 <!DOCTYPE html>
 <?php
@@ -253,16 +251,6 @@ if($isLocalHost){
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
-<!--
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script>
- -->
-
-<script type="text/javascript">
-//init globa variables
-//let Hul, $Db, cfg_widgets, cfg_layout, regional, layoutMgr, editCMS_instance2;
-</script>
-
-
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
@@ -285,13 +273,13 @@ if($isLocalHost){
     // overwrite the standard jquery show method
     // apply listener in widgets on this page to refresh content on show
     // example
-    //        var that = this;
+   
     //        this.element.on("myOnShowEvent", function(event){
     //            if( event.target.id == that.element.attr('id')){
-    //                that._refresh();
+   
     //            }
-    //        });
-    //        this.element.off("myOnShowEvent");
+   
+   
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
@@ -383,7 +371,7 @@ if($isLocalHost){
                 +'corruption of the database.';
 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
-                var entities = (params)?params:'all';//'rty,dty,rst,swf';
+                var entities = (params)?params:'all';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){

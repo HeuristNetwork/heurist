@@ -90,7 +90,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             sortable: true,
             onSortStop: function(){
                 that._onActionListener(null, 'save-order');
-                //that._toolbar.find('#btnApplyOrder').show();
+               
             },
             droppable: function(){   //change group for record type
                 
@@ -154,7 +154,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             $('<h4>Record Type Groups</h4>').css({'margin':5}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
-            //this._defineActionButton2(btn_array[2], this.searchForm);
+           
             
             this.searchForm.height(70);
             
@@ -219,7 +219,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';
         }
 
         if(recName=='Trash'){

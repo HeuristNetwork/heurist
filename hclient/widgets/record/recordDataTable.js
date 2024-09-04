@@ -108,7 +108,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
                     for(const node of selected){
                         node.setSelected(false);
-                        //node.setActive(false);
+                       
                     }
                 }
             }
@@ -140,7 +140,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             this._loadRecordTypesTreeView( id );
             
             let tree = that.element.find('.rtt-tree').fancytree("getTree");           
-            //tree.render(true);
+           
             tree.visit(function(node){
                 node.setSelected(false); //reset
                 node.setExpanded(true);
@@ -177,7 +177,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                         //find it among facets
                         for(let i=0; i<that.selectedFields.length; i++){
                             if(that.selectedFields[i]==node.data.code){
-                                //that._addSelectedColumn(node.data.code, node.data.title);
+                               
                                 node.setSelected(true);
                                 break;
                             }
@@ -377,7 +377,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     getSettings: function( mode_action ){
 
         //get selected fields from treeview
-        let selectedFields = []; //false && mode_action?{}:[];
+        let selectedFields = [];
         let tree = this.element.find('.rtt-tree').fancytree("getTree");
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
@@ -558,7 +558,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        //that._assignSelectedFields();
+                       
                     },500);
                 },
                 select: function(e, data) {

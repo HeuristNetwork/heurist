@@ -58,9 +58,9 @@ $.widget( "heurist.resultListCollection", {
                 .appendTo($('<div style="display:inline-block;vertical-align:bottom">').appendTo(this.element));
 
         this._initBtn('Add');
-        //this._initBtn('Remove');
+       
         this._initBtn('Clear');
-        //this._initBtn('List');
+       
         
         this._initBtn('Action');    
         if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
@@ -182,7 +182,7 @@ $.widget( "heurist.resultListCollection", {
 
         let link = $('<a>',{
             text: window.hWin.HR(label), href:'#'
-        });//IJ 2015-06-26 .css('font-weight','bold');
+        });
         
         this['btn_'+name] = $('<li data-action="'+name+'">')
             .css({background: 'lightgray','margin-right':'10px'})

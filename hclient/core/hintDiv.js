@@ -148,7 +148,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 
 		let left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
-		let top_pos=Math.max(xy[1]-(div_height/2)+offset,0);//-scrollValue;
+		let top_pos=Math.max(xy[1]-(div_height/2)+offset,0);
 
 		popup_div.css( {left:left_pos+'px',
 					top:top_pos+'px',
@@ -192,7 +192,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _hideToolTip(){
 		if(needHideTip && popup_div){
-			//!!! currentTipId = null;
+		
 			_clearHideTimer();
 			popup_div.css( {visibility:"hidden",opacity:"0"});
 		}

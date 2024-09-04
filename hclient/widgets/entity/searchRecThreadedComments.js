@@ -31,7 +31,7 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
         this.input_sort_sdate = this.element.find('#input_sort_sdate');
         this._on(this.input_sort_rectitle,  { change:this.startSearch });
         this._on(this.input_sort_sdate,  { change:this.startSearch });
-        //this._on( this.input_search, { keyup: this.startSearch });
+       
         
         this.startSearch();            
     },  

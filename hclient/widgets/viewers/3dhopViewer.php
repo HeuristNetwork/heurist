@@ -76,7 +76,6 @@ if($is_not_inited){
     exit;
 }
 
-//$url = "models/40microns.nxz";
 
 define('EDIR','../../../external/3DHOP/');
 ?>

@@ -155,7 +155,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     searchRecent: function(domain){
         this.clearInputs();
         
-        //this.input_search_recent.prop('checked', true);
+       
         this.input_sort_type.val('recent');
 
         if(!window.hWin.HEURIST4.util.isempty(domain)){
@@ -185,8 +185,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search.parent().hide();
                 this.input_search_path.parent().hide();
                 this.input_search_url.parent().show();
-                //this.element.find('span.local').hide();
-                //this.element.find('span.external').show();
+               
+               
                 this.element.find('.heurist-helper1 > .local').hide();
                 this.element.find('.heurist-helper1 > .external').show();
 
@@ -241,7 +241,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     
             request['a']          = 'search'; //action
             request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
+            request['details']    = 'id';
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
             let that = this;                                                
@@ -264,7 +264,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     },
     
     getUploadContainer:function(){
-        return this.btn_add_record_inline; //element.find('#btn_add_record_loc');
+        return this.btn_add_record_inline;
     }
 
 });

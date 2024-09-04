@@ -361,7 +361,7 @@ function __editTheme_continue(){
         modal:  true,
         title: window.hWin.HR('Define Heurist Theme'),
         resizeStop: function( event, ui ) {//fix bug
-            //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+           
         },
         beforeClose: function(){
             //show warning in case of modification

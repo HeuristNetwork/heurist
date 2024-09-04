@@ -194,7 +194,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Restore');
-        //res[1].disabled = null;
+       
         return res;
     },
 
@@ -263,7 +263,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         request['a']          = 'search'; //action
         request['entity']     = 'sysArchive';
-        request['details']    = 'full'; //'id';
+        request['details']    = 'full';
         request['convert']    = 'records_list';
 
         //returns recordset of heurist records with additional fields

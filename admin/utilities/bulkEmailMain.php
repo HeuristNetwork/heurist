@@ -319,7 +319,7 @@ if(!$has_emails || empty($emails)) {
                 isFormSubmit = true;
 
                 var action = $("#emailOptions").attr("onsubmit");
-                //$("#emailOptions").attr("onsubmit", "");
+               
                 $("input[name='exportCSV']").val(1);
 
                 /*
@@ -333,7 +333,7 @@ if(!$has_emails || empty($emails)) {
                 getDbList();
                 $("#emailOptions").submit();
 
-                //$("#emailOptions").attr("onsubmit", action);
+               
                 $("input[name='exportCSV']").val('');
 
                 setTimeout('isFormSubmit=false', 5000);
@@ -403,8 +403,6 @@ if(!$has_emails || empty($emails)) {
 
                 if(!isValid) {
                     window.hWin.HEURIST4.msg.showMsgFlash(err_text, 5000);
-                }else{
-                    //verifySystemAdminPwd();
                 }
 
                 return isValid;
@@ -697,7 +695,7 @@ if(!$has_emails || empty($emails)) {
                                 if(response.status == "ok"){
                                     setupDBSelection(response.data);
                                     applyDBSort($('input[name="dbSortBy"]:checked').attr('id'));
-                                    //displayRecordCount();
+                                   
                                 } else {
 
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -779,7 +777,7 @@ if(!$has_emails || empty($emails)) {
                             database_details = response.data.details;
                             setupDBSelection(response.data.list);
                             //applyDBSort('name'); already in alphabetic order by default
-                            //displayRecordCount();
+                           
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){

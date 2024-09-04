@@ -63,7 +63,7 @@ $.widget( "heurist.widgetname", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //this.select_rectype.remove();
+       
     }
 
 });

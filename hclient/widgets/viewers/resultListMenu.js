@@ -53,8 +53,8 @@ $.widget( "heurist.resultListMenu", {
             this._initMenu('Reorder');  
             this.options.search_realm = this.options.resultList.resultList('option', 'search_realm');
         } 
-        //this._initMenu('Experimental','',0);
-        //this._initMenu('Layout');
+       
+       
         this.divMainMenuItems.menu();
 
         this.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'100px', 'text-align':'center'}); // center, place gap and setting width
@@ -65,9 +65,9 @@ $.widget( "heurist.resultListMenu", {
             this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
         }
 
-        //this.divMainMenuItems.children('li').children('a').css({'padding-right': '22px !important'});
+       
         this.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
-        //this.divMainMenuItems.children('li>a>.ui-icon').css({right: '2px', left:'unset'});
+       
         
         //-----------------------     listener of global events
         let sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
@@ -103,7 +103,7 @@ $.widget( "heurist.resultListMenu", {
                     window.hWin.HAPI4.currentRecordsetSelection = that.getSelectionIds();
                 }
             }
-            //that._refresh();
+           
         });
 
         this._refresh();
@@ -149,7 +149,7 @@ $.widget( "heurist.resultListMenu", {
             this.btn_Reorder.show();
 
             this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').show();
-            //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
+           
             
             function ___set_menu_item_visibility(i,item){
                 item = $(item);
@@ -173,7 +173,7 @@ $.widget( "heurist.resultListMenu", {
             
             
         }else{
-            //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
+           
             this.menu_Selected.find('.logged-in-only').hide();
             this.menu_Collected.find('.logged-in-only').hide();
             this.btn_Recode.hide();
@@ -222,7 +222,7 @@ $.widget( "heurist.resultListMenu", {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 1);
-            //$( ele ).delay(800).hide();
+           
         };
         
         let _show = function(ele, parent) {
@@ -233,7 +233,7 @@ $.widget( "heurist.resultListMenu", {
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
-            //$( document ).one( "click", function() { menu.hide(); });
+           
 
             return false;
         };
@@ -241,10 +241,10 @@ $.widget( "heurist.resultListMenu", {
         let link = $('<a href="#"'
                 +(this.options.is_h6style?' style="padding-right:22px !important"':'')
                 +'>'+window.hWin.HR(menu_label?menu_label:name)+'</a>')
-        //,{});
+       
         
         if(this.options.is_h6style){
-            //link.css({'padding-right': '22px !important'});
+           
             if(name=='Reorder'){
                 $('<span class="ui-icon ui-icon-signal">').css({'transform':'rotate(90deg)'}).appendTo(link);  //caret-1-s
             }else{

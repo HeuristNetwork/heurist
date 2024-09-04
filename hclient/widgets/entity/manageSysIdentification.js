@@ -97,7 +97,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
         let ele = this.editForm.find('input[type=file]');  //this._as_dialog.find
         if(ele.length>0){
-            ele.fileupload('option','pasteZone', this.editForm); //this._as_dialog);
+            ele.fileupload('option','pasteZone', this.editForm);
         }
 
         if(!window.hWin.HAPI4.has_access(2)){

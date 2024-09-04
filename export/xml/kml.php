@@ -47,7 +47,6 @@ header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"export.kml\"");
 }
 header("Content-Type: text/xml; charset=utf-8");
-//header('Content-type: application/vnd; charset=utf-8');
 
 $dtFile = ($system->defineConstant('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 $dtKMLfile = ($system->defineConstant('DT_KML_FILE')?DT_KML_FILE:0);

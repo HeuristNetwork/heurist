@@ -111,7 +111,7 @@ if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-he
 if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}//'heurist.huma-num.fr'
 if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');}
 
-//print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
+
 
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);
@@ -121,7 +121,7 @@ $upload_root = $system->getFileStoreRootFolder();
 define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = array();
-//$exclusion_list = exclusion_list();
+
 
 if(!$arg_no_action){
 
@@ -134,9 +134,9 @@ if(!$arg_no_action){
 /*TMP
 //Arche_RECAP
 //AmateurS1
-//$databases = array('ARNMP_COMET','ArScAn_Material','arthur_base','arvin_stamps');
+
 $databases = array('AmateurS1');
-//$databases = array('ARNMP_COMET');
+
 */
 
 //userInteraction.log
@@ -150,7 +150,7 @@ $email_list = array();
 $email_list_deleted = array();
 $tot_size = 0;
 
-//$databases = array('falk_playspace');
+
 
 foreach ($databases as $idx=>$db_name){
 

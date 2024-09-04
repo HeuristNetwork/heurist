@@ -56,7 +56,7 @@ $.widget( "heurist.profile_edit", {
         .appendTo( this.element );
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);
+       
 
         this._refresh();
 
@@ -167,7 +167,7 @@ $.widget( "heurist.profile_edit", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //this.select_rectype.remove();
+       
     },
 
     //----
@@ -266,7 +266,7 @@ $.widget( "heurist.profile_edit", {
                 : window.hWin.HR('Registration')  );
             this.edit_form.dialog("open");
             this.edit_form.parent().addClass('ui-dialog-heurist');
-            //css({'font-size':'0.8em'});
+           
             this.edit_form.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
         }
@@ -281,7 +281,7 @@ $.widget( "heurist.profile_edit", {
         if(is_simple_captcha){  //simple captcha
             $dd.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
-            $dd.empty(); //find("#img").remove();
+            $dd.empty();
             $('<img id="img" src="hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },

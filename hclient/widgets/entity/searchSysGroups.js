@@ -157,7 +157,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
     
             request['a']          = 'search'; //action
             request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
+            request['details']    = 'id';
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
             let that = this;                                                

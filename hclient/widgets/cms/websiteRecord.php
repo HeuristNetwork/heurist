@@ -160,7 +160,7 @@ if(!($rec_id>0))
             exit;
         }
     }else{
-        //$message = $system->getError()['message'];
+       
         include_once ERROR_REDIR;
         exit;
     }
@@ -169,17 +169,14 @@ if(!($rec_id>0))
 // check if this record has been replaced (merged)
 $rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 
-//validate permissions
-//$rec = mysql__select_row_assoc($mysqli,
-//        'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 $rec = recordSearchByID($system, $rec_id, true);
 
 $home_page_on_init = $rec_id;
 
 if($rec==null){
-    //redirectURL(ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
+   
     $message = 'Website ID '.$home_page_on_init.' does not refer to a CMS Home record';
-    //'Record #'.$home_page_on_init.' not found';
+   
     include_once ERROR_REDIR;
     exit;
 }
@@ -451,7 +448,7 @@ if(!$isWebPage){  //not standalone web page
         if(defined('DT_CMS_FOOTER')){
             $page_footers = @$rec['details'][DT_CMS_FOOTER];
         }
-        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER):'';
+       
         $is_page_footer_fixed = ($page_footer_type != ConceptCode::getTermLocalID('2-531'));
         $default_style = ";border-top:2px solid rgb(112,146,190);background:lightgray;";
         if ($is_page_footer_fixed) {

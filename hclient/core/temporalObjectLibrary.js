@@ -726,7 +726,7 @@ Temporal.cloneObj = function(obj) {
         return Object.prototype.toString.apply(a) === '[object Array]';
     }
 
-    //return eval($.toJSON(o));
+   
     if(typeof(obj) !== "object") return obj;
 
     if(obj === null) return obj;
@@ -1255,7 +1255,7 @@ window.TDate = function (strDate) {
             let h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
             if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
                 _tzOffset = '00:00';
-                //throw " TDate exception - invalid string supplied to setTimezone() - " + str;
+               
             } else {
                 _tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
                 if(_tzOffset && _tzOffset.length>0 && _tzOffset.indexOf(":")<0){
@@ -1318,7 +1318,6 @@ window.TDate = function (strDate) {
 
 
 // static function  parse() - parses a string assuming ISO format precision and set Date
-//called like myTDate  = TDate.parse("1952/04/16 14:05"); or myTDate = new TDate(); .... TDate.parse(myTDate,"1952/04/16 14:05");
 TDate.parse = function () {
     // if there are no arguments nothing to do
     if (!arguments.length) {
@@ -2086,7 +2085,7 @@ function formatGregJulian(val, isneed){
             
             return  res.trim();
             //toString('d MMM yyyy') - misses space!
-            //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
+           
 
         }else{
             return val;

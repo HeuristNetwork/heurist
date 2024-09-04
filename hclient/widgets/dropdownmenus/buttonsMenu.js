@@ -64,9 +64,9 @@ $.widget( "heurist.buttonsMenu", {
                 that.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
             }
 
-            //that.divMainMenuItems.children('li').children('a').css({'padding-right': '22px !important'});
+           
             that.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
-            //that.divMainMenuItems.children('li>a>.ui-icon').css({right: '2px', left:'unset'});
+           
             
 
             that._refresh();
@@ -108,7 +108,7 @@ $.widget( "heurist.buttonsMenu", {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 1);
-            //$( ele ).delay(800).hide();
+           
         };
 
         let _show = function(ele, parent) {
@@ -119,7 +119,7 @@ $.widget( "heurist.buttonsMenu", {
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
-            //$( document ).one( "click", function() { menu.hide(); });
+           
 
             return false;
         };

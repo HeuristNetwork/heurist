@@ -297,7 +297,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             let allowed = Object.keys($Db.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
-            //allowed.splice(allowed.indexOf("geo"),1);
+           
             allowed.splice(allowed.indexOf("file"),1);
             
             if(action_type=='extract_pdf'){
@@ -389,7 +389,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         $('#fld-1').show();    
                     }
             });
-            //$('.editint-inout-repeat-button').hide();
+           
 
         }else if(action_type=='url_to_file'){
 
@@ -935,7 +935,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         $('body > div:not(.loading)').hide();
         $('.loading').show();
         
-        //request['DBGSESSID'] = '425944380594800002;d=1,p=0,c=07';
+       
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 

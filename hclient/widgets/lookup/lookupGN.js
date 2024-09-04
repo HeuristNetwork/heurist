@@ -195,7 +195,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
-        //res[1].disabled = null;
+       
         return res;
     },
 

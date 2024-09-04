@@ -114,7 +114,7 @@ function verify_credentials( show_warning ){
         }else if(requiredLevel==2){
            msg += ' as database onwer';
         //}else if(requiredLevel!=0){
-        //   msg = '';
+       
         }
         if(msg!=''){
             var win_mappreview = window.parent.hWin;
@@ -123,7 +123,7 @@ function verify_credentials( show_warning ){
                 var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
                     {OK:
                     function(){
-                        //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                       
                         $dlg2.dialog( "close" );
                         
                         showLoginDialog(false, function( is_logged ) {

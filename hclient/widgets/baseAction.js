@@ -61,7 +61,7 @@ $.widget( "heurist.baseAction", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        // it prevents inputs in FF this.element.disableSelection();
+       
         this._$ = selector => this.element.find(selector);
     }, //end _create
     
@@ -72,7 +72,7 @@ $.widget( "heurist.baseAction", {
 
         if(this.options.htmlContent==''){
             this.options.htmlContent = this.options.actionName+'.html';
-                    //+(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
+                   
         }
         
         if(this.options.isdialog){  //show this widget as popup dialog
@@ -142,7 +142,7 @@ $.widget( "heurist.baseAction", {
             
             if(this.options.innerTitle){ 
 
-                let fele = this.element.children().get(0);//('fieldset');
+                let fele = this.element.children().get(0);
                 
                 //titlebar            
                 this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
@@ -157,7 +157,7 @@ $.widget( "heurist.baseAction", {
                 }});
                 this.closeBtn.find('.ui-icon-closethick').css({'color': 'rgb(255,255,255)'});
                 
-                $(fele).css('margin-top', '38px'); //this._innerTitle.height());
+                $(fele).css('margin-top', '38px');
                 
             }
 
@@ -189,7 +189,7 @@ $.widget( "heurist.baseAction", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //if(this.selectRecordScope) this.selectRecordScope.remove();
+       
 
     },
     
@@ -420,8 +420,8 @@ $.widget( "heurist.baseAction", {
                             that._hideProgress();
                         }else{
                             div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
+                           
+                           
                         }
                     }else{
                         div_loading.hide();

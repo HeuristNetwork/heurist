@@ -69,7 +69,7 @@ $.widget( "heurist.recordAction", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -485,8 +485,8 @@ $.widget( "heurist.recordAction", {
                             that._hideProgress();
                         }else{
                             div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
+                           
+                           
                         }
                     }else{
                         div_loading.hide();

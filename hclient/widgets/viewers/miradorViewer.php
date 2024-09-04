@@ -65,7 +65,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
         $system->error_exit_api();//exit from script
     }
     //get baseURL
-    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null; //HEURIST_BASE_URL;
+    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null;
 
     //detect is this mirador image or annotation
     if($system->defineConstant('RT_MAP_ANNOTATION')){
@@ -73,7 +73,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
         $mysqli = $system->get_mysqli();
-        //$file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
+       
 
         if($res['rec_RecTypeID']==RT_MAP_ANNOTATION){
             //find parent record with iiif image - it returns obfuscation id
@@ -159,7 +159,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }else{
     if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
-        //$url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
+       
     }elseif(!@$_REQUEST['q']){ //query not defined
         exit('Need to define either query or file ID');
     }else{
@@ -172,7 +172,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }
 
 
-    //$_SERVER['QUERY_STRING'];
+   
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
 $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
@@ -207,7 +207,6 @@ if($use_custom_mirador){
 if (!preg_match('[\W]', $dbname)){
 ?>
     window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
-//    window.endpointURL = "<?php echo $baseUrl.'h6-alpha/api/'.htmlspecialchars($dbname).'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php
 }

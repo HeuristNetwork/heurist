@@ -107,7 +107,7 @@ window.hWin.HEURIST4.util = {
     },
     
     isNumber: function (n) {
-        //return typeof n === 'number' && isFinite(n);
+       
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
     
@@ -159,7 +159,7 @@ window.hWin.HEURIST4.util = {
             ele = $("body");   
         }
         //else {
-            //ele = ele.parent();
+           
         //}
         const fs = ele.css('font-size');
         /*
@@ -236,7 +236,7 @@ window.hWin.HEURIST4.util = {
                 //not installed
             }
         } else { //firefox,chrome,opera
-            //navigator.plugins.refresh(true);
+           
             let mimeTypes = navigator.mimeTypes;
             let mime = navigator.mimeTypes['application/x-mailto'];
             if(mime) {
@@ -265,7 +265,7 @@ window.hWin.HEURIST4.util = {
             
             if(need_encode==2 || need_encode==1){
                 f_encode = encodeURIComponent;
-                //f_encode = window.hWin.HEURIST4.util.encodeSuspectedSequences;
+               
             }else if(need_encode==3){
                 f_encode = JSON.stringify;
             }
@@ -391,7 +391,7 @@ window.hWin.HEURIST4.util = {
 
     isArray: function (a)
     {
-        return Array.isArray(a); //Object.prototype.toString.apply(a) === '[object Array]';
+        return Array.isArray(a);
     },
     
     isGeoJSON: function(a, allowempty){
@@ -888,7 +888,7 @@ window.hWin.HEURIST4.util = {
         {
             // Firefox requires the link to be added to the DOM
             // before it can be clicked.
-            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
+            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link
             link.style.display = "none";
             document.body.appendChild(link);
             link.click();        
@@ -902,15 +902,15 @@ window.hWin.HEURIST4.util = {
     },
 
     random: function(){
-        //Math.round(new Date().getTime() + (Math.random() * 100));
-        //return Math.floor((Math.random() * 10000) + 1);
+       
+       
         if(window.crypto){
             const typedArray = new Uint8Array(10);
             const randomValues = window.crypto.getRandomValues(typedArray);
             return randomValues.join('').substr(0,15);        
         }else{
             return ''+Math.floor(Date.now() * Math.random())
-            //const arng = new alea(new Date().getTime());
+           
             //return Math.ceil( arng.quick() * 99999999 ); //1~87  
         }
         
@@ -944,9 +944,9 @@ window.hWin.HEURIST4.util = {
     },
 
     getFileExtension:function(filename){
-        // (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
-        // filename.split('.').pop();
-        //filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+       
+       
+       
         if(filename){
             let res = filename.match(/\.([^\./\?]+)($|\?)/);
             return (res && res.length>1)?res[1]:'';
@@ -1267,8 +1267,8 @@ if (!Array.prototype.unique){
     {
         
         //return $.grep(this, function(el, index) {
-        //    return index === $.inArray(el, this);
-        //});
+       
+       
         
         
             var n = {},r=[];

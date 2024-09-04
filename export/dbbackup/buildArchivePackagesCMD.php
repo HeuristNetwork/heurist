@@ -185,20 +185,20 @@ foreach ($arg_database as $idx=>$db_name){
         $folders_to_copy = folderSubs($database_folder, array('backup', 'scratch', 'file_uploads', 'filethumbs', 'webimagecache', 'blurredimagescache'));
 
         // this is limited set of folder
-        //$folders_to_copy = $system->getSystemFolders( 1, $db_name );
+       
     }
 
     if(!$arg_skip_files){
         if($folders_to_copy==null) {$folders_to_copy = array();}
-        $folders_to_copy[] = $database_folder.'file_uploads/';//HEURIST_FILES_DIR;
-        $folders_to_copy[] = $database_folder.'filethumbs/';//HEURIST_THUMB_DIR;
+        $folders_to_copy[] = $database_folder.'file_uploads/';
+        $folders_to_copy[] = $database_folder.'filethumbs/';
 
         $copy_files_in_root = true; //copy all files within database folder
     }else{
         $copy_files_in_root = false;
     }
 
-    //var_dump($folders_to_copy);
+   
 
     if($folders_to_copy==null){
         $folders_to_copy = array('no copy folders');
@@ -237,7 +237,7 @@ foreach ($arg_database as $idx=>$db_name){
      echo "zip.. ";
 
     // Create a zipfile of the definitions and data which have been dumped to disk
-    $destination = $backup_zip; //$folder.'.zip';
+    $destination = $backup_zip;
     if(file_exists($destination)) {unlink($destination);}
     $res = UArchive::zip($folder, null, $destination, false);
 

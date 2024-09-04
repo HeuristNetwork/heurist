@@ -128,7 +128,6 @@ echo "root : ".$upload_root."\n";
 $exclusion_list = exclusion_list();//read databases_not_to_crons
 
 set_time_limit(0);//no limit
-//ini_set('memory_limit','1024M');
 
 $datetime1 = date_create('now');
 $cnt_archived = 0;

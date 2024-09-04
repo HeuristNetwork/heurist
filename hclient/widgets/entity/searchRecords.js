@@ -214,7 +214,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                         window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
                     }
                 }else if (is_browse) {
-                    //this.element.find('#addrec_helper').hide();
+                   
                 }
             }else if(is_addonly){
                 that.btn_select_rt.click(); //show dropdown
@@ -483,13 +483,13 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 detail: 'ids',
                 links_count: links_count,
                 id: window.hWin.HEURIST4.util.random()}
-            //source: this.element.attr('id') };
+           
 
             let that = this;                                                
-            //that.loadanimation(true);
+           
 
             window.hWin.HAPI4.RecordMgr.search(request, function( response ){
-                //that.loadanimation(false);
+               
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(response.data.links_count){

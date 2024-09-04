@@ -394,7 +394,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(!(options.height>0)){
             let height = $(content).height()+90;
-            //options.height = $(content).height();//90;
+           
             $dlg.dialog({height:height});
         }
            
@@ -478,7 +478,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR("length must be between ") +
                 min + " "+window.hWin.HR("and")+" " + max + ". ";
                 if(len<min){
-                    //message_text = message_text + (min-len) + window.hWin.HR(" characters left");
+                   
                 }else{
                     message_text = message_text + (len-max) + window.hWin.HR(" characters over");
                 }
@@ -606,7 +606,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         }else{
 
-            //create new div for dialogue with $(this).uniqueId();
+           
             $dlg = $('<div>')
             .addClass('loading')
             .appendTo( $(opener.document).find('body') );
@@ -630,7 +630,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $dosframe.attr('webkitallowfullscreen',true);
                 $dosframe.attr('mozallowfullscreen',true);
                 
-                //$dosframe.css({position:'fixed', top:'0px', left:'0px'});
+               
             }
 
             $dosframe.hide();
@@ -698,8 +698,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     return resConfirm;
                     }*/
 
-                    //content.document.reference_to_parent_dialog = $dlg.attr('id');
-                    //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
+                   
+                   
                     //functions in internal document
                     //content.close = $dosframe[0].close;    // make window.close() do what we expect
 
@@ -719,7 +719,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         return true;
                     };
 
-                    //content.popupOpener = opener;
+                   
                     content.doDialogResize = $dosframe[0].doDialogResize;
 
                 }
@@ -995,7 +995,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             frame_container.addClass('loading');
             
             //callback function to resize dialog from internal iframe functions
-            //$dosframe[0].doDialogResize = function(width, height) {};
+           
 
             $dosframe.off('load');
             //on load content event listener
@@ -1048,7 +1048,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             //start content loading
             $dosframe.attr('src', url);
                         
-            //return $dosframe;
+           
     },   
     
     //
@@ -1218,7 +1218,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     sendCoverallToBack: function(force_close) {
         if(force_close===true) window.hWin.HEURIST4.msg.coverallKeep = false;
         if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
-        $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
+        $(window.hWin.HEURIST4.msg.coverall).hide();
     },
   
 
@@ -1412,9 +1412,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         return $dlg;
-        //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
+       
+       
+       
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },  
     

@@ -187,9 +187,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         const localIds = window.hWin.HAPI4.sysinfo['dbconst'];
         const DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        const DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        const DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
-        const DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
+        const DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR'];
+        const DT_BG_COLOR = localIds['DT_BG_COLOR'];
+        const DT_OPACITY = localIds['DT_OPACITY'];
         
         //make bounding box for map datasource transparent and unselectable
         let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
@@ -443,7 +443,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId; // + '.png';
+                            iconImgEvt = iconId;
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '&color='
                                         + encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
@@ -518,11 +518,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
-                        //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
-                /*}
-                if(geoType!=2 || shapes.length>0){*/
                     aitems.push(item);
                 }
 
@@ -593,10 +590,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         let localIds = window.hWin.HAPI4.sysinfo['dbconst'];
         let DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        let DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        let DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-551;
-        let DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
-        let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY']; //3-1092;
+        let DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR'];
+        let DT_BG_COLOR = localIds['DT_BG_COLOR'];
+        let DT_OPACITY = localIds['DT_OPACITY'];
+        let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY'];
         
         //make bounding box for map datasource transparent and unselectable
         let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
@@ -756,7 +753,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }else if(geovalues.length==1){
                     res['geometry'] = geovalues[0];
                 }else{
-                    //res['geometry'] = [];
+                   
                 }
                 
                 let symbology = _getFieldValue(record, DT_SYMBOLOGY);
@@ -1103,7 +1100,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(idx>-1){
             return record[idx];
         }else{
-            return isnull(record[fldname])?null:record[fldname]; //return null;
+            return isnull(record[fldname])?null:record[fldname];
         }
     }
     
@@ -1679,7 +1676,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }else{
                 rectypes = recordset2.getRectypes();
             }    
-            //structures = response.structures;
+           
             
             let records2 = recordset2.getRecords();
             let order2 = recordset2.getOrder();
@@ -1780,7 +1777,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         */
         length: function(){
             //return Object.keys(records)
-            return order.length; //$(records).length;
+            return order.length;
         },
 
         /**

@@ -512,7 +512,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                           'term-images', 'webimagecache', 'blurredimagescache'));//except these folders - some of them may exist in old databases only
 
                 //limited set
-                //$folders_to_copy = $system->getSystemFolders( 1 );
+               
 
                 echo_flush2("<br><br>Exporting system folders<br>");
             }
@@ -561,12 +561,12 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                if(@$_REQUEST['allrecs']!="1"){
                    $userid = $system->get_user_id();
                    $q = "owner:$userid";//user:$userid OR
-                   //$_REQUEST['depth'] = '5';
+                  
                    $hml_url = $hml_url.'&depth=5';
                }else{
                    $q = "sortby:-m";
-                   //$_REQUEST['depth'] = '0';
-                   //$_REQUEST['linkmode'] = 'none';
+                  
+                  
                    $hml_url = $hml_url.'&depth=0&linkmode=none';
                }
                $hml_url = $hml_url.'&q='.$q;
@@ -588,15 +588,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                $_REQUEST['w'] = 'all';
                $_REQUEST['a'] = '1';
                $_REQUEST['q'] = $q;
-               $_REQUEST['rev'] = 'no';//do not include reverse pointers
-               $_REQUEST['filename'] = '1';//FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
+               $_REQUEST['rev'] = 'no'; //do not include reverse pointers
+               $_REQUEST['filename'] = '1';
 
                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
                if (is_file($to_include)) {
                    include_once $to_include;
                }
 
-//error_log('loadRemoteURLContentWithRange <<');
 
                if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip){
                    $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
@@ -645,7 +644,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $msg = error_get_last();
                         $msg = !empty($msg) ? print_r($msg, true) : "None provided";
                         echo_flush2("<br>Unable to create TSV file for $table values at $filename<br>Error message: $msg<br><br>");
-                        break;//continue;
+                        break;
                     }
 
                     while($row = $res->fetch_assoc()){
@@ -1009,7 +1008,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             );
                         }
 
-                        $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey'];//$system->get_system('sys_NakalaKey');
+                        $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey'];
                         $params['use_test_url'] = @$_REQUEST['use_test_url'] == 1 || strpos($repo_account,'nakala')===1 ? 1 : 0; // use test version
 
                         $params['status'] = 'pending';// keep new record private, so it can be deleted

@@ -374,7 +374,7 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
-                    //$children.push();
+                   
                     recTitle_item = {key:'rec_Title', type:'freetext',
                         title:('Title'+($mode!=7?' <span style="font-size:0.7em">(Constructed Text)</span>':'')), 
                         code:($recTypeId+_separator+'title'), name:'Record title'};
@@ -504,7 +504,7 @@ window.hWin.HEURIST4.dbs = {
                             let $ffr = {};
                             $ffr['rst_DisplayName'] = 'Parent entity';
                             $ffr['rst_PtrFilteredIDs'] = $parent_Rts.join(',');
-                            //$ffr['dty_Type'] = 'resource';
+                           
                             $ffr['rst_DisplayHelpText'] = 'Reverse pointer to parent record';
                             $ffr['rst_RequirementType'] = 'optional';
                             $ffr['rst_DisplayOrder'] = '0'; // place at top
@@ -560,7 +560,7 @@ window.hWin.HEURIST4.dbs = {
 
                                             if(separate_meta_fields){
                                                 // remove constructed title and metadata, keep fields node
-                                                //$res_dt['children'][i]['children'] = $res_dt['children'][i]['children'].slice(0, 2);
+                                               
 
                                                 // move fields out of sub-heading
                                                 let fields = $res_dt['children'][i]['children'].pop();
@@ -844,7 +844,7 @@ window.hWin.HEURIST4.dbs = {
                             $res = __getRecordTypeTree($recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                             if($res){
                                 $res['rt_ids'] = $recTypeId; //list of rectype - constraint
-                                //$res['reverse'] = "yes";
+                               
                                 $pref = ($detailType=="resource")?"lf":"rf";
 
                                 $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" 
@@ -884,7 +884,7 @@ window.hWin.HEURIST4.dbs = {
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
-                                //$res['constraint'] = 0;
+                               
                                 if($mode==5){
                                     $res['rt_ids'] = '';
                                     $res['lazy'] = true;
@@ -957,7 +957,7 @@ window.hWin.HEURIST4.dbs = {
                     
                 let $stype = ($detailType=='resource' || $detailType=='relmarker' || $detailType=='separator')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){
-                    //before 2017-06-20  $stype = $stype."linked from";
+                   
                     $res['isreverse'] = 1;
                 }
                 if($stype!=''){
@@ -1044,7 +1044,7 @@ window.hWin.HEURIST4.dbs = {
                     }
                     //asign codes
                     if(Array.isArray(def['children'])){
-                        //def['children'].unshift({});
+                       
                         def = __assignCodes(def);
                         res.push( def );
                     }                    
@@ -1871,7 +1871,7 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 //sort children by name
-                //children = window.hWin.HEURIST4.util.merge_sort(children, $Db.trm_SortingById);
+               
                 children.sort($Db.trm_SortingById);
                 
                 if(mode=='tree'){
@@ -2294,7 +2294,7 @@ window.hWin.HEURIST4.dbs = {
         if(new_parent_id>0){
             if(!t_idx[new_parent_id]) t_idx[new_parent_id] = []; 
             if(Array.isArray(term_ID)){
-                //t_idx[new_parent_id] = t_idx[new_parent_id].concat( term_ID );
+               
 
                 for(let i=0; i<term_ID.length; i++)
                     if(window.hWin.HEURIST4.util.findArrayIndex(term_ID[i], t_idx[new_parent_id])<0){
@@ -2446,9 +2446,9 @@ window.hWin.HEURIST4.dbs = {
             if(rtid==''){
 
                 if(dtid=='typeid' || dtid=='typename'){
-                    //dtid = null;
-                    //harchy.push(' . '+rec_header);
-                    //harchy_fields.push(rec_header);
+                   
+                   
+                   
                 }
             
             }else if(rtid=='any'){
@@ -2526,7 +2526,7 @@ window.hWin.HEURIST4.dbs = {
                                 break;
                             }
 
-                            harchy.push(' . '+sFieldName+' > '); //&gt;
+                            harchy.push(' . '+sFieldName+' > ');
                             harchy_fields.push(sFieldName);
                         }else{
                             let from_rtid = codes[j+2];
@@ -2852,7 +2852,7 @@ window.hWin.HEURIST4.dbs = {
         let arr_idx = {}; // id to array idx
         for(const rty_id of rty_IDs){ // Get base fields and instances for each rectype
 
-			//const rty_id = rty_IDs[idx];
+		
 			const rty_name = $Db.rty(rty_id, 'rty_Name');
 
 			const recset = $Db.rst(rty_id);
@@ -2909,7 +2909,7 @@ window.hWin.HEURIST4.dbs = {
             const show_in_list = field[3];
 
             if(mode == 1){
-                //let title = dty_title + '<div style="padding-left: 10px;">' + rst_titles.join('<br>') + '</div>';
+               
                 processed_fields.push({key: dty_id, title: dty_title, hidden: show_in_list});
 
                 for(const rst_title of rst_titles){

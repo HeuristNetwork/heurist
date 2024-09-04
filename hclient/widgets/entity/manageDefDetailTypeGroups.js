@@ -89,7 +89,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             sortable: true,
             onSortStop: function(){
                 that._onActionListener(null, 'save-order');
-                //that._toolbar.find('#btnApplyOrder').show();
+               
             },
             droppable: function(){
                 
@@ -184,9 +184,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
         let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
-        }else{
-            //html = html + '<div>';
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';
         }
         
         if(recName=='Trash'){
@@ -204,7 +202,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                     null,'icon_text','padding-top:9px');
             }
 
-            let cnt = 0;//recordset.fld(record, 'dtg_FieldCount');
+            let cnt = 0;
 
             html = html 
             +((cnt>0)

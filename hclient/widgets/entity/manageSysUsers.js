@@ -33,9 +33,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.edit_mode = 'popup';
+       
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
         this.options.height = 640;
@@ -45,7 +45,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            //this.options.height = 640;
+           
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -102,7 +102,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             if(window.hWin.HAPI4.is_admin()){
                 title = 'Manage All Users as Database Administrator';    
             }else{                    
-                //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+               
                 title = 'Manage Users';    
             }
         }
@@ -163,7 +163,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         return s;
                     }
                 );
-            //this.recordList.resultList('applyViewMode');
+           
         }
 
         this._on( this.searchForm, {
@@ -253,7 +253,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         function(response){             
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 //reload
-                                //that.searchForm.searchSysUsers('startSearch');
+                               
                                 if(newRole=='remove'){
                                     let recset = that.recordList.resultList('getRecordSet');
                                     recset.removeRecord(usr_ID);
@@ -523,7 +523,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(!window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.currentUser['ugr_ID']==this._currentEditID){
             let input_ele = this._editing.getFieldByName('ugr_Enabled');
             input_ele.hide();
-            //input_ele.editing_input('f', 'rst_Display', 'hidden');
+           
         }
         
         //fill SAML service providers list
@@ -629,7 +629,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
                 this._selection = new HRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
+               
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;        

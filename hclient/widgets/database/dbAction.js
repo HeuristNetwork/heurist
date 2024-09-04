@@ -425,7 +425,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     if(res && res.filename){
                         that._$('#selectedZip').text(res.filename);
                         that._$('#divSelectedZip').show();
-                        //alert(res.path, res.filename);
+                       
                         
                         //suggest database name
                         if(that._$('#dbname').val().trim()==''){
@@ -859,7 +859,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 if(ids.length>0){
                     ids = ids.join(',');
                     //window.hWin.HEURIST4.util.windowOpenInPost(window.hWin.HAPI4.baseURL, '_blank', null,
-                    //    {db:window.hWin.HAPI4.database,w:'all',q:'ids:'+ids});
+                   
                     window.open( window.hWin.HAPI4.baseURL_pro+'?db='
                                 +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
                 }

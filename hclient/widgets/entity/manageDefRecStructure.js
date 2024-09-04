@@ -70,14 +70,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_height = 640;
         this.options.edit_width = 640;
         
         this.options.width = 1200;
         this.options.height = 640;
         this.options.edit_mode = 'inline';//'popup'; //editonly
-        this.options.editClassName = 'ui-heurist-bg-light'; // was 'ui-widget-content';
+        this.options.editClassName = 'ui-heurist-bg-light';
 
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
@@ -165,7 +165,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }else{
                 title = 'Manage Record Structure';    
                 if(this.options.rty_ID>0){
-                    title = title+': '+window.hWin.HEURIST4.dbs.rtyField(this.options.rty_ID, 'rty_Name');  //rectypes.names[this.options.rty_ID];
+                    title = title+': '+window.hWin.HEURIST4.dbs.rtyField(this.options.rty_ID, 'rty_Name'); 
                 }
             }
             
@@ -267,7 +267,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._on(this.btnClose, {click:this.closeDialog});
         */
 
-        //this.btnCloseTree = this.element.find('.closeTreePanel').button({text:false,icon:'ui-icon-carat-2-w'});
+       
         this._on(this.element.find('.closeTreePanel'), {click:function(){ 
             if(this.options.external_preview){
                 this.options.external_preview.manageRecords('closeWestPanel');
@@ -455,7 +455,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(this._treeview.fancytree('instance')){
             let tree = this._treeview.fancytree('getTree');
             tree.reload(treeData)
-            //tree.render(true);
+           
         
         }else{
         
@@ -474,7 +474,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(ele.hasClass('ui-icon') || ele.attr('data-action') == 'delete'){
                     return;
                 }else if(ele.hasClass('fancytree-expander') && ele.parent().hasClass('fancytree-has-children')){
-                    //data.node.setExpanded(!data.node.isExpanded());
+                   
                     return;
                 }
 
@@ -670,7 +670,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 },100); 
                 //window.hWin.HEURIST4.util.stopEvent(event); 
-                //return false;
+               
             });
 
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
@@ -694,7 +694,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(node) node = $(node[0]);
                 }
 
-                node.find('.svs-contextmenu3').hide();//css('visibility','hidden');
+                node.find('.svs-contextmenu3').hide();
                 node.find('.detail-count').css('display','inline-block');
                 that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
 
@@ -712,7 +712,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         node = $(event.target).parents('.fancytree-node');
                     }
 
-                    node.find('.svs-contextmenu3').css('display','inline-block');//.css('visibility','visible');
+                    node.find('.svs-contextmenu3').css('display','inline-block');
 
                     // update button position based on existance of usage
                     let $ele_usage = node.find('.detail-count');
@@ -868,7 +868,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._menuTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 800);
-            //$( ele ).delay(800).hide();
+           
     },
     
     _showMenu: function(ele, parent) {
@@ -879,7 +879,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left-2 top", at: "left top", of: parent });
-            //$( document ).one( "click", function() { menu.hide(); });
+           
             return false;
     },
     
@@ -901,7 +901,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
         }
         
-        let is_narrow = true;//(this.options.edit_mode=='inline');
+        let is_narrow = true;
         
         let recID   = fld('rst_ID');
         
@@ -934,7 +934,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
 /*        
         if(false && this.options.edit_mode=='popup'){
-                //+ (showActionInList?this._rendererActionButton('edit'):'');
+               
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
@@ -1036,7 +1036,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     // set visibility of buttons on toolbar (depends on isModified)
     //
     onEditFormChange: function( changed_element ){
-        //this._super(changed_element);
+       
             
         //show hide buttons in treeview
         let isEditOpen = this.editForm.is(':visible');
@@ -1686,13 +1686,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             
             let v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
-            //$Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr');
+           
             this._rst_PointerMode_Enable(v!=1);
             
             this.editForm.show();
             this._editing.setFocus();
             
-            //this.editForm.position({my:'left top', at:'left bottom', of:ed_ele}).show();
+           
             
             // Temporary Solution: Sometimes, after using the 'Add new base field' popup, the requirement type dropdown loads incorrectly
             // The menu widget is loaded behind the record editor popup and lacks the populate highlight for the hover event on menu options
@@ -1770,7 +1770,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         edit_ele= this._editing.getFieldByName('rst_CreateChildIfRecPtr');
         if(edit_ele){
             edit_ele.editing_input('option','change', function(){
-                //let input = this.getInputs()[0];
+               
                 that.onCreateChildIfRecPtr( this );  
             }); 
         }
@@ -2136,8 +2136,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         //remove old content
-        //let edit_ele = this._editing.getFieldByName('rst_TermPreview');
-        //edit_ele.find('.input-div').empty();
+       
+       
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
 
@@ -2154,7 +2154,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._editing.setFieldValueByName('rst_DefaultValue', '', false);
         }
         let ele = this._editing.getFieldByName('rst_TermPreview');
-        //ele.editing_input('fset','dty_Type',(term_type!='relation')?'enum':'relationtype');
+       
         ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
@@ -2177,7 +2177,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //disable
         let edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
         if(edit_ele){
-            //edit_ele.editing_input('option','showclear_button',false);
+           
             let ele = this._editing.getInputs('rst_PtrFilteredIDs')
             window.hWin.HEURIST4.util.setDisabled(ele, true);
         }
@@ -2432,7 +2432,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
             fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
         }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
-            //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
+           
         }
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';
@@ -2501,7 +2501,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let is_usual_way = (!(this._stillNeedUpdateForRecID>0)); 
         this._stillNeedUpdateForRecID = 0;
         //record is already updated in _saveEditAndClose
-        //this._super( recID, fieldvalues );
+       
         if(is_usual_way){
             
         }
@@ -2556,7 +2556,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     let sepType = recset.fld(record, 'rst_DefaultValue');
                     let extraStyle = '';
                     if(sepType == 'group'){
-                        //padding-left:10px;
+                       
                         extraStyle = 'style="display:inline-block;';
                     }
                     if(title == '-'){
@@ -2904,7 +2904,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             that._rst_PointerMode_Enable(false);
                         }else{
                             ed_input.setValue(0, true);
-                            //$(ed_input).prop('checked', false);
+                           
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });

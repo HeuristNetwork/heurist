@@ -176,9 +176,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 pages.unshift({key:'',title:''});   
                 window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
             }
-            //isWebPage = false;
+           
         }else{
-            //isWebPage = true;
+           
             selPage.parent().hide();
         }
         
@@ -209,7 +209,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             
             if(opts.search_page) {
                 $(selPage).val(opts.search_page);        
-                //selPage.hSelect('refresh');
+               
             }
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
@@ -770,13 +770,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                     let ifilter = null; 
                     let val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
-                    // $dlg.find('input[name="allowed_svsIDs"]').val();
+                   
                     if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
                         if(Array.isArray(val)) val = val.join(',');
                         ifilter = {svs_ID:val};
                     }else{
                         val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
-                        //$dlg.find('input[name="allowed_UGrpID"]').val();
+                       
                         if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
                             if(Array.isArray(val)) val = val.join(',');
                             ifilter = {svs_UGrpID:val};

@@ -66,7 +66,7 @@ $.widget( "heurist.navigation", {
             if(this.element.parent().attr('data-heurist-app-id')){
                 this.element.parent().css({'background':'none','border':'none'});
             }
-            //A11 this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
+           
         }else{
             this.element.css('height','100%');    
             if(this.element.parents('.main-header').length>0){
@@ -208,7 +208,7 @@ $.widget( "heurist.navigation", {
             DT_CMS_MENU_FORMAT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU_FORMAT'],
             
             TERM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'], //$Db.getLocalID('trm','2-531'),
-            TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'], //$Db.getLocalID('trm','99-5447');
+            TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'],
 
             TRM_NAME_ONLY = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NAME_ONLY'],
             TRM_ICON_ONLY = window.hWin.HAPI4.sysinfo['dbconst']['TRM_ICON_ONLY'];
@@ -233,7 +233,7 @@ $.widget( "heurist.navigation", {
             
             if(!record) continue; //record may be non-public or deleted
             
-            let page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
+            let page_id = menuitems[i];
 
             if(Object.hasOwn(this.ids_menu_entries, page_id) && this.ids_menu_entries[page_id].length > 0){ // check recursive references
 
@@ -295,7 +295,7 @@ $.widget( "heurist.navigation", {
 
                     res = res + menu_value;
                 }else if(orientation == 'list'){
-                    //res.push(menu_value);
+                   
                     continue;
                 }
 
@@ -343,7 +343,7 @@ $.widget( "heurist.navigation", {
                     $res['expanded'] = (this.options.expand_levels>0 || lvl<this.options.expand_levels); 
                     $res['has_access'] = (window.hWin.HAPI4.is_admin() 
                                 || window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
-                                        //&& menuitems.length==1);
+                                       
                     resitems.push($res);
 
                 }else if(orientation=='list'){
@@ -383,7 +383,7 @@ $.widget( "heurist.navigation", {
                     menuName = window.hWin.HEURIST4.util.htmlEscape(menuName);
                     menuName = iconOnly ? `<span style="display:none;">${menuName}</span>` : menuName;
 
-                    iconStyle += !iconOnly ? 'padding-right:4px;' : '';//scale:2;
+                    iconStyle += !iconOnly ? 'padding-right:4px;' : '';
 
                     $res = '<li><a href="#" style="padding:2px 1em;'
                             +(hasContent?'':'cursor:default;')
@@ -595,7 +595,7 @@ $.widget( "heurist.navigation", {
 
         
         
-        //this._refresh();
+       
     }, //end _onGetMenuData
 
     //
@@ -727,7 +727,7 @@ $.widget( "heurist.navigation", {
 
                         let pagetitle = $dlg.find('h2.webpageheading');
                         if(pagetitle.length>0){ //find title - this is first children
-                            //pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
+                           
                             if(!data.page_showtitle){
                                 pagetitle.hide();
                             }
@@ -787,11 +787,11 @@ $.widget( "heurist.navigation", {
                     if(pageCss && Object.keys(pageCss).length>0){
                         if(!that.pageStyles_original[page_target]){ //keep to restore
                             that.pageStyles_original[page_target] = $(page_target).clone();
-                            //document.getElementById(page_target.substr(1)).style;//$(page_target).css();
+                           
                         }
                         $(page_target).css(pageCss);
                     }else if(that.pageStyles_original[page_target]){ //restore
-                        //document.getElementById(page_target.substr(1)).style = that.pageStyles_original[page_target];
+                       
                         $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
                     }
                     
@@ -861,7 +861,7 @@ $.widget( "heurist.navigation", {
 
                             layoutMgr.layoutInit( null, $(page_target) );
                             
-                            //OLD 2022-02-17 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
+                           
                             
                             if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                 that.options.aftermenuselect( document, data.page_id );

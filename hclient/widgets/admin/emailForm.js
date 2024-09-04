@@ -74,7 +74,7 @@ $.widget( "heurist.emailForm", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -106,7 +106,7 @@ $.widget( "heurist.emailForm", {
             this._element_form.hide()
             this._initDialog();
         }else{
-            //this.element.addClass('ui-heurist-bg-light');
+           
         }
         
         //init layout
@@ -480,8 +480,8 @@ $.widget( "heurist.emailForm", {
 
         
         // }else if(false){
-        //    const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
-        //    $dd.load(url);
+       
+       
         }else{ //image captcha
             $dd.empty();
             $('<img alt src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);

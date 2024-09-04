@@ -130,7 +130,6 @@ $import_help = "{"
     . "\n \t}";
 
 // START OUTPUT
-//$fd = fopen('php://output', 'w');
 
 $json = "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[";
 //fwrite($fd, "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[");// starting string
@@ -203,17 +202,14 @@ $db_details = "\n \t\"database\":{"
     . "\n \t\t\"rectypes\": {". $rectypes ."\n \t\t}"
     . "\n \t}";
 $json .= $db_details;
-//fwrite($fd, $db_details);
 
 // Close off
 $json .= "\n}}";
-//fwrite($fd, "\n}}");
 
 $filename = 'Template_' . $_REQUEST['db'] . '_' . date("YmdHis") . '.json';
 
 header(CTYPE_JSON);
 header('Content-Disposition: attachment; filename="'.$filename.'";');
-//header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
 echo $json;
 

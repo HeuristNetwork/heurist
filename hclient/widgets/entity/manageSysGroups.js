@@ -35,7 +35,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         this.options.use_cache = false;
         this.options.width = 960;
 
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = false;
         this.options.edit_height = 572;
         this.options.height = 740;
@@ -275,7 +275,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         function(response){             
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 //reload
-                                //that.searchForm.searchSysUsers('startSearch');
+                               
                                 if(newRole=='remove'){
                                     window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
                                 }else{
@@ -460,7 +460,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             html += edit;
             html += btn_delete;
             //(window.hWin.HAPI4.has_access(recID) && recID != 1 || true) ? btn_delete : 
-            //            '<div style="height:16px;margin: 0px 25px;"></div>';
+           
         }
 
         html = html 
@@ -501,7 +501,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
                 this._selection = new HRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
+               
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;       
@@ -552,7 +552,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         };
 
         let that = this;                                                
-        //that.loadanimation(true);
+       
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){

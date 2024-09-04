@@ -173,7 +173,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, 
                                     ['freetext','blocktext'], window.hWin.HR('select'));
-                     //,{useHtmlSelect:true});
+                    
         if(fieldSelect.find('option').length==1){
             fieldSelect.empty();
             window.hWin.HEURIST4.ui.addoption(fieldSelect.get(0), 0, 'There are no text fields');

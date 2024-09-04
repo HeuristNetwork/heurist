@@ -61,7 +61,6 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once 'initPage.php';
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
@@ -95,11 +94,11 @@ if(isset($message)){
 }
 
 function echo_flush($msg){
-    //ob_start();
+   
     print $msg;
-    //ob_end_flush();
-    //@ob_flush();
-    //@flush();
+   
+   
+   
 }
 
 //

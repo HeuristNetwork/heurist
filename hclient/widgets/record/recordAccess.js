@@ -146,12 +146,11 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
                 
                 if(that.options.currentAccess){
-                    //fieldSelect.val(this.options.currentOwner);
+                   
                     
                     if( that.options.currentAccess=='hidden' || that.options.currentAccessGroups){
-                        //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
                         that.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
-                        that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+                        that.element.find('#div_AccessGroups').show();
                         that._adjustHeight();
                     }else{
                         that.element.find('#rb_Access-'+that.options.currentAccess).prop('checked', true);
@@ -174,7 +173,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 that._on( that.element.find('input[name="rb_Access"]'), {change:function(){
                     
                     if(that.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                        that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+                        that.element.find('#div_AccessGroups').show();
                     }else{
                         that.element.find('#div_AccessGroups').hide();
                     }

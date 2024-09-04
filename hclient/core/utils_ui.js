@@ -109,7 +109,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled, selected, hidden)
     {
         let option = document.createElement("option");
-        //option = new Option(text,value);
+       
         option.text = text; 
         option.value = value;
         if(disabled===true){
@@ -121,7 +121,7 @@ window.hWin.HEURIST4.ui = {
         if(hidden===true){
             option.hidden = true;
         }
-        //$(option).appendTo($(sel));
+       
         sel.appendChild(option);
         /*
         try {
@@ -796,7 +796,7 @@ window.hWin.HEURIST4.ui = {
                     
                     opt = window.hWin.HEURIST4.ui.addoption(selObj, '',  fieldName);
                     $(opt).attr('depth',1);
-                    //opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
+                   
                     opt.disabled = "disabled";
                   }
                 }
@@ -1159,7 +1159,7 @@ window.hWin.HEURIST4.ui = {
                     let win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
                     parent_ele = $(win.frameElement).parents('.ui-dialog');
                     if(parent_ele.length==0){
-                        //parent_ele = $(win.frameElement).parents('.ui-menu6-container');
+                       
                         parent_ele = $(selObj[0].ownerDocument.body);
                     }else{
                         selObj.addClass('adjust-to-button');
@@ -1478,10 +1478,10 @@ window.hWin.HEURIST4.ui = {
                     if(!$(ele).hasClass('separator-hidden')) $(ele).css('display','table-cell');
                 });
                 
-                //$container.find(className).css('display','block');
-                //$container.find('div.div-table-cell'+className).css('display','table-cell');
+               
+               
             }else{
-                //$help_button.removeClass('ui-state-focus');
+               
                 $container.find('div.div-table-cell'+className).css('display','none');
                 $container.find(className).css('display','none');
             }
@@ -1550,7 +1550,7 @@ window.hWin.HEURIST4.ui = {
                                          .appendTo(_innerTitle)
                                          .on({click:function(){
                                              $helper_div.hide(oEffect);
-                                             //__onDialogClose();
+                                            
                                          }});
                                 
                                 
@@ -1568,7 +1568,7 @@ window.hWin.HEURIST4.ui = {
                                 let divpos = null;
                                 if(options.position && $.isPlainObject(options.position)){
                                     divpos = options.position;
-                                    //divpos['of'] = $help_button;
+                                   
                                 }else if(options.position=='top'){ //show div above button
                                     divpos = { my: "right bottom", at: "right top", of: $help_button }
                                 }else{
@@ -1639,7 +1639,7 @@ window.hWin.HEURIST4.ui = {
                                             options.title = window.hWin.HR('Heurist context help');                                    
                                         }
                                         
-                                        //_innerTitle.find('span').text( options.title );
+                                       
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
                                         options.container.children('.ent_content_full').css({width:'70%'}); //right:424
                                     
@@ -1706,7 +1706,7 @@ window.hWin.HEURIST4.ui = {
         if(popup_options && 
             $.isPlainObject(popup_options.new_record_params) && 
                 (popup_options.new_record_params['rt']>0 || popup_options.new_record_params['RecTypeID']>0)){
-            //rec_ID = -1;
+           
             query_or_recordset = null;
             
         }
@@ -1779,7 +1779,7 @@ window.hWin.HEURIST4.ui = {
                 
                     window.hWin.HAPI4.RecordMgr.search(query_request, 
                     function( response ){
-                        //that.loadanimation(false);
+                       
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             let recset = new HRecordSet(response.data);
@@ -1924,7 +1924,7 @@ window.hWin.HEURIST4.ui = {
         let isEdit = (selector_function!==false);
         
         if(info['trm_ID']>0){
-            //margin-left:0.5em;
+           
             sRelBtn = 
                 '<div style="display:table-cell;min-width:120px;text-align:right;vertical-align: middle;">'
                 +'<div class="btn-edit"/><div class="btn-rel"/><div class="btn-del"/></div>';
@@ -1942,7 +1942,7 @@ window.hWin.HEURIST4.ui = {
             let lbl = $Db.trm(term_ID, 'trm_Label');
             let len = lbl.length;
             lbl = window.hWin.HEURIST4.util.htmlEscape(lbl);
-            //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
+           
             reltype = '<div style="display:table-cell;min-width:'+(Math.min(20,len)+1)+'ex;'
                 +'color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'
                 +  lbl + '</div>'
@@ -1951,7 +1951,7 @@ window.hWin.HEURIST4.ui = {
         let rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
                         + '<img alt src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
-                            'background-image:url(\''    //vertical-align:top;margin-top:2px;
+                            'background-image:url(\''   
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
                            :'') 
                         + '"/>'
@@ -1960,12 +1960,12 @@ window.hWin.HEURIST4.ui = {
         let ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="display: table-row;margin-bottom:0.2em;'
-                        +(isEdit?'background:#F4F2F4 !important;':'')+'">' //padding-bottom:0.2em;
+                        +(isEdit?'background:#F4F2F4 !important;':'')+'">'
 
                         //relation type
                         
         + '<div '  // class="detail"   truncate
-                        + 'style="display:table-cell; word-break: break-word; vertical-align: middle;">'  //min-width:60ex;max-width:160ex;
+                        + 'style="display:table-cell; word-break: break-word; vertical-align: middle;">' 
                         
                         + reltype
                         
@@ -1975,7 +1975,7 @@ window.hWin.HEURIST4.ui = {
                             
                         //triangle icon fo
                         + ((reltype!='')?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
-                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'')
 
                         //record type icon for resource
                         + (reltype==''?rectype_icon:'')
@@ -1987,7 +1987,7 @@ window.hWin.HEURIST4.ui = {
                             + '" data-rectypeid="'+ info['rec_RecTypeID']
                             + '" data-recid="'
                                         +info['rec_ID']
-                                        +'" style="display:table-cell;vertical-align:middle">'  //padding-top:4px;
+                                        +'" style="display:table-cell;vertical-align:middle">' 
                         + rec_Title
                         + '</span>'
                         
@@ -2375,7 +2375,7 @@ window.hWin.HEURIST4.ui = {
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
 */          
         }else if(configMode.entity=='SysImportFiles'){
-            fieldTitle = 'sif_TempDataTable';//'imp_table';
+            fieldTitle = 'sif_TempDataTable';
             request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
         }
@@ -2434,7 +2434,7 @@ window.hWin.HEURIST4.ui = {
     //
     showEntityDialog: function(entityName, options){
         
-        entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
+        entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1);
                             
         let widgetName = 'manage'+entityName;
         
@@ -2744,7 +2744,7 @@ window.hWin.HEURIST4.ui = {
             help_text='';
         }
         
-        //return window.hWin.HEURIST4.util.htmlEscape();
+       
         return window.hWin.HEURIST4.util.stripTags(help_text,'a, u, i, b, br, strong');        
     },
     
@@ -3079,7 +3079,7 @@ window.hWin.HEURIST4.ui = {
                                 }else{
                                     //draw on the right and reduce max width for data
                                     player.parentNode.parentNode.style.float = 'right';
-                                    //$('#div_public_data').css('max-width', w_win-w_img-200);
+                                   
                                 }
 
                             }
@@ -3313,7 +3313,7 @@ window.hWin.HEURIST4.ui = {
         if(!style) style = {};
         if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
         if(!(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0)){
-            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
+            style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize;
         }
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
@@ -3358,7 +3358,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
       let buttonItem = $( "<span>", {
         "class": "ui-selectmenu-text"
       })
-      //this._setText( buttonItem, item.label );
+     
       buttonItem.html(item.label).css({'min-height': '17px'});
      
       if(window.hWin.HEURIST4.util.isColor(item.value)){
@@ -3442,7 +3442,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 ele.hSelect('close');
-                //$( ele ).hide();
+               
                 }, 800);
         },
         _show = function(ele, parent) {
@@ -3450,7 +3450,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             
             $('.menu-or-popup').hide(); //hide other
             
-            //parent.click();
+           
             
             return false;
         };

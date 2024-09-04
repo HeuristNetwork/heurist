@@ -47,11 +47,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
         this.input_search_type = this.element.find('#input_search_type');
         this._on( this.input_search_type, { change: this.startSearch });
         
-        if(this.options.select_mode=='manager'){
-//            this.element.find('#input_search_type_div').css('float','left');
-        }
-                      
-        //this.startSearch();            
     },  
 
     //

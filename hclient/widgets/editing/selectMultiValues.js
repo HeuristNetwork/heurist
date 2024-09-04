@@ -173,7 +173,7 @@ $.widget( "heurist.selectMultiValues", {
                     if(node.data.files_count>0)
                         $span.html(node.title+' <span style="font-weight:normal">('+node.data.files_count+')</span>');
                     if(node.data.issystem){
-                        $span.addClass('graytext');//.css({color:'red !important'});
+                        $span.addClass('graytext');
                     }
             },            
             extensions: ['edit'], //'filter'],

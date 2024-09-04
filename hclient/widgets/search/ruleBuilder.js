@@ -124,7 +124,7 @@ $.widget( "heurist.ruleBuilder", {
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
 
-        this._on( this.btn_delete, {click: this._removeRule }); // function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
+        this._on( this.btn_delete, {click: this._removeRule });
         this._on( this.btn_edit, {click: this._editFilter }); 
 
         if(this.options.level<3)
@@ -205,7 +205,7 @@ $.widget( "heurist.ruleBuilder", {
     //update relation and target selectors
     _onSelectRectype: function(event){
 
-        let rt_ID = this.select_source_rectype.val(); //event.target.value;
+        let rt_ID = this.select_source_rectype.val();
 
         //find all relation types
         // a. pointer fields
@@ -225,7 +225,7 @@ $.widget( "heurist.ruleBuilder", {
             let recset = all_structs[rty_ID];
             recset.each2(function(dtyID, record){
             
-            //dtyID = record['rst_DetailTypeID'];
+           
             let fieldtype = $Db.dty(dtyID, 'dty_Type');
             
             if(fieldtype=='resource' || fieldtype=='relmarker'){
@@ -365,10 +365,10 @@ $.widget( "heurist.ruleBuilder", {
         this.select_fields.prop('disabled', false);
         
         this.select_fields.prop("selectedIndex",0);
-        //this._on( this.select_fields, { change: this._onSelectFieldtype });
+       
         this._onSelectFieldtype();
         
-        //this._on( this.select_fields, { change: this._onSelectFieldtype });
+       
         let sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
         sel.hSelect( "widget" ).css({'font-size':'0.9em','max-width':'200px'});
         let that = this;
@@ -403,7 +403,7 @@ $.widget( "heurist.ruleBuilder", {
             if(arr_field){
                 if(arr_field.terms){
                     is_not_relation = false;
-                    //this.label_3.show();
+                   
                     this.select_reltype.css({'visibility':'visible'});
                     this.select_reltype.prop('disabled', false);
                     let sel = window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
@@ -413,21 +413,21 @@ $.widget( "heurist.ruleBuilder", {
 
                 }
                 //reduced list of constraints
-                window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true); //arr_field.rectypes.length>1?'any':null);
+                window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true);
                 if(arr_field.rectypes.length!=1){
                     window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
                     this.select_target_rectype.val(0);
                     this.select_target_rectype.prop('disabled', false);
                 }else{
-                    //this.select_target_rectype.prop('disabled', true);
+                   
                     this.select_target_rectype.prop('selectedIndex',0);
                 }
-                //this._arr_rectypes_subset = arr_field.rectypes;
+               
                 is_not_selected = false;
             }
 
             if(is_not_relation){
-                //this.label_3.hide();
+               
                 this.select_reltype.css({'visibility':'visible'});
                 window.hWin.HEURIST4.ui.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
                 this.select_reltype.prop('disabled', true);
@@ -437,13 +437,13 @@ $.widget( "heurist.ruleBuilder", {
         }
         if(is_not_selected){
             //show all constraints
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null, true); //this._arr_rectypes.length>1?'any':null);
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null, true);
             if(this._arr_rectypes.length>1){
                 window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
             }
             this.select_target_rectype.prop('disabled', this.select_target_rectype.find("option").length==1);
 
-            //this._arr_rectypes_subset = this._arr_rectypes;
+           
         }
 
     },
@@ -729,14 +729,14 @@ $.widget( "heurist.ruleBuilder", {
         
         //1:2; link to/from
         //3:4; relatiom to/from
-        //codes [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
+       
 
         //refresh query
         let codes = this._getCodes();
         if(codes==null){
             return null;
         }else{
-            //let query = this._getQuery(codes);
+           
             
             const rt_source = parseInt(codes[0]),
                 dty_ID    = parseInt(codes[1]),

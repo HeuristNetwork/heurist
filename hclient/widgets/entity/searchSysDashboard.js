@@ -56,7 +56,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                          show_on_startup: 1 });     
                     that._trigger( "onclose" );
                     
-                    //that._trigger( "viewmode" );
+                   
                 }); 
 
         this.btn_close_mode = this.element.find('#btn_close_mode')
@@ -139,7 +139,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         
                 request['a']          = 'search'; //action
                 request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
+                request['details']    = 'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
                 //we may search users in any database

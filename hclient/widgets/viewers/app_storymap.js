@@ -268,7 +268,7 @@ $.widget( "heurist.app_storymap", {
                 this.pnlStory.css({top:(this.pnlOverview.height()+'px')});
             }else 
             if(this.options.reportOverviewMode=='inline'){
-                //this.pnlStory.height(this.element.height());
+               
                 //this._resultList.height('100%');    
             }
 
@@ -287,7 +287,7 @@ $.widget( "heurist.app_storymap", {
                 +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
             let navbar = $('<div style="top:2px;right:46px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
-                +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
+                +'background-clip: padding-box;border-radius: 4px;">'
             +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
             +'<span id="nav-status" '+css+';width:auto;padding:0px 5px;border-right: 1px solid #ccc" href="#" '
@@ -541,7 +541,7 @@ $.widget( "heurist.app_storymap", {
     //     
     _onScroll: function(event, that) {
         
-        let ele = $(event.target); //this.div_content;
+        let ele = $(event.target);
         $.each(ele.find('.recordDiv'), function(i,item){
             let tt = $(item).position().top;
             let h = -($(item).height()-50);
@@ -768,8 +768,8 @@ $.widget( "heurist.app_storymap", {
                                                     }
                                                 });        
                                                 
-                                                //sortFields = {"9":1,"10":1,"11":1};
-                                                //sortFields[DT_DATE] = 1;
+                                               
+                                               
                                                 sortFields[DT_START_DATE] = 1;
                                                 sortFields[DT_END_DATE] = 1;
                                             }else{
@@ -955,7 +955,7 @@ $.widget( "heurist.app_storymap", {
             }
         }else{
             //clear 
-            //this.options.storyRecordID = null;
+           
             this.pnlOverview.html(
             '<h3 class="not-found" style="color:teal;">'
             +  this.options.elementsPlaceholder + '</h3>'
@@ -1484,7 +1484,7 @@ $.widget( "heurist.app_storymap", {
                         if(res){
                             that._initialElementID = item.rec_ID;
                             //open story element
-                            //setTimeout(function(){that._scrollToStoryElement( item.rec_ID )}, 1000);
+                           
                             return false;                        
                         }
                     }
@@ -1628,7 +1628,7 @@ $.widget( "heurist.app_storymap", {
             }
             
             if(this._mapping && this._mapping.length>0){
-                //this._animateStoryElement_A(recID);
+               
                 if(recID==0 || Number.parseInt(recID)==this.options.storyRecordID){
                     //zoom for entire story
                     
@@ -1679,7 +1679,7 @@ $.widget( "heurist.app_storymap", {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    //recID = parseInt(recID);
+                   
                     // 1. find all resource (record pointer) fields that points to places               
                     that._cache_story_places[recID] = {};
                     that._cache_story_places[recID]['places'] = [];
@@ -1756,7 +1756,7 @@ $.widget( "heurist.app_storymap", {
                                 {
                                      
                                     that._cache_story_places[recID]['geojson'] = geojson_data;
-                                    //that._cache_story_places[recID]['timeline'] = timeline_data;
+                                   
 
                                     // 3. create links between points
                                     if(that.options.reportElementMapMode!='all'){
@@ -1840,7 +1840,7 @@ $.widget( "heurist.app_storymap", {
         */
 
         //or several actions per scope
-        //let anime = [{scope:'all',range:1,actions:[{action:'fly'},{action:'fade_in',duration:500}]}];
+       
         
         //let anime = [{scope:'all',range:1,action:'fade_in_out',duration:500}]; //show one by one
         
@@ -2458,7 +2458,7 @@ $.widget( "heurist.app_storymap", {
         let path = null;
         //create link path from begin to end place
         if (begin_pnt.length>0 || end_pnt.length>0 || tran_pnt.length>0){
-            //$geovalues = array();
+           
             
             //PAIRS: many start points and transition points - star from start points to first transition
             if(begin_pnt.length>1 || end_pnt.length>1){

@@ -575,7 +575,7 @@ function editSymbology(current_value, mode_edit, callback){
         modal:  true,
         title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
         resizeStop: function( event, ui ) {//fix bug
-            //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+           
         },
         beforeClose: function(){
             //show warning in case of modification
@@ -703,7 +703,7 @@ function editSymbology(current_value, mode_edit, callback){
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             click: function(e, data){
@@ -747,8 +747,8 @@ function editSymbology(current_value, mode_edit, callback){
                                     titles.push(harchy.harchy.join(''));
                                 }
                             }                            
-                            //geofield_input.val(selectedFields.join(','));
-                            //_editing_symbology.setModified(true);
+                           
+                           
                             _editing_symbology.setFieldValueByName2('geofield',selectedFields.join(','),true);
                             geofield_lbls.html(titles.join('<br>'));
                             $dlg2.dialog('close');
@@ -932,7 +932,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         function(event){
             let $mnu = $select.hSelect('menuWidget');
             if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')!='progress'){
-                let foo = $select.hSelect('option','change');//.trigger('change');
+                let foo = $select.hSelect('option','change');
                 foo.call(this, null, 'select'); //call __onSelectMenu
             }
         }});
@@ -1292,7 +1292,7 @@ function browseRecords(_editing_input, $input){
     let pointerMode = that.f('rst_PointerMode');
     
     if(isparententity && pointerMode!='addonly'){
-        pointerMode = 'dropdown_add'; //was 'addorbrowse';
+        pointerMode = 'dropdown_add';
     }
     
     let is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
@@ -1633,7 +1633,7 @@ function browseRecords(_editing_input, $input){
                         $(that.selObj).remove();
                     }
                     
-                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);//, [{key:'select', title:'Search/Add'}]);
+                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);
 
                     $(that.selObj).attr('rectype-select', 1);
                     $(that.selObj).appendTo($inputdiv);
@@ -1656,7 +1656,7 @@ function browseRecords(_editing_input, $input){
                     + '</span><div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
                     +window.hWin.HR('No records match the filter')+'</div></div>');
                     
-                    //$(opt).attr('icon-url', search_icon);
+                   
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
@@ -1717,7 +1717,7 @@ function browseRecords(_editing_input, $input){
                                  rec_RecTypeID: rec_RecType,
                                  rec_IsChildRecord:false
                                 }, __show_select_dropdown);
-                            //ele.appendTo($inputdiv);
+                           
                             that.onChange();
                             
                             if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
@@ -1742,7 +1742,7 @@ function browseRecords(_editing_input, $input){
                 
                 let $inpt_ele = $inputdiv.find('.sel_link2'); //button
                 let _ref_id = $input.attr('id');
-                //$input.addClass('selectmenu-parent');
+               
                 
                 if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
                     $inpt_ele = $inputdiv.find('.link-div');
@@ -1795,7 +1795,7 @@ function browseTerms(_editing_input, $input, value){
                 __recreateTrmLabel($input, trm_ID);
             });
             lang_code = '';
-            //return;
+           
         }
 
         $input.empty();

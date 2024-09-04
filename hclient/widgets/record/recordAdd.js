@@ -160,10 +160,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         this._fillSelectRecordTypes( this.options.currentRecType );
 
         if(this.options.get_params_only===true){
-            //this.element.find('#btnAddRecord').hide();
+           
             this.element.find('#btnAddRecordInNewWin').hide();
         }
-        //function(event){that.doAction(event)} );
+       
         if(this.options.allowExpanded){
             
             this.element.find('#div_more_options').show();
@@ -186,7 +186,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 select_return_mode:'recordset', //ids by default
                 onselect:function(event, data){
                     if(data && data.selection){
-                        that.options.currentRecTags = data.astext; //data.selection;
+                        that.options.currentRecTags = data.astext;
                         that._onRecordScopeChange();
                     }
                 }
@@ -208,7 +208,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             });
             //window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_CREDENTIALS, 
             //    function(data) { 
-            //});
+           
 
         }
 
@@ -228,7 +228,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     // events bound via _on are removed automatically
     // revert other modifications here
     _destroy: function() {
-        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+       
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                             +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS);
         //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
@@ -265,20 +265,18 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.expandBtn.hide();
             this.closeBtn.show();
             $dlg.css('bottom','40px').show(); //space to show button toolbar
-            this.element.parent().width(500);//.height(450);
-            //$icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
+            this.element.parent().width(500);
+           
             this._innerTitle.text(window.hWin.HR('Record addition settings'));
 
         
             if(this.options.allowExpanded){
-                //this.element.find('.add_record').show();
                 this.element.find('#div_sel_tags').css('display','block');
                 this.element.find('#div_add_link').show();
                 this.element.find('#div_more_options').hide();
                 this.element.parent().height('auto');
                 this._adjustHeight();
             }else{
-                //this.element.find('#div_more_options').show();
                 this.element.find('.add_record').hide();
                 this.element.parent().height(450);
             }
@@ -297,7 +295,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.closeBtn.hide();
             $dlg.css('bottom','2px').hide();
             this.element.parent().width(200).height('auto');
-            //$icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
+           
             this._innerTitle.text(window.hWin.HR('Add Record'));
         }    
                 
@@ -375,7 +373,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 
             }else if(action=='btnAddRecordInNewWin'){
                 let url = this._onRecordScopeChange();
-//                $('#txt_add_link').val();
                window.open(url, '_blank');
             }else{
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});    
@@ -467,7 +464,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
               }
             } );            
 
-            //this.rectype_list.html(ele.hSelect('menuWidget').clone());
+           
         }
         /*
         $.each(rtSelect.find('option'),function(i, item){

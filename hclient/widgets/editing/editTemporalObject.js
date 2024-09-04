@@ -71,8 +71,8 @@ function calendarPopup(buttonElt) {
 function getOffset(obj) {
 
         let x = 0, y = 0;
-        let sleft = 0;//obj.ownerDocument.body.scrollLeft;
-        let stop = 0; //obj.ownerDocument.body.scrollTop;
+        let sleft = 0
+        let stop = 0;
         while (obj) {
             x += obj.offsetLeft;
             y += obj.offsetTop;
@@ -240,7 +240,7 @@ let TemporalPopup = (function () {
         let active_idx = _type2TabIndexMap[ that.curTemporal.getType() ? that.curTemporal.getType():'s' ];
         $('#display-div').tabs('option','active',active_idx);
         
-		//dRangeDraw();
+	
 
         $(".withCalendarsPicker").change(_updateGeorgianDate);
         _updateGeorgianDate();
@@ -296,8 +296,8 @@ let TemporalPopup = (function () {
             early_date = convertCLD($early.val(), from_calendar_type);
             late_date = convertCLD($latest.val(), from_calendar_type);
             
-			//early_date = convert($early, false);
-			//late_date = convert($latest, false);
+		
+		
 		}
         
         let tDate1 = TDate.parse(early_date);
@@ -337,17 +337,17 @@ let TemporalPopup = (function () {
             let from_calendar_type = calendar.name.toLowerCase();
             
             if (type === "s") {
-                //value = convert($("#simpleDate"), true);
+               
                 value = convertCLD($("#simpleDate").val(), from_calendar_type);
             }else if (type === "f") {
-                //value = convert($("#fTPQ"), true) + " " + convert($("#fTAQ"), true);
+               
 
                 value = convertCLD($("#fTPQ").val(), from_calendar_type)
                         +' '
                         +convertCLD($("#fTAQ").val(), from_calendar_type);
 
             }else  if (type === "p") {
-                //value = convert($("#TPQ"), true) + " " + convert($("#TAQ"), true);
+               
                 //PDB  PDE
                 
                 value = convertCLD($("#TPQ").val(), from_calendar_type)
@@ -514,7 +514,7 @@ let TemporalPopup = (function () {
 							}
                             //convert to gregorian
                             if(elem.hasClass('withCalendarsPicker')){
-                                //val = convert(elem, true);
+                               
                                 val = convertCLD(elem.val(), from_calendar_type);
                             }
 							temporal.addObjForString(code, val);  // FIXME  this should validate input from the user.
@@ -542,7 +542,7 @@ let TemporalPopup = (function () {
                     temporal.removeObjForCode("CL2");
                 }*/
                 
-                //dt = convert(elem, true);
+               
                 dt = convertCLD(elem.val(), from_calendar_type);
                 
 			}else if(is_japanese_cal || dt.indexOf('年') !== -1){
@@ -714,7 +714,7 @@ let TemporalPopup = (function () {
                 if($(this).val()!=''){
                     try{
                         //convert to new 
-                        //changed_options['defaultDate'] = convert($(this), false);
+                       
                         changed_options['defaultDate'] = convertCLD($(this).val(), old_calendar, new_calendar);
                         $(this).val(changed_options['defaultDate']);
                     }catch(e){
@@ -792,13 +792,13 @@ let TemporalPopup = (function () {
                 }
                 //japanese->gregorian->native
                 //try{
-                //    tDate = TDate.parse(value);
+               
                 //}catch($e){
                 try{
                     cal_value = fromCalendar.japaneseToGregorian(value); // translate first to gregorian
                     value = `${cal_value.year()}-${cal_value.month()}-${cal_value.day()}`;
                     cal_value = null;
-                    //dformat = 'yyyy-mm-dd';
+                   
                 }catch($e3){
                 }
                 //}
@@ -838,9 +838,9 @@ let TemporalPopup = (function () {
                 }
 
                 if(__noNeedConvert(fromcal, tocal)){
-                    //newval = cal_value;
-                    //newval._calendar.local.name = toCalendar.local.name;
-                    //newval._calendar.name  = toCalendar.local.name;
+                   
+                   
+                   
                     //
                     newval = cal_value._calendar.formatDate(dformat, cal_value);
                 }else{
@@ -936,7 +936,7 @@ let TemporalPopup = (function () {
 				if(togregorian){
 					newval = $inpt.val();
 				}else{
-					//newval = togregorian ?$inpt.val():value;
+				
 					newval = value;
 					newval._calendar.local.name = tocalendar.local.name;
 					newval._calendar.name  = tocalendar.local.name;

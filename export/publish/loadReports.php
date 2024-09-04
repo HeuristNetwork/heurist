@@ -114,7 +114,7 @@ $mysqli = $system->get_mysqli();
     }elseif($metod=="savereport"){ //-----------------
 
         $data  = @$_REQUEST['data'];
-        //$recID  = @$_REQUEST['recID'];
+       
 
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
@@ -291,7 +291,7 @@ exit;
 
                     if ($rows==0 || is_string($rows) ) {
                         $oper = (($isInsert)?"inserting":"updating");
-                        $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
+                        $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query;
                     } else {
                         if($isInsert){
                             $ret = -$mysqli->insert_id;
