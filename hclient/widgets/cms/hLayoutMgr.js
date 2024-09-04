@@ -956,7 +956,7 @@ function hLayoutMgr(){
                 }else{
 
                     if(ele[0].nodeName=='TABLE'){
-                        //window.hWin.HEURIST4.msg.showMsgDlg('We encounter troubles on conversion. Dynamic widget is within TABLE element');
+                        
                         //return false;
                     }
 

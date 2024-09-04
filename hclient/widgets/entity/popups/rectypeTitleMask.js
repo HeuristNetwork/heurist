@@ -234,12 +234,12 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             function (response) {
                 if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-                    //window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), true );
+                    
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     
                 }else{
                     
-                    //window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), false );
+                    
                     
                     if(that.element.find('#listRecords > option').length>1){
                         

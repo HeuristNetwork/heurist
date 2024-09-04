@@ -1158,7 +1158,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     // and add to selector
                     $sel_viepoints.empty();
                     window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
-                    //window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), gmap.getBounds().toUrlValue(), location_name);
+                    
 
                 }
             }, {title:'Save map extent',yes:'Save',no:"Cancel"});

@@ -207,7 +207,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _onRecordScopeChange() {
         
         let isdisabled = (selectRecordScope.val()=='');
-        //window.hWin.HEURIST4.util.setDisabled($('#btn-ok'), isdisabled);
+        
         let ele = $('#btn-ok');
         ele.off('click');
         if(isdisabled){
@@ -608,12 +608,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
             $('#cb_replace_all').prop('checked',true).addClass('ui-state-disabled');;
             $('#fld-1').hide();
-           //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), true);
+           
            if(action_type=='delete_detail') return;
         }else{
             $('#cb_remove_all').removeClass('ui-state-disabled');;
             $('#cb_replace_all').removeClass('ui-state-disabled');;
-            //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), false);
+            
         }
         
         if(field_type=='freetext' || field_type=='blocktext'){

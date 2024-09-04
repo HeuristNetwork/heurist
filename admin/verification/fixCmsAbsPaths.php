@@ -66,9 +66,9 @@ function __correctAbsPaths(){
 
     $dbRecDetails = new RecordsBatch($system, null);
 
-    //$databases = array('amade_testnewsystem');
-    //$databases = array('osmak_9c');
-    //$databases = array('CBAP_Uncovering_Pacific_Pasts');
+   
+   
+   
 
     foreach ($databases as $idx=>$db_name){
 
@@ -140,7 +140,7 @@ function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
 
-    //print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
+   
 
     $paths0 = array('\/HEURIST', '\/html', '');
     $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
@@ -156,7 +156,7 @@ function replaceAbsPathinCMS($recID, $val){
             }
         }
     }
-    //print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
+   
 
     //report if anything has been fixed
     if($cnt > 0){

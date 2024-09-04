@@ -244,13 +244,13 @@ $.widget( "heurist.mainMenu6", {
                 //keep main menu open on document mouse leave
                 //that._on($(document),{mouseleave: that._resetCloseTimers });
                 
-                let cms_record_id = urlParams.get('cms'); //window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+                let cms_record_id = urlParams.get('cms'); 
                 if(cms_record_id>0){
                     let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                     widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
                 }else{
                     //action 
-                    let cmd = urlParams.get('cmd'); //window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
+                    let cmd = urlParams.get('cmd'); 
                     if(cmd){
                         let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                         widget.mainMenu('menuActionById',cmd);

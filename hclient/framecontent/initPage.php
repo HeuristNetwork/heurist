@@ -446,7 +446,7 @@ if($isLocalHost){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
         }
         //add version to title
-        //window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
+        
     }
 
 </script>

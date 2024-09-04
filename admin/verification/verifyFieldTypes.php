@@ -278,7 +278,7 @@ function getTermsWithIssues($mysqli){
         }
         
         if($prev_id>0){
-            $dupes[] = $prev_id; //$TL[$prev_id]['trm_Label'];
+            $dupes[] = $prev_id;
             $prev_id = 0;
         }
         $dupes[] = $trm_ID;
@@ -380,7 +380,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
         if($key===false){
             $res = $res.'"'.$termid.'":{'.createValidTermTree($child_terms, $invalidTermIDs).'},';
         }else{ //invalid
-            //return "";
+           
         }
     }
     return $res==''?'': substr($res,0,-1);

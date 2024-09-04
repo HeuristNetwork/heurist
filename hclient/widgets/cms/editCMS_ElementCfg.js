@@ -505,8 +505,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         if($(event.target).is(':checked')){
             
             //disable
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), true);
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-left"]'), false);
+            
+            
 
             $container.find('input[name^="'+type+'-"]').prop('readonly',true);
             $container.find('input[name^="'+type+'-left"]').removeProp('readonly');
@@ -515,7 +515,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             
         }else{
             $container.find('input[name^="'+type+'-"]').removeProp('readonly');
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), false);
+            
         }       
     }
     

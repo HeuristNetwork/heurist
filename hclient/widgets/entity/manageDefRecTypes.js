@@ -1045,7 +1045,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, opts);
                 }else if(action=='show_in_list' || action=='hide_in_list'){
                     
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    
                     let newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal });
                     

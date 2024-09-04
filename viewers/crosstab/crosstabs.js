@@ -98,7 +98,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //hide left panel(saved searches) and maximize analysis
         //let _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
-        //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+        
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
 
       configEntityWidget = $('#divLoadSettings').configEntity({
@@ -1516,7 +1516,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $($newInterval.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
 
 
-            //window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
+            
     }
 
     function __addeditInterval( name, idx, notSaved){

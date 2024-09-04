@@ -30,7 +30,6 @@ exit;
 ini_set('max_execution_time', '0');
 
 
-//define('ADMIN_PWD_REQUIRED', 1);
 define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
@@ -116,7 +115,7 @@ function __checkVersionDatabase(){
             
                 print DIV_E;
             }else{
-                //print DIV_S.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].DIV_E;
+               
             }
         }
     }
@@ -138,7 +137,7 @@ function __updateDatabase(){
         if(hasTable($mysqli, 'defRecStructure')){
 
             if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-                //print $db_name.': already exists<br>';
+               
             }else{
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
@@ -183,7 +182,7 @@ function __renameDegreeToKM(){
 
 
     //$query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
-    //.'where rst_DisplayName like "%degrees%"';
+   
 
     $query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
     .'where rst_DetailTypeID in (select dty_ID from defDetailTypes where dty_OriginatingDBID=3 and dty_IDInOriginatingDB in (1085,1086))';
@@ -281,21 +280,21 @@ function findMissedTermLinks() {
                 if(!(mysql__select_value($mysqli, 'select rtg_ID FROM '.$db_name.'.defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
         .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
-                    //$mysqli->query($query);
+                   
                     $report[] = '"Trash" group has been added to rectype groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select vcg_ID FROM '.$db_name.'.defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
         .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
-                    //$mysqli->query($query);
+                   
                     $report[] = '"Trash" group has been added to vocabulary groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select dtg_ID FROM '.$db_name.'.defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
         .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
-                    //$mysqli->query($query);
+                   
                     $report[] = '"Trash" group has been added to field groups';
                 }
 */
@@ -309,11 +308,11 @@ Hide layer outside zoom range 3-1087  ( 2-6257 )  3-5081, 3-5082
 Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
         */
         //from fields to vocabs to terms - assign proper ccodes
-        //print "<br><br>".$db_name.'<br>';
-        //verifySpatialVocab('Show legend on startup','3-1079','2-6255');
-        //verifySpatialVocab('Suppress timeline','3-1080','2-6256');
-        //verifySpatialVocab('Hide layer outside zoom range','3-1087','2-6257');
-        //verifySpatialVocab('Show labels','3-1088','2-6258');
+       
+       
+       
+       
+       
 
 
     }//while  databases
@@ -327,7 +326,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
 
     foreach ($db2_with_terms as $db_name=>$value){
         print $db_name.'<br>';
-        //print print_r($value, true).'<br>';
+       
     }
 
 
@@ -458,7 +457,7 @@ function __findWrongChars(){
 
 function find_invalid_string($val){
     if(is_string($val)){
-        $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
+        $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);   //
         if($stripped_val!=$val){
             throw new Exception(mb_convert_encoding($val,'UTF-8'));
         }
@@ -758,7 +757,7 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
 
             }else{
                 $not_found1[] = $nid;
-                //echo 'Record not found for NID '.$nid.'<br>';
+               
             }
 
         }
@@ -834,7 +833,7 @@ function __correctGetEstDate(){
 
     global $mysqli, $databases;
 
-    //$databases = array('hdb_MPCE_Mapping_Print_Charting_Enlightenment');
+   
     print '__correctGetEstDate<br>';
 
     foreach ($databases as $idx=>$db_name){
@@ -842,7 +841,7 @@ function __correctGetEstDate(){
         mysql__usedatabase($mysqli, $db_name);
 
 
-        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100';//' and rdi_DetailTypeID=1151';
+        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100';
         $res = $mysqli->query($query);
         if ($res){
             $cnt=0;
@@ -859,7 +858,7 @@ function __correctGetEstDate(){
 
                     $query = 'UPDATE recDetails SET dtl_Value="'.
                                                     $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
-                    //$mysqli->query($query);
+                   
                     print htmlspecialchars($rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue).'<br>';
 
                     $cnt++;
@@ -1109,7 +1108,7 @@ function __listOfAdminUsers(){
             {
                $mind = $vals['ugr_Modified'];     
             }
-            echo '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
+            echo '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);
         }
     }
     print '<br>Earliest: '.$mind.'<br>';
@@ -1131,9 +1130,9 @@ function __convertTustep(){
     $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
 
     // Convert the codepoints to entities
-    //$str = preg_replace("/\\\\u([0-9a-fA-F]{4})/", "&#x\\1;", $str);
+   
 
-    //preg_replace_callback("/(@[^\0-\x]@u)/isU", function($n) { return hexToString($n[0] );}, $s);
+   
 
     $matches = array();
     preg_match_all("/\&[0-9a-zA-Z]+;/", $s, $matches);
@@ -1144,15 +1143,15 @@ function __convertTustep(){
 
     print '<xmp>'.$m.'</xmp>';
     print '<br>';
-    //print '<xmp>'.$s.'</xmp>';
+   
     print '<br>';
     print print_r($matches, true);
     print '<br>';
     print print_r($matches2, true);
 
-    //print '<xmp>'.htmlspecialchars_decode($s).'</xmp>';
+   
 */
-    //print print_r(get_html_translation_table(HTML_ENTITIES),true);
+   
     
     define('AMP', '&amp;');
     define('TS_AMP', '#%#%#');
@@ -1286,7 +1285,7 @@ AMP =>TS_AMP,
     //
     $query = 'SELECT dtl_ID, dtl_Value, dtl_DetailTypeID, dtl_RecID FROM recDetails, Records '
     .'WHERE dtl_RecID=rec_ID AND rec_RecTypeID NOT IN (51,52) AND dtl_DetailTypeID in ('.implode(',',$txt_field_types).')';
-    //.' AND rec_ID IN (1593,4060 ,8603, 11704, 22025, 22491, 25393 , 25570, 28848, 28959    )';
+   
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){
@@ -1382,12 +1381,12 @@ function __findRDF(){
 
         $r1 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes'));
         $d1 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes'));
-        //$s1 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure');
+       
         $t1 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms'));
 
         $r2 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null'));
         $d2 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null'));
-        //$s2 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure where rst_SemanticReferenceURL!="" and rst_SemanticReferenceURL is not null');
+       
         $t2 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null'));
 
         if($r2>0 && $d2>1){
@@ -1447,18 +1446,18 @@ function __findBelegSpan($context){
     $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context,
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-    //$context2 = $dom->documentElement->nodeValue;
+   
 
     $finder = new DomXPath($dom);
-    //$classname='Beleg';
+   
     $nodes = $finder->query("//span[contains(concat(' ', normalize-space(@class), ' '), ' Beleg ')]");
 
     foreach ($nodes as $idsx=>$node)
     {
         $nvals[] = $dom->saveHTML($node);
         //if(strpos($nval))
-        //echo '<xmp>'.$dom->saveHTML($node).'</xmp><br>';
-        //echo '<xmp>'.$node->nodeValue.'</xmp><br>';
+       
+       
     }
 
     //if there no characters between spans they merge without space <span>a</span><span>dam</span> => adam
@@ -1508,12 +1507,12 @@ function __findBelegSpan($context){
                     mb_convert_encoding($str, "UTF-8").'<br>';
         */
 
-        //$res = $res.$space.$nval;
+       
         $res = $res.$space.$nodes[$idx]->nodeValue;
     }
 
-    //print '<xmp>'.$context.'</xmp>';
-    //print $res.'<br><br>';
+   
+   
 
     print $res."\t";
     print htmlspecialchars($context_original)."\n";
@@ -1526,7 +1525,6 @@ function __findBelegSpan($context){
 function __getBelegContext(){
      global $system, $mysqli;
 
-//print '<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>';
 
      header('Content-type: text/plain;charset=UTF-8');
 
@@ -1534,8 +1532,6 @@ function __getBelegContext(){
 
      //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
      $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids'));// 'limit'=>10,
-//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids'));// 'limit'=>10,
-//     echo var_dump($res);
 
      $ids = @$res['data']['records'];
 
@@ -1547,7 +1543,6 @@ function __getBelegContext(){
              $val = $rec['details'][1094];
              $val = array_shift($val);
 
-//$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';
 /*
 $val = '<span class="Beleg">
     <span style="mso-char-type: symbol; mso-symbol-font-family: Mediaevum;">
@@ -1567,7 +1562,6 @@ $val = '<span class="Beleg">
          }
      }
 
-//print '</body></html>';
 }
 
 //
@@ -1577,7 +1571,7 @@ function __fixDirectPathImages(){
 
     global $system, $mysqli, $databases;
 
-    //$databases = array('osmak_9c');
+   
     $databases = array('efeo_khmermanuscripts');
 
     $doc = new DOMDocument();
@@ -1678,7 +1672,7 @@ function __fixDirectPathImages(){
                     $val_orig = str_replace($img,$img2,$val_orig);
 
                     $val = substr($val, $end+1);//rest
-                    //$val = trim(substr(strstr($val, $path), strlen($path)));
+                   
 
                 }else{
                     $success = false;
@@ -1702,7 +1696,7 @@ function __fixDirectPathImages(){
                 }
                 */
 
-                //print '<xmp>'.$val_orig.'</xmp>';
+               
                 $cnt2++;
             }
 
@@ -1721,7 +1715,7 @@ function __fixDirectPathImages(){
                     print $rec_ID.' '.$surl.'<br>';
 
                     $val = substr($val, $k+$m+1);//rest
-                    //$val = trim(substr(strstr($val, $path), strlen($path)));
+                   
 
                 }else{
                     print 'end of url not found '.substr($val, $k, 50);

@@ -418,7 +418,7 @@ $.widget( "heurist.embedDialog", {
         let opt, selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope, '', 'select...');
-        //window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Create new layout');
+        
         
         //page type
         let local_trmID = $Db.getLocalID('trm', '2-6254');

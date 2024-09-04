@@ -2048,7 +2048,7 @@ window.hWin.HEURIST4.dbs = {
             }else{
                 t_idx[new_parent_id] = children;
             }
-           //window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links',t_idx);
+           
         }
     },
     

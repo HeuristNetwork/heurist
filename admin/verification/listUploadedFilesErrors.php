@@ -159,7 +159,7 @@ $mysqli = $system->get_mysqli();
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
-                    //array_push($dups_ids, intval($res4[0]));
+                   
                 }
                 $res3->close();
 
@@ -207,7 +207,7 @@ $mysqli = $system->get_mysqli();
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
-                    //array_push($dups_ids, intval($res4[0]));
+                   
                 }
                 $res3->close();
 
@@ -254,7 +254,7 @@ $mysqli = $system->get_mysqli();
 
                 if(!$res3){
                     //$this->system->addError(HEURIST_DB_ERROR, 'Unable to query recUploadedFiles for file '
-                    //                    . $res[0], $mysqli->error);
+                   
                     continue;
                 }
 
@@ -279,7 +279,7 @@ $mysqli = $system->get_mysqli();
                             //files are the same
                             $is_unique = false;
                             $dups_files[$id]['dupes'][ $res4['ulf_ID'] ] = $res_fullpath;
-                            //array_push($file_a['dupes'], array($res4['ulf_ID'] => $res_fullpath));
+                           
                             break;
                         }
                     }
@@ -502,7 +502,7 @@ $mysqli = $system->get_mysqli();
                             if(window.hWin.HEURIST4.util.isnull(context) || window.hWin.HEURIST4.util.isnull(context['result'])){
                                 window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
-                                //window.hWin.HEURIST4.msg.showMsg(context['result']);
+                                
                                 var url = window.hWin.HAPI4.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+window.hWin.HAPI4.database;
 
                                 if(window.parent.parent.addDataMenu)
@@ -663,7 +663,7 @@ $mysqli = $system->get_mysqli();
 
                         var res = [];
                         $.each($('input.'+action_name+':checked'), function(idx, item){
-                            var ulf_id = $(item).attr('data-id');//parent().text();
+                            var ulf_id = $(item).attr('data-id');
                             res.push(ulf_id);
                         });
 

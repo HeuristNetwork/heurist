@@ -101,7 +101,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //actions for redirection https://hist/heurist/[dbname]/web/
             if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
                 installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
-                if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
+                if(installDir=='/') installDir = '/h6-alpha/';/* to change back to '/heurist/'; */
             }else{
                 installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
             }
@@ -1662,7 +1662,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             , search_new: function (request, callback) {
                 // start search
-                //window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
+                
 
                 _callserver('record_output', request, callback);    //standard search
             }

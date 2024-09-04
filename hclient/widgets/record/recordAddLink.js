@@ -162,7 +162,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             $(opt).attr('data-select', 1);
             selScope.appendChild(opt);
             
-            //window.hWin.HEURIST4.ui.addoption(selScope,rty, 'Selected records: ' + $Db.rty(rty,'rty_Plural'));
+            
         }
           
         if(!(rty>0)){

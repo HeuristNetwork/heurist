@@ -361,7 +361,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     if(parent_node){
         parent_node
         .on("mouseover", function(d) {
-            if(drag_link_source_id!=null){
+            if(window.drag_link_source_id!=null){
                 //cancel timer
                 if(drag_link_timer>0){
                     clearTimeout(drag_link_timer);
@@ -372,7 +372,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
             }            
         })
         .on("mouseout", function(d) {
-            if(drag_link_source_id!=null){
+            if(window.drag_link_source_id!=null){
                 drag_link_timer = setTimeout(function(){
                     window.drag_link_target_id = null;
                     if(window.drag_link_line) window.drag_link_line.attr("stroke","#ff0000");
@@ -1003,7 +1003,7 @@ function _addNewLinkField(source_ID, target_ID){
             width: dim.w,
             afterclose: function(){
                 //remove link line
-                drag_link_source_id = null;
+                window.drag_link_source_id = null;
                 if(window.drag_link_line) window.drag_link_line.remove();
                 window.drag_link_line = null;
             },
@@ -1036,7 +1036,7 @@ function _linkTwoRecords(source_ID, target_ID){
             settings.onRefreshData.call(this);
         }
 
-        drag_link_source_id = null;
+        window.drag_link_source_id = null;
         if(window.drag_link_line) window.drag_link_line.remove();
         window.drag_link_line = null;
     }                            

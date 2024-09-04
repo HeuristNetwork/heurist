@@ -4303,7 +4303,7 @@ $.widget( "heurist.mapping", {
                 __addDrawItems(l2);
                 this.drawZoomTo();
             }catch(e){
-                //window.hWin.HEURIST4.msg.showMsgFlash('Invalid geojson', 2000);
+                
             }
     },   
     

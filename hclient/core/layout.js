@@ -279,7 +279,7 @@ function HLayout(args) {
               togglerLength_closed:40,
               onopen_start : function(){ 
                   let  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
-                  let mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
+                  let mw = 250; 
                   if(w<310){
                       let tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
                       window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);

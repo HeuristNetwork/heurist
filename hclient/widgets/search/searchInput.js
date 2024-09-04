@@ -251,7 +251,7 @@ $.widget( "heurist.searchInput", {
             
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
             
-            let request = {}; //window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+            let request = {}; 
 
             request.q = qsearch;
             request.w  = this.options.search_domain;

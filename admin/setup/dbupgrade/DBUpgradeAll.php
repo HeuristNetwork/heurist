@@ -92,8 +92,8 @@ $mysqli = $system->get_mysqli();
 
         }else{
             //check that v1.3 has
-            //hasTable($mysqli, 'usrRecPermissions', $db_name);
-            //hasTable($mysqli, 'sysDashboard', $db_name);
+           
+           
         }
 
 

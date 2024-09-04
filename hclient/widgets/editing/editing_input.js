@@ -534,7 +534,7 @@ $.widget( "heurist.editing_input", {
         }else if(this.detailType=='file' || this.detailType=='geo'){
             values_to_set = this.options.values;
         }else {
-            values_to_set = this.options.values; //window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
+            values_to_set = this.options.values; 
         }
         
         //recreate input elements and assign given values
@@ -1712,7 +1712,7 @@ $.widget( "heurist.editing_input", {
 
                     browseTerms(this, $input, value);
 
-                    //window.hWin.HEURIST4.ui.initHSelect($input, false);
+                    
                     
                     $input.hSelect({
                         'open': (e) => {
@@ -4654,7 +4654,7 @@ $.widget( "heurist.editing_input", {
                                              },
                                              selector_function);
                                              
-                            //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                            
                         }
                     }
                     if(!sTitle){
@@ -4692,7 +4692,7 @@ $.widget( "heurist.editing_input", {
                                         ele.show();
                                         ele.parent().find('.sel_link2').hide(); //hide big button to select new link
                                     }
-                                    //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
+                                    
                                 }
                             }
                         );

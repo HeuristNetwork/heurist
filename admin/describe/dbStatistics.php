@@ -433,9 +433,9 @@ if($is_csv){
                     })
                     .dialog("open");
 
-                    //$dlg.parent('.ui-dialog').css({top:150,left:150});
+                   
 
-                    //$(document.body).scrollTop(0);
+                   
 
                 }
 
@@ -455,7 +455,7 @@ if($is_csv){
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                //submit.parentNode.removeChild(submit);
+                               
                                 $("#div-pw").hide();
                                 var ele = $("#authorized");
                                 ele.css({'background-image': 'url(../../hclient/assets/loading-animation-white.gif)',

@@ -27,7 +27,6 @@ use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
-//header(HEADER_CORS_POLICY);
 header(CTYPE_JSON);
 
 $system = new hserv\System();
@@ -81,7 +80,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		}
 
 		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
-		//$system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
+	
 		$rtn = json_encode($response);
 
 		print $rtn;
@@ -184,7 +183,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$lastmod_logic = $mysqli->real_escape_string( filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING) );
 		$lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
 		$lastmod_period = intval($db_request['lastmod_period']);
-		//$lastmod_unit = $mysqli->real_escape_string( filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING) );
+	
         //to avoid injection
         $lastmod_unit = 'ALL';
         switch (strtoupper(@$db_request['lastmod_unit'])) {
@@ -366,7 +365,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 //
 function getDatabaseDetails($mysqli, $db_list){
 
-	//global $mysqli;
+
 	$details = array();
 
 	// Retrieve record count and last update (record or structure)

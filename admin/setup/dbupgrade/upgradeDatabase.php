@@ -162,7 +162,7 @@ if(!defined('PDIR')){
                                         }
                                     }
                                     if($trg_min==3 && $trg_sub>0){ //to 1.3.16
-                                        //print "<p>Upgraded to $trg_maj.$trg_min.$trg_sub</p>";
+                                       
                                     }else{
                                         print "<p>Upgraded to $src_maj.$src_min.0</p>";
                                     }

@@ -184,7 +184,7 @@ title: "Overview"
 
                         //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                 //reload main menu

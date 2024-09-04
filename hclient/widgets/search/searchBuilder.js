@@ -793,7 +793,7 @@ $.widget( "heurist.searchBuilder", {
             }
             this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
-            //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
+            
 
             //'title','modified',
             let allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',

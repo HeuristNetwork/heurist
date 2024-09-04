@@ -63,8 +63,6 @@ if (@$argv) {
         }
     }
 
-//print print_r($ARGV,true)."\n";
-//exit;
 //sudo php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php -- -database camil_inthemarginofstone
 //camillaC_Pakistan_Villages
     $arg_database = null;

@@ -4118,13 +4118,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             ele.find('#btnRecSave').css('visibility', mode);
             ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
             
-            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
-            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
+            
+            
             
             window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
             window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
             
-            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
+            
             
             //save buton is always enabled - just greyout in nonchanged state
             if(mode=='hidden'){
@@ -6781,7 +6781,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             window.hWin.HAPI4.RecordMgr.search(request, (response) => {
 
                 if(response.status != window.hWin.ResponseStatus.OK){
-                    //window.hWin.HEURIST4.msg.showMsgErr(response);
+                    
                     that._checkStructureFromSource(NEXT_ATTEMPT);
                     return;
                 }
@@ -6816,7 +6816,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 !response?.data?.rectypes?.names ||
                 Object.keys(response?.data?.rectypes?.names).length == 0){
 
-                //window.hWin.HEURIST4.msg.showMsgErr(response);
+                
                 that._source_db.id = 0;
                 that._checkStructureFromSource(NEXT_ATTEMPT);
                 return;

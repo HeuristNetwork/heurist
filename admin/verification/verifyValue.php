@@ -197,7 +197,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
 
         //label may have fullstop in its own name - so we always search with and without hierarchy
-        $withHierarchy = true;//(strpos($label,'.')>0);
+        $withHierarchy = true;
 
         self::initialize();
         self::getTerms();

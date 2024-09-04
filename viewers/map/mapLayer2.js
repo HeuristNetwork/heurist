@@ -321,7 +321,7 @@ function HMapLayer2( _options ) {
 
         let worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
 
-        let image_extent = null; //window.hWin.HEURIST4.geo.parseWorldFile( worldFileData, image_width, image_height);
+        let image_extent = null; 
 
         if(image_extent==null){
             image_extent = _getBoundingBox();  //get wkt bbox from DT_GEO_OBJECT 

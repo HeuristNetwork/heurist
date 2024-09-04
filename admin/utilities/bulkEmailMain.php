@@ -628,11 +628,11 @@ if(!$has_emails || empty($emails)) {
 
                         if($(event.target).val()==='ALL') {
                             window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
-                            //window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), true);
+                            
                             window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), true);
                         } else {
                             window.hWin.HEURIST4.util.setDisabled($("#recModified"), false);
-                            //window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic-button"), false);
+                            
                             window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), false);
                         }
                     }

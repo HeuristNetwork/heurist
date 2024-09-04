@@ -736,7 +736,7 @@ $.widget( "heurist.resultList", {
                         if(this.div_content.mediaViewer('instance')) this.div_content.mediaViewer('clearAll');
                     }
                     
-                    //window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
+                    
             }});
         }
 
@@ -2317,7 +2317,7 @@ $.widget( "heurist.resultList", {
         }
         
 
-        //window.hWin.HEURIST4.util.stopEvent(event);
+        
         
         this.triggerSelection();
     },
@@ -4514,7 +4514,7 @@ $.widget( "heurist.resultList", {
                     }
                 });
             }else{
-                //window.hWin.HEURIST4.msg.showMsgErr(response);
+                
             }
         });
     },

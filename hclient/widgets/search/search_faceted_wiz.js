@@ -570,7 +570,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 let bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", null, 3, 64 );
                 if(!bValid){
                     svs_name.focus();
-                    //window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR("Define Saved search name"), 2000, "Required", svs_name);
+                    
                     //setTimeout(function(){svs_name.focus();},2200);
                     return;
                 }else{
@@ -2323,7 +2323,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
         if(prevent_real_save===true || this._save_in_porgress===true) return;
         this._save_in_porgress = true;
-        //window.hWin.HEURIST4.util.setDisabled(this.element.parent().find('.ui-dialog-buttonset').find("#btnSave"), true);
+        
 
         let request = {svs_Name: svs_name.val(),
             svs_Query: JSON.stringify(this.options.params),   //$.toJSON

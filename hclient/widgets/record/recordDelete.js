@@ -373,7 +373,7 @@ function(){
                                         ' record' + (response.data.noaccess>1?'s':''));
                            }     
                             
-                            //window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
+                            
                             window.hWin.HEURIST4.msg.showMsgDlg(msg);
                             
                         }else{

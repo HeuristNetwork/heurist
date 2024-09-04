@@ -296,7 +296,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
                             //    foreach($records as $index) {
                             foreach($records as $record) {
-                                    //  $record = $records[$index];
+                                   
                                 $rec_ID = intval($record['rec_ID']);
                                 $is_master = ($rec_ID== $master_rec_id);
                                 print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$rec_ID.'">';
@@ -470,7 +470,7 @@ EXP;
 
                                                 if($m_detail['dtl_Geo']){
                                                     if(trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])){
-                                                        //print $m_detail['dtl_Geo'].'  '.$d_detail['dtl_Geo'];
+                                                       
                                                         array_push($removeIndices,$i);
                                                     }
                                                 }elseif($m_detail['dtl_UploadedFileID']) {
@@ -916,7 +916,7 @@ function do_fix_dupe()
 
         if(!($master_pers_record && $delete_dup_pers_record)) {continue;}
 
-        //        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
+       
         if(strlen(@$delete_dup_pers_record['bkm_PwdReminder'])>0){
             $master_pers_record['bkm_PwdReminder'] = $master_pers_record['bkm_PwdReminder'].";". $delete_dup_pers_record['bkm_PwdReminder'];
         }

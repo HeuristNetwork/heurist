@@ -110,7 +110,7 @@ window.hWin.HEURIST4.ui = {
     {
         let option = document.createElement("option");
         //option = new Option(text,value);
-        option.text = text; //window.hWin.HEURIST4.util.htmlEscape(text);
+        option.text = text; 
         option.value = value;
         if(disabled===true){
             option.disabled = true;
@@ -1671,7 +1671,7 @@ window.hWin.HEURIST4.ui = {
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
             if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
-                //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
+                
                 showLoginDialog(isforsed, callback);
             }else{
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', function(){

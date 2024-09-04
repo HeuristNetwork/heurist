@@ -139,7 +139,7 @@ class SystemEmailExt {
 		} else {
 
 			$this->set_error('No email body has been provided');//, the Heurist team has been notified
-			//$system->addError(HEURIST_ERROR, "Bulk Email System: The email's body (emailBody) is missing from the form data. Data => " . print_r($data, TRUE));
+		
 			return -1;
 		}
 
@@ -783,7 +783,7 @@ class SystemEmailExt {
             foreach ($this->user_invalid_email as $info) {
                 $user_list .= "&nbsp;&nbsp;". $info[0] ." ". $info[1]. '  '. $info[2] .' ('.$info[3].')'.": ". $info[4] ."<br>";
             }
-            $user_list .= "}";//.$this->get_log();
+            $user_list .= "}";
         }
 
 		$user_list_size = strlen($user_list);// User List part in bytes

@@ -67,7 +67,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
 
         let opt, selScope = this.selectRecordScope.get(0); //selector
-        //window.hWin.HEURIST4.ui.addoption(selScope,0,'please select the records to be affected …');
+        
 
         let rty_ID = 0;
         let rectype_Ids = this._currentRecordset.getRectypes();

@@ -133,7 +133,7 @@ if (@$argv) {
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = DIV_E.$tabs0;
-    //exit('This function must be run from the shell');
+   
 }
 
 use hserv\utilities\DbUtils;
@@ -151,8 +151,8 @@ if(!$is_shell){
     $sysadmin_pwd = USanitize::getAdminPwd();
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-        //$response = $system->getError();
-        //print $response['message'];
+       
+       
         exit;
     }
 }
@@ -193,7 +193,7 @@ if(!$arg_no_action){
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
     }else{
-        //echo $backup_sysarch.' exists'."\n";
+       
     }
 
     echo 'Deleted databases: '.$backup_root."\n";
@@ -210,9 +210,7 @@ if(!$arg_no_action){
 /*TMP
 //Arche_RECAP
 //AmateurS1
-//$databases = array('ARNMP_COMET','ArScAn_Material','arthur_base','arvin_stamps');
 $databases = array('AmateurS1');
-//$databases = array('ARNMP_COMET');
 */
 
 set_time_limit(0);//no limit
@@ -387,8 +385,8 @@ if($need_email){
 
             $report =  $diff.' months, n='.$vals['cnt'].' INACTIVE';
         }else{
-            //echo ' '.$vals['cnt'].' records '.$diff.' months. OK'."\n";
-            //no report for db without action echo $eol;
+           
+           
         }
 /*
 * Dump and bz2 import tables that are
@@ -461,7 +459,7 @@ if($need_email){
 
             $cnt_dumped = 0;
 
-            //$sif_purge = array( 3 => 'import20210531163600');
+           
             $arc_cnt = 0;
             $cnt_dumped = 0;
             if(ALLOW_PURGE_IMPORTTABLES){
@@ -473,14 +471,10 @@ if($need_email){
 
                     $file_name = preg_replace('/[()]/g','',$file_name);
 
-//echo $file_name."\n";
-//echo strlen($file_name)."\n";
                     $len = strlen($file_name);
                     if($len>96){ //100 is max for tar file
                         $len = $len-100+26;
                         $file_name = substr($file_name,0,-$len).substr($file_name,-19);
-//echo $file_name."\n";
-//echo strlen($file_name)."\n";
                     }
 
                     $dumpfile = $backup_imports2."/".$file_name.'.sql';
@@ -568,9 +562,9 @@ if($need_email){
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
                             $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
 
-                            //echo $db_name.' purge sysArchive to '.$dumpfile;
+                           
                             $dump->start($dumpfile);
-                            //echo $db_name.' ... dumped ';
+                           
                             $res = true;
                         } catch (Exception $e) {
                             $report .= ("Error: ".$e->getMessage()."\n");
@@ -592,7 +586,7 @@ if($need_email){
 
                             $destination = $destination.'.tar';
 
-                            //echo ' ... archived to '.$destination."\n";
+                           
 
                             $archOK = UArchive::createBz2($dumpfile, null, $destination, false);
                         }else{
@@ -603,7 +597,6 @@ if($need_email){
 
                         if($archOK){
                             //clear table
-//                            $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
                             $query = 'DROP TABLE sysArchive';
                             $mysqli->query($query);
                             $mysqli->query("CREATE TABLE sysArchive (
@@ -670,7 +663,7 @@ function exclusion_list(){
 
     $res = array();
     $fname_ = dirname(__FILE__)."/../../../databases_not_to_purge.txt";
-    //$fname_ = '/var/www/html/HEURIST/databases_not_to_purge.txt';
+   
     $fname = realpath($fname_);
     if($fname==false || !file_exists($fname)){
         
@@ -683,7 +676,7 @@ function exclusion_list(){
         return false;
     }
     
-    //ini_set('auto_detect_line_endings', 'true');
+   
     $handle = @fopen($fname, "r");
     while (!feof($handle)) {
         $line = trim(fgets($handle, 100));

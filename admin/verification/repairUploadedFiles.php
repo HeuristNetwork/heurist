@@ -44,7 +44,6 @@ if(!$system->init(@$req_params['db'])){
     return;
 }
 
-//$response = array("status"=>HEURIST_OK, "data"=> $res);
 
 if (!$system->is_dbowner()) {
     $response = $system->addError(HEURIST_REQUEST_DENIED,

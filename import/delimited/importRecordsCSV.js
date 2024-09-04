@@ -1232,7 +1232,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         cb.prop('checked',true);
                         if(keep_field_key!=fields_affected[i]){ //do not disable itself
                             //NO MORE DISABLITY since 2016-11-29
-                            //window.hWin.HEURIST4.util.setDisabled(cb, true);
+                            
                             //cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                         }
                     }
@@ -3134,7 +3134,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             if(key_idx<0){ //key field not defined
                 if($('#sa_match1').is(':checked')) $('#sa_match0').prop('checked', true);
-                //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), true);
+                
                 //$('label[for="sa_match1"]').css('color','lightgray');
                 $('#sa_match1').hide();
                 $('label[for="sa_match1"]').hide();
@@ -3142,7 +3142,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $('#sa_match1').show();
                 $('label[for="sa_match1"]').show();
                 $('#lbl_sa_match1').html('Use <i>'+imp_session['columns'][key_idx]+'</i>'); //Skip matching
-                //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), false);
+                
                 //$('label[for="sa_match1"]').css('color','');
                 
             }

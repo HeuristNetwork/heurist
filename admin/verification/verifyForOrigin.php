@@ -180,7 +180,7 @@
                  //convert constraints to concept codes
                  $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                  $codes = array();
-                 //$codes[] = $row['dty_PtrTargetRectypeIDs'];
+                
                  foreach($rids as $rty_id){
                      $codes[] = $rty_Codes[$rty_id];
                  }
@@ -264,8 +264,8 @@
                 if($stmt->execute()){
                     $res = $stmt->get_result();
                 }
-                //$query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
-                //$res = $mysqli->query($query);
+               
+               
 
                 if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error); return; }
                 $row = $res->fetch_assoc();
@@ -301,7 +301,7 @@
                      //convert constraints to concept codes
                      $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                      $codes = array();
-                     //$codes[] = $row['dty_PtrTargetRectypeIDs'];
+                    
                      foreach($rids as $r_id){
                          $code = @$rty_Codes2[$r_id];
                          if($code){
@@ -377,7 +377,7 @@
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
                             $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);
-                            //array_push($missing2, $rty_code.'  '.@$rty_Names[$rty_code] );
+                           
                         }
                     }
                     if(count($missing)>0){

@@ -213,7 +213,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                         show_guest_login = false;
                     }else{
                         //$dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
-                        //window.hWin.HEURIST4.ui.addoption(sel[0],0,'Heurist');
+                        
                     }
                     
                     for(let id of sp_keys){

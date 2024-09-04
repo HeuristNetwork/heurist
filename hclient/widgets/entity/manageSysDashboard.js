@@ -305,7 +305,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             /* this feature is disabled
             this.show_on_startup.prop('checked', (this.usrPreferences.show_on_startup==1));// || this.usrPreferences.show_as_ribbon==1
             this.show_as_ribbon.prop('checked', this.usrPreferences.show_as_ribbon==1);
-            //window.hWin.HEURIST4.util.setDisabled(this.show_on_startup, (this.usrPreferences.show_as_ribbon==1));
+            
             */
 
         }

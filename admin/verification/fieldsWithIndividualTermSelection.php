@@ -142,7 +142,7 @@ $is_csv = (@$_REQUEST['html']!=1);
                     .'<td>'.$vocab_count.TD.count($terms).TD.($is_idis?count($nonTerms):'').TD.intval($rec_usage).TR_E;
             }else {
                 //'",'.$row[3]. ($is_vocab?'1':'').','.($is_vocab?'':'1').
-                //print $db_name.',"'.$row[0].'",'.$row[3].','.($is_idis?'1':'').PHP_EOL;
+               
 
                 $record_row = array($db_name, $row[0], $row[3], $row[4], $vocab_count, count($terms), ($is_idis?count($nonTerms):''), $rec_usage);
                 fputcsv($fd, $record_row, ',', '"');

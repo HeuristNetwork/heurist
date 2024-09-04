@@ -303,7 +303,7 @@ function handleSettingsInUI() {
 
         if(window.currentMode=='icons'){
             let isLabelVisible = (newval=='on');
-            //window.d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
+            
             if(isLabelVisible) {
                 visualizeData();
             }else{
@@ -416,7 +416,7 @@ function changeViewMode(mode){
     if(mode!=window.currentMode){
         if(mode=='infoboxes'){ // && window.currentMode=='icons'
             window.currentMode = 'infoboxes';
-            //window.d3.selectAll(".icon-mode").style('display', 'none');
+            
             window.d3.selectAll(".info-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode-full").style('display', 'none');
             window.d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
@@ -443,7 +443,7 @@ function changeViewMode(mode){
         }else{
             
             window.currentMode = 'icons';
-            //window.d3.selectAll(".icon-mode").style('display', 'initial');
+            
             window.d3.selectAll(".info-mode").style('display', 'none');
             window.d3.selectAll(".info-mode-full").style('display', 'none');
             window.d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers

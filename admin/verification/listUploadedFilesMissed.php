@@ -106,7 +106,7 @@ $missed_folders = array();
 
 foreach ($databases as $idx=>$db_name){
 
-    //mysql__usedatabase($mysqli, $db_name);
+   
     list($db_full_name, $db_name) = mysql__get_names($db_name);// full name used for query, short hand used for filestore
 
     $db_full_name = preg_replace(REGEX_ALPHANUM, "", $db_full_name);//for snyk
@@ -165,7 +165,7 @@ if(!(is_array($missed) && count($missed)>0)){
 
     print '<div style="padding-top:20px;color:red">There are <b>'.count($missed).' of '.$total_count
          .'</b> registered files are missed</div>';
-    //print '<div><a href="#">Download report as CSV</a></div>';
+   
 }
 
 if(!$is_included){

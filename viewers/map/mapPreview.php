@@ -223,7 +223,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
             if(target_database==window.hWin.HAPI4.database && !window.hWin.HAPI4.has_access()){
                 showLoginDialog(false, function(){_exportMapSpace();});
-                //window.hWin.HAPI4.SystemMgr.verify_credentials(function(){_exportMapSpace();}, 0);
+                
                 return;
             }
 

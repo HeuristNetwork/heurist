@@ -604,7 +604,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
  
                 if(action=='show_in_list' || action=='hide_in_list'){
                     
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    
                     let newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({dty_ID:recID, dty_ShowInLists:newVal });
                     
@@ -1151,7 +1151,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //this._editing.setDisabled( setdis )
         //let ele = this._editing.getFieldByName('dty_Name');
         //ele.editing_input('setDisabled', false);
-        //window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), setdis );
+        
       
         //find base field to suggest
         if(input_name.val().length>2){

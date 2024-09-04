@@ -2133,7 +2133,7 @@ this_id       : "term"
         setQueryMode: function(val){
             let isChanged = _sQueryMode != val;
             _sQueryMode = val;
-            //window.hWin.HEURIST4.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
+            
 
 
             if(document.getElementById('cbUseAllRecords1')){

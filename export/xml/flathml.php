@@ -1196,7 +1196,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         output( XML_HEADER."\n" );
 
         //add attributes
-        $recAttr['xmlns'] = 'http:s//heuristnetwork.org';
+        $recAttr['xmlns'] = 'https://heuristnetwork.org';
         $recAttr['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
         $recAttr['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation_and_templates/scheme_record.xsd';
     }

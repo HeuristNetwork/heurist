@@ -787,7 +787,7 @@ function afterPageLoad(document, pageid, eventdata){
             setTimeout(function(){ afterPageLoad(document, pageid, eventdata) },500);
             return;
         }else{
-            //window.hWin.HEURIST4.msg.showMsgErr('Some widgets on this page may not inited properly');
+            
         }
     }
 

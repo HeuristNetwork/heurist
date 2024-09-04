@@ -318,7 +318,7 @@ $.widget( "heurist.resultListCollection", {
     
     warningOnExit: function( callback_continue ){
 
-        let col = this._collection; //window.hWin.HEURIST4.collection.collectionGet();
+        let col = this._collection; 
         if( col && col.length>0 ){
             
                 let that = this, $dlg, buttons = {};

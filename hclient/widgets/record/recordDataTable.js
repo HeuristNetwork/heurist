@@ -455,7 +455,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     {
         let isdisabled = this._super();
         
-        //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
+        
         
         let rtyID = this.selectRecordScope.val();
         //reload treeview

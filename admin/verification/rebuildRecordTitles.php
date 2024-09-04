@@ -49,7 +49,7 @@ $rty_ids_list = null;
 if(@$_REQUEST['recTypeIDs']){
     $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
-    //$rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
+   
     if(count($rty_ids)>0) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
@@ -303,7 +303,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             $unchanged_count++;
 
         }elseif (! preg_match('/^\\s*$/', $new_title)) {    // if new title is blank, leave the existing title
-            //$updates[$rec_id] = $new_title;
+           
             $updates[] = $rec_id;
             $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
                 $mysqli->real_escape_string($new_title).'" where rec_ID='.$rec_id);
@@ -352,7 +352,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
 
     $q_updates = '';
     if(count($updates)>1000){
-        $q_updates = 'sortby:-m';//'&limit='.count($updates);
+        $q_updates = 'sortby:-m';
     }elseif(count($updates)>0){
         $q_updates = 'ids:'.implode(',',$updates);
     }

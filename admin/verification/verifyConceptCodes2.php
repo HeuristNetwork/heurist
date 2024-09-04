@@ -91,7 +91,7 @@ $mysqli = $system->get_mysqli();
         $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM `'
             .$db_name.'`.defDetailTypes WHERE  dty_OriginatingDBID>0 AND '
             ."(dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL)";
-            //'(NOT (dty_IDInOriginatingDB>0)) ';
+           
 
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }

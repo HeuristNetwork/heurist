@@ -155,7 +155,7 @@ $.widget( "heurist.navigation", {
                 that._onGetMenuData();   
             }else{
                 $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.divMainMenu);
-                //window.hWin.HEURIST4.msg.showMsgErr(response);
+                
             }
         });
     },

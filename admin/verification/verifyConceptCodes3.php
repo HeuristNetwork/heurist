@@ -107,7 +107,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         continue;
 */
 
-        //$registered[$db_name] = $ver;
+       
 
         $rec_types = array();
         $det_types = array();
@@ -120,7 +120,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             ." FROM `$db_name`.defRecTypes "
             .' WHERE (rty_OriginatingDBID="" OR rty_OriginatingDBID IS NULL '
             .'OR rty_IDInOriginatingDB="" OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)';
-            //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
+           
 
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
@@ -165,7 +165,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             ." WHERE  dty_OriginatingDBID='' OR dty_OriginatingDBID IS NULL " //
             ."OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL ";
 
-            //.' OR dty_Name LIKE "% 2" OR dty_Name LIKE "% 3"';
+           
 
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }

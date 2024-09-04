@@ -213,7 +213,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                 /*
                 if(this.options.add_new_record){
                     //create new record 
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+                    
                     //this._addNewRecord(this.options.rectype_for_new_record, sel);                     
                 }else{
                     //pass mapped values and close dialog

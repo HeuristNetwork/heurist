@@ -1101,7 +1101,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                     node.setExpanded(true);
                 });            
                 _updateActionIcons(500);//it inits tinyMCE also
-            } //_initTinyMCE();
+            } //_initTinyMCE
             
         }else{
 
@@ -2138,7 +2138,7 @@ function(value){
                         page_was_modified = false;
                         page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
                         
-                        //window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                        
 
                         /* 2022-01-04 IJ does not want direct name of web page title
                         if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {

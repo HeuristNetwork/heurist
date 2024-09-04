@@ -72,7 +72,7 @@ if (@$argv) {
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = DIV_E.$tabs0;
-    //exit('This function must be run from the shell');
+   
 }
 
 
@@ -234,7 +234,7 @@ function exclusion_list(){
     $res = array();
     $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_purge.txt");
     if($fname!==false && file_exists($fname)){
-        //ini_set('auto_detect_line_endings', 'true');
+       
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));

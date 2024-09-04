@@ -496,7 +496,7 @@ $.widget( "heurist.svs_list", {
     reloadSavedSearches: function( callback ){
         
         let that = this;
-        //window.hWin.HAPI4.currentUser.ugr_SvsTreeData = this.__default_TreeData();
+        
         window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.allowed_UGrpID},
                 function(response){
 
@@ -694,7 +694,7 @@ $.widget( "heurist.svs_list", {
                                     that.element.find('div[grpid='+response.data['ugr_ID']+']').attr('title',
                                         that.options.edit_data = response.data['ugr_Description']);
                                 }else{
-                                    //window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                                    
                                 }
                             }
                         );                            
@@ -1365,7 +1365,7 @@ $.widget( "heurist.svs_list", {
                                 
                             svs_ID = data.node.key; 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._QUERY];
-                            qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._NAME];
+                            qname   = data.node.key; 
                         }
                     }
 
@@ -2024,7 +2024,7 @@ $.widget( "heurist.svs_list", {
             window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID]){
                                 
             let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._QUERY];
-            let qname   = query_name || svs_ID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._NAME];
+            let qname   = query_name || svs_ID; 
             
             this.doSearch( svs_ID, qname, qsearch, null );
         }else{
@@ -2570,7 +2570,7 @@ $.widget( "heurist.svs_list", {
                     }
                     catch (err) {
                         console.error(err);
-                        //window.hWin.HEURIST4.msg.showMsgErr(err);
+                        
                     }
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);

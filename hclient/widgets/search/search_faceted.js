@@ -1687,7 +1687,7 @@ $.widget( "heurist.search_faceted", {
             
             //clear main result set
             this.doReset();
-            //window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
+            
         
             return; 
         }else if(!this.options.ispreview && this.options.showresetbutton && !this.options.params.ui_spatial_filter){

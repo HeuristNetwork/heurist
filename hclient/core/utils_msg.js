@@ -636,7 +636,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dosframe.hide();
             //callback function to resize dialog from internal frame functions
             $dosframe[0].doDialogResize = function(width, height) {
-                //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
+                
                 /*
                 let body = $(this.document).find('body');
                 let dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
@@ -842,9 +842,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 function __adjustOneResize(e){
                     let ele = e ?$(e.target) :options.container;
 
-                    let dialog_height = ele.height(); //window.innerHeight - $dlg.parent().position().top - 5;
+                    let dialog_height = ele.height(); 
                     $dlg.dialog( 'option', 'height', dialog_height);
-                    let dialog_width = ele.width(); //window.innerWidth - $dlg.parent().position().left - 5;
+                    let dialog_width = ele.width(); 
                     $dlg.dialog( 'option', 'width', dialog_width);
                 }
                 //$(window).resize(__adjustOneResize)

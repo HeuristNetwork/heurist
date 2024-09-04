@@ -2503,7 +2503,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //record is already updated in _saveEditAndClose
         //this._super( recID, fieldvalues );
         if(is_usual_way){
-            //window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
+            
         }
 
         // Check if user is going to update the base field's name or help text

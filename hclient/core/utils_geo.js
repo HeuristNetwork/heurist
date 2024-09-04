@@ -434,7 +434,7 @@ window.hWin.HEURIST4.geo = {
                 break;
 
             case "r":  //rectangle
-            case "rect": //matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);break;
+            case "rect":
             case "pl": //polygon
             case "polygon":
                 matches = wkt.match(/POLYGON\s?\(\((.+)\)\)/i);

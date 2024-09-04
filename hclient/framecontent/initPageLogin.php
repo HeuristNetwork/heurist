@@ -125,15 +125,15 @@ function verify_credentials( show_warning ){
                     function(){
                         //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg2.dialog( "close" );
-                        //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);
+                        
                         showLoginDialog(false, function( is_logged ) {
-                            //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
+                            
                         }, win_mappreview, 'heurist-clearinghouse-login-dialog');
                     }});
             }else{
                 //show login dialog at once
                 showLoginDialog(false, function(is_logged){
-                            //window.hWin.HAPI4.verify_credentials( true );
+                            
                         }, win_mappreview, 'heurist-clearinghouse-login-dialog');
             }
 

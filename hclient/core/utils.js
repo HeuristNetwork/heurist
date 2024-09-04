@@ -698,13 +698,6 @@ window.hWin.HEURIST4.util = {
                     }
 
                     let res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
-                    /*
-                    if(res.indexOf('-')==0){ //BCE
-                        res = res.substring(1);
-                        //for proper parsing need 6 digit year
-                        res = '-00'+res;//.substring(res.length));
-                    }
-                    */
                     return res;
                 }else{
                     return '';
@@ -1330,11 +1323,11 @@ function tinymceURLConverter(url, node, on_save, name)
 {
     if(url.indexOf(window.hWin.HAPI4.baseURL_pro)===0)
     {
-        url = url.replace(window.hWin.HAPI4.baseURL_pro, './'); //'../heurist/');
+        url = url.replace(window.hWin.HAPI4.baseURL_pro, './');
         
     }else if(url.indexOf(window.hWin.HAPI4.baseURL)===0)
     {
-        url = url.replace(window.hWin.HAPI4.baseURL, './'); //../heurist/');
+        url = url.replace(window.hWin.HAPI4.baseURL, './');
     }
 
     // Return URL

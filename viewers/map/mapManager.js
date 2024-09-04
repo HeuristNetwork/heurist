@@ -1386,7 +1386,7 @@ function HMapManager( _options )
                 }else{
                     val = options.visible_panels[val];
                     is_collapsed = !window.hWin.HEURIST4.util.istrue(val, false);
-                    is_visible = (val!=-1);//window.hWin.HEURIST4.util.istrue(val, false);
+                    is_visible = (val!=-1);
                 }
                 
                 if(is_visible){
