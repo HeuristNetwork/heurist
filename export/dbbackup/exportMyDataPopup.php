@@ -788,7 +788,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                 if(!$res){
                     print DIV_E;
-                    report_message("Sorry, unable to generate MySQL database dump. ".$system->getError()['message'].'  '.$please_advise, true, true);
+                    report_message("Sorry, unable to generate MySQL database dump. ".$system->getErrorMsg().'  '.$please_advise, true, true);
                 }
 
                 if($separate_sql_zip){ // copy sql dump to separate directory
@@ -1017,7 +1017,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $rtn = uploadFileToNakala($system, $params);//upload database archive
 
                         if($rtn === false){
-                            $rtn = $system->getError()['message'];
+                            $rtn = $system->getErrorMsg();
                             echo_flush2('failed<br>');
                         }else{
                             echo_flush2('finished<br>');

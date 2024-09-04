@@ -53,7 +53,7 @@ if($is_included){
     $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
-        print $system->getError()['message'];
+        print $system->getErrorMsg();
         return;
     }
     if(!$system->is_admin()){ //  $system->is_dbowner()

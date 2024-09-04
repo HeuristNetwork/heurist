@@ -210,7 +210,7 @@ if(count($blanks)>0){
 
     if( is_bool($res) && !$res ){
 
-        print error_Div($system->getError()['message']);
+        print error_Div($system->getErrorMsg());
 
     }else{
         print '<div><span id=total_count>'.intval($res['total_count']).'</span> records in total</div>';

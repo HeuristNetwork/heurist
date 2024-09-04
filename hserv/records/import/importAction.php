@@ -3407,7 +3407,7 @@ public static function importTerms($params){
 
                 $res = $def_terms->batch_action();
                 if(!$res){
-                    $results['error'][$idx] = self::$system->getError()['msg'];
+                    $results['error'][$idx] = 'batch_action: '.self::$system->getErrorMsg();
                     continue 2;
                 }
 
@@ -3430,13 +3430,13 @@ public static function importTerms($params){
                 'fields' => $new_terms,
                 'term_separator' => $trm_Separator
             ]);
-
+            
             $res = $def_terms->batch_action();
             if(!$res){
-                $results['error'][$idx] = self::$system->getError()['msg'];
+                $results['error'][$idx] = 'batch_action(2): '.self::$system->getErrorMsg();
                 continue;
             }
-
+            
             if(!empty($res)){
                 $results['success'][$idx] = array_merge($results['success'][$idx], $res);
                 $total += count($res);

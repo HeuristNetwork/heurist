@@ -109,7 +109,7 @@ function __correctAbsPaths(){
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();
         if(!$res){
-            print 'ERROR: '.$system->getError()['message'];
+            print 'ERROR: '.$system->getErrorMsg();
         }
 
         print '<hr>';

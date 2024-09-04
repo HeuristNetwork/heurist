@@ -181,7 +181,7 @@ foreach ($databases as $idx=>$db_name){
     if($success){
         echo $tabs0.'Email sent.'.$eol;
     }else{
-        echo $tabs0.'Unable to send email; Error: ' . $system->getError()['message'] . $eol;
+        echo $tabs0.'Unable to send email; Error: ' . $system->getErrorMsg() . $eol;
     }
 }//for
 

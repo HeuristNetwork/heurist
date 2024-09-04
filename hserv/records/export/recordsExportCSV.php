@@ -972,7 +972,7 @@ public static function output_header($data, $params)
                 // retrieve usages
                 $cnt_res = $defRecStructure->run();
                 // save
-                $fld_usages[$rt] = $cnt_res !== false ? $cnt_res : self::$system->getError()['message'];
+                $fld_usages[$rt] = $cnt_res !== false ? $cnt_res : self::$system->getErrorMsg();
                 //$fld_usages[$rt] = $cnt_res !== false ? $cnt_res : array();
             }
 

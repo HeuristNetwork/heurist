@@ -64,7 +64,7 @@
     $sysadmin_pwd = USanitize::getAdminPwd();
 
     if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
-        print $response = $system->getError()['message'];
+        print $response = $system->getErrorMsg();
         $system->clearError();
     }else{
 
