@@ -58,7 +58,6 @@ class DbEntitySearch
                 $values = explode(',', $values);
                 //$values = array($values);
             }
-            //if (preg_match('/^\d+(?:,\d+)+$/', $this->value))
             foreach($values as $val){  //intval()
                 if( !(is_numeric($val) && $val!=null)){
                     $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $val");

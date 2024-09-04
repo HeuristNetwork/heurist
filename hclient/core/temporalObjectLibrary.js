@@ -2134,8 +2134,6 @@ function temporalToHumanReadableString(inputStr) {
             }
             
             if (str.match(/DAT=([^\|]+)/)) {
-                //if (str.search(/COM=[^\|]+/) == -1) {
-                //}
                 str = formatGregJulian(str.match(/DAT=([^\|]+)/)[1], isgj);
             }else if (str.search(/COM=[^\|]+/) != -1) {
                 str = str.match(/COM=([^\|]+)/)[1];

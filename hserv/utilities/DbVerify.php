@@ -2513,7 +2513,7 @@ FIXMSG
                             }
                             $bibs_manualfix[] = $row;
 
-                        } else { //if ($row['is_ambig']===true)
+                        } else {
                             //suggestion
                             $row['dtl_Value'] .= " <span style=\"color:green\">suggestion to {$row['new_value']}</span>";
                             $bibs_suggested[] = $row;

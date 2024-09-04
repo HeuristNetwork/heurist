@@ -273,7 +273,6 @@ $.widget( "heurist.resultList", {
                 }else 
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_COLLECT){
                 
-                    //if(!that._isSameRealm(data)) return;
                     that.setCollected( data.collection );
                 
                 }else 
@@ -2660,9 +2659,6 @@ $.widget( "heurist.resultList", {
                     let idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, recIDs_list);
                     if(idx>=0){ 
                         $(rdiv).addClass('selected');
-                        //if(that._lastSelectedIndex==rec_id){
-                        //    $(rdiv).addClass('selected_last');
-                        //}
                     }
                 });
                 if(recIDs_list.length==1){
@@ -3777,7 +3773,6 @@ $.widget( "heurist.resultList", {
 
     showRetainedSelection: function(){
 
-        //if(window.hWin.HEURIST4.util.isnull(need_show)){
         let need_show = this.cb_selected_only.is(':checked');
 
 

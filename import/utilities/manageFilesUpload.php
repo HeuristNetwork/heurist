@@ -210,15 +210,10 @@ if(!($max_size>0)) {$max_size = 0;}
                 }else{
                     print '<p><b>Allowable extensions for upload:</b>'.htmlspecialchars( implode(', ',$allowed_exts) ).'</p>';
                 }
-
-//@todo change to entity dialog
                 ?>
 
                  <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification',
                     {onClose:function(){
-
-                        //var mediaFolders = window.hWin.HAPI4.sysinfo['sys_MediaFolders'];
-                        //var mediaExts = window.hWin.HAPI4.sysinfo['sys_MediaExtensions'];
                         location.reload();
 
                     }}); return false;}"

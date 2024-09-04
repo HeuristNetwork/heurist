@@ -531,14 +531,10 @@ $.widget( "heurist.search_faceted", {
             let isform_empty = this._fillQueryWithValues(query);
  
             if((hasHistory || !isform_empty) && !this.options.params.ui_spatial_filter) {
-                //if(this.div_title) this.div_title.css('width','45%');
                 if(this.options.showresetbutton && this.btn_reset){
                     this.btn_reset.show()   
                 }
-                //this.btn_save.show();  //@todo
             }else{
-                //if(this.div_title) this.div_title.css({'width':'auto', 'max-width':'90%'});
-    
                 if(this.btn_reset) this.btn_reset.hide()   
                 this.btn_save.hide(); 
             }
@@ -1087,22 +1083,6 @@ $.widget( "heurist.search_faceted", {
                     $container.accordion({
                         collapsible: true,
                         heightStyle: 'content'
-/*                       , activate: function( event, ui ) {
-                            if(ui.newHeader && ui.newHeader[0]){
-                                let _facet_index = $(ui.newHeader[0]).attr('data-index');
-                                
-                                let field = that.options.params.facets[_facet_index];
-                                if(field['last_count_query']){
-                                    let hashQuery = field['last_count_query'];
-                                    field['last_count_query'] = null;
-                                    let stored_counts = that._getCachedCounts( hashQuery, _facet_index );
-                                    if(stored_counts){
-                                        that._redrawFacets(stored_counts, false);
-                                    }
-                                }
-                            }
-                        }
-*/                        
                     });
                     if(that.options.params.show_accordion_icons === false){ // hide expand/collapse icons
                         $container.accordion('option', 'icons', false);
@@ -1728,8 +1708,7 @@ $.widget( "heurist.search_faceted", {
                 let colon_pos = s.indexOf(':');
                 if(colon_pos>0){
                     //let pred_type = s.substring(0,colon_pos).toLowerCase();
-                    //if([].indexOf(pred_type)>=0){
-                        search_any_filter = s;
+                    search_any_filter = s;
                 }
                     
                 if(!search_any_filter) search_any_filter = {f:s};
@@ -3122,15 +3101,12 @@ $.widget( "heurist.search_faceted", {
                             function __dateToString(val){
                                 try{
                                     let sval = ''+val;
-                                    //if(sval.match(/^-?\d+/) && val<-2500){
-                                    //    val = sval.substr(1)+' bce';
-                                    //}else
+
                                     if(field.date_type=='years_only'){
                                         if(val<0){
                                             val = sval.substring(1)+' bce';
                                         }
                                     }else
-                                    //if(!sval.match(/^-?\d+/) || Math.abs(val)>2200)
                                     {
                                         let tDate = new TDate((new Date(val)).toISOString());
                                         val = tDate.toString(date_format);

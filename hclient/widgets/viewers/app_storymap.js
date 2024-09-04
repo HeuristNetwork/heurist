@@ -296,10 +296,6 @@ $.widget( "heurist.app_storymap", {
                 +'title="Next" role="button" aria-label="Next">&gt;</a></div>')        
                 .appendTo(this.pnlStory);
                 
-            //if(this.options.reportOverviewMode=='header'){
-                //navbar.css({top: this.pnlOverview.height()+10+'px'});
-                //this.pnlStoryReport.css({'position':'absolute',top:(this.pnlOverview.height()+'px'), bottom:0, left:0, right:0})
-            //}
             this.pnlStoryReport.css({width:'100%',height:'100%'});   
                 
             this._on(this.pnlStory.find('#btn-prev'),{click:function(){ this._onNavigate(false); }});    
@@ -544,7 +540,6 @@ $.widget( "heurist.app_storymap", {
     // Change current story element - resultList listener
     //     
     _onScroll: function(event, that) {
-        //if(this._disable_onScroll) return;
         
         let ele = $(event.target); //this.div_content;
         $.each(ele.find('.recordDiv'), function(i,item){
@@ -1614,9 +1609,7 @@ $.widget( "heurist.app_storymap", {
                 
                 
             }
-            //else
-            //if(this.options.reportElementMode=='tab'){
-            else { //if(this.options.reportElementMode=='vertical'){    
+            else {
             
                 if(this.options.reportElementDistinct=='highlight'){
                     this._resultList.find('.recordDiv').removeClass('selected');
@@ -1940,7 +1933,7 @@ $.widget( "heurist.app_storymap", {
                 //particular record id
                 places = [step['scope']]; 
                 
-            }else{ //if(step['scope']=='all'){ //default
+            }else{
                 scope = 'places'; //all places ids in proper order
             }
             
@@ -1968,12 +1961,10 @@ $.widget( "heurist.app_storymap", {
                 while (end<places.length){
                     
                     end = start+range;
-                    //if(end>=places.length) end = places.length-1;
                     
                     aRanges.push(places.slice(start, end));
                     start = end;
                     
-                    //if(end>=places.length-1) break;
                 }
             }else{
                 aRanges.push(places);
@@ -2322,7 +2313,6 @@ $.widget( "heurist.app_storymap", {
                     
                     mapwidget.applyStyleForLayer(top_layer, lyr, style);
                     
-                    //if(lyr._map==null) lyr.addTo( nativemap )                    
                 });
                 color_step++;
                 setTimeout(__changeColor, delay);

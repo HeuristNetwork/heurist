@@ -373,7 +373,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //a record may have several geofields/placemarks for example place of birth and death
                 //besides it may be linked (several times) to "place" record types
                 //we need to treat them as separate timemap item
-                //var geovalues = array(); 
                 let shapes = (recShape && geoType!=1)?recShape:[];
                 if(!Array.isArray(shapes)){
                     shapes = [];
@@ -680,8 +679,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 let timevalues = [];
                 for(let k=0; k<dates.length; k++){
                         
-                        //if(true || timeenabled<MAXITEMS){
-                     
                             dres = dates[k];
                             
                             let date_start = (dres[0]==null)?dres[1]:dres[0];
@@ -693,7 +690,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(date_end==null) date_end = '';
                             timevalues.push([date_start, '', '', date_end, '']);
                                 
-                        //}
                         timeenabled++;
                 }                      
                 if(timevalues.length>0){
@@ -721,7 +717,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             for(let m=0; m<geodata.length; m++){
                                 
                                 let geo_json = parseWKT(geodata[m].wkt);
-                                //var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
 
                                 if(geo_json){ //main shape
                                     geovalues.push(geo_json);
@@ -1083,10 +1078,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     }
                 }else if(fldname=="dtl_EndDate"){
                     return _getFieldValue(record, DT_END_DATE);
-                    //if(d[11] && d[11][0]){ return d[11][0]; }
+
                 }else if(fldname=="dtl_Description"){
                     return _getFieldValue(record, DT_SHORT_SUMMARY);
-                    //if(d[3] && d[3][0]){return d[3][0];}
                     
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[DT_GEO_OBJECT] && d[DT_GEO_OBJECT][0]){
                     let g = d[DT_GEO_OBJECT][0].split(' ');
@@ -1503,7 +1497,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             let _records = {}, _order=[], that = this;
             
-            //if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
 
             // if structure not defined - default type is freetext            

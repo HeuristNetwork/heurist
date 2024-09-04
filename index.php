@@ -519,12 +519,6 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
 
         //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
 
-
-        //if database is empty show welcome screen
-        //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-        //    showTipOfTheDay(false);
-        //}
-
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='WebSearch'){
             var active_tab = '<?php echo htmlspecialchars(str_replace("'","\'",@$_REQUEST['views']),ENT_NOQUOTES);?>';

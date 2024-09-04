@@ -533,7 +533,6 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8');//to send back to client
                     array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
                 }
-                //if(count($err_encoding)>100) {break;}
             }
 
             $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"

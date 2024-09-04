@@ -299,7 +299,6 @@ $.widget( "heurist.mainMenu6", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     
                     //not need to check realm since this widget the only per instance
-                    //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     if(data && (data.ispreview || data.increment || data.search_realm)) return;
 
                     // Check whether to block auto switch to explore menu
@@ -330,7 +329,6 @@ $.widget( "heurist.mainMenu6", {
 
                     if(data && data.request && (data.request.ispreview || data.request.increment || data.search_realm)) return;
                     
-                    //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     that.coverAll.hide();
                     // window.hWin.HAPI4.currentRecordset is the same as data.recordset
                     if(data.recordset && data.recordset.length()>0){
@@ -348,7 +346,6 @@ $.widget( "heurist.mainMenu6", {
                         that._updateDefaultAddRectype();
                     }
                 }else{  //ON_STRUCTURE_CHANGE
-                    //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                     //refresh list of rectypes after structure edit
                     that._updateDefaultAddRectype();
                     window.hWin.HEURIST4.browseRecordCache = {};

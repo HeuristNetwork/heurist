@@ -338,8 +338,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         }
         
-        //if(this.searchForm && this.searchForm.length>0)
-        //this.searchForm.find('#input_search').focus();
         this.input_search.focus();
 
         if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data) || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){

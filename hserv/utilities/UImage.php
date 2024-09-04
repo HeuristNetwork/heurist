@@ -915,10 +915,6 @@ class UImage {
         );
         if ($scale >= 1) {
 
-            //if ($image_oriented) {
-            //  $ret = ($write_func!=null)?$write_func($src_img, $scaled_file, $image_quality):false;
-            //  return $ret;
-            //}
             //save into file
             if(!$scale_type || $scale_type == 'png'){
 

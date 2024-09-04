@@ -4026,12 +4026,7 @@ $.widget( "heurist.editing_input", {
             }
         }
         
-        //if(this.detailType!='blocktext')
-        //    $input.css('max-width', '600px');
-
-
         //name="type:1[bd:138]"
-
         
         //clear button
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
@@ -4850,14 +4845,10 @@ $.widget( "heurist.editing_input", {
                     //create and fill SELECT
                     //this.configMode.entity
                     //this.configMode.filter_group
-                    //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
                     let selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
                     
-                    //add add/browse buttons
-                    //if(this.configMode.button_browse){}
-                
                 }else{
                     //type: select, radio, checkbox
                     //hideclear   
@@ -4888,7 +4879,6 @@ $.widget( "heurist.editing_input", {
                     //allTerms.unshift({key:'', title:''});
                     
                     //array of key:title objects
-                    //if($input==null) $input = $('<select>').uniqueId();
                     let selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
 

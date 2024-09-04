@@ -574,8 +574,6 @@ $.widget( "heurist.app_timemap", {
     //
     , _setLayersVisibility: function (selection, mapdoc_ID, new_visiblity) {
 
-        //if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
-
         if(!this.element.is(':visible')
             || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
             return;
@@ -589,14 +587,6 @@ $.widget( "heurist.app_timemap", {
                 if(!(mapdoc_ID>=0)) mapdoc_ID = 0;
                 let mapManager = mapping.mapping( 'getMapManager' );
                 mapManager.setLayersVisibility(mapdoc_ID, selection, new_visiblity);
-                /*
-                //if layer is visible - select and zoom to record in search results
-                let recID = selection[0];
-                let layer_rec = mapManager.getLayer( mapdoc_ID, recID );
-                if(layer_rec && (layer_rec['layer']).isVisible()){
-                    this._doVisualizeSelection( selection );
-                }
-                */ 
 
                 //zoom to visible elements only
                 this.zoomToSelection( new_visiblity );

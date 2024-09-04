@@ -419,15 +419,10 @@ class UArchive {
                             $phar->addFile($file, $newfile);
 
                             // THERE IS NO WAY TO SET INDIVIDUAL COMPRESSION LEVEL PER FILE
-                            //$type = strtolower(substr(strrchr($newfile, '.'), 1));
-                            //if(in_array($type, $do_not_compress)){
-                            //    $phar->setCompressionIndex($entry_idx, \ZipArchive::CM_STORE);
-                            //}
+
                             $entry_idx++;
 
                             $numFiles++;
-
-                            //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                         }
 
                     }

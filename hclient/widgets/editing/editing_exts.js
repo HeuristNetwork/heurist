@@ -1972,8 +1972,6 @@ function browseTerms(_editing_input, $input, value){
             let ref_id = $(that.selObj).attr('ref-id');
 
             let $input = $('#'+ref_id);
-            //var $inputdiv = $('#'+ref_id).parent();
-            //var opt = $(that.selObj).find('option:selected');
             that.newvalues[$input.attr('id')] = trm_ID;
             $input.attr('data-value', trm_ID); //that's more reliable
 
@@ -2325,14 +2323,8 @@ function selectRecord(options, callback)
             parententity: 0,
             default_palette_class: 'ui-heurist-populate',
             onselect:function(event, data){
-                //if( window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                //    callback(data.selection[0]);
-                //}
-                
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                     let recordset = data.selection;
-                    //var record = recordset.getFirstRecord();
-                    //var record_id = recordset.fld(record,'rec_ID');
                     callback(data.selection);
                 }
             }

@@ -302,7 +302,6 @@ let TemporalPopup = (function () {
         
         let tDate1 = TDate.parse(early_date);
         let tDate2 = TDate.parse(late_date);
-        //if(tDate1.getYear()>tDate2.getYear())
 
 		if( tDate1.compare(tDate2) >= 0 ){ //new Date(early_date).getTime() >= new Date(late_date).getTime()){
 

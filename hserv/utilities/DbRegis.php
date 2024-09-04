@@ -407,10 +407,6 @@ class DbRegis {
 
         if(!self::initialize()) {return false;} //can not connect to index database
 
-        //if(@$params['fields']==null){
-        //    $params['fields'] = 'rec_URL';
-        //}
-
         if(self::$isOutSideRequest){
             $params['action'] = 'info';
             return self::_registrationRemoteCall($params);

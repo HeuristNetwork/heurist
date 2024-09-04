@@ -162,7 +162,6 @@ foreach ($dbs as $db){
 
         $i++;
     }
-    //if($i>10) {break;}
 }//foreach
 
 if($is_csv){

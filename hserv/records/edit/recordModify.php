@@ -114,7 +114,7 @@ function recordAddDefaultValues($system, $record=null){
 
         if($ownerid == 'current_user'){
             $ownerid = $system->get_user_id();
-        }else {  //if(!empty($ownerid))
+        }else {
             $ownerid = prepareIds($ownerid, true);
         }
 
@@ -2054,7 +2054,6 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         }
                         $stmt->close();
 
-                        //if(!in_array($recID,$updates))
                         $updates[] = $recID;
                         $updated_count++;
                     }else{
@@ -2531,11 +2530,6 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     }elseif(!in_array($dtyID, $not_purify)){
                         $dtl_Value = super_trim($dtl_Value);
                         $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
-                        //$dtl_Value = $purifier->purify($dtl_Value);
-                        //$dtl_Value = htmlspecialchars_decode( $dtl_Value );//&gt; to >
-
-                        //if(!((defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU) ||
-                        //     (defined('RT_CMS_HOME') && $rectype==RT_CMS_HOME) )){
 
                         if($det_types[$dtyID]=="freetext"){ //remove non standard attributes
                         //(\w+)
@@ -3103,13 +3097,6 @@ function recordDuplicate($system, $id){
             break;
         }
 
-        //@todo duplicate uploaded files
-        //$fd_res = unregister_for_recid2($id, $needDeleteFile);
-        //if ($fd_res) { $error = "database error - " . $fd_res; break; }
-
-        //@todo update details with new file ids
-
-
         $res = mysql__duplicate_table_record($mysqli, 'usrReminders', 'rem_RecID', $id, $new_id);
         if(!is_int($res)){ $error = $res; break; }
 
@@ -3119,35 +3106,9 @@ function recordDuplicate($system, $id){
         $res = mysql__duplicate_table_record($mysqli, 'usrRecPermissions', 'rcp_RecID', $id, $new_id);
         if(!is_int($res)){ $error = $res; break; }
 
-        //$res = mysql__duplicate_table_record($mysqli, 'recThreadedComments', 'cmt_RecID', $id, $new_id);
-        //if(!is_int($res)){ $error = $res; break; }
-
-        //@todo change all woots with title bookmark: to user:
-        /*
-        mysql_query('update woots set woot_Title="user:" where woot_Title in (select concat("boomark:",bkm_ID) as title from usrBookmarks where bkm_recID = ' . $id.')');
-        if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
-        */
-
         $res = mysql__duplicate_table_record($mysqli, 'usrBookmarks', 'bkm_RecID', $id, $new_id);
         if(!is_int($res)){ $error = $res; break; }
         $bkmk_count = $mysqli->affected_rows;
-
-        /*@todo add to woot
-        mysql_query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
-        '(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$id.'")');
-        if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
-
-        mysql_query('delete from woot_Chunks where chunk_WootID in '.
-        '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
-        if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
-
-        mysql_query('delete from woot_RecPermissions where wrprm_WootID in '.
-        '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
-        if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
-
-        mysql_query('delete from woots where woot_Title="record:'.$id.'"');
-        if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
-        */
 
         mysql__foreign_check($mysqli, true);
 

@@ -130,9 +130,6 @@ $.widget( "heurist.timeline", {
                         that.options.onselect.call(that, that.selected_rec_ids);    
                     }
     
-                    //$( document ).bubble( "option", "content", "" );
-                    //_showSelection(true, true, null); //show selection on map
-                    //if(_onSelectEventListener)_onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
         

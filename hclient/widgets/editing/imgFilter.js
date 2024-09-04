@@ -134,8 +134,6 @@ function imgFilter( current_cfg, main_callback, $container=null ){
                 filter = filter + item.attr('name')+'('+val+suffix+') ';
             }
         });
-        //var filter_css = {filter:'', '-webkit-filter':'', '-moz-filter': ''};
-
         return filter_cfg; //{filte:filter, cfg:filter_cfg};
     }//_getValues
 

@@ -148,7 +148,7 @@ class DbsTerms
 
                 while ( $term[$idx_term_parent]>0 ) {
                     $term = $this->getTerm($term[$idx_term_parent]);
-                    //if(!$term) {break;}
+
                     if($term[$idx_term_parent]>0){
                         array_unshift($labels, $term[$idx_term_label]);
                     }else{

@@ -776,9 +776,6 @@ if($isLocalHost){
                     }
                 }
 
-                //if(!force_all_images && window.hWin && window.hWin.HAPI4){
-                //    window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
-                //}
             }
 
             function mediaTooltips(){
@@ -1979,7 +1976,6 @@ function print_public_details($bib) {
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-                //if($is_map_popup) {break;}
             }else{
                 print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }

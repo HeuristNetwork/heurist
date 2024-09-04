@@ -646,7 +646,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         _addNewLinkField(window.drag_link_source_id, window.drag_link_target_id);  
                         setTimeout(function(){window.drag_link_line.attr("stroke","#00ff00");}, 500);
                 }else{
-                    drag_link_source_id = null;
+                    window.drag_link_source_id = null;
                     if(window.drag_link_line) window.drag_link_line.remove();
                     window.drag_link_line = null;
                 }

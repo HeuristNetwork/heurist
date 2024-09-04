@@ -2258,7 +2258,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             for (idx=0; idx<rlen; idx++) {
                 if(idx){
 
-                    //if(typeof curpage_val==="undefined" ||
                     if(curpage_val!=records_resp[idx][3])
                     {
 

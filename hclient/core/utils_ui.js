@@ -599,7 +599,6 @@ window.hWin.HEURIST4.ui = {
             
         }else{  //show rectypes separated by groups
         
-            //var groups = $Db.rtg().makeKeyValueArray('rtg_Name');
             let groups = {};
             let groups_order = $Db.rtg().getSubSetByRequest({ 'sort:rtg_Order':1 });
             
@@ -722,9 +721,6 @@ window.hWin.HEURIST4.ui = {
             eventHandlers     = options['eventHandlers'];
             extraOptions      = options['extraOptions'] ? options['extraOptions'] : {};
         }
-        
-        //var trash_id = $Db.getTrashGroupId('dtg');
-        
         
         let dtyID, details;
      
@@ -1134,9 +1130,6 @@ window.hWin.HEURIST4.ui = {
     //
     initHSelect: function(selObj, useHtmlSelect, apply_style, eventHandlers, extraOptions){            
 
-        //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
-        ////depth>1 || (optgroup==null && depth>0
-        
         selObj = $(selObj);
 
         if(!extraOptions || !$.isPlainObject(extraOptions)){
@@ -1359,8 +1352,6 @@ window.hWin.HEURIST4.ui = {
             
             $context.trigger('competency', exp_level); //some contexts need specific behaviour to apply the level
             
-            //if(is_exit) return;
-            //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
     }, 
       
     // Init button that show/hide help tips for popup dialog
@@ -1574,8 +1565,6 @@ window.hWin.HEURIST4.ui = {
                                 $helper_div.dialog( "close" );
                             }else{                        
                             
-                                //var div_height = Math.min(500, (document.body).height()-$help_button.top());
-                                //var div_width  = Math.min(600, (document.body).width() *0.8);
                                 let divpos = null;
                                 if(options.position && $.isPlainObject(options.position)){
                                     divpos = options.position;
@@ -2964,8 +2953,6 @@ window.hWin.HEURIST4.ui = {
             diffGreen = (diffGreen * percentFade) + startRGB.g;
             diffBlue = (diffBlue * percentFade) + startRGB.b;
 
-            //var result = "rgb(" + Math.round(diffRed) + ", " + Math.round(diffGreen) + ", " + Math.round(diffBlue) + ")";
-            
             let result = window.hWin.HEURIST4.ui.rgbToHex(Math.round(diffRed), Math.round(diffGreen), Math.round(diffBlue));
             
             return result;

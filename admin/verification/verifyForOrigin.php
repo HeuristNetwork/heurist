@@ -89,7 +89,6 @@
         $databases = array();
         while (($row = $res->fetch_assoc())) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
-                //if($row[0]>'hdb_Masterclass_Cookbook')
                     $databases[] = $row[0];
             }
         }

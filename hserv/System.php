@@ -274,11 +274,7 @@ class System {
 
         foreach($config as $idx=>$cfg){
 
-            //$allowed_dbs = @$cfg['database'];
-            //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
-
             $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-            //if($rty_ID>0){
 
             $cfg['rty_ID'] = $rty_ID;
 
@@ -1454,10 +1450,8 @@ class System {
         }
 
         $cookie_session_id = @$_COOKIE['heurist-sessionid'];
-        //NOT USED if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
 
-        //if(session_id() == '' || !isset($_SESSION)) {
         if (session_status() != PHP_SESSION_ACTIVE) {
             
             session_name('heurist-sessionid');//set session name
@@ -1484,14 +1478,14 @@ class System {
                 $lifetime = time() + 30*24*60*60;
                 $session_id = session_id();//ID of current sessiin $cookie_session_id;
                 if (strnatcmp(phpversion(), '7.3') >= 0) {
-                    $cres = setcookie('heurist-sessionid', $session_id, [
+                    $cres = setcookie('heurist-sessionid', $session_id, array(
                         'expires' => $lifetime,
                         'path' => '/',
                         'domain' => '',
                         'Secure' => $is_https,
                         'HttpOnly' => true,
                         'SameSite' => 'Strict' //'Lax'
-                    ]);
+                    ));
                 }else{
                     //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
                     $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
@@ -1766,14 +1760,14 @@ class System {
         $session_id = session_id();
 
         if (strnatcmp(phpversion(), '7.3') >= 0) {
-            $cres = setcookie('heurist-sessionid', $session_id, [
+            $cres = setcookie('heurist-sessionid', $session_id, array(
                 'expires' => $lifetime,
                 'path' => '/',
                 'domain' => '',
                 'Secure' => $is_https,
                 'HttpOnly' => true,
                 'SameSite' => 'Strict'  //Lax
-            ]);
+            ));
 
         }else{
             $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );//login
@@ -1803,7 +1797,6 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) {unset($_SESSION[$this->dbname_full]['ugr_Groups']);}
         if(@$_SESSION[$this->dbname_full]['ugr_Permissions']) {unset($_SESSION[$this->dbname_full]['ugr_Permissions']);}
-        //if(@$_SESSION[$this->dbname_full]['ugr_Enabled']) {unset($_SESSION[$this->dbname_full]['ugr_Enabled']);}
         if(@$_SESSION[$this->dbname_full]['ugr_GuestUser']!=null) {unset($_SESSION[$this->dbname_full]['ugr_GuestUser']);}
 
         // clear

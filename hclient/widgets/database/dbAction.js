@@ -184,7 +184,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //if(this.selectRecordScope) this.selectRecordScope.remove();
 
     },
     
@@ -322,14 +321,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._session_id = 0;
                     that._hideProgress();
-                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    //console.error(response);                   
-                    //}
-                    /*if(response.data && response.data.length>0){
-                        response.status = window.hWin.ResponseStatus.OK;
-                        that._afterActionEvenHandler(response.data);
-                    }*/
-                    //window.hWin.HEURIST4.msg.showMsgErr(response);
                 });
                 
                 
@@ -743,7 +734,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _initVerificationResponse: function(response){
         
-            //if(this._session_id==0) return;
             this._session_id = 0;
     
             let div_res = this._$("#div_result");

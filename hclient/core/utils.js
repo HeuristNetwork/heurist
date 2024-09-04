@@ -189,8 +189,6 @@ window.hWin.HEURIST4.util = {
             $.each(element, function(idx, ele){
                 ele = $(ele);
                 
-                //if(mode !== (ele.prop('disabled')=='disabled')){
-                
                 if( ($.heurist.hSelect !=="undefined") && window.hWin.HEURIST4.util.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
 
                     if (mode) {
@@ -208,8 +206,6 @@ window.hWin.HEURIST4.util = {
                         ele.removeClass('ui-state-disabled ui-button-disabled');
                     }
                 }
-                
-                //}
             });
         }
     },
@@ -593,10 +589,6 @@ window.hWin.HEURIST4.util = {
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     
-                    //var UNKNOWN_ERROR = (window.hWin)
-                    //        ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
-                    //if(textStatus=='timeout'){}
-                    
                     let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                     
                     if(caller){
@@ -660,8 +652,6 @@ window.hWin.HEURIST4.util = {
         mapForm.action = actionUrl;
         
         for (const key in params){
-        //if (keyParams && valueParams && (keyParams.length == valueParams.length)){
-            //for (var i = 0; i < keyParams.length; i++){
             let mapInput = document.createElement("input");
                 mapInput.type = "hidden";
                 mapInput.name = key;

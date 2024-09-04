@@ -254,10 +254,6 @@ function editCMS_Manager( options ){
                     }
                 ];
 
-                //var body = $(this.document).find('body');
-                //var dim = {h:body.innerHeight(), w:body.innerWidth()};
-                //dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
-                
                 edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(sURL,
                     edit_buttons, window.hWin.HR('Define Website'),
                     {   

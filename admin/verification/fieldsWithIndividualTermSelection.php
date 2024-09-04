@@ -42,7 +42,6 @@ $is_csv = (@$_REQUEST['html']!=1);
     $databases = array();
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = htmlspecialchars($row[0]);
         }
     }
@@ -150,10 +149,8 @@ $is_csv = (@$_REQUEST['html']!=1);
             }
         }
         $cnt4++;
-        //if($cnt4>20) {break;}
     }//while  databases
     if(!$is_csv){
-        //  print '<tr><td colspan="2"></td><td>'.$cnt2.TD.$cnt3.TR_E;
         print '</table>';
         print '[end report]';
     }else{

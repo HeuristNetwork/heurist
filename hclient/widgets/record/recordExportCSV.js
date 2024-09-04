@@ -333,16 +333,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
-        //this.selectRecordScope.val(this.options.init_scope);    
-        //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
         
         window.hWin.HEURIST4.ui.initHSelect(selScope);
-        
-        let wmenu = $(selScope).hSelect( "menuWidget" );  //was menu
-        //wmenu.find('li.ui-state-disabled').css({'display':'none !important'});
-        //$(selScope).hSelect('widget').text('select...');
-        //this.element.find('li.ui-state-disabled').css({'display':'none !important'});
         
     },
             
@@ -392,9 +385,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         this.element.find('#postform').attr('action', url);
         this.element.find('#postform').submit();
             
-        //if(mode==1){ //open in new window
-        //}else{ //download
-        //}
     },
     
     //

@@ -108,7 +108,6 @@ if($mode>1){
                         window.location = '<?php echo PDIR.'hclient/framecontent/infoPage.php?error='.rawurlencode('It is possible to perform this operation from Heurist admin interface only');?>';
                     }
                 }else if(is_repository){
-                    //if($('#sel_repository').length > 0)
                     initRepositorySelector();
                 }
 

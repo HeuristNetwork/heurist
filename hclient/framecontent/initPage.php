@@ -342,8 +342,6 @@ if($isLocalHost){
     //
     function onHapiInit(success)
     {
-        //if(isHapiInited) {return;}
-
         isHapiInited = true;
 
         if(success) // Successfully initialized system

@@ -382,7 +382,6 @@ $.widget( "heurist.searchBuilder", {
 
         if(!(top_rty_ID>0)) top_rty_ID = 0;
         if(!(rty_ID>0)) rty_ID = 0;
-        //if(!(dty_ID>0)) dty_ID = 0;
         
         if(ele_id){
             
@@ -764,14 +763,6 @@ $.widget( "heurist.searchBuilder", {
             change: function(){
                     let val = this.getValues();
                     val = val[0].split(',');
-                    //$.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
-                    /*
-                    that.pnl_Tree.find('#field_treeview').hide();
-                    setTimeout(function(){
-                        that.adjustTreePanel();
-                        that.pnl_Tree.find('#field_treeview').fadeIn(500);
-                    },1000);
-                    */
             }    
         };
 
@@ -782,9 +773,7 @@ $.widget( "heurist.searchBuilder", {
     // init fieldtreeview
     , _initTreeView: function(rectypeIds){
         
-        //if(!this.is_advanced) return;
         
-
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
 
             let that = this;

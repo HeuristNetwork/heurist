@@ -281,8 +281,6 @@
                 }
                 $verties_cnt++;
             }else
-			//if($geoObject['type']=="polyline" || $geoObject['type']=="l")
-            //if($geoObject['type']=="polygon" || $geoObject['type']=="pl")
             if(USE_GOOGLE){
 
                     $points = array();

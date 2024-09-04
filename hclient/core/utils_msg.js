@@ -1112,8 +1112,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $(element).show().appendTo($dlg);
 
             let body = $(this.document).find('body');
-            //var dim = { h: Math.min((options.height>0?options.height:400), body.innerHeight()-10), 
-            //            w: Math.min((options.width>0?options.width:690), body.innerWidth()-10) };
             
             let dimW = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
             let dimH = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');

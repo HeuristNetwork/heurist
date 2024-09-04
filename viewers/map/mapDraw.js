@@ -47,8 +47,6 @@
         //check for UTM - assume they are integer and at least several are more than 180
         for (let k=0; k<arc.length; k++){
             
-            //if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE) continue;
-        
             let crd = Number(arc[k]);
             if(isNaN(crd)){
                 alert(arc[k]+" is not number value");

@@ -800,9 +800,6 @@ Whole value = EQUAL
                     op = '-';
                 }
                 
-                //if(isnegate){
-                //    op = '-'+op;
-                //}
                 if(this._current_field_type=='enum'
                     && (this.options.enum_field == 'term' || this.options.enum_field == 'desc') 
                     && lang_code != ''){

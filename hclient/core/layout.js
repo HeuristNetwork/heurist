@@ -28,8 +28,6 @@ function HLayout(args) {
      const _className = "HLayout",
          _version   = "0.4";      
 
-    //let Hul = window.hWin.HEURIST4.util;
-
     let widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
          layouts = [],  //json description of layout
@@ -100,7 +98,6 @@ function HLayout(args) {
         
         if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
         
-        //var $container = $(_containerid);
         let ele = $('div[layout_id="'+layout_id+'"]');
         if( ele.hasClass('ui-tabs-panel') ){
             $(ele.parent()).tabs( "option", "active", ele.index()-1 );
@@ -130,7 +127,6 @@ function HLayout(args) {
             $container = $(_containerid); 
         }
      
-        //if(!window.hWin.HEURIST4.util.isFunction($container.layout)) return;
         if(!$container.hasClass('ui-layout-container')) {
             $container = $container.children().find('.ui-layout-container');
         }
@@ -258,7 +254,6 @@ function HLayout(args) {
     let grid_min_size = 200;
     let grid_step_size = 100;
     let app_counter = 0; //to maintain unique id for panels and tabs
-    //var layout, $container;
 
     //
     // north-west-east-south layout
@@ -613,8 +608,6 @@ function HLayout(args) {
                     }else{ //tabs by default
                         // in design mode - it is called from iframe and baseURL is different 
                         // to fix this mess
-                        //var rhash = /#.*$/;
-                        //var locationUrl = window.location.href.replace( rhash, "" ); //Client_DOM_Code_Injection
                         
                         let locationUrl = window.hWin.HAPI4.baseURL;
                         $pane.find('li > a').each(function(idx, item){
@@ -818,15 +811,6 @@ console.error('Cardinal layout widget does not have proper options');
                         css:{top:event.pageY-offset.top,left:event.pageX-offset.left,height:200,width:200}});
                 appAdjustContainer();
                 $app_content.appendTo( $tab );
-
-                /*the same
-                //var tt = $tab.get();
-                //var pp = $portlet.get();
-                //tt.appendChild(tt);
-                //$portlet.prependTo( $tab );
-                //$portlet.appendTo($tab);
-                //$tab.append($portlet);
-                */
 
                 //remove from source
                 $li.remove();
@@ -1266,8 +1250,6 @@ console.error('Cardinal layout widget does not have proper options');
             }
         }
         
-        //var $container = $(containerid);
-        
         //add style to header
         if(!window.hWin.HEURIST4.util.isempty(layout.cssfile)){
             
@@ -1500,7 +1482,6 @@ console.error('Cardinal layout widget does not have proper options');
         visibilityAppById: function ( layout_id, show_or_hide ){
             
             if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
-            //var $container = $(_containerid);
             let ele = $('div[layout_id="'+layout_id+'"]');
             
             if( ele.hasClass('ui-tabs-panel') ){

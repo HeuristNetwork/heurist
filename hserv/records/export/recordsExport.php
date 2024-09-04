@@ -1077,12 +1077,6 @@ XML;
 
                 if(self::$system->defineConstant('DT_NAME', true)){
 
-                    //$val = mysql__select_value(self::$mysqli,'select dtl_Value from recDetails where rec_ID='
-                    //    .$params['metadata'].' and dtl_DetailTypeID='.DT_NAME);
-                    //if($val){
-                        //$originalFileName = USanitize::sanitizeFileName($val);
-                    //}
-
                     recordSearchDetails(self::$system, $record, array(DT_NAME));
                     if(is_array($record['details'][DT_NAME])){
                         $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
@@ -1752,9 +1746,6 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         }
     }//if search for linked values
 
-    // $res['geometry'] - merged GeometryCollection
-    // $res['geometries'] - separated by fields  $res['geometries_dty']
-    // $res['geometries_dty'] - dty_IDs
     if(is_array($geovalues)){
         if(count($geovalues)>1){
             $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
@@ -1944,7 +1935,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
             foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
 
                 if($field_type=='resource' || $field_type=='relmarker'){
-                    //continue;
+                    
                     //if multi constraints - search all details
                     $link_rec_Id =  $field_value['id'];
                     $relation_id =  @$field_value['relation_id'];

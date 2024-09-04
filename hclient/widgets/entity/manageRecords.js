@@ -854,13 +854,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'0.5em'},
                               click: function() { 
                                   
-                                /*A123  remarked since onselect triggered in onClose event  */
-                                //if(true){ // || that._additionWasPerformed
                                     that.options.select_mode = 'select_single'
                                     that.selectedRecords(that._currentEditRecordset); //it calls that._selectAndClose();
-                                //}else{
-                                //    that.closeEditDialog();   
-                                //}
                                   
                               }},
                         {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
@@ -1290,7 +1285,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 
                 //this tabs are open by default
-                //if(!this.usrPreferences.summary_tabs) 
                 this.usrPreferences.summary_tabs = ['0','1','2','3']; //since 2018-03-01 always open
 
                 //load content for editFormSummary
@@ -1360,8 +1354,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     handleTabsResize: function() {
             if (this._resizeTimer) clearTimeout(this._resizeTimer);
-            
-            //if windowHeight != $(window).height() || windowWidth != $(window).width()) 
             
                 let that = this;
                 this._resizeTimer = setTimeout(

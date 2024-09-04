@@ -520,7 +520,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
          * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
          */
 
-        //var recordType = $('#inpt_doctype').val(); // which record type is requested
         let maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 

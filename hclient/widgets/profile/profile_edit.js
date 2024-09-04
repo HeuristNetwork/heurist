@@ -243,8 +243,7 @@ $.widget( "heurist.profile_edit", {
 
         for(let id in this.options.edit_data){
             if(!window.hWin.HEURIST4.util.isnull(id)){
-                let inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
-                //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
+                this.edit_form.find("#"+id).val(this.options.edit_data[id]);
             }
         }
         //restore repeat password also

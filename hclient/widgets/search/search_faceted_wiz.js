@@ -394,7 +394,6 @@ $.widget( "heurist.search_faceted_wiz", {
             if(ch<400) ch = 400;
             
         }
-        //if(width<minw) 
         this._dialog.dialog( 'option', 'width', minw);
         
         let topPos = 0;
@@ -409,16 +408,6 @@ $.widget( "heurist.search_faceted_wiz", {
         let ht = Math.min(ch, window.innerHeight-topPos);
         this._dialog.dialog('option', 'height', ht);    
         
-        /*
-        if(this.options.is_h6style){
-            //let dialog_height = window.innerHeight - this.element.parent().position().top - 5;
-            //this.element.dialog( 'option', 'height', dialog_height);
-        }else{
-            let ht = window.innerHeight; //$(window).height();
-            if(ht>700) ht = 700;
-            this.element.dialog( 'option', 'height',  ht );
-        }
-        */
     }
 
     ,show: function( ){
@@ -663,12 +652,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(newstep>0)  //increase delay on mouse exit 
                     this.options.menu_locked.call( this, 'delay');
             }
-            
-            //if(newstep==3)               //skip step - define ranges
-            //this.navigateWizard(1);
         }
-
-        //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
     }
 
     //
@@ -1682,8 +1666,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
 
                     let ids = node.data.code.split(":");
-                    //rtid: ids[ids.length-2],
-                    //id:  ids[ids.length-1],
 
                     //if facets are already defined try to restore title,help and type from previous
                     let old_facet = this._findFacetByCode(node.data.code);
@@ -2196,9 +2178,6 @@ $.widget( "heurist.search_faceted_wiz", {
         this._assignFacetParams();
         this._defineDomain();
 
-        //if( (window.hWin.HAPI4.sysinfo['db_workset_count']>0 && window.hWin.HAPI4.sysinfo['db_workset_count']<10000) 
-        //    || window.hWin.HAPI4.sysinfo['db_total_records']<10000 )
-        
         if( this.facetPreview_reccount < 10000 ){
             this._refresh_FacetsPreviewReal();
             $(this.step3).find('#btnUpdatePreview').hide();

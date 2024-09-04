@@ -270,11 +270,6 @@ var mirador = Mirador.viewer({
   ]
 });
 
-// We create the action first. Note we are using a specified `windowId` here. This could be accessed from the store instead of specifying upfront.
-//var action = Mirador.actions.setCanvas('uniqueid', 'https://iiif.harvardartmuseums.org/manifests/object/299843/canvas/canvas-43182083')
-// Dispatch it.
-//mirador.store.dispatch(action);
-
 </script>
 <?php
 }

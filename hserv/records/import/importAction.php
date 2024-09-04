@@ -1390,7 +1390,6 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         $k++;
 
-        //if($wrong_records) {return $wrong_records;}
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }elseif($wrong_records) {
@@ -1727,8 +1726,6 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $cc = 0;
 
         while ($row = $res->fetch_row()){
-
-            //if(!($row[0]==575)) {continue;}
 
             $is_error = false;
             $newvalue = array();

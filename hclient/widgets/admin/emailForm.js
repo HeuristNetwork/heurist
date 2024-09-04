@@ -472,8 +472,6 @@ $.widget( "heurist.emailForm", {
             
             const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
             
-            //var request = {json:1,id:id};
-            //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
             $.getJSON(url,
                 function(captcha){
                         that._element_form.find('#captcha_img').text(captcha.value)

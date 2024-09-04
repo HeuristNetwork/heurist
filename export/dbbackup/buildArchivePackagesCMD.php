@@ -123,19 +123,6 @@ $action = 'backupDBs';
 if(!isActionInProgress($action, 30)){
     exit("It appears that backup operation has been started already. Please try this function later");
 }
-/*
-//set semaphore file
-$progress_flag = $backup_root.'inprogress.info';
-//flag that backup in progress
-if(file_exists($progress_flag)){
-    //if(file_exists($progress_flag)) {unlink($progress_flag);}
-    exit("It appears that backup operation has been started already. Please try this function later $progress_flag \n");
-}
-$fp = fopen($progress_flag,'w');
-fwrite($fp, '1');
-fclose($fp);
-*/
-
 
 if($with_triggers){
     $dump_options = array(
@@ -222,55 +209,8 @@ foreach ($arg_database as $idx=>$db_name){
         folderRecurseCopy( $database_folder, $folder, $folders_to_copy, null, $copy_files_in_root);
     }
 
-    //if(false){// 2016-10-25
-    //    folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
-    //}
-
-
-    if(!$arg_skip_hml){
-        /* Ian J. 20/4/2022: ? THIS REQUIRES FURTHER WORK TO IMPLEMENT ?
-        echo "hml.. ";
-        //load hml output into string file and save it
-        if(@$_REQUEST['allrecs']!="1"){
-        $userid = get_user_id();
-        $q = "owner:$userid";//user:$userid OR
-        $_REQUEST['depth'] = '5';
-        }else{
-        $q = "sortby:-m";
-        $_REQUEST['depth'] = '0';
-        }
-
-
-        $_REQUEST['w'] = 'all';
-        $_REQUEST['a'] = '1';
-        $_REQUEST['q'] = $q;
-        $_REQUEST['rev'] = 'no';//do not include reverse pointers
-        $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
-
-        echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
-
-        $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-        if (is_file($to_include)) {
-        include_once $to_include;
-        }
-        */
-    }//export HML
-
     // Export database definitions as readable text
-
     echo "sql.. ";
-
-    /*
-    echo_flush2("Exporting database definitions as readable text<br>");
-
-    $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-    saveURLasFile($url, $folder."/Database_Structure.txt");//save to $upload_root.DIR_BACKUP.HEURIST_DBNAME
-
-    echo_flush2("Exporting database definitions as XML<br>");
-
-    $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-    saveURLasFile($url, $folder."/Database_Structure.xml");//save to $upload_root.DIR_BACKUP.HEURIST_DBNAME
-    */
 
     // Do an SQL dump of the whole database
     $dumpfile = $folder."/".$db_name."_MySQL_Database_Dump.sql";

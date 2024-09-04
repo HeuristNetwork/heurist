@@ -211,10 +211,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             }
             _getCss();
             
-            //var css = 
-            //element.removeAttr('style');
-            //element.css(css);
-            
             _enableSave();
         }});
 

@@ -2346,21 +2346,6 @@ function recordSearch($system, $params, $relation_query=null)
 
                             $fin_result['data']['order'] = array_merge($fin_result['data']['order'],
                                 array_keys($response['data']['records']));
-                            /*
-                            foreach( array_keys($response['data']['records']) as $rt){
-                            $rectype_id = @$rt['4'];
-                            if($rectype_id){
-                            //if(@$fin_result['data']['rectypes'][$rectype_id]){
-                            //    $fin_result['data']['rectypes'][$rectype_id]++;
-                            //}else{
-                            //    $fin_result['data']['rectypes'][$rectype_id]=1;
-                            //}
-                            if(!array_key_exists($rectype_id, $fin_result['data']['rectypes'])){
-                            $fin_result['data']['rectypes'][$rectype_id] = 1;
-                            }
-                            }
-                            }
-                            */
                         }
                     }
 
@@ -3162,10 +3147,6 @@ function recordSearch($system, $params, $relation_query=null)
                 if(is_array($relations)){
                     $response['data']['relations'] =  $relations;
                 }
-                //if(is_array($permissions)){
-                //        $response['data']['permissions'] =  $permissions;
-                //}
-
             }//$is_ids_only
 
 
@@ -3189,25 +3170,13 @@ function recordSearch($system, $params, $relation_query=null)
 */
 function array_merge_unique($a, $b) {
     foreach($b as $item){
-        //if(!in_array($item,$b)){
+
         if(array_search($item, $a)===false){
             $a[] = $item;
         }
     }
     return $a;
 }
-/*
-function array_merge_unique3(array $array1 ) { ///[, array $...]
-    $result = array_flip(array_flip($array1));
-    foreach (array_slice(func_get_args(),1) as $arg) {
-        $result =
-        array_flip(
-            array_flip(
-                array_merge($result,$arg)));
-    }
-    return $result;
-} */
-
 
 function mergeRecordSets($rec1, $rec2){
 

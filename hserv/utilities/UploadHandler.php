@@ -568,7 +568,6 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $filename = basename($upload_path);
         $upload_path = dirname($upload_path);
         if(!isPathInHeuristUploadFolder($upload_path, false))
-        //if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
         {
             $file->error = $this->get_error_message('only_heurist')
                 .' a)'.realpath($upload_path)
@@ -1839,10 +1838,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
                     //Artem Osmakov - get subfolder name by replacing Ё to /
                     $file_name = ($file_name ? $file_name : $upload['name'][$index]);
-                    //$file_name = USanitize::sanitizeFileName($file_name ? $file_name : $upload['name'][$index], false);
-                    //if(strpos($file_name,'~')!==0){
-                    //    $file_name = $prefix.$file_name
-                    //}
+
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
@@ -1852,9 +1848,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $file_name = $pathinfo['basename'];
 
                         $origial_filename = $file_name;
-                        //$k = strrpos($file_name, "/");
-                        //$subfolder_name = substr($file_name, 0, $k);
-                        //$file_name =  substr(strrchr($file_name, "/"), 1 );
+
                     }else{
                         $origial_filename = $upload['name'][$index];
                     }

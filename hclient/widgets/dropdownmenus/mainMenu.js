@@ -1455,7 +1455,6 @@ $.widget( "heurist.mainMenu", {
                     }
                 }
                 
-                //var position = { my: "center", at: "center", of: window.hWin };
                 let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
                 if(options['width']>maxw) options['width'] = maxw*0.95;
                 let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
@@ -2271,7 +2270,6 @@ $.widget( "heurist.mainMenu", {
         this._initial_search_already_executed = true;
         
         let lt = window.hWin.HAPI4.sysinfo['layout']; 
-        //if(window.hWin.HEURIST4.util.getUrlParameter('cms')){
             
         
         let cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
@@ -2279,9 +2277,6 @@ $.widget( "heurist.mainMenu", {
         if(cms_record_id>0 || !window.hWin.HEURIST4.util.isempty(cmd)){
             //ignore initial search of some menu command is called from url or need to open cms editor
             
-            //this.menuActionById('menu-cms-edit', {record_id:cms_record_id});
-            //window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
-
         }else 
         if(!window.hWin.HAPI4.is_publish_mode){
 

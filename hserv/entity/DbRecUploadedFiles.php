@@ -127,8 +127,6 @@ class DbRecUploadedFiles extends DbEntityBase
         //compose ORDER BY
         $order = array();
 
-        //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:ulf_Added'];
         if($value!=null){
             array_push($order, 'ulf_Added '.($value>0?'ASC':'DESC'));
@@ -412,9 +410,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                                 }
 
-                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
                                 $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF;
-                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -433,9 +429,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;
 
-                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
                                 $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF_IMAGE;
-                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -641,7 +635,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     if($res>0){
                         $this->records[$rec_idx]['ulf_ObfuscatedFileID'] = $nonce;
-    //                    $this->records[$rec_idx]['ulf_ID'] = $res;
                     }
                 }
             }

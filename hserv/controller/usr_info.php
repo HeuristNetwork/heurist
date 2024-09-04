@@ -506,8 +506,6 @@
                       }
 
                   }elseif($op=='delete'){
-                      //if (is_dir($dir))
-
 
                       if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');

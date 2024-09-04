@@ -150,7 +150,7 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
 
         $imp_session = json_decode($imp_session, true);
         if($imp_session!==false && is_array(@$imp_session['sequence'])){
-            //if($imp_session['primary_rectype']==$rty_ID){
+
             foreach($imp_session['sequence'] as $seq){
 
                 if($seq['rectype']==$rty_ID && is_array(@$seq['mapping_flds']) && count($seq['mapping_flds'])>0){

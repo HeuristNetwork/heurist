@@ -273,7 +273,6 @@ class DbAnnotations extends DbEntityBase
                         }else{
                             $value = $row[2];
                         }
-                        //if(!@$details[$field_type]) {$details[$field_type] = array();}
                         $details[$field_type][] = $value; //"t:"
                     }
                 }

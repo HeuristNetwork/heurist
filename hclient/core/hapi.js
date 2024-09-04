@@ -191,7 +191,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     let _key_count;
     function _getKeyCount(data, level) {
         level = level || 0;
-        //_key_count[level] = _key_count[level] || 0;
         let _key_count = 0;
         for (let k in data) {
             Object.hasOwn(data, k) && _key_count++;
@@ -528,7 +527,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 + '</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                 (password_entered)=>{
 
-
                                     let on_passwordcheck = 
                                         (response)=>{
                                             if (response.status == window.hWin.ResponseStatus.OK && response.data == 'ok') {
@@ -537,8 +535,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                                 window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
                                             }
                                         };
-                                                            
-                                    
+
                                     window.hWin.HAPI4.SystemMgr.action_password(
                                             { action: password_protected, password: password_entered },
                                             on_passwordcheck);
@@ -1652,11 +1649,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }
                 }
 
-
-                //if limit is not defined - get it from preferences
-                //if(window.hWin.HEURIST4.util.isnull(request.limit)){
-                //    request.limit = window.hWin.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
-                //}
 
                 window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
 

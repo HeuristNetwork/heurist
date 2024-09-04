@@ -1083,8 +1083,6 @@ abstract class DbEntityBase
             }else{
                 if(!$res) {return false;}
             }
-            
-            //if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default search mode
 
             return true;
         }else{

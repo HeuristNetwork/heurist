@@ -224,16 +224,11 @@ $email_list = array();
 $email_list_deleted = array();
 $email_list_failed = array();
 
-//$databases = array('osmak_3');
-
 foreach ($databases as $idx=>$db_name){
 
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
-    //if(strcmp($db_name,'crvr_eglisesXX')<=0){
-    //    continue;
-    //}
 
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
@@ -692,7 +687,7 @@ function exclusion_list(){
     $handle = @fopen($fname, "r");
     while (!feof($handle)) {
         $line = trim(fgets($handle, 100));
-        //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
+        
         if(strpos($line,'#')!==false){
             $line = trim(strstr($line,'#',true));
         }

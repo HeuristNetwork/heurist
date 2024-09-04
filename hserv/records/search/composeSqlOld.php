@@ -1304,10 +1304,6 @@ class Predicate {
             $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
         }
 
-        //if($this->negate){
-        //    $res = SQL_NOT.$res;
-        //}
-
         return $res;
     }
 
@@ -1826,7 +1822,6 @@ class FieldPredicate extends Predicate {
             $cs_ids = getCommaSepIds($this->value);
 
             if ($cs_ids) {
-            //if (preg_match(REGEX_CSV, $this->value)) { it does not work for more than 500 entries
                 $isnumericvalue = false;
                 $isin = true;
             }else{
@@ -2342,7 +2337,6 @@ class BibIDPredicate extends Predicate {
                     $cs_ids = implode(',',$rsvd);
                 }
 
-            //if (preg_match(REGEX_CSV, $this->value)) { - regex does not work for >500 entries
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';

@@ -463,9 +463,7 @@ function HEditing(_options) {
                             .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))
                             .addClass('heurist-helper1').appendTo(fieldContainer);
                         //see applyCompetencyLevel
-                        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                     }else  
-                    //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
                         
                         //assign values from record

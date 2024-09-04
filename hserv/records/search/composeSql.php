@@ -380,8 +380,6 @@ function parse_query_to_json($query){
                         $res = array_merge($res, array_shift($subres) );
                     }else{
 
-                        //if($previous_key && )
-
                         if(false && @$res[count($res)-1]['title']){
                             $res[count($res)-1]['title'] .= (' '.$word);
                         }else{
@@ -996,8 +994,6 @@ class HLimb {
                             $where = $res["where"];
                         }else{
                             array_push($wheres, "(".$res["where"].")");
-                            //$where = $where."(".$res["where"].")";
-                            //if($ind<$cnt) {$where = $where.$cnj;}
                         }
                     }elseif($limb->error_message){
                         $this->error_message = $limb->error_message;
@@ -1042,7 +1038,6 @@ class HPredicate {
     var $field_id = null; //dty_ID
     var $field_type = null;
     var $field_term = null; //term field: array('term', 'label', 'concept', 'conceptid', 'desc', 'code') // trm_XXX fields
-    //var $field_lang = null; // third or fourth code in predicate f:[dty_ID]:[trm_ID]:[lng_ISO639-1]
 
     var $value;
     var $valid = false;
@@ -2006,7 +2001,6 @@ class HPredicate {
             $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
             $ids = mysql__select_list2($mysqli, $sub_query);
             if(is_array($ids) && count($ids)>0){
-                //if(count($ids)>2000)
                 $val = SQL_IN.implode(',',$ids).')';
             }else{
                 $val = ' =0';
@@ -2981,7 +2975,6 @@ class HPredicate {
             }
 
             if ($cs_ids && strpos($cs_ids, ',')>0) {
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - regex does not work for >500 entries
 
                 // comma-separated list of defRecTypes ids
                 $in = ($this->negate)? 'not in' : 'in';

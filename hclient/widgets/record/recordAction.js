@@ -461,9 +461,6 @@ $.widget( "heurist.recordAction", {
                 let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._hideProgress();
-                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    //    console.error(response);                   
-                    //}
                 });
             }});
         
@@ -471,16 +468,6 @@ $.widget( "heurist.recordAction", {
         let pbar = progress_div.find('#progressbar');
         let progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
-        //pbar.progressbar('value', 0);
-        /*{
-              value: false,
-              change: function() {
-                progressLabel.text( progressbar.progressbar( "value" ) + "%" );
-              },
-              complete: function() {
-                progressLabel.text( "Complete!" );
-              }
-        });*/
         
         this._progressInterval = setInterval(function(){ 
             

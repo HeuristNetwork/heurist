@@ -339,8 +339,6 @@ $mysqli = $system->get_mysqli();
     //
     while ( $res = $res1->fetch_assoc() ) {
 
-            //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) {continue;}
-
             //verify path
             $res['db_fullpath'] = null;
 
@@ -684,9 +682,6 @@ $mysqli = $system->get_mysqli();
 
                         var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-
-                        //var params = "db="+window.hWin.HAPI4.database+"&data=" + encodeURIComponent(str);
-                        //window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
 
                         var request = {db:window.hWin.HAPI4.database, data:str};
                         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);

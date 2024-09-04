@@ -1800,8 +1800,6 @@ window.hWin.HEURIST4.dbs = {
     //
     trm_SortingById: function(a, b){
 
-        //var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
-
         let a_name = $Db.trm(a,'trm_Label').toLocaleUpperCase();
         let b_name = $Db.trm(b,'trm_Label').toLocaleUpperCase();
         let a_order = parseInt($Db.trm(a,'trm_OrderInBranch'), 10);
@@ -1846,16 +1844,10 @@ window.hWin.HEURIST4.dbs = {
             else mode='flat';
         }
         
-        //if(mode == 'tree' || mode == 'select'){ // get translated labels for particular language
-        //    translated_labels = $Db.trm_getTranslatedLabels(vocab_id, language);
-        //}        
-
         function __addChilds(recID, lvl_parents, include_vocab){
         
             let label = $Db.trm_getLabel(recID, language);
-            //translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
-        
-            //recID = parseInt(recID);
+
             let node = {title: label, key: recID};
             
             if(include_vocab && lvl_parents==0){

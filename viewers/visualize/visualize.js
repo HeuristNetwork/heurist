@@ -1468,7 +1468,6 @@ function addBackgroundCircles() {
 * These circles are white
 */
 function addForegroundCircles() {
-    //var circleSize = getSetting('setting_circlesize');
     let entitycolor = getSetting('setting_entitycolor');
 
     let circles = window.d3.selectAll(".node")

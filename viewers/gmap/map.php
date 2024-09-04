@@ -243,9 +243,6 @@ $system->defineConstants();
                             // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                             var recset = new HRecordSet(response.data);
 
-                            //var mapdataset = recset.toTimemap();
-                            //mapping.load([mapdataset]);
-
                             mapping.load( null, //mapdataset,
                                 null,  //array of record ids
                                 mapdocument,    //map document on load
@@ -436,7 +433,6 @@ $system->defineConstants();
 
             var nt = parseInt(legend.css('bottom'), 10);
             nt = 30; //bottom
-            //var mh = $('#map').height();
             var mh = $("#mapping").find('.ui-layout-center').height();
 
             var is_collapsed = (legend.find('#collapse').text() == "+");

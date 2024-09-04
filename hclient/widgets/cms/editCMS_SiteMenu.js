@@ -120,7 +120,6 @@ title: "Overview"
                 selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
                 renderNode: function(event, data) {
                     
-                        //if(data.has_access){}
                         let item = data.node;
                         _defineActionIcons( item );
                     

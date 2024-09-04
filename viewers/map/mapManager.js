@@ -71,8 +71,6 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
-        //if ( !window.hWin.HEURIST4.util.isFunction($('body').hMapPublish) ) return;
-        
         let container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
@@ -683,7 +681,6 @@ function HMapManager( _options )
                         //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
 
 
-                        //if(node.parent.isSelected()){
                         let mapdoc_id = node.data.mapdoc_id;
                         let layer_id = node.data.layer_id;
                         let not_visible = true; 
@@ -701,8 +698,6 @@ function HMapManager( _options )
                                             not_visible = false;
                                         }
                                 }
-                                //node.visitSiblings(function(){},true);
-                                
                             }
                             
                             (layer_rec['layer']).applyThematicMap( active_themes );

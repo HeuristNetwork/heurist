@@ -98,7 +98,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
         this.mapIds(this.options.mapping.fields, this.options.mapping.rty_ID);    /* Set the session variable 'id_map' to be an object of all record, detail and vocab type ids to simplify the replacement task */
 
-        //var record = this.options.edit_record.getFirstRecord(); /* Retrieve Record */
         let record = this.options.edit_fields;  /* Retrieve Edit Fields */
 
         /* Check if selected Work has: project keyword/s, parisian category, and a basis for classification */

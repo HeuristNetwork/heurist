@@ -398,11 +398,8 @@ function hLayoutMgr(){
         //remove previous one
         let old_widget = container.find('div[data-hid='+layout.key+']');
         if(old_widget.length>0){
-            //parent_ele = old_widget.parent();
-            //var prev_sibling = old_widget.prev();
             $d.insertBefore(old_widget);
             old_widget.remove();
-            //old_widget.replaceWith($d);
         }else{
             $d.appendTo(container);    
         }
@@ -477,8 +474,6 @@ function hLayoutMgr(){
     //
     function _layoutInitWidget(layout, container){
 
-        //var layout = _layoutContentFindElement(_layout_cfg, container.attr('data-lid'));
-
         let app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
 
         if(!layout.options) layout.options = {};
@@ -497,7 +492,6 @@ function hLayoutMgr(){
             }
         }
         
-        //var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
         if(_supp_options['lang']){
             // xx - means it will use current language
             layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');    
@@ -663,8 +657,6 @@ function hLayoutMgr(){
         $d = _layoutCreateDiv(layout, '', forStorage);
         
         $d.appendTo(container);
-          
-        //if(isEditMode) $d.css('border','2px dotted blue');
           
         if($d.parent().hasClass('layout-content')){
             $d.addClass('ent_wrapper');    
@@ -996,7 +988,6 @@ function hLayoutMgr(){
                         }
                     }                 
 
-                    //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
                     if(!$.isEmptyObject(css)) child['css'] = css;
                 }
                 res.push(child);

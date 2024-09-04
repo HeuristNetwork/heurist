@@ -949,12 +949,8 @@ $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dt
             $record['RecTypeID'] = $recTypeID;
 
 
-            //if($record['RecTypeID']<1){
-            //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
-            //}
-
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
-                $record_src['rec_ID'] = uniqid();//''.microtime();
+                $record_src['rec_ID'] = uniqid();
             }else {
 
                 //in case source id is not numerics or more than MAX INT

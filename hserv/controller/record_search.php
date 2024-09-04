@@ -77,8 +77,7 @@
     //these are internal parameters, they cannot be sent from client side
     if( @$req_params['sql'] ) {unset( $req_params['sql'] );}
     if( @$req_params['parentquery'] ) {unset ($req_params['parentquery'] );}
-    //if( @$req_params['needall'] ) {unset ($req_params['needall'] );}
-
+    
     //get list of registered database and master index db on the same server
     if(@$req_params['remote'] == 'master' &&
        strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //the same server  - switch database only

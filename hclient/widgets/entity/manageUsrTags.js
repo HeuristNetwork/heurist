@@ -557,8 +557,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     //   
     _afterDeleteEvenHandler: function( recID ){
         this._currentEditID = null;
-        //this.addEditRecord(null);
-        //if(this._editing)this._editing.initEditForm(null, null); 
         
         //detach inline input    
         if(this.edit_replace_input) this.edit_replace_input.appendTo(this.element);

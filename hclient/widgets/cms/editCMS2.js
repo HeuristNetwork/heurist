@@ -2090,10 +2090,6 @@ function(value){
                 items[i].title = null;
                 delete items[i].title;
                 
-                //if(items[i].content && items[i].dom_id){
-                //    contents.push({id:items[i].dom_id,lang:'',content:items[i].content});        
-                //}
-                
                 if(items[i].children){
                     __cleanLayout(items[i].children);    
                 }

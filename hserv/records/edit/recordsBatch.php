@@ -404,7 +404,6 @@ class RecordsBatch
 
                 if($res==2){
                     if($allow_multi_parent){
-                        //if(!in_array($child_id, $childInserted)) {array_push($childInserted, $child_id);}
                         if(!in_array($child_id, $childMiltiplied)) {array_push($childMiltiplied, $child_id);}
                     }else{
                         array_push($childUpdated, $child_id);
@@ -1437,9 +1436,6 @@ class RecordsBatch
                                 if(!DEBUG_RUN){
                                     $pdf    = $parser->parseFile($file);
 
-                                    //if(false){
-                                    //    $text = $pdf->getText();
-                                    //}else{
                                         // Retrieve all pages from the pdf file.
                                         $pages  = $pdf->getPages();
                                         $page_cnt = 0;
@@ -1467,7 +1463,6 @@ class RecordsBatch
 
 
                                         }//foreach
-                                    //}
 
                                 }else{
                                     //debug without real parsing

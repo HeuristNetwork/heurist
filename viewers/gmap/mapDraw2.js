@@ -65,7 +65,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             sPrompt = (type==google.maps.drawing.OverlayType.POLYGON?'Polygon':'Polyline')
                 +': enter coordinates as sequence of lat long separated by space';
         }
-        //if(sPrompt) sPrompt += '(for UTM first easting then northing)';
         $('#coords_hint').html(sPrompt);
     }
 

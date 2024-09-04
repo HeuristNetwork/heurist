@@ -115,8 +115,6 @@ class DbUsrTags extends DbEntityBase
         //compose ORDER BY
         $order = array();
 
-        //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:tag_Modified'];
         if($value!=null){
             array_push($order, 'tag_Modified '.($value>1?'ASC':'DESC'));
@@ -135,8 +133,6 @@ class DbUsrTags extends DbEntityBase
 
         if($needCount){
             array_push($this->data['details'],'(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
-            //array_push($where, "(tag_ID=rtl_TagID)");
-            //array_push($from_table, 'usrRecTagLinks');
         }
 
         $is_ids_only = (count($this->data['details'])==1);

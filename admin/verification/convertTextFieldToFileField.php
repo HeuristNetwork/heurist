@@ -95,7 +95,6 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $databases = array();
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
         }
     }
@@ -107,11 +106,6 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
 
     foreach ($databases as $idx=>$db_name){
 
-        //get local id
-        //$query = 'select rty_ID from '.$db_name.'.defRecTypes where rty_OriginatingDBID=2 and rty_IDInOriginatingDB=11';
-        //$rty_ID = mysql__select_value($mysqli, $query);
-
-
         $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
         $query = "select dty_ID from `$db_name`.defDetailTypes where  dty_Type='freetext' AND dty_OriginatingDBID="
@@ -122,9 +116,6 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
 
         if($dty_ID>0)
         {
-            //switch database
-            //mysql__usedatabase($mysqli, $db_name);
-
             //change
             $query = "update `$db_name`.defDetailTypes set dty_Type='file' where dty_ID=".$dty_ID;
             $mysqli->query($query);

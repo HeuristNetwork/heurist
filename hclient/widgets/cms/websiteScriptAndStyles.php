@@ -1151,9 +1151,6 @@ function initLinksAndImages($container, search_data){
                 $(link).attr('data-pageid', rec_id);
 
                 var eventdata = null;
-                //if(query!=null){
-                //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
-                //}
 
                 $(link).on('click', function(event){
 
@@ -1534,10 +1531,6 @@ if($website_custom_css!=null){
 <?php
 // javascript from field DT_CMS_SCRIPT of home record
 if($website_custom_javascript!=null){
-
-    //pass url params to custom javascript
-    //var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
-    //eventdata = {url_params:params};
 
     print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
     print "try{\n".$website_custom_javascript."\n}catch(e){console.error(e)}}</script>";

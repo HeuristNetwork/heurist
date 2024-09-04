@@ -146,38 +146,6 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             this.element.find('#postdata').val( JSON.stringify(request) );
             this.element.find('#postform').attr('action', url);
             this.element.find('#postform').submit();
-                
-            //if(mode==1){ //open in new window
-            //}else{ //download
-            //}     
-            
-            /*
-                var that = this;                                                
-                
-                window.hWin.HAPI4.RecordMgr.access(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            that._context_on_close = (response.data.updated>0);
-                            
-                            that.closeDialog();
-                            
-                            var msg = 'Processed : '+response.data.processed + ' record'
-                                + (response.data.processed>1?'s':'') +'. Updated: '
-                                + response.data.updated  + ' record'
-                                + (response.data.updated>1?'s':'');
-                           if(response.data.noaccess>0){
-                               msg += ('<br><br>Not enough rights (logout/in to refresh) for '+response.data.noaccess+
-                                        ' record' + (response.data.noaccess>1?'s':''));
-                           }     
-                            
-                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-      */  
     },
     
     _initControls: function(){

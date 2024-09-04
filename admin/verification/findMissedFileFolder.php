@@ -54,19 +54,6 @@ if(!@$_REQUEST['mail']){
     //1. find all database
     $databases = mysql__getdatabases4($mysqli, false);
 
-/*
-    $query = 'show databases';
-    $res = $mysqli->query($query);
-    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
-    $databases = array();
-    while (($row = $res->fetch_row())) {
-        if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
-                $databases[] = $row[0];
-        }
-    }
-*/
-
     $root = $system->getFileStoreRootFolder();
 
     $check_subfolders = true;
@@ -80,7 +67,6 @@ if(!@$_REQUEST['mail']){
 
     foreach ($databases as $idx=>$db_name){
 
-        //list($database_name_full, $db_name) = mysql__get_names($db_name);
         $db_name = htmlspecialchars($db_name);
 
         $dir = $root.$db_name.'/';

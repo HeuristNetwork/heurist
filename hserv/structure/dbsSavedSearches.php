@@ -78,9 +78,6 @@
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
 
-            //$groups = user_getWorkgroups($mysqli, $ugrID);
-            //if( $groups && count($groups)>0){
-
             $ugr_groups = $system->get_user_group_ids(null, true);//always get latest
 
             $current_User = $system->getCurrentUser();
@@ -395,7 +392,6 @@
         }
 
         // 5 - websearch
-        //if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){
         if(is_array($groups) && count($groups)==1){
             $where = ' = '.$groups[0];
         }elseif(is_array($groups) && count($groups)>1){

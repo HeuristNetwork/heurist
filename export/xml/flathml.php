@@ -154,23 +154,13 @@ if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.DIR_BACKUP.HEU
     $output_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "xml");
 
     $output_file_fd = fopen($output_file, 'w');
-    //$output_file = fopen ($output_file_name, "w");
-    //if(!$output_file){
-    //    die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
-    //}
+
     $_REQUEST['mode'] = 1;
 }
 
 
 if(!defined('HEURIST_HML_DIR')){
-    /*$path = $system->get_system('sys_hmlOutputDirectory');//@todo check
-    if ($path) {
-    $path = getRelativePath(HEURIST_FILESTORE_DIR, $path);
-    if(folderCreate($path, true)){
-    define('HEURIST_HML_DIR', $path);
-    }
-    }
-    if(!defined('HEURIST_HML_DIR')){*/
+
     define('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR . 'hml-output/');
     folderCreate2(HEURIST_HML_DIR, '', true);
     define('HEURIST_HML_URL', HEURIST_FILESTORE_URL . 'hml-output/');
@@ -601,7 +591,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 */
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     global $system, $mysqli, $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $PUBONLY;
-    //if (!$REVERSE) {return array();}
+
     $nlrIDs = array();// new linked record IDs
     $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' .
     'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .

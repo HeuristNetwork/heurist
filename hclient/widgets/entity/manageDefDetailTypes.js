@@ -379,7 +379,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         let html = '';
-        //if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
         let fields = this.visible_fields; //this.usrPreferences.fields;
         
         let i = 0;
@@ -603,8 +602,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 let that = this;
  
-                //if(action=='group'){}
-                    
                 if(action=='show_in_list' || action=='hide_in_list'){
                     
                     //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);

@@ -1164,7 +1164,6 @@ class DbUtils {
             }
             return false;
         }else{
-            //if($verbose) { echo "<p>OK</p>";}
             return true;
         }
     }
@@ -1436,9 +1435,6 @@ class DbUtils {
                     }
                 }
 
-
-                //$mysqli->autocommit(FALSE);
-                //if($res) {$mysqli->commit();}
             }
 
         if(!$res){

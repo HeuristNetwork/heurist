@@ -202,7 +202,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }
         
         let group_id = recordset.fld(record, 'svs_UGrpID');
-        //var group_name = window.hWin.HAPI4.usr_names({UGrpID:group_id});
+
         let group_name = (group_id==window.hWin.HAPI4.user_id())
                             ?window.hWin.HAPI4.currentUser['ugr_FullName']
                             :window.hWin.HAPI4.sysinfo.db_usergroups[group_id];

@@ -277,18 +277,6 @@ if(mysql__check_dbname($db)==null){
 
 
                     }else{
-                        //modify $external_url or perform authorization to external repository here
-                        // @todo
-                        //if(is_array($fileParams) && @$fileParams['repository']){
-                        //    $service_id = $fileParams['repository'];
-                        //    $credentials = user_getRepositoryCredentials2($system, $service_id);
-                        //    if($credentials!=null){
-                        //           @$credentials[$service_id]['params']['writeApiKey']
-                        //           @$credentials[$service_id]['params']['readApiKey']
-                        //    }
-                        //}
-
-
                         redirectURL($external_url);//redirect to URL (external)
                     }
 

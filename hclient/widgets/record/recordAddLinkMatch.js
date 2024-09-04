@@ -166,7 +166,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             }
         
             this._on( fieldPointerSel, { change: that._fillTargetRecordTypes} );        
-            //if(fieldPointerSel.selectedIndex<0) fieldPointerSel.selectedIndex=0;
             window.hWin.HEURIST4.ui.initHSelect(fieldPointerSel, false);
             fieldPointerSel.trigger('change');
             

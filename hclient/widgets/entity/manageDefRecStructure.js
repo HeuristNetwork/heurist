@@ -2206,7 +2206,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         ele.empty();
             
             
-        //if(this.defval_container) return; //already inited
         this.defval_container = ele;
         
         let is_increment = (defval=='increment_new_values_by_1');

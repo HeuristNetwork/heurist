@@ -242,8 +242,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                         let recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
                                             let recID = recs[recs.length-1];
-                                            //const isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
-                                            //if(isTrash) return;
                                             this._onActionListener(event, {action:'edit',recID:recID}); 
                                         }
                                     }
@@ -1180,14 +1178,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         +'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
                         +$Db.getConceptID('rty',this._currentEditID, true));
             }
-            
-            
-            //hide after edit init btnRecRemove for status locked 
-            //if(false){ //@todo
-            //    ele = this._toolbar;
-            //    ele.find('#btnRecRemove').hide();
-            //}
-            
             let that = this;
 
             function __extendTitleMaskInput(){

@@ -26,7 +26,6 @@
 function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
     const _className = 'editCMS_WidgetCfg';
-    //var isWebPage = false;
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -372,7 +371,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
                         }else if(item.attr('type')=='radio'){
                             item.prop('checked', item.val()== String(opts[item.attr('name')]));
-                        }else {  //if(item.val()!=''){
+                        }else {
                             item.val( opts[item.attr('name')] );
                         }
                     }
@@ -1293,11 +1292,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
         }else
-        if(widget_name=='heurist_StoryMap'){
-            //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
-            //cont.find('input[name="storyRectypes"]').val( storyRectypes );
-            
-            //cont.find('select[name="storyFields"]').val
+        if(widget_name=='heurist_StoryMap')
+        {
             let storyFields = cont.find('#storyFields').editing_input('getValues');
             cont.find('input[name="storyFields"]').val( storyFields );
             

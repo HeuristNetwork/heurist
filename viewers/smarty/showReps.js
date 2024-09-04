@@ -256,7 +256,6 @@ function ShowReps( is_snippet_editor ) {
             if(window.hWin.HEURIST4.util.isnull(template_file)){
                 return;
             }
-            //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
             
             //limit to  records  smarty-output-limit
             let recset;
@@ -751,7 +750,6 @@ function ShowReps( is_snippet_editor ) {
                     if(!window.hWin.HEURIST4.util.isnull(context))
                     {
                         let mode = context.ok;
-                        //if(mode==="delete"){
                         if(modeRef===3){ //delete
                             //todo!!!! - remove template from the list and clear editor
                             _reload_templates();
@@ -862,9 +860,7 @@ function ShowReps( is_snippet_editor ) {
                 request['recordset'] = {records:[$('#listRecords').val()], reccount:1};
                 
             }else{
-                //_showProgress();    
                 if(_currentRecordset!=null){
-                    //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
                     request['recordset'] = JSON.stringify(_currentRecordset);
                 }else{
                     request = window.hWin.HEURIST4.util.cloneJSON(_currentQuery);

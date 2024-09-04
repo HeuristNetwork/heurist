@@ -254,14 +254,13 @@ $requestUri:
 
             }elseif($action=='hml'){
 
-        // http://127.0.0.1/heurist/osmak_9c/hml/18/1
+                //example: https://example.org/heurist/dbname/hml/18/1
 
                 if(@$requestUri[3]){
                     $redirect .= ('export/xml/flathml.php?db='.$database.'&w=a&q=');
 
                     $ids = prepareIds(@$requestUri[3]);
 
-                    //if(ctype_digit($requestUri[3]) && $requestUri[3]>0){
                     if(count($ids)>0){
                         $redirect .= ('ids:'.$requestUri[3]);
                     }else{
@@ -285,7 +284,6 @@ $requestUri:
                 $query = null;
                 if(@$requestUri[3]){
                     $ids = prepareIds(@$requestUri[3]);
-                    //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
                     if(count($ids)>0){
                         $query = ('ids:'.$requestUri[3]);
                     }else{
@@ -311,7 +309,6 @@ $requestUri:
                         $redirect .= ('viewers/smarty/showReps.php?db='.$database.'&template='.basename($requestUri[3]).'&publish=1&w=a&q=');
 
                         $ids = prepareIds(@$requestUri[4]);
-                        //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
                         if(count($ids)>0){
                             $query = ('ids:'.$requestUri[4]);
                         }else{

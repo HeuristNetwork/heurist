@@ -380,7 +380,6 @@ class DbsImport {
 
             foreach($def_ids as $def_id){
                 $this->_getTopMostVocabulary($def_id, 'enum');
-                //if(count($this->imp_terms['enum'])==0)
                 $this->_getTopMostVocabulary($def_id, 'relation');
             }
 

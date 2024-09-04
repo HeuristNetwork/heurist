@@ -398,7 +398,6 @@ class Temporal {
             }
 
 
-            //if(!is_numeric($value)){
             if($timespan==null && !preg_match(REGEX_YEARONLY, $value) ){
                 $timespan = json_decode($value, true);
 

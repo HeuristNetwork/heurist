@@ -430,9 +430,6 @@ $.widget( "heurist.manageEntity", {
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
-                                    //if(!window.hWin.HEURIST4.util.isRecordSet(selected_recs) 
-                                    //    || selected_recs.entityName==this._entityName)
-                                    //{}
                                         this.selectedRecords(selected_recs); //assign
                                         
                                         if (this.options.edit_mode=='inline'){
@@ -681,7 +678,6 @@ $.widget( "heurist.manageEntity", {
     // @todo  to remove
     _rendererActionButton: function(action, isheader){        
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){        
-        //if(this.options.select_mode=='manager'){
             let idx = 0;
             for(idx in this.options.action_select){
                 let act = this.options.action_select[idx];
@@ -971,7 +967,6 @@ $.widget( "heurist.manageEntity", {
                 
                 
             }else {
-                //if(options.in_popup_dialog===false){ 
                 let cancelbutton_label = (options['select_mode']=='select_multi' || options['select_mode']=='select_roles')
                     ?'Cancel':'Close';
                 
@@ -1506,8 +1501,6 @@ $.widget( "heurist.manageEntity", {
                         window.hWin.HEURIST4.msg.bringCoverallToFront(this.editForm);   
                     }
                 }
-                
-                //if(this._toolbar) this._toolbar.css('visibility','hidden'); //hide();               
                 
                 let that = this;                                                
                 //that.loadanimation(true);

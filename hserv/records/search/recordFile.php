@@ -510,7 +510,6 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
-    //if(isPathInHeuristUploadFolder($filename, true)){
 
         $range = @$_SERVER['HTTP_RANGE'];
         $range_max = 0;
@@ -537,8 +536,6 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             header(HEADER_CORS_POLICY);
             header('access-control-allow-credentials: true');
         }
-
-        //header('Content-Type: application/octet-stream');
 
         //force download  - important for embed element DO NOT include this atttibute!
         if($originalFileName!=null){
@@ -575,9 +572,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                     if($range_max>0){
                         if($range_min>0) {fseek($handle,$range_min);}
                         $chunk = fread($handle, $range_max-$range_min+1);
-                        //echo unpack("c2/n",$chunk);
                         echo $chunk;
-                        //fread($handle, $range_max-$range_min+1);//by chunks
                     }else{
                         while (!feof($handle)) {
                             echo fread($handle, 1000);//by chunks

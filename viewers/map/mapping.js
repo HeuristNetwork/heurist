@@ -323,8 +323,6 @@ $.widget( "heurist.mapping", {
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
                 //global 
-                //if(mapping) mapping.onWinResize();
-                //that.adjustToolbarHeight();
                 that._adjustLegendHeight();
             }
             
@@ -342,7 +340,6 @@ $.widget( "heurist.mapping", {
             layout_opts.north__spacing_open = 0;
 
             layout_opts.south__onresize_end = function() {
-                //if(mapping) mapping.setTimelineMinheight();
                 that._adjustLegendHeight();
             };
         
@@ -1705,10 +1702,6 @@ $.widget( "heurist.mapping", {
                 if(nativeZoom>=0 && nativeZoom<maxZoom){
                     maxZoom = nativeZoom;
                 } 
-                //if(this.userDefinedMinZoom>=0 && maxZoom<this.userDefinedMinZoom){
-                //    maxZoom = this.userDefinedMinZoom;  
-                //}
-
                 if(window.hWin.HEURIST4.util.isObject(fly_params) && (!fly_params['maxZoom'] || fly_params['maxZoom'] > maxZoom)){
                     fly_params['maxZoom'] = maxZoom;
                 }
@@ -1982,10 +1975,6 @@ $.widget( "heurist.mapping", {
        
         if(style || !affected_layer.options.default_style){
        
-            //update markers only if style has been changed
-            //var marker_style = null;
-            //var myIcon = new L.Icon.Default();
-            
             // set default values -------       
             style = this.setStyleDefaultValues( style );
             
@@ -2354,8 +2343,6 @@ $.widget( "heurist.mapping", {
             }else{
                 layer.setIcon(setIcon);    
                 layer.setOpacity( markerStyle.opacity );
-                //if(markerStyle.color)
-                //    layer.valueOf()._icon.style.filter = hexToFilter(markerStyle.color);
             }
 
         }else if(layer instanceof L.CircleMarker){
@@ -2581,12 +2568,7 @@ $.widget( "heurist.mapping", {
 
         if(layer.feature.properties.rec_ID>0){
             
-            //if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
-
             that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight without zoom
-            //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
-            //    that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
-            //}
             
             if(!add_to_selection){
 
@@ -2960,7 +2942,6 @@ $.widget( "heurist.mapping", {
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, recIDs)>=0)) 
                     {
                         res.push(layer);
-                        //if(recIDs.length==1) return false;
                     }
                 });
             }    
@@ -2982,8 +2963,6 @@ $.widget( "heurist.mapping", {
                 $.each(layers,function(i, lyr){
                     
                     if(lyr instanceof L.Marker){
-                        //var icon = lyr._icon;
-                        //$(icon).css('opacity', opacity);
                         lyr.setOpacity( opacity );                        
                     }else{
                         lyr.setStyle({
@@ -3048,11 +3027,9 @@ $.widget( "heurist.mapping", {
                         if (_selection===true || (layer.feature &&
                          window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)){
                               selected_markers.push( layer );
-                              //if(selected_markers.length==_selection.length) return false;
                          }
                     });
             }
-            //if(selected_markers.length==_selection.length) break;
         }        
         
         return selected_markers;
@@ -3504,9 +3481,6 @@ $.widget( "heurist.mapping", {
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
                         that.setFeatureSelection(selected_rec_ids, true, true, false); //timeline select - highlight on map and zoom
-                        //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
-                        //    that.options.onselect.call(that, selected_rec_ids);
-                        //s}
                     },                
                     onfilter: function(show_rec_ids, hide_rec_ids){
                         
@@ -3653,43 +3627,6 @@ $.widget( "heurist.mapping", {
                     }else
                     if(val=='draw') //draw plugin
                     {
-                        //var is_geofilter = (controls.indexOf('drawfilter')>=0);
-                        
-                          /*
-                        L.Edit.PolyVerticesEdit = L.Edit.PolyVerticesEdit.extend(
-                           {
-                                    icon: new L.DivIcon({
-                                      iconSize: new L.Point(8, 8),
-                                      className: 'leaflet-div-icon leaflet-editing-icon',
-                                    }),
-                                    touchIcon: new L.DivIcon({
-                                        iconSize: new L.Point(12, 12), //was 20
-                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
-                                    })
-                          });            
-                        L.Edit.Poly = L.Edit.Poly.extend(
-                           {
-                                    icon: new L.DivIcon({
-                                      iconSize: new L.Point(8, 8),
-                                      className: 'leaflet-div-icon leaflet-editing-icon',
-                                    }),
-                                    touchIcon: new L.DivIcon({
-                                        iconSize: new L.Point(12, 12), //was 20
-                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
-                                    })
-                          });            
-                        L.Draw.Polyline = L.Draw.Polyline.extend(
-                           {
-                                    icon: new L.DivIcon({
-                                      iconSize: new L.Point(8, 8),
-                                      className: 'leaflet-div-icon leaflet-editing-icon',
-                                    }),
-                                    touchIcon: new L.DivIcon({
-                                        iconSize: new L.Point(12, 12), //was 20
-                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
-                                    })
-                          });            
-                          */
                         that.drawSetControls( that.options.drawMode );
                         
                     }//draw events
@@ -3728,8 +3665,6 @@ $.widget( "heurist.mapping", {
             
         //   legend: [basemaps,search,mapdocs|onedoc,off,width]
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
-        
-        //$('#map-settingup-message').text('EXPERIMENTAL');
         
         //show/hide available basemaps
         this.mapManager.filterListBaseMap( params['basemaps'] );  
@@ -4063,12 +3998,6 @@ $.widget( "heurist.mapping", {
                         that.printLegend = $dlg.find('#dlg-prompt-legend').is(':checked');
                         
                         let sMode = $dlg.find('#dlg-prompt-mode').val();
-                        
-                        //var opts = {pageSize:'A4'};
-                        //margin:{right:150}, scale:1};
-                        //if(sTitle!=''){
-                        //    opts['header'] = {text:sTitle, enabled:true };
-                        //}
                         
                         let modeToUse = L.BrowserPrint.Mode[sMode](); 
                        

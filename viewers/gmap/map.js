@@ -1672,8 +1672,6 @@ if(_mapdata.limit_warning){
 
                             items_to_update_data.push(itemdata);
 
-                            //if(idx == selection.length-1) lastSelectedItem = item;
-
                         }else{ //clear selection
                             //item.opts.theme
                             //item.changeTheme(customTheme, true); - dont work
@@ -1856,18 +1854,9 @@ if(_mapdata.limit_warning){
             //              - this is main customization way for Digital Harlem
             // 4. html content is created from item.opts values
             
-            //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
-
-                //if(!item.opts.info){
-                //    return;   //supress popup
-                //}else 
 
                 let mapdocument = null;
-                /*                
-                let mapdocument = that.map_control.getMapDocumentDataById(); //get current map document
-                mapdocument = {popup_template:'Person connected to Place via Events.tpl'};
-                mapdocument = {popup_template:'BoroPlaceOnMap.tpl'};
-                */
+
                     
                 if(mapdocument && mapdocument.popup_template){ //1. as smarty output 
                                                

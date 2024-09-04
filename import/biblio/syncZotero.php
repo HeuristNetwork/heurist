@@ -552,9 +552,6 @@ if($step=="1"){  //first step - info about current status
                 $recId = null;
                 $rec_URL = null;
 
-                //if($zotero_itemid!='4SRQ8WRJ'){
-                //                    continue;
-                //}
                 // 3) try to search record in database by zotero id
                 $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="

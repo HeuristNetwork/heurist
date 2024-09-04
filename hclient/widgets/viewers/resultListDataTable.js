@@ -184,7 +184,6 @@ that._dout('myOnShowEvent');
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
-        //this._refresh();
     },
     
     _dout: function(msg){
@@ -476,9 +475,6 @@ this._dout('reload datatable '+this.options.serverSide);
             
             if(this.options.show_column_config){
 
-                //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
-                //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
-                
                 if(window.hWin.HEURIST4.util.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
                     this.selConfigs = $('<div>').appendTo(sel_container);
                     

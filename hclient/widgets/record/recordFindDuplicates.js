@@ -123,13 +123,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
-        //this.selectRecordScope.val(this.options.init_scope);    
-        //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
         
         selScope = this.selectRecordScope.get(0);
         window.hWin.HEURIST4.ui.initHSelect(selScope);
-        //$('#sel_record_scope-button').css('line-height', '1em');
     },
             
     //

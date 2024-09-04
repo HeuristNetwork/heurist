@@ -2225,7 +2225,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             cbs.parent().hide();
         }
 
-        //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
 
         
@@ -3352,10 +3351,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }
             
-            
-            //if(false && sWarning){
-            //    window.hWin.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
-            //}else
             __doMatchingStart();
             
 
@@ -3859,8 +3854,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             ignore_rectype: handle_rectype
         };
         
-//        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
-        
         _showStep(0);
     
         window.hWin.HAPI4.doImportAction(request, 
@@ -3968,7 +3961,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(!mapping_flds || $.isEmptyObject(mapping_flds)){
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_keys'];
         }
-        //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
         
         let header_flds = null;
@@ -4946,7 +4938,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#prepareWarnings').hide();
             $('#divFieldMapping2').show();
         }else{
-        //$('#mr_cnt_disamb').parent().hide();
             $('#divFieldMapping2').hide();
         }
 
@@ -4960,7 +4951,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $("#selImportId-button").css('width', sw);   
             }
             imp_ID = 0;
-            //$('#divStep2').find('fieldset').show();
+            
         }else if(page>2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();

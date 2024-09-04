@@ -716,7 +716,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             });
         }
-        else { //if(this.options.select_mode=='select_single' || this.options.select_mode=='select_multi'){
+        else {
            //SELECT MODE
 
             if(this.options.select_mode_target){
@@ -1207,34 +1207,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         });
                     }
                 });
-            }else if(this.options.auxilary=='term'){
-
-                //Show grayed arrows next to terms with child terms or on the same level as a term with child terms    
-                //if(record_divs.find('.has_child_terms').length == 0){
-                    //record_divs.find('.no_child_terms').css('visibility', 'hidden');
-                //}else{
-
-                    // Artem: code is remarked due it causes huge workload if vocabulary has more then 100 terms
-                    // Besides it seems senceless. It just hides edit button for children terms
-                    /*
-                    $.each(record_divs, function(idx, term_div){
-                        
-                        let parent_ids = $(term_div).attr('data-parent');
-                        let child_divs = record_divs.parent().find('[data-parent^="'+ parent_ids +'"]').filter(
-                            function(i, ele){
-                                if($(ele).attr('data-parent') == parent_ids){
-                                    return false;
-                                }
-                                return true;
-                            }
-                        );
-
-                        if(child_divs.length == 0){
-                            $(term_div).find('div:first-child').css('visibility', 'hidden');
-                        }
-                    });
-                    */
-                //}
             }
         }
     },
@@ -2642,7 +2614,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             function(i,item){
                 item = $(item);
                 if(item.attr('data-parent').indexOf(';'+recID+';')>=0){
-                    //if(item.is(':visible')){
+                    
                     if(is_collapsed){
                         item.show();
                     }else{

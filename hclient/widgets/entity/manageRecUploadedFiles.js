@@ -688,9 +688,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         
                         //auto detect extension of external service
                         let curr_url = ele.editing_input('getValues'); 
-                        // remarked since we need to check it on server side
-                        //let ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
-                        //if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
+
                         if( !window.hWin.HEURIST4.util.isempty(curr_url[0]) && curr_url[0]!=that._previousURL ){    
     
                             that._previousURL = curr_url[0];
@@ -698,17 +696,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._requestMimeTypeByURL();
                         }
                     }
-                    /*,paste: function(){
-                        let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-                        if(ele.editing_input('instance') !== undefined){ // trigger blur event on paste
-                            ele.editing_input('getInputs')[0].blur();
-                        }
-                    } */
+
                 });
             
             ele.editing_input('focus');
         }else{
-            //this.onEditFormChange(false); 
             //force show save button
             let ele = this._toolbar;
             if(ele){

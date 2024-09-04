@@ -253,7 +253,6 @@ $.widget( "heurist.svs_list", {
 
             let hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
-            //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
             if(this.options.btn_visible_filter && !this.isPublished) toppos = toppos + 2;
             if(hasHeader) toppos = toppos + 2;
 
@@ -576,11 +575,6 @@ $.widget( "heurist.svs_list", {
             +'<div title="'+this._HINT_WITHRULES+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
             +'&nbsp;&nbsp;Rules</div>';
-/*            
-            +'<div title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;RuleSet</div>';
-*/
             this.helper_btm = $( '<div class="heurist-helper3" style="float:right;padding:2.5em 0.5em 0 0;">'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
             .appendTo( this.accordeon );

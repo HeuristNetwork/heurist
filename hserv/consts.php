@@ -106,16 +106,6 @@ if(isset($dbMySQLpath) && file_exists($dbMySQLpath)){
 }
 define('HEURIST_DB_MYSQL_SCRIPT_MODE', $dbScriptMode);
 
-/*  @todo - redirect to system config error page
-
-if (!($dbAdminUsername && $dbAdminPassword)) { //if these are not specified then we can't do anything
-returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
-}
-if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
-//die("MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
-returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
-}
-*/
 define('ADMIN_DBUSERNAME', $dbAdminUsername);//user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('HEURIST_DB_PREFIX', $dbPrefix);
@@ -123,7 +113,7 @@ define('HEURIST_DB_PORT', $dbPort);
 
 //---------------------------------
 $date = new DateTime();
-//define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2023 The University of Sydney.');
+
 define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);//.' '.$date->format('d M Y @ H:i') );
 
 /**

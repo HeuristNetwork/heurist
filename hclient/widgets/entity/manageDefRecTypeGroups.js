@@ -220,8 +220,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
-        }else{
-            //html = html + '<div>';
         }
 
         if(recName=='Trash'){
@@ -238,10 +236,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
                                 null,'icon_text','padding-top:9px');
             }
-            
-            //var cnt = 0;//recordset.fld(record, 'rtg_RtCount');
-            //        +((cnt>0)
-            //        ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
             
             html = html 
                     + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 

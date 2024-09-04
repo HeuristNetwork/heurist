@@ -48,70 +48,6 @@ foreach ($databases as $idx=>$db_name){
     $databases[$idx] = htmlspecialchars( $db_name );
 }
 
-
-/*
-    $query = 'show databases';
-    $res = $mysqli->query($query);
-    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
-    $databases = array();
-    while (($row = $res->fetch_row())) {
-        if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
-                $databases[] = $row[0];
-        }
-    }
-*/
-
-/*
-if(false){
-    //find non UTF-8 in rty_TitleMask
-    __findWrongChars();
-}elseif(false){
-
-    __updateDatabase();
-}elseif(false){
-
-    __checkVersionDatabase();
-}elseif(false){
-    //trm_NameInOriginatingDB
-    __setTermNameTo255();
-    //__findLongTermLabels();
-}elseif(false){
-    findMissedTermLinks();
-}elseif(false){
-    __setTermYesNo();
-}else  if(false){
-    __renameDegreeToKM();
-}else  if(false){
-    __recreateProceduresTriggers();
-}else  if(false){
-    __addOtherSources();
-}else  if(false){
-    __renameField39();
-}elseif(false ){
-    __copy_RecType_And_Term_Icons_To_EntityFolder();
-}else  if(false){
-    __delete_OLD_RecType_And_Term_Icons_Folders();
-}elseif(false){
-    __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
-}elseif(false){
-    __correctGetEstDate();
-}elseif(false){
-    __removeDuplicationValues();
-}elseif(false){
-    __listOfAdminUsers();
-}elseif(false){
-    __convertTustep();
-}
-    __dropBkpDateIndex();
-    __findRDF();
-
-__getBelegContext();
-
-__fixDirectPathImages();
-
-*/
-
 __checkVersionDatabase();
 
 print '<br>[end]';
@@ -122,13 +58,6 @@ print '<br>[end]';
 function __checkVersionDatabase(){
     global $system, $mysqli, $databases;
 
-    //if(@$_REQUEST['reset']){
-    //            $query = 'UPDATE sysIdentification SET sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1';
-    //            $mysqli->query($query);
-    //    print ' Database reset to v 1.2.0<br>';
-    //    return;
-    //}
-    
     $min_version = '1.3.16';
 
     foreach ($databases as $idx=>$db_name){
@@ -1122,144 +1051,12 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
 //
 //
 //
-function __copy_RecType_And_Term_Icons_To_EntityFolder(){
-    global $mysqli, $databases;
-
-    echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
-
-
-    if(!defined('HEURIST_FILESTORE_ROOT')) {return;}
-
-        /* DISABLED
-    foreach ($databases as $idx=>$db_name){
-
-        //mysql__usedatabase($mysqli, $db_name);
-
-        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
-
-        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defRecTypes/';
-
-        folderCreate($path, false);
-        folderCreate($path.'icon/', false);
-        folderCreate($path.'thumbnail/', false);
-
-        $content = folderContent($old_path);
-
-        $cnt = 0;
-        $cnt2 = 0;
-
-        foreach ($content['records'] as $object) {
-            if ($object[1] != '.' && $object[1] != '..') {
-
-                $rty_id = substr($object[1],0,-4);
-
-                if(intval($rty_id)>0 || $rty_id=='0'){
-                    $old_icon = $old_path.$object[1];
-
-                    if(file_exists($old_icon)){
-
-                        $ext = substr($object[1],-3);
-
-                        //if icon exists skip
-                        list($fname, $ctype,$url) = resolveEntityFilename('defRecTypes', $rty_id, 'icon', $db_name, $ext);
-                        if($fname==null){
-
-                            //copy icon
-                            $new_icon = $path.'icon/'.$object[1];
-                            copy($old_icon, $new_icon);
-
-                            $cnt++;
-                        }
-                    }
-
-                    //copy thumb
-                    $old_thumb = $old_path.'thumb/th_'.$object[1];
-                    if(file_exists($old_thumb)){
-                        $new_thumb = $path.'thumbnail/'.$object[1];
-                        if(!file_exists($new_thumb)){
-                            copy($old_thumb, $new_thumb);
-                            $cnt2++;
-                        }
-                    }
-
-                }
-            }
-        }
-
-        echo $db_name.'  '.$cnt.'  '.$cnt2.'<br>';
-        //remove old folder
-        //folderDelete($old_path, true);
-
-        //thumbnails
-        $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
-
-        $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/defTerms/';
-
-        $content = folderContent($old_path);
-
-        folderCreate($path, false);
-        folderCreate($path.'thumbnail/', false);
-        $cnt = 0;
-
-        foreach ($content['records'] as $object) {
-            if ($object[1] != '.' && $object[1] != '..') {
-
-                $trm_id = substr($object[1],0,-4);
-
-                if(intval($trm_id)>0 || $trm_id=='0'){
-                    $old_icon = $old_path.$object[1];
-
-                    if(file_exists($old_icon)){
-
-                        $ext = substr($object[1],-3);
-
-                        //if icon exist skip
-                        list($fname, $ctype,$url) = resolveEntityFilename('defTerms', $trm_id, 'icon', $db_name, $ext);
-                        if($fname!=null) {continue;}
-
-                        $new_icon = $path.$object[1];
-                        if(file_exists($new_icon)){
-                            continue;
-                        }
-                        //copy icon
-                        copy($old_icon, $new_icon);
-
-                        //copy thumb
-                        copy($old_icon, $path.'thumbnail/'.$object[1]);
-
-                        $cnt++;
-                    }
-                }
-            }
-        }
-
-if($cnt>0) {echo $db_name.'   terms:'.$cnt.'<br>';}
-
-        //remove old folder
-        //folderDelete($old_path, true);
-
-
-
-    }
-          */
-}
-
-//
-//
-//
 function __removeDuplicationValues(){
 
     global $system, $mysqli, $databases;
 
     $cnt = 0;
-    /*
-    foreach ($databases as $idx=>$db_name){
-        if($db_name=='') {continue;}
-    }
-    */
 
-    //mysql__usedatabase($mysqli, 'MBH_Manuscripta_Bibliae_Hebraicae');
-    //mysql__usedatabase($mysqli, 'osmak_9c');
 
     $query = 'SELECT dtl_RecID, dtl_DetailTypeID, dtl_Value, count(dtl_Value) as cnt '.
     'FROM recDetails WHERE dtl_Geo IS NULL AND dtl_UploadedFileID IS NULL '.
@@ -1526,7 +1323,6 @@ AMP =>TS_AMP,
                 print '<xmp>'.$m2.'</xmp>';
                 */
                 $cnt++;
-                //if($cnt>1000) {break;}
             }
 
             //find missed unconverted HTML entities

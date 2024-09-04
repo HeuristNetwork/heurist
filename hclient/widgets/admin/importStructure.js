@@ -756,9 +756,6 @@ $.widget( "heurist.importStructure", {
         // remove generated elements
         if(this.searchForm_dbs) this.searchForm_dbs.remove();
         if(this.recordList_dbs) this.recordList_dbs.remove();
-
-        //if(this.searchForm_rty) this.searchForm_rty.remove();
-        //if(this.recordList_rty) this.recordList_rty.remove();
     },
 
     //----------------------
@@ -767,7 +764,7 @@ $.widget( "heurist.importStructure", {
     //
     _onActionListener:function(event, action){
         if(action=='select-and-close'){
-            //this._selectAndClose();
+           
             return true;
         } else {
             let recID = 0;

@@ -153,7 +153,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		// Ensure that the Heurist db has the required tables, ignore if they don't
         $dbname = $db[0];
-        if(mysql__check_dbname($dbname)!=null){ //invalid dbname
+        if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //invalid dbname
             continue;
         }
         $query = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'Records' OR Tables_in_$dbname = 'recDetails' OR Tables_in_$dbname = 'sysUGrps' OR Tables_in_$dbname = 'sysUsrGrpLinks'";

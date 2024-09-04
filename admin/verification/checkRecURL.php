@@ -235,9 +235,6 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                 ob_flush();
                 flush();
             }
-            //if($is_check_heurist_instance && $cnt_total>10){
-            //    break;
-            //}
         }
         $res->close();
 

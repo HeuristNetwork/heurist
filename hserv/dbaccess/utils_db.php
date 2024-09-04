@@ -935,42 +935,7 @@ use hserv\structure\ConceptCode;
                     $res = true;
                 }
 
-            /*}elseif($dbScriptMode==1){ //DISABLED
-                //internal routine
-                $script_content = file_get_contents($script_file);
-
-                //create separate connection
-                $mysqli2 = null;
-                $res2 = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
-                if ( is_array($res2) ){
-                    $error = $res2[1];
-                }else{
-                    $mysqli2 = $res2;
-                }
-
-                $connected = mysql__usedatabase($mysqli2, $database_name_full);
-                if($connected!==true){
-                    $error = $connected[1];//error message
-                }
-
-                if($error==''){
-                    // execute the SQL
-                    $res3 = mysqli_multi_query($mysqli2, $script_content);
-                    if (!$res3){
-                        $error = $mysqli2->error;
-                    }else{
-                        $res = true;
-                    }
-                    //if (!$mysqli2->ping()) {
-                    //    $mysqli2=null;
-                    //}
-                }
-
-                //close connection
-                if($mysqli2!=null){
-                    $mysqli2->close();
-                }
-            */
+            
             }else{ //3d party function that uses PDO
 
                 if(!function_exists('execute_db_script')){
@@ -1368,9 +1333,6 @@ use hserv\structure\ConceptCode;
                     }
                     if(!$error){
                         $cnt++;
-                        //if($offset>0 && $cnt % 50000 == 0){
-                        //    print 'processed :'.$cnt;
-                        //}
                     }
 
                     $cnt_all++;
@@ -1405,9 +1367,6 @@ use hserv\structure\ConceptCode;
         }
         }
 
-        //if(!$isok){
-        //    file_put_contents($log_file, json_encode( $system->getError() ));
-        //        }
         if($isok && $need_populate){ //verbose output
             $report[] = '<ul><li>Added into date index: '.$cnt.'</li>'
                         .'<li>Errors date pasring: '.$cnt_err.'</li>'

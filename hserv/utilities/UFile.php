@@ -331,7 +331,6 @@ use hserv\utilities\USanitize;
 
             $files = scandir($folder);
             foreach ($files as $filename) {
-                //if (!(( $filename == '.' ) || ( $filename == '..' ) || is_dir(HEURIST_DIR.$dir . $filename)))
 
                     $path_parts = pathinfo($filename);
                     if(array_key_exists('extension', $path_parts))
@@ -1157,9 +1156,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
         USanitize::errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
     } else {
-        //if(!$data){
-            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        //}
+        $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     }
     curl_close($ch);
 

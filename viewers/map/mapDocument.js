@@ -808,7 +808,6 @@ console.log(treedata);
                 return;
             }
             
-            //if(map_documents==null) _loadMapDocuments(); //init list of mapdocs
         },
         
         //
