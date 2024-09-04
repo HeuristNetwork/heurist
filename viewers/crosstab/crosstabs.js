@@ -28,11 +28,7 @@
 /*
 * Global variables
 */
-var crosstabsAnalysis;
-var intervalsNumeric;
-var intervalsValues;
-var minMax = [];
-var originalOutliers = [];
+window.crosstabsAnalysis = null;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -47,6 +43,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     const _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
 
     const MAX_FOR_AUTO_RETRIEVE = 6000;
+    
+    let intervalsNumeric;
+    let minMax = [];
+    let originalOutliers = [];
 
     let fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }

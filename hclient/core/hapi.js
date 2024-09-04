@@ -553,10 +553,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 + 'actions on a single database) can carry out this action.<br>'
                                 + 'This action requires a special system administrator password (not a normal login password)'
                                 + '</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
-                                function (password_entered) {
+                                (password_entered)=>{
 
                                     window.hWin.HAPI4.SystemMgr.action_password({ action: password_protected, password: password_entered },
-                                        function (response) {
+                                        (response)=>{
                                             if (response.status == window.hWin.ResponseStatus.OK && response.data == 'ok') {
                                                 callback(password_entered);
                                                 //window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null,password_entered);

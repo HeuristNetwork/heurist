@@ -620,7 +620,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 const dx = (x < (event.clientX - svgPos.left))?-2:2;
                 const dy = (y < (event.clientY - svgPos.top))?-2:2;
 
-                drag_link_line = svg.append("svg:line")
+                window.drag_link_line = svg.append("svg:line")
                 .attr("stroke","#ff0000")
                 .attr("stroke-width",4)
                 .attr("x1", x).attr("y1", y)
@@ -628,16 +628,13 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 .attr("y2", event.clientY - svgPos.top+dy);
             })
             .on("drag", function(){
-                if(drag_link_line){
-                    //drag_link_line
-                    //.attr("x2", Number(drag_link_line.attr("x2"))+window.d3.event.dx)
-                    //.attr("y2", Number(drag_link_line.attr("y2"))+window.d3.event.dy); //scale is not used
+                if(window.drag_link_line){
                     let svgPos = $("svg").position();
 
-                    const dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
-                    const dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
+                    const dx = (window.drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
+                    const dy = (window.drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
 
-                    drag_link_line
+                    window.drag_link_line
                         .attr("x2", event.clientX - svgPos.left+dx)
                         .attr("y2", event.clientY - svgPos.top+dy);
 
@@ -650,8 +647,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         setTimeout(function(){window.drag_link_line.attr("stroke","#00ff00");}, 500);
                 }else{
                     drag_link_source_id = null;
-                    if(drag_link_line) drag_link_line.remove();
-                    drag_link_line = null;
+                    if(window.drag_link_line) window.drag_link_line.remove();
+                    window.drag_link_line = null;
                 }
             });
 
@@ -1007,8 +1004,8 @@ function _addNewLinkField(source_ID, target_ID){
             afterclose: function(){
                 //remove link line
                 drag_link_source_id = null;
-                if(drag_link_line) drag_link_line.remove();
-                drag_link_line = null;
+                if(window.drag_link_line) window.drag_link_line.remove();
+                window.drag_link_line = null;
             },
             callback: function(context) {
                 
@@ -1040,8 +1037,8 @@ function _linkTwoRecords(source_ID, target_ID){
         }
 
         drag_link_source_id = null;
-        if(drag_link_line) drag_link_line.remove();
-        drag_link_line = null;
+        if(window.drag_link_line) window.drag_link_line.remove();
+        window.drag_link_line = null;
     }                            
 
     let opts = {
