@@ -495,7 +495,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             scope: 'vocab_change',
                             hoverClass: 'ui-drag-drop', //highlight
                             drop: function( event, ui ){
-
                                 let trg = $(event.target).hasClass('recordDiv')
                                 ?$(event.target)
                                 :$(event.target).parents('.recordDiv');

@@ -235,8 +235,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             
-            //ignore if record structure editor is opened
-            if($('div.defRecStructure').length==0)
+            //ignore if record structure editor or Design panel is opened
+            const can_check = $('div.defRecStructure').length==0 && 
+            $('.ui-menu6-section.ui-heurist-design').css('display')!='block';
+
+            if(can_check)
             {
                 window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
                     _callserver(action, request, callback, timeout);
