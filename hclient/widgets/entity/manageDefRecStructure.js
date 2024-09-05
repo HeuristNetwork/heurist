@@ -1017,7 +1017,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +`<strong>${window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))}</strong>`
                 +'"</b> from this record type?<br><br>'
                 +`<span style="display:${display};">`
-                    +`<div>Permanently delete the data (${this._calculated_usages[rst_ID]} values) from this field<br>(applies to this record type only)?<div> <input type="checkbox" id="delData" />`
+                    +'<div>'
+                        +`<input type="checkbox" id="delData" style="float: left; margin: 0px 10px 0px 0px;" />`
+                        +`Permanently delete the data (${this._calculated_usages[rst_ID]} values) from this field<br>(applies to this record type only)?`
+                    +'</div>'
                 +'</span>',
                 {
                     'Proceed': function(){ 
