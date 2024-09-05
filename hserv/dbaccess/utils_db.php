@@ -1560,12 +1560,12 @@ $mysqli->kill($thread_id);
         $ids = prepareIds($ids);
         
         $cnt = count($ids);
-        if($cnt==1){
+        if($cnt==0){
+            return SQL_FALSE; // (1=0) none
+        }elseif($cnt==1){
             $q = '='.$ids[0];
         }elseif($cnt>1){
             $q = SQL_IN.implode(',',$ids).')';
-        }else{
-            $q = SQL_FALSE; // (1=0) none
         }
         
         return '('.$field.$q.')';
