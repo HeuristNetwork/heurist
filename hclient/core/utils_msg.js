@@ -477,9 +477,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(max>0 && min>1){
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR("length must be between ") +
                 min + " "+window.hWin.HR("and")+" " + max + ". ";
-                if(len<min){
-                   
-                }else{
+                if(len>=min){
                     message_text = message_text + (len-max) + window.hWin.HR(" characters over");
                 }
 

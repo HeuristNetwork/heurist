@@ -53,7 +53,7 @@ Implementation of the Traditional Japanese Calendar,
 		leapYear: function (year) {
 			let date = this._validate(year, this.minMonth, this.minDay,
 				$.calendars.local.invalidYear || $.calendars.regional[''].invalidYear);
-			var year = date.year() + (date.year() < 0 ? 1 : 0); // No year zero
+			year = date.year() + (date.year() < 0 ? 1 : 0); // No year zero
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 		},
 
@@ -314,7 +314,7 @@ Implementation of the Traditional Japanese Calendar,
 			if(str.indexOf('年') === -1){
 				return -1;
 			}
-
+			let year;
 			[year, ] = str.split('年');
 			let era = year.replace(/[0-9]+/, '');
 
@@ -438,18 +438,18 @@ Implementation of the Traditional Japanese Calendar,
 			let kanji = null;
 			[kanji, year] = this._japaneseYearToGregorian(year);
 
-			if (year == NaN || year <= 0) {
+			if (isNaN(year) || year <= 0) {
 				return 'Invalid year';
 			}
 
 			// Remove remaining kanji
 			month = parseInt(month);
-			if (month == NaN || month <= 0) {
+			if (isNaN(month) || month <= 0) {
 				return 'Invalid month';
 			}
 
 			day = parseInt(day);
-			if (day == NaN || day <= 0) {
+			if (isNaN(day) || day <= 0) {
 				return 'Invalid day';
 			}
 

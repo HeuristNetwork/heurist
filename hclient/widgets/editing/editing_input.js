@@ -835,7 +835,7 @@ $.widget( "heurist.editing_input", {
 
                     $input.parents('.input-div').remove();
                 }
-                that.inputs = array(that.inputs[0]);
+                that.inputs = [that.inputs[0]];
             }
 
             $(this.inputs[0]).parents('.input-div').find('input[type="checkbox"]').prop('checked', false);
@@ -2098,7 +2098,6 @@ $.widget( "heurist.editing_input", {
                         let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         let headers = relations.headers;
                         let dtID = this.options.dtID;
-                        
                         
                       if(!isInwardRelation){
                             let direct = relations.direct; //outward

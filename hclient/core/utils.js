@@ -298,19 +298,21 @@ window.hWin.HEURIST4.util = {
     //
     isJSON: function(value){
         
+        let res;
             try {
                 if(typeof value === 'string'){
                     value = value.replace(/[\n\r]+/g, '');
                     value = JSON.parse(value);    
                 }
                 if(Array.isArray(value) || $.isPlainObject(value)){
-                    return value;
+                    res = value;
                 }
             }
             catch (err) {
+                res = false;
             } 
             
-            return false;       
+            return res;       
     },
     
     //

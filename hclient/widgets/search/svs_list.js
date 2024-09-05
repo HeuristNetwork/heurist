@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global hSvsEdit */
+/* global HSvsEdit */
 
 $.widget( "heurist.svs_list", {
 
@@ -2427,7 +2427,7 @@ $.widget( "heurist.svs_list", {
 
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
-                function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
+                function(){ that.hSvsEdit = HSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
 
     },

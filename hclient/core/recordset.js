@@ -752,8 +752,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     res['geometry'] = {type:'GeometryCollection', geometries:geovalues};
                 }else if(geovalues.length==1){
                     res['geometry'] = geovalues[0];
-                }else{
-                   
                 }
                 
                 let symbology = _getFieldValue(record, DT_SYMBOLOGY);

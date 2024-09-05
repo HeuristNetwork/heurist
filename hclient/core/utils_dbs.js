@@ -2446,9 +2446,6 @@ window.hWin.HEURIST4.dbs = {
             if(rtid==''){
 
                 if(dtid=='typeid' || dtid=='typename'){
-                   
-                   
-                   
                 }
             
             }else if(rtid=='any'){
