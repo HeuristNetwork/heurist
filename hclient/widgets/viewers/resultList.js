@@ -210,14 +210,10 @@ $.widget( "heurist.resultList", {
             this.element.attr('data-widgetid', this.options.widget_id);
         }
 
-        if(this.options.pagesize<50 || this.options.pagesize>5000){
-            if(this.options.blog_result_list==true){
-                this.options.pagesize = 10;
-            }
-            else{
-                this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
-                if(!this.options.pagesize) this.options.pagesize = 50;
-            }
+        if(this.options.blog_result_list==true){
+            this.options.pagesize = 10;
+        }else if(this.options.pagesize<50 || this.options.pagesize>5000){
+            this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
 
         this.options.empty_remark = this.options.empty_remark=='def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
@@ -740,8 +736,9 @@ $.widget( "heurist.resultList", {
             }});
         }
 
-        // Check if allow_record_content_view needs to be overwritten
-        this.options.allow_record_content_view = !this._is_publication || this.options.blog_result_list || this.options.allow_record_content_view || this.options.view_mode == 'record_view';
+        // Check if allow_record_content_view needs to be overwritten, always hide in backend
+        this.options.allow_record_content_view = this._is_publication && (this.options.blog_result_list || this.options.allow_record_content_view);
+        this.options.export_options = !this._is_publication ? 'csv' : this.options.export_options;
 
         //------------------
         let smodes = '<button value="list" class="btnset_radio"/>'
@@ -788,11 +785,19 @@ $.widget( "heurist.resultList", {
         
         this._on( this.view_mode_selector.find('button'), {
             click: function(event) {
-                    let btn = $(event.target).parent('button');
-                    let view_mode = btn.attr('value');
+                let btn = $(event.target).parent('button');
+                let view_mode = btn.attr('value');
 
-                    this.applyViewMode(view_mode);
-                    window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
+                let total_inquery = (this._currentRecordset!=null) ? this._currentRecordset.count_total() : 0;
+                total_inquery = (this._currentSubset) ? this._currentSubset.count_total() : total_inquery;
+
+                if(view_mode == 'record_content' && total_inquery > 100){
+                    // Block record content view at high result counts
+                    return;
+                }
+
+                this.applyViewMode(view_mode);
+                window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
         }});
 
         this.span_pagination = $( "<div>")
@@ -856,42 +861,21 @@ $.widget( "heurist.resultList", {
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
             this._on(this.export_button, {
-                click: function(){
+                click: this._exportRecords
+            });
+        }else if(!this._is_publication){ // show CSV export button on backend
 
-                    if(!this._currentRecordset || this._currentRecordset.length() == 0){
-                        window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
-                        return;
-                    }
-
-                    // Set current query and current recordset
-                    window.hWin.HEURIST4.current_query_request = this._query_request;
-                    window.hWin.HAPI4.currentRecordset = this._currentRecordset;
-
-                    if(this._collection && this._collection.length > 0){
-                        window.hWin.HAPI4.currentRecordsetCollected = this._collection;
-                    }
-
-                    let selected = this.getSelected(true);
-                    if(selected){
-                        window.hWin.HAPI4.currentRecordsetSelection = selected;
-                    }
-
-                    // open export menu in dialog/popup
-                    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-
-                    let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
-                    if(handle_formats){
-                        url += `&output=${this.options.export_options}`
-                    }
-
-                    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
-                        onpopupload: function(){
-                            if(handle_formats){
-                                $('#export_record_popup').dialog('widget').hide();
-                            }
-                        }
-                    });
+            this.export_button = $('<button>', {
+                text: window.hWin.HR('CSV'), title: 'Export current results in CSV format',
+                class: 'ui-main-color', style: 'padding: 8px; float: right; margin-right: 10px;'
+            }).button({
+                icons: {
+                    primary: 'ui-icon-arrowthick-1-s'
                 }
+            }).insertBefore(this.view_mode_selector);
+
+            this._on(this.export_button, {
+                click: this._exportRecords
             });
         }
 
@@ -2873,6 +2857,15 @@ $.widget( "heurist.resultList", {
                 }
             });
         }
+
+        let $content_view = this.view_mode_selector.find('button[value="record_content"]');
+        if($content_view.length > 0 && total_inquery > 100){
+            total_inquery <= 100
+                ? $content_view.attr('title', window.hWin.HR('Record contents'))
+                               .find('.ui-icon').css('color', '')
+                : $content_view.attr('title', 'This function is disabled for over 100 records as it is really only usable with a limited record count')
+                               .find('.ui-icon').css('color', 'grey');
+        }
     },
 
     //
@@ -4542,5 +4535,42 @@ $.widget( "heurist.resultList", {
     getCurrentViewMode: function(){
         return this._current_view_mode;
     },
+
+    _exportRecords: function(){
+
+        if(!this._currentRecordset || this._currentRecordset.length() == 0){
+            window.hWin.HEURIST4.msg.showMsgFlash('No records to export...', 3000);
+            return;
+        }
+
+        // Set current query and current recordset
+        window.hWin.HEURIST4.current_query_request = this._query_request;
+        window.hWin.HAPI4.currentRecordset = this._currentRecordset;
+
+        if(this._collection && this._collection.length > 0){
+            window.hWin.HAPI4.currentRecordsetCollected = this._collection;
+        }
+
+        let selected = this.getSelected(true);
+        if(selected){
+            window.hWin.HAPI4.currentRecordsetSelection = selected;
+        }
+
+        // open export menu in dialog/popup
+        let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+
+        let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+        if(handle_formats){
+            url += `&output=${this.options.export_options}`
+        }
+
+        window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+            onpopupload: function(){
+                if(handle_formats){
+                    $('#export_record_popup').dialog('widget').hide();
+                }
+            }
+        });
+    }
     
 });
