@@ -253,19 +253,21 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
                         foreach($records as $index => $record){
 
+                            //Note - it searches only reverse references
+                            //search rec_IDs that links to this record
                             $rec_references = mysql__select_list2($mysqli,
                                     'select dtl_RecID from recDetails WHERE dtl_Value='.intval($records[$index]['rec_ID'])
                                     .' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
                             if ($rec_references){
                                 // only store the references that are actually records
-                                $records[$index]["refs"] = mysql__select_list2($mysqli, 'select rec_ID from Records '
+                                $records[$index]["refs"] = mysql__select_assoc2($mysqli, 'select rec_ID, rec_Title from Records '
                                      .' WHERE rec_ID in ('.join(',', $rec_references).')');
                                 if(is_array($records[$index]["refs"])){
                                     $records[$index]["ref_count"] = count($records[$index]["refs"]);
                                 }else{
                                     $records[$index]["ref_count"] = 0;
                                 }
-                                $invalid_rec_references += array_diff($rec_references, $records[$index]["refs"]);
+                                $invalid_rec_references += array_diff($rec_references, array_keys($records[$index]["refs"]));
                             }
 
                             $details = array();
@@ -323,7 +325,7 @@ EXP;
 EXP;
                                 }
                                 print '<span style="font-size: 120%;">'
-                                    .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>')
+                                    .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>',false)
                                     .' - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
                                 print TABLE_S;
                                 foreach ($record['details'] as $rd_type => $detail) {
@@ -392,11 +394,11 @@ EXP;
 
                                 print TABLE_S;
 
-                                if (array_key_exists("refs",$record)) {
+                                if (array_key_exists("refs", $record)) {
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
-                                    foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
-                                        print edit_link(ref, ($i++));
+                                    foreach ($record["refs"] as $rec_ID=>$rec_Title) {
+                                        print edit_link($rec_ID, $rec_ID.' '.htmlspecialchars($rec_Title), true);
                                     }
                                     print TR_E;
                                 }
@@ -456,7 +458,7 @@ EXP;
                                 else {print '<td><div><b>Duplicate</b></div></td>';}
                                 print '<td style="width: 500px;">';
                                 print '<div style="font-size: 120%;">'
-                                        .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>')
+                                        .edit_link($rec_ID,$rec_ID.' <b>'.htmlspecialchars($record['rec_Title']).'</b>', false)
                                 .' - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></div>';
                                 print TABLE_S;
                                 if ($is_master) {
@@ -542,11 +544,11 @@ EXP;
 
                                 print TABLE_S;
 
-                                if (array_key_exists("refs",$record)) {
+                                if (array_key_exists("refs", $record)) {
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
-                                    foreach ($record["refs"] as $ref) {
-                                        print edit_link(ref, ($i++));
+                                    foreach ($record["refs"] as $rec_ID=>$rec_Title) {
+                                        print edit_link($rec_ID, $rec_ID.' '.htmlspecialchars($rec_Title), true);
                                     }
                                     print TR_E;
                                 }
@@ -657,12 +659,21 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
     return $rv;
 }
 
-function edit_link($rec_id, $label){
-    return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'">'.$label.'</a>';
+function edit_link($rec_id, $label, $truncated=false){
+    
+    if($truncated){
+        $label = '<span class="truncate" style="display:block;max-width:225px">'.$label.'</span>';
+    }
+    
+    return '<a target="edit" href="'
+            .HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id
+            .'">'.$label.'</a>';
 }
 
 //
 // $rd_type - detail type id or term id
+
+// Artem: Errneus implementation. dty_ID and trm_ID can have the same values!
 //
 function detail_str($rd_type, $rd_val)
 {
@@ -673,13 +684,13 @@ function detail_str($rd_type, $rd_val)
             $titles = mysql__select_assoc2($mysqli, 'select rec_ID, rec_Title from Records where rec_ID in ('
                     .implode(',',$rd_val).')');
             foreach ($rd_val as $val){
-                $rv[] = edit_link($val, $titles[$val]);
+                $rv[] = edit_link($val, $titles[$val], true);
             }
             return $rv;
         }
         elseif($rd_val>0) {
             $title =  mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID ='.$rd_val);
-            return edit_link($rd_val, $title);
+            return edit_link($rd_val, $title, true);
         }
     }
     /*
