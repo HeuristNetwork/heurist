@@ -757,7 +757,7 @@ public static function exportList($params){
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add headers
-    fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group'], "\t");
+    fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group', 'Instant merge (replace record_to_keep with record ID to keep)'], "\t");
 
     unset($duplicates['summary']);
 
@@ -768,15 +768,17 @@ public static function exportList($params){
         $merge_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&db=" . HEURIST_DBNAME;
         $search_URL = HEURIST_BASE_URL . "?w=all&q=ids:{$all_group_IDs}&db=" . HEURIST_DBNAME;
         $ignore_URL = HEURIST_BASE_URL . "hserv/controller/recordVerify.php?a=dupes&ignore={$all_group_IDs}&db=" . HEURIST_DBNAME;
+        $instant_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&instant_merge=1&db=" . HEURIST_DBNAME . "&master_rec_id=record_to_keep";
 
         foreach($records as $rec_ID => $rec_Title) {
             
             $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . HEURIST_DBNAME;
-            fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL], "\t");
+            fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL, $instant_URL], "\t");
 
             $merge_URL = '';
             $search_URL = '';
             $ignore_URL = '';
+            $instant_URL = '';
         }
 
         fwrite($fd, "\n\n");

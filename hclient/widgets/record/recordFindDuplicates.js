@@ -653,7 +653,6 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
         let params = new URLSearchParams({
             db: window.hWin.HAPI4.database,
-            commit: 1,
             instant_merge: 1,
             master_rec_id: rec_id,
             bib_ids: Object.keys(this.dupes[group_idx]).join(',')

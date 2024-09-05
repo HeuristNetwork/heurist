@@ -81,7 +81,7 @@ if ( count($bib_ids)==0 ){
     exit;
 }
 
-if(@$_REQUEST['commit']){
+if(@$_REQUEST['commit'] || $instant_merge){
     do_fix_dupe();
     return;
 }
