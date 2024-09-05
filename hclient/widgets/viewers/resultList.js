@@ -3648,6 +3648,7 @@ $.widget( "heurist.resultList", {
                 if(Object.hasOwn(that._cached_linked_images, cur_rec)){
                     if(!window.hWin.HEURIST4.util.isempty(that._cached_linked_images[cur_rec])){
                         $(ele).css('background-image', `url("${that._cached_linked_images[cur_rec]}")`)
+                              .css('opacity',1);
                     }
                 }else{
                     rec_images.push(cur_rec);
@@ -3685,7 +3686,8 @@ $.widget( "heurist.resultList", {
                         $rec.find('.recTypeThumb.rectypeThumb')
                             .removeClass('rectypeThumb')
                             .addClass('realThumb')
-                            .css('background-image', `url("${url}")`);
+                            .css('background-image', `url("${url}")`)
+                            .css('opacity',1);
                     }
                 });
             }
