@@ -863,7 +863,7 @@ $.widget( "heurist.resultList", {
             this._on(this.export_button, {
                 click: this._exportRecords
             });
-        }else if(!this._is_publication){ // show CSV export button on backend
+        }else if(this.options.entityName=='records' && !this._is_publication){ // show CSV export button on backend
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('CSV'), title: 'Export current results in CSV format',
@@ -4555,22 +4555,26 @@ $.widget( "heurist.resultList", {
         if(selected){
             window.hWin.HAPI4.currentRecordsetSelection = selected;
         }
+        
+        if(this.options.export_options=='csv'){
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV', {});    
+        }else{
+            // open export menu in dialog/popup
+            let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
 
-        // open export menu in dialog/popup
-        let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-
-        let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
-        if(handle_formats){
-            url += `&output=${this.options.export_options}`
-        }
-
-        window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
-            onpopupload: function(){
-                if(handle_formats){
-                    $('#export_record_popup').dialog('widget').hide();
-                }
+            let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
+            if(handle_formats){
+                url += `&output=${this.options.export_options}`
             }
-        });
+
+            window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
+                onpopupload: function(){
+                    if(handle_formats){
+                        $('#export_record_popup').dialog('widget').hide();
+                    }
+                }
+            });
+        }
     }
     
 });
