@@ -48,6 +48,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     '<div>'
                     +'<ul id="menu-file-add-local" link-style="background:#ededed" name="Select file to upload" data-icon="ui-icon-plus"></ul>'
                     +'<ul id="menu-file-add-ext" link-style="background:#ededed" name="Select external file/URL" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-import-csv" link-style="background:#ededed" name="Import file data from CSV" data-icon="ui-icon-file-table"></ul>'
                     +'<ul name="Selected" style="margin-left:150px">'
                     +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
                     +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'

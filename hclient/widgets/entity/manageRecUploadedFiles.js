@@ -164,6 +164,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }else if(action=='menu-file-add-ext'){ 
                         this._additionMode='remote'; this.addEditRecord(-1);
                         
+                    }else if(action=='menu-file-import-csv'){ 
+
+                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                        widget.mainMenu('menuActionById','menu-files-data');
+                        
+                        
                     }else if(action=='menu-file-select-all'){ 
                         this._selectAllFiles = true;
                         this.recordList.resultList('setSelected', 'all');
