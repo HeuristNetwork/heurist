@@ -1361,7 +1361,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     $query_rel = 'SELECT rec_ID, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
     .' LEFT JOIN recDetails d2 on rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID='.(defined('DT_START_DATE')?DT_START_DATE:0)
     .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.(defined('DT_END_DATE')?DT_END_DATE:0)
-    .SQL_WHERE;
+    .SQL_WHERE.' rec_ID=';
 
     if($direction>=0){
 

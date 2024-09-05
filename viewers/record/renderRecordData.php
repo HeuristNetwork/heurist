@@ -2325,7 +2325,7 @@ function print_relation_details($bib) {
         print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
         print DIV_MAP_POPUP;
     }else{
-        print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related';
+        print '<div class="detailRowHeader relatedSection">Related';
     }
 
     $relfields_details = mysql__select_all($mysqli,
