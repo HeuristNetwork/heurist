@@ -59,20 +59,13 @@ class DbRecThreadedComments extends DbEntityBase
             case 'name':
                 $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified'; 
                 break;  
-            default   //'full':
+            default:   //'full'
                 $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
         }
         
-        $orderby = null;
-        $value = @$this->data['sort:cmt_Modified'];
-        if($value!=null){
-            $orderby = 'cmt_Modified '.($value==1?'ASC':'DESC');
-        }else{
-            $value = @$this->data['sort:cmt_RecTitle'];
-            if($value!=null){
-                $orderby = 'rec_Title '.($value==1?'ASC':'DESC'));
-                $needRecords = true;
-            }
+        $orderby = $this->searchMgr->setOrderBy();
+        if($orderby!=null && strpos('recTitle',$orderby)===0){
+            $needRecords = true;
         }
         
         if($needRecords){ //return rec_Title for comment

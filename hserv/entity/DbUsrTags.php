@@ -112,24 +112,7 @@ class DbUsrTags extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:tag_Modified'];
-        if($value!=null){
-            array_push($order, 'tag_Modified '.($value>1?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:tag_Usage'];
-            if($value!=null){
-                array_push($order, 'tag_Usage '.($value>1?'ASC':'DESC'));
-                $needCount = true;
-            }else{
-                $value = @$this->data['sort:tag_Text'];
-                if($value!=null){
-                    array_push($order, 'tag_Text '.($value>1?'ASC':'DESC'));
-                }
-            }
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
         if($needCount){
             array_push($this->data['details'],'(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
@@ -144,8 +127,8 @@ class DbUsrTags extends DbEntityBase
          if(count($where)>0){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+         if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();

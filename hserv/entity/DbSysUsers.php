@@ -155,28 +155,7 @@ class DbSysUsers extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:ugr_Modified'];
-        if($value!=null){
-            array_push($order, 'ugr_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:ugr_LastName'];
-            if($value!=null){
-                array_push($order, 'ugr_LastName '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:ugr_ID'];
-                if($value!=null){
-                    array_push($order, 'ugr_ID '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:ugr_Name'];
-                    if($value!=null){
-                        array_push($order, 'ugr_Name ASC');
-                    }
-                }
-            }
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
         if($needCount){ //find count of groups where given user is a memmber
             array_push($this->data['details'],
@@ -192,8 +171,8 @@ class DbSysUsers extends DbEntityBase
          if(count($where)>0){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+         if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();

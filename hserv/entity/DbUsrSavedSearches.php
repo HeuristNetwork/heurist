@@ -44,94 +44,23 @@ class DbUsrSavedSearches extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-
-        $needCheck = false;
-
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('svs_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('svs_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        //find filters belong to group
-        $pred = $this->searchMgr->getPredicate('svs_UGrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'svs_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'svs_ID,svs_Name';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'svs_ID,svs_Name,svs_UGrpID,svs_Query';
-
-        }else{
-            $needCheck = true;
+        
+        $this->searchMgr->addPredicate('svs_ID');
+        $this->searchMgr->addPredicate('svs_Name');
+        $this->searchMgr->addPredicate('svs_UGrpID');
+        
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('svs_ID'); break;  
+            case 'name':
+                $this->searchMgr->setSelFields('svs_ID,svs_Name'); 
+                break;  
+            default:   // list, full
+                $this->searchMgr->setSelFields('svs_ID,svs_Name,svs_UGrpID,svs_Query');
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        $orderby = $this->searchMgr->setOrderBy('svs_Name ASC');
 
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:svs_Modified'];
-        if($value!=null){
-            array_push($order, 'svs_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:svs_Name'];
-            if($value!=null){
-                array_push($order, 'svs_Name '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:svs_ID'];
-                if($value!=null){
-                    array_push($order, 'svs_ID '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:svs_Name'];
-                    if($value!=null){
-                        array_push($order, 'svs_Name ASC');
-                    }
-                }
-            }
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-        if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-        }
-        if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-        }
-
-        $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby);
     }
 
 

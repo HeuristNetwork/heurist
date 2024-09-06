@@ -164,24 +164,7 @@ class DbDefRecTypes extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:rty_Modified'];
-        if($value!=null){
-            array_push($order, 'rty_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:rty_Name'];
-            if($value!=null){
-                array_push($order, 'rty_Name '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:rty_ID'];
-                if($value!=null){
-                    array_push($order, 'rty_ID '.($value>0?'ASC':'DESC'));
-                }
-            }
-        }
-
+        $orderby = $this->searchMgr->setOrderBy();
 
         if($needCount){ //find count of records by rectype
 
@@ -211,8 +194,8 @@ class DbDefRecTypes extends DbEntityBase
         if(count($where)>0){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
         }
-        if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+        if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
         }
 
         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();

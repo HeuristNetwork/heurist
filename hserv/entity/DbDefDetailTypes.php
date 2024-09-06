@@ -68,118 +68,28 @@ class DbDefDetailTypes extends DbEntityBase
               return false;
         }
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('dty_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Type');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Status');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Modified');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_DetailTypeGroupID');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        $needCheck = false;
-
-        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'dty_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'dty_ID,dty_Name';
-
-        }elseif(@$this->data['details']=='list'){
-
-            $this->data['details'] = 'dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = implode(',', $this->fieldNames) ;
-        }else{
-            $needCheck = true;
+        $this->searchMgr->addPredicate('dty_ID');
+        $this->searchMgr->addPredicate('dty_Name');
+        $this->searchMgr->addPredicate('dty_Type');
+        $this->searchMgr->addPredicate('dty_Status');
+        $this->searchMgr->addPredicate('dty_Modified');
+        $this->searchMgr->addPredicate('dty_DetailTypeGroupID');
+        
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('dty_ID'); break;  
+            case 'name':
+                $this->searchMgr->setSelFields('dty_ID,dty_Name'); 
+                break;  
+            case 'list':
+                $this->searchMgr->setSelFields('dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID'); 
+                break;  
+            default:   // full
+                $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:dty_Modified'];
-        if($value!=null){
-            array_push($order, 'dty_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:dty_Type'];
-            if($value!=null){
-                array_push($order, 'dty_Type '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:dty_Name'];
-                if($value!=null){
-                    array_push($order, 'dty_Name '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:dty_ID'];
-                    if($value!=null){
-                        array_push($order, 'dty_ID '.($value>0?'ASC':'DESC'));
-                    }
-                }
-            }
-        }
-
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('dty_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'],'dty_ID');
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
-
+        return $this->searchMgr->composeAndExecute($orderby);
     }
 
     //

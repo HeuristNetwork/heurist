@@ -245,7 +245,7 @@ class DbEntitySearch
         .' FROM '.$this->config['tableName'];
         
         if($sup_tables!=null){
-            $query .= $sup_tables
+            $query .= $sup_tables;
         }
         if($sup_where!=null){
             $this->whereConditions[] = $sup_where;
@@ -469,6 +469,26 @@ class DbEntitySearch
             }
         }
     }
+    
+    //
+    //
+    //
+    public function setOrderBy($default=null){
+        $orderby = null;
+        foreach($this->data as $key=>$value){
+            if(strpos($key,'sort:')===0){
+                $field = substr($key,5);                    
+                $orderby = $field.' '.($value==1?'ASC':'DESC');
+                break;
+            }
+        }
+        
+        if($orderby==null && $default!=null){
+            $orderby = $default;
+        }
+        return $orderby;
+    }
+    
 
     //
     //

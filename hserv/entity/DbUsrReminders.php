@@ -120,26 +120,7 @@ class DbUsrReminders extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:rem_Modified'];
-        if($value!=null){
-            array_push($order, 'rem_Modified '.($value==1?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:rem_RecTitle'];
-            if($value!=null){
-                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
-                $needRecords = true;
-            }else{
-                $value = @$this->data['sort:rem_StartDate'];
-                if($value!=null){
-                    array_push($order, 'rem_StartDate '.($value==1?'ASC':'DESC'));
-                }
-            }
-        }
-
-
+        $orderby = $this->searchMgr->setOrderBy();
 
         $is_ids_only = (count($this->data['details'])==1);
 
@@ -157,8 +138,8 @@ class DbUsrReminders extends DbEntityBase
          if(count($where)>0){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+         if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
