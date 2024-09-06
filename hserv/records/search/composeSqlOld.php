@@ -447,17 +447,17 @@ function parse_query($search_domain, $text, $sort_order, $parentquery, $currUser
 
 class Query {
 
-    var $from_clause = '';
-    var $where_clause = '';
-    var $sort_clause = '';
-    var $recVisibilityType;
-    var $parentquery = null;
+    public $from_clause = '';
+    public $where_clause = '';
+    public $sort_clause = '';
+    public $recVisibilityType;
+    public $parentquery = null;
 
-    var $top_limbs;
-    var $sort_phrases;
-    var $sort_tables;
+    public $top_limbs;
+    public $sort_phrases;
+    public $sort_tables;
 
-    var $fixed_sortorder = null;
+    public $fixed_sortorder = null;
 
 
     public function __construct($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
@@ -646,9 +646,9 @@ class Query {
 
 
 class OrLimb {
-    var $and_limbs;
+    public $and_limbs;
 
-    var $parent;
+    public $parent;
 
 
     public function __construct(&$parent, $text) {
@@ -714,11 +714,11 @@ class OrLimb {
 
 
 class AndLimb {
-    var $negate;
-    var $exact, $lessthan, $greaterthan, $fulltext;
-    var $pred;
+    public $negate;
+    public $exact, $lessthan, $greaterthan, $fulltext;
+    public $pred;
 
-    var $parent;
+    public $parent;
 
 
     public function __construct(&$parent, $text) {
@@ -997,9 +997,9 @@ class AndLimb {
 //
 //
 class SortPhrase {
-    var $value;
+    public $value;
 
-    var $parent;
+    public $parent;
 
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
@@ -1031,37 +1031,37 @@ class SortPhrase {
         switch (strtolower($subtext)) {
             case 'set': case 'fixed': //sort as defined in ids predicate
                 if($this->parent->fixed_sortorder){
-                    return array("FIND_IN_SET(TOPBIBLIO.rec_ID, '{$this->parent->fixed_sortorder}')", 'rec_ID', NULL);
+                    return array("FIND_IN_SET(TOPBIBLIO.rec_ID, '{$this->parent->fixed_sortorder}')", 'rec_ID', null);
                 }else{
-                    return array(NULL, NULL, NULL);
+                    return array(null, null, null);
                 }
 
             case 'p': case 'popularity':
-                return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
+                return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', null);
 
             case 'r': case 'rating':
                 if ($this->parent->search_domain == BOOKMARK) {
-                    return array('-(bkm_Rating)'.$scending, 'bkmk_rating', NULL);//SAW Ratings Change todo: test queries with rating
+                    return array('-(bkm_Rating)'.$scending, 'bkmk_rating', null);//SAW Ratings Change todo: test queries with rating
                 } else {    // default to popularity sort
-                    return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
+                    return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', null);
                 }
 
             case 'interest':    //todo: change help file to reflect depricated predicates
             case 'content':
             case 'quality':
-                return array('rec_Title'.$scending, NULL);// default to title sort
+                return array('rec_Title'.$scending, null);// default to title sort
                 break;
 
             case 'u': case 'url':
-                return array('rec_URL'.$scending, 'rec_URL', NULL);
+                return array('rec_URL'.$scending, 'rec_URL', null);
 
             case 'm': case 'modified':
-                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Modified'.$scending, NULL);}
-                else {return array('rec_Modified'.$scending, 'rec_Modified', NULL);}
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Modified'.$scending, null);}
+                else {return array('rec_Modified'.$scending, 'rec_Modified', null);}
 
             case 'a': case 'added':
-                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Added'.$scending, NULL);}
-                else {return array('rec_Added'.$scending, 'rec_Added', NULL);}
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Added'.$scending, null);}
+                else {return array('rec_Added'.$scending, 'rec_Added', null);}
 
             case 'f': case 'field':
                 /* Sort by field is complicated.
@@ -1096,7 +1096,7 @@ class SortPhrase {
                             "from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID ".
                             "where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id ".
                             "order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
-                            "dtl_DetailTypeID=$field_id", NULL);
+                            "dtl_DetailTypeID=$field_id", null);
                     }
                 } elseif (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
                     @list($_, $field_name, $show_multiples) = $matches;
@@ -1124,16 +1124,16 @@ class SortPhrase {
                             "from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID ".
                             "where dty_Name='".$mysqli->real_escape_string($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID ".
                             "order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
-                            "dtl_DetailTypeID=$field_id", NULL);
+                            "dtl_DetailTypeID=$field_id", null);
                     }
                 }
 
             case 't': case 'title':
-                return array('rec_Title'.$scending, NULL);
+                return array('rec_Title'.$scending, null);
             case 'id': case 'ids':
-                return array('rec_ID'.$scending, NULL);
+                return array('rec_ID'.$scending, null);
             case 'rt': case 'type':
-                return array('rec_RecTypeID'.$scending, NULL);
+                return array('rec_RecTypeID'.$scending, null);
             default;
         }
     }
@@ -1141,17 +1141,19 @@ class SortPhrase {
 
 
 class Predicate {
-    var $value;
+    public $value;
 
-    var $parent;
+    public $parent;
 
-    var $need_recursion = true;
+    public $need_recursion = true;
 
+    public $query;
+    
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = $value;
-        $this->query = NULL;
+        $this->query = null;
     }
 
     public function makeJSON() {
@@ -1167,7 +1169,6 @@ class Predicate {
     }
 
     //get the top most parent - the Query
-    var $query;
     public function &getQuery() {
         if (! $this->query) {
             $c = &$this->parent;
@@ -1561,9 +1562,9 @@ class AnyPredicate extends Predicate {
 
 
 class FieldPredicate extends Predicate {
-    var $field_type;        //name of dt_id
-    var $field_type_value;  //field type
-    var $nests = null;
+    public $field_type;        //name of dt_id
+    public $field_type_value;  //field type
+    public $nests = null;
 
     public function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
@@ -2065,7 +2066,7 @@ class FieldPredicate extends Predicate {
 
 
 class FieldCountPredicate extends Predicate {
-    var $field_type;        //name of dt_id
+    public $field_type;        //name of dt_id
 
     public function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
@@ -2157,7 +2158,7 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
 
 
 class TagPredicate extends Predicate {
-    var $wg_value;
+    public $wg_value;
 
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
@@ -2181,7 +2182,7 @@ class TagPredicate extends Predicate {
             }
         }
         if (! $any_wg_values) {$this->wg_value = array();}
-        $this->query = NULL;
+        $this->query = null;
     }
 
     //@todo - not supported in json
@@ -3038,7 +3039,7 @@ class BeforePredicate extends Predicate {
 
 
 class DatePredicate extends Predicate {
-    var $col;
+    public $col;
 
     public function __construct(&$parent, $col, $value) {
         $this->col = $col;

@@ -31,7 +31,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         $this->foreignChecks = array(
                     array('select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID`',
                           'Cannot delete non empty group')
-                );        
+                );
 
     }
     

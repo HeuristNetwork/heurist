@@ -545,25 +545,25 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
 class HQuery {
 
-    var $from_clause = '';
-    var $where_clause = '';
-    var $sort_clause = '';
-    var $recVisibilityType;
-    var $parentquery = null;
+    public $from_clause = '';
+    public $where_clause = '';
+    public $sort_clause = '';
+    public $recVisibilityType;
+    public $parentquery = null;
 
-    var $error_message = null;
+    public $error_message = null;
 
-    var $top_limb = array();
-    var $sort_phrases;
-    var $sort_tables; // sorting may require the introduction of more tables
+    public $top_limb = array();
+    public $sort_phrases;
+    public $sort_tables; // sorting may require the introduction of more tables
 
-    var $currUserID;
-    var $search_domain;
+    public $currUserID;
+    public $search_domain;
 
-    var $level = "0";
-    var $cnt_child_query = 0;
+    public $level = "0";
+    public $cnt_child_query = 0;
 
-    var $fixed_sortorder = null;
+    public $fixed_sortorder = null;
 
 
     public function __construct($level, $query_json, $search_domain=null, $currUserID=null) {
@@ -888,16 +888,16 @@ class HQuery {
 */
 class HLimb {
 
-    var $parent;           // query
-    var $limbs = array();// limbs and predicates
-    var $conjunction = "all";//and
+    public $parent;           // query
+    public $limbs = array();// limbs and predicates
+    public $conjunction = "all";//and
 
     //results
-    var $tables = array();
-    var $where_clause = "";
-    var $error_message = null;
+    public $tables = array();
+    public $where_clause = "";
+    public $error_message = null;
 
-    var $allowed = array('all'=>SQL_AND,'any'=>" OR ",'not'=>SQL_NOT);
+    public $allowed = array('all'=>SQL_AND,'any'=>" OR ",'not'=>SQL_NOT);
 
     //besides  not,any
     //
@@ -1033,37 +1033,37 @@ class HLimb {
 //
 class HPredicate {
 
-    var $pred_type;
-    var $field_id = null; //dty_ID
-    var $field_type = null;
-    var $field_term = null; //term field: array('term', 'label', 'concept', 'conceptid', 'desc', 'code') // trm_XXX fields
+    public $pred_type;
+    public $field_id = null; //dty_ID
+    public $field_type = null;
+    public $field_term = null; //term field: array('term', 'label', 'concept', 'conceptid', 'desc', 'code') // trm_XXX fields
 
-    var $value;
-    var $valid = false;
-    var $query = null;
+    public $value;
+    public $valid = false;
+    public $query = null;
 
     //for related_to, related_from
-    var $is_relationship = false;
+    public $is_relationship = false;
 
-    var $relation_types = null;
-    var $relation_fields = null; // field in relationshio record: array(field_id=>value)
-    var $relation_prefix = '';//prefix for recLinks
+    public $relation_types = null;
+    public $relation_fields = null; // field in relationshio record: array(field_id=>value)
+    public $relation_prefix = '';//prefix for recLinks
 
-    var $field_list = false; //list of id values used in predicate IN (val1, val2, val3... )
+    public $field_list = false; //list of id values used in predicate IN (val1, val2, val3... )
 
-    var $error_message = null;
+    public $error_message = null;
 
-    var $qlevel;
-    var $index_of_predicate;
+    public $qlevel;
+    public $index_of_predicate;
     //@todo - remove?
-    var $negate = false;
-    var $exact = false;
-    var $fulltext = false;
-    var $case_sensitive = false;
-    var $lessthan = false;
-    var $greaterthan = false;
+    public $negate = false;
+    public $exact = false;
+    public $fulltext = false;
+    public $case_sensitive = false;
+    public $lessthan = false;
+    public $greaterthan = false;
 
-    var $allowed = array('t','type','typeid','typename',
+    public $allowed = array('t','type','typeid','typename',
             'ids','id','title','added','modified','url','notes',
             'after','before',
             'addedby','owner','access',
@@ -1076,7 +1076,7 @@ class HPredicate {
             'tag','keyword','kwd');
 
     //trm_OriginatingDBID trm_IDInOriginatingDB
-    var $allowed_term_fields = array('term'=>'trm_Label', 'label'=>'trm_Label',
+    public $allowed_term_fields = array('term'=>'trm_Label', 'label'=>'trm_Label',
         'concept'=>'trm_ConceptId', 'conceptid'=>'trm_ConceptId', 'desc'=>'trm_Description', 'code'=>'trm_Code');
 
     /*

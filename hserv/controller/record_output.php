@@ -272,7 +272,7 @@
 
     }else{
 
-        if(@$params['vers']==2){
+        if(@$params['vers']==2){ //
 
             $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf');
             $idx = array_search(strtolower($params['format']),$allowed_formats);
@@ -282,16 +282,6 @@
             }
 
             $classname = 'hserv\records\export\exportRecords'.strtoupper($allowed_formats[$idx]);
-/*
-            spl_autoload_register(function ($class) {
-                $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
-                if (file_exists($file)) {
-                    require_once $file;
-                    return true;
-                }
-                return false;
-            });
-*/            
 
             $outputHandler = false;
 
