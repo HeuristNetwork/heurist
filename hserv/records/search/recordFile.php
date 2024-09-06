@@ -1016,8 +1016,8 @@ function getBlurredImage($system, $file_info, $return_url = true){
     };
 
     if(file_exists($blur_file_path)){
-        //return $return_url ? $blur_file_url : $blur_file_path;
-        fileDelete($blur_file_path);
+        return $return_url ? $blur_file_url : $blur_file_path;
+        //DEBUG fileDelete($blur_file_path)
     }
 
     // Scale down to 800x800

@@ -97,8 +97,10 @@ if(mysql__check_dbname($db)==null){
             //Obfuscated id is allowed only
             exit;
         }
+        
+        $need_session = (@$req_params['mode']==null && @$req_params['metadata']==null);
 
-        if(!$system->init($db, true, false)){
+        if(!$system->init($db, true, $need_session)){
             exit;
         }
 
@@ -117,7 +119,7 @@ if(mysql__check_dbname($db)==null){
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
             $fileParams = $fileinfo['ulf_Parameters'];// external repository service id
-            $all_can_view = empty($fileinfo['ulf_WhoCanView']) || $fileinfo['ulf_WhoCanView'] == 'public';
+            $all_can_view = empty($fileinfo['ulf_WhoCanView']) || $fileinfo['ulf_WhoCanView'] == 'viewable';
             if($fileParams!=null && !empty($fileParams)){
                 $fileParams = json_decode($fileParams, true);
             }
@@ -152,8 +154,7 @@ if(mysql__check_dbname($db)==null){
                     <?php
                 }
 
-            }else
-            if( @$req_params['mode']=='tag'){
+            }elseif( @$req_params['mode']=='tag'){
 
                 //request may have special parameters for audio/video players
                 if(@$req_params['fancybox']){
@@ -178,8 +179,7 @@ if(mysql__check_dbname($db)==null){
 
                     downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
 
-                }else
-                if(is_string($filepath) && file_exists($filepath) && !is_dir($filepath)){
+                }elseif(is_string($filepath) && file_exists($filepath) && !is_dir($filepath)){
 
                     //fix issue if original name does not have ext
                     if(@$req_params['embedplayer']!=1){
@@ -197,23 +197,22 @@ if(mysql__check_dbname($db)==null){
                     }
 
                     $is_download = (@$req_params['download']==1);
+                    
+                    $is_image = (strpos($mimeType, DIR_IMAGE)===0);
+                    $get_blurred_image = $is_image && !$all_can_view && !$system->has_access();
 
                     if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles)
                     { //&& strpos($fileinfo['fullPath'],'file_uploads/')===0
 
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
-                        $get_blurred_image = !$all_can_view && !$system->has_access();
-                        $get_cached_image = @$_REQUEST['fullres'] === '0';
-
+                        
                         if($get_blurred_image){ //!$all_can_view
 
                             $blurred_url = getBlurredImage($system, $fileinfo);
                             $direct_url = !$blurred_url ? HEURIST_BASE_URL . 'hclient/assets/100x100-login-required.png' : $blurred_url;
 
-                            $get_cached_image = false;
-                        }
-                        if($get_cached_image){ // get web cached version
+                        }elseif(@$req_params['fullres'] === '0'){ //$get_cached_image get web cached version
 
                             $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
                             if($cache_url){
@@ -231,6 +230,9 @@ if(mysql__check_dbname($db)==null){
                         redirectURL(HEURIST_FILESTORE_URL.$fileinfo['fullPath']);
 
                     }else {
+                        if($get_blurred_image){
+                            $filepath = getBlurredImage($system, $fileinfo, false);
+                        }
                         //see recordFile.php
                         downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
                     }
@@ -264,8 +266,8 @@ if(mysql__check_dbname($db)==null){
                         $response = array('status'=>HEURIST_OK, 'data'=>$external_url);
                         print json_encode($response);
 
-                    }else
-                    if(strpos($originalFileName,ULF_TILED_IMAGE)===0){
+                    }
+                    elseif(strpos($originalFileName,ULF_TILED_IMAGE)===0){
 
                         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
 
