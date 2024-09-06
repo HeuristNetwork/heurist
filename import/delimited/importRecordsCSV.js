@@ -1614,8 +1614,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // init field mapping table - main table to work with 
     //
-    function _initFieldMapppingTable( ){
-    
+    function _initFieldMapppingTable(){
+
         $('#tblFieldMapping > tbody').empty();
                         
         let sIndexes = "",
@@ -1795,8 +1795,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
                 +'</td></tr>'
                 +sID_field+sIndexes+sAllFields
-                +'<tr height="40" style="border-bottom:1px solid lightgray"><td class="subh" colspan="5">'
-                +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
+                +'<tr height="40" style="border-bottom:1px solid lightgray">'
+                + '<td class="subh" colspan="2"><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td>'
+                + '<td class="subh" id="add_new_col" colspan="3" style="border-left: none; padding: 10px 0px;">'
+                    + '<input id="txtColName" placeholder="Column name..." size="20">'
+                    + '<button id="btnInsertData" style="margin-left: 10px; vertical-align: bottom;">Add</button><br><br>'
+                    + '<input id="txtColData" placeholder="Value..." size="30">'
+                + '</td>'
+                +'</tr>');
+
+            $('#btnInsertData').button({icon: 'ui-icon-plus'});
+
+            $('#btnInsertData').on('click', _insertNewColumn);
+            $('#txtColName, #txtColData').on('keyup', (event) => {
+                if(event.key == 'Enter' || event.code == 'Enter'){
+                    _insertNewColumn();
+                }
+            });
         }
         
         //init listeners
@@ -1821,6 +1836,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         _initCreateFieldButtons();
         //load data
         _getValuesFromImportTable();            
+
         //
         
         if(sProcessed!=''){
@@ -1930,7 +1946,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#divStep3 > .ent_header').height(h);
 
         $('#divStep3 > .ent_content').css({top:(h+5+'px')});
-        
+
+        let $insert_col = $('#add_new_col');
+        if($insert_col.length > 0){
+            currentStep >= 3 || currentStep <= 5 ? $insert_col.find('input, button').show() : $insert_col.find('input, button').hide();
+        }
+
         /* todo - check how it works with new layout
         //adjust position of footer with action buttons  
         var content = $('#divFieldMapping');
@@ -2614,42 +2635,40 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
                 
-                        response = response.data;
-                    
-                        $("#current_row").html(response[0]);
+                    response = response.data;
+                
+                    $("#current_row").html(response[0]);
 
-                        for(let i=1; i<response.length;i++){
-                            let sval;
-                            if(window.hWin.HEURIST4.util.isnull(response[i])){
+                    for(let i=1; i<response.length;i++){
+                        let sval;
+                        if(window.hWin.HEURIST4.util.isnull(response[i])){
+                            sval = "&nbsp;";
+                        }else{
+
+                            let idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
+                            
+                            let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                            
+                            sval = response[i].substr(0,100);
+
+                            if(isIndex && response[i]<0){
+                                sval = "&lt;New Record&gt;";
+                            }else if(sval==""){
                                 sval = "&nbsp;";
-                            }else{
-
-                                let idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
-                                
-                                let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
-                                
-                                sval = response[i].substr(0,100);
-
-                                if(isIndex && response[i]<0){
-                                    sval = "&lt;New Record&gt;";
-                                }else if(sval==""){
-                                    sval = "&nbsp;";
-                                }else if(response[i].length>100){ //add ... 
-                                    sval = sval + '&#8230;';
-                                }
+                            }else if(response[i].length>100){ //add ... 
+                                sval = sval + '&#8230;';
                             }
-
-                            if($("#impval"+(i-1)).length>0){
-                                
-                                if($("#impval"+(i-1)).attr('data-isindex')==1){
-                                    sval = '<span class="ui-icon ui-icon-arrowthick-1-e" style="color:#b36ae2"></span>&nbsp;' + sval;
-                                }
-                                $("#impval"+(i-1)).html(sval);
-                            }
-                                
                         }
 
-                    
+                        if($("#impval"+(i-1)).length>0){
+
+                            if($("#impval"+(i-1)).attr('data-isindex')==1){
+                                sval = '<span class="ui-icon ui-icon-arrowthick-1-e" style="color:#b36ae2"></span>&nbsp;' + sval;
+                            }
+                            $("#impval"+(i-1)).html(sval);
+                        }
+                    }
+
                 }else{
                     _showStep(1);
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -4725,6 +4744,52 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     });
                 }
             });
+        });
+    }
+
+    //
+    // Add new column + default data to each row
+    //
+    function _insertNewColumn(){
+
+        let col_name = $('#txtColName').val();
+        let col_data = $('#txtColData').val();
+
+        if(window.hWin.HEURIST4.util.isempty(col_name) || window.hWin.HEURIST4.util.isempty(col_data)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Both a column name and data are required...', 3000);
+            return;
+        }
+
+        let request = {
+            db: window.hWin.HAPI4.database,
+            imp_ID: imp_ID,
+            action: 'insert_column',
+            column_name: col_name,
+            column_data: col_data,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.doImportAction(request, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            switch(currentStep){
+                case 3:
+                    _loadSession();
+                    break;
+                case 4:
+                case 5:
+                    _doMatchingInit();
+                    _doPrepare();
+                    break;
+
+                default:
+                    break;
+            }
+
         });
     }
 

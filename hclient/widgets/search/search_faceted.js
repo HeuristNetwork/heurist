@@ -1367,7 +1367,7 @@ $.widget( "heurist.search_faceted", {
             input_style = {'width':(w-70)+'px','max-width':(w-70)+'px','min-width':'auto'};
         }
 
-        $input.removeClass('text').css(input_style);
+        $input.removeClass('text ui-widget-content').css(input_style);
 
         let btn_clear = $( "<span>")  //for direct input
             .insertBefore( $input_div )
@@ -2509,6 +2509,7 @@ $.widget( "heurist.search_faceted", {
                             }else{
                                 btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
                             }
+                            btn_dropdown.find('.ui-selectmenu-icon').css('right', '0px');
                             $sel.change(function(event){ that._onDropdownSelect(event); });
                         }
                         
@@ -3800,9 +3801,8 @@ $.widget( "heurist.search_faceted", {
         }
     }
 
-    ,_createOption : function(facet_index, indent, cterm){
-        
-       
+    ,_createOption: function(facet_index, indent, cterm){
+
         let hist = this.options.params.facets[facet_index].history;
         if(!hist) hist = [];
         let step = hist.length+1;
@@ -4334,10 +4334,6 @@ $.widget( "heurist.search_faceted", {
                     }
 
                     $count_lbl.text(txt);
-                    
-                   
-                   
-                   
                 }
 
                 $count_lbl.attr('title', `Expands to ${response.data.count} records`);

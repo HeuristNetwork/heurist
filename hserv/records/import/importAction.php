@@ -25,6 +25,7 @@
 */
 
 use hserv\entity\DbDefTerms;
+use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
@@ -3455,6 +3456,62 @@ public static function importTerms($params){
     mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
 
     return $results;
+}
+
+//
+// Insert a new column into each record row, with pre-filled data
+//
+public static function insertNewColumns($params){
+
+    self::initialize();
+
+    $mysqli = self::$mysqli;
+
+    // Prepare data
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+    $import_table = $imp_session['import_table'];
+
+    $col_name = @$params['column_name'];
+    $col_data = USanitize::cleanupSpaces(@$params['column_data']);
+    if(empty($col_name) || empty($col_data)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Both a new column name and data are required');
+        return false;
+    }
+
+    $new_column = count($imp_session['columns']);
+    $new_column = "field_{$new_column}";
+
+    $imp_session['columns'][] = $col_name;
+    $imp_session['uniqcnt'][] = "1";
+
+    $column_size = mb_strlen($col_data) + 5;
+
+    // Update import table
+    $add_column = "ALTER TABLE $import_table ADD $new_column VARCHAR($column_size)";
+    $res = $mysqli->query($add_column);
+    if(!$res){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to add the new column to the desired import table');
+        return false;
+    }
+
+    $update_query = "UPDATE $import_table SET $new_column = ?";
+    $res = mysql__exec_param_query($mysqli, $update_query, ['s', $col_data]);
+    if($res !== true){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to update the column with provided data');
+        return false;
+    }
+
+    // Update import session
+    $res = ImportSession::save($imp_session);
+    if(!$res){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to update import session with new column details');
+        return false;
+    }
+
+    return true;
 }
 } //end class
 ?>

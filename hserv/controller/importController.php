@@ -251,9 +251,13 @@ if(!$system->init(@$_REQUEST['db'])){
                 $res = ImportHeurist::importRecordsFromDatabase(@$_REQUEST);
             }
 
-        }else if($action=='import_terms'){
+        }elseif($action=='import_terms'){
 
             $res = ImportAction::importTerms(@$_REQUEST);
+
+        }elseif($action=='insert_column'){
+
+            $res = ImportAction::insertNewColumns(@$_REQUEST);
 
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
