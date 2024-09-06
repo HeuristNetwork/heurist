@@ -97,6 +97,8 @@ abstract class DbEntityBase
     protected $isDeleteReady = false;
     
     protected $requireAdminRights = true;
+    
+    protected $duplicationCheck = null;
 
     //
     // constructor - loads configuration from json file
@@ -104,7 +106,9 @@ abstract class DbEntityBase
     public function __construct( $system, $data=null ) {
        $this->system = $system;
 
-       $this->init();//recreate table is it does not exist
+       if(method_exists($this,'init')){
+            $this->init();    
+       }
 
        $reflect = new \ReflectionClass($this);
        
@@ -172,8 +176,8 @@ abstract class DbEntityBase
 
 
     //
-    // config getter
-    //
+    // 
+    // abstract 
     public function init(){}
 
     //
@@ -1034,6 +1038,30 @@ abstract class DbEntityBase
     }
 
     //
+    // validate duplication
+    //
+    protected function doDuplicationCheck($idx, $field, $message){
+        
+            if(@$this->records[$idx][$field]){
+                $mysqli = $this->system->get_mysqli();
+                $res = mysql__select_value($mysqli,
+                        "SELECT {$this->primaryField} FROM ".$this->config['tableName']."  WHERE $field='"
+                        .$mysqli->real_escape_string( $this->records[$idx][$field] )."'");
+                if($res>0 && $res!=@$this->records[$idx][$this->primaryField]){
+                    
+                    $sup_info = null;
+                    if($this->config['tableName']=='defDetailTypes'){ //special case
+                        $sup_info = array($this->primaryField=>$res);
+                    }
+                    
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $message, $sup_info);
+                    return false;
+                }
+            }
+            return true;
+    }
+    
+    //
     // extracts records from "data" parameter and fills $this->recordIDs and $this->records
     // it is used in delete, save
     //
@@ -1103,7 +1131,15 @@ abstract class DbEntityBase
                     }
                 }
             }
-        }
+
+            if(!empty($this->duplicationCheck)){
+                foreach($this->duplicationCheck as $field=>$msg){
+                    if(!$this->doDuplicationCheck($idx, $field, $msg)){
+                         return false;                           
+                    }
+                }
+            }
+        }//foreach
 
         return true;
     }

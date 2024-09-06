@@ -24,6 +24,15 @@ use hserv\entity\DbEntityBase;
 
 class DbDefDetailTypeGroups extends DbEntityBase
 {
+    public function init(){
+        $this->duplicationCheck = array('dtg_Name'=>'Field type group cannot be saved. The provided name already exists');
+
+        $this->foreignChecks = array(
+                    array('select count(dty_ID) from defDetailTypes where dty_DetailTypeGroupID',
+                          'Cannot delete non empty group')
+                );
+    }
+    
     /**
     *  search field gruops
     */
@@ -51,47 +60,21 @@ class DbDefDetailTypeGroups extends DbEntityBase
     //
     //
     //
-    public function delete($disable_foreign_checks = false){
-        
-        $this->isDeleteReady = false;
-        
-        $this->foreignChecks = array(
-                    array('select count(dty_ID) from defDetailTypes where dty_DetailTypeGroupID',
-                          'Cannot delete non empty group')
-                );
-                
-        return parent::delete();
-    }
-
-    //
-    //
-    //
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
+        if($ret){
+            //add specific field values
+            foreach($this->records as $idx=>$record){
 
-        //add specific field values
-        foreach($this->records as $idx=>$record){
+                $this->records[$idx]['dtg_Modified'] = date(DATE_8601);//reset
 
-            //validate duplication
-            if(@$this->records[$idx]['dtg_Name']){
-                $mysqli = $this->system->get_mysqli();
-                $res = mysql__select_value($mysqli,
-                        "SELECT dtg_ID FROM ".$this->config['tableName']."  WHERE dtg_Name='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['dtg_Name'] )."'");
-                if($res>0 && $res!=@$this->records[$idx]['dtg_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type group cannot be saved. The provided name already exists');
-                    return false;
+                if(!(@$this->records[$idx]['dtg_Order']>0)){
+                    $this->records[$idx]['dtg_Order'] = 2;
                 }
+
+                $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dtg_ID']>0));
             }
-
-            $this->records[$idx]['dtg_Modified'] = date(DATE_8601);//reset
-
-            if(!(@$this->records[$idx]['dtg_Order']>0)){
-                $this->records[$idx]['dtg_Order'] = 2;
-            }
-
-            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dtg_ID']>0));
         }
 
         return $ret;

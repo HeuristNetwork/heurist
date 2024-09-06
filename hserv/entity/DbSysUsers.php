@@ -281,24 +281,17 @@ class DbSysUsers extends DbEntityBase
             }
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name already exists');
-                return false;
+            //validate duplication
+            if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'User cannot be saved. The provided name already exists')){
+                    return false;                           
             }
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_eMail='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_eMail'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided email already exists');
-                return false;
+            if(!$this->doDuplicationCheck($idx, 'ugr_eMail', 'User cannot be saved. The provided email already exists')){
+                    return false;                           
             }
 
             //find records to be approved and new ones
             if($this->system->is_admin() && "y"==@$this->records[$idx]['ugr_Enabled'] && @$this->records[$idx]['ugr_ID']>0){
+                $mysqli = $this->system->get_mysqli();
                 $res = mysql__select_value($mysqli,
                          'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_LoginCount=0 AND ugr_Type="user" AND ugr_ID='
                                 .$this->records[$idx]['ugr_ID']);

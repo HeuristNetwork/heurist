@@ -24,6 +24,17 @@ use hserv\entity\DbEntityBase;
 
 class DbDefRecTypeGroups extends DbEntityBase
 {
+    
+    public function init(){
+        $this->duplicationCheck = array('rtg_Name'=>'Record type group cannot be saved. The provided name already exists');
+        
+        $this->foreignChecks = array(
+                    array('select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID`',
+                          'Cannot delete non empty group')
+                );        
+
+    }
+    
     /**
     *  search rectype groups
     */
@@ -51,39 +62,12 @@ class DbDefRecTypeGroups extends DbEntityBase
     //
     //
     //
-    public function delete($disable_foreign_checks = false){
-        
-        $this->isDeleteReady = false;
-        
-        $this->foreignChecks = array(
-                    array('select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID`',
-                          'Cannot delete non empty group')
-                );        
-
-        return parent::delete();
-    }
-
-    //
-    //
-    //
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
 
         //add specific field values
         foreach($this->records as $idx=>$record){
-
-            //validate duplication
-            if(@$this->records[$idx]['rtg_Name']){
-                $mysqli = $this->system->get_mysqli();
-                $res = mysql__select_value($mysqli,
-                        "SELECT rtg_ID FROM ".$this->config['tableName']."  WHERE rtg_Name='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['rtg_Name'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['rtg_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type group cannot be saved. The provided name already exists');
-                    return false;
-                }
-            }
 
             $this->records[$idx]['rtg_Modified'] = date(DATE_8601);//reset
 

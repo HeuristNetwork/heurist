@@ -201,16 +201,9 @@ class DbSysGroups extends DbEntityBase
             $this->records[$idx]['ugr_Password'] = 'PASSWORD NOT REQUIRED';
             $this->records[$idx]['ugr_eMail'] = 'EMAIL NOT SET FOR '.$this->records[$idx]['ugr_Name'];
 
-
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                        'Workgroup cannot be saved. The provided name already exists');
-                return false;
+            if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'Workgroup cannot be saved. The provided name already exists')){
+                    return false;                           
             }
 
         }

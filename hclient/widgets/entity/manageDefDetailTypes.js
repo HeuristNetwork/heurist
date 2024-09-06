@@ -1854,16 +1854,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
                     {default_palette_class:this.options.default_palette_class});
-            }else if(this._currentEditID == -1 && res.dty_id){ // attempted to create new field, name is already used
+            }else if(this._currentEditID == -1 && res.dty_ID){ // attempted to create new field, name is already used
 
-                let cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
-                let exist_name = $Db.dty(res.dty_id, 'dty_Name');
+                let cannotEdit = $Db.dty(res.dty_ID, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
+                let exist_name = $Db.dty(res.dty_ID, 'dty_Name');
                 let msg = 'The name "<span id="field_name">'+ exist_name +'</span>" which you have specified for the new field '
-                    + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_id +'</span>).<br><br>';
+                    + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_ID +'</span>).<br><br>';
 
                 if(!cannotEdit){
 
-                    if($Db.rst_usage(res.dty_id).length == 0){ // check if in use
+                    if($Db.rst_usage(res.dty_ID).length == 0){ // check if in use
                         msg += '<span id="btnDelete">DELETE</span> <span style="margin-left: 20px">Delete the existing base field (it has not been used)</span><br><br>';
                     }
 
@@ -1884,14 +1884,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         'a'          : 'delete',
                         'entity'     : that.options.entity.entityName,
                         'request_id' : window.hWin.HEURIST4.util.random(),
-                        'recID'      : res.dty_id
+                        'recID'      : res.dty_ID
                     };
 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                $Db.dty().removeRecord( res.dty_id );
+                                $Db.dty().removeRecord( res.dty_ID );
 
                                 $dlg.dialog('close');
                                 that._saveEditAndClose();
@@ -1921,10 +1921,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         window.hWin.HEURIST4.msg.showMsgFlash('Please enter a new name', 1500);
                                         return;
                                     }
-                                    let fld_record = $Db.rst(that.options.newFieldForRtyID, res.dty_id);
+                                    let fld_record = $Db.rst(that.options.newFieldForRtyID, res.dty_ID);
 
-                                    that._currentEditID = res.dty_id;
-                                    that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_id}, 
+                                    that._currentEditID = res.dty_ID;
+                                    that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_ID}, 
                                         function(id, flds){
 
                                             $Db.dty().setRecord(id, flds);
@@ -1939,15 +1939,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                                     entity: 'defRecStructure',
                                                     fields: {
                                                         rst_DisplayName: new_name,
-                                                        rst_DetailTypeID: res.dty_id,
+                                                        rst_DetailTypeID: res.dty_ID,
                                                         rst_RecTypeID: that.options.newFieldForRtyID
                                                     },
                                                     request_id: window.hWin.HEURIST4.util.random()
                                                 };
                                                 window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
                                                     if(response.status == window.hWin.ResponseStatus.OK){ // update cache, prepare rec structure tree for updating
-                                                        $Db.rst(that.options.newFieldForRtyID).setRecord(res.dty_id, {rst_DisplayName: new_name});
-                                                        that.updatedRstField = res.dty_id;
+                                                        $Db.rst(that.options.newFieldForRtyID).setRecord(res.dty_ID, {rst_DisplayName: new_name});
+                                                        that.updatedRstField = res.dty_ID;
                                                     }
                                                     that._currentEditID = -1;
                                                     that._saveEditAndClose();

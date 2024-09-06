@@ -321,12 +321,9 @@ class DbDefRecTypes extends DbEntityBase
                 $this->records[$idx]['rty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['rty_Name']);
                 $this->records[$idx]['rty_Name'] = super_trim($this->records[$idx]['rty_Name']);
 
-                $res = mysql__select_value($mysqli,
-                        "SELECT rty_ID FROM defRecTypes  WHERE rty_Name='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['rty_Name'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['rty_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type cannot be saved. The provided name already exists');
-                    return false;
+                //validate duplication
+                if(!$this->doDuplicationCheck($idx, 'rty_Name', 'Record type cannot be saved. The provided name already exists')){
+                        return false;                           
                 }
             }
 

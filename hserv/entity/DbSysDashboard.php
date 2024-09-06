@@ -155,19 +155,9 @@ class DbSysDashboard extends DbEntityBase
                 $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterSavedSearch'];
             }
 
-
-
             //validate duplication
-            if(@$this->records[$idx]['dsh_Label']){
-                $mysqli = $this->system->get_mysqli();
-                $res = mysql__select_value($mysqli,
-                        "SELECT dsh_ID FROM ".$this->config['tableName']."  WHERE dsh_Label='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['dsh_Label'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['dsh_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED,
-                            'Dashboard entry cannot be saved. The provided name already exists');
-                    return false;
-                }
+            if(!$this->doDuplicationCheck($idx, 'dsh_Label', 'Dashboard entry cannot be saved. The provided name already exists')){
+                    return false;                           
             }
         }
 

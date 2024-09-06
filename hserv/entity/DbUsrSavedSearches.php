@@ -105,6 +105,7 @@ class DbUsrSavedSearches extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
+            
             $this->records[$idx]['svs_Modified'] = date(DATE_8601);//reset
 
             $tbl = $this->config['tableName'];
