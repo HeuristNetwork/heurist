@@ -166,24 +166,17 @@ class DbUsrBookmarks extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);//bookmark ids
-
-        $mysqli = $this->system->get_mysqli();
-
-
-        $query = 'SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks where tag_ID=rtl_TagID AND tag_UGrpID='
-            .$this->system->get_user_id()
-            .' AND rtl_RecID=bkm_RecID AND bkm_ID in (' . implode(',', $this->recordIDs). ')';
-
-        $cnt = mysql__select_value($mysqli, $query);
-
-        if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'It is not possible to remove bookmark. Bookmarked record has personal tags');
-                return false;
-        }
-
-        $ret = parent::delete();
+        $this->recordIDs = null; //reset to obtain ids from $data
+        $this->isDeleteReady = false;
+        
+        $this->foreignChecks = array(
+                    array('SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks '
+                    .'WHERE tag_ID=rtl_TagID AND tag_UGrpID='.$this->system->get_user_id()
+                    .' AND rtl_RecID=bkm_RecID AND bkm_ID',
+                    'It is not possible to remove bookmark. Bookmarked record has personal tags')
+                );
+        
+        return parent::delete();
     }
 
 

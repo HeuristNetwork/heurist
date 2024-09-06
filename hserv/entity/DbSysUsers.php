@@ -30,6 +30,11 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 class DbSysUsers extends DbEntityBase
 {
 
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
+    
     /**
     *  search users
     *
@@ -390,10 +395,17 @@ class DbSysUsers extends DbEntityBase
     //
     //
     public function delete($disable_foreign_checks = false){
-
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-        if(in_array(2, $this->recordIDs)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owner" user');
+        
+        
+        $this->recordIDs = null; //reset to obtain ids from $data
+        
+        $this->foreignChecks = array(
+                    array('SELECT FIND_IN_SET(2, "#IDS#")','Cannot remove "Database Owner" user'),
+                    array('SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary=0 AND rec_OwnerUGrpID IN (#IDS#) LIMIT 1',
+                          'Deleting User with existing Records not allowed')
+                );
+        
+        if(!$this->deletePrepare()){
             return false;
         }
 
@@ -413,16 +425,6 @@ class DbSysUsers extends DbEntityBase
                     'It is not possible to remove  user #'.$usrID.'. This user is the only admin of the workgroup #'.$res[0]);
                 return false;
             }
-
-        }
-
-        //check for existing records
-        $query = 'SELECT count(rec_ID) FROM Records WHERE rec_OwnerUGrpID in ('
-                        . implode(',', $this->recordIDs) . ') AND rec_FlagTemporary=0 limit 1';
-        $res = mysql__select_value($mysqli, $query);
-        if($res>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Deleting user with existing Records not allowed');
-            return false;
         }
 
         //---------------------------------------------------

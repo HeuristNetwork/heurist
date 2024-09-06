@@ -30,7 +30,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
     public function search(){
 
         if(parent::search()===false){
-              return false;
+              return false;                                                                              
         }
         
         $this->searchMgr->addPredicate('dtg_ID');
@@ -52,43 +52,15 @@ class DbDefDetailTypeGroups extends DbEntityBase
     //
     //
     public function delete($disable_foreign_checks = false){
-
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
-            return false;
-        }
-
-        $query = 'select count(dty_ID) from defDetailTypes where dty_DetailTypeGroupID in ('.implode(',', $this->recordIDs).')';
-        $ret = mysql__select_value($this->system->get_mysqli(), $query);
-
-        if($ret>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
-            return false;
-        }
-
+        
+        $this->isDeleteReady = false;
+        
+        $this->foreignChecks = array(
+                    array('select count(dty_ID) from defDetailTypes where dty_DetailTypeGroupID',
+                          'Cannot delete non empty group')
+                );
+                
         return parent::delete();
-    }
-
-
-    //
-    // validate permission
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit field type groups. Insufficient rights (logout/in to refresh) for this operation '
-                        .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
-            return false;
-
-        }
-
-        return true;
     }
 
     //

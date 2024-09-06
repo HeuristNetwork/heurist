@@ -226,13 +226,11 @@ class DbDefRecTypes extends DbEntityBase
     //
     //
     public function delete($disable_foreign_checks = false){
-
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record type identificator');
+        
+        if(!$this->deletePrepare()){
             return false;
         }
+
         if(count($this->recordIDs)>1){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove record types in batch');
             return false;
@@ -285,7 +283,6 @@ class DbDefRecTypes extends DbEntityBase
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
-
         //delete temporary records
         $res = true;
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
@@ -319,25 +316,6 @@ class DbDefRecTypes extends DbEntityBase
         if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $res;
-    }
-
-
-    //
-    // validate permission for edit record type
-    // for delete and assign see appropriate methods
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
-                return false;
-        }
-
-        return true;
     }
 
     //

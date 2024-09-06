@@ -28,6 +28,11 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 class DbSysDashboard extends DbEntityBase
 {
 
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
+        
     /**
     *  search groups
     *

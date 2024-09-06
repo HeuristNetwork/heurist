@@ -157,12 +157,12 @@ class DbRecUploadedFiles extends DbEntityBase
         }elseif(@$this->data['details']=='list'){
 
             //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
-            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB,ulf_WhoCanView';
             $needCalcFields = true;
 
         }elseif(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource,ulf_WhoCanView';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
             $needCalcFields = true;
@@ -1262,14 +1262,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     public function delete($keep_uploaded_files=false, $check_referencing=true){ //$disable_foreign_checks = false
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
-            return false;
-        }
-
-        if(!$this->_validatePermission()){
+        $this->recordIDs = null;
+    
+        if(!$this->deletePrepare()){
             return false;
         }
 

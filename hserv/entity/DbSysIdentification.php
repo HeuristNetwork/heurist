@@ -136,6 +136,7 @@ class DbSysIdentification extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
         //virtual method
+        return false;
     }
 
 

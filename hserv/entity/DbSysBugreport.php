@@ -28,6 +28,11 @@ define('DT_FILE','type:2-38');
 class DbSysBugreport extends DbEntityBase
 {
 
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
+    
     /**
     *  search users
     *
@@ -41,20 +46,6 @@ class DbSysBugreport extends DbEntityBase
     */
     public function search(){
         return null;
-    }
-
-    //
-    // validate permission
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->has_access()){
-             $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You must be logged in for bug reporting. Insufficient rights (logout/in to refresh) for this operation');
-             return false;
-        }
-
-        return true;
     }
 
     //

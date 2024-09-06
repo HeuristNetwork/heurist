@@ -226,12 +226,12 @@ class DbUsrTags extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
 
             $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT rtl_RecID '
-                        .'FROM usrRecTagLinks WHERE rtl_TagID in ('.implode(',', $this->recordIDs).')');
+                        .'FROM usrRecTagLinks WHERE rtl_TagID='.intval($this->recordIDs[0]));
             $cnt = count($recIDs_inuse);
 
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED,
-                (($cnt==1 && count($this->records)==1)
+                (($cnt==1)
                 ? 'There is a record'
                 : 'There are '.$cnt.' records')
                 .' with this tag.<br>You must delete the record(s)'

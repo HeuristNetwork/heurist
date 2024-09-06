@@ -187,12 +187,10 @@ class DbDefDetailTypes extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field type identificator');
+        if(!$this->deletePrepare()){
             return false;
         }
+
         if(count($this->recordIDs)>1){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove field types in batch');
             return false;
@@ -216,25 +214,6 @@ class DbDefDetailTypes extends DbEntityBase
         }
 
         return parent::delete();
-    }
-
-
-    //
-    // validate permission for edit record type
-    // for delete and assign see appropriate methods
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit field types. Insufficient rights (logout/in to refresh) for this operation');
-                return false;
-        }
-
-        return true;
     }
 
     //

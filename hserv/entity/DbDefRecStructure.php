@@ -192,24 +192,6 @@ class DbDefRecStructure extends DbEntityBase
     }
 
     //
-    // validate permission for edit record type
-    // for delete and assign see appropriate methods
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                'You are not admin and can\'t edit record type structure. Insufficient rights (logout/in to refresh) for this operation');
-            return false;
-        }
-
-        return true;
-    }
-
-    //
     //
     //
     protected function prepareRecords(){
@@ -306,6 +288,8 @@ class DbDefRecStructure extends DbEntityBase
                 $this->recordIDs = array($this->recordIDs);
             }
         }
+        
+        $this->isDeleteReady = false;
 
         return parent::delete();
     }

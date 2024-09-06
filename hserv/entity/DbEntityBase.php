@@ -89,6 +89,14 @@ abstract class DbEntityBase
     // Name of table
     //
     private $entityName;
+    
+    //
+    //
+    protected $foreignChecks = null; //array of queries to validate references (before delete)
+    
+    protected $isDeleteReady = false;
+    
+    protected $requireAdminRights = true;
 
     //
     // constructor - loads configuration from json file
@@ -464,10 +472,8 @@ abstract class DbEntityBase
     public function save(){
 
         //extract records from $_REQUEST data
-        if($this->records==null){ //records can be pepared beforehand
-            if(!$this->prepareRecords()){
-                    return false;
-            }
+        if($this->records==null && !$this->prepareRecords()){ //records can be pepared beforehand
+            return false;
         }
 
         //validate permission for current user and set of records see $this->recordIDs
@@ -593,14 +599,12 @@ abstract class DbEntityBase
         }
         return $results;
     }//save
-
+    
     //
-    // @todo multirecords and transaction
+    // prepare and check ids
     //
-    // returns - deleted:[], no_rights:[], in_use:[]
-    //
-    public function delete($disable_foreign_checks=false){
-
+    protected function deletePrepare(){
+        
         if(!@$this->recordIDs){
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         }
@@ -611,6 +615,44 @@ abstract class DbEntityBase
         }
 
         if(!$this->_validatePermission()){
+            return false;
+        }
+        
+        if(!empty($this->foreignChecks)){
+            
+            foreach($this->foreignChecks as $check){
+                
+                $query = $check[0];
+                
+                if(strpos($query,'#IDS#')>0){
+                    $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
+                }else{
+                    $query .= (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
+                }
+                
+                $ret = mysql__select_value($this->system->get_mysqli(), $query);
+
+                if($ret>0){
+                    $msg = @$check[1]?$check[1]:'Cannot delete '.$this->config['entityTitle'];
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                    return false;
+                }
+            }
+        }
+        
+        $this->isDeleteReady = true;
+        
+        return true;
+    }
+
+    //
+    // @todo multirecords and transaction
+    //
+    // returns - deleted:[], no_rights:[], in_use:[]
+    //
+    public function delete($disable_foreign_checks=false){
+        
+        if(!$this->isDeleteReady && !$this->deletePrepare()){
             return false;
         }
 
@@ -690,10 +732,26 @@ abstract class DbEntityBase
 
 
     //
-    //@todo validate permission per record
+    // Validates permission for delete and update operations
     //
     protected function _validatePermission(){
+        
+        
+        if($this->requireAdminRights &&
+            !$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
+            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
+            
+            $ent_name = @$this->config['entityTitlePlural']?$this->config['entityTitlePlural']:'this entity';
 
+            $this->system->addError(HEURIST_REQUEST_DENIED,
+                    'You are not admin and can\'t edit '.$ent_name
+                    .'. Insufficient rights (logout/in to refresh) for this operation '
+                    .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
+            // You have to be Administrator of group \'Database Managers\' for this operation                    
+            return false;
+        }
+        
         if(!$this->system->has_access()){
              $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You must be logged in. Insufficient rights (logout/in to refresh) for this operation');
@@ -702,6 +760,7 @@ abstract class DbEntityBase
 
         return true;
     }
+    
     //
     // @todo
     //

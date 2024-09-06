@@ -253,7 +253,10 @@
                     //it outputs geojson and exits
                     $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
                     RecordsExport::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
-
+                    
+                    //$classname = 'hserv\records\export\exportRecordsGEOJSON';
+                    //$outputHandler = new $classname($system);
+                    //$res = $outputHandler->output($recdata, array('leaflet'=>true, 'depth'=>0, 'simplify'=>true) );
 
                 }else{
                     //entire kml is considered as unified map entry

@@ -112,43 +112,15 @@ class DbDefVocabularyGroups extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
-            return false;
-        }
-
-        $query = 'select count(trm_ID) from defTerms where `trm_VocabularyGroupID` in ('
-                                .implode(',', $this->recordIDs)
-                                .')  and NOT (trm_ParentTermID>0)';
-        $ret = mysql__select_value($this->system->get_mysqli(), $query);
-
-        if($ret>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
-            return false;
-        }
-
+        $this->isDeleteReady = false;
+        
+        $this->foreignChecks = array(
+                    array('SELECT count(trm_ID) FROM defTerms WHERE NOT (trm_ParentTermID>0) AND `trm_VocabularyGroupID`',
+                          'Cannot delete non empty group')
+                );
+                
         return parent::delete();
     }
-
-    //
-    // validate permission
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit Vocabulary groups. Insufficient rights (logout/in to refresh) for this operation');
-                return false;
-        }
-
-        return true;
-    }
-
 
     //
     //
