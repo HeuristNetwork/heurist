@@ -551,7 +551,7 @@ if(!$format){ $format='csv';}
                 <tbody>
                                     <tr>
                                         <td rowspan="3" width="250">
-                                            <h2 id="mrr_big">Existing: 586  New: 100</h2>
+                                            <h2 id="mrr_big">Existing: 0&nbsp;&nbsp;&nbsp;New: 0</h2>
                                         </td>
                                         <td rowspan="3">
                                             <div id="prepareWarnings"
