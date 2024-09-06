@@ -208,7 +208,7 @@ class DbEntitySearch
         return $val;
     }
 
-    
+
     public function addPredicate($fieldname, $is_ids=false) {
         
         $pred = $this->getPredicate($fieldname, $is_ids);
@@ -223,7 +223,7 @@ class DbEntitySearch
     }
     
     
-    public function composeAndExecute($orderBy){
+    public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
         
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
@@ -243,16 +243,24 @@ class DbEntitySearch
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.$this->config['tableName'];
+        
+        if($sup_tables!=null){
+            $query .= $sup_tables
+        }
+        if($sup_where!=null){
+            $this->whereConditions[] = $sup_where;
+        }
 
         if(count($this->whereConditions)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$this->whereConditions);
+            $query .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
         }
+        
          
         if($orderBy!=null){
-            $query = $query.' ORDER BY '.$orderBy;   
+            $query .= ' ORDER BY '.$orderBy;   
         }
          
-        $query = $query.' '.$this->getLimit().$this->getOffset();
+        $query .= ' '.$this->getLimit().$this->getOffset();
 
         $res = $this->execute($query, $is_ids_only);
         return $res;
