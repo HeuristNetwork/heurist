@@ -392,7 +392,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                                $geovalues[] = $json;
                                $geovalues_dty[] = $dty_ID;
                             }
-                        }catch(Exception $e){
+                        }catch(\Exception $e){
                         }
 
                         $val = $wkt;
