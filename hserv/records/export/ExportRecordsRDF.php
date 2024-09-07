@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 define('DC_TITLE', 'dc:title');
 
@@ -92,10 +93,10 @@ protected function _outputPrepare($data, $params)
 protected function _outputHeader(){
      $this->graph = new \EasyRdf\Graph();
 
-     EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
-     //EasyRdf\RdfNamespace::set('base', HEURIST_REF);
-     EasyRdf\RdfNamespace::set('db', HEURIST_REF.'db/');
-     EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
+     \EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
+     \EasyRdf\RdfNamespace::set('base', HEURIST_REF);
+     \EasyRdf\RdfNamespace::set('db', HEURIST_REF.'db/');
+     \EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
 
     if(self::$defRecTypes==null) {
         self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
@@ -125,7 +126,7 @@ protected function _outputHeader(){
 private function initializeTerms(){
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 }
 

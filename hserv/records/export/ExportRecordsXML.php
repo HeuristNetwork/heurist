@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 /**
 *
@@ -44,7 +45,7 @@ protected function _outputHeader(){
 //
 protected function _outputRecord($record){
 
-    $xml = new SimpleXMLElement(XML_HEADER.'<record/>');
+    $xml = new \SimpleXMLElement(XML_HEADER.'<record/>');
     self::_array_to_xml($record, $xml);
     fwrite($this->fd, substr($xml->asXML(),38));//remove header
 
@@ -61,7 +62,7 @@ protected function _outputFooter(){
 
     $database_info = $this->_getDatabaseInfo();
 
-    $xml = new SimpleXMLElement(XML_HEADER.'<database/>');
+    $xml = new \SimpleXMLElement(XML_HEADER.'<database/>');
     self::_array_to_xml($database_info, $xml);
     fwrite($this->fd, substr($xml->asXML(),38));
     fwrite($this->fd, '</heurist>');

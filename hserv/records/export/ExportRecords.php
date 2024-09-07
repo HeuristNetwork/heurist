@@ -8,7 +8,7 @@
 */
 
 /**
-* exportRecords.php - abstract class to export records
+* ExportRecords.php - abstract class to export records
 *
 * Controller is records_output
 *
@@ -21,8 +21,9 @@
 * @version     4.0
 */
 
+namespace hserv\records\export;
 
-require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
+require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP and EasyRdf
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';

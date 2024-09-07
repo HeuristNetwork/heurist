@@ -45,7 +45,6 @@
 
     require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
     require_once dirname(__FILE__).'/../records/import/importParser.php';//parse CSV, KML and save into import table
-    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
 
     $response = array();
@@ -249,14 +248,12 @@
 
                     //returns records in PLACE? format recordSearchByID/recordSearchDetails
                     $records = ImportParser::convertParsedToRecords($parsed, $mapping);
+                    $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
 
                     //it outputs geojson and exits
-                    $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
-                    RecordsExport::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
-                    
-                    //$classname = 'hserv\records\export\exportRecordsGEOJSON';
-                    //$outputHandler = new $classname($system);
-                    //$res = $outputHandler->output($recdata, array('leaflet'=>true, 'depth'=>0, 'simplify'=>true) );
+                    $classname = 'hserv\records\export\ExportRecordsGEOJSON';
+                    $outputHandler = new $classname($system);
+                    $res = $outputHandler->output($recdata, array('format'=>'geojson', 'leaflet'=>true, 'depth'=>0, 'simplify'=>true) );
 
                 }else{
                     //entire kml is considered as unified map entry

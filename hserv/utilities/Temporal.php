@@ -18,7 +18,7 @@
 * Brief description of file
 *
 * Usage:
-* for export: recordsExport.php (json)  export/xml/kml.php
+* for export: exportRecordsJSON.php  export/xml/kml.php
 *                   @todo flathml.php  outputTemporalDetail (xml),  recordsExportCSV.php (csv)
 *
 * for import:     importParser.php  prepareDateField   @todo validate real dates only

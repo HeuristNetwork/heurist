@@ -21,7 +21,9 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
+
 
 /**
 *
@@ -330,7 +332,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 
     if(!array_key_exists($rt_id, $columns)) {return null;}
@@ -461,7 +463,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
                 }elseif($this->datatable_session_id > 0 && $field_type=='date'){
 
-                    $temporal = new Temporal($field_value);
+                    $temporal = new \Temporal($field_value);
                     $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
 
                 }
@@ -508,7 +510,7 @@ private function _getJsonFeature($record, $extended_mode){
         }
         if(self::$defTerms==null) {
             self::$defTerms = dbs_GetTerms($this->system);
-            self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+            self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
         }
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
@@ -665,7 +667,7 @@ private function _calculateSummaryExtent($is_return_rec){
         }
         if(count($mbox)==4){
 
-            $gPoint = new GpointConverter();
+            $gPoint = new \GpointConverter();
             $gPoint->setLongLat($mbox['minx'], $mbox['miny']);
             $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['minx'])/100000,0);
 
@@ -709,7 +711,7 @@ private function _calculateSummaryExtent($is_return_rec){
 private static function _getExtentFromWkt($wkt)
 {
         $bbox = null;
-        $geom = geoPHP::load($wkt, 'wkt');
+        $geom = \geoPHP::load($wkt, 'wkt');
         if(!$geom->isEmpty()){
             $bbox = $geom->getBBox();
         }

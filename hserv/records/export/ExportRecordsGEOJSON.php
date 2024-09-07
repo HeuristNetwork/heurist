@@ -20,9 +20,10 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-use hserv\structure\ConceptCode;
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
+use hserv\structure\ConceptCode;
 
 /**
 *
@@ -328,7 +329,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         if(self::$defTerms==null) {
             self::$defTerms = dbs_GetTerms($this->system);
-            self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+            self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
         }
     }else{
         $idx_name = -1;
@@ -408,7 +409,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         $date_end = $value;
                     }elseif($value!=null){
                         //parse temporal
-                        $ta = new Temporal($value);
+                        $ta = new \Temporal($value);
                         $ta = $ta->getTimespan(true);
                         if($ta!=null){
                             $ta[] = $dty_ID;
@@ -635,13 +636,13 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         $dty_ID = intval(DT_START_DATE);
 
         if($date_start && $date_end){ //both are defined
-            $dt = Temporal::mergeTemporals($date_start, $date_end);
+            $dt = \Temporal::mergeTemporals($date_start, $date_end);
         }else{
             if(!$date_start){
                 $date_start = $date_end;
                 $dty_ID = intval(DT_END_DATE);
             }
-            $dt = new Temporal($date_start);
+            $dt = new \Temporal($date_start);
         }
 
         if($dt && $dt->isValid())
@@ -684,14 +685,14 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 //
 private static function _getJsonFromWkt($wkt, $simplify=true)
 {
-        $geom = geoPHP::load($wkt, 'wkt');
+        $geom = \geoPHP::load($wkt, 'wkt');
         if(!$geom->isEmpty()){
 
             /*The GEOS-php extension needs to be installed for these functions to be available
             if($simplify)$geom->simplify(0.0001, TRUE);
             */
 
-            $geojson_adapter = new GeoJSON();
+            $geojson_adapter = new \GeoJSON();
             $json = $geojson_adapter->write($geom, true);
 
             if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){

@@ -25,11 +25,15 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     require_once dirname(__FILE__).'/../../autoload.php';
-    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
 
     $response = array();
 
-    $params = $_REQUEST;
+    if(isset($req_params)){
+        $params = $req_params; //from api.php
+    }else{
+        $params = $_REQUEST;    
+    }
+    
 
     if(!isset($system) || $system==null){
 
@@ -52,9 +56,8 @@
 
 
     }
-
-    RecordsExport::setSession($system);
-    $res = RecordsExport::getIiifResource(null, $params['id'], $params['resource']);
+    
+    $res = hserv\records\export\ExportRecordsIIIF::getIiifResource($system, null, 3, $params['id'], @$params['resource']);
 
     $system->dbclose();
 

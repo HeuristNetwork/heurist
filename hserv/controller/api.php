@@ -7,6 +7,9 @@ RewriteEngine On
 RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
 
 */
+use hserv\utilities\USanitize;
+require_once dirname(__FILE__).'/../../autoload.php';
+
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 

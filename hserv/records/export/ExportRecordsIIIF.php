@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 /**
 *
@@ -67,8 +68,8 @@ protected function _outputHeader(){
 
     if($this->iiif_version==2){
 
-        $manifest_uri = self::gen_uuid();
-        $sequence_uri = self::gen_uuid();
+        $manifest_uri = self::genUUID();
+        $sequence_uri = self::genUUID();
 
     $iiif_header = <<<IIIF
 {
@@ -337,7 +338,7 @@ SERVICE3;
         }
 
 
-        $canvas_uri = self::gen_uuid();
+        $canvas_uri = self::genUUID();
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;
@@ -376,7 +377,7 @@ CANVAS2;
 //                    "width": $width
       }else{
 
-//$annotation_uri = self::gen_uuid();
+//$annotation_uri = self::genUUID();
 //  "duration": 5,
 //        "height": $height,
 //        "width": $width
@@ -484,14 +485,14 @@ CANVAS3;
 //
 // not used
 //
-private static function gen_uuid2() {
+private static function genUUID2() {
     return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4) );
 }
 
 //
 //
 //
-private static function gen_uuid() {
+private static function genUUID() {
     return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
         // 32 bits for "time_low"
         random_int( 0, 0xffff ), random_int( 0, 0xffff ),

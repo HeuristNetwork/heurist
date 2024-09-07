@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 /**
 *
@@ -60,7 +61,7 @@ protected function _outputHeader(){
         return false;
     }
 
-    $t2 = new DateTime();
+    $t2 = new \DateTime();
     $dt = $t2->format('Y-m-d');
 
     //although anyURI is defined it is not recognized by gephi v0.92
@@ -93,7 +94,7 @@ protected function _outputHeader(){
 
         $query = "SELECT rst_DisplayName, rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID = ? AND rst_DetailTypeID NOT IN (?,?,?,?,?)";
         $query_params = ['iiiiii', $rel_RecTypeID, $rel_Source, $rel_Target, $rel_Type, $rel_Start, $rel_End];
-        $res = mysql__select_param_query(self::$mysqli, $query, $query_params);
+        $res = mysql__select_param_query($this->mysqli, $query, $query_params);
 
         $id_idx = 6;
 
@@ -237,7 +238,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
     }
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
