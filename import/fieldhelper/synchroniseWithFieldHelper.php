@@ -147,17 +147,22 @@ $failed_exts = array();
 
         <h2>ADVANCED USERS</h2>
 
-        <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
+        <p style="font-weight:bold;font-size:larger;padding:10 0">Create Digital Media records from uploaded files (often images)</p>
 
-        This function creates/reads XML manifest files (as defined by FieldHelper http://fieldhelper.org) in the folders (and their descendants) listed in Design > Properties and writes the metadata as Digital Media records in the database, with pointers back to the files described by the manifests. New files are added to existing manifests.
+        <p>Note: Use with caution, this function can create a lot of extra records if there are many images</p>
+        
+        <p>This function creates, updates and reads XML manifest files in the folders (and their descendants) 
+        listed in Design > Properties (Paths which contain files to be indexed as multimedia records) 
+        and creates Digital Media records for all files uploaded to the database, with pointers back to the files. 
+        New files are added to existing manifests. </p>
 
          <p>
-            The database may already contain Digital Media records; records are added for new files, existing records are unaffected.
+            Digital Media records are only added for files without such a record, existing Digital Media records are unaffected.
          </p><p>
-            Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any adminstrtors who have access to the backend), or be owned and writable by apache or www-data (as appropriate).
+            <i>Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any administrators who have access to the backend), or be owned and writable by apache or www-data (as appropriate).</i>
          </p>
          <p>
-            Files should be uploaded through Import > Upload media files (limited normally to 30M) or by direct sftp access to the server for larger files (available to system administrators only).
+            Files should be uploaded through Populate > Upload media files/images (limited normally to 30M) or by direct sftp access to the file_uploads directory, or sub-directories, on the server for larger files or very large bulk uploads (available to system administrators only).
          </p>
          <?php
 
@@ -173,10 +178,10 @@ $failed_exts = array();
             "</b><br>Note: these fields may appear to be present, but do not have the correct origin codes ".
             "(source of the field definition) for this function to use them.".
             "<p>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
-            "<ul><li>Go to Manage &gt; Structure &gt; Browse templates<br>&nbsp;</li>".
-            "<li>Navigate to the HeuristCoreDefinitions database<br>&nbsp;</li>".
-            "<li>Check 'Show existing record types'</li>&nbsp;".
-            "<li>Check 'Click the download icon on the Digital Media Item'</li></ul>".
+            "<ul><li>Go to Design &gt; Browse templates<br>&nbsp;</li>".
+            "<li>Navigate to the Heurist_Core_Definitions database (# 2)<br>&nbsp;</li>".
+            "<li>Check 'Show all' checkbox and open the Media group</li>&nbsp;".
+            "<li>Click the download icon on the Digital Media record type</li></ul>".
             "You may proceed without this step, but these fields will not be imported</p>";
         }
 

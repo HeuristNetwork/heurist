@@ -432,10 +432,10 @@ if(!($max_size>0)) {$max_size = 0;}
                 if(files.length > 0){
 
                     var msg = "You have uploaded " + (files.length/2) + " new media files.<br><br>"
-                            + "They will not be visible as records in the database until you create media<br>records using Index media files.";
+                            + "They will not be visible as records in the database until you create media<br>records using Create media records.";
 
                     var btns = {};
-                    btns[window.hWin.HR('Index Media Files')] = function(){
+                    btns[window.hWin.HR('Create Media Records')] = function(){
 
                         // Close popup
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -451,7 +451,7 @@ if(!($max_size>0)) {$max_size = 0;}
                             setTimeout(function(){ window.close();}, 100);
                         }
 
-                        // Open Index media files window
+                        // Open Create media records window
                         setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').trigger('click');}, 500);
                     };
                     btns[window.hWin.HR('Exit without Indexing')] = function(){
@@ -471,7 +471,7 @@ if(!($max_size>0)) {$max_size = 0;}
                     }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files',
-                        yes:window.hWin.HR('Index Media Files'), no:window.hWin.HR('Exit without Indexing')});
+                        yes:window.hWin.HR('Create Media Records'), no:window.hWin.HR('Exit without Indexing')});
                 } else 
                 if ($(event.target).is('button')){
                         $('#btnCancel').trigger('click');
