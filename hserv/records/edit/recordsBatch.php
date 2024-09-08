@@ -751,7 +751,8 @@ class RecordsBatch
 
         $basetype = $this->getDetailType($dtyID);
 
-        $partialReplace = false;
+        $partialReplace = @$this->data['subs'] == 1 || @$this->data['substr'] == 1;
+        $wholeReplace = @$this->data['wholeval'] == 1;
 
         if(@$this->data['sVal']==null){    //value to be replaced
             //all except file type
@@ -772,7 +773,7 @@ class RecordsBatch
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
-                    if(@$this->data['subs']==1){
+                    if($partialReplace || $wholeReplace){
                         $is_like = true;
                     }
                     $searchClause = $mysqli->real_escape_string(@$this->data['sVal']);
@@ -947,7 +948,7 @@ class RecordsBatch
 
                     }else
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
-                        $newVal = preg_replace("/".preg_quote($this->data['sVal'], "/")."/i",$this->data['rVal'],$dtlVal);
+                        $newVal = preg_replace("/".preg_quote($this->data['sVal'], "/")."/i", $this->data['rVal'], $dtlVal);
                     }else{
                         $newVal = $this->data['rVal'];
                     }
@@ -1063,6 +1064,9 @@ class RecordsBatch
 
         $isDeleteInAllRecords = $this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0;
 
+        $partialRemove = @$this->data['subs'] == 1 || @$this->data['substr'] == 1;
+        $wholeRemove = @$this->data['wholeval'] == 1;
+
         $mysqli = $this->system->get_mysqli();
 
         if($isDeleteAll){
@@ -1076,7 +1080,7 @@ class RecordsBatch
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
-                    if(@$this->data['subs']==1){
+                    if($partialRemove || $wholeRemove){
                         $unconditionally = true;
                         $is_like = true;
                     }
@@ -1131,7 +1135,7 @@ class RecordsBatch
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                      'rec_Modified'  => $now);
 
-        if(@$this->data['subs']==1){
+        if($partialRemove){
             $baseTag = "~replace field $dtyName $now";
         }else{
             $baseTag = "~delete field $dtyName $now";
@@ -1218,10 +1222,10 @@ class RecordsBatch
                 }
             }
 
-            if(@$this->data['subs']==1){
+            if($partialRemove){
                 //this is not real delete - this is replacement of value part with empty string
                 $now = date(DATE_8601);
-                $dtl = Array('dtl_Modified'  => $now);
+                $dtl = ['dtl_Modified' => $now];
 
                 $sRegEx = "/".preg_quote($this->data['sVal'], "/")."/";
 
@@ -1244,6 +1248,22 @@ class RecordsBatch
                         if (!is_numeric($ret)) {
                             $sqlErrors[$recID] = $ret;
                             continue;
+                        }
+                    }
+                }
+
+                $sql = true;
+
+            }elseif($wholeRemove){
+
+                $sRegEx = "/".preg_quote($this->data['sVal'], "/")."/";
+
+                foreach ($valuesToBeDeleted as $dtl_ID => $dtl_Value) {
+
+                    if(preg_match($sRegEx, $dtl_Value)){
+                        $sql = "DELETE FROM recDetails WHERE dtl_ID = $dtl_ID";
+                        if($mysqli->query($sql) !== true){
+                            $sqlErrors[$recID] = $mysqli->error;
                         }
                     }
                 }

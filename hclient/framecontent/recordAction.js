@@ -327,37 +327,41 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(action_type=='add_detail'){
             _createInputElement('fld-1', window.hWin.HR('Value to be added'));
         }else if(action_type=='replace_detail'){                              
-            
-            $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<div class="header">'  // style="padding-left: 16px;"
-                +'<label for="cb_replace_all">Replace all values</label></div>'
-                +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
-                +'</div>').on('change', function(){
 
-                    if ($(this).find('input').is(':checked')){
-                        $('#cb_whole_value').parent().hide();   
-                        $('#cb_add_value').parent().show();
-                        $('#fld-1').hide();
-                    }else{
-                        $('#cb_whole_value').parent().show();
-                        $('#cb_add_value').parent().hide();
-                        $('#fld-1').show();    
-                    }
-                                                            
-                }).appendTo($fieldset);
-                
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'
+                +'<label for="cb_replace_all">Replace all values</label></div>'
+                +'<input id="cb_replace_all" name="replace_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'
+                +'<label for="cb_whole_value">Replace complete value</label></div>'
+                +'<input id="cb_whole_value" name="replace_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'
+                +'<label for="cb_sub_string">Replace substring</label></div>'
+                +'<input id="cb_sub_string" name="replace_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px" checked="checked">'
+                +'</div>').appendTo($fieldset);
+
+            $('input[name="replace_type"]').on('change', () => {
+
+                if ($('#cb_replace_all').is(':checked')){
+                    $('#cb_add_value').parent().show();
+                    $('#fld-1').hide();
+                }else{
+                    $('#cb_add_value').parent().hide();
+                    $('#fld-1').show();    
+                }
+            });
+
             $('<div style="padding: 0.2em; width: 100%; display: none;" class="input">'
                 +'<div class="header" style="padding-bottom: 10px;">'
                 +'<label for="cb_add_value">Insert as new value,<br><span style="font-size: smaller;">if none exist</span></label></div>'
                 +'<input id="cb_add_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
                 +'</div>').appendTo($fieldset);
-
-            $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<div class="header">'  // style="padding-left: 16px;"
-                +'<label for="cb_whole_value">Replace substring</label></div>'
-                +'<input id="cb_whole_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
-                +'</div>').appendTo($fieldset);
-                
             
             _createInputElement('fld-1', window.hWin.HR('Value to find'));
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
@@ -365,31 +369,26 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='delete_detail'){
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<div class="header">'  // style="padding-left: 16px;"
-                +'<label for="cb_remove_all">Remove all occurrences</label></div>'
-                +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'<div class="header">'
+                +'<label for="cb_sub_string">Remove search string only</label></div>'
+                +'<input id="cb_sub_string" name="delete_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px" checked="checked">'
+                +'</div>').appendTo($fieldset);
+                
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'
+                +'<label for="cb_whole_value">Remove complete value</label></div>'
+                +'<input id="cb_whole_value" name="delete_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
                 +'</div>').appendTo($fieldset);
 
-            $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<div class="header">'  // style="padding-left: 16px;"
-                +'<label for="cb_whole_value">Remove substring</label></div>'
-                +'<input id="cb_whole_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
-                +'</div>').appendTo($fieldset);
-            
-                
             _createInputElement('fld-1', window.hWin.HR('Remove value matching'));
 
-            
-            $('#cb_remove_all').on('change', function(){ 
-                    if ($(this).is(':checked')){
-                        $('#cb_whole_value').parent().hide();   
-                        $('#fld-1').hide();
-                    }else{
-                        $('#cb_whole_value').parent().show();
-                        $('#fld-1').show();    
-                    }
+            $('#delete_type').on('change', function(){ 
+                if ($('#cb_delete_all').is(':checked')){
+                    $('#fld-1').hide();
+                }else{
+                    $('#fld-1').show();    
+                }
             });
-           
 
         }else if(action_type=='url_to_file'){
 
@@ -617,9 +616,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
         
         if(field_type=='freetext' || field_type=='blocktext'){
-            $('#cb_whole_value').parent().show();
+            $('#cb_sub_string').parent().show();
         }else{
-            $('#cb_whole_value').parent().hide();
+            $('#cb_sub_string').parent().hide();
         }
         
 
@@ -763,18 +762,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         alert('Define value to search');
                         return;
                     }
-                    
-                    if($('#cb_whole_value').is(':checked')){
-                        request['subs'] = 1;
-                    }
+
+                    $('#cb_sub_string').is(':checked') ? request['substr'] = 1 : request['wholeval'] = 1;
                 }else{
                     request['insert_new_values'] = $('#cb_add_value').is(':checked') ? 1 : 0;
                 }
                 request['rVal'] = getFieldValue('fld-2');
                 if(!_allow_empty_replace && window.hWin.HEURIST4.util.isempty(request['rVal'])){
-                    
+
+                    let msg_part = request['substr'] == 1 ? '(only the search string is deleted)' : '(the whole value is deleted)';
                     let msg = 'You have not defined a replacement value<br><br>'
-                            + `Click "${window.hWin.HR('OK')}" to delete the search string<br>`
+                            + `Click "${window.hWin.HR('OK')}" to delete the search string ${msg_part}<br>`
                             + `Click "${window.hWin.HR('Cancel')}" if you want to replace the search string with a new string`;
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, 
@@ -835,9 +833,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         alert('Define value to delete');
                         return;
                     }
-                    if($('#cb_whole_value').is(':checked')){
-                        request['subs'] = 1;
-                    }
+
+                    $('#cb_sub_string').is(':checked') ? request['substr'] = 1 : request['wholeval'] = 1;
                 }
             }else if(action_type=='extract_pdf'){
                 

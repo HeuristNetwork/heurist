@@ -97,7 +97,7 @@ function __correctAbsPaths(){
         'dt_extended_description'=>$dty_ID,
         'sVal'=>'https://heurist',
         'rVal'=>'replaceAbsPathinCMS',
-        'subs'=>1, //substring
+        'substr'=>1, //substring
         'debug'=>0,
         'tag'=>0
         );
