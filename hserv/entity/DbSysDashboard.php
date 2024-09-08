@@ -61,7 +61,7 @@ class DbSysDashboard extends DbEntityBase
             default: $this->searchMgr->setSelFields('dsh_ID,dsh_Order,dsh_Label,dsh_Description,dsh_Enabled,dsh_ShowIfNoRecords,dsh_CommandToRun,dsh_Parameters');
         }
 
-        return $this->searchMgr->composeAndExecute();
+        return $this->searchMgr->composeAndExecute(null);
     }
 
     //
