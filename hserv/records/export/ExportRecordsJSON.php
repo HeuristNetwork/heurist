@@ -200,11 +200,16 @@ protected function _outputHeader(){
 
     }elseif($this->is_restapi==1){
 
-        if(count($this->records)==1){
-            //fwrite($this->fd, '');
+        fwrite($this->fd, '{"records":[');
+
+        /*        
+        if(count($records)==1 && @$params['recID']>0){
+            //fwrite($fd, '');
         }else{
-            fwrite($this->fd, '{"records":[');
+            fwrite($fd, '{"records":[');
         }
+        */
+        
 
     }else {
 
@@ -282,11 +287,7 @@ protected function _outputFooter(){
 
     }elseif($this->is_restapi==1){
 
-        if(count($this->records)==1){
-            //fwrite($this->fd, '');
-        }else{
-            fwrite($this->fd, ']}');
-        }
+        fwrite($this->fd, ']}'); //close records
 
     }else {
 
