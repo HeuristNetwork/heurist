@@ -28,39 +28,8 @@ use hserv\utilities\USanitize;
 
 class DbDefDetailTypes extends DbEntityBase
 {
-/*
-    'dty_Documentation'=>5000,
-    'dty_EntryMask'=>'text',
-    'dty_OriginatingDBID'=>'int',
-    'dty_NameInOriginatingDB'=>255,
-    'dty_IDInOriginatingDB'=>'int',
-
-    'dty_OrderInGroup'=>'int',
-    'dty_TermIDTreeNonSelectableIDs'=>1000,
-    'dty_FieldSetRectypeID'=>'int',
-    'dty_LocallyModified'=>'bool2'
-*/
-
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
+    *  search detail fields
     */
     public function search(){
 

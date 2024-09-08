@@ -43,8 +43,6 @@ class DbSysUsers extends DbEntityBase
     *  offset
     *  limit
     *  request_id
-    *
-    *  @todo overwrite
     */
     public function search(){
 

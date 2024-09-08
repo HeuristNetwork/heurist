@@ -44,64 +44,19 @@ class DbUsrBookmarks extends DbEntityBase
               return false;
         }
 
-        $needCheck = false;
-
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('bkm_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_UGrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_RecID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_Rating');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
+        
+        $this->searchMgr->addPredicate('bkm_ID');
+        $this->searchMgr->addPredicate('bkm_UGrpID');
+        $this->searchMgr->addPredicate('bkm_RecID');
+        $this->searchMgr->addPredicate('bkm_Rating');
+        
         if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'bkm_ID';
-
-        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes';
-
+            $this->searchMgr->setSelFields('bkm_ID');
         }else{
-            $needCheck = true;
+            $this->searchMgr->setSelFields('bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes');
         }
-
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        
+        return $this->searchMgr->composeAndExecute(null);
     }
 
 

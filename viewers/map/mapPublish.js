@@ -22,14 +22,8 @@
 if((typeof L !=='undefined') && L.Control)
 {
     
-L.Control.Publish = L.Control.extend({
-    
-    mapPublish: null,
-    _container: null,
-    _mapwidget: null,
-    
-    initialize: function(options) {
-
+function commonCodeInit(options)
+{
         options = options || {};
         
         L.Util.setOptions(this, options);
@@ -37,28 +31,40 @@ L.Control.Publish = L.Control.extend({
         this._mapwidget = options.mapwidget;
         
         L.Control.prototype.initialize.call(this, this.options);
-    },
+} 
 
-    
-    onAdd: function(map) {
-        
+function commonOnAdd(label, icon){
+
         let container = this._container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)
           .disableScrollPropagation(container);
         
-        //this.mapPublish = new hMapPublish({container: $(container), mapwidget:this._mapwidget});
-        
-        $('<a>').attr('title', window.hWin.HR('Publish Map'))
+        $('<a>').attr('title', window.hWin.HR(label))
             .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon ui-icon-globe')
+            .addClass('ui-icon '+icon)
             .appendTo(container);
+    
+}   
+    
+L.Control.Publish = L.Control.extend({
+    
+    mapPublish: null,
+    _container: null,
+    _mapwidget: null,
+    
+    initialize: commonCodeInit,
+
+    
+    onAdd: function(map) {
+        
+        commonOnAdd.call(this, 'Publish Map', 'ui-icon-globe');
         
         L.DomEvent
-            .on(container, 'click', this._onClick, this);
+            .on(this._container, 'click', this._onClick, this);
         
-        return container;
+        return this._container;
     },
 
     onRemove: function(map) {
@@ -85,32 +91,13 @@ L.Control.Help = L.Control.extend({
     _container: null,
     _mapwidget: null,
     
-    initialize: function(options) {
-
-        options = options || {};
-        
-        L.Util.setOptions(this, options);
-        
-        this._mapwidget = options.mapwidget;
-        
-        L.Control.prototype.initialize.call(this, this.options);
-    },
-
+    initialize: commonCodeInit,
     
     onAdd: function(map) {
         
-        let container = this._container = L.DomUtil.create('div','leaflet-bar');
-
-        L.DomEvent
-          .disableClickPropagation(container)
-          .disableScrollPropagation(container);
+        commonOnAdd.call(this, 'Help', 'ui-icon-help');
         
-        $('<a>').attr('title', window.hWin.HR('Help'))
-            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon ui-icon-help')
-            .appendTo(container);
-        
-        window.hWin.HEURIST4.ui.initHelper({ button:container,
+        window.hWin.HEURIST4.ui.initHelper({ button:this._container,
                 url:window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
                 position:{ my: "center center", at: "center center", 
                 of: $(window.parent.document) }, no_init:true} ); 
@@ -118,7 +105,7 @@ L.Control.Help = L.Control.extend({
         /*L.DomEvent
             .on(container, 'click', this._onClick, this);*/
         
-        return container;
+        return this._container;
     },
 
     onRemove: function(map) {

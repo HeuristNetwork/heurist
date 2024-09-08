@@ -15,7 +15,7 @@
     
     let arc = s.split(' ');  
     
-    let islat = false, k;
+    let islat = false;
     let hemisphere = 'N';  
     
     if(window.hWin.HEURIST4.util.isnull(type) && arc.length>2){
@@ -183,13 +183,11 @@
             }else{
                 wkt =  'LINESTRING ('+coords.join(', ')+')';
             }
-        }else {
-            if(coords.length==1){
+        }else if(coords.length==1){
                 wkt =  'POINT ('+coords[0]+')';
                 
-            }else{
+        }else{
                 wkt =  'MULTIPOINT ('+coords.join(', ')+')';
-            }
         }
     }
     if(wkt!='' && window.hWin.HEURIST4.util.isFunction(callback)){
