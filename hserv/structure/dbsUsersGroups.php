@@ -238,6 +238,10 @@
         if(session_status() == PHP_SESSION_ACTIVE){  // all information is stored within the current session
 
             $db = $system->dbname_full();//dbname()
+            
+            if(!@$_SESSION[$db]){
+                $_SESSION[$db] = array();
+            }
 
             // Check for user
             $user = user_getByField($mysqli, 'ugr_Name', $username);
@@ -369,7 +373,7 @@
                 return $response;
             }else{
                 $msg = $system->getError();
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'We were unable to send you a reset pin', $msg?@$msg['message']:null);
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'We were unable to email you a reset pin', $msg?@$msg['message']:null);
                 return false;
             }
 
