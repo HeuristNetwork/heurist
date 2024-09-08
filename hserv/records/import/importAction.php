@@ -26,6 +26,7 @@
 
 use hserv\entity\DbDefTerms;
 use hserv\utilities\USanitize;
+use hserv\entity\DbRecUploadedFiles;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';

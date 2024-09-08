@@ -44,6 +44,7 @@
 use hserv\utilities\USystem;
 use hserv\entity\DbsUsersGroups;
 use hserv\structure\ConceptCode;
+use hserv\entity\DbRecUploadedFiles;
 
 require_once 'recordFile.php';//it includes UFile.php
 require_once 'composeSql.php';

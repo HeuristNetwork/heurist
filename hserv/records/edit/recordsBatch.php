@@ -25,6 +25,7 @@
 * @version     4.0
 */
 use hserv\utilities\USanitize;
+use hserv\entity\DbRecUploadedFiles;
 
 // Include Composer autoloader if not already done.
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';
