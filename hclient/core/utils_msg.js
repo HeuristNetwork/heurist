@@ -65,7 +65,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             msg = response;
         }else{
             let request_code = null;
-            if(window.hWin.HEURIST4.util.isempty(response?.message) || response.message.trim().toLowerCase() == 'error'){
+            
+            if($.isPlainObject(response.message)){
+                    response = response.message;
+            }
+            
+            if(window.hWin.HEURIST4.util.isempty(response.message) || response.message.trim().toLowerCase() == 'error'){
 
                 msg = 'Error_Empty_Message';
                 if(response){
