@@ -70,10 +70,10 @@ class System {
         set_dbname_full
         init_db_connection - connect to server and select database (move to db_utils?)
         initPathConstants  - set path constants
-        login_verify  - load user info from session or reloads from database
+        loginVerify  - load user info from session or reloads from database
 
     login
-        login_verify
+        loginVerify
 
 
 
@@ -130,7 +130,7 @@ class System {
 
             $this->_executeScriptOncePerDay();
 
-            $this->login_verify( false );//load user info from session on system init
+            $this->loginVerify( false );//load user info from session on system init
             if($this->get_user_id()>0){
                 //set current user for stored procedures (log purposes)
                 $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
@@ -532,29 +532,37 @@ class System {
     *  2 - allow webaccess (.htaccess_via_url will be copied to this folder)
     *  3 - must be backuped
     */
-    public function getArrayOfSystemFolders(){
+    public function getArrayOfSystemFolders($is_for_backup=false){
 
         global $allowWebAccessThumbnails, $allowWebAccessUploadedFiles, $allowWebAccessEntityFiles;
 
         //const name, description, allow webaccess, for backup
         $folders = array();
+
         $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowWebAccessThumbnails, true);
-        $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
-        //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
-        $folders['scratch']      = array('SCRATCH','used to store temporary files', false);
         $folders['hml-output']   = array('HML','used to write published records as hml files', true);
         $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
-        $folders['generated-reports'] = array(null,'used to write generated reports');
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
-        $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
-        $folders['backup']        = array(null,'used to write files for user data dump');
         $folders['settings']      = array('SETTING','', false, true);
-        $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
-
         // do not create constant (if name is empty)
         $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
-        //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
-        $folders['faims']    = array('','');
+        
+
+        if(!$is_for_backup)
+        {
+            $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
+            //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
+            $folders['scratch']      = array('SCRATCH','used to store temporary files', false);
+            
+            $folders['generated-reports'] = array(null,'used to write generated reports');
+            $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
+            $folders['backup']        = array(null,'used to write files for user data dump');
+            $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
+            //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
+            $folders['faims']    = array('','');
+        }
+        
+        
 
         return $folders;
     }
@@ -562,7 +570,7 @@ class System {
     //
     // $is_for_backup - 0 no, 1 - archive backup, 2 - delete backup
     //
-    public function getSystemFolders($is_for_backup=false, $database_name=null){
+    public function getSystemFolders($database_name=null){
 
         $folders = $this->getArrayOfSystemFolders();
 
@@ -573,41 +581,12 @@ class System {
         if($database_name!=null){
             $dbfolder = $dbfolder.$database_name.'/';
         }
-
-        if($is_for_backup==2){
             
-            foreach ($folders as $folder_name=>$folder){
-
-                if(!@$folder[3] || $folder_name=='documentation_and_templates') { continue; }
-
-                $folder_name = realpath($dbfolder.$folder_name);
-                  
-                if($folder_name!==false){
-                    $folder_name = str_replace('\\', '/', $folder_name);
-                    array_push($system_folders, $folder_name.'/');
-                }
-            }//for
-
-            $folder_name = realpath($dbfolder.'file_uploads');
-            if($folder_name!==false){
-                array_push($system_folders, str_replace('\\', '/', $folder_name).'/');
-            }
-        }else{
-            
-            foreach ($folders as $folder_name=>$folder){
-                if($is_for_backup && !@$folder[3]){ continue; }
-                
-                $folder_name = $dbfolder.$folder_name;
-                $folder_name = str_replace('\\', '/', $folder_name);
-                array_push($system_folders, $folder_name.'/');
-            }//for
-            
-        }
-        
-        //special case - these folders can be defined in sysIdentification and be outisde database folder
-        if($is_for_backup){
-            return $system_folders;
-        }
+        foreach ($folders as $folder_name=>$folder){
+            $folder_name = $dbfolder.$folder_name;
+            $folder_name = str_replace('\\', '/', $folder_name);
+            array_push($system_folders, $folder_name.'/');
+        }//for
         
         if(defined('HEURIST_XSL_TEMPLATES_DIR')) {array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);}
         if(defined('HEURIST_HTML_DIR')) {array_push($system_folders, HEURIST_HTML_DIR);}
@@ -1123,7 +1102,7 @@ class System {
             }
 
             //current user reset - reload actual info from database
-            $this->login_verify( true, $is_guest_allowed );
+            $this->loginVerify( true, $is_guest_allowed );
 
             $dbowner = user_getDbOwner($this->mysqli);//info about user #2
 
@@ -1386,12 +1365,13 @@ class System {
             session_name('heurist-sessionid');//set session name
             session_cache_limiter('none');
             
+            /*
             if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
                 session_id($_COOKIE['heurist-sessionid']);
-                @session_start();
-            }else{
-                @session_start();    
             }
+            */
+            
+            @session_start();
         }
 
         if (session_status() != PHP_SESSION_ACTIVE) {
@@ -1431,7 +1411,7 @@ class System {
     * ugr_Preferences are always loaded from database
     *
     */
-    private function login_verify( $user, $is_guest_allowed=false ){
+    private function loginVerify( $user, $is_guest_allowed=false ){
 
         $reload_user_from_db = false;
 
@@ -1458,7 +1438,9 @@ class System {
 
         $islogged = ($userID != null);
 
-        if($islogged){
+        if(!$islogged){
+            return false;    
+        }
 
             if(@$_SESSION[$this->dbname_full]['need_refresh']) {
                 unset($_SESSION[$this->dbname_full]['need_refresh']);
@@ -1490,9 +1472,10 @@ class System {
                             'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
                             'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
-            if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
-            }
+            //always restore from db
+            // if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){ }
+            $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
+            
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
 
             //remove credentials for remote repositories
@@ -1501,7 +1484,7 @@ class System {
                 unset($this->current_User['ugr_Preferences']['externalRepositories']);
             }
 
-        }
+        
         return $islogged;
     }
 
@@ -1714,7 +1697,7 @@ class System {
     public function user_LogActivity($action, $suplementary = '', $user_id=null){
 
         if($user_id==null){
-            $this->login_verify( false );
+            $this->loginVerify( false );
             $user_id = $this->get_user_id();
         }
 
@@ -1826,7 +1809,7 @@ class System {
     }
 
     //
-    //
+    //  Retuns link for given record id
     //
     public function recordLink($rec_id){
 
@@ -1843,19 +1826,21 @@ class System {
             if(empty($template) || !file_exists($this->getSysDir('smarty-templates') . $template)){
                 $template = '';// use standard record viewer
             }else{
-                $template = urlencode($template);
+                $template = urlencode($template); //use smarty 
             }
         }
 
         $use_rewrite = isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink;
 
         $base_url = HEURIST_BASE_URL;
-        if($use_rewrite && strpos($base_url, "/HEURIST/") !== false){
-            $parts = explode('/', $base_url);
-            $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
-        }
 
         if($use_rewrite){
+            
+            if(strpos($base_url, "/HEURIST/") !== false){
+                $parts = explode('/', $base_url);
+                $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
+            }
+            
             $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
                         : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
 
@@ -1865,10 +1850,6 @@ class System {
                         : $base_url . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
 
             return $url;
-            /* it will be redirected
-                HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-                    .$this->dbname.'&recID='.$rec_id;
-            */
         }
     }
 
@@ -2275,24 +2256,23 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         $existing_settings = '';
 
         if(file_exists($setting_file) && $replace_settings != 0){
-
             $existing_settings = file_get_contents($setting_file);
-
-            if(!empty($existing_settings)){
-
-                $existing_settings = json_decode($existing_settings, TRUE);
-                if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
-                    return $this->addError(HEURIST_ERROR, "An error occurred with retrieving the existing database settings for $setting_name");
-                }
-
-                if($replace_settings == 1){
-                    $existing_settings = array_replace_recursive($existing_settings, $settings);
-                }else{
-                    $existing_settings = array_replace_recursive($settings, $existing_settings);
-                }
-            }
         }
 
+        if(!empty($existing_settings)){
+
+            $existing_settings = json_decode($existing_settings, true);
+            if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
+                return $this->addError(HEURIST_ERROR, "An error occurred with retrieving the existing database settings for $setting_name");
+            }
+
+            if($replace_settings == 1){
+                $existing_settings = array_replace_recursive($existing_settings, $settings);
+            }else{
+                $existing_settings = array_replace_recursive($settings, $existing_settings);
+            }
+        }
+        
         $existing_settings = empty($existing_settings) ? $settings : $existing_settings;
 
         $final_settings = json_encode($existing_settings);

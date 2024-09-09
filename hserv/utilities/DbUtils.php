@@ -253,7 +253,6 @@ class DbUtils {
 
             }
 
-            //$folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
             $folders_to_copy[] = realpath($db_dump_file);
 
             if($format=='zip' || !extension_loaded('bz2')){

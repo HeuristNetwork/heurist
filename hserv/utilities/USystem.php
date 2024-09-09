@@ -438,6 +438,8 @@ class USystem {
             //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
             $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
         }
+        
+        return $cres;
     }
 
     

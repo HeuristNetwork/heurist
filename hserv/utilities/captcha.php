@@ -26,11 +26,15 @@ if (session_status() != PHP_SESSION_ACTIVE) {
     session_name('heurist-sessionid');
     session_cache_limiter('none');
 
-    if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
-        session_id($_COOKIE['heurist-sessionid']);
-        @session_start();
-    } else {   //session does not exist - create new one and save on cookies
-        @session_start();
+    /*
+    //get session id from cookes
+    if (@$_COOKIE['heurist-sessionid']) { 
+            session_id($_COOKIE['heurist-sessionid']);
+    }
+    }*/
+        
+    @session_start();
+    if (!@$_COOKIE['heurist-sessionid']) {
         hserv\utilities\USystem::sessionUpdateCookies(0);
     }
 }
