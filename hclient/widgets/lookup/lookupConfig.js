@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global stringifyMultiWKT, accessToken_GeonamesAPI */
+/* global stringifyMultiWKT */
 
 $.widget( "heurist.lookupConfig", {
 
@@ -81,11 +81,11 @@ $.widget( "heurist.lookupConfig", {
                 service: 'https://ghap.tlcmap.org/places?containsname=London&searchausgaz=on&searchncg=on&searchpublicdatasets=on'
             },
             geoName: {
-                lookup: `http://api.geonames.org/searchJSON?username=${accessToken_GeonamesAPI}&maxRows=10&q=London`,
+                lookup: `http://api.geonames.org/searchJSON?maxRows=10&q=London`,
                 service: 'https://www.geonames.org/search.html?q=London&country='
             },
             postalCodeSearch: {
-                lookup: `http://api.geonames.org/postalCodeLookupJSON?username=${accessToken_GeonamesAPI}&maxRows=10&placename=London`,
+                lookup: `http://api.geonames.org/postalCodeLookupJSON?maxRows=10&placename=London`,
                 service: 'https://www.geonames.org/postalcode-search.html?q=London&country='
             },
             bnfLibrary: {

@@ -159,7 +159,7 @@
     if(!$valid_service){
         $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST);//exit from script
     }
-    if($cur_type == 'geonames' && (!isset($accessToken_GeonamesAPI) || empty($accessToken_GeonamesAPI))){
+    if($cur_type == 'geonames' && empty($accessToken_GeonamesAPI)){
         $system->error_exit_api('Unable to use the geonames API, API key is missing from configuration file', HEURIST_ACTION_BLOCKED);
     }
 

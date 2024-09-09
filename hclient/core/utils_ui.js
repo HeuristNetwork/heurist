@@ -2710,8 +2710,6 @@ window.hWin.HEURIST4.ui = {
                 scripts = [path+'recordAccess.js', path+'recordAdd.js'];
             }else if( actionName=='thematicMapping'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
-            }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
-                scripts.unshift( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
             }else if(actionName=='dbCreate'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/baseAction.js', 
                            window.hWin.HAPI4.baseURL + 'hclient/widgets/database/dbAction.js'];

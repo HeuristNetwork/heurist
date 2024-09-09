@@ -21,7 +21,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global accessToken_GeonamesAPI */
 
 $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
 
@@ -269,7 +268,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
             return;
         }
 
-        let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI;
+        let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?';
 
         if(this.element.find('#inpt_postalcode').val()!=''){
             sURL += '&postalcode=' + this.element.find('#inpt_postalcode').val(); 

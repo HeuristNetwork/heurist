@@ -22,8 +22,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global accessToken_GeonamesAPI */
-
 $.widget( "heurist.lookupGN", $.heurist.recordAction, {
 
     // default options
@@ -310,7 +308,6 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
                 }
             }
         }
-        sURL += ('&username='+accessToken_GeonamesAPI);
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
