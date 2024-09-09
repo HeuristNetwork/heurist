@@ -115,7 +115,7 @@ class DbDefVocabularyGroups extends DbEntityBase
         $this->isDeleteReady = false;
         
         $this->foreignChecks = array(
-                    array('SELECT count(trm_ID) FROM defTerms WHERE NOT (trm_ParentTermID>0) AND `trm_VocabularyGroupID`',
+                    array('SELECT count(trm_ID) FROM defTerms WHERE (trm_ParentTermID IS NULL OR trm_ParentTermID=0) AND `trm_VocabularyGroupID`',
                           'Cannot delete non empty group')
                 );
                 
