@@ -401,22 +401,26 @@ $mysqli->kill($thread_id);
     */
     function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
+        
+        if(!($mysqli && $query)){
+            return array();
+        }
+        
         $matches = array();
-        if($mysqli && $query){
-            $res = $mysqli->query($query);
+        
+        $res = $mysqli->query($query);
 
-            if ($res){
-                if($functionName!=null){
-                    while ($row = $res->fetch_row()){
-                        array_push($matches, $functionName($row[0]));
-                    }
-                }else{
-                    while ($row = $res->fetch_row()){
-                        array_push($matches, $row[0]);
-                    }
+        if ($res){
+            if($functionName!=null){
+                while ($row = $res->fetch_row()){
+                    array_push($matches, $functionName($row[0]));
                 }
-                $res->close();
+            }else{
+                while ($row = $res->fetch_row()){
+                    array_push($matches, $row[0]);
+                }
             }
+            $res->close();
         }
 
         return $matches;
@@ -501,28 +505,31 @@ $mysqli->kill($thread_id);
     * @return []
     */
     function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
-        $result = null;
-        if($mysqli){
-            $result = array();
-            $res = $mysqli->query($query);
-            if ($res){
-                while ($row = $res->fetch_row()){
-
-                    if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
-
-                    if($mode==1){
-                        $rec_id = array_shift($row);
-                        $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
-                    }else {
-                        array_push($result, $row);
-                    }
-                }
-                $res->close();
-
-            }elseif($mysqli->error){
-                return null;
-            }
+        
+        if(!$mysqli){
+            return null;   
         }
+        
+        $result = array();
+        $res = $mysqli->query($query);
+        if ($res){
+            while ($row = $res->fetch_row()){
+
+                if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
+
+                if($mode==1){
+                    $rec_id = array_shift($row);
+                    $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
+                }else {
+                    array_push($result, $row);
+                }
+            }
+            $res->close();
+
+        }elseif($mysqli->error){
+            return null;
+        }
+        
         return $result;
     }
 
@@ -1506,33 +1513,28 @@ $mysqli->kill($thread_id);
     //
     function prepareIds($ids, $can_be_zero=false){
 
-        if($ids!=null){
-            if(!is_array($ids)){
-                if(is_numeric($ids)){
-                    $ids = array($ids);
-                }else{
-                    /*if(substr($ids, -1) === ','){//remove last comma
-                        $ids = substr($ids,0,-1);
-                    }*/
-                    $ids = explode(',', $ids);
-                }
-            }
-
-            $res = array();
-            foreach($ids as $v){
-                if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
-                    $res[] = intval($v);
-                }
-            }
-            return $res;
-            /*
-            $ids = array_filter($ids, function ($v) {
-                 return is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) ;
-            });
-            */
-        }else{
+        if($ids==null){
             return array();
         }
+        
+        if(!is_array($ids)){
+            if(is_numeric($ids)){
+                $ids = array($ids);
+            }else{
+                /*if(substr($ids, -1) === ','){//remove last comma
+                    $ids = substr($ids,0,-1);
+                }*/
+                $ids = explode(',', $ids);
+            }
+        }
+
+        $res = array();
+        foreach($ids as $v){
+            if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
+                $res[] = intval($v);
+            }
+        }
+        return $res;
     }
 
     //
@@ -1692,65 +1694,18 @@ $mysqli->kill($thread_id);
         }
 
         return $keep_autocommit;
-
     }
-
-
-
-    // NOT USED
-    // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
-    //
-    function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
-
-        if($session_id==null) {return;}
-
-        $res = null;
-        $need_close = false;
-        /*
-        if($mysqli===null){
-            $need_close = true;
-            $mysqli = mysqli_connection_overwrite(DATABASE);
-        }*/
-
-        if($is_init){
-            //check that session table exists
-            if(!hasTable($mysqli, 'sysSessionProgress')){
-                //recreate
-                $mysqli->query('CREATE TABLE sysSessionProgress(stp_ID varchar(32) NOT NULL COMMENT "User session ID generated by the server", stp_Data varchar(32) COMMENT "Stores progress data for the session identified by the session ID", PRIMARY KEY (stp_ID))');
-
-            }
-        }
-
-        if($value=='REMOVE'){
-            //$mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
+    
+    function mysql__end_transaction($mysqli, $res, $keep_autocommit){
+    
+        if($res){
+            $mysqli->commit();
         }else{
-            $session_id = $mysqli->real_escape_string($session_id);
-
-            $query = "select stp_Data from sysSessionProgress where stp_ID=".$session_id;
-            $res = mysql__select_value($mysqli, $query);
-            if($value!=null && $res!='terminate'){
-                $value = $mysqli->real_escape_string($value);
-                //write
-                if($res==null){
-
-                    $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
-                }else{
-
-                list($execution_counter, $tot)  = explode(',',$value);
-                if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
-                }
-
-                    $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
-                }
-                $mysqli->query($query);
-                $res = $value;
-            }
-            //$mysqli->commit();
+            $mysqli->rollback();
         }
-        if($need_close) {$mysqli->close();}
-
-        return $res;
+        if($keep_autocommit===true) {$mysqli->autocommit(true);}
     }
+    
 
     //
     // returns value of session file

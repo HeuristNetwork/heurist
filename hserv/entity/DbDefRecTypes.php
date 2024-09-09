@@ -245,7 +245,7 @@ class DbDefRecTypes extends DbEntityBase
         $query = 'SELECT sys_TreatAsPlaceRefForMapping FROM sysIdentification where 1';
 
         $val = mysql__select_value($mysqli, $query);
-        if($val!=null && $val!=''){
+        if(notEmpty($val)){
                 $places = explode(',', $val);
                 if (in_array($rtyID, $places)) {
                     $this->system->addError(HEURIST_ACTION_BLOCKED, "You cannot delete record type $rtyID. "
@@ -270,7 +270,7 @@ class DbDefRecTypes extends DbEntityBase
         $res = true;
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
         $recIds = mysql__select_list2($mysqli, $query);
-        if(is_array($recIds) && count($recIds)>0) {
+        if(!empty($recIds)) {
             $res = recordDelete($this->system, $recIds, false);
             $res = ($res['status']==HEURIST_OK);
         }
@@ -282,21 +282,13 @@ class DbDefRecTypes extends DbEntityBase
             $this->system->addError(HEURIST_DB_ERROR,
                     "Cannot delete from table defRecStructure", $mysqli->error);
             $res = false;
-        }elseif($affected===0){
-            //$this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
-            //$res = false;
         }
-
 
         if($res){
             $res = parent::delete(true);
         }
-        if($res){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $res, $keep_autocommit);
 
         return $res;
     }
@@ -308,7 +300,6 @@ class DbDefRecTypes extends DbEntityBase
 
         $ret = parent::prepareRecords();
 
-        //@todo captcha validation for registration
         $mysqli = $this->system->get_mysqli();
 
         //add specific field values
@@ -326,8 +317,10 @@ class DbDefRecTypes extends DbEntityBase
                         return false;                           
                 }
             }
+            
+            $is_new = !(@$this->records[$idx]['rty_ID']>0);
 
-            if(!(@$this->records[$idx]['rty_ID']>0)){
+            if($is_new){
                 $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
 
                 if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
@@ -338,9 +331,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
             }else{
 
-                if (array_key_exists('rty_IDInOriginatingDB',$this->records[$idx])
-                     && $this->records[$idx]['rty_IDInOriginatingDB']==''){
-
+                if (@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                     $this->records[$idx]['rty_IDInOriginatingDB'] = null;
                     unset($this->records[$idx]['rty_IDInOriginatingDB']);
                 }
@@ -353,7 +344,7 @@ class DbDefRecTypes extends DbEntityBase
 
             $this->records[$idx]['rty_Modified'] = date(DATE_8601);//reset
 
-            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
+            $this->records[$idx]['is_new'] = $is_new;
         }
 
         return $ret;
@@ -524,14 +515,8 @@ class DbDefRecTypes extends DbEntityBase
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
         }
-
-        if($ret===false){
-            $mysqli->rollback();
-        }else{
-            $mysqli->commit();
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $res, $keep_autocommit);
 
         return $ret;
     }
@@ -546,9 +531,14 @@ class DbDefRecTypes extends DbEntityBase
 
         $where2 = '';
         $where2_conj = '';
+        $wg_ids = array();//all groups for admin
+        
         if($ugr_ID!=2){ //by default always exclude "hidden" for not database owner
 
-                if($ugr_ID>0){
+                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
+                $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
+        
+                if($ugr_ID>0){  //logged in
 
                     $currentUser = $this->system->getCurrentUser();
 
@@ -560,27 +550,19 @@ class DbDefRecTypes extends DbEntityBase
                             $wg_ids = $this->system->get_user_group_ids();
                         }
                     }
-                }
-                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
 
-                    //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
+                    //if there is entry for record in usrRecPermissions current user must be member of allowed groups
+                    $from = ' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
 
-                $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
-                if ($ugr_ID>0){ //logged in
-
-                        //if there is entry for record in usrRecPermissions current user must be member of allowed groups
-                        $from = ' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
-
-                        $where2 = $where2
-                            .' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
-                            .join(',', $wg_ids).')))';
+                    $where2 = $where2
+                        .' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
+                        .join(',', $wg_ids).')))';
                 }
 
                 $where2_conj = ' or ';
-        }else{
-            $wg_ids = array();//all groups for admin
         }
-        if($ugr_ID>0 && is_array($wg_ids) && count($wg_ids)>0){
+        
+        if($ugr_ID>0 && !empty($wg_ids)){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
         return array($from, '(not r0.rec_FlagTemporary)'.($where2?SQL_AND:'').$where2);

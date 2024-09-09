@@ -269,23 +269,22 @@ class DbDefRecStructure extends DbEntityBase
             if(!($this->recordIDs>0)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for given record and field type');
                 return false;
-            }else{
-                $this->recordIDs = array($this->recordIDs);
             }
+            
+            $this->recordIDs = array($this->recordIDs);
+            
         }elseif(@$this->data['dtyID']){
             $dty_ID = $this->data['dtyID'];
 
             $this->recordIDs = null;
             if(is_numeric($dty_ID) && $dty_ID > 0){
-                $this->recordIDs = mysql__select_list2($mysqli,
+                $this->recordIDs = mysql__select_list2($mysqli,  //always returns array
                     'SELECT rst_ID FROM '.$this->config['tableName']
                     .SQL_WHERE.predicateId('rst_DetailTypeID',$dty_ID));
             }
-            if(!$this->recordIDs || !is_array($this->recordIDs) || count($this->recordIDs) == 0){
+            if(empty($this->recordIDs)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for field ID ' . $dty_ID);
                 return false;
-            }elseif(!is_array($this->recordIDs)){
-                $this->recordIDs = array($this->recordIDs);
             }
         }
         
