@@ -8,6 +8,8 @@ RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
 
 */
 use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+
 require_once dirname(__FILE__).'/../../autoload.php';
 
 
@@ -165,19 +167,8 @@ if (@$requestUri[3]=='iiif') {
         {
             $system->error_exit_api();
         }else{
-                    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                    $session_id = session_id();
-                    $lifetime = time() + 24*60*60;     //day
-                    
-                    $cres = setcookie('heurist-sessionid', $session_id, [
-                        'expires' => $lifetime,
-                        'path' => '/',
-                        'domain' => '',
-                        'Secure' => $is_https,
-                        'HttpOnly' => true,
-                        'SameSite' => 'Strict' //'Lax'
-                    ]);
-                    
+            $lifetime = time() + 24*60*60;     //day
+            USystem::sessionUpdateCookies($lifetime);
         }
 
     }elseif($requestUri[3]==='logout'){

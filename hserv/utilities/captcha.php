@@ -19,28 +19,19 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
 if (session_status() != PHP_SESSION_ACTIVE) {
 
-    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+    require_once 'USystem.php';
+    
     session_name('heurist-sessionid');
     session_cache_limiter('none');
 
     if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
         session_id($_COOKIE['heurist-sessionid']);
         @session_start();
-
     } else {   //session does not exist - create new one and save on cookies
         @session_start();
-        
-        $cres = setcookie('heurist-sessionid', session_id(), [
-            'expires' => 0,
-            'path' => '/',
-            'domain' => '',
-            'Secure' => $is_https,
-            'HttpOnly' => true,
-            'SameSite' => 'Strict' //'Lax'
-        ]);        
+        hserv\utilities\USystem::sessionUpdateCookies(0);
     }
 }
 

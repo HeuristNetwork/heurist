@@ -18,7 +18,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-    require_once dirname(__FILE__).'/autoload.php';
+use hserv\utilities\USystem;
+
+require_once dirname(__FILE__).'/autoload.php';
 
 $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 
@@ -171,13 +173,10 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }
 
 }elseif (@$_REQUEST['logo']){
-    $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
-    $mime_type = 'jpg';
-    if(!$host_logo || !file_exists($host_logo)){
-        $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.png");
-        $mime_type = 'png';
-    }
-    if($host_logo!==false && file_exists($host_logo)){
+    
+    list($host_logo, $host_url, $mime_type) = USystem::getHostLogoAndUrl();
+    
+    if($host_logo!=null && file_exists($host_logo)){
         header('Content-type: image/'.$mime_type);
         readfile($host_logo);
         return;

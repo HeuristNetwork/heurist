@@ -329,5 +329,118 @@ class USystem {
 
         return $ret;
     }
+    
+    //
+    //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+    //
+    public static function getHostLogoAndUrl(){
+        
+        //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+        $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.jpg");
+        $mime_type = 'jpg';
+        if(!$host_logo || !file_exists($host_logo)){
+            $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.png");
+            $mime_type = 'png';
+        }
+        $host_url = null;
+        if($host_logo!==false &&  file_exists($host_logo)){
+            $host_logo = defined('HEURIST_BASE_URL')?HEURIST_BASE_URL.'?logo=host':null;
+            
+            $host_url = realpath(dirname(__FILE__)."/../../../organisation_url.txt");
+            if($host_url!==false && file_exists($host_url)){
+                $host_url = file_get_contents($host_url);
+            }else{
+                $host_url = null;
+            }
+        }else{
+            $host_logo = null;
+        }
+    
+        return array($host_logo, $host_url, $mime_type);
+    }
+    
+    //======================= session routines =================================
+    //
+    //
+    // Retruns array of database where current user was logged in
+    //
+    public static function sessionRecentDatabases($current_User){
+        $dbrecent = array();
+        if($current_User && @$current_User['ugr_ID']>0){
+            foreach ($_SESSION as $db=>$session){
+
+                $user_id = @$_SESSION[$db]['ugr_ID'];
+                if($user_id == $current_User['ugr_ID']){
+                    if(strpos($db, HEURIST_DB_PREFIX)===0){
+                        $db = substr($db,strlen(HEURIST_DB_PREFIX));
+                    }
+                    array_push($dbrecent, $db);
+                }
+            }
+        }
+        return $dbrecent; 
+    }
+    
+    //
+    //
+    //
+    public static function sessionCheckFolder($defaultRootFileUploadPath){
+        
+        if(!ini_get('session.save_handler')=='files') { return true; }
+        
+        $folder = session_save_path();
+        if(file_exists($folder) && is_writeable($folder)){ return true; }
+            
+        $needSend = true;
+        $fname = $defaultRootFileUploadPath."lastWarningSent.ini";
+        if (file_exists($fname)){//check if warning is already sent
+            $datetime1 = date_create(file_get_contents($fname));
+            $datetime2 = date_create('now');
+            $interval = date_diff($datetime1, $datetime2);
+            $needSend = ($interval->format('%h')>4);//in hours
+        }
+        if($needSend){
+
+            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access',
+                                'The sessions folder has become inaccessible');
+            if($rv){
+                if (file_exists($fname)) {unlink($fname);}
+                file_put_contents($fname, date_create('now')->format(DATE_8601));
+            }
+        }
+
+    }
+    
+    //
+    //
+    //
+    public static function sessionUpdateCookies($lifetime=null){
+    
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+
+        //update cookie - to keep it alive for next 30 days
+        if($lifetime==null){
+                $lifetime = time() + 30*24*60*60;
+        }
+        
+        $session_id = session_id(); //ID of current session $cookie_session_id
+        
+        if (strnatcmp(phpversion(), '7.3') >= 0) {
+            $cres = setcookie('heurist-sessionid', $session_id, array(
+                'expires' => $lifetime,
+                'path' => '/',
+                'domain' => '',
+                'Secure' => $is_https,
+                'HttpOnly' => true,
+                'SameSite' => 'Strict' //'Lax'
+            ));
+        }else{
+            //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
+            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
+        }
+    }
+
+    
+    
 }
 ?>

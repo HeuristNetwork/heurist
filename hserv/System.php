@@ -498,7 +498,7 @@ class System {
 
         global $defaultRootFileUploadPath;
 
-        if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+        if (notEmpty($defaultRootFileUploadPath)) {
 
             if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                 $defaultRootFileUploadPath.= "/";// append trailing /
@@ -568,38 +568,42 @@ class System {
 
         $system_folders = array();
 
-        if($database_name==null){
-            $dbfolder = HEURIST_FILESTORE_DIR;
-        }else{
-            $dbfolder = HEURIST_FILESTORE_ROOT.$database_name.'/';
+        $dbfolder = HEURIST_FILESTORE_ROOT;
+        
+        if($database_name!=null){
+            $dbfolder = $dbfolder.$database_name.'/';
         }
 
-        foreach ($folders as $folder_name=>$folder){
+        if($is_for_backup==2){
+            
+            foreach ($folders as $folder_name=>$folder){
 
-            if(($is_for_backup && !@$folder[3])
-                ||
-               ($is_for_backup==2 && $folder_name=='documentation_and_templates')) { continue; }
+                if(!@$folder[3] || $folder_name=='documentation_and_templates') { continue; }
 
-              
-            if($is_for_backup==2){
                 $folder_name = realpath($dbfolder.$folder_name);
-            }else{
-                $folder_name = $dbfolder.$folder_name;
-            }
+                  
+                if($folder_name!==false){
+                    $folder_name = str_replace('\\', '/', $folder_name);
+                    array_push($system_folders, $folder_name.'/');
+                }
+            }//for
 
-            if($folder_name!==false){
-                $folder_name = str_replace('\\', '/', $folder_name);
-                array_push($system_folders, $folder_name.'/');
-            }
-        }//for
-
-        if($is_for_backup==2){ //delete backup
             $folder_name = realpath($dbfolder.'file_uploads');
             if($folder_name!==false){
                 array_push($system_folders, str_replace('\\', '/', $folder_name).'/');
             }
+        }else{
+            
+            foreach ($folders as $folder_name=>$folder){
+                if($is_for_backup && !@$folder[3]){ continue; }
+                
+                $folder_name = $dbfolder.$folder_name;
+                $folder_name = str_replace('\\', '/', $folder_name);
+                array_push($system_folders, $folder_name.'/');
+            }//for
+            
         }
-
+        
         //special case - these folders can be defined in sysIdentification and be outisde database folder
         if($is_for_backup){
             return $system_folders;
@@ -649,11 +653,11 @@ class System {
         }
 
         list($database_name_full, $dbname) = mysql__get_names($dbname);
-        if(!$dbname || mysql__check_dbname($dbname)!=null) {return false;}
+        if(mysql__check_dbname($dbname)!=null) {return false;}
 
         $upload_root = $this->getFileStoreRootFolder();
 
-        if (!(isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="")) {
+        if (!notEmpty($defaultRootFileUploadPath)) {
 
             //path is not configured in ini - set dafault values
             $install_path = 'HEURIST/';
@@ -668,21 +672,6 @@ class System {
         
         $check = folderExists(HEURIST_FILESTORE_DIR, true);
         if($check<0){
-
-            /* mail will be sent from log
-            $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
-
-            $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
-                    "<br>The directory (" . HEURIST_FILESTORE_DIR . ")"
-                    .(($check==-1)
-                    ?"does not exist (check setting in heuristConfigIni.php file)"
-                    :"is not writeable by PHP (check permissions)")
-                    ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
-                    ."may not have been mounted on the web server.";
-
-            // Error needs extra attention, send an email now to Heurist team/Bug report
-            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
-            */
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
                        "</b><br>The directory "
@@ -704,7 +693,7 @@ class System {
 
         foreach ($folders as $folder_name=>$folder){
             
-            if($folder[0]=='' || $folder[0]==null) { continue; }
+            if(!notEmpty($folder[0])) { continue; }
 
             $allowWebAccess = (@$folder[2]===true);
 
@@ -1109,34 +1098,11 @@ class System {
                 $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
             }
         }
-        /* ordered as in language-codes-active-list.json
-        foreach($glb_lang_codes as $codes){
-            $lang = strtoupper($codes['a3']);
-            if(in_array($lang, $common_languages_for_translation)){
-                $common_languages[$lang] = $codes;
-            }
-        }
-        */
+
 
         try{
 
-            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
-            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-            if(!$host_logo || !file_exists($host_logo)){
-                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
-            }
-            $host_url = null;
-            if($host_logo!==false &&  file_exists($host_logo)){
-                $host_logo = HEURIST_BASE_URL.'?logo=host';
-                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-                if($host_url!==false && file_exists($host_url)){
-                    $host_url = file_get_contents($host_url);
-                }else{
-                    $host_url = null;
-                }
-            }else{
-                $host_logo = null;
-            }
+            list($host_logo, $host_url) = USystem::getHostLogoAndUrl();
             
             if(!$this->mysqli){
                 return array(
@@ -1162,20 +1128,8 @@ class System {
             $dbowner = user_getDbOwner($this->mysqli);//info about user #2
 
             //list of databases recently logged in
-            $dbrecent = array();
-            if($this->current_User && @$this->current_User['ugr_ID']>0){
-                foreach ($_SESSION as $db=>$session){
-
-                    $user_id = @$_SESSION[$db]['ugr_ID'];
-                    if($user_id == $this->current_User['ugr_ID']){
-                        if(strpos($db, HEURIST_DB_PREFIX)===0){
-                            $db = substr($db,strlen(HEURIST_DB_PREFIX));
-                        }
-                        array_push($dbrecent, $db);
-                    }
-                }
-            }
-
+            $dbrecent = USystem::sessionRecentDatabases($this->current_User);
+            
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
 
@@ -1422,84 +1376,31 @@ class System {
         if(headers_sent()) {return true;}
 
         //verify that session folder is writable
-        if($check_session_folder && ini_get('session.save_handler')=='files'){
-            $folder = session_save_path();
-            if(file_exists($folder) && !is_writeable($folder)){
-                    $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
-
-                    $needSend = true;
-                    $fname = $defaultRootFileUploadPath."lastWarningSent.ini";
-                    if (file_exists($fname)){//check if warning is already sent
-                        $datetime1 = date_create(file_get_contents($fname));
-                        $datetime2 = date_create('now');
-                        $interval = date_diff($datetime1, $datetime2);
-                        $needSend = ($interval->format('%h')>4);//in hours
-                    }
-                    if($needSend){
-
-                        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access',
-                                            'The sessions folder has become inaccessible');
-                        if($rv){
-                            if (file_exists($fname)) {unlink($fname);}
-                            file_put_contents($fname, date_create('now')->format(DATE_8601));
-                        }
-                    }
-
-                return false;
-            }
+        if($check_session_folder && !USystem::sessionCheckFolder($defaultRootFileUploadPath)){
+            $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
+            return false;
         }
-
-        $cookie_session_id = @$_COOKIE['heurist-sessionid'];
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-
+        
         if (session_status() != PHP_SESSION_ACTIVE) {
             
             session_name('heurist-sessionid');//set session name
             session_cache_limiter('none');
-            @session_start();
-
-            /*
-            if ($cookie_session_id) { //get session id from cookes
-                session_id($cookie_session_id);  //$cookie_session_id
+            
+            if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
+                session_id($_COOKIE['heurist-sessionid']);
                 @session_start();
-
-            } else {   //session does not exist - create new one and save on cookies
-                @session_start();
+            }else{
+                @session_start();    
             }
-            */
         }
 
-        if (session_status() == PHP_SESSION_ACTIVE) {
+        if (session_status() != PHP_SESSION_ACTIVE) {
+            return false;    
+        }
 
-            $cres = false;
-            
-            if (@$_SESSION[$this->dbname_full]['keepalive']) {
-                //update cookie - to keep it alive for next 30 days
-                $lifetime = time() + 30*24*60*60;
-                $session_id = session_id(); //ID of current session $cookie_session_id
-                if (strnatcmp(phpversion(), '7.3') >= 0) {
-                    $cres = setcookie('heurist-sessionid', $session_id, array(
-                        'expires' => $lifetime,
-                        'path' => '/',
-                        'domain' => '',
-                        'Secure' => $is_https,
-                        'HttpOnly' => true,
-                        'SameSite' => 'Strict' //'Lax'
-                    ));
-                }else{
-                    //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
-                    $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
-                }
-
-
-
-                if($cres==false){
-                    USanitize::errorLog('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);
-                }
-            }
-
-        }else{
-            return false;
+        if (@$_SESSION[$this->dbname_full]['keepalive'] && !USystem::sessionUpdateCookies()) 
+        {
+            USanitize::errorLog('CANNOT UPDATE COOKIE '.session_id().'   '.$this->dbname_full);
         }
 
         return true;
@@ -1752,36 +1653,12 @@ class System {
             $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
         }
 
-        //$time = time() + 30;
-
-        //update cookie expire time
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        //$session_id = session_id();//session_regenerate_id();
-        $session_id = session_id();
-
-        if (strnatcmp(phpversion(), '7.3') >= 0) {
-            $cres = setcookie('heurist-sessionid', $session_id, array(
-                'expires' => $lifetime,
-                'path' => '/',
-                'domain' => '',
-                'Secure' => $is_https,
-                'HttpOnly' => true,
-                'SameSite' => 'Strict'  //Lax
-            ));
-
-        }else{
-            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );//login
-        }
-
-        if(!$cres){
-
-        }
+        USystem::sessionUpdateCookies($lifetime);
 
         $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
 
         //update login time in database
         user_updateLoginTime($this->mysqli, $userID);
-
     }
 
 
@@ -2086,7 +1963,7 @@ class System {
 
         $is_NOT_allowed = true;
 
-        if(isset($password_entered) && $password_entered!=null && $password_entered!='') {
+        if(notEmpty($password_entered)) {
             $pw = $password_entered;
 
             // Password in configIni.php must be at least $min_length characters
