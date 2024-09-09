@@ -408,17 +408,20 @@ this._dout('reload datatable '+this.options.serverSide);
         //adjust position for datatable controls    
         this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
         let lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
-        this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
+        
+        this.div_content.find('.dt-info').css({float:'left','padding-top':'11px','padding-left':'10px','padding-right':'10px'}); //was dataTables_info
        
         this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
         this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
         this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});
         
-        this.div_content.find('.dataTables_info').css('padding-top','11px');
-        this.div_content.find('.dataTables_paginate').css('padding-top','7px');
+        this.div_content.find('.dt-paging').css({float:'right','padding-top':'7px'}); //was dataTables_paginate
+        
         this.div_content.find('.paginate_button').css('padding','2px');
+        
         this.div_content.find('.dt-buttons').css('padding-top','7px');
         this.div_content.find('.dt-button').css('padding','2px');
+        
         this.selConfigs = null;
 
         const that = this;
