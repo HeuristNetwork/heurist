@@ -289,16 +289,22 @@ class DbDefTerms extends DbEntityBase
     private function _parseHierarchy($input) {
         $result = array();
 
-        $trm_sep = (!array_key_exists('term_separator', $this->data))
-                        ? '.'
-                        : ((empty($this->data['term_separator'])) ? false : $this->data['term_separator']);
+        $trm_sep = @$this->data['term_separator'];
+        
+        if($trm_sep==null){
+             $trm_sep = '.';
+        }
+        
+        //(!array_key_exists('term_separator', $this->data))
+        //                ? '.'
+        //                : ((empty($this->data['term_separator'])) ? false : $this->data['term_separator']);
 
-        foreach ($input AS $path) {
+        foreach ($input as $path) {
             $path = $path['trm_Label'];
 
             $prev = &$result;
 
-            if($trm_sep){
+            if($trm_sep!=''){
                 $s = strtok($path, $trm_sep);
 
                 //iterate path

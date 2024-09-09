@@ -850,7 +850,7 @@ class SystemEmailExt {
 			return -1;
 		}
 
-		if (!isset($this->receipt) || empty($this->receipt)) {
+		if (!notEmpty($this->receipt)) {
             return 0;   
         }
 
@@ -862,7 +862,7 @@ class SystemEmailExt {
 
             $title = isset($this->email_subject) ? $this->email_subject :'Heurist System Email Receipt';
             $title .= '  ['.$this->emails_sent_count.']  ';
-            if(isset($this->error_msg) && $this->error_msg!=''){
+            if(notEmpty($this->error_msg)){
                 $title = 'ERROR. '.$title;
             }
 
@@ -875,13 +875,12 @@ class SystemEmailExt {
 			$rtn = recordSave($system, array("ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details));
 
 			if ($rtn["status"] === HEURIST_OK && $rtn["data"] == $rec_id) {
-
 				return $rtn;
-			} else {
-
-				$this->set_error("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), TRUE));
-				return -1;
 			}
+
+			$this->set_error("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), TRUE));
+            return -1;
+			
 		} else {
 
 			$this->set_error("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));

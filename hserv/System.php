@@ -2259,7 +2259,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             $existing_settings = file_get_contents($setting_file);
         }
 
-        if(!empty($existing_settings)){
+        if(notEmpty($existing_settings)){
 
             $existing_settings = json_decode($existing_settings, true);
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
@@ -2271,9 +2271,9 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             }else{
                 $existing_settings = array_replace_recursive($settings, $existing_settings);
             }
+        }else{
+            $existing_settings = $settings;    
         }
-        
-        $existing_settings = empty($existing_settings) ? $settings : $existing_settings;
 
         $final_settings = json_encode($existing_settings);
         if(json_last_error() !== JSON_ERROR_NONE){

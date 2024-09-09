@@ -437,7 +437,7 @@ EXP;
                             }
                         }else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
                             $master_index = array_search($master_rec_id, $rec_keys);
-                            if ($master_index === FALSE){  // no master selected we can't do a merge
+                            if ($master_index === false){  // no master selected we can't do a merge
                                 return;
                             } elseif ($master_index > 0){  // rotate the keys so the master is first
                                 $temp = array_slice($rec_keys, 0,$master_index);
@@ -511,18 +511,18 @@ EXP;
                                     if($is_missing_master && !in_array($rd_type, $missing_in_master)){
                                         $missing_in_master[] = $rd_type;
                                     }
-                                    $detail = detail_get_html_input_str( $detail, $repeatCount, $is_master, $is_missing_master );
-                                    if (is_array($detail)) {
+                                    $inputs = detail_get_html_input_str( $detail, $repeatCount, $is_master, $is_missing_master );
+                                    if (!empty($inputs)) {
                                         if ($repeatCount != 1){//repeatable
-                                            foreach ($detail as $val) {
+                                            foreach ($inputs as $val) {
                                                 print "<div>$val</div>";
                                             }
                                         } else{
-                                            print "<div>{$detail[0]}</div>";
+                                            print "<div>{$inputs[0]}</div>";
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
-                                    } else{
-                                        print "<div>$detail</div>";
+                                        //} else{
+                                        //print "<div>$detail</div>";
                                     }
 
                                     print TD_E;
@@ -617,6 +617,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
     global $mysqli;
 
     $is_type_repeatable = $repeatCount != 1;
+    $rv = array();
 
     foreach($detail as $rg){
         $detail_id = $rg['dtl_ID'];
@@ -683,6 +684,8 @@ function detail_str($rd_type, $rd_val)
         if (is_array($rd_val)) {
             $titles = mysql__select_assoc2($mysqli, 'select rec_ID, rec_Title from Records where rec_ID in ('
                     .implode(',',$rd_val).')');
+                    
+            $rv = array();
             foreach ($rd_val as $val){
                 $rv[] = edit_link($val, $titles[$val], true);
             }
@@ -705,23 +708,14 @@ function detail_str($rd_type, $rd_val)
     }
     }
     */
-    elseif (in_array($rd_type, array_keys($enum_bdts))) {
-        if(is_integer($rd_val)){
+    elseif (in_array($rd_type, array_keys($enum_bdts)) && is_integer($rd_val) ) {
             $res = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID ='.$rd_val);
             if($res){
                 return $res;
-            }else  {
-                return $rd_val;
             }
-
-        }else{
-            return $rd_val;
-        }
-
-
-    } else {
-        return $rd_val;
     }
+    
+    return $rd_val;
 }
 
 // ---------------------------------------------- //
