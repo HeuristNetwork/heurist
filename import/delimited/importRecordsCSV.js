@@ -126,10 +126,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 let msg = textStatus+' '+errorThrown;
                 if(textStatus == 'error'){
-                    msg = 'An unknown error occurred while attempting to upload your CSV file.<br>This may be due to an unstable or slow internet connection.';
+                    msg = 'An unknown error occurred while attempting to upload your CSV file.<br>This may be due to an unstable or slow internet connection.<br><br>';
+                    msg += `Server status code ${jqXHR.status}: <strong>${errorThrown}</strong><br>`
+                        + '<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_blank" rel="noopener">List of HTTP Status Codes</a>';
                 }
 
-                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
+                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error: Server HTTP Status error', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
             }
         },
         fail: function(e, data){

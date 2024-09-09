@@ -1250,7 +1250,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     
                 return;
             }else if(ids.length > 5000){
-                window.hWin.HEURIST4.msg.showMsgFlash('The number of selected files exceeds the limit', 2000);
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: "Please limit selection to approximately 5000 files, or else select none, and<br>"
+                            +"click the download again, in which case the information for all files is downloaded.",
+                    error_title: "Too many files selected",
+                    status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                });
                 return;
             }
             ids = ids.join(',');

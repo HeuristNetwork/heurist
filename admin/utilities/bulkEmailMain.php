@@ -683,7 +683,7 @@ if(!$has_emails || empty($emails)) {
 
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An error has occurred with retrieving the filtered list of databases.<br>"
-                                        + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                        + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                         + "Please contact the Heurist team if this problem persists",
                                     error_title: 'Unable to retrieve database list',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
@@ -764,7 +764,7 @@ if(!$has_emails || empty($emails)) {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "An error has occurred with retrieving the complete list of databases.<br>"
-                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Unable to retrieve database list',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
@@ -821,7 +821,7 @@ if(!$has_emails || empty($emails)) {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "An error has occurred with retrieving the Email record short summary field (email body).<br>"
-                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Failed to retrieve email details'
                         });
@@ -933,7 +933,7 @@ if(!$has_emails || empty($emails)) {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "An error has occurred with retrieving the the user count for the selected databases and user type.<br>"
-                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Failed to retrieve record count'
                         });
@@ -1005,7 +1005,7 @@ if(!$has_emails || empty($emails)) {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "An error has occurred with retrieving the the user count for the selected databases and user type.<br>"
-                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Failed to retrieve user count'
                         });
@@ -1054,7 +1054,7 @@ if(!$has_emails || empty($emails)) {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "An error has occurred with verifying the System Administrator password.<br>"
-                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Failed to authenticate'
                         });
