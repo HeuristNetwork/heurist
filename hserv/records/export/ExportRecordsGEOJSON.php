@@ -150,7 +150,6 @@ protected function _outputPrepare($data, $params){
         $this->system->defineConstant('DT_MINIMUM_ZOOM_LEVEL', true);
         $this->system->defineConstant('DT_MAXIMUM_ZOOM_LEVEL', true);
 
-
     }
     return $res;
 }

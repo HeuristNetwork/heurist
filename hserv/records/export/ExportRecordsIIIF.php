@@ -43,7 +43,6 @@ protected function _outputPrepare($data, $params){
 
     $res = parent::_outputPrepare($data, $params);
     if($res){
-
         $this->iiif_version = (@$params['version']==2 || @$params['v']==2)?2:3;
     }
     return $res;

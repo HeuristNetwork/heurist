@@ -68,6 +68,7 @@ protected function _outputPrepare($data, $params){
 
         $this->records_cnt = intval(@$params['recordsTotal']);
         $this->records_cnt_filtered = intval(@$params['recordsFiltered']);
+        
     }
     return $res;
 }

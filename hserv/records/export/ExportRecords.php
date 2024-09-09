@@ -208,7 +208,6 @@ protected function _outputPrepare($data, $params){
         recordSearchRelatedIds($this->system, $this->records, $direction, $no_relationships, 0, $max_depth, $limit);
     }
 
-    $this->_outputPrepareFields($params);
 
     return true;
 }
@@ -231,6 +230,9 @@ protected function _outputPrepareFields($params){
         if(@$params['columns'] && is_array($params['columns'])){
 
             foreach($params['columns'] as $col_name){
+                if(is_array($col_name)){
+                    $col_name = $col_name['data']; 
+                }
 
                 if(is_numeric($col_name) && $col_name>0){
                     array_push($this->retrieve_detail_fields, $col_name);
@@ -274,6 +276,8 @@ public function output($data, $params){
         return false;
     }
 
+    $this->_outputPrepareFields($params);
+    
     $this->_outputHeader();
 
     //MAIN LOOP  ----------------------------------------
