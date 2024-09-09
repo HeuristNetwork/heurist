@@ -412,36 +412,49 @@ abstract class DbEntityBase
     //
     public function run(){
 
+        if(!$this->isvalid()){
+            return false;    
+        }
+        
         $res = false;
-
-        if($this->isvalid()){
-            if(@$this->data['a'] == 'search'){
+        
+        $action =@$this->data['a'];
+        
+        switch ($action) {
+           case 'search':
                 $res = $this->search();
-            }else  if(@$this->data['a'] == 'title'){ //search for entity title by id
+                break;
+           case 'title':
                 $res = $this->search_title();
-            }elseif(@$this->data['a'] == 'add'){
+                break;
+           case 'add':
                 $this->is_addition = true;
                 $this->data['a'] = 'save';
                 $res = $this->save();
                 $this->is_addition = false;
-            }elseif(@$this->data['a'] == 'save'){
+                break;
+           case 'save':
                 $res = $this->save();
-            }elseif(@$this->data['a'] == 'delete'){
+                break;
+           case 'delete':
                 $res = $this->delete();
-
-            }elseif(@$this->data['a'] == 'config'){ // return configuration
+                break;
+           case 'config':
                 $res = $this->config( @$this->data['locale'] );
-            }elseif(@$this->data['a'] == 'files'){ // working with settings/config files
-
+                break;
+           case 'files':
+                // working with settings/config files
                 // get list of files by extension
                 // put data into file
                 // load date from file
-                $res = $this->files( $this->data );
-
-            }elseif(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
+                $res = $this->files($this->data);
+                break;
+           case 'counts':
+                //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
-            }elseif(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){
-                //special and batch action. see details of operaion for method of particular class
+                break;
+           case 'action':
+           case 'batch':
                 $res = $this->batch_action();
                 if($res &&
                     !(@$this->data['get_translations'] ||
@@ -449,11 +462,10 @@ abstract class DbEntityBase
                 {
                         $this->_cleanDbDefCache();
                 }
-            }else {
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
-            }
+                break;
+           default: 
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed"); 
         }
-
         return $res;
     }
 
