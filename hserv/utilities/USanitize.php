@@ -156,7 +156,7 @@ class USanitize {
     //
     // We can also use HTMLPurifier (see example in showReps.php)
     //
-    public static function sanitizeString($message, $allowed_tags=null){
+    public static function sanitizeString($message, $allowed_tags=null, $allowed_entities=true){
         if($message==null){
             $message = '';
         }else{
@@ -180,6 +180,12 @@ class USanitize {
             if($allowed_tags!==false){
                 $message = str_replace('&lt;', '<', $message);
                 $message = str_replace('&gt;', '>', $message);
+            }
+
+            if($allowed_entities){
+                $message = mb_ereg_replace_callback("&amp;([a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});", function($matches){
+                    return "&{$matches[1]};";
+                }, $message);
             }
         }
         return $message;
