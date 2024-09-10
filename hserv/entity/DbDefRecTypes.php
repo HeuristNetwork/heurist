@@ -304,6 +304,16 @@ class DbDefRecTypes extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
+             if(!prepareRecord($idx)){
+                 break;
+             }
+        }//foreach
+
+        return $ret;
+
+    }
+    
+    private function prepareRecord($idx){
 
             //validate duplication
             if(@$this->records[$idx]['rty_Name']){
@@ -326,9 +336,11 @@ class DbDefRecTypes extends DbEntityBase
                 if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                     $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
                 }
+                
                 if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
                     $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
                 }
+            
             }else{
 
                 if (@$this->records[$idx]['rty_IDInOriginatingDB']==''){
@@ -345,10 +357,8 @@ class DbDefRecTypes extends DbEntityBase
             $this->records[$idx]['rty_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = $is_new;
-        }
 
-        return $ret;
-
+            return true;        
     }
 
     //

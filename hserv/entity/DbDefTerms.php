@@ -231,11 +231,13 @@ class DbDefTerms extends DbEntityBase
 
         //extract records from $_REQUEST data
         if(!$this->prepareRecords(true)){
-                return false;
+            return false;
         }
 
         //create tree array $record['trm_ParentTermID']
-        if(count($this->records)>0){
+        if(isEmptyArray($this->records)){
+            return array();   
+        }
 
             if(@$this->records[0]['trm_VocabularyGroupID']>0){
                 return $this->save();
@@ -279,7 +281,7 @@ class DbDefTerms extends DbEntityBase
                     $terms_added = array_merge($terms_added, $ret);
                 }
             }
-        }
+       
         return $terms_added;
     }
 

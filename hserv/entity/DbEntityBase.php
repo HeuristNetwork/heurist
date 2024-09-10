@@ -634,30 +634,33 @@ abstract class DbEntityBase
             return false;
         }
         
-        if(!empty($this->foreignChecks)){
+        $this->isDeleteReady = true;
+        
+        if(empty($this->foreignChecks)){
+            $this->isDeleteReady = true;
+            return true;
+        }
             
-            foreach($this->foreignChecks as $check){
-                
-                $query = $check[0];
-                
-                if(strpos($query,'#IDS#')>0){
-                    $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
-                }else{
-                    $query .= (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
-                }
-                
-                $ret = mysql__select_value($this->system->get_mysqli(), $query);
+        foreach($this->foreignChecks as $check){
+            
+            $query = $check[0];
+            
+            if(strpos($query,'#IDS#')>0){
+                $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
+            }else{
+                $query .= (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
+            }
+            
+            $ret = mysql__select_value($this->system->get_mysqli(), $query);
 
-                if($ret>0){
-                    $msg = @$check[1]?$check[1]:'Cannot delete '.$this->config['entityTitle'];
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, $msg);
-                    return false;
-                }
+            if($ret>0){
+                $msg = @$check[1]?$check[1]:'Cannot delete '.$this->config['entityTitle'];
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                return false;
             }
         }
         
         $this->isDeleteReady = true;
-        
         return true;
     }
 
@@ -815,23 +818,24 @@ abstract class DbEntityBase
         $isinsert = ($rec_ID<1);
 
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') {continue;}
-
-            if(array_key_exists($fieldname, $fieldvalues)){
-                $value = $fieldvalues[$fieldname];
-            }else{
-                if(!$isinsert) {continue;}
-                $value = null;
+            if (@$field_config['dty_Role']=='virtual' || 
+                @$field_config['dty_Role']=='primary' ||
+                @$field_config['rst_RequirementType'] != 'required')
+            {
+                continue;
             }
+
+            if(!(array_key_exists($fieldname, $fieldvalues) || $isinsert)){
+                continue;   
+            }
+            
+            $value = @$fieldvalues[$fieldname];
 
             if(@$field_config['rst_MultiLang'] && is_array($value)){
                 $value = count($value)>0?$value[0]:'';
             }
 
-            if( ( $value===null  || trim($value)=='' ) &&
-                (@$field_config['dty_Role']!='primary') &&
-                (@$field_config['rst_RequirementType'] == 'required')){
-
+            if( isEmptyStr($value) ){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Field $fieldname is mandatory.");
                 return false;
             }
