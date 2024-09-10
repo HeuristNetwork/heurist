@@ -44,7 +44,7 @@ $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
-$system = new hserv\System();
+$system = new hserv\System(true);
 
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database

@@ -63,6 +63,9 @@ class System {
     private $version_release = null;
 
     private $database_settings = array('TinyMCE formats' => 'text_styles.json', 'Webfonts' => 'webfonts.json');
+    
+    //do not check session folder, loads only basic user info
+    private $need_full_session_check = false;
 
     /*
 
@@ -79,6 +82,10 @@ class System {
 
     */
 
+    public function __construct( $full_check=false ) {
+        
+        $this->need_full_session_check = $full_check;
+    }
 
     /**
     * Read configuration parameters from config file
@@ -115,7 +122,7 @@ class System {
             return true;
         }
 
-        if(!$this->start_my_session()){
+        if(!$this->start_my_session( $this->need_full_session_check )){
             return false;
         }
 
@@ -128,7 +135,10 @@ class System {
             // attempt to get release version
             $this->version_release = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? "alpha" : "stable";
 
-            $this->_executeScriptOncePerDay();
+            if($this->need_full_session_check){
+                $this->_executeScriptOncePerDay();    
+            }
+            
 
             $this->loginVerify( false );//load user info from session on system init
             if($this->get_user_id()>0){
@@ -1350,12 +1360,10 @@ class System {
     */
     private function start_my_session($check_session_folder=true){
 
-        global $defaultRootFileUploadPath;
-
         if(headers_sent()) {return true;}
 
         //verify that session folder is writable
-        if($check_session_folder && !USystem::sessionCheckFolder($defaultRootFileUploadPath)){
+        if($this->need_full_session_check && $check_session_folder && !USystem::sessionCheckFolder()){
             $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
             return false;
         }
@@ -1409,7 +1417,8 @@ class System {
     *         false -  from $_SESSION
     *
     * ugr_Preferences are always loaded from database
-    *
+    * 
+    * @todo - load all user info if it is required only
     */
     private function loginVerify( $user, $is_guest_allowed=false ){
 
@@ -1464,6 +1473,9 @@ class System {
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
                 }
+                
+                //always restore from db
+                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }//$reload_user_from_db from db
 
             $this->current_User = array('ugr_ID'=>intval($userID),
@@ -1472,10 +1484,6 @@ class System {
                             'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
                             'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
-            //always restore from db
-            // if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){ }
-            $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
-            
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
 
             //remove credentials for remote repositories
