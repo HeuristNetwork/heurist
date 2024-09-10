@@ -1842,23 +1842,21 @@ class System {
 
         $base_url = HEURIST_BASE_URL;
 
-        if($use_rewrite){
-            
-            if(strpos($base_url, "/HEURIST/") !== false){
-                $parts = explode('/', $base_url);
-                $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
-            }
-            
-            $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
-                        : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
-
-            return $url;
-        }else{
+        if(!$use_rewrite){
             $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
                         : $base_url . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
-
             return $url;
         }
+            
+        if(strpos($base_url, "/HEURIST/") !== false){
+            $parts = explode('/', $base_url);
+            $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
+        }
+        
+        $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
+                    : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
+
+        return $url;
     }
 
 

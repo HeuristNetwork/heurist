@@ -488,9 +488,7 @@ function predicateRecordVisibility($dst='trg'){
 //
 function predicateRtyDtyFilters($rtyIDs, $dtyIDs, $dt_field='dty_ID')
 {
-    return (is_array($rtyIDs) && !empty($rtyIDs) ? 'AND trg.rec_RecTypeID in (' .join(',', prepareIds($rtyIDs)) . ') ' : '') 
-         . (is_array($dtyIDs) && !empty($dtyIDs) > 0 ? 'AND '.$dt_field.' in (' .join(',', prepareIds($dtyIDs)) . ') ' : '');
-    
+    return predicateId('trg.rec_RecTypeID', $rtyIDs, SQL_AND) . predicateId($dt_field, $dtyIDs, SQL_AND);
 }
 
 
@@ -824,8 +822,8 @@ function _getReversePointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, src.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records src '
     .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (src.rec_ID = rl_SourceID) and (src.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
+    .predicateId('src.rec_RecTypeID', $rtfilter, SQL_AND)
+    .predicateId('rl_DetailTypeID', $ptrfilter, SQL_AND)
     .predicateRecordVisibility('src');
 
     $resout = array();
@@ -951,27 +949,29 @@ function _getRelations($rec_id, $depth){
         $res->close();
     }
 
-    if($REVERSE){
-    //
-    // find reverse relations
-    //
-    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
-    .' left join Records rel on rel.rec_ID=rl_RelationID'
-    .' where rl_TargetID='.intval($rec_id).' and rl_RelationTypeID>0 '
-    .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
-    .predicateRecordVisibility('src');
+    if(!$REVERSE){
+        return $resout;
+    }
+    
+        //
+        // find reverse relations
+        //
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
+        .' left join Records rel on rel.rec_ID=rl_RelationID'
+        .' where rl_TargetID='.intval($rec_id).' and rl_RelationTypeID>0 '
+        .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
+        .predicateId('src.rec_RecTypeID', $rtfilter, SQL_AND)
+        .predicateId('rl_RelationTypeID', $relfilter, SQL_AND)
+        .predicateRecordVisibility('src');
 
 
-    $res = $mysqli->query($query);
-    if($res){
-        while ($row = $res->fetch_assoc()) {
-            $resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+        $res = $mysqli->query($query);
+        if($res){
+            while ($row = $res->fetch_assoc()) {
+                $resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+            }
+            $res->close();
         }
-        $res->close();
-    }
-    }
 
     return $resout;
 }
@@ -1390,25 +1390,28 @@ function outputRecordStub($recordStub) {
 
 function makeFileContentNode($file) {
 
-    if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
+    if (@$file['fxm_MimeType'] !== "application/xml") {
+        return;
+    }
 
         $filename = resolveFilePath($file['fullPath']);
         if ( !($file['ulf_OrigFileName'] == ULF_REMOTE || strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 ) && file_exists($filename)) { //@todo check preferred source
 
+            $src = $filename;
             $xml = simplexml_load_file( $filename );
-            if (!$xml) {
-                makeTag('error', null, " Error while attemping to read $filename .");
-                return;
+            if ($xml) {
+                $xml = $xml->asXML();
             }
-            $xml = $xml->asXML();
         } else {
+            $src = $file['URL'];
             $xml = loadRemoteURLContent($file['URL']);//include remote xml into hml output
-            if (!$xml) {
-                makeTag('error', null, ' Error while attemping to read '.$file['URL']);
-                return;
-            }
         }
 
+        if (!$xml) {
+            makeTag('error', null, ' Error while attemping to read '.$src);
+            return;
+        }
+        
         //embedding so remove any xml element
         $content = preg_replace("/^\<\?xml[^\?]+\?\>/", "", $xml);
 
@@ -1423,14 +1426,11 @@ function makeFileContentNode($file) {
         if ($ret == 0) {
             makeTag('error', null, "Invalid XML - ".xml_error_string(xml_get_error_code($parser)));
             xml_parser_free($parser);
-            return;
-        }
-
-        if ($content) {
+            
+        }elseif ($content) {
             makeTag('content', array("type" => "xml"), $content, true, false);
         }
         return;
-    }
 }
 
 

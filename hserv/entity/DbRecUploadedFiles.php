@@ -1641,7 +1641,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $this->setData($fileinfo);
        $this->setRecords(null);//reset
        $ulf_ID = $this->save();
-       if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
+       if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
 
        if( $ulf_ID>0 && $dtl_ID>0 ){ //register in recDetails
 
@@ -1652,12 +1652,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                $this->system->get_mysqli()->query($query2);
 
                //get full file info
-               $fileinfo = fileGetFullInfo($this->system, $ulf_ID);
-               if(is_array($fileinfo) && count($fileinfo)>0){
-                    return $fileinfo[0];
-               }
-
+               $ulf_ID = fileGetFullInfo($this->system, $ulf_ID);
        }
+       
+       if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
        return $ulf_ID;
 
     }

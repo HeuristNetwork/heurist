@@ -578,17 +578,26 @@ class DbDefRecTypes extends DbEntityBase
         if(@$this->data['mode']=='record_count')
         {
 
+            $res = countsUsage();
+            
+        }elseif(@$this->data['mode']=='cms_record_count'){
+
+            $res = countsUsageCMS();
+
+        }
+
+        return $res;
+    }
+    
+    //
+    //
+    //
+    private function countsUsage(){
+        
+
             $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = '';
-/*
-        LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID
-WHERE
- (not r0.rec_FlagTemporary) and ( (r0.rec_NonOwnerVisibility in ("public","pending"))
- or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (14,0)))
- or r0.rec_OwnerUGrpID in (14,0) ) GROUP BY r0.rec_RecTypeID
-            $query = 'SELECT d.rty_ID, count(r0.rec_ID) FROM defRecTypes d ';
-            $where = ' LEFT OUTER JOIN Records r0 ON r0.rec_RectypeID=d.rty_ID AND ';
-*/
+
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
                 $query = $query . $conds[0];
@@ -602,9 +611,15 @@ WHERE
 
             $query = $query . SQL_WHERE.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
 
-           $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+        
+            return $res;
+    }
 
-        }elseif(@$this->data['mode']=='cms_record_count'){
+    //
+    //
+    //
+    private function countsUsageCMS(){
 
             $this->system->defineConstant('RT_CMS_HOME');
             $this->system->defineConstant('RT_CMS_MENU');
@@ -638,10 +653,10 @@ WHERE
 
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3),
                 'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);
-
-        }
-
-        return $res;
+                
+            return $res;
+        
     }
+    
 }
 ?>

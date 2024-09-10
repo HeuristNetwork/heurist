@@ -532,4 +532,9 @@ function isEmptyStr($val){
     return empty($val) || $val=='';
 }
 
+function isEmptyArray($val){
+    return !is_array($val) || empty($val);     
+}
+
+
 ?>

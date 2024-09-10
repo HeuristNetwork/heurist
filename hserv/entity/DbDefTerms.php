@@ -1225,20 +1225,13 @@ class DbDefTerms extends DbEntityBase
 
         //find all children terms (including by reference)
         $children = $this->getChildren($trm_ID);
-
-        if(is_array($children) && count($children)>0){
-                $children[] = $trm_ID;  //itself
-                $children = prepareIds($children);
-                $s = 'in ('.implode(',',$children).')';
-        }else{
-                $s = '= '.intval($trm_ID);
-        }
+        $children[] = $trm_ID;  //itself
+        
+        $s = predicateId('dtl_Value', $children, SQL_AND);
 
         $mysqli = $this->system->get_mysqli();
 
-
-
-        if(!is_array($check_dty_IDs) || count($check_dty_IDs)==0){
+        if(isEmptyArray($check_dty_IDs)){
             $real_vocab_id = getTermTopMostParent($mysqli, $trm_ID);
             $check_dty_IDs = $this->getFieldsThatUseVocabulary($real_vocab_id);
         }
@@ -1247,13 +1240,12 @@ class DbDefTerms extends DbEntityBase
             $check_dty_IDs = prepareIds($check_dty_IDs);//for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
             $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
-                .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) AND '
-                .'(dtl_Value '.$s.')';
+                .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) '.$s;
+
         }else{
             $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
                 ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
-                ."(dty_Type='enum' or dty_Type='relationtype') AND "
-                .'(dtl_Value '.$s.')';
+                ."(dty_Type='enum' or dty_Type='relationtype') $s";
         }
 
         $total_count_rows = 0;
@@ -1272,17 +1264,18 @@ class DbDefTerms extends DbEntityBase
 
             $res->close();
         }
+        
         if($mysqli->error){
             $this->system->addError(HEURIST_DB_ERROR,
                 'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
-        }else{
-            $ret['recID'] = $trm_ID;
-            $ret['fields'] = $check_dty_IDs;
-            $ret['reccount'] = $total_count_rows;
-            $ret['records'] = $records;
-            $ret['children'] = count($children);
         }
+        
+        $ret['recID'] = $trm_ID;
+        $ret['fields'] = $check_dty_IDs;
+        $ret['reccount'] = $total_count_rows;
+        $ret['records'] = $records;
+        $ret['children'] = count($children);
 
         return $ret;
 

@@ -86,7 +86,7 @@ function HRecordSet(initdata) {
                 fields_detail = response.fields_detail;
                 
                 _isMapEnabled = response.mapenabled;
-                //@todo - merging
+
             }else{
                     
                 if(response.order){
@@ -112,17 +112,15 @@ function HRecordSet(initdata) {
     */
     function _makeKeyValueArray(namefield){
         
-        let ids, record, key, rec_title;
-        
         let result = [];
         
         for(let idx in order){
             if(idx)
             {
-                key = order[idx];
+                const key = order[idx];
                 
-                record = records[key];
-                rec_title = _getFieldValue(record, namefield);
+                let record = records[key];
+                const rec_title = _getFieldValue(record, namefield);
                 
                 result.push({key:key, title:rec_title});
             }
@@ -229,15 +227,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            
-            for (let i=0; i<dty_ids.length; i++) {
-                const dtype = $Db.dty(dty_ids[i],'dty_Type');
+            dty_ids.forEach((dty_id)=>{
+            {
+                const dtype = $Db.dty(dty_id,'dty_Type');
                 if(dtype=='date' || dtype=='year'){
-                    timefields.push(dty_ids[i]);
+                    timefields.push(dty_id);
                 }else if(dtype=='geo'){
-                    geofields.push(dty_ids[i]);
+                    geofields.push(dty_id);
                 }
-            }
+            });
         }
         
         let linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)

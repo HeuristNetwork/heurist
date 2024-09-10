@@ -398,6 +398,7 @@ $mysqli->kill($thread_id);
 
     /**
     * returns array of FIRST column values
+    * alwasys return array
     */
     function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
@@ -1555,22 +1556,23 @@ $mysqli->kill($thread_id);
     }
     
     //
+    // if $operation not null it returns empty string for empty $ids and 
+    //    full predictate  
     //
-    //
-    function predicateId($field, $ids)
+    function predicateId($field, $ids, $operation=null)
     {
         $ids = prepareIds($ids);
         
         $cnt = count($ids);
         if($cnt==0){
-            return SQL_FALSE; // (1=0) none
+            return isEmptyStr($operation)?SQL_FALSE:''; // (1=0) none
         }elseif($cnt==1){
             $q = '='.$ids[0];
         }elseif($cnt>1){
             $q = SQL_IN.implode(',',$ids).')';
         }
         
-        return '('.$field.$q.')';
+        return (!isEmptyStr($operation)?" $operation ":'').'('.$field.$q.')';
     }
 
 

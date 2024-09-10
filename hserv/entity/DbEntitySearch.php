@@ -121,23 +121,22 @@ class DbEntitySearch
 
         $value = @$this->data[$fieldname];
 
-        if($value!=null){
-
-            if(is_bool($value)){
-                $value = $value?1:0;
-            }elseif(is_numeric($value)){
-                $value = $value==1?1:0;
-            }else{
-                $value = $value=='y'?1:0;
-            }
-            if(!($value==1 || $value==0)){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
-                return false;
-            }
-            return $value;
-
+        if($value==null){
+            return true;   
         }
-        return true;
+
+        if(is_bool($value)){
+            $value = $value?1:0;
+        }elseif(is_numeric($value)){
+            $value = $value==1?1:0;
+        }else{
+            $value = $value=='y'?1:0;
+        }
+        if(!($value==1 || $value==0)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
+            return false;
+        }
+        return $value;
     }
 
 

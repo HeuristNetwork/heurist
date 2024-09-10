@@ -424,7 +424,9 @@ function __findWrongChars(){
 
         mysql__usedatabase($mysqli, $db_name);
 
-        if(hasTable($mysqli, 'defRecTypes')){
+        if(!hasTable($mysqli, 'defRecTypes')){
+            continue;
+        }
 
             $list = mysql__select_assoc($mysqli, 'select rty_ID, rty_TitleMask from defRecTypes');
 
@@ -433,7 +435,6 @@ function __findWrongChars(){
             $db_name = htmlspecialchars($db_name);
 
             $res = json_encode($list);//JSON_INVALID_UTF8_IGNORE
-            if(true || !$res){
 
                 foreach($list as $id => $val){
                     $wrong_string = null;
@@ -447,11 +448,10 @@ function __findWrongChars(){
                     }
                 }//foreach
 
-            }
+            
             if($isOK){
                     print $db_name.' OK<br>';
             }
-        }
     }
 }
 
