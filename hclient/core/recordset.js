@@ -228,7 +228,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 
             //detect geo and time fields from recordset        
             dty_ids.forEach((dty_id)=>{
-            {
                 const dtype = $Db.dty(dty_id,'dty_Type');
                 if(dtype=='date' || dtype=='year'){
                     timefields.push(dty_id);
