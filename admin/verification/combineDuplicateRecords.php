@@ -398,7 +398,7 @@ EXP;
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $rec_ID=>$rec_Title) {
-                                        print edit_link($rec_ID, $rec_ID.' '.htmlspecialchars($rec_Title), true);
+                                        print edit_link($rec_ID, htmlspecialchars($rec_Title), true);
                                     }
                                     print TR_E;
                                 }
@@ -548,7 +548,7 @@ EXP;
                                     print '<tr><td>References</td></tr><tr><td>';
                                     $i = 1;
                                     foreach ($record["refs"] as $rec_ID=>$rec_Title) {
-                                        print edit_link($rec_ID, $rec_ID.' '.htmlspecialchars($rec_Title), true);
+                                        print edit_link($rec_ID, htmlspecialchars($rec_Title), true);
                                     }
                                     print TR_E;
                                 }
@@ -660,15 +660,18 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
     return $rv;
 }
 
-function edit_link($rec_id, $label, $truncated=false){
+function edit_link($rec_id, $label, $id_only=false){
     
-    if($truncated){
-        $label = '<span class="truncate" style="display:block;max-width:225px">'.$label.'</span>';
+    $link = '<a target="edit" href="'
+            .HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'">';
+    
+    if($id_only){
+        $link .= "<span title=\"$label\">$rec_id</span></a> ";
+    }else{
+        $link .= "$label</a>";
     }
     
-    return '<a target="edit" href="'
-            .HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id
-            .'">'.$label.'</a>';
+    return $link;
 }
 
 //
