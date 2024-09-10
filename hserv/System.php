@@ -498,7 +498,7 @@ class System {
 
         global $defaultRootFileUploadPath;
 
-        if (notEmpty($defaultRootFileUploadPath)) {
+        if (!isEmptyStr($defaultRootFileUploadPath)) {
 
             if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                 $defaultRootFileUploadPath.= "/";// append trailing /
@@ -636,7 +636,7 @@ class System {
 
         $upload_root = $this->getFileStoreRootFolder();
 
-        if (!notEmpty($defaultRootFileUploadPath)) {
+        if (isEmptyStr($defaultRootFileUploadPath)) {
 
             //path is not configured in ini - set dafault values
             $install_path = 'HEURIST/';
@@ -672,7 +672,7 @@ class System {
 
         foreach ($folders as $folder_name=>$folder){
             
-            if(!notEmpty($folder[0])) { continue; }
+            if(isEmptyStr($folder[0])) { continue; }
 
             $allowWebAccess = (@$folder[2]===true);
 
@@ -1944,7 +1944,7 @@ class System {
 
         $is_NOT_allowed = true;
 
-        if(notEmpty($password_entered)) {
+        if(!isEmptyStr($password_entered)) {
             $pw = $password_entered;
 
             // Password in configIni.php must be at least $min_length characters
@@ -2259,7 +2259,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             $existing_settings = file_get_contents($setting_file);
         }
 
-        if(notEmpty($existing_settings)){
+        if(!isEmptyStr($existing_settings)){
 
             $existing_settings = json_decode($existing_settings, true);
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
@@ -2282,7 +2282,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
         $res = fileSave($final_settings, $setting_file);
 
-        if(!$res || $res == 0){
+        if($res == 0){
             return $this->addError(HEURIST_ERROR, "An error occurred while attempting to save database settings for $setting_name");
         }
 

@@ -245,7 +245,7 @@ class DbDefRecTypes extends DbEntityBase
         $query = 'SELECT sys_TreatAsPlaceRefForMapping FROM sysIdentification where 1';
 
         $val = mysql__select_value($mysqli, $query);
-        if(notEmpty($val)){
+        if(!isEmptyStr($val)){
                 $places = explode(',', $val);
                 if (in_array($rtyID, $places)) {
                     $this->system->addError(HEURIST_ACTION_BLOCKED, "You cannot delete record type $rtyID. "

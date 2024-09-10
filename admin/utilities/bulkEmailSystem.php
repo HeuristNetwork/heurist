@@ -850,7 +850,7 @@ class SystemEmailExt {
 			return -1;
 		}
 
-		if (!notEmpty($this->receipt)) {
+		if (isEmptyStr($this->receipt)) {
             return 0;   
         }
 
@@ -862,7 +862,7 @@ class SystemEmailExt {
 
             $title = isset($this->email_subject) ? $this->email_subject :'Heurist System Email Receipt';
             $title .= '  ['.$this->emails_sent_count.']  ';
-            if(notEmpty($this->error_msg)){
+            if(!isEmptyStr($this->error_msg)){
                 $title = 'ERROR. '.$title;
             }
 

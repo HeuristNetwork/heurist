@@ -527,9 +527,9 @@ function redirectURL($url){
     header('Location: '.$url);   
 }
 
-function notEmpty($val){
+function isEmptyStr($val){
     // !empty is analogous to isset($foo) && $foo
-    return !empty($val) && $val!='';
+    return empty($val) || $val=='';
 }
 
 ?>
