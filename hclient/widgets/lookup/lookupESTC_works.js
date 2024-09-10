@@ -24,26 +24,17 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
+$.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
 
     options: {
+
         height: 540,
         width: 820,
 
-        modal: true,
-
-        mapping: null, //configuration from record_lookup_config.json
-        edit_fields: null,  //realtime values from edit form fields
-        edit_record: false,  //recordset of the current record being edited
-
         title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
 
-        htmlContent: 'lookupESTC_works.html',
-        helpContent: null, //help file in context_help folder
-
-        add_new_record: false, //if true it creates new record on selection
+        htmlContent: 'lookupESTC_works.html'
     },
-    recordList: null,
 
     //    
     //
@@ -51,50 +42,16 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
     _initControls: function () {
 
         let that = this;
-        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
-        this.options.resultList = $.extend(this.options.resultList,
-            {
-                recordDiv_class: 'recordDiv_blue',
-                eventbased: false,  //do not listent global events
+        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'});
 
-                multiselect: false, //(this.options.select_mode!='select_single'),
-
-                select_mode: 'select_single', //this.options.select_mode,
-                selectbutton_label: 'select!!', //this.options.selectbutton_label, for multiselect
-
-                view_mode: 'list',
-                show_viewmode: false,
-
-                entityName: this._entityName,
-                //view_mode: this.options.view_mode?this.options.view_mode:null,
-
-                pagesize: (this.options.pagesize > 0) ? this.options.pagesize : 9999999999999,
-                empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>',
-                renderer: this._rendererResultList,
-            });
-
-        //init record list
-        this.recordList = this.element.find('#div_result');
-        this.recordList.resultList(this.options.resultList);
-        this.element.parents('.ui-dialog').find('#btnDoAction').hide()
-        this._on(this.recordList, {
-            "resultlistonselect": function (event, selected_recs) {
-                window.hWin.HEURIST4.util.setDisabled(
-                    this.element.parents('.ui-dialog').find('#btnDoAction'),
-                    (selected_recs && selected_recs.length() != 1));
-            },
-            "resultlistondblclick": function (event, selected_recs) {
-                if (selected_recs && selected_recs.length() == 1) {
-                    this.doAction();
-                }
-            }
+        this.options.resultList = $.extend(this.options.resultList, {
+            empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>'
         });
+
+        this.element.parents('.ui-dialog').find('#btnDoAction').hide()
 
         this._on(this.element.find('#btnLookupLRC18C').button(), {
             'click': this._doSearch
-        });
-        this._on(this.element.find('input'), {
-            'keypress': this.startSearchOnEnterPress
         });
 
         // Set search button status based on the existence of input
@@ -124,55 +81,23 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
         return this._super();
     },
 
+    // getActionButtons
+
     /* Render Lookup query results */
     _rendererResultList: function (recordset, record) {
-        function fld(fldname, width) {
-            let s = recordset.fld(record, fldname);
-            s = s ? s : '';
-            if (width > 0) {
-                s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
-            }
-            return s;
-        }
 
-        let recID = fld('rec_ID');
-        let rectypeID = fld('rec_RecTypeID');
-        let recIcon = window.hWin.HAPI4.iconBaseURL + '1';
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-            + window.hWin.HAPI4.iconBaseURL + '1&version=thumb&quot;);"></div>';
+        recordset.setFld(record, 'rec_RecTypeID', this.options.mapping.rty_ID);
 
-        let html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
-            + html_thumb
-
-            + '<div class="recordIcons">'
-            + '<img src="' + window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif'
-            + '" class="rt-icon" style="background-image: url(&quot;' + recIcon + '&quot;);"/>'
-            + '</div>'
-
-            + '<div class="recordTitle" style="left:30px;right:2px">'
-            + record[5]
-            + '</div>'
-            + '</div>';
-        return html;
+        const rec_Title = recordset.fld(record, 'rec_Title');
+        recordset.setFld(record, 'rec_Title', `<div class="recordTitle" style="left:30px;right:2px">${rec_Title}</div>`);
     },
 
-    //
-    //
-    //
-    startSearchOnEnterPress: function (e) {
-        let code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 13) {
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
-            this._doSearch();
-        }
-    },
-    
     /* Show a confirmation window after user selects a record from the lookup query results */
     /* If the user clicks "Check Author", then call method _checkAuthor*/
     doAction: function () {
+
         let that = this;
-        
+
         let sels = this.recordList.resultList('getSelected', false); //get complete record that's been selected
         if(!sels){ return; }
 
@@ -185,6 +110,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
             let details = record.d;
 
             if(!details){
+
                 let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
                 let query_request = { 
                     serviceType: 'ESTC',
@@ -224,21 +150,17 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                 });
                 return;
             }
-            
-            let recpointers = [];
-            let term_id = '';
 
-            for(let i = 0; i < fields.length; i++){
+            for(const fld_Name of fields){
 
-                let dty_ID = this.options.mapping.fields[fields[i]];
-                let field_name = fields[i];
+                let dty_ID = this.options.mapping.fields[fld_Name];
 
                 if(dty_ID == '' || !dty_ID){
                     continue;
                 }
 
                 // defintions mapping can be found in the original version => lookupLRC18C.js
-                switch (field_name) {
+                switch (fld_Name) {
                     case 'title':
                         dlg_response[dty_ID] = details[1] ? details[1] : '';
                         break;
@@ -265,7 +187,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                 }
             }
 
-            term_id = '';
+            let term_id = '';
 
             if(details[298]){
                 term_id = details[298][0];
@@ -303,18 +225,13 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                             }
                         });
 
-                        that._context_on_close = dlg_response;
-                        that._as_dialog.dialog('close');
+                        that.closingAction(dlg_response);
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
             }else{
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                that._context_on_close = dlg_response;
-                that._as_dialog.dialog('close');
+                that.closingAction(dlg_response);
             }
 
         }else{
@@ -345,7 +262,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
 
         if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
             let sort_by_key = "'sortby'"
-            query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
+            query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
         }
 
         let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
@@ -373,11 +290,9 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
 
             if(response.status && response.status == window.hWin.ResponseStatus.OK){
                 if(response.data.count>response.data.reccount){
-                    window.hWin.HEURIST4.msg.showMsgDlg('Your request generated '
-                    + response.data.count+' results. Only first '
-                    + response.data.reccount 
-                    + ' have been retrieved. You may specify more restrictive criteria '
-                    + ' to narrow the result.');        
+                    window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
+                        + `Only first ${response.data.reccount} have been retrieved. `
+                        + 'You may specify more restrictive criteria to narrow the result.');
                     response.data.count = response.data.reccount;
                 }
                 that._onSearchResult(response);
@@ -386,14 +301,14 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
             }
         });
     },    
-    
-    /* Build each Works as a record to display list of records that can be selected by the user*/
-    _onSearchResult: function (response) {
-        this.recordList.show();
+
+    //
+    // Build each Works as a record to display list of records that can be selected by the user
+    //
+    _onSearchResult: function (response){
         if(!response.data){
             response.data = response;
         }
-        let recordset = new HRecordSet(response.data);
-        this.recordList.resultList('updateResultSet', recordset);
+        this._super(response.data, true);
     },
 });

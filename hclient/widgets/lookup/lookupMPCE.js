@@ -28,24 +28,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
+$.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
-        // default options
+    // default options
     options: {
         /* Setting popup size, based on user preference */
         height: (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_h', 780)),
         width:  (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_w', 1200)),
-        modal:  true,
-
-        mapping: null, //configuration from record_lookup_configuration.json
 
         title:  "Super Book (Work) Classification Tool for MPCE Project",
 
-        htmlContent: "lookupMPCE.html",
-        helpContent: null, //help file in context_help folder
-
-        add_new_record: false,
+        htmlContent: "lookupMPCE.html"
     },
+
+    action_button_label: 'Update Record',
 
     id_map: {   // ID Map for Record Types, Detail Types, and Vocabulary. Assigned in mapIds
         RT_Editions: null,
@@ -84,10 +80,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
     // Editions Variables
     editions_info: null,    // basic information about editions for this work
-
-    _init: function(){
-        this._super();
-    },
 
     //  
     // invoked from _init after loading of html content
@@ -266,13 +258,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         return this._super();
     },
 
-    _getActionButtons: function(){
-        let res = this._super(); //dialog buttons
-        res[1].text = window.hWin.HR('Update Record');
-       
-        return res;
-    },
-
     /*
         Update Record with selected Classifications and move back to Record Editor popup
 
@@ -285,11 +270,11 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());    // use this function to show "in progress" animation and cover-all screen for long operation
 
         // assign values to be sent back to edit form - format is similar to this.options.edit_fields
-        this._context_on_close = {};
-        this._context_on_close[this.id_map.DT_Category] = $('#category_field').val();
-        this._context_on_close[this.id_map.DT_Basis] = $('#basis_field').val();
-        this._context_on_close[this.id_map.DT_Notes] = $('#notes_field').val();
-        this._context_on_close[this.id_map.DT_Keywords] = (this.project_keywords.length == 0) ? null : this.project_keywords;
+        let res = {};
+        res[this.id_map.DT_Category] = $('#category_field').val();
+        res[this.id_map.DT_Basis] = $('#basis_field').val();
+        res[this.id_map.DT_Notes] = $('#notes_field').val();
+        res[this.id_map.DT_Keywords] = (this.project_keywords.length == 0) ? null : this.project_keywords;
 
         let idxRecent = (this.prev_works == null) ? -1 : this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]);
         let hasKeywords = !window.hWin.HEURIST4.util.isempty(this.project_keywords);
@@ -309,9 +294,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
             localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
         }
 
-        window.hWin.HEURIST4.msg.sendCoverallToBack();  // use this function to hide cover-all/loading
-
-        this._as_dialog.dialog('close');    // close popup
+        this.closingAction(res);
     },
 
     /** Keyword Assignment **/
