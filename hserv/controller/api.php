@@ -42,19 +42,31 @@ if(@$_REQUEST['method']){
 
 //allowed entities for entityScrud
 $entities = array(
+
+'rtg'=>'DefRecTypeGroups',
+'dtg'=>'DefDetailTypeGroups',
+'vcg'=>'DefVocabularyGroups',
+'rty'=>'DefRecTypes',
+'dty'=>'DefDetailTypes',
+'trm'=>'DefTerms',
+'rst'=>'DefRecStructure',
+'rem'=>'UsrReminders',
+'swf'=>'SysWorkflowRules',
+'tag'=>'UsrTags',
+
 'fieldgroups'=>'DefDetailTypeGroups',
-'fields'=>'DefDetailTypes',
 'rectypegroups'=>'DefRecTypeGroups',
 'rectypes'=>'DefRecTypes',
+'fields'=>'DefDetailTypes',
 'terms'=>'DefTerms',
 'reminders'=>'DbUsrReminders',
+
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
 'records'=>'Records', //only search allowed
 'login'=>'System',
 'logout'=>'System',
 
-'rem'=>'UsrReminders',
 'annotations'=>'Annotations', //for iiif annotation server
 'iiif'=>'iiif', //for iiif presenatation v3 (only GET allowed)
 );
@@ -66,8 +78,17 @@ $entities = array(
 
 //auth
     //usr_info
+    
+// http://127.0.0.1/h6-alpha/hserv/controller/entityScrud.php?db=osmak_9a&entity=rst&a=search&details=structure&rst_ID=12
+// http://127.0.0.1/h6-alpha/api/osmak_9a/rst/12
+// http://127.0.0.1/h6-alpha/api/osmak_9a/rem/1
+// http://127.0.0.1/h6-alpha/api/osmak_9a/tag?rtl_RecID=9
+        
+    
 
-if(count($requestUri)>0){
+if(count($requestUri)>0){ //splitted path
+// api/db/entity/recID
+
     $params = array();
     foreach($requestUri as $prm){
         $k = strpos($prm, '?');
@@ -92,7 +113,8 @@ if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
         exitWithError('API Not Found', 400);
     }
 
-}elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is parameter
+}
+elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is parameter
 
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $req_params['db'], $requestUri[2], @$requestUri[3]);

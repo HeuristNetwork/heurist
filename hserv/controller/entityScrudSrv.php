@@ -36,6 +36,7 @@
 
         if($entity_name!=null){
             $classname = 'hserv\entity\Db'.ucfirst($entity_name);
+            $params['entity'] = $entity_name;
             $entity = new $classname($system, $params);
         }
 
