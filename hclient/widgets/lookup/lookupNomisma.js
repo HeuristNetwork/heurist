@@ -63,7 +63,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         return this._super();
@@ -85,8 +85,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
             let s
 
             if(fldname == 'dates'){
-                s = recordset.fld(record, 'when.timespans.start') + ' to ' + recordset.fld(record, 'when.timespans.end') 
-                        + ' (end date: ' + recordset.fld(record, 'properties.closing_date') + ')';
+                s = `${recordset.fld(record, 'when.timespans.start')} to ${recordset.fld(record, 'when.timespans.end')}` 
+                        + ` (end date: ${recordset.fld(record, 'properties.closing_date')})`;
             }else{
                 s = recordset.fld(record, fldname);
             }
@@ -95,14 +95,14 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
             let title = s;
 
             if(fldname == 'properties.gazetteer_uri'){
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
+                s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View nomisma record';
             }else if(fldname == 'properties.count'){
-                s = '(count: ' + s + ')';
+                s = `(count: ${s})`;
             }
 
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
+                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
             }
             return s;
         }

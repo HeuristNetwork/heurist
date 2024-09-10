@@ -45,11 +45,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
     //
     _initControls: function(){
 
-        //this.element => dialog inner content
-        //this._as_dialog => dialog container
-
-        let that = this;
-
         // Extra field styling
         this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
@@ -59,25 +54,25 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         let $select = this.element.find('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
         let sel_options = {
-            'useHtmlSelect': false
+            useHtmlSelect: false
         };
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
 
         this._on(this.element.find('input[name="dump_field"]'), {
-            'change': function(){
+            change: function(){
                 let opt = this.element.find('input[name="dump_field"]:checked').val();
                 window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
             }
         });
 
         this._on(this.element.find('#save-settings').button(), {
-            'click': this._saveExtraSettings
+            click: this._saveExtraSettings
         });
 
         // Setup settings tab
@@ -98,8 +93,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         if(!options || window.hWin.HEURIST4.util.isempty(options)){
             options = {
-                'dump_record': true,
-                'dump_field': 'rec_ScratchPad'
+                dump_record: true,
+                dump_field: 'rec_ScratchPad'
             };
 
             need_save = true;
@@ -222,7 +217,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
             let s = recordset.fld(record, fldname);
             let authority_type = recordset.fld(record, 'authority_type');
 
-            s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
 
             let title = s;
 
@@ -273,104 +268,101 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         // get selected recordset
         let recset = this.recordList.resultList('getSelected', false);
 
-        if(recset && recset.length() == 1){
+        if(!recset || recset.length() != 1){
+            return;
+        }
 
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
+        let res = {};
+        let rec = recset.getFirstRecord(); // get selected record
 
-            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
-            res['ext_url'] = recset.fld(rec, 'auturl'); // add BnF URL
+        res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+        res['ext_url'] = recset.fld(rec, 'auturl'); // add BnF URL
 
-            // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(let k=0; k<map_flds.length; k++){
+        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
+        for(const fld_Name of map_flds){
 
-                let dty_ID = this.options.mapping.fields[map_flds[k]];
-                let val = recset.fld(rec, map_flds[k]);
-                let field_type = $Db.dty(dty_ID, 'dty_Type');
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            let val = recset.fld(rec, fld_Name);
+            let field_type = $Db.dty(dty_ID, 'dty_Type');
 
-                if(val != null){
+            if(val != null){
 
-                    let val_isArray = Array.isArray(val);
-                    let val_isObject = window.hWin.HEURIST4.util.isObject(val);
+                let val_isArray = Array.isArray(val);
+                let val_isObject = window.hWin.HEURIST4.util.isObject(val);
 
-                    // Match term labels with val, need to return the term's id to properly save its value
-                    if(field_type == 'enum'){
+                // Match term labels with val, need to return the term's id to properly save its value
+                if(field_type == 'enum'){
 
-                        if(val_isObject){ 
-                            val = Object.values(val);
-                        }else if(!val_isArray){
-                            val = [val];
-                        }
-
-                        let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-                        let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
-
-                        for(let i=0; i<val.length; i++){
-
-                            if(!Number.isInteger(+val[i])){
-                                continue;
-                            }
-
-                            for(let j = 0; j < term_Ids.length; j++){
-                                let trm_code = $Db.trm(term_Ids[j], 'trm_Code');
-                                if(trm_code == val[i]){
-                                    val[i] = term_Ids[j];
-                                    break;
-                                }
-                            }
-                        }
-                    }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
-
-                        let search_val = '';
-
-                        if(val_isObject){
-
-                            for(let key in val){
-
-                                if(search_val != ''){
-                                    search_val += ', ';
-                                }
-                                search_val += val[key];
-                            }
-                        }else if(val_isArray){
-                            search_val = val.join(', ');
-                        }else{
-                            search_val = val;
-                        }
-
-                        val = search_val;
-                    }
-                }
-
-                // Check that val and id are valid, add to response object
-                if(dty_ID>0 && val){
-
-                    if(!res[dty_ID]){
-                        res[dty_ID] = [];
+                    if(val_isObject){ 
+                        val = Object.values(val);
+                    }else if(!val_isArray){
+                        val = [val];
                     }
 
-                    if(window.hWin.HEURIST4.util.isObject(val)){
+                    let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
 
-                        let complete_val = '';
+                    for(const idx in val){
+
+                        if(!Number.isInteger(+val[idx])){
+                            continue;
+                        }
+
+                        let existing_term = $Db.getTermByCode(vocab_ID, +val[idx]);
+                        if(existing_term !== null){
+                            val[idx] = existing_term;
+                        }
+                    }
+                }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
+
+                    let search_val = '';
+
+                    if(val_isObject){
+
                         for(let key in val){
 
-                            if(complete_val != ''){
-                                complete_val += ', ';
+                            if(search_val != ''){
+                                search_val += ', ';
                             }
-                            complete_val += val[key];
+                            search_val += val[key];
                         }
-                    }else if(field_type != 'resource' && Array.isArray(val)){
-                        res[dty_ID].push(val.join(', '));
+                    }else if(val_isArray){
+                        search_val = val.join(', ');
                     }else{
-                        res[dty_ID].push(val);    
+                        search_val = val;
                     }
+
+                    val = search_val;
                 }
             }
 
-            this.closingAction(res);
+            // Check that val and id are valid, add to response object
+            if(dty_ID>0 && val){
+
+                if(!res[dty_ID]){
+                    res[dty_ID] = [];
+                }
+
+                if(window.hWin.HEURIST4.util.isObject(val)){
+
+                    let complete_val = '';
+                    for(let key in val){
+
+                        if(complete_val != ''){
+                            complete_val += ', ';
+                        }
+                        complete_val += val[key];
+                    }
+                }else if(field_type != 'resource' && Array.isArray(val)){
+                    res[dty_ID].push(val.join(', '));
+                }else{
+                    res[dty_ID].push(val);    
+                }
+            }
         }
+
+        this.closingAction(res);
     },
 
     /**
@@ -553,7 +545,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         fields = fields.concat('BnF_ID');
 
         // Parse json to Record Set
-        let i = 1; console.log(json_data);
+        let i = 1;
         for(const record of json_data.result){
 
             let recID = i++;

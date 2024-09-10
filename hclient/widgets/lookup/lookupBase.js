@@ -49,7 +49,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             show_viewmode: false,
             pagesize: 20, // number of records to display per page,
 
-            entityName: this._entityName,
+            entityName: 'Lookups',
 
             empty_remark: '<div style="padding:1em 0 1em 0">No records match the search</div>' // For empty results
         }

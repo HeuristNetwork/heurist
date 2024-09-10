@@ -163,12 +163,12 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
         this.element.parents('.ui-dialog').find('#btnDoAction').hide()
 
         this._on(this.element.find('#btnLookupLRC18C').button(), {
-            'click': this._doSearch
+            click: this._doSearch
         });
 
         // Set search button status based on the existence of input
         this._on(this.element.find('input'), {
-            'keyup': function(event){
+            keyup: function(event){
                 if($(event.target).val() != ''){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
                 }else{
@@ -230,109 +230,107 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
         let that = this;
 
         let sels = this.recordList.resultList('getSelected', true); //ids of selected records
+        if(!sels || sels.length == 0){
+            return;
+        }
 
-        if(sels && sels.length>0){
+        window.hWin.HEURIST4.msg.bringCoverallToFront( that._as_dialog.parent() );
 
-            window.hWin.HEURIST4.msg.bringCoverallToFront( that._as_dialog.parent() );
+        //avoid sync on every request
+        this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
 
-            //avoid sync on every request
-            this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
+        let request = { 
+            serviceType: 'ESTC',
+            action: 'import_records',
+            source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
+            org_db: window.hWin.HAPI4.database,
+            db: window.hWin.HAPI4.database,
+            q: `ids:${sels.join(',')}`,
+            rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
+            mapping: this.mapping_defs,
+            //session: session_id,
+            id: window.hWin.HEURIST4.util.random()
+        };
 
-            let request = { 
-                serviceType: 'ESTC',
-                action: 'import_records',
-                source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                org_db: window.hWin.HAPI4.database,
-                db: window.hWin.HAPI4.database,
-                q: 'ids:'+sels.join(','), 
-                rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
-                mapping: this.mapping_defs,
-                //session: session_id,
-                id: window.hWin.HEURIST4.util.random()
-            };
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
 
-            window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
+            response = window.hWin.HEURIST4.util.isJSON(response);
+            if(response.status == window.hWin.ResponseStatus.OK){
 
-                response = window.hWin.HEURIST4.util.isJSON(response);
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                    let target_dty_ID = that.options.mapping.fields['properties.edition']
-    
-                    let cnt = response.data.count_imported;
-                    let cnt_ex = response.data.cnt_exist;
-                    let cnt_i = response.data.count_ignored;
-                    let ids = response.data.ids;  //all
-                    let ids_ex  = response.data.exists; //skipped
-                    if(!ids_ex) ids_ex = [];
-                    
-                    let rec_ids = ids.concat(ids_ex);
-                    
-                    let query_request = { 
-                        serviceType: 'ESTC',
-                        org_db: window.hWin.HAPI4.database,
-                        db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                        q: 'ids:"' + rec_ids.join(',') + '"', 
-                        w: 'a',
-                        detail: 'header' 
-                    };
+                let target_dty_ID = that.options.mapping.fields['properties.edition']
 
-                    //find record titles
-                    window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
-                        function(response){
+                let cnt = response.data.count_imported;
+                let cnt_ex = response.data.cnt_exist;
+                let cnt_i = response.data.count_ignored;
+                let ids = response.data.ids;  //all
+                let ids_ex  = response.data.exists; //skipped
+                if(!ids_ex) ids_ex = [];
 
-                            response = window.hWin.HEURIST4.util.isJSON(response);
+                let rec_ids = ids.concat(ids_ex);
 
-                            if(response.status == window.hWin.ResponseStatus.OK){                        
-                                
-                                let sImported = '', sExisted = '';
-                                
-                                let recordset = new HRecordSet(response.data);
-                                
-                                if(cnt>0){
-                                    for(let i=0; i<ids.length; i++)
-                                    if(ids_ex.indexOf(ids[i])<0)
-                                    {
-                                        let rec = recordset.getById(ids[i])  
-                                        sImported += (`<li>${ids[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                                    }
-                                    sImported = `<ul>${sImported}</ul>`;
+                let query_request = { 
+                    serviceType: 'ESTC',
+                    org_db: window.hWin.HAPI4.database,
+                    db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                    q: `ids:"${rec_ids.join(',')}"`, 
+                    w: 'a',
+                    detail: 'header' 
+                };
+
+                //find record titles
+                window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
+                    function(response){
+
+                        response = window.hWin.HEURIST4.util.isJSON(response);
+
+                        if(response.status == window.hWin.ResponseStatus.OK){                        
+
+                            let sImported = '', sExisted = '';
+
+                            let recordset = new HRecordSet(response.data);
+
+                            if(cnt>0){
+                                for(let i=0; i<ids.length; i++)
+                                if(ids_ex.indexOf(ids[i])<0)
+                                {
+                                    let rec = recordset.getById(ids[i])  
+                                    sImported += (`<li>${ids[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
                                 }
-                                if(cnt_ex>0){
-                                    for(let i=0; i<ids_ex.length; i++)
-                                    {
-                                        let rec = recordset.getById(ids_ex[i])  
-                                        sExisted += (`<li>{ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                                    }
-                                    sExisted = `<ul>${sExisted}</ul>`;
-                                }
-
-                                window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
-                                    +`${cnt} record${(cnt>1?'s are':' is')} imported.<br>`
-                                        +sImported
-                                    +(cnt_ex>0
-                                    ?(`${cnt_ex} record${(cnt_ex>1?'s are':' is')} already in database`):'')
-                                        +sExisted
-                                    +(cnt_i>0
-                                    ?(`${cnt_i} record${(cnt_i>1?'s are':' is')}`
-                                    +' skipped. Either record type is not set in mapping or is missing from this database'):'')
-                                );
-
+                                sImported = `<ul>${sImported}</ul>`;
                             }
+                            if(cnt_ex>0){
+                                for(let i=0; i<ids_ex.length; i++)
+                                {
+                                    let rec = recordset.getById(ids_ex[i])  
+                                    sExisted += (`<li>{ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
+                                }
+                                sExisted = `<ul>${sExisted}</ul>`;
+                            }
+
+                            window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
+                                +`${cnt} record${(cnt>1?'s are':' is')} imported.<br>`
+                                    +sImported
+                                +(cnt_ex>0
+                                ?(`${cnt_ex} record${(cnt_ex>1?'s are':' is')} already in database`):'')
+                                    +sExisted
+                                +(cnt_i>0
+                                ?(`${cnt_i} record${(cnt_i>1?'s are':' is')}`
+                                +' skipped. Either record type is not set in mapping or is missing from this database'):'')
+                            );
+
                         }
-                    );
+                    }
+                );
 
-                    window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
+                window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
 
-                    this.closingAction({[target_dty_ID]: ids[0]});
-                    
-                }else{
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
-        }else{
-            window.hWin.HEURIST4.msg.showMsgDlg('Select at least one source record');
-        }        
+                this.closingAction({[target_dty_ID]: ids[0]});
+
+            }else{
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
     },
 
     /* Get the user input from lookupLRC18C.html and build the query string */
@@ -341,97 +339,45 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
 
         let that = this;
 
-        let edition_name = "",
-        edition_date = "",
-        edition_author = "",
-        edition_work = "",
-        edition_place = "",
-        estc_no = "",
-        vol_count = "",
-        vol_parts = "",
-        book_format = '';
+        let query = {"t":"30"}; //search for Books
 
-        let query_string;
-        let query;
-
-        const use_json_for_fulltext_search = true;
-        if(use_json_for_fulltext_search){ //use json format and fulltext search
-
-            query = {"t":"30"}; //search for Books
-
-            if (this.element.find('#edition_name').val() != '') {
-                query['f:1'] = `@${this.element.find('#edition_name').val()}`;
-            }
-            if (this.element.find('#edition_date').val() != '') {
-                query['f:9'] = this.element.find('#edition_date').val();
-            }
-            if (this.element.find('#edition_author').val() != '') {
-                //Standardised agent name  - 250
-                query['linkedto:15'] = {"t":"10", "f:250":this.element.find('#edition_author').val()};
-            }
-            if (this.element.find('#edition_work').val() != '') {
-                query['linkedto:284'] = {"t":"49","f:272":this.element.find('#edition_work').val()};
-                //Helsinki work ID - 272
-                //Project Record ID - 271
-            }
-            if (this.element.find('#edition_place').val() != '') {
-                query['linkedto:259'] = {"t":"12", "title":this.element.find('#edition_place').val()};
-            }
-            if (this.element.find('#vol_count').val() != '') {
-                query['f:137'] = `=${this.element.find('#vol_count').val()}`;
-            }
-            if (this.element.find('#vol_parts').val() != '') {
-                query['f:290'] = `=${this.element.find('#vol_parts').val()}`;
-            }
-            if (this.element.find('#select_bf').val()>0) {
-                query['f:256'] = this.element.find('#select_bf').val();
-            }
-            if (this.element.find('#estc_no').val() != '') {
-                query['f:254'] = `@${this.element.find('#estc_no').val()}`;
-            }
-
-            if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
-                let sort_by_key = "'sortby'"
-                query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
-            }
-
-            query_string = query;
-
-        }else{
-            if (this.element.find('#edition_name').val() != ''){
-                edition_name = ` f:1:"${this.element.find('#edition_name').val()}"`;
-            }
-            if (this.element.find('#edition_date').val() != ''){
-                edition_date = ` f:9: "${this.element.find('#edition_date').val()}"`;
-            }
-            if (this.element.find('#edition_author').val() != ''){
-                edition_author = ` f:15: "${this.element.find('#edition_author').val()}"`;
-            }
-            if (this.element.find('#edition_work').val() != ''){
-                edition_work = ` f:284: "${this.element.find('#edition_work').val()}"`;
-            }
-            if (this.element.find('#edition_place').val() != ''){
-                edition_place = ` f:259: "${this.element.find('#edition_place').val()}"`;
-            }
-            if (this.element.find('#vol_count').val() != ''){
-                vol_count = ` f:137: "${this.element.find('#vol_count').val()}"`;
-
-            }
-            if (this.element.find('#vol_parts').val() != ''){
-                vol_parts = ` f:290: "${this.element.find('#vol_parts').val()}"`;
-            }
-
-            let selectedBF = this.element.find('#select_bf option:selected').text()
-            if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
-                book_format = `all: ${selectedBF}`
-            } else {
-                book_format = ""
-            }
-            if (this.element.find('#estc_no').val() != '') {
-                estc_no = ` f:254: "${this.element.find('#estc_no').val()}"`;
-            }
-            query_string = `t:30 ${edition_name}${edition_date}${edition_author}${edition_work}${edition_place}${book_format}${estc_no}${vol_count}${vol_parts}`;
+        if (this.element.find('#edition_name').val() != '') {
+            query['f:1'] = `@${this.element.find('#edition_name').val()}`;
         }
+        if (this.element.find('#edition_date').val() != '') {
+            query['f:9'] = this.element.find('#edition_date').val();
+        }
+        if (this.element.find('#edition_author').val() != '') {
+            //Standardised agent name  - 250
+            query['linkedto:15'] = {"t":"10", "f:250":this.element.find('#edition_author').val()};
+        }
+        if (this.element.find('#edition_work').val() != '') {
+            query['linkedto:284'] = {"t":"49","f:272":this.element.find('#edition_work').val()};
+            //Helsinki work ID - 272
+            //Project Record ID - 271
+        }
+        if (this.element.find('#edition_place').val() != '') {
+            query['linkedto:259'] = {"t":"12", "title":this.element.find('#edition_place').val()};
+        }
+        if (this.element.find('#vol_count').val() != '') {
+            query['f:137'] = `=${this.element.find('#vol_count').val()}`;
+        }
+        if (this.element.find('#vol_parts').val() != '') {
+            query['f:290'] = `=${this.element.find('#vol_parts').val()}`;
+        }
+        if (this.element.find('#select_bf').val()>0) {
+            query['f:256'] = this.element.find('#select_bf').val();
+        }
+        if (this.element.find('#estc_no').val() != '') {
+            query['f:254'] = `@${this.element.find('#estc_no').val()}`;
+        }
+
+        if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
+            let sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
+        }
+
+        query_string = query;
 
         let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 

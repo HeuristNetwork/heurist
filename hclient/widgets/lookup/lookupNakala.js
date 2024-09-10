@@ -49,7 +49,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         let request = {
@@ -171,82 +171,47 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        let that = this;
-
         if(!recset){
             // get selected recordset
             recset = this.recordList.resultList('getSelected', false);
         }
 
-        if(recset && recset.length() == 1){
+        if(!recset || recset.length() != 1){
+            return;
+        }
 
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
+        let res = {};
+        let rec = recset.getFirstRecord(); // get selected record
 
-            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(let k=0; k<map_flds.length; k++){
+        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
+        for(const fld_Name of map_flds){
 
-                let dty_ID = this.options.mapping.fields[map_flds[k]];
-                let val = recset.fld(rec, map_flds[k]);
-                let field_type = $Db.dty(dty_ID, 'dty_Type');
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            let val = recset.fld(rec, fld_Name);
+            let field_type = $Db.dty(dty_ID, 'dty_Type');
 
-                if(val != null){
-
-                    if(field_type == 'resource' && !res['ext_url']){
-                        res['ext_url'] = recset.fld(rec, 'rec_url');
-                    }
-
-                    // Match term labels with val, need to return the term's id to properly save its value
-                    if(field_type == 'enum'){
-
-                        if(window.hWin.HEURIST4.util.isObject(val)){ 
-                            val = Object.values(val);
-                        }
-
-                        let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-                        let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
-
-                        for(let i=0; i<term_Ids.length; i++){
-
-                            let trm_Label = $Db.trm(term_Ids[i], 'trm_Label').toLowerCase();
-
-                            if(Array.isArray(val)){ // multiple values
-
-                                for(let j = 0; j < val.length; j++){
-
-                                    if(val[j].toLowerCase() == trm_Label){
-                                        val[j] = term_Ids[i];
-                                    }
-                                }
-                            }else if(val){ // In case of one single value
-                                
-                                if(val.toLowerCase() == trm_Label){
-                                    val = term_Ids[i];
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Check that val and id are valid, add to response object
-                if(dty_ID>0 && val){
-
-                    if(!res[dty_ID]){
-                        res[dty_ID] = [];
-                    }
-
-                    if(window.hWin.HEURIST4.util.isObject(val)){
-                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
-                    }else{
-                        res[dty_ID] = res[dty_ID].concat(val);    
-                    }
-                }
+            if(val != null && field_type == 'resource' && !res['ext_url']){
+                res['ext_url'] = recset.fld(rec, 'rec_url');
             }
 
-            this.closingAction(res);
+            // Check that val and id are valid, add to response object
+            if(dty_ID>0 && val){
+
+                if(!res[dty_ID]){
+                    res[dty_ID] = [];
+                }
+
+                if(window.hWin.HEURIST4.util.isObject(val)){
+                    res[dty_ID] = res[dty_ID].concat(Object.values(val));
+                }else{
+                    res[dty_ID] = res[dty_ID].concat(val);    
+                }
+            }
         }
+
+        this.closingAction(res);
     },
 
     /**

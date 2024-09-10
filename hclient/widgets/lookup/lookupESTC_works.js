@@ -51,12 +51,12 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
         this.element.parents('.ui-dialog').find('#btnDoAction').hide()
 
         this._on(this.element.find('#btnLookupLRC18C').button(), {
-            'click': this._doSearch
+            click: this._doSearch
         });
 
         // Set search button status based on the existence of input
         this._on(this.element.find('input'), {
-            'keyup': function(event){
+            keyup: function(event){
 
                 let $inputs_with_value = that.element.find('input').filter(function(){ return $(this).val(); });
 
@@ -83,7 +83,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
 
     // getActionButtons
 
-    /* Render Lookup query results */
+    // Render Lookup query results
     _rendererResultList: function (recordset, record) {
 
         recordset.setFld(record, 'rec_RecTypeID', this.options.mapping.rty_ID);
@@ -92,155 +92,149 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
         recordset.setFld(record, 'rec_Title', `<div class="recordTitle" style="left:30px;right:2px">${rec_Title}</div>`);
     },
 
-    /* Show a confirmation window after user selects a record from the lookup query results */
-    /* If the user clicks "Check Author", then call method _checkAuthor*/
+    // Show a confirmation window after user selects a record from the lookup query results
+    // If the user clicks "Check Author", then call method _checkAuthor
     doAction: function () {
 
         let that = this;
 
         let sels = this.recordList.resultList('getSelected', false); //get complete record that's been selected
-        if(!sels){ return; }
+        if(!sels || sels.length() != 1){ return; }
 
         let dlg_response = {};
         let fields = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-        if(sels.length() == 1){
+        let record = sels.getFirstRecord();
+        let details = record.d;
 
-            let record = sels.getFirstRecord();
-            let details = record.d;
+        if(!details){
 
-            if(!details){
+            let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
+            let query_request = { 
+                serviceType: 'ESTC',
+                org_db: window.hWin.HAPI4.database,
+                db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                q: 'ids:' + sel_Rec_ID, 
+                detail: 'detail' 
+            };
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-                let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
-                let query_request = { 
-                    serviceType: 'ESTC',
-                    org_db: window.hWin.HAPI4.database,
-                    db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                    q: 'ids:' + sel_Rec_ID, 
-                    detail: 'detail' 
-                };
+            window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
                 
-                window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                response = window.hWin.HEURIST4.util.isJSON(response);
 
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
-                    response = window.hWin.HEURIST4.util.isJSON(response);
-
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        let recordset = new HRecordSet(response.data);
-                        let record = recordset.getFirstRecord();
-                        if(!record || !record.d){
-                            window.hWin.HEURIST4.msg.showMsgErr({
-                                message: 'We are having trouble performing your request on the ESTC server. '
-                                        +`Impossible obtain details for selected record ${sel_Rec_ID}`,
-                                error_title: 'Issues with ESTC server',
-                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                            });
-                        }else{
-                            let recset = that.recordList.resultList('getRecordSet');
-                            recset.addRecord2(sel_Rec_ID, record);
-                            that.doAction();        
-                        }
+                    let recordset = new HRecordSet(response.data);
+                    let record = recordset.getFirstRecord();
+                    if(!record || !record.d){
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'We are having trouble performing your request on the ESTC server. '
+                                    +`Impossible obtain details for selected record ${sel_Rec_ID}`,
+                            error_title: 'Issues with ESTC server',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        let recset = that.recordList.resultList('getRecordSet');
+                        recset.addRecord2(sel_Rec_ID, record);
+                        that.doAction();        
                     }
-                });
-                return;
-            }
-
-            for(const fld_Name of fields){
-
-                let dty_ID = this.options.mapping.fields[fld_Name];
-
-                if(dty_ID == '' || !dty_ID){
-                    continue;
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
+            });
+            return;
+        }
 
-                // defintions mapping can be found in the original version => lookupLRC18C.js
-                switch (fld_Name) {
-                    case 'title':
-                        dlg_response[dty_ID] = details[1] ? details[1] : '';
-                        break;
-                    case 'extendedTitle':
-                        dlg_response[dty_ID] = details[276] ? details[276] : '';
-                        break;
-                    case 'projectId':
-                        dlg_response[dty_ID] = details[271] ? details[271] : '';
-                        break;
-                    case 'helsinkiTitle':
-                        dlg_response[dty_ID] = details[273] ? details[273] : '';
-                        break;
-                    case 'helsinkiId':
-                        dlg_response[dty_ID] = details[272] ? details[272] : '';
-                        break;
-                    case 'helsinkiIdAssignation':
-                        dlg_response[dty_ID] = details[298] ? details[298] : '';
-                        break;
-                    case 'helsinkiRawData':
-                        dlg_response[dty_ID] = details[236] ? details[236] : '';
-                        break;
-                    default:
-                        break;
-                }
+        for(const fld_Name of fields){
+
+            let dty_ID = this.options.mapping.fields[fld_Name];
+
+            if(dty_ID == '' || !dty_ID){
+                continue;
             }
 
-            let term_id = '';
-
-            if(details[298]){
-                term_id = details[298][0];
+            // defintions mapping can be found in the original version => lookupLRC18C.js
+            switch (fld_Name) {
+                case 'title':
+                    dlg_response[dty_ID] = details[1] ? details[1] : '';
+                    break;
+                case 'extendedTitle':
+                    dlg_response[dty_ID] = details[276] ? details[276] : '';
+                    break;
+                case 'projectId':
+                    dlg_response[dty_ID] = details[271] ? details[271] : '';
+                    break;
+                case 'helsinkiTitle':
+                    dlg_response[dty_ID] = details[273] ? details[273] : '';
+                    break;
+                case 'helsinkiId':
+                    dlg_response[dty_ID] = details[272] ? details[272] : '';
+                    break;
+                case 'helsinkiIdAssignation':
+                    dlg_response[dty_ID] = details[298] ? details[298] : '';
+                    break;
+                case 'helsinkiRawData':
+                    dlg_response[dty_ID] = details[236] ? details[236] : '';
+                    break;
+                default:
+                    break;
             }
+        }
 
-            if(term_id != ''){
+        let term_id = '';
 
-                let request = {
-                    serviceType: 'ESTC',
-                    db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                    a: 'search',
-                    entity: 'defTerms',
-                    details: 'list', //name
-                    request_id: window.hWin.HEURIST4.util.random(),
-                    trm_ID: term_id
-                };
+        if(details[298]){
+            term_id = details[298][0];
+        }
 
-                window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-                
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+        if(term_id != ''){
 
-                    window.hWin.HEURIST4.msg.sendCoverallToBack(); 
-                    response = window.hWin.HEURIST4.util.isJSON(response);
+            let request = {
+                serviceType: 'ESTC',
+                db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                a: 'search',
+                entity: 'defTerms',
+                details: 'list', //name
+                request_id: window.hWin.HEURIST4.util.random(),
+                trm_ID: term_id
+            };
 
-                    if(response.status == window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+            
+            window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
-                        let recordset = new HRecordSet(response.data);
-                        recordset.each2(function(id, record){
-                            for(let i in dlg_response){
-                                for(let j = 0; j < dlg_response[i].length; j++){
-                                    if(dlg_response[i][j] == id){
-                                        dlg_response[i][j] = record['trm_Label'];
-                                    }
+                window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+                response = window.hWin.HEURIST4.util.isJSON(response);
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    let recordset = new HRecordSet(response.data);
+                    recordset.each2(function(id, record){
+                        for(let i in dlg_response){
+                            for(let j = 0; j < dlg_response[i].length; j++){
+                                if(dlg_response[i][j] == id){
+                                    dlg_response[i][j] = record['trm_Label'];
                                 }
                             }
-                        });
+                        }
+                    });
 
-                        that.closingAction(dlg_response);
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-            }else{
-                that.closingAction(dlg_response);
-            }
-
+                    that.closingAction(dlg_response);
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
         }else{
-            window.hWin.HEURIST4.msg.showMsgDlg('Select at least one source record');
-        }        
+            that.closingAction(dlg_response);
+        }
     },
 
-    /* Get the user input from lookupESTC_works.html and build the query string */
-    /* Then lookup ESTC database if the query produces any search results */
+    // Get the user input from lookupESTC_works.html and build the query string
+    // Then lookup ESTC database if the query produces any search results
     _doSearch: function () {
 
         let that = this;

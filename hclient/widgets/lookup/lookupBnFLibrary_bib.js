@@ -56,25 +56,25 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         let $select = this.element.find('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
         let sel_options = {
-            'useHtmlSelect': false
+            useHtmlSelect: false
         };
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
 
         this._on(this.element.find('input[name="dump_field"]'), {
-            'change': function(){
+            change: function(){
                 let opt = this.element.find('input[name="dump_field"]:checked').val();
                 window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
             }
         });
 
         this._on(this.element.find('#save-settings').button(), {
-            'click': this._saveExtraSettings
+            click: this._saveExtraSettings
         });
 
         // Setup settings tab
@@ -95,9 +95,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
         if(!options || window.hWin.HEURIST4.util.isempty(options)){
             options = {
-                'author_codes': '',
-                'dump_record': true,
-                'dump_field': 'rec_ScratchPad'
+                author_codes: '',
+                dump_record: true,
+                dump_field: 'rec_ScratchPad'
             };
 
             need_save = true;
@@ -379,6 +379,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         let that = this;
         let field_name, val; // in case timeout completes 
 
+        // get selected recordset
+        let recset = this.recordList.resultList('getSelected', false);
+
+        if(!recset || recset.length() != 1){
+            return;
+        }
+
         this.action_timeout = setTimeout(function(){
 
             window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -402,179 +409,166 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
             });
         }, 20000); // set timeout to 20 seconds
 
-        // get selected recordset
-        let recset = this.recordList.resultList('getSelected', false);
+        let res = {};
+        let rec = recset.getFirstRecord(); // get selected record
 
-        if(recset && recset.length() == 1){
+        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
+        if(this.options.mapping.options.dump_record == true){
+            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
+        }
+        res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
 
-            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
+        for(const fld_Name of map_flds){
 
-            if(this.options.mapping.options.dump_record == true){
-                res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
-            }
-            res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            val = recset.fld(rec, fld_Name);
+            let field_type = $Db.dty(dty_ID, 'dty_Type');
 
-            // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(let k=0; k<map_flds.length; k++){
+            if(val != null && dty_ID != ''){
 
-                field_name = map_flds[k];
-                let dty_ID = this.options.mapping.fields[field_name];
-                val = recset.fld(rec, field_name);
-                let field_type = $Db.dty(dty_ID, 'dty_Type');
-
-                if(val != null && dty_ID != ''){
-
-                    // Convert to array
-                    if(window.hWin.HEURIST4.util.isObject(val)){
-                       
-                        val = Object.values(val);
-                    }else if(!Array.isArray(val)){
-                        val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
-                        val = [val];
-                    }
-
-                    if(field_name == 'author' || field_name == 'contributor'){ // special treatment for author field
-
-                        for(let i = 0; i < val.length; i++){
-
-                            let value = '';
-                            let search = '';
-                            let role = '';
-                            let cur_val = val[i];
-
-                            if($.isPlainObject(cur_val)){
-                                if(cur_val['firstname']){
-                                    value = cur_val['firstname'];
-                                }
-                                if(cur_val['surname']){
-                                    value = (value != '') ? value + ' ' + cur_val['surname'] : cur_val['surname'];
-                                }
-                                search = value;
-                                if(cur_val['active']){
-                                    value = (value != '') ? `${value} [${cur_val['active']}]` : `No Name, years active: ${cur_val['active']}`;
-                                }
-                                if(cur_val['id']){
-                                    value = (value != '') ? `${value} (id: ${cur_val['id']})` : `id: ${cur_val['id']}`;
-                                }
-                                if(cur_val['role']){
-                                    role = (value != '') ? cur_val['role'] : '';
-                                }
-                            }else{
-                                value = cur_val;
-                                search = cur_val;
-                            }
-
-                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
-                                if(field_type == 'resource'){
-                                    val[i] = {'value': value, 'search': search};
-                                }else if(field_type == 'relmarker'){
-                                    val[i] = {'value': value, 'search': search, 'relation': role};
-                                }else{
-                                    val[i] = value;
-                                }
-                            }
-                        }
-
-                        if(!res[dty_ID]){
-                            res[dty_ID] = [];
-                        }
-                        res[dty_ID] = res[dty_ID].concat(val);
-
-                        continue;
-                    }else if(field_name == 'publisher'){
-
-                        for(let i = 0; i < val.length; i++){
-
-                            let value = '';
-                            let search = '';
-                            let cur_val = val[i];
-
-                            if($.isPlainObject(cur_val)){
-                                if(cur_val['name']){
-                                    value = cur_val['name'];
-                                    search = value;
-                                }
-                                if(cur_val['location']){
-                                    value = (value != '') ? `${value} ${cur_val['location']}` : cur_val['location'];
-                                    search = (search != '') ? search : value;
-                                }
-                            }
-
-                            if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
-
-                                if(field_type == 'resource'){
-                                    val[i] = {'value': value, 'search': search};
-                                }else if(field_type == 'relmarker'){
-                                    val[i] = {'value': value, 'search': search, 'relation': ''};
-                                }else{
-                                    val[i] = value;
-                                }
-                            }
-                        }
-
-                        if(!res[dty_ID]){
-                            res[dty_ID] = [];
-                        }
-                        res[dty_ID] = res[dty_ID].concat(val);
-
-                        continue;
-                    }else if(field_name == 'language'){ // handle if language equals '###'
-
-                        for(let i = 0; i < val.length; i++){
-                            if(val[i] == '###' || val[i] == 'und'){
-                                val[i] = 'unknown';
-                            }
-                        }
-                    }
-
-                    if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
-
-                        if(window.hWin.HEURIST4.util.isObject(val)){ 
-                            val = Object.values(val);
-                        }else if(!Array.isArray(val)){
-                            val = [val];
-                        }
-
-                        let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-                        let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
-
-                        for(let i=0; i<val.length; i++){
-
-                            if(!Number.isInteger(+val[i])){
-                                continue;
-                            }
-
-                            for(let j = 0; j < term_Ids.length; j++){
-                                let trm_code = $Db.trm(term_Ids[j], 'trm_Code');
-                                if(trm_code == val[i]){
-                                    val[i] = term_Ids[j];
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                // Convert to array
+                if(window.hWin.HEURIST4.util.isObject(val)){
+                    
+                    val = Object.values(val);
+                }else if(!Array.isArray(val)){
+                    val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
+                    val = [val];
                 }
 
-                // Check that val and id are valid, add to response object
-                if(dty_ID > 0 && val){
+                if(fld_Name == 'author' || fld_Name == 'contributor'){ // special treatment for author field
+
+                    for(const cur_val of val){
+
+                        let value = '';
+                        let search = '';
+                        let role = '';
+
+                        if($.isPlainObject(cur_val)){
+                            if(cur_val['firstname']){
+                                value = cur_val['firstname'];
+                            }
+                            if(cur_val['surname']){
+                                value = (value != '') ? `${value} ${cur_val['surname']}` : cur_val['surname'];
+                            }
+                            search = value;
+                            if(cur_val['active']){
+                                value = (value != '') ? `${value} [${cur_val['active']}]` : `No Name, years active: ${cur_val['active']}`;
+                            }
+                            if(cur_val['id']){
+                                value = (value != '') ? `${value} (id: ${cur_val['id']})` : `id: ${cur_val['id']}`;
+                            }
+                            if(cur_val['role']){
+                                role = (value != '') ? cur_val['role'] : '';
+                            }
+                        }else{
+                            value = cur_val;
+                            search = cur_val;
+                        }
+
+                        if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
+                            if(field_type == 'resource'){
+                                val[i] = {'value': value, 'search': search};
+                            }else if(field_type == 'relmarker'){
+                                val[i] = {'value': value, 'search': search, 'relation': role};
+                            }else{
+                                val[i] = value;
+                            }
+                        }
+                    }
 
                     if(!res[dty_ID]){
                         res[dty_ID] = [];
                     }
+                    res[dty_ID] = res[dty_ID].concat(val);
 
-                    if(window.hWin.HEURIST4.util.isObject(val)){
-                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
-                    }else{
-                        res[dty_ID] = res[dty_ID].concat(val);    
+                    continue;
+                }else if(fld_Name == 'publisher'){
+
+                    for(const cur_val of val){
+
+                        let value = '';
+                        let search = '';
+
+                        if($.isPlainObject(cur_val)){
+                            if(cur_val['name']){
+                                value = cur_val['name'];
+                                search = value;
+                            }
+                            if(cur_val['location']){
+                                value = (value != '') ? `${value} ${cur_val['location']}` : cur_val['location'];
+                                search = (search != '') ? search : value;
+                            }
+                        }
+
+                        if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
+
+                            if(field_type == 'resource'){
+                                val[i] = {'value': value, 'search': search};
+                            }else if(field_type == 'relmarker'){
+                                val[i] = {'value': value, 'search': search, 'relation': ''};
+                            }else{
+                                val[i] = value;
+                            }
+                        }
+                    }
+
+                    if(!res[dty_ID]){
+                        res[dty_ID] = [];
+                    }
+                    res[dty_ID] = res[dty_ID].concat(val);
+
+                    continue;
+                }else if(fld_Name == 'language'){ // handle if language equals '###'
+
+                    for(const idx in val){
+                        if(val[idx] == '###' || val[idx] == 'und'){
+                            val[idx] = 'unknown';
+                        }
+                    }
+                }
+
+                if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
+
+                    if(window.hWin.HEURIST4.util.isObject(val)){ 
+                        val = Object.values(val);
+                    }else if(!Array.isArray(val)){
+                        val = [val];
+                    }
+
+                    let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+
+                    for(const idx in val){
+
+                        if(!Number.isInteger(+val[idx])){
+                            continue;
+                        }
+
+                        let existing_term = $Db.getTermByCode(vocab_ID, +val[idx]);
+                        if(existing_term !== null){
+                            val[idx] = existing_term;
+                        }
                     }
                 }
             }
 
-            this.closingAction(res);
+            // Check that val and id are valid, add to response object
+            if(dty_ID > 0 && val){
+
+                if(!res[dty_ID]){
+                    res[dty_ID] = [];
+                }
+
+                if(window.hWin.HEURIST4.util.isObject(val)){
+                    res[dty_ID] = res[dty_ID].concat(Object.values(val));
+                }else{
+                    res[dty_ID] = res[dty_ID].concat(val);    
+                }
+            }
         }
+
+        this.closingAction(res);
     },
 
 
@@ -762,13 +756,13 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
             let values = [recID, this.options.mapping.rty_ID];
 
             // Add current record details, field by field
-            for(let k=0; k<map_flds.length; k++){
+            for(const fld_Name of map_flds){
 
                 // With the current setup for API search, the 'Rights' field is no longer sent
-                if(map_flds[k]=='rights'){
+                if(fld_Name == 'rights'){
                     values.push(null);
                 }else{ // just add field details
-                    values.push(record[map_flds[k]]);
+                    values.push(record[fld_Name]);
                 }
             }
 

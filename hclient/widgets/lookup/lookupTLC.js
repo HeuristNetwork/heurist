@@ -43,13 +43,11 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     //
     _initControls: function(){
 
-        let that = this;
-
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
         // adding additional event listeners
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         return this._super();
@@ -97,21 +95,21 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         // retrieve selected record/s
         let sel = this.recordList.resultList('getSelected', false);
+        if(!sel || sel.length() != 1){
+            return;
+        }
 
-        if(sel && sel.length() == 1){
+        if(this.options.add_new_record){
 
-            if(this.options.add_new_record){
+            //create new record 
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-                //create new record 
-                window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+            let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
 
-                let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
-
-                this._addNewRecord(rectype_id, sel);                     
-            }else{
-                //pass mapped values and close dialog
-                this.closingAction(sel);
-            }
+            this._addNewRecord(rectype_id, sel);                     
+        }else{
+            //pass mapped values and close dialog
+            this.closingAction(sel);
         }
     },
     
@@ -197,8 +195,8 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         fields = fields.concat(map_flds);
         fields = fields.concat('recordLink');
 
-        for(let k=0; k<map_flds.length; k++){
-            map_flds[k] = map_flds[k].split('.'); 
+        for(const idx in map_flds){
+            map_flds[idx] = map_flds[idx].split('.'); 
         }
 
         if(!geojson_data.features) geojson_data.features = geojson_data;
@@ -211,18 +209,18 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
             let hasGeo = false;
             let values = [recID, this.options.mapping.rty_ID];
-            for(let k=0; k<map_flds.length; k++){
+            for(const fld_Name of map_flds){
 
-                let val = feature[ map_flds[k][0] ];
+                let val = feature[ fld_Name[0] ];
 
-                for(let m=1; m<map_flds[k].length; m++){
-                    if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
-                        val = val[ map_flds[k][m] ];
+                for(const fld_Part of fld_Name){
+                    if(val && !window.hWin.HEURIST4.util.isnull( val[ fld_Part ])){
+                        val = val[fld_Part];
                     }
                 }      
 
                 // Special handling for Geo Objects
-                if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Name]){
                     if(!window.hWin.HEURIST4.util.isempty(val)){
                         val = {"type": "Feature", "geometry": val};
                         let wkt = stringifyMultiWKT(val);    

@@ -58,7 +58,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         });
 
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         return this._super();
@@ -83,12 +83,12 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
             let title = s;
 
             if(fldname == 'recordLink'){
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
+                s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View geoname record';
             }
 
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
+                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
             }
             return s;
         }
@@ -159,14 +159,14 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         let xml_response = 0;
 
         if(this.element.find('#inpt_id').val()!=''){
-            sURL += 'get?geonameId=' + encodeURIComponent(this.element.find('#inpt_id').val());
+            sURL += `get?geonameId=${encodeURIComponent(this.element.find('#inpt_id').val())}`;
             xml_response = 1;
         }else{
 
             sURL += 'searchJSON?';
 
             if(this.element.find('#inpt_query').val()!=''){
-                sURL += '&q=' + encodeURIComponent(this.element.find('#inpt_query').val());
+                sURL += `&q=${encodeURIComponent(this.element.find('#inpt_query').val())}`;
             }
             if(this.element.find('#inpt_country').val()!=''){
     
@@ -206,7 +206,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
                 }
     
                 if(_countryCode != ''){
-                    sURL += '&country=' + _countryCode; 
+                    sURL += `&country=${_countryCode}`; 
                 }
             }
         }

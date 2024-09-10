@@ -66,7 +66,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         this._sel_elements = {
@@ -401,57 +401,58 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         // get selected recordset
         let recset = this.recordList.resultList('getSelected', false);
 
-        if(recset && recset.length() == 1){
-
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
-
-            res['ext_url'] = recset.fld(rec, 'uri'); // add Opentheso link
-
-            for(const field in this.options.mapping.fields){
-
-                let dtyID = this.options.mapping.fields[field];
-
-                if(window.hWin.HEURIST4.util.isempty(dtyID)) { continue; }
-                else if(!res[dtyID]) { res[dtyID] = []; }
-
-                if(field == 'term_field'){
-    
-                    let type = $Db.dty(dtyID, 'dty_Type');
-                    let trm_val = {
-                        'label': recset.fld(rec, 'label'),
-                        'desc': recset.fld(rec, 'desc'),
-                        'code': recset.fld(rec, 'code'),
-                        'uri': recset.fld(rec, 'uri'),
-                        'translations': recset.fld(rec, 'translations')
-                    };
-    
-                    if(type != 'enum'){
-                        trm_val = type == 'blocktext' ? JSON.stringify(trm_val) : trm_val['label']; // Object.values(trm_val).join(' ; ')
-                    }
-    
-                    trm_val = Array.isArray(trm_val) ? trm_val : [trm_val];
-
-                    res[dtyID] = res[dtyID].concat(trm_val);
-                }else{
-
-                    let fld = field.slice(5);
-
-                    let value = recset.fld(rec, fld);
-
-                    if(fld == 'translations'){
-                        value = Object.keys(value).map((lang) => `${lang}: ${value[lang]}`);
-                    }
-
-                    value = Array.isArray(value) ? value : [value];
-
-
-                    res[dtyID] = res[dtyID].concat(value);
-                }
-            }
-
-            this.closingAction(res);
+        if(!recset || recset.length() != 1){
+            return;
         }
+
+        let res = {};
+        let rec = recset.getFirstRecord(); // get selected record
+
+        res['ext_url'] = recset.fld(rec, 'uri'); // add Opentheso link
+
+        for(const field in this.options.mapping.fields){
+
+            let dtyID = this.options.mapping.fields[field];
+
+            if(window.hWin.HEURIST4.util.isempty(dtyID)) { continue; }
+            else if(!res[dtyID]) { res[dtyID] = []; }
+
+            if(field == 'term_field'){
+
+                let type = $Db.dty(dtyID, 'dty_Type');
+                let trm_val = {
+                    label: recset.fld(rec, 'label'),
+                    desc: recset.fld(rec, 'desc'),
+                    code: recset.fld(rec, 'code'),
+                    uri: recset.fld(rec, 'uri'),
+                    translations: recset.fld(rec, 'translations')
+                };
+
+                if(type != 'enum'){
+                    trm_val = type == 'blocktext' ? JSON.stringify(trm_val) : trm_val['label']; // Object.values(trm_val).join(' ; ')
+                }
+
+                trm_val = Array.isArray(trm_val) ? trm_val : [trm_val];
+
+                res[dtyID] = res[dtyID].concat(trm_val);
+            }else{
+
+                let fld = field.slice(5);
+
+                let value = recset.fld(rec, fld);
+
+                if(fld == 'translations'){
+                    value = Object.keys(value).map((lang) => `${lang}: ${value[lang]}`);
+                }
+
+                value = Array.isArray(value) ? value : [value];
+
+
+                res[dtyID] = res[dtyID].concat(value);
+            }
+        }
+
+        this.closingAction(res);
     },
 
     /**

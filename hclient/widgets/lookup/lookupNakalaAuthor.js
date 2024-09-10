@@ -44,14 +44,9 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         // Action button styling
         this.element.find('#btnStartSearch').addClass("ui-button-action");
 
-        // Prepare result list options
-        this.options.resultList = $.extend(this.options.resultList, {
-            
-        });
-
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         return this._super();
@@ -138,36 +133,37 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
             recset = this.recordList.resultList('getSelected', false);
         }
 
-        if(recset && recset.length() == 1){
+        if(!recset || recset.length() != 1){
+            return;
+        }
 
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
+        let res = {};
+        let rec = recset.getFirstRecord(); // get selected record
 
-            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-            // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(let k=0; k<map_flds.length; k++){
+        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
+        for(const fld_Name of map_flds){
 
-                let dty_ID = this.options.mapping.fields[map_flds[k]];
-                let val = recset.fld(rec, map_flds[k]);
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            let val = recset.fld(rec, fld_Name);
 
-                // Check that val and id are valid, add to response object
-                if(dty_ID>0 && val){
+            // Check that val and id are valid, add to response object
+            if(dty_ID>0 && val){
 
-                    if(!res[dty_ID]){
-                        res[dty_ID] = [];
-                    }
+                if(!res[dty_ID]){
+                    res[dty_ID] = [];
+                }
 
-                    if(window.hWin.HEURIST4.util.isObject(val)){
-                        res[dty_ID] = res[dty_ID].concat(Object.values(val));
-                    }else{
-                        res[dty_ID] = res[dty_ID].concat(val);    
-                    }
+                if(window.hWin.HEURIST4.util.isObject(val)){
+                    res[dty_ID] = res[dty_ID].concat(Object.values(val));
+                }else{
+                    res[dty_ID] = res[dty_ID].concat(val);    
                 }
             }
-
-            this.closingAction(res);
         }
+
+        this.closingAction(res);
     },
 
     /**

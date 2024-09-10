@@ -62,7 +62,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
         });
 
         this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
+            click: this._doSearch
         });
 
         return this._super();
@@ -87,12 +87,12 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
             let title = s;
 
             if(fldname == 'googleMapLink'){
-                s = '<a href="' + s + '" target="_blank"> google maps </a>';
+                s = `<a href="${s}" target="_blank" rel="noopener"> google maps </a>`;
                 title = 'View location via Google Maps';
             }
 
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
+                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
             }
             return s;
         }
@@ -162,10 +162,10 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
         let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?';
 
         if(this.element.find('#inpt_postalcode').val()!=''){
-            sURL += '&postalcode=' + this.element.find('#inpt_postalcode').val(); 
+            sURL += `&postalcode=${this.element.find('#inpt_postalcode').val()}`; 
         }
         if(this.element.find('#inpt_placename').val()!=''){
-            sURL += '&placename=' + this.element.find('#inpt_placename').val();
+            sURL += `&placename=${this.element.find('#inpt_placename').val()}`;
         }
         if(this.element.find('#inpt_country').val()!=''){
 
@@ -205,7 +205,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
             }
 
             if(_countryCode != ''){
-                sURL += '&country=' + _countryCode; 
+                sURL += `&country=${_countryCode}`; 
             }
         }
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
