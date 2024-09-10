@@ -377,7 +377,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
         }
 
-        query_string = query;
+        let query_string = query;
 
         let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 

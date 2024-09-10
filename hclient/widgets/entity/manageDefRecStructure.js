@@ -858,7 +858,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         */
         this._on( this.menues['menu_'+name], {
             //mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
-            mouseleave : function(){this._hideMenu(this.menues['menu_'+name])}
+            mouseleave : function(){
+                    this._hideMenu(this.menues['menu_'+name])
+            }
         });
 
     },

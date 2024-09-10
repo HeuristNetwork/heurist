@@ -308,28 +308,35 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 });
                         
                     }
-                    this.rts_actions_menu.hide(); 
+                    this.hideRtsMenu();
                 }
             });
 
             //prevent exit on select events                    
             this._on( this.rts_actions_menu.find('.edit_rts'), {
-                mouseover : function(){ this._rts_selector_flag = true; clearTimeout(this._menuTimeoutId); },
-                mouseleave : function(){ this._rts_selector_flag = false; },
+                mouseover : function(){ this._rts_selector_flag = true; 
+                                clearTimeout(this._menuTimeoutId); },
+                mouseleave : function(){
+                                this._rts_selector_flag = false; },
                 change: function(event){
                         this._rts_changed_flag = true;
                         $(this.edit_rts_apply[0]).trigger('click');
                        
                 }                
             });
-                    
+            
             this._on( this.rts_actions_menu, {
-                mouseover : function(){ if(this._menuTimeoutId>0){ clearTimeout(this._menuTimeoutId); } this._menuTimeoutId=0;},
+                mouseover : function(){ 
+                        if(this._menuTimeoutId>0){ clearTimeout(this._menuTimeoutId); } this._menuTimeoutId=0;},
                 mouseleave : function(){ 
+                    
                     if(this._rts_selector_flag || this._rts_changed_flag) return;
-                    if($('.ui-selectmenu-menu.ui-selectmenu-open').length>0) return; //do not hide if dropdown is opened
+                    
+                    //do not hide if dropdown is opened
+                    if($('.ui-selectmenu-menu.ui-selectmenu-open:hover').length>0) return; 
+                    
                     that._menuTimeoutId = setTimeout(function() {
-                        that.rts_actions_menu.hide(); 
+                        that.hideRtsMenu();
                         that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                     }, 800);  
                 },
@@ -339,7 +346,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                         if(this._rts_selector_flag || this._rts_changed_flag) return;
                         let dt_id = this.rts_actions_menu.attr('data-did');
-                        this.rts_actions_menu.hide();
+                        
+                        this.hideRtsMenu();
                         
                         let ele = $(event.target);
                         let action = ele.attr('data-action');
@@ -454,6 +462,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
     },
     
+    hideRtsMenu: function(){
+            this.rts_actions_menu.find('.edit_rts').hSelect('close');
+            this.rts_actions_menu.hide(); 
+    },
+    
     //
     //
     //
@@ -535,6 +548,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.rts_actions_menu.find('select.s_width').val(v).hSelect('refresh');
                 }
 
+                that.rts_actions_menu.find('.edit_rts').hSelect('close');
+                
                 that.rts_actions_menu.find('.edit_rts_btn').hide();
                 that._rts_changed_flag = false;
                 that.rts_actions_menu
@@ -546,7 +561,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 }, mouseout: function(event){
                     that._menuTimeoutId = setTimeout(function() {
-                        that.rts_actions_menu.hide();
+                        that.hideRtsMenu();
                         that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
                     }, 800);
             }});
