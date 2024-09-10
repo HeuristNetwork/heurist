@@ -51,93 +51,32 @@ class DbUsrTags extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-
-        $needCount = false;
-        $needCheck = false;
-
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('tag_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('tag_Text');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('tag_Modified');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('tag_UGrpID', true);
-        if($pred!=null) {
-            array_push($where, $pred);
+        
+        $sup_tables = null;
+        $sup_where = null;
+        
+        $this->searchMgr->addPredicate('tag_ID');
+        $this->searchMgr->addPredicate('tag_Text');
+        $this->searchMgr->addPredicate('tag_Modified');
+        $this->searchMgr->addPredicate('tag_UGrpID');
+        $this->searchMgr->addPredicate('rtl_RecID');
+        if(@$this->data['rtl_RecID']){
+            $sup_tables = ',usrRecTagLinks';
+            $sup_where  = '(rtl_TagID=tag_ID)';
         }
 
-
-        $value = @$this->data['rtl_RecID'];
-        if($value>0){
-            array_push($where, '(rtl_TagID=tag_ID and rtl_RecID='.$value.')');
-            array_push($from_table, 'usrRecTagLinks');
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('tag_ID'); break;
+            case 'label': $this->searchMgr->setSelFields('tag_ID,tag_Text'); break;
+            case 'name':  $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_UGrpID'); break;
+            default: //case 'full':
+                $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID'
+                    .',(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage'); 
         }
 
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'tag_ID';
-
-        }elseif(@$this->data['details']=='label'){
-
-            $this->data['details'] = 'tag_ID,tag_Text';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'tag_ID,tag_Text,tag_UGrpID';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID';
-            $needCount = true;
-
-        }else{
-            $needCheck = true;
-        }
-
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
         $orderby = $this->searchMgr->setOrderBy();
-
-        if($needCount){
-            array_push($this->data['details'],'(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-         }
-         if($orderby!=null){
-            $query = $query.' ORDER BY '.$orderby;
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
 

@@ -565,7 +565,9 @@ private static function __get_record_value($rec_id, $reset=false) {
         self::$records = array();
     }
 
-    if(!@self::$records[$rec_id]){
+    if(@self::$records[$rec_id]){
+        return self::$records[$rec_id];
+    }
 
         $ret = null;
 
@@ -597,7 +599,7 @@ private static function __get_record_value($rec_id, $reset=false) {
         }
 
         self::$records[$rec_id] = $ret;
-    }
+    
     return self::$records[$rec_id];
 }
 
@@ -609,7 +611,6 @@ private static function __get_record_value($rec_id, $reset=false) {
 */
 private static function __get_enum_value($enum_id, $enum_param_name)
 {
-    $ret = null;
 
     if($enum_param_name==null || strcasecmp($enum_param_name,'term')==0){
         $enum_param_name = "label";
@@ -619,46 +620,50 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 
     $ress = self::$mysqli->query('select trm_id, trm_label, trm_code, '
     .'concat(trm_OriginatingDBID, \'-\', trm_IDInOriginatingDB) as trm_conceptid, trm_parenttermid from defTerms where trm_ID = '.intval($enum_id));
-    if($ress){
+    if(!$ress){
+        return null;
+    }
+    
+        
         $relval = $ress->fetch_assoc();
+        $ress->close();
 
         $get_param = mb_strtolower($enum_param_name, 'UTF-8');
 
         // If trm_label then construct is: "branch_trm_label. ... .leaf_term_label", ignore root label
-        if(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null){
-
-            $trm_id = @$relval['trm_parenttermid'];
-            $ret = @$relval['trm_label'];
-
-            while(1){
-
-                $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
-
-                if($parent_ress){
-
-                    $parent_trm = $parent_ress->fetch_assoc();
-                    if($parent_trm == null || $parent_trm['trm_ParentTermID'] == null || $parent_trm['trm_ParentTermID'] == 0){
-                        $parent_ress->close();
-                        break;
-                    }else{
-                        $ret = $parent_trm['trm_label'] . "." . $ret;
-
-                        $trm_id = $parent_trm['trm_ParentTermID'];
-                    }
-
-                    $parent_ress->close();
-                }else{
-                    break;
-                }
-            }
-        }else{
-            $ret = @$relval['trm_'.$get_param];
+        if(!(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null)){
+        
+            return @$relval['trm_'.$get_param];
+            
         }
+        
+        $ret = null;
 
-        $ress->close();
-    }
+        $trm_id = @$relval['trm_parenttermid'];
+        $ret = @$relval['trm_label'];
 
-    return $ret;
+        while(1){
+
+            $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
+
+            if(!$parent_ress){
+                break;   
+            }
+
+            $parent_trm = $parent_ress->fetch_assoc();
+            if($parent_trm == null || $parent_trm['trm_ParentTermID'] == null || $parent_trm['trm_ParentTermID'] == 0){
+                $parent_ress->close();
+                break;
+            }
+            
+            $ret = $parent_trm['trm_label'] . "." . $ret;
+
+            $trm_id = $parent_trm['trm_ParentTermID'];
+
+            $parent_ress->close();
+        }//while
+
+        return $ret;
 }
 
 //
@@ -843,23 +848,26 @@ private static function __get_rt_id( $rt_search ){
 
         $res = mysql__select_param_query(self::$mysqli, $query, $params);
 
-        if($res){
-            $row = $res->fetch_assoc();
-            $res->close();
-            if($row){
-
-                if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
-                is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
-                    $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
-                } elseif (self::$db_regid>0) {
-                    $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
-                } else {
-                    $rt_cc = $row['rty_ID'];
-                }
-                return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
-            }
+        if(!$res){
+            return array(0, '', '');
+        
         }
-        return array(0, '', '');
+        
+        $row = $res->fetch_assoc();
+        $res->close();
+        if(!$row){
+            return array(0, '', '');    
+        }
+
+        if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
+        is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
+            $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
+        } elseif (self::$db_regid>0) {
+            $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
+        } else {
+            $rt_cc = $row['rty_ID'];
+        }
+        return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
 }
 
 /*
@@ -1287,21 +1295,23 @@ if (! function_exists('array_str_replace')) {
             for ($i=0; $i < count($search);++$i) {
                 if($search[$i]==null || $search[$i]=='') {continue;}
                 $offset = mb_strpos($subject, $search[$i]);
-                if ($offset === FALSE) {continue;}
+                if ($offset === false) {continue;}
+                
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
                     $match_offset = $offset;
                 }
             }
 
-            if ($match_idx != -1) {
-                $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
-                $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
-            } else {    // no matches for any of the strings
+            if ($match_idx == -1) {
+                // no matches for any of the strings
                 $val .= $subject;
                 $subject = '';
                 break;
             }
+            
+            $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
+            $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
         }
 
         return $val;

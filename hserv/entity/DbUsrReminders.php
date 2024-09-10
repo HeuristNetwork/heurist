@@ -57,98 +57,36 @@ class DbUsrReminders extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-
-        $needCheck = false;
-        $needRecords = false;
-
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('rem_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_OwnerUGrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_RecID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_Message');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToWorkgroupID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToUserID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToEmail');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'rem_ID';
-
-        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list'){
-
-            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
-
-            $needRecords = true;
-
-            $from_table[0] = $from_table[0]
-                    .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
-                    .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID ';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
-
-        }else{
-            $needCheck = true;
+        
+        $sup_tables = null;
+        $sup_where = null;
+        
+        $this->searchMgr->addPredicate('rem_ID');
+        $this->searchMgr->addPredicate('rem_OwnerUGrpID');
+        $this->searchMgr->addPredicate('rem_RecID');
+        $this->searchMgr->addPredicate('rem_Message');
+        $this->searchMgr->addPredicate('rem_ToWorkgroupID');
+        $this->searchMgr->addPredicate('rem_ToUserID');
+        $this->searchMgr->addPredicate('rem_ToEmail');
+        
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('rem_ID'); break;
+            case 'list': 
+            case 'name': 
+                $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName,rec_Title as rem_RecTitle');
+                
+                $sup_tables = ' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
+                             .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID, Records ';
+                $sup_where = '(rec_ID=rem_RecID)';
+                
+                break;
+            default: //case 'full':
+                $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq');
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
         $orderby = $this->searchMgr->setOrderBy();
 
-        $is_ids_only = (count($this->data['details'])==1);
-
-        if($needRecords){
-              array_push($this->data['details'], 'rec_Title as rem_RecTitle');
-              array_push($from_table,'Records');
-              array_push($where, 'rec_ID=rem_RecID');
-        }
-
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-         }
-         if($orderby!=null){
-            $query = $query.' ORDER BY '.$orderby;
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
     //

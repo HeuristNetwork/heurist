@@ -246,19 +246,13 @@ class DbUsrRecPermissions extends DbEntityBase
             if(!$res){
                 $this->system->addError(HEURIST_DB_ERROR,
                         'Cannot save data in table '.$this->config['entityName'], $mysqli->error);
+            }else{
+                $res = array($mysqli->insert_id);    
             }
-
-
         }
 
-        if(!$res){
-            //rollback
-            $mysqli->rollback();
-        }else{
-            $mysqli->commit();
-            $res = array($mysqli->insert_id);
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysql, $res, $keep_autocommit);
+        
         return $res;
 
     }

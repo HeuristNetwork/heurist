@@ -54,61 +54,32 @@ class DbDefRecStructure extends DbEntityBase
         if(parent::search()===false){
             return false;
         }
-
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('rst_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rst_RecTypeID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rst_DetailTypeID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rst_CalcFunctionID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $needCheck = false;
+        
         $is_structure = false;
-
-        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'rst_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'rst_ID,rst_DisplayName';
-
-        }elseif(@$this->data['details']=='rectype'){
-
-            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID';
-
-        }elseif(@$this->data['details']=='list'){
-
-            $is_structure = true;
-            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
+        
+        $this->searchMgr->addPredicate('rst_ID');
+        $this->searchMgr->addPredicate('rst_RecTypeID');
+        $this->searchMgr->addPredicate('rst_DetailTypeID');
+        $this->searchMgr->addPredicate('rst_CalcFunctionID');
+        
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('rst_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('rst_ID,rst_DisplayName'); break;
+            case 'rectype': $this->searchMgr->setSelFields('rst_ID,rst_RecTypeID,rst_DetailTypeID'); break;
+            case 'list': 
+                $is_structure = true;
+                $this->searchMgr->setSelFields('rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription'
-			.',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
-            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ';
-            //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs
-
-        }elseif(@$this->data['details']=='full'){
-            //all fields from configuration json
-
-            $this->data['details'] = implode(',', $this->fieldNames);
-
-        }elseif(@$this->data['details']=='structure'){
-
-            //$this->data['details'] = implode(',', $this->fieldNames);
-            $is_structure = true;
-
+            .',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
+            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ');
+                break;  
+            case 'full': 
+                $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
+                break;  
+            case 'structure': 
+                $is_structure = true;
+                
             $colNames = array("rst_RecTypeID", "rst_DetailTypeID",
             //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
             "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
@@ -134,61 +105,28 @@ class DbDefRecStructure extends DbEntityBase
             "dty_FieldSetRectypeID",
             "dty_Type");
 
-            $this->data['details'] = implode(',', $colNames);
-
-        }else{
-            $needCheck = true;
+                $this->searchMgr->setSelFields(implode(',', $colNames));
+                break;  
+            default:
+                if(!isEmptyArray(@$this->data['details'])){ //specific list of fields
+                    $fields = implode(',', $this->data['details']);
+                }else{
+                    $fields = @$this->data['details'];
+                }
+                if(isEmptyStr($fields)){
+                    $fields =  implode(',', $this->fieldNames);
+                }
+                $this->searchMgr->setSelFields($fields);
         }
+        
+        $orderby = 'rst_DisplayOrder ASC';
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array('rst_DisplayOrder ASC');
-
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('rst_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'],'rst_ID');
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
+        $sup_tables = null;
         if($is_structure){
-            $query = $query.' left join defDetailTypes on rst_DetailTypeID = dty_ID ';
+            $sup_tables = ' left join defDetailTypes on rst_DetailTypeID = dty_ID ';
         }
-
-        if(count($where)>0){
-            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
-        }
-        if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-        }
-
-        $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
-
+        
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables);
     }
 
     //
@@ -206,25 +144,29 @@ class DbDefRecStructure extends DbEntityBase
 
             $row = mysql__select_row_assoc($mysqli,
                 'SELECT rst_ID, rst_OriginatingDBID FROM '.$this->config['tableName']
-                .SQL_WHERE.predicateId('rst_DetailTypeID',$this->records[$idx]['rst_DetailTypeID'])
-                .SQL_AND.predicateId('rst_RecTypeID',$this->records[$idx]['rst_RecTypeID']));
+                .SQL_WHERE
+                .predicateId('rst_DetailTypeID',$this->records[$idx]['rst_DetailTypeID'])
+                .predicateId('rst_RecTypeID',$this->records[$idx]['rst_RecTypeID'],SQL_AND));
 
             $isInsert = !(@$row['rst_ID']>0);
 
             if($isInsert){
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
-                if(!@$this->records[$idx]['rst_Status']) {$this->records[$idx]['rst_Status'] = 'open';}
 
-                if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
-                    $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
-                }
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
-                if(@$this->records[$idx]['rst_Status']=='') {$this->records[$idx]['rst_Status'] = 'open';}
             }
 
+            if(isEmptyStr(@$this->records[$idx]['rst_Status'])) {
+                $this->records[$idx]['rst_Status'] = 'open';
+            }
+
+            if($this->records[$idx]['rst_DefaultValue']=='tabs' && isEmptyStr(@$this->records[$idx]['rst_DisplayName'])){
+                $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
+            }
+            
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 

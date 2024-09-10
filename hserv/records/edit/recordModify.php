@@ -1094,12 +1094,15 @@ function recordGetIncrementedValue($system, $params){
 */
 function recordGetAllIncremenetedValues($system, $params){
 
-    $ret = array();
-    $rty_ID = @$params['rtyID'];
+    $rty_ID = intval(@$params['rtyID']);
     $ignore_dtys = @$params['ignore_dtys'];
 
-    if($rty_ID > 0){
+    if(!($rty_ID > 0)){
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Get all ] incremented values. Record type is missing');   
+    }
 
+    $ret = array();
+    
         if(!empty($ignore_dtys) && !is_array($ignore_dtys)){
             $ignore_dtys = explode(',', $ignore_dtys);
         }
@@ -1128,14 +1131,6 @@ function recordGetAllIncremenetedValues($system, $params){
                 $ret[$dty_ID] = $result['result'];
             }
         }
-    }else{
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Get all ] incremented values. Record type is missing');
-    }
-/*
-    if(!$ret_as_details){
-        $ret = array('status' => HEURIST_OK, 'result' => $ret);
-    }
-*/
 
     return $ret;
 }
@@ -1511,9 +1506,11 @@ function deleteOneRecord($system, $id, $rectype){
 // $allow_multi_parent - if true means that there can be many parents for child, if true - insert only
 function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedByImport=0, $allow_multi_parent=false){
 
-    $res = 0;
+    if(!defined('DT_PARENT_ENTITY')){
+        return 0;    
+    }
 
-    if(defined('DT_PARENT_ENTITY')){
+    $res = 0;
 
         $child_id  = intval($child_id);
         $dtl_ID = -1;
@@ -1543,7 +1540,6 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
             if(!($mysqli->insert_id>0)) {$res=-1;}
         }
-    }
 
     return $res;
 
@@ -2200,10 +2196,8 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         $mask = $rectype_or_mask;
     }
 
-    if($mask == null){
-
-
-
+    if($mask == null)
+    {
         if(!(isset($rectype) && $rectype>0)){
             $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
             if(!($rectype>0)){
@@ -2217,40 +2211,30 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
             $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
             return false;
         }
-
     }
-
 
     $new_title = TitleMask::fill($recID, $mask);
 
-    if($new_title==null && $recTitleDefault!=null) {$new_title = $recTitleDefault;}
-
-
-    if ($new_title) {
-        $new_title = trim($new_title);
-        if($new_title!=''){
-
-            if(mb_strlen($new_title)>1023){
-                $new_title = mb_substr($new_title,0,1023);
-            }
-
-            $query = "UPDATE Records set rec_Title=? where rec_ID=".intval($recID);
-
-            $stmt = $mysqli->prepare($query);
-
-            //$stmt->bind_param('ss', $date_mod, $new_title);
-            $stmt->bind_param('s', $new_title);
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
-                $stmt->close();
-                $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
-                return false;
-            }
-            $stmt->close();
-        }
-    }else{
-        $new_title = 'Can\'t get title for #'.$recID;
+    if($new_title==null && $recTitleDefault!=null) {
+        $new_title = $recTitleDefault;
     }
+
+    $new_title = trim($new_title);
+    
+    if(isEmptyStr($new_title)){
+        return 'Can\'t get title for #'.$recID;
+    }
+    
+    if(mb_strlen($new_title)>1023){
+        $new_title = mb_substr($new_title,0,1023);
+    }
+            
+    $res = mysql__exec_param_query($mysqli, 'UPDATE Records set rec_Title=? where rec_ID='.intval($recID), array('s',$new_title) );
+    if($res!==true){
+        $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $res);
+        return false;
+    }
+
 
     return $new_title;
 }
@@ -3166,13 +3150,16 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
 
     $recIDs = prepareIds($recIDs);
 
-    if(is_array($recIDs) && count($recIDs)>0){
-
+    if(isEmptyArray($recIDs)){
+        return;
+    }
+        
+        
         $access_grps = prepareIds($access_grps);
         $owner_grps = prepareIds($owner_grps, true);
 
-        $has_access_values = is_array($access_grps) && !empty($access_grps);
-        $has_owner_values = is_array($owner_grps) && !empty($owner_grps);
+        $has_access_values = !empty($access_grps);
+        $has_owner_values = !empty($owner_grps);
 
         if($has_access_values){
             $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).') AND rcp_Level = "view"';
@@ -3183,26 +3170,24 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
             $mysqli->query($query);
         }
 
-        if($has_access_values || $has_owner_values){
-            //add group record permissions
-            $values = array();
-            foreach($recIDs as $recID){
-                if(is_array($owner_grps)){
-                    foreach ($owner_grps as $grp_id){
-                        array_push($values,'('.intval($grp_id).','.$recID.',"edit")');
-                    }
-                }
-                if(is_array($access_grps)){
-                    foreach ($access_grps as $grp_id){
-                        array_push($values,'('.intval($grp_id).','.$recID.',"view")');
-                    }
-                }
-            }
-            $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',',$values);
-            $mysqli->query($query);
-            //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
+        if(!($has_access_values || $has_owner_values)){
+            return;
         }
-    }
+        
+        //add group record permissions
+        $values = array();
+        foreach($recIDs as $recID){
+            
+                foreach ($owner_grps as $grp_id){
+                    array_push($values,'('.intval($grp_id).','.$recID.',"edit")');
+                }
+            
+                foreach ($access_grps as $grp_id){
+                    array_push($values,'('.intval($grp_id).','.$recID.',"view")');
+                }
+        }
+        $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',',$values);
+        $mysqli->query($query);
 
 }
 
@@ -3342,24 +3327,33 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
     $current_value = 0;
     $emails = null;
+    
+    $res = array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
 
-    if($new_value>0 && @$record['FlagTemporary']!=1){
+    if (!($new_value>0 && @$record['FlagTemporary']!=1)) {
+        return $res;   
+    }            
+        
 
-        $recID = intval(@$record['ID']);
-        $recID = abs($recID);
+    $recID = intval(@$record['ID']);
+    $recID = abs($recID);
 
 
-        $mysqli = $system->get_mysqli();
+    $mysqli = $system->get_mysqli();
 
-        if(!$is_insert){
-            //find current stage
-            $query = "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=".DT_WORKFLOW_STAGE;
-            $current_value = mysql__select_value($mysqli, $query);
-        }
+    if(!$is_insert){
+        //find current stage
+        $query = "SELECT dtl_Value FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID=".DT_WORKFLOW_STAGE;
+        $current_value = mysql__select_value($mysqli, $query);
+        $res['curr_value'] = $current_value;
+    }
+    
+    if($current_value==$new_value){
+        return $res;
+    }
+    
 
         //if stage is changed - assign new values for rec_OwnerUGrpID and rec_NonOwnerVisibility
-        if($current_value!=$new_value){
-
             $query = 'SELECT swf_StageRestrictedTo, swf_SetOwnership, swf_SetVisibility, swf_SendEmail FROM sysWorkflowRules '
             .'WHERE swf_RecTypeID='.$record['RecTypeID'].' AND swf_Stage='.$new_value;
             $rule = mysql__select_row_assoc($mysqli, $query);
@@ -3400,16 +3394,16 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
                     $query = 'SELECT ugr_eMail FROM sysUGrps '
                     .'WHERE ugr_ID IN ('.$rule['swf_SendEmail'].')';
-                    $emails = mysql__select_list2($mysqli, $query);
+                    
+                    $res['emails'] = mysql__select_list2($mysqli, $query);
                 }
 
             }else{
-                $new_value = 0; //not allowed
+                $res['new_value'] = 0; //not allowed
             }
-        }
-    }
+        
 
-    return array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
+    return $res;
 }
 
 //
@@ -3431,7 +3425,7 @@ function checkUserPermissions($system, $action){
         return false;
     }
 
-    $permissions = $res;
+    $permissions = $res; //'y','n','y_no_add','y_no_delete','y_no_add_delete'
     $action_msg = ($action == 'add' ? 'create' : '') .
                   ($action == 'edit' ? 'modify' : '') .
                   ($action == 'delete' ? 'delete' : '') .
@@ -3440,23 +3434,25 @@ function checkUserPermissions($system, $action){
     $block_msg = 'Your account does not have permission to ' . $action_msg
                 .' records,<br>please contact the database owner for more details.';
 
+    $res = true;
+                
     if($permissions == 'n'){
 
-        if($action == 'add' && $system->is_guest_user()){
-            //addition allowed for not enabled/guest user
-            //verify daily limit for guest users
-            $cnt_added_by_guests = mysql__select_value($mysqli,
-            'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
-
-            if($cnt_added_by_guests>199){
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Number of records added by guest users for the current database exceeds allowed daily limit');
-                return false;
-            }
-
-        }else{
+        if(!($action == 'add' && $system->is_guest_user())){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
+        
+        //addition allowed for not enabled/guest user
+        //verify daily limit for guest users
+        $cnt_added_by_guests = mysql__select_value($mysqli,
+        'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
+
+        if($cnt_added_by_guests>199){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Number of records added by guest users for the current database exceeds allowed daily limit');
+            $res = false;
+        }
+        
     }elseif(  ($permissions == 'y_no_add')
             || ($action == 'add' && strpos($permissions, 'add') !== false)
             || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
@@ -3464,10 +3460,10 @@ function checkUserPermissions($system, $action){
         //  y_no_add - means readonly
 
         $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
-        return false;
+        $res = false;
     }
 
-    return true;
+    return $res;
 }
 
 ?>

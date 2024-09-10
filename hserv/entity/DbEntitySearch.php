@@ -263,8 +263,7 @@ class DbEntitySearch
 
         $res = $this->execute($query, $is_ids_only);
         return $res;
-        
-        
+
     }
     
     

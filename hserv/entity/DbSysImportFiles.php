@@ -229,17 +229,20 @@ class DbSysImportFiles extends DbEntityBase
                 $this->system->addError(HEURIST_DB_ERROR,
                         'Cannot delete data from list of imported files', $mysqli->error);
                 return false;
-        }else{
-                if($delete_all_import_tables){
-
-                    $tables = mysql__select_list2($mysqli, "SHOW TABLES LIKE 'import20%'");
-                    foreach($tables as $table_name){
-                        $query = "drop table IF EXISTS `$table_name`";
-                        $mysqli->query($query);
-                    }
-                }
-                return true;
         }
+
+        if(!$delete_all_import_tables){
+            return true;
+        }
+
+        $tables = mysql__select_list2($mysqli, "SHOW TABLES LIKE 'import20%'");
+        foreach($tables as $table_name){
+            $query = "drop table IF EXISTS `$table_name`";
+            $mysqli->query($query);
+        }
+
+        return true;
+        
     }
 
 
