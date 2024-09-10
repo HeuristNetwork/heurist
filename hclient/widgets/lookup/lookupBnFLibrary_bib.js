@@ -25,32 +25,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
+$.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
     // default options
     options: {
     
         height: 700,
         width:  800,
-        modal:  true,
         
         title:  "Search the Bibliothèque nationale de France's bibliographic records",
         
-        htmlContent: 'lookupBnFLibrary_bib.html',
-        helpContent: null, //in context_help folder
-
-        mapping: null, //configuration from record_lookup_config.json
-
-        add_new_record: false, //if true it creates new record on selection
-        
-        pagesize: 20 // result list's number of records per page
+        htmlContent: 'lookupBnFLibrary_bib.html'
     },
-    
-    recordList: null,
 
     action_timeout: null, // timeout for processing doAction
-
-    tabs_container: null, // tabs container
 
     _forceClose: false, // skip saving additional mapping and close dialog
 
@@ -59,11 +47,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        //this.element => dialog inner content
-        //this._as_dialog => dialog container
-
-        let that = this;
-
         // Extra field styling
         this.element.find('.header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
@@ -71,55 +54,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         // Action button styling
         this.element.find('#btnStartSearch').addClass("ui-button-action");
 
-        // Prepare result list options
-        this.options.resultList = $.extend(this.options.resultList, 
-        {
-               recordDivEvenClass: 'recordDiv_blue',
-               eventbased: false,  //do not listent global events
-
-               multiselect: false, // allow only one record to be selected
-               select_mode: 'select_single', // only accept one record for selection
-
-               selectbutton_label: 'select!!', // not used
-
-               view_mode: 'list', // result list viewing mode [list, icon, thumb]
-               show_viewmode:false,
-               
-               entityName: this._entityName,
-               
-               pagesize: this.options.pagesize, // number of records to display per page, 
-               empty_remark: '<div style="padding:1em 0 1em 0">No records match the search</div>', // For empty results
-               renderer: this._rendererResultList // Record render function, is called on resultList updateResultSet
-        });                
-
-        // Init record list
-        this.recordList = this.element.find('.div_result');
-
-        this.recordList.resultList( this.options.resultList );
-        this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
-
-        // Init select & double click events for result list
-        this._on( this.recordList, {        
-            "resultlistonselect": function(event, selected_recs){
-                window.hWin.HEURIST4.util.setDisabled( 
-                    this.element.parents('.ui-dialog').find('#btnDoAction'), 
-                    (selected_recs && selected_recs.length()!=1));
-            },
-            "resultlistondblclick": function(event, selected_recs){
-                if(selected_recs && selected_recs.length()==1){
-                    this.doAction();                                
-                }
-            }
-        });        
-
         // Handling for 'Search' button        
         this._on(this.element.find('#btnStartSearch').button(),{
             'click':this._doSearch
-        });
-
-        // For capturing the 'Enter' key while typing
-        this._on(this.element.find('input'),{
-            'keypress':this.startSearchOnEnterPress
         });
 
         let $select = this.element.find('#rty_flds');
@@ -143,15 +80,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         // Setup settings tab
         this._setupSettings();
 
-        this._as_dialog.on('dialogbeforeclose', function(e){
-            if(!that._forceClose){
-                that._forceClose = true;
-                that._saveExtraSettings(true);
-                return false;
-            }
-        });
-
-        this.tabs_container = this.element.find('#tabs-cont').tabs();
         this.element.find('#inpt_any').focus();
 
         return this._super();
@@ -258,6 +186,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
     _saveExtraSettings: function(close_dlg = false){
 
         let that = this;
+
         let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
         const codes = this._getRoleCodes();
         const rec_dump_settings = this._getRecDumpSetting();
@@ -299,24 +228,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             });
         }
     },
-    
-    /**
-     * Function handler for pressing the enter button while focused on input element
-     * 
-     * Param:
-     *  e (event trigger)
-     */
-    startSearchOnEnterPress: function(e){
-        
-        let code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 13) {
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
-            this._doSearch();
-        }
 
-    },
-    
     /**
      * Result list rendering function called for each record
      * 
@@ -349,7 +261,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 }
 
                 if(!s || s == ''){ 
-                    return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
+                    return `<div style="display:inline-block;width:${width}ex" class="truncate">No provided creator</div>`;
                 }
 
                 let creator_val = '';
@@ -364,10 +276,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                             cur_string = cur_obj['firstname'];
                         }
                         if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
-                            cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
+                            cur_string = (cur_string != '') ? `${cur_obj['surname']}, ${cur_string}` : cur_obj['surname'];
                         }
                         if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
-                            cur_string += ' (' + cur_obj['active'] + ')';
+                            cur_string += ` (${cur_obj['active']})`;
                         }
 
                         if(cur_string == ''){
@@ -388,7 +300,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             }else if(fldname == 'publisher'){
 
                 if(!s || s == ''){ 
-                    return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided publisher</div>';
+                    return `<div style="display:inline-block;width:${width}ex" class="truncate">No provided publisher</div>`;
                 }
 
                 let pub_val = '';
@@ -432,42 +344,20 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             let title = s;
 
             if(fldname == 'biburl'){
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
+                s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View bibliographic record';
             }
             
             if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
+                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
             }
             return s;
         }
+        
+        const recTitle = fld('author', 25) + fld('publisher', 20) + fld('date', 10) + fld('title', 70) + fld('biburl', 12); 
+        recordset.setFld(record, 'rec_Title', recTitle);
 
-        // Generic details, not completely necessary
-        let recID = fld('rec_ID');
-        let rectypeID = fld('rec_RecTypeID');
-        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-
-        let recTitle = fld('author', 25) + fld('publisher', 20) + fld('date', 10) + fld('title', 70) + fld('biburl', 12); 
-
-        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-            + html_thumb
-                + '<div class="recordIcons">'
-                +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                + '</div>'
-                +  recTitle
-            + '</div>';
-        return html;
-    },
-
-    /**
-     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
-     */
-    _getActionButtons: function(){
-        let res = this._super(); //dialog buttons
-        res[1].text = window.hWin.HR('Select');
-        return res;
+        return this._super(recordset, record);
     },
 
     /**
@@ -564,10 +454,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                 }
                                 search = value;
                                 if(cur_val['active']){
-                                    value = (value != '') ? value + ' [' + cur_val['active'] + ']' : 'No Name, years active: ' + cur_val['active'];
+                                    value = (value != '') ? `${value} [${cur_val['active']}]` : `No Name, years active: ${cur_val['active']}`;
                                 }
                                 if(cur_val['id']){
-                                    value = (value != '') ? value + ' (id: ' + cur_val['id'] + ')' : 'id: ' + cur_val['id'];
+                                    value = (value != '') ? `${value} (id: ${cur_val['id']})` : `id: ${cur_val['id']}`;
                                 }
                                 if(cur_val['role']){
                                     role = (value != '') ? cur_val['role'] : '';
@@ -608,11 +498,9 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                     search = value;
                                 }
                                 if(cur_val['location']){
-                                    value = (value != '') ? value + ' ' + cur_val['location'] : cur_val['location'];
+                                    value = (value != '') ? `${value} ${cur_val['location']}` : cur_val['location'];
                                     search = (search != '') ? search : value;
                                 }
-                            }else{
-                                let completed_val = cur_val; //????
                             }
 
                             if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
@@ -691,26 +579,15 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
 
     /**
-     * Perform final actions before exiting popup
-     * 
-     * Param:
-     *  dlg_reponse (json) => mapped values to fields
+     * Clear timeout before returning result
+     *
+     * @param {json} dlg_reponse - mapped values to fields
      */
-    closingAction: function(dlg_response, action = 'save'){
-
-        let that = this;
+    closingAction: function(dlg_response){
 
         clearTimeout(this.action_timeout); // clear timeout
 
-        if(window.hWin.HEURIST4.util.isempty(dlg_response)){
-            dlg_response = {};
-        }
-
-        window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-        // Pass mapped values back and close dialog
-        this._context_on_close = dlg_response;
-        this._as_dialog.dialog('close');
+        this._super(dlg_response);
     },
     
     /**
@@ -734,7 +611,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
         let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
-        let sURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords='+maxRecords+'&startRecord=1&recordSchema=unimarcxchange'; // base URL
+        let sURL = `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=${maxRecords}&startRecord=1&recordSchema=unimarcxchange`; // base URL
 
         // Check that something has been entered
         if(this.element.find('#inpt_any').val()=='' && this.element.find('#inpt_title').val()=='' 
@@ -762,36 +639,36 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         // any field
         if(this.element.find('#inpt_any').val()!=''){
-            query += 'bib.anywhere '+ this.element.find('#inpt_any_link').val() +' "' + this.element.find('#inpt_any').val() + '"';
+            query += `bib.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"`;
 
             if(titleHasValue || authorHasValue || recidHasValue){ // add combination logic
-                query += ' ' + this.element.find('#inpt_any_logic').val() + ' ';
+                query += ` ${this.element.find('#inpt_any_logic').val()} `;
             }
         }
 
         // work title field
         if(titleHasValue){
 
-            query += 'bib.title '+ this.element.find('#inpt_title_link').val() +' "' + this.element.find('#inpt_title').val() + '"';
+            query += `bib.title ${this.element.find('#inpt_title_link').val()} "${this.element.find('#inpt_title').val()}"`;
 
             if(authorHasValue || recidHasValue){ // add combination logic
-                query += ' ' + this.element.find('#inpt_title_logic').val() + ' ';
+                query += ` ${this.element.find('#inpt_title_logic').val()} `;
             }
         }
 
         // author field
         if(authorHasValue){
 
-            query += 'bib.author '+ this.element.find('#inpt_author_link').val() +' "' + this.element.find('#inpt_author').val() + '"';
+            query += `bib.author ${this.element.find('#inpt_author_link').val()} "${this.element.find('#inpt_author').val()}"`;
 
             if(recidHasValue){ // add combination logic
-                query += ' ' + this.element.find('#inpt_author_logic').val() + ' ';
+                query += ` ${this.element.find('#inpt_author_logic').val()} `;
             }
         }
 
         // record id field
         if(recidHasValue){
-            query += 'bib.recordid '+ this.element.find('#inpt_recordid_link').val() +' "' + this.element.find('#inpt_recordid').val() + '"';
+            query += `bib.recordid ${this.element.find('#inpt_recordid_link').val()} "${this.element.find('#inpt_recordid').val()}"`;
             // no combination logic as record id is the last field
         }
 
@@ -810,7 +687,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             query += ')';
             query = encodeURIComponent(query);
 
-            sURL += '&query=' + query;
+            sURL += `&query=${query}`;
         }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element); // show loading cover
@@ -846,130 +723,70 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
             }
         });
     },
-    
+
     /**
      * Prepare json for displaying via the Heuirst resultList widget
-     * 
-     * Param:
-     *  json_data (json) => search response
+     *
+     * @param {json} json_data - search response
      */
     _onSearchResult: function(json_data){
-
-        this.recordList.show();
-
-        let is_wrong_data = true;
 
         let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data) {
-            
-            if(!json_data.result) return false;
+        if(!json_data){
+            this._super(false);
+        }
 
-            let res_records = {}, res_orders = [];
+        if(!json_data.result) return false;
 
-            // Prepare fields for mapping
-            // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
-            let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-            let map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);
+        let res_records = {}, res_orders = [];
+
+        // Prepare fields for mapping
+        // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
+        let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
+        let map_flds = Object.keys(this.options.mapping.fields);
+        fields = fields.concat(map_flds);
+
+        if(this.options.mapping.options.dump_record == true){
+            fields = fields.concat('BnF_ID');
+        }
+
+        // Parse json to Record Set
+        let i = 1;
+        for(const record of json_data.result){
+
+            let recID = i++;
+            let values = [recID, this.options.mapping.rty_ID];
+
+            // Add current record details, field by field
+            for(let k=0; k<map_flds.length; k++){
+
+                // With the current setup for API search, the 'Rights' field is no longer sent
+                if(map_flds[k]=='rights'){
+                    values.push(null);
+                }else{ // just add field details
+                    values.push(record[map_flds[k]]);
+                }
+            }
 
             if(this.options.mapping.options.dump_record == true){
-                fields = fields.concat('BnF_ID');
-            }
-            
-            // Parse json to Record Set
-            let i=0;
-            for(;i<json_data.result.length;i++){
-
-                let record = json_data.result[i];                
-                let recID = i+1;
-                let values = [recID, this.options.mapping.rty_ID];
-
-                // Add current record details, field by field
-                for(let k=0; k<map_flds.length; k++){
-
-                    // With the current setup for API search, the 'Rights' field is no longer sent
-                    if(map_flds[k]=='rights'){
-                        values.push(null);
-                    }else{ // just add field details
-                        values.push(record[map_flds[k]]);
-                    }
-                }
-
-                if(this.options.mapping.options.dump_record == true){
-                    values.push(record['BnF_ID']);
-                }
-
-                res_orders.push(recID);
-                res_records[recID] = values;
+                values.push(record['BnF_ID']);
             }
 
-            if(res_orders.length>0){
-
-               
-
-                // Create the record set for the resultList
-                let res_recordset = new HRecordSet({
-                    count: res_orders.length,
-                    offset: 0,
-                    fields: fields,
-                    rectypes: [this.options.mapping.rty_ID],
-                    records: res_records,
-                    order: res_orders,
-                    mapenabled: true
-                });
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
-            }
-
-            if(json_data.numberOfRecords > maxRecords){
-                window.hWin.HEURIST4.msg.showMsgDlg(
-                    "There are " + json_data.numberOfRecords + " records satisfying these criteria, only the first "+ maxRecords +" are shown.<br>Please narrow your search.",
-                );
-            }
+            res_orders.push(recID);
+            res_records[recID] = values;
         }
 
-        if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr({
-                message: 'Service did not return data in an appropriate format',
-                error_title: 'No valid data'
-            });
-        }else{
-            this.tabs_container.tabs('option', 'active', 1); // switch to results tab
-        }
-    },
-
-    //
-    removeDupAuthors: function(author_key, records){
-
-        if(records == null || !window.hWin.HEURIST4.util.isObject(records) || window.hWin.HEURIST4.util.isempty(author_key)){
-            return records;
+        if(json_data.numberOfRecords > maxRecords){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                `There are ${json_data.numberOfRecords} records satisfying these criteria, only the first ${maxRecords} are shown.<br>Please narrow your search.`
+            );
         }
 
-        for(let i in records){
-
-            let author_details = records[i][author_key];
-
-            if(author_details && author_details.length > 1){
-
-                records[i][author_key] = author_details.filter(function(val, idx, arr){
-
-                    return idx === arr.findIndex(function(obj){
-
-                        if(val.id && obj.id){
-                            return val.id == obj.id;
-                        }else if(val.firstname && val.surname && obj.firstname && obj.surname){
-                            return val.firstname == obj.firstname && val.surname == obj.surname;
-                        }
-                    });
-                });
-            }
-        }
-
-        return records;
+        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        this._super(res);
     }
 });

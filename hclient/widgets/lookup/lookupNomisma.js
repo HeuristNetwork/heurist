@@ -28,34 +28,23 @@
 */
 /* global stringifyMultiWKT */
 
-$.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
+$.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
     // default options
     options: {
-    
+
         height: 720,
         width:  510,
-        modal:  true,
-        
+
         title:  'Search Nomisma database of coins and currency via several options',
-        
-        htmlContent: 'lookupNomisma.html',
-        helpContent: null, //in context_help folder
-        
-        mapping: null, //configuration from sys_ExternalReferenceLookups
-               
-        add_new_record: false  //if true it creates new record on selection
-        //define onClose to get selected values
+
+        htmlContent: 'lookupNomisma.html'
     },
-    
-    recordList:null,
 
     //  
     // invoked from _init after loading of html content
     //
     _initControls: function(){
-
-        let that = this;
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
@@ -66,45 +55,11 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         this.element.find('#btnRdfSearch').hide();
 
         // Prepare result list options
-        this.options.resultList = $.extend(this.options.resultList, 
-        {
-               recordDivEvenClass: 'recordDiv_blue',
-               eventbased: false,  //do not listent global events
-
-               multiselect: false, // allow only one record to be selected
-               select_mode: 'select_single', // only accept one record for selection
-
-               selectbutton_label: 'select!!', // not used
-
-               view_mode: 'list', // result list viewing mode [list, icon, thumb]
-               show_viewmode:false,
-               
-               entityName: this._entityName,
-               
-               pagesize: this.options.pagesize, // number of records to display per page
-               empty_remark: '<div style="padding:1em 0 1em 0">No Results Found<br><br>'
-                            + 'This result may also be due to a misconfiguration/failed connection to the Nomisma server.<br>'
-                            + 'Please advise the Heurist team if this persists with searches which you are sure should return results.</div>', // For empty results
-               renderer: this._rendererResultList // Record render function, is called on resultList updateResultSet
-        });                
-
-        // Init record list
-        this.recordList = this.element.find('#div_result');
-        this.recordList.resultList( this.options.resultList );     
-        
-        // Init select & double click events for result list
-        this._on( this.recordList, {        
-            "resultlistonselect": function(event, selected_recs){
-                window.hWin.HEURIST4.util.setDisabled( 
-                    this.element.parents('.ui-dialog').find('#btnDoAction'), 
-                    (selected_recs && selected_recs.length()!=1));
-            },
-            "resultlistondblclick": function(event, selected_recs){
-                if(selected_recs && selected_recs.length()==1){
-                    this.doAction();                                
-                }
-            }
-        });        
+        this.options.resultList = $.extend(this.options.resultList, {
+            empty_remark: '<div style="padding:1em 0 1em 0">No Results Found<br><br>'
+                        + 'This result may also be due to a misconfiguration/failed connection to the Nomisma server.<br>'
+                        + 'Please advise the Heurist team if this persists with searches which you are sure should return results.</div>' // For empty results
+        });
 
         // Handling for 'Search' button        
         this._on(this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch').button(),{
@@ -151,40 +106,16 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             }
             return s;
         }
-
-        let recID = fld('rec_ID');
-        let rectypeID = fld('rec_RecTypeID');
+        
         let recTitle = '';
-
         if(fld('properties.type') == 'hoard'){
             recTitle = fld('properties.type', 10) + fld('label', 30) + fld('dates', 35) + fld('properties.gazetteer_uri', 10);
         }else{
             recTitle = fld('properties.type', 10) + fld('properties.gazetteer_label', 30) + fld('properties.count', 15) + fld('properties.gazetteer_uri', 10); 
         }
+        recordset.setFld(record, 'rec_Title', recTitle);
 
-        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-
-        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-                        + html_thumb
-                        + '<div class="recordIcons">'
-                        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                        + '</div>'
-                        +  recTitle
-                    + '</div>';
-        return html;
-    },
-
-    /**
-     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
-     */
-    _getActionButtons: function(){
-        let res = this._super(); //dialog buttons
-        res[1].text = window.hWin.HR('Select');
-        return res;
+        return this._super(recordset, record);
     },
 
     //
@@ -196,10 +127,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         let sel = this.recordList.resultList('getSelected', false);
         
         if(sel && sel.length() == 1){
-
             //pass mapped values and close dialog
-            this._context_on_close = sel;
-            this._as_dialog.dialog('close');
+            this.closingAction(sel);
         }
     },
     
@@ -250,119 +179,96 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         );
     },
     
-    //
-    //
-    //
+    /**
+     * Prepare json for displaying via the Heuirst resultList widget
+     *
+     * @param {json} json_data - search response
+     */
     _onSearchResult: function(geojson_data){
-        
-        this.recordList.show();
-       
-        let is_wrong_data = true;
-                        
-        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
-            
-            let res_records = {}, res_orders = [];
-                
-            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-            
-            let fields = ['rec_ID','rec_RecTypeID'];
-            let map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);
-            
-            for(let k=0; k<map_flds.length; k++){
-                map_flds[k] = map_flds[k].split('.'); 
-            }
-            
-            if(!geojson_data.features) geojson_data.features = geojson_data;
-            
-            //parse json
-            let i=0;
-            for(;i<geojson_data.features.length;i++){
-                let feature = geojson_data.features[i];
-                
-                let recID = i+1;
-                
-                let hasGeo = false;
-                let values = [recID, this.options.mapping.rty_ID];
-                for(let k=0; k<map_flds.length; k++){
 
-                    let val = feature[map_flds[k][0]];
+        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
+            this._super(false);
+        }
 
-                    if(map_flds[k][0] == 'when' && val){
+        let res_records = {}, res_orders = [];
 
-                        if(map_flds[k][2] == 'start' && val['timespans']){
-                            val = val['timespans'][0]['start'];
-                        }else if(map_flds[k][2] == 'end' && val['timespans']){
-                            val = val['timespans'][0]['end'];
-                        }
+        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+
+        let fields = ['rec_ID','rec_RecTypeID'];
+        let map_flds = Object.keys(this.options.mapping.fields);
+        fields = fields.concat(map_flds);
+
+        for(const idx in map_flds){
+            map_flds[idx] = map_flds[idx].split('.'); 
+        }
+
+        if(!geojson_data.features) geojson_data.features = geojson_data;
+
+        //parse json
+        let i = 0;
+        for(const feature of geojson_data.features){
+
+            let recID = i++;
+            
+            let hasGeo = false;
+            let values = [recID, this.options.mapping.rty_ID];
+            for(const fld_Names of map_flds){
+
+                let val = feature[fld_Names[0]];
+
+                if(fld_Names[0] == 'when' && val){
+
+                    if(fld_Names[2] == 'start' && val['timespans']){
+                        val = val['timespans'][0]['start'];
+                    }else if(fld_Names[2] == 'end' && val['timespans']){
+                        val = val['timespans'][0]['end'];
                     }
+                }
 
-                    for(let m=1; m<map_flds[k].length; m++){
-                        if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
-                            val = val[ map_flds[k][m] ];
-                        }else if(map_flds[k][m] == 'count'){
-                            val = 0;
-                        }
-                    }      
-                    
-                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){ // looking for geospatial values
-                        if(!window.hWin.HEURIST4.util.isempty(val)){
-                            val = {"type": "Feature", "geometry": val};
-                            let wkt = stringifyMultiWKT(val);    
-                            if(window.hWin.HEURIST4.util.isempty(wkt)){
-                                val = '';
-                            }else{
+                for(const part of fld_Names){
+                    if(val && !window.hWin.HEURIST4.util.isnull(val[part])){
+                        val = val[part];
+                    }else if(part == 'count'){
+                        val = 0;
+                    }
+                }      
+                
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names]){ // looking for geospatial values
+                    if(!window.hWin.HEURIST4.util.isempty(val)){
+                        val = {"type": "Feature", "geometry": val};
+                        let wkt = stringifyMultiWKT(val);    
+                        if(window.hWin.HEURIST4.util.isempty(wkt)){
+                            val = '';
+                        }else{
 
-                                let typeCode = 'm';
-                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                    if(wkt.indexOf('LINESTRING')>=0){
-                                        typeCode = 'l';
-                                    }else if(wkt.indexOf('POLYGON')>=0){
-                                        typeCode = 'pl';
-                                    }else {
-                                        typeCode = 'p';
-                                    }
+                            let typeCode = 'm';
+                            if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
+                                if(wkt.indexOf('LINESTRING')>=0){
+                                    typeCode = 'l';
+                                }else if(wkt.indexOf('POLYGON')>=0){
+                                    typeCode = 'pl';
+                                }else {
+                                    typeCode = 'p';
                                 }
-                                val = typeCode+' '+wkt;
-                                hasGeo = true;
                             }
+                            val = `${typeCode} ${wkt}`;
+                            hasGeo = true;
                         }
-                    }else{ // not looking for geospatial values
-                        hasGeo = true;
                     }
-                    values.push(val);    
+                }else{ // not looking for geospatial values
+                    hasGeo = true;
                 }
-
-                if(hasGeo){
-                    res_orders.push(recID);
-                    res_records[recID] = values;    
-                }
+                values.push(val);    
             }
 
-            if(res_orders.length>0){        
-                let res_recordset = new HRecordSet({
-                    count: res_orders.length,
-                    offset: 0,
-                    fields: fields,
-                    rectypes: [this.options.mapping.rty_ID],
-                    records: res_records,
-                    order: res_orders,
-                    mapenabled: true //???
-                });              
-
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
+            if(hasGeo){
+                res_orders.push(recID);
+                res_records[recID] = values;    
             }
         }
-       
-        if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);
-            
-            window.hWin.HEURIST4.msg.showMsgErr({
-                message: 'Service did not return data in an appropriate format',
-                error_title: 'No valid data'
-            });
-        }
+
+        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        this._super(res);
     }
 });
 

@@ -22,51 +22,27 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
+$.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
 
     // default options
     options: {
-    
+
         height: 520,
         width:  800,
-        modal:  true,
-        
+
         title:  'Lookup values Postal codes for Heurist record',
-        
+
         htmlContent: 'lookupGN_postalCode.html',
-        //helpContent: 'lookupGN_postalCode.html', //in context_help folder
-        
-        mapping:null, //configuration from sys_ExternalReferenceLookups
-               
-        add_new_record: false  //if true it creates new record on selection
-        //define onClose to get selected values
     },
-    
-    recordList:null,
+
     _country_vocab_id: 0,
 
     //  
     // invoked from _init after loading of html content
     //
     _initControls: function(){
-            
-/*
-"placename":"Manly",
-"anps id":"43347",
-"state":"NSW",
-"LGA":"MANLY",
-"Latitude":"-33.79833333333333",
-"Longitude":"151.28444444444443",
-"Original Data Source":"State Records (TLCM)",
-"flag":"Uses GDA94 Coordinates instead of WGS84",
-"description":"A suburb about 4 km S by E of Brookvale and about 6 km N by E of Vaucluse.  Boundaries shown on map marked GNB 3641"
 
-[{"type":"Feature","id":"857","properties":{"rec_ID":"857"....},"geometry":{"type":"Point","coordinates":[48.671137,46.998197]}},
-*/   
-
-        let that = this;
-
-        //fill countries dropdown
+        // Fill countries dropdown
         let ele = this.element.find('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509');
         if(this._country_vocab_id > 0){
@@ -81,76 +57,16 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
 
         this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
 
-        this.options.resultList = $.extend(this.options.resultList, 
-        {
-               recordDivEvenClass: 'recordDiv_blue',
-               eventbased: false,  //do not listent global events
+        this.options.resultList = $.extend(this.options.resultList, {
+            empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>'
+        });
 
-               multiselect: false, //(this.options.select_mode!='select_single'), 
-
-               select_mode: 'select_single', //this.options.select_mode,
-               selectbutton_label: 'select!!', //this.options.selectbutton_label, for multiselect
-               
-               view_mode: 'list',
-               show_viewmode:false,
-               
-               entityName: this._entityName,
-               //view_mode: this.options.view_mode?this.options.view_mode:null,
-               
-               pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-               empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>',
-               renderer: this._rendererResultList       
-        });                
-
-        //init record list
-        this.recordList = this.element.find('#div_result');
-        this.recordList.resultList( this.options.resultList );     
-        
-        this._on( this.recordList, {        
-                "resultlistonselect": function(event, selected_recs){
-                            window.hWin.HEURIST4.util.setDisabled( 
-                                this.element.parents('.ui-dialog').find('#btnDoAction'), 
-                                (selected_recs && selected_recs.length()!=1));
-                        },
-                "resultlistondblclick": function(event, selected_recs){
-                            if(selected_recs && selected_recs.length()==1){
-                                this.doAction();                                
-                            }
-                        }
-                //,"resultlistonaction": this._onActionListener        
-                });
-        
-        
-        
         this._on(this.element.find('#btnStartSearch').button(),{
             'click':this._doSearch
         });
-        
-        this._on(this.element.find('input'),{
-            'keypress':this.startSearchOnEnterPress
-        });
-        
-        
+
         return this._super();
     },
-    
-    /**
-     * Function handler for pressing the enter button while focused on input element
-     * 
-     * Param:
-     *  e (event trigger)
-     */
-    startSearchOnEnterPress: function(e){
-        
-        let code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 13) {
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
-            this._doSearch();
-        }
-
-    },
-    
     
     /**
      * Result list rendering function called for each record
@@ -181,35 +97,10 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
             return s;
         }
 
-        let recID = fld('rec_ID');
-        let rectypeID = fld('rec_RecTypeID'); 
-
         let recTitle = fld('postalcode', 10) + fld('placeName', 40) + fld('adminName2', 30) + fld('adminName1', 30) + fld('countryCode', 6);
+        recordset.setFld(record, 'rec_Title', recTitle);
 
-        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-
-        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-                + html_thumb            
-                + '<div class="recordIcons">'
-                +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                + '</div>'
-                +  recTitle
-            + '</div>';
-        return html;
-    },
-
-    /**
-     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
-     */
-    _getActionButtons: function(){
-        let res = this._super(); //dialog buttons
-        res[1].text = window.hWin.HR('Select');
-       
-        return res;
+        return this._super(recordset, record);
     },
 
     /**
@@ -226,33 +117,33 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
      */
     doAction: function(){
 
-        //detect selection
+        // Detect selection
         let recset = this.recordList.resultList('getSelected', false);
-        
-        if(recset && recset.length() == 1){
-            
-            let res = {};
-            let rec = recset.getFirstRecord();
-            
-            let map_flds = Object.keys(this.options.mapping.fields);
-            
-            for(let k=0; k<map_flds.length; k++){
-                let dty_ID = this.options.mapping.fields[map_flds[k]];
-                let val = recset.fld(rec, map_flds[k]);
-                
-                if(map_flds[k]=='countryCode' && this._country_vocab_id>0){
-                    val = $Db.getTermByCode(this._country_vocab_id, val);
-                }
-                
-                if(dty_ID>0 && val){
-                    res[dty_ID] = val;    
-                }
-            }
+        if(!recset || recset.length() != 1){
+            return;
+        }
 
-            //pass mapped values and close dialog
-            this._context_on_close = res;
-            this._as_dialog.dialog('close');
-        }        
+        let res = {};
+        let rec = recset.getFirstRecord();
+
+        let map_flds = Object.keys(this.options.mapping.fields);
+
+        for(const fld_Name of map_flds){
+
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            let val = recset.fld(rec, fld_Name);
+
+            val = fld_Name == 'countryCode' && this._country_vocab_id > 0 
+                    ? $Db.getTermByCode(this._country_vocab_id, val)
+                    : val;
+
+            if(dty_ID > 0 && !window.hWin.HEURIST4.util.isempty(val)){
+                res[dty_ID] = val;    
+            }
+        }
+
+        // Pass mapped values and close dialog
+        this.closingAction(res);
     },
     
     /**
@@ -336,95 +227,69 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
             }
         );
     },
-    
+
     /**
      * Prepare json for displaying via the Heuirst resultList widget
-     * 
-     * Param:
-     *  json_data (json) => search response
+     *
+     * @param {json} json_data - search response
      */
     _onSearchResult: function(json_data){
-        
-        this.recordList.show();
-
-        let is_wrong_data = true;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data) {
+        if(!json_data){
+            this._super(false);
+        }
 
-            let res_records = {}, res_orders = [];
+        let res_records = {}, res_orders = [];
 
-            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-            if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
-                this.options.mapping.fields['location'] = DT_GEO_OBJECT;
-            }
+        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
+            this.options.mapping.fields['location'] = DT_GEO_OBJECT;
+        }
 
-            let fields = ['rec_ID', 'rec_RecTypeID'];
-            let map_flds = Object.keys(this.options.mapping.fields);
+        let fields = ['rec_ID', 'rec_RecTypeID'];
+        let map_flds = Object.keys(this.options.mapping.fields);
 
-            fields = fields.concat(map_flds);
-            fields = fields.concat('googleMapLink');
+        fields = fields.concat(map_flds);
+        fields = fields.concat('googleMapLink');
 
-            if(!json_data.postalcodes) json_data.postalcodes = json_data;
+        if(!json_data.postalcodes) json_data.postalcodes = json_data;
 
-            //parse json
-            let i=0;
-            let data = json_data.postalcodes;
+        //parse json
+        let i = 1;
+        let data = json_data.postalcodes;
 
-            for(;i<data.length;i++){
-                let feature = data[i];
-                
-                let recID = i+1;
-                
-                let val;
-                let values = [recID, this.options.mapping.rty_ID];
-                
-                for(let k=0; k<map_flds.length; k++){
-                    
-                    if(map_flds[k]=='location'){
-                        if(feature[ 'lng' ] && feature[ 'lat' ]){
-                            val = 'p POINT('+feature[ 'lng' ]+' '+feature[ 'lat' ]+')';
-                        }else{
-                            val = '';
-                        }
-                    }else{
-                        val = feature[ map_flds[k] ];
-                    }
-                        
-                    values.push(val);    
+        for(const idx in data){
+
+            let feature = data[idx];
+
+            let recID = i++;
+
+            let val;
+            let values = [recID, this.options.mapping.rty_ID];
+
+            for(const fld_Name of map_flds){
+
+                if(fld_Name == 'location'){
+                    val = feature['lng'] && feature['lat'] 
+                        ? `p POINT(${feature['lng']} ${feature['lat']})`
+                        : '';
+                }else{
+                    val = feature[fld_Name];
                 }
 
-                // https://maps.google.com/?q=lat,lng or https://www.google.com/maps/search/?api=1&query=lat,lng
-                values.push('https://www.google.com/maps/search/?api=1&query='+feature['lat']+','+feature['lng']);
-
-                res_orders.push(recID);
-                res_records[recID] = values;
+                values.push(val);    
             }
 
-            if(res_orders.length>0){        
-                let res_recordset = new HRecordSet({
-                    count: res_orders.length,
-                    offset: 0,
-                    fields: fields,
-                    rectypes: [this.options.mapping.rty_ID],
-                    records: res_records,
-                    order: res_orders,
-                    mapenabled: true //???
-                });              
-                
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
-            }
-        }
-       
-        if(is_wrong_data){
+            // https://maps.google.com/?q=lat,lng or https://www.google.com/maps/search/?api=1&query=lat,lng
+            values.push(`https://www.google.com/maps/search/?api=1&query=${feature['lat']},${feature['lng']}`);
 
-            this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr({
-                message: 'Service did not return data in an appropriate format',
-                error_title: 'No valid data'
-            });
+            res_orders.push(recID);
+            res_records[recID] = values;
         }
+
+        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        this._super(res);
     }
 });

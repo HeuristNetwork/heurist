@@ -92,7 +92,8 @@
             'country' => $MIXED,
             'postalcode' => $MIXED,
             'placename' => $MIXED,
-            'maxRows' => $NUMBERED
+            'maxRows' => $NUMBERED,
+            'geonameId' => $MIXED
         ),
 
         'bnf' => array(
