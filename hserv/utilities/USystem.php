@@ -384,31 +384,16 @@ class USystem {
     //
     //
     //
-    public static function sessionCheckFolder($defaultRootFileUploadPath){
+    public static function sessionCheckFolder(){
         
         if(!ini_get('session.save_handler')=='files') { return true; }
         
         $folder = session_save_path();
         if(file_exists($folder) && is_writeable($folder)){ return true; }
             
-        $needSend = true;
-        $fname = $defaultRootFileUploadPath."lastWarningSent.ini";
-        if (file_exists($fname)){//check if warning is already sent
-            $datetime1 = date_create(file_get_contents($fname));
-            $datetime2 = date_create('now');
-            $interval = date_diff($datetime1, $datetime2);
-            $needSend = ($interval->format('%h')>4);//in hours
-        }
-        if($needSend){
-
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access',
-                                'The sessions folder has become inaccessible');
-            if($rv){
-                if (file_exists($fname)) {unlink($fname);}
-                file_put_contents($fname, date_create('now')->format(DATE_8601));
-            }
-        }
-
+        sendEmailToAdmin('Session folder access', 'The sessions folder has become inaccessible', true);
+            
+        return false;
     }
     
     //
