@@ -289,15 +289,12 @@ class DbDefRecStructure extends DbEntityBase
             $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
-                    $mysqli->rollback();
                     $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set order for fields in rectord type #'.$rty_ID, $mysqli->error );
                     break;
                 }
         }
-        if($ret){
-            $mysqli->commit();
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }

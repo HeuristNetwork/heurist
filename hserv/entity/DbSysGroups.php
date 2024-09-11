@@ -307,10 +307,6 @@ class DbSysGroups extends DbEntityBase
 
         if($ret){
             $ret = parent::delete();
-        }
-
-        if($ret){
-            $mysqli->commit();
 
             if(is_array(@$affectedUserIds) && count($affectedUserIds)>0){
                 foreach($affectedUserIds as $usrID)  //affected users
@@ -324,14 +320,9 @@ class DbSysGroups extends DbEntityBase
                     }
                 }
             }
-            //update user groups for current user
-            //$this->system->updateSessionForUser( $this->system->get_user_id() );
-            //@todo   $groups = reloadUserGroups(get_user_id());
-            //@todo   updateSessionForUser(get_user_id(), 'user_access', $groups);
-        }else{
-            $mysqli->rollback();
         }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
@@ -422,7 +413,6 @@ class DbSysGroups extends DbEntityBase
                 $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
-                    $mysqli->rollback();
                     $this->system->addError(HEURIST_DB_ERROR,
                         'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
@@ -430,20 +420,8 @@ class DbSysGroups extends DbEntityBase
             }//foreach
 
         }
-        if($ret){
-            $mysqli->commit();
-
-            //save special semaphore file to trigger user refresh for other users
-            /*
-            foreach ($assignIDs as $usrID)
-            if($usrID!=$this->system->get_user_id()){
-                $fname = HEURIST_FILESTORE_DIR.$usrID;
-                fileSave('X',$fname);//change role
-            }
-            */
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }

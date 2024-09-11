@@ -114,13 +114,10 @@
                 }
 
                 $response = recordDuplicate($system, $_REQUEST['id']);
-
-                if( $response && @$response['status']==HEURIST_OK ){
-                    $mysqli->commit();
-                }else{
-                    $mysqli->rollback();
-                }
-                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+                
+                $isOK = $response && @$response['status']==HEURIST_OK;
+                
+                mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);

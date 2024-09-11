@@ -82,12 +82,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
     }//while
 
 
-    if( $upgrade_success ){
-        $mysqli->commit();
-    }else{
-        $mysqli->rollback();
-    }
-    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+    mysql__end_transaction($mysqli, $upgrade_success, $keep_autocommit);
 
     return $upgrade_success;
 }

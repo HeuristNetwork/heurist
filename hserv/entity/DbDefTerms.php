@@ -921,15 +921,8 @@ class DbDefTerms extends DbEntityBase
                 //import terms (from csv)
                 $ret = $this->_importTerms();
             }
-
-            if($ret===false){
-                $mysqli->rollback();
-            }else{
-                $mysqli->commit();
-            }
-
-            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
-
+            
+            mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
             return $ret;
     }

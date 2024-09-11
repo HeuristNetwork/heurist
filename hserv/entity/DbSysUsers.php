@@ -438,13 +438,8 @@ class DbSysUsers extends DbEntityBase
         }
 
         //@todo - remove assosiated images
-
-        if($ret){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
@@ -557,14 +552,9 @@ class DbSysUsers extends DbEntityBase
         }
 
         /* Check if everything has been successful */
-        if($return){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
-
+        
+        mysql__end_transaction($mysqli, $return, $keep_autocommit);
+        
         return $return;
     }
 
@@ -758,8 +748,6 @@ class DbSysUsers extends DbEntityBase
         }
 
         if($ret){
-            $mysqli->commit();
-
             $ret = 'Users imported: '.count($newUserIDs);
             if (count($userIDs_already_exists)>0){
                 $ret = $ret.'. Users already exists: '.count($userIDs_already_exists);
@@ -768,10 +756,10 @@ class DbSysUsers extends DbEntityBase
             if(count($newUserIDs) == 1 && $import_from_login){ // email DB Owner
                 user_EmailAboutNewUser($this->system, $newUserIDs[0], true);
             }
-        }else{
-            $mysqli->rollback();
         }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
+        
 
         return $ret;
     }

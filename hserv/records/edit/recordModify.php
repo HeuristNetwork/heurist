@@ -1009,12 +1009,7 @@ function recordDelete($system, $recids, $need_transaction=true,
         }
 
         if($need_transaction){
-            if($msg_termination || $msg_error){
-                $mysqli->rollback();
-            }else{
-                $mysqli->commit();
-            }
-            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+            mysql__end_transaction($mysqli, !($msg_termination || $msg_error), $keep_autocommit);
         }
         return $res;
 
@@ -1047,7 +1042,7 @@ function recordGetIncrementedValue($system, $params){
             //2. get max value for numeric and last value for non numeric
             if($isNumeric){
                 $res = mysql__select_value($mysqli, 'select max(CAST(dtl_Value as SIGNED)) FROM recDetails, Records'
-                    ." WHERE dtl_RecID=rec_ID and rec_RecTypeID=$rt_ID and dtl_DetailTypeID=$dt_ID)");
+                    ." WHERE dtl_RecID=rec_ID and rec_RecTypeID=$rt_ID and dtl_DetailTypeID=$dt_ID");
             }else{
                 $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
                     ." WHERE dtl_RecID=rec_ID and rec_RecTypeID=$rt_ID and dtl_DetailTypeID=$dt_ID"

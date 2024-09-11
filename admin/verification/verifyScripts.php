@@ -1351,11 +1351,8 @@ AMP =>TS_AMP,
         }//while
         $res->close();
     }
-
-    if($isOk){
-        $mysqli->commit();
-    }
-    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+    
+    mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
 
     print '<br>Replaced in '.$cnt.' fields';
 
@@ -1726,13 +1723,7 @@ function __fixDirectPathImages(){
 
         }
 
-        if($success){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysqli, $success, $keep_autocommit);
 
         }else{
             print 'CMS rectypes not defined '.$rty_ID_1.' '.$rty_ID_2.' '.$dty_ID;
