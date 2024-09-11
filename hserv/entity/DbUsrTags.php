@@ -173,10 +173,14 @@ class DbUsrTags extends DbEntityBase
     //
     private function replaceTags(){
 
+
+        if(isEmptyArray($this->recordIDs) || isEmptyArray($this->newTagID)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
+            return false;
+        }
+
         $ret = false;
-
-        if(count($this->recordIDs)>0 && count($this->newTagID)>0){
-
+        
             $newTagID = $this->newTagID[0];
 
             $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
@@ -202,11 +206,7 @@ class DbUsrTags extends DbEntityBase
                     }
                 }
             }
-
-        }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
-        }
-
+            
         return $ret;
     }
 

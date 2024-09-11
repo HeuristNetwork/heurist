@@ -282,7 +282,7 @@
             $system->addError(HEURIST_REQUEST_DENIED,
                 'Cannot delete filter criteria. Current user must be an administrator for group');
             return false;
-        }else{
+        }
 
             if(!$ugrID>0){
                 $ugrID = $system->get_user_id();
@@ -290,32 +290,28 @@
 
             $rec_ids = prepareIds($rec_ids);
 
-            if (count($rec_ids)>0) {
+            if (isEmptyArray($rec_ids)) {
+                $system->addError(HEURIST_INVALID_REQUEST);
+                return false;
+            }
 
                 $query = 'delete from usrSavedSearches where svs_ID in ('. join(', ', $rec_ids) .') and svs_UGrpID='.$ugrID;
 
                 $mysqli = $system->get_mysqli();
                 $res = $mysqli->query($query);
 
-                if($res){
-                    $cnt = $mysqli->affected_rows;
-                    if($cnt>0){
-                        return array("status"=>HEURIST_OK, "data"=> $cnt);
-                    }else{
-                        $system->addError(HEURIST_NOT_FOUND);
-                        return false;
-                    }
-                }else{
+                if(!$res){
                     $system->addError(HEURIST_DB_ERROR,'Cannot delete saved search', $query.' '.$mysqli->error );
                     return false;
                 }
-
-            }else{
-                $system->addError(HEURIST_INVALID_REQUEST);
-                return false;
-            }
-
-        }
+                
+                $cnt = $mysqli->affected_rows;
+                if($cnt>0){
+                    return array("status"=>HEURIST_OK, "data"=> $cnt);
+                }else{
+                    $system->addError(HEURIST_NOT_FOUND);
+                    return false;
+                }
     }
 
     /**

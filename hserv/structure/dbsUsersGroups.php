@@ -478,8 +478,10 @@
 
         $result = array();
 
-        if($mysqli && intval($ugr_ID))
+        if(!$mysqli || intval($ugr_ID)==0)
         {
+            return $result;    
+        }
 
             $dbprefix = '';
             if($database!=null){
@@ -497,6 +499,8 @@
 
             $res = $mysqli->query($query);
             if($res){
+                return $result; 
+            }
                 while ($row = $res->fetch_row()) {
                     if($isfull){
                         $id = array_shift($row);
@@ -506,9 +510,8 @@
                     }
                 }
                 $res->close();
-            }
-        }
-        return $result;
+            
+            return $result; 
     }
 
     //@todo verify why it returns db onwer

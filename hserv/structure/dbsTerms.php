@@ -133,11 +133,16 @@ class DbsTerms
     public function getTermLabel($term_id, $with_hierarchy=false) {
 
         $term = $this->getTerm($term_id);
-        if($term){
+        if(!$term){
+            return '';
+        }
 
             $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
 
-            if($with_hierarchy){
+            if(!$with_hierarchy){
+                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
+            }
+            
                 $labels = '';
                 $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
                 $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
@@ -156,13 +161,6 @@ class DbsTerms
                     }
                 }
                 return implode('.',$labels);
-            }else{
-                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
-            }
-        }else{
-            return '';
-        }
-
     }
 
     //
@@ -435,7 +433,7 @@ class DbsTerms
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }elseif(is_array($children) && count($children)>0 ) {
+            }elseif( !isEmptyArray($children) ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) {return $res;}

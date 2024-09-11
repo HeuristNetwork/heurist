@@ -2014,19 +2014,17 @@ class TagPredicate extends Predicate {
 
                 $value = $this->value[$i];
                 $wg_value = $this->wg_value[$i];
+                
+                $sql_tags = ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');                
 
                 if ($wg_value) {
-                    $query .= '(';
-                    $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
-                    $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
+                    $query .= '( '. $sql_tags .' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                     
                 } elseif (is_numeric($value)) {
                     $query .= "kwd.tag_ID=$value ";
                 } else {
-                    $query .= '(';
-                    $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
+                    $query .= '( '.$sql_tags;
                         
                     $pquery = &$this->getQuery();
                     if($pquery->search_domain != BOOKMARK){
@@ -2043,6 +2041,8 @@ class TagPredicate extends Predicate {
         global $mysqli;
         
         $sql_where = 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+        $sql_tag_eq = 'kwd.tag_Text ="';
+        $sql_tag_like = 'kwd.tag_Text like "';
 
         $pquery = &$this->getQuery();
         $not = ($this->parent->negate)? SQL_NOT : '';
@@ -2060,8 +2060,8 @@ class TagPredicate extends Predicate {
                         $query .= 'rtl_TagID='.intval($value).' ';
                     } else {
                         $query .=  ($this->parent->exact
-                            ? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                            ? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }
@@ -2081,8 +2081,8 @@ class TagPredicate extends Predicate {
                     if (is_numeric($value)) {
                         $query .= "kwd.tag_ID=$value ";
                     } else {
-                        $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
-                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }

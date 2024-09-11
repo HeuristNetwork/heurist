@@ -148,9 +148,10 @@ function __updateDatabase(){
                 if(!$res){
                     print $db_name.' Cannot modify defRecStructure to add rst_SemanticReferenceURL: '.$mysqli->error;
                     return false;
-                }else{
-                    print $db_name.'<br>';
                 }
+                    
+                print $db_name.'<br>';
+                
             }
 
             if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
@@ -164,9 +165,10 @@ function __updateDatabase(){
                 if(!$res){
                     print $db_name.' Cannot modify defRecStructure to add rst_TermsAsButtons: '.$mysqli->error;
                     return false;
-                }else{
-                    print $db_name.'<br>';
                 }
+                
+                print $db_name.'<br>';
+                
             }
 
         

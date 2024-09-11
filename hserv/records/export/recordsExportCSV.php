@@ -1529,12 +1529,13 @@ private static function createJointCSVTables($csvData, &$columnInfo, $mainRecord
             if (!isset($csvRowLookups[$recordTypeID])) {
                 $csvRowLookups[$recordTypeID] = [];
             }
-            foreach ($rows as $index => $row) {
-                if ($includeHeader && $index === 0) {
-                    $csvRowLookups[$recordTypeID]['header'] = $row;
-                } else {
-                    $csvRowLookups[$recordTypeID][$row[0]] = $row;
-                }
+            
+            if ($includeHeader) {
+                $csvRowLookups[$recordTypeID]['header'] = array_shift($rows); //$rows[0];
+            }
+            
+            foreach ($rows as $row) {
+                $csvRowLookups[$recordTypeID][$row[0]] = $row;
             }
         }
     }

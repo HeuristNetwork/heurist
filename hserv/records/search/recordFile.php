@@ -884,19 +884,18 @@ function getPlayerURL($mimeType, $url, $params=null){
         }
     }elseif( $mimeType == MT_SOUNDCLOUD || strpos($url, 'soundcloud.com')>0){
 
-        $autoplay = '&amp;auto_play=';
-        $show_artwork = '&amp;show_artwork=';
 
+        $autoplay = 'false';
         if($params && @$params['auto_play']){
-            $autoplay .= 'true';
-        }else{
-            $autoplay .= 'false';
+            $autoplay = 'true';
         }
+        $autoplay = '&amp;auto_play='.$autoplay;
+        
+        $show_artwork = 'true';
         if($params && @$params['show_artwork']==0){
-            $show_artwork .= 'false';
-        }else{
-            $show_artwork .= 'true';
+            $show_artwork = 'false';
         }
+        $show_artwork = '&amp;show_artwork='.$show_artwork;
 
         return 'https://w.soundcloud.com/player/?url='.$url
                 .$autoplay.'&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
@@ -904,6 +903,12 @@ function getPlayerURL($mimeType, $url, $params=null){
     }
 
     return $url;
+}
+
+function isNotLocalFile($origName){
+    return strpos($origName, ULF_REMOTE) === 0 || // skip if not local file
+           strpos($origName, ULF_IIIF) === 0 ||
+           strpos($origName, ULF_TILED_IMAGE) === 0;
 }
 
 /**
@@ -919,9 +924,7 @@ function getPlayerURL($mimeType, $url, $params=null){
  */
 function getWebImageCache($system, $fileinfo, $return_url=true){
 
-    $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], ULF_REMOTE) === 0 || // skip if not local file
-                 strpos(@$fileinfo['ulf_OrigFileName'], ULF_IIIF) === 0 ||
-                 strpos(@$fileinfo['ulf_OrigFileName'], ULF_TILED_IMAGE) === 0;
+    $skip_file = isNotLocalFile(@$fileinfo['ulf_OrigFileName']);
 
     if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
         return false;
@@ -978,9 +981,8 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
  */
 function getBlurredImage($system, $file_info, $return_url = true){
 
-    $skip_combine = strpos(@$file_info['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
-                    strpos(@$file_info['ulf_OrigFileName'], '_iiif') === 0 ||
-                    strpos(@$file_info['ulf_OrigFileName'], '_tiled') === 0;
+    // skip if not local file
+    $skip_combine = isNotLocalFile(@$file_info['ulf_OrigFileName']);
 
     $is_public = @$file_info['ulf_WhoCanView'] !== 'loginrequired';
 
@@ -1135,6 +1137,8 @@ function fileGetMetadata($fileinfo){
 
     $image = null;
     $alt_image = null;
+    
+    $res = array();
 
     if(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $sourceType!='tiled' && $type_media=='image'){
 
@@ -1166,8 +1170,6 @@ function fileGetMetadata($fileinfo){
             $res = array('error'=>'Image is not loaded');//Cannot load image file to get dimensions
         }
 
-    }else{
-        $res = array();
     }
 
     $res['mimetype'] = $mimeType;

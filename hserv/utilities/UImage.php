@@ -109,7 +109,9 @@ class UImage {
     */
     public static function makeURLScreenshot($siteURL){
 
-        if(filter_var($siteURL, FILTER_VALIDATE_URL)){
+        if(!filter_var($siteURL, FILTER_VALIDATE_URL)){
+            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');            
+        }
 
             //$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
             $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
@@ -173,9 +175,6 @@ class UImage {
                 return array('error'=>'Cannot download image from thumbnail generator service. '.$siteURL.' to '.$heurist_path);
             }
 
-        }else{
-            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
-        }
     }
 
     /**

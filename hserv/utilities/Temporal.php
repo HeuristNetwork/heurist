@@ -738,6 +738,7 @@ class Temporal {
         $date = strval($date);
         $k = strpos($date,'.');
         if($k>0){
+            
             $res = substr($date,0,$k);//year
             $mmdd = substr($date,$k+1);
             if(strlen($mmdd)<3){
@@ -753,18 +754,14 @@ class Temporal {
 
             if(intval($res)<0 && strlen($res)<5){
                 $res = '-'.str_pad(substr($res,1), 4,'0',STR_PAD_LEFT);
-            }else{
-                //$res = str_pad($res, 4,'0',STR_PAD_LEFT);
             }
-
 
             $res = $res.'-'.$month.'-'.$day;
-        }else{
-            if($date=='0'){
+            
+        }elseif($date=='0'){
                 $res = '0000-01-01';
-            }else{
+        }else{
                 $res = $date;
-            }
         }
         return $res;
     }
@@ -1190,8 +1187,9 @@ class Temporal {
 
         if(intval($dt1['year'])<-10000 || intval($dt2['year'])<-10000){
             //years only
-            $res = array('years'=>intval($dt2['year']) - intval($dt1['year']));
-        }else{
+            return array('years'=>intval($dt2['year']) - intval($dt1['year']));
+        }
+        
 
             if(count($dt1) == 1){ // only year, add -01-01 for ISO format
                 $dt1['month'] = 1;
@@ -1235,7 +1233,6 @@ class Temporal {
             }else{
                 $res = false;
             }
-        }
 
         return $res;
 
@@ -1364,19 +1361,24 @@ class Temporal {
     //
     private static function _deviationToText($value, $prefix){
 
-        if($value){
-            try{
-                $i = new DateInterval($value);
-                if($i){
-                    $ret = ($i->y ? ("$prefix{$i->y} years") :
-                        ($i->m ? ("$prefix{$i->m} months") :
-                            ($i->d ? ("$prefix{$i->d} days") :'' )));
-                    return $ret;
-                }
-            } catch (Exception  $e){
-            }
+        if(!$value){
+            return '';    
         }
-        return '';
+        
+        $ret = '';
+        
+        try{
+            $i = new DateInterval($value);
+            if($i){
+                $ret = ($i->y ? ("$prefix{$i->y} years") :
+                    ($i->m ? ("$prefix{$i->m} months") :
+                        ($i->d ? ("$prefix{$i->d} days") :'' )));
+            }
+        } catch (Exception  $e){
+            $ret = '';
+        }
+        
+        return $ret;
     }
 
     //

@@ -2122,25 +2122,26 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
     if(count($values)==1){
         array_push($nv, super_trim($values[0]));
-    }else{
+        return $nv;
+    }
 
-        if($csv_enclosure==1){
-            $csv_enclosure = "'";
-        }elseif($csv_enclosure=='none'){
-            $csv_enclosure = 'ʰ';//rare character
-        }else {
-            $csv_enclosure = '"';
-        }
+    if($csv_enclosure==1){
+        $csv_enclosure = "'";
+    }elseif($csv_enclosure=='none'){
+        $csv_enclosure = 'ʰ';//rare character
+    }else {
+        $csv_enclosure = '"';
+    }
 
-        foreach($values as $idx=>$value){
-            if($value!=""){
-                if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
-                    $value = substr($value,1,strlen($value)-2);
-                }
-                array_push($nv, super_trim($value));
+    foreach($values as $idx=>$value){
+        if($value!=""){
+            if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
+                $value = substr($value,1,strlen($value)-2);
             }
+            array_push($nv, super_trim($value));
         }
     }
+    
     return $nv;
 }
 
@@ -2173,29 +2174,34 @@ private static function findOriginalRecord($recordId){
 
     $query = "SELECT rec_URL, rec_ScratchPad FROM Records WHERE rec_ID=".$recordId;
     $row = mysql__select_row(self::$mysqli, $query);
-    if($row){
-
-        $details['recordURL'] = $row[0];
-        $details['recordNotes'] = $row[1];
-
-        $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
-        $dets = mysql__select_all(self::$mysqli, $query);
-        if($dets){
-            foreach ($dets as $row){
-                $bd_id = $row[0];
-                $field_type = $row[1];
-                if($row[4]){ //dtl_UploadedFileID
-                    $value = $row[4];
-                }elseif($row[3]){
-                    $value = $row[2].' '.$row[3];
-                }else{
-                    $value = $row[2];
-                }
-                if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
-                $details["t:".$field_type]["bd:".$bd_id] = $value;
-            }
-        }
+    if(!$row){
+        return $details;
     }
+
+    $details['recordURL'] = $row[0];
+    $details['recordNotes'] = $row[1];
+
+    $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
+    $dets = mysql__select_all(self::$mysqli, $query);
+    if(!$dets){
+        return $details;
+    }
+    
+    
+    foreach ($dets as $row){
+        $bd_id = $row[0];
+        $field_type = $row[1];
+        if($row[4]){ //dtl_UploadedFileID
+            $value = $row[4];
+        }elseif($row[3]){
+            $value = $row[2].' '.$row[3];
+        }else{
+            $value = $row[2];
+        }
+        if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
+        $details["t:".$field_type]["bd:".$bd_id] = $value;
+    }
+    
     return $details;
 }
 

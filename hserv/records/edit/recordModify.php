@@ -1529,15 +1529,15 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
                 'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));
+
             if($mysqli->error) {$res = -1; }
-        }else{
-            $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
-                "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
-            if(!($mysqli->insert_id>0)) {$res=-1;}
+            return $res;
         }
-
-    return $res;
-
+            
+        $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
+                "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
+        if(!($mysqli->insert_id>0)) {$res=-1;}
+        return $res;
 }
 
 
@@ -3421,10 +3421,14 @@ function checkUserPermissions($system, $action){
     }
 
     $permissions = $res; //'y','n','y_no_add','y_no_delete','y_no_add_delete'
-    $action_msg = ($action == 'add' ? 'create' : '') .
-                  ($action == 'edit' ? 'modify' : '') .
-                  ($action == 'delete' ? 'delete' : '') .
-                  ($action == 'add delete' ? 'create or delete' : '');
+    switch($action){
+        case 'add': $action_msg = 'create'; break;
+        case 'edit': $action_msg = 'modify'; break;
+        case 'add delete': $action_msg = 'create or delete'; break;
+        default:        
+            $action_msg = $action;
+            break;
+    }
 
     $block_msg = 'Your account does not have permission to ' . $action_msg
                 .' records,<br>please contact the database owner for more details.';

@@ -1293,7 +1293,7 @@ if (! function_exists('array_str_replace')) {
             $match_idx = -1;
             $match_offset = -1;
             for ($i=0; $i < count($search);++$i) {
-                if($search[$i]==null || $search[$i]=='') {continue;}
+                if(isEmptyStr($search[$i])) {continue;}
                 $offset = mb_strpos($subject, $search[$i]);
                 if ($offset === false) {continue;}
                 

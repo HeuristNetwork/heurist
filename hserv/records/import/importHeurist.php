@@ -510,9 +510,13 @@ public static function importRecordsFromDatabase($params){
     $filesize = saveURLasFile($remote_path, $heurist_path);//save json import from remote db to tempfile in scratch folder
 
 //2. import records
-    if($filesize>0 && file_exists($heurist_path)){
+    if($filesize==0 || !file_exists($heurist_path)){
+        self::$system->addError(HEURIST_ERROR,
+                'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
+        return false;
+    }
+    
         //read temp file, import records
-
         $params2 = array(
             'session' => @$params['session'],
             'is_cms_init' => 0,
@@ -541,12 +545,6 @@ public static function importRecordsFromDatabase($params){
         unlink($heurist_path);//remove temp file
 
         return $res;
-    }else{
-        self::$system->addError(HEURIST_ERROR,
-            'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
-        return false;
-    }
-
 }
 
 //

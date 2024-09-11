@@ -1161,7 +1161,7 @@ public static function simpleCsvParser($params){
 
     $csv_enclosure = ($csv_enclosure==1)?"'":'"';
 
-    $response = array();
+
 
     if(intval($csv_linebreak)>0){  //no breaks - group by
             $group_by = $csv_linebreak;
@@ -1173,10 +1173,11 @@ public static function simpleCsvParser($params){
                 $temp[] = array_slice($response, $i, $csv_linebreak);
                 $i = $i + $csv_linebreak;
             }
-            $response = $temp;
+            return $temp;
+    }
 
-    }else{
-
+    $response = array();    
+    
         if($csv_linebreak=="auto"){
             //ini_set('auto_detect_line_endings', true);
             $lb = "\n";
@@ -1197,7 +1198,6 @@ public static function simpleCsvParser($params){
              $row = str_getcsv($Row, $csv_delimiter , $csv_enclosure);//parse the items in rows
              array_push($response, $row);
         }
-    }
 
     return $response;
 

@@ -275,11 +275,11 @@ class USanitize {
             {
                 if($v!=null){
 
-                    if(is_array($v) && count($v)>0){
-                        USanitize::purifyHTML($v, $purifier);
-                    }else{
+                    if(isEmptyArray($v)){
                         $v = $purifier->purify($v);
                         //$v = htmlspecialchars_decode($v);
+                    }else{
+                        USanitize::purifyHTML($v, $purifier);
                     }
                     $params[$k] = $v;
                 }

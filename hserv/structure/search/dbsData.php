@@ -337,11 +337,17 @@
         $res->close();
 
 
-        if($load_rectypes){
+        if(!$load_rectypes){
+            return $rtGroups;   
+        }
+        
             $query = 'select rty_ID, rty_RecTypeGroupID, rty_ShowInLists from defRecTypes order by rty_OrderInGroup, rty_Name';
 
             $res = $mysqli->query($query);
-            if($res){
+            if(!$res){
+                return $rtGroups;
+            }
+            
                 while ($row = $res->fetch_row()) {
 
                     $rtg_ID = $row[1];
@@ -356,8 +362,6 @@
                         }
                     }
                 }
-            }
-        }
 
         return $rtGroups;
     }
