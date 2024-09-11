@@ -2003,7 +2003,8 @@ class TagPredicate extends Predicate {
     }
     
     private function tagWhereExp(){
-
+        global $mysqli;
+        
         $query = '';
         
         $sql_tag_eq = 'kwd.tag_Text ="';

@@ -3533,7 +3533,7 @@ $.widget( "heurist.mapping", {
     
         //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
         let controls = [];
-        if(params['controls']!='none'){
+        if(!window.hWin.HEURIST4.util.isempty(params['controls']) && params['controls']!='none'){
             controls = __splitval(params['controls']);
         }
         

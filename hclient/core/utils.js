@@ -298,7 +298,7 @@ window.hWin.HEURIST4.util = {
     //
     isJSON: function(value){
         
-        let res;
+            let res = false;
             try {
                 if(typeof value === 'string'){
                     value = value.replace(/[\n\r]+/g, '');
