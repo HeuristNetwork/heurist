@@ -588,11 +588,11 @@ class DbDefRecTypes extends DbEntityBase
         if(@$this->data['mode']=='record_count')
         {
 
-            $res = countsUsage();
+            $res = $this->countsUsage();
             
         }elseif(@$this->data['mode']=='cms_record_count'){
 
-            $res = countsUsageCMS();
+            $res = $this->countsUsageCMS();
 
         }
 
