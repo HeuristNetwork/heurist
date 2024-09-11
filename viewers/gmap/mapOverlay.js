@@ -819,7 +819,7 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
         if(msg=='') {
             let imageURL = source.files[0];
 
-            let image_bounds = window.hWin.HEURIST4.geo.parseCoordinates('rect', source.bounds, 1, google);
+            let image_bounds = window.hWin.HEURIST4.geo.parseWKTCoordinates('rect', source.bounds, 1, google);
 
             let overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
 

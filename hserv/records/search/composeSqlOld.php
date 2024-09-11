@@ -520,7 +520,7 @@ class Query {
 
             foreach($matches[1] as $entry){
                 if(is_array($entry)){ //
-                    //array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
+
                     array_push( $or_limbs, new OrLimb($this, substr($text, $offset, $entry[1]-$offset)) );
                     $offset = $entry[1]+strlen($entry[0]);
                 }
@@ -528,13 +528,6 @@ class Query {
         }
         array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
 
-        /*
-        $or_texts = preg_split('/"[^"]+"|(\\bOR\\b)/i', $text);// *OR *
-        for ($i=0; $i < count($or_texts);++$i){
-        if ($or_texts[$i]){
-        array_push( $or_limbs, new OrLimb($this, $or_texts[$i]) );
-        }
-        }*/
         array_push($this->top_limbs, $or_limbs);
     }
 
@@ -548,37 +541,12 @@ class Query {
         if ($visibility_type){
             $visibility_type = strtolower($visibility_type);
             if ($visibility_type[0] == '-') {
-                $negate = true;
+                //not implemented $negate = true;
                 $visibility_type = substr($visibility_type, 1);
             }
             if(in_array($visibility_type,array('viewable','hidden','pending','public')))
             {
                 $this->recVisibilityType = $visibility_type;
-            }
-        }
-    }
-
-    public function makeJSON() {
-
-        $this->where_json = array();//reset
-
-        $where_clauses = array();
-
-        if(is_array($this->top_limbs)){
-            for ($i=0; $i < count($this->top_limbs);++$i) {
-
-                $or_clauses = array();
-                $or_limbs = $this->top_limbs[$i];
-                for ($j=0; $j < count($or_limbs);++$j) {
-                    $new_json = $or_limbs[$j]->makeJSON();
-                    array_push($or_clauses, $new_json);
-                }
-
-                if(count($or_clauses)>1){
-                    array_push($this->where_json, array('any'=>$or_clauses));
-                }elseif(count($or_clauses)>0){
-                    array_push($this->where_json, $or_clauses);
-                }
             }
         }
     }
@@ -614,17 +582,13 @@ class Query {
         for ($i=0; $i < count($this->sort_phrases);++$i) {
             @list($new_sql, $new_sig, $new_tables) = $this->sort_phrases[$i]->makeSQL();
 
-            if($new_sql!=null){
-
-                if (! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
+            if($new_sql!=null && ! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
                     if ($sort_clause) {$sort_clause .= ', ';}
 
                     $sort_clause .= $new_sql;
                     if ($new_tables) {array_push($this->sort_tables, $new_tables);}
 
                     $sort_clauses[$new_sig] = 1;
-                }
-
             }
         }
         if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
@@ -682,21 +646,7 @@ class OrLimb {
         $this->and_limbs[] = new AndLimb($this, $text);
     }
 
-    public function makeJSON() {
-        $sql = '';
-
-        $and_clauses = array();
-        for ($i=0; $i < count($this->and_limbs);++$i) {
-            $new_sql = $this->and_limbs[$i]->pred->makeJSON();
-            if (strlen($new_sql) > 0) {
-                array_push($and_clauses, $new_sql);
-            }
-        }
-        return $and_clauses;
-    }
-
     public function makeSQL() {
-        $sql = '';
 
         $and_clauses = array();
         for ($i=0; $i < count($this->and_limbs);++$i) {
@@ -706,9 +656,7 @@ class OrLimb {
             }
         }
         sort($and_clauses);
-        $sql = join(SQL_AND, $and_clauses);
-
-        return $sql;
+        return join(SQL_AND, $and_clauses);
     }
 }
 
@@ -1156,10 +1104,6 @@ class Predicate {
         $this->query = null;
     }
 
-    public function makeJSON() {
-        return array();
-    }
-
     //$table_name=null
     public function makeSQL() { return '1';}
 
@@ -1314,21 +1258,6 @@ class Predicate {
 
 class TitlePredicate extends Predicate {
 
-    public function makeJSON($isTopRec=true) {
-
-            $not = ($this->parent->negate)? '-' : '';
-
-            $compare = '';
-            if ($this->parent->exact){
-                $compare = '=';
-            }elseif($this->parent->lessthan){
-                $compare = '<';
-            }elseif($this->parent->greaterthan){
-                $compare = '>';
-            }
-            return array('f:title'=> $not.$compare.$this->value);
-    }
-
     public function makeSQL($isTopRec=true) {
         global $mysqli;
 
@@ -1360,12 +1289,6 @@ class TitlePredicate extends Predicate {
 
 class TypePredicate extends Predicate {
 
-
-    public function makeJSON($isTopRec=true) {
-            $not = ($this->parent->negate)? '-' : '';
-            return array('t'=> $not.$this->value);
-    }
-
     public function makeSQL($isTopRec=true) {
         global $mysqli;
 
@@ -1393,11 +1316,6 @@ class TypePredicate extends Predicate {
 
 class URLPredicate extends Predicate {
 
-    public function makeJSON() {
-            $not = ($this->parent->negate)? '-' : '';
-            return array('f:url'=> $not.$this->value);
-    }
-
     public function makeSQL() {
         global $mysqli;
 
@@ -1411,11 +1329,6 @@ class URLPredicate extends Predicate {
 
 
 class NotesPredicate extends Predicate {
-
-    public function makeJSON() {
-            $not = ($this->parent->negate)? '-' : '';
-            return array('f:notes'=> $not.$this->value);
-    }
 
     public function makeSQL() {
         global $mysqli;
@@ -1434,11 +1347,6 @@ class NotesPredicate extends Predicate {
 
 
 class UserPredicate extends Predicate {
-
-    //@todo - user/groups search is not implement for json
-    public function makeJSON() {
-            return array();
-    }
 
     public function makeSQL() {
         global $mysqli;
@@ -1469,11 +1377,6 @@ class UserPredicate extends Predicate {
 
 class AddedByPredicate extends Predicate {
 
-    //@todo - user/groups search is not implement for json
-    public function makeJSON() {
-        return array();
-    }
-
     public function makeSQL() {
         global $mysqli;
 
@@ -1494,32 +1397,6 @@ class AddedByPredicate extends Predicate {
 }
 
 class AnyPredicate extends Predicate {
-
-    public function makeJSON() {
-            $compare = '';
-
-            if($this->parent->negate){
-
-                if ($this->parent->exact){
-                    $compare = '!=';
-                }elseif($this->parent->lessthan){
-                    $compare = '>=';
-                }elseif($this->parent->greaterthan){
-                    $compare = '<=';
-                }
-            }else{
-
-                if ($this->parent->exact){
-                    $compare = '=';
-                }elseif($this->parent->lessthan){
-                    $compare = '<';
-                }elseif($this->parent->greaterthan){
-                    $compare = '>';
-                }
-            }
-
-            return array('f'=> $compare.$this->value);
-    }
 
     public function makeSQL() {
         global $mysqli;
@@ -1604,36 +1481,6 @@ class FieldPredicate extends Predicate {
         }
         */
     }
-
-    public function makeJSON() {
-            $compare = '';
-
-            if($this->parent->negate){
-
-                if ($this->parent->exact){
-                    $compare = '!=';
-                }elseif($this->parent->lessthan){
-                    $compare = '>=';
-                }elseif($this->parent->greaterthan){
-                    $compare = '<=';
-                }
-            }else{
-
-                if ($this->parent->exact){
-                    $compare = '=';
-                }elseif($this->parent->lessthan){
-                    $compare = '<';
-                }elseif($this->parent->greaterthan){
-                    $compare = '>';
-                }
-            }
-
-            $res = array();
-            $res['f:'.$this->field_type] = $compare.$this->value;
-            return $res;
-            //@todo implement nested values
-    }
-
 
     public function makeSQL() {
         global $mysqli;
@@ -2078,36 +1925,6 @@ class FieldCountPredicate extends Predicate {
         }
     }
 
-    public function makeJSON() {
-            $compare = '';
-
-            if($this->parent->negate){
-
-                if ($this->parent->exact){
-                    $compare = '!=';
-                }elseif($this->parent->lessthan){
-                    $compare = '>=';
-                }elseif($this->parent->greaterthan){
-                    $compare = '<=';
-                }
-            }else{
-
-                if ($this->parent->exact){
-                    $compare = '=';
-                }elseif($this->parent->lessthan){
-                    $compare = '<';
-                }elseif($this->parent->greaterthan){
-                    $compare = '>';
-                }
-            }
-
-            $res = array();
-            $res['f#:'.$this->field_type] = $compare.$this->value;
-            return $res;
-            //@todo implement nested values
-    }
-
-
     public function makeSQL() {
         global $mysqli;
 
@@ -2184,12 +2001,6 @@ class TagPredicate extends Predicate {
         if (! $any_wg_values) {$this->wg_value = array();}
         $this->query = null;
     }
-
-    //@todo - not supported in json
-    public function makeJSON() {
-            return array();
-    }
-
 
     public function makeSQL() {
         global $mysqli;
@@ -2292,21 +2103,6 @@ class TagPredicate extends Predicate {
 
 
 class BibIDPredicate extends Predicate {
-
-    public function makeJSON() {
-
-        $not = ($this->parent->negate)? '-' : '';
-
-        $compare = '';
-        if ($this->parent->exact){
-            $compare = '=';
-        }elseif($this->parent->lessthan){
-            $compare = '<';
-        }elseif($this->parent->greaterthan){
-            $compare = '>';
-        }
-        return array('ids'=> $not.$compare.$this->value);
-    }
 
     public function makeSQL() {
         $res = "TOPBIBLIO.rec_ID ".$this->get_field_value();
@@ -2991,11 +2787,6 @@ class RelationsForPredicate extends Predicate {
 
 class AfterPredicate extends Predicate {
 
-    public function makeJSON(){
-            $not = ($this->parent->negate)? '-' : '';
-            return array(REC_MODIFIED=>(($this->parent->negate)?'<':'>').$this->value);
-    }
-
     public function makeSQL() {
 
          try{
@@ -3015,11 +2806,6 @@ class AfterPredicate extends Predicate {
 
 
 class BeforePredicate extends Predicate {
-
-    public function makeJSON(){
-            $not = ($this->parent->negate)? '-' : '';
-            return array(REC_MODIFIED=>(($this->parent->negate)?'>':'<').$this->value);
-    }
 
     public function makeSQL() {
          try{
@@ -3044,12 +2830,6 @@ class DatePredicate extends Predicate {
     public function __construct(&$parent, $col, $value) {
         $this->col = $col;
         parent::__construct($parent, $value);
-    }
-
-
-    public function makeJSON(){
-            $not = ($this->parent->negate)? '-' : '';
-            return array(REC_MODIFIED=>$not.$this->value);
     }
 
     public function makeSQL() {
