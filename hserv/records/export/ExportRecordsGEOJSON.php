@@ -160,7 +160,7 @@ protected function _outputPrepare($data, $params){
 protected function _outputPrepareFields($params){
 
     if($this->is_leaflet){
-        $this->retrieve_detail_fields = array('file');
+        $this->retrieve_detail_fields = null;
         $this->retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else{
         parent::_outputPrepareFields($params);
