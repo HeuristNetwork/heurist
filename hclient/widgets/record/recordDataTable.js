@@ -435,10 +435,10 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         });
 
         if(need_id){
-            selectedCols.push({data:'rec_ID',title:'ID', visible:false});
+            selectedCols.push({data:'rec_ID',title:'Record H-ID', visible:false});
         }
         if(need_type){
-            selectedCols.push({data:'rec_RecTypeID',title:'Record type ID', visible:false});
+            selectedCols.push({data:'typename',title:'Record type', visible:false});
         }
         if(selectedCols.length==2){
             selectedCols = null;//.push({data:'rec_Title',title:'Title',visible:true});    
