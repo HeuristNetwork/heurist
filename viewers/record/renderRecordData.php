@@ -63,18 +63,10 @@ $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['relo
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
 $show_private_details = !array_key_exists('privateDetails', $_REQUEST) ? 1 : intval($_REQUEST['privateDetails']);
 
-$hide_images = -1;
-
+// 1 - No linked media, 2 - No images at all
+$hide_images = 0;
 if(array_key_exists('hideImages', $_REQUEST)){
     $hide_images =  intval($_REQUEST['hideImages']);
-}
-// 1 - No linked media, 2 - No images at all
-if($hide_images<0 || $hide_images>2){
-    if($is_production){ //for production all images are allways visible
-        $hide_images = 0;
-    }else{
-        $hide_images = $system->user_GetPreference('recordData_Images', 0);
-    }
 }
 
 // How to handle fields set to hidden
@@ -751,31 +743,28 @@ if($isLocalHost){
                 $('.miradorViewer_link').on('click', __openMiradorViewer);
             }
 
-            //
-            // Show/Hide media and linked media
-            // @param {force_all_images} Boolean - was call triggered by clicking 'show all images'
-            //
-            function displayImages(force_all_images){
+            /**
+             * Show/Hide media and linked media
+             * 
+             * @param {boolean} [show_all=false] Force the display of all images
+             */
+            function displayImages(show_all = false){
 
                 // 0 - show all (default), 1 - hide linked, 2 - hide all
-                /*if(force_all_images && window.hWin && window.hWin.HAPI4
-                    hide_images = window.hWin.HAPI4.get_prefs_def('recordData_Images', 0);
-                }else */
-                let hide_images = $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
+                let hide_images = show_all || $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
 
-                if(!force_all_images && hide_images == 2){ //hide all images
-                    $('.media-content').hide();
-
+                $('.media-content').show();
+                if(hide_images == 1){ // hide linked media
+                    $('.linked-media').hide();
                 }else{
-                    $('.media-content').show();
-                    if(hide_images == 1){ // hide linked media
-                        $('.linked-media').hide();
-                    }else{
-                        $('.linked-media').show();
-                        //$('#show-linked-media').attr('checked', true);
-                    }
+                    $('.linked-media').show();
                 }
 
+                sessionStorage.setItem('Heurist_RecView_LinkedMedia', hide_images);
+
+                if(show_all){ // set checkbox to checked
+                    $('#show-linked-media').attr('checked', true);
+                }
             }
 
             function mediaTooltips(){
@@ -920,7 +909,13 @@ if($isLocalHost){
 
                 showMediaViewer();//init thumbs for iiif
 
-                //displayImages(false);
+                // Set default setting for show linked media, stored within session
+                let def_ImageSettings = sessionStorage.getItem('Heurist_RecView_LinkedMedia');
+                //let param_ImageSetting = window.hWin.HEURIST4.util.getUrlParameter('hideImages', location.search);
+                def_ImageSettings = def_ImageSettings != 0 && def_ImageSettings != 1 ? 1 : def_ImageSettings;
+                if($('#show-linked-media').length > 0){
+                    $('#show-linked-media').prop('checked', def_ImageSettings == 0).trigger('change');
+                }
 
                 mediaTooltips();
 
@@ -1060,10 +1055,11 @@ if(!empty($import_webfonts)){
             font-weight: normal;
             font-size: 11px;
             margin-left: 15px;
+            cursor: pointer;
+            vertical-align: middle;
         }
         .media-control input {
             margin: 0;
-            vertical-align: -2px;
         }
 <?php
 if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
@@ -2022,8 +2018,14 @@ function print_public_details($bib) {
             }
 
             $media_control_chkbx = '';
-            if($k == 0 && $thumb['linked'] != true && !$is_production && !$is_map_popup && $several_media>1){
-                $media_control_chkbx = ' <label class="media-control"><input type="checkbox" id="show-linked-media" onchange="displayImages(false);" '. ($hide_images == 0 ? ' checked="checked"' : '') .'> show linked media</label>';
+            if($k == 0 && !$is_production && !$is_map_popup && $several_media>1){
+                $checked_status = $hide_images == 0 ? ' checked="checked"' : '';
+                $media_control_chkbx = " <label class='media-control'><input type='checkbox' id='show-linked-media' onchange='displayImages(false);' $checked_status> show linked media</label>";
+
+                if($thumb['linked'] == true){
+                    print "<h5 style='margin-block:1.5em'>Linked Media Only: $media_control_chkbx</h5>";
+                    $media_control_chkbx = '';
+                }
             }
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0)
@@ -2031,80 +2033,79 @@ function print_public_details($bib) {
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
             $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
 
-        if(!$is_map_popup){
-            print '<div class="download_link">';
-
             if(!$is_map_popup){
+                print '<div class="download_link">';
 
-                if($k==0 && $several_media>1){
-                    print '<a href="#" onclick="displayImages(true);">'
-                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>'.BR2;
+                if(!$is_map_popup){
+
+                    if($k==0 && $several_media>1){
+                        print '<a href="#" onclick="displayImages(true);">'
+                        .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>'.BR2;
+                    }
+                    if(!empty($thumbs) && !$isAudioVideo){
+                        print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
+                        .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>'.BR2;
+                    }
                 }
-                if(!empty($thumbs) && !$isAudioVideo){
-                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
-                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>'.BR2;
+
+                if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
+                    ( strpos($thumb['mimeType'],'youtube')===false &&
+                    strpos($thumb['mimeType'],'vimeo')===false &&
+                    strpos($thumb['mimeType'],'soundcloud')===false)) )
+                {
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
+                        .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                        .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                        .'"></span>&nbsp;Mirador</a>'.BR2;
                 }
+
+                if(@$thumb['external_url']){
+                    print '<a href="' . htmlspecialchars($thumb['external_url'])
+                                    . '" class="external-link" target=_blank>open in new tab'
+                                    . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
+                }else{
+                    print '<a href="' . htmlspecialchars($download_url)
+                                    . '" class=" image_tool" target="_surf">'
+                                    . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
+                                    . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
+                }
+                print BR2;
+
+                $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
+                $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
+                $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
+                $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
+
+                if(!empty($caption) || !empty($description)){
+
+                    $val = !empty($caption) ? $caption : '';
+                    $val = !empty($description) && !empty($val) ? $val . BR2 . $description : $val;
+                    $val = empty($val) ? $description : $val;
+
+                    print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                            . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                            . 'description</span>'.BR2;
+                }
+
+                if(!empty($rights) || !empty($owner)){
+
+                    $val = !empty($rights) ? $rights : '';
+                    $val = !empty($owner) && !empty($val) ? $val . BR2 . $owner : $val;
+                    $val = empty($val) ? $owner : $val;
+
+                    print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                            . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                            . 'rights</span>'.BR2;
+                }
+
+                if(!$is_map_popup && $thumb['player'] && !$without_header){
+                    print '<a id="lnk'.htmlspecialchars($thumb['id'])
+                            .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                            .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
+                }
+
+                print '</div><!-- CLOSE download_link -->';//CLOSE download_link
             }
-
-            if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
-                 ( strpos($thumb['mimeType'],'youtube')===false &&
-                   strpos($thumb['mimeType'],'vimeo')===false &&
-                   strpos($thumb['mimeType'],'soundcloud')===false)) )
-            {
-                print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
-                    .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                    .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    .'"></span>&nbsp;Mirador</a>'.BR2;
-            }
-
-            if(@$thumb['external_url']){
-                print '<a href="' . htmlspecialchars($thumb['external_url'])
-                                . '" class="external-link" target=_blank>open in new tab'
-                                . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-            }else{
-                print '<a href="' . htmlspecialchars($download_url)
-                                . '" class=" image_tool" target="_surf">'
-                                . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
-                                . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-            }
-            print BR2;
-
-            $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
-            $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
-            $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
-            $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
-
-            if(!empty($caption) || !empty($description)){
-
-                $val = !empty($caption) ? $caption : '';
-                $val = !empty($description) && !empty($val) ? $val . BR2 . $description : $val;
-                $val = empty($val) ? $description : $val;
-
-                print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
-                        . 'description</span>'.BR2;
-            }
-
-            if(!empty($rights) || !empty($owner)){
-
-                $val = !empty($rights) ? $rights : '';
-                $val = !empty($owner) && !empty($val) ? $val . BR2 . $owner : $val;
-                $val = empty($val) ? $owner : $val;
-
-                print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
-                        . 'rights</span>'.BR2;
-            }
-
-            if(!$is_map_popup && $thumb['player'] && !$without_header){
-                print '<a id="lnk'.htmlspecialchars($thumb['id'])
-                        .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                        .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
-            }
-
-            print '</div><!-- CLOSE download_link -->';//CLOSE download_link
-        }
-
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'
