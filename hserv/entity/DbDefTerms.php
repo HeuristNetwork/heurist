@@ -247,12 +247,14 @@ class DbDefTerms extends DbEntityBase
             //group by parent term ID
             $records_by_prent_id = array();
             foreach($this->records as $idx => $record){
-                if($record['trm_ParentTermID']>0){
+                if(!($record['trm_ParentTermID']>0)){
+                    continue;
+                }
                     if(!@$records_by_prent_id[$record['trm_ParentTermID']]){
                         $records_by_prent_id[$record['trm_ParentTermID']] = array();
                     }
                     $records_by_prent_id[$record['trm_ParentTermID']][] = $record;
-                }
+                
             }
 
             $terms_added = array();

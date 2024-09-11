@@ -134,11 +134,12 @@ function __updateDatabase(){
 
         $db_name = htmlspecialchars($db_name);
 
-        if(hasTable($mysqli, 'defRecStructure')){
+        if(!hasTable($mysqli, 'defRecStructure')){
+            continue;
+        }
 
-            if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
+            if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
                
-            }else{
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
                 ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
@@ -168,7 +169,7 @@ function __updateDatabase(){
                 }
             }
 
-        }
+        
     }
 }
 
@@ -356,7 +357,15 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 .$db_name.'.defDetailTypes WHERE dty_Name="'.$sName.'"';
 
         $fields = mysql__select_row($mysqli, $query);
-        if($fields){
+        if(!$fields){
+            $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
+                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
+            $fields = mysql__select_row($mysqli, $query);
+            if($fields){
+                print error_Div('FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]));
+            }
+            return;
+        }
 
             $f_code = explode('-',$f_code);
             $v_code = explode('-',$v_code);
@@ -400,14 +409,8 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             }else{
                 print error_Div('VOCAB NOT DEFINED');
             }
-        }else{
-            $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
-                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
-            $fields = mysql__select_row($mysqli, $query);
-            if($fields){
-                print error_Div('FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]));
-            }
-        }
+        
+        
 }
 
 //
@@ -843,7 +846,9 @@ function __correctGetEstDate(){
 
         $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100';
         $res = $mysqli->query($query);
-        if ($res){
+        if (!$res){
+            continue;   
+        }
             $cnt=0;
             $is_invalid = false;
             while ($row = $res->fetch_row()){
@@ -873,7 +878,7 @@ function __correctGetEstDate(){
             if($cnt>0 || $is_invalid){
                 print htmlspecialchars($db_name.'  '.$cnt).'<br>';
             }
-        }
+        
 
     }//for
 }

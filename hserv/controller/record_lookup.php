@@ -1350,7 +1350,7 @@
             }
         }
 
-        if(!$data || !is_array($data) || empty($data)){
+        if(isEmptyArray($data)){
             return array();
         }
 
@@ -1365,11 +1365,11 @@
             $data_rtn = $data['years'];
         }
 
-        if(empty($data_rtn) || count($data_rtn) == 0){ // all
+        if(isEmptyArray($data_rtn)){ // all
             return $data;
-        }else{
-            return $data_rtn;
         }
+        
+        return $data_rtn;
     }
 
     function updateNakalaMetadata($system){

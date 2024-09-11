@@ -56,11 +56,14 @@ class DbRecThreadedComments extends DbEntityBase
             case 'id': $fieldList = 'cmt_ID'; break;  
             case 'list':
                 $needRecords = true;
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified'; 
+                break;
             case 'name':
                 $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified'; 
                 break;  
             default:   //'full'
                 $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
+                break;
         }
         
         $orderby = $this->searchMgr->setOrderBy();

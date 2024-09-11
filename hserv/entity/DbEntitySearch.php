@@ -52,7 +52,9 @@ class DbEntitySearch
 
         $values = @$this->data[$fieldname];
 
-        if($values!=null && $data_type!='freetext'){
+        if($values==null || $data_type=='freetext'){
+            return true;
+        }
             //array of integer or integer
             if(!is_array($values)){
                 $values = explode(',', $values);
@@ -65,7 +67,7 @@ class DbEntitySearch
                 }
             }
             //return $values;
-        }
+        
         return true;
     }
 
@@ -76,7 +78,9 @@ class DbEntitySearch
 
         $value = @$this->data[$fieldname];
 
-        if($value!=null){
+        if($value==null){
+            return true;   
+        }
 
             $enums = $this->fields[$fieldname]['rst_FieldConfig'];
 
@@ -110,7 +114,7 @@ class DbEntitySearch
                     return false;
                 }
             }//for
-        }
+        
         return true;
     }
 

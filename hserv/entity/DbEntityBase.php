@@ -640,6 +640,8 @@ abstract class DbEntityBase
             $this->isDeleteReady = true;
             return true;
         }
+        
+        $compare = (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
             
         foreach($this->foreignChecks as $check){
             
@@ -648,7 +650,7 @@ abstract class DbEntityBase
             if(strpos($query,'#IDS#')>0){
                 $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
             }else{
-                $query .= (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
+                $query .= $compare;
             }
             
             $ret = mysql__select_value($this->system->get_mysqli(), $query);
@@ -808,13 +810,7 @@ abstract class DbEntityBase
 
         $fieldvalues = $this->data['fields'];
 
-        $table_prefix = @$this->config['tablePrefix'];
-        if($table_prefix==null){
-            $table_prefix = '';
-        }elseif (substr($table_prefix, -1) !== '_') {
-            $table_prefix = $table_prefix.'_';
-        }
-        $rec_ID = intval(@$fieldvalues[$this->primaryField]);// $table_prefix.'ID'
+        $rec_ID = intval(@$fieldvalues[$this->primaryField]);
         $isinsert = ($rec_ID<1);
 
         foreach($this->fields as $fieldname=>$field_config){

@@ -2006,6 +2006,9 @@ class TagPredicate extends Predicate {
 
         $query = '';
         
+        $sql_tag_eq = 'kwd.tag_Text ="';
+        $sql_tag_like = 'kwd.tag_Text like "';
+        
         for ($i=0; $i < count($this->value);++$i) {
                 if ($i > 0) {$query .= 'or ';}
 
@@ -2014,16 +2017,18 @@ class TagPredicate extends Predicate {
 
                 if ($wg_value) {
                     $query .= '(';
-                    $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
-                        : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                    $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
                     $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
                     
                 } elseif (is_numeric($value)) {
                     $query .= "kwd.tag_ID=$value ";
                 } else {
                     $query .= '(';
-                    $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
-                        : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                    $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
+                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
+                        
+                    $pquery = &$this->getQuery();
                     if($pquery->search_domain != BOOKMARK){
                         $query .= ' and ugr_ID is null ';
                     }
