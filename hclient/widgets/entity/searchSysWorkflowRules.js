@@ -86,8 +86,6 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {};
         
             if(this.input_search_rectype.val() && this.input_search_rectype.val()!='any'){

@@ -44,6 +44,7 @@ $.widget( "heurist.searchEntity", {
     },
     
     _need_load_content:true, // do not load search form html content
+    _search_request:{},
 
     // the widget's constructor
     _create: function() {
@@ -162,7 +163,35 @@ $.widget( "heurist.searchEntity", {
     // public methods
     //
     startSearch: function(){
-        //TO EXTEND        
+        
+            if(!this._search_request){
+                this._search_request = {};
+            }
+                    
+            this._trigger( "onstart" );
+    
+            this._search_request['a']          = 'search'; //action
+            this._search_request['entity']     = this.options.entity.entityName;
+            this._search_request['request_id'] = window.hWin.HEURIST4.util.random();
+            if(!this._search_request['details']){
+                this._search_request['details'] = 'id';
+            }
+            if(this.options.database){
+                this._search_request['db'] = this.options.database;    
+            }
+            
+
+            let that = this;                                                
+       
+            window.hWin.HAPI4.EntityMgr.doRequest(this._search_request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that._trigger( "onresult", null, 
+                            {recordset:new HRecordSet(response.data), request:this._search_request} );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });      
     },
     
 

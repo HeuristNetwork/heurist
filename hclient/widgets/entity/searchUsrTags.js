@@ -64,8 +64,6 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             /* we don't filter by group - just hide acccordion

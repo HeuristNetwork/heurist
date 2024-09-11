@@ -66,8 +66,6 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             request['trm_Domain'] = this.currentDomain();
@@ -85,24 +83,9 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
                 
             //NOTE use_cache=false for terms has no practical sense                    
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'list';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                let that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new HRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
+                request['details']   = 'list';
+                this._search_request = request;
+                this._super();
             }            
     },
     

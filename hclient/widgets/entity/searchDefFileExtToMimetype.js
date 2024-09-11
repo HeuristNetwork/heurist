@@ -54,8 +54,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {};
             
             if(this.input_search.val()!=''){

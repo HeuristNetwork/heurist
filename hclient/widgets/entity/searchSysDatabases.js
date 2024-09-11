@@ -49,7 +49,6 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
-        this._super();
         
         let request = {};
         

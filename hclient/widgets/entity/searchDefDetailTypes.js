@@ -173,8 +173,6 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             if(this.input_search.val()!=''){
@@ -247,28 +245,8 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 this._trigger( "onfilter", null, request);            
                 
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                //we may search users in any database
-                request['db']     = this.options.database;
-
-                let that = this;                                                
-           
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new HRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
+                this._search_request = request;
+                this._super();                
             }            
             
     },

@@ -379,8 +379,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.parent().find('.recordList').show();
         }
 
-        this._super();
-
         let qstr = '', domain = 'a', qobj = [];
         
         let links_count = null;

@@ -171,8 +171,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             let domain = this.currentDomain();
@@ -236,27 +234,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['sort:ulf_OrigFileName'] = '-1';   
             }
             
-            
-            
-            this._trigger( "onstart" );
-    
-            request['a']          = 'search'; //action
-            request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id';
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            let that = this;                                                
-            
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new HRecordSet(response.data), request:request} );
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-                    
+            this._search_request = request;
+            this._super();
     },
     
     currentDomain:function(){

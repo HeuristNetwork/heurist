@@ -115,8 +115,6 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
-        
-            this._super();
             
             let request = {}
         
@@ -173,40 +171,9 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             }else{
                 request['sort:ugr_Name'] = '1';   
             }
-                 
             
-/*
-            if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = window.hWin.HAPI4.get_prefs('recent_Users');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                var d = new Date(); 
-               
-                d.setTime(d.getTime()-7*24*60*60*1000);
-                request['ugr_Modified'] = '>'+d.toISOString();
-            }
-*/            
-            this._trigger( "onstart" );
-    
-            request['a']          = 'search'; //action
-            request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id';
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            //we may search users in any database
-            request['db']     = this.options.database;
-
-            let that = this;                                                
-       
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new HRecordSet(response.data), request:request} );
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
+            this._search_request = request;
+            this._super();
                            
     }
 });
