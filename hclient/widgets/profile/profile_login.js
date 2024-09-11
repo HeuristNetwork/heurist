@@ -330,6 +330,11 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
             });
 
+            // Avoid submitting the form, it returns the user to the switchboard
+            $dlg.find('form').on('submit', function(event){
+                window.hWin.HEURIST4.util.stopEvent(event);
+            });
+
             $dlg.find("#link_restore").on("click", function(){
                 if(saml_login_only){ return; }
                 updateStatus($dlg, 1, '');
