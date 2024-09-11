@@ -792,7 +792,7 @@ class AndLimb {
 
                 $fieldtype_id = null;
 
-                if ($colon_pos === FALSE){
+                if ($colon_pos === false){
                     $value = $this->cleanQuotedValue($raw_pred_val);
                 } elseif($colon_pos == 0){
                     $value = $this->cleanQuotedValue($raw_pred_val);
@@ -821,7 +821,7 @@ class AndLimb {
                         elseif (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
                             //elseif (($colon_pos = strpos($raw_pred_val, '@'))) {$this->fulltext = true;}
                 }
-                if ($colon_pos === FALSE){
+                if ($colon_pos === false){
                     $value = $this->cleanQuotedValue($raw_pred_val);
 
                     if (($colon_pos = strpos($value, '@'))===0) {$this->fulltext = true;}
@@ -899,12 +899,12 @@ class AndLimb {
 
             case 'latitude':
             case 'lat':
-                return new LatitudePredicate($this, $pred_val);
+                return new CoordinatePredicate($this, $pred_val, 'ST_Y');
 
             case 'longitude':
             case 'long':
             case 'lng':
-                return new LongitudePredicate($this, $pred_val);
+                return new CoordinatePredicate($this, $pred_val, 'ST_X');
 
             case 'hhash':
                 return new HHashPredicate($this, $pred_val);
@@ -2001,13 +2001,43 @@ class TagPredicate extends Predicate {
         if (! $any_wg_values) {$this->wg_value = array();}
         $this->query = null;
     }
+    
+    private function tagWhereExp(){
+
+        $query = '';
+        
+        for ($i=0; $i < count($this->value);++$i) {
+                if ($i > 0) {$query .= 'or ';}
+
+                $value = $this->value[$i];
+                $wg_value = $this->wg_value[$i];
+
+                if ($wg_value) {
+                    $query .= '(';
+                    $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
+                        : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                    $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
+                    
+                } elseif (is_numeric($value)) {
+                    $query .= "kwd.tag_ID=$value ";
+                } else {
+                    $query .= '(';
+                    $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
+                        : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
+                    if($pquery->search_domain != BOOKMARK){
+                        $query .= ' and ugr_ID is null ';
+                    }
+                    $query .= ') ';
+                }
+        }        
+        
+        return null;
+    } 
 
     public function makeSQL() {
         global $mysqli;
         
         $sql_where = 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
-        $sql_tag_eq = 'kwd.tag_Text = "';
-        $sql_tag_like = 'kwd.tag_Text like "';
 
         $pquery = &$this->getQuery();
         $not = ($this->parent->negate)? SQL_NOT : '';
@@ -2024,33 +2054,17 @@ class TagPredicate extends Predicate {
                     if (is_numeric($value)) {
                         $query .= 'rtl_TagID='.intval($value).' ';
                     } else {
-                        $query .=     ($this->parent->exact
-                            ? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
+                        $query .=  ($this->parent->exact
+                            ? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
+                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }
                 $query .= ') and kwd.tag_UGrpID='.$pquery->currUserID.')) ';
             } else {
                 $query='('.$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                . ' where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
-                for ($i=0; $i < count($this->value);++$i) {
-                    if ($i > 0) {$query .= 'or ';}
-
-                    $value = $this->value[$i];
-                    $wg_value = $this->wg_value[$i];
-
-                    if ($wg_value) {
-                        $query .= '(';
-                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
-                        $query .=      ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
-                    } else {
-                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
-                    }
-                }
-                $query .= '))) ';
+                . ' where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and ('
+                . tagWhereExp(). ')))';
             }
         } else {
             if (! $this->wg_value) {
@@ -2062,38 +2076,17 @@ class TagPredicate extends Predicate {
                     if (is_numeric($value)) {
                         $query .= "kwd.tag_ID=$value ";
                     } else {
-                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
+                        $query .=      ($this->parent->exact? 'kwd.tag_Text ="'.$mysqli->real_escape_string($value).'" '
+                            : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                     }
                     $first_value = false;
                 }
                 $query .= '))) ';
             } else {
                 $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
-                . $sql_where;
-                for ($i=0; $i < count($this->value);++$i) {
-                    if ($i > 0) {$query .= 'or ';}
+                . $sql_where
+                . tagWhereExp(). '))) ';
 
-                    $value = $this->value[$i];
-                    $wg_value = $this->wg_value[$i];
-
-                    if ($wg_value) {
-                        $query .= '(';
-                        $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                            : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
-                        $query .= ' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
-                    } else {
-                        if (is_numeric($value)) {
-                            $query .= "kwd.tag_ID=$value ";
-                        } else {
-                            $query .= '(';
-                            $query .=      ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                                : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
-                            $query .= ' and ugr_ID is null) ';
-                        }
-                    }
-                }
-                $query .= '))) ';
             }
         }
 
@@ -2166,13 +2159,12 @@ class BibIDPredicate extends Predicate {
 }
 
 
-//
-// this is special case
-// find records that are linked from parent/top query (resource (record pointer) field in parent record = record ID)
-//
-// 1. take parent query from parent object
-//
-class LinkedFromParentPredicate extends Predicate {
+abstract class LinkedPredicate extends Predicate {
+    
+    protected $fromField;
+    protected $toField;
+    protected $toRLink;
+    
     public function makeSQL() {
 
         $rty_ID = null;
@@ -2191,29 +2183,8 @@ class LinkedFromParentPredicate extends Predicate {
 
         $rty_IDs = prepareIds($rty_ID);
         $dty_IDs = prepareIds($dty_ID);
-
-
-        /*
-        //additions for FROM and WHERE
-        if($rty_ID){
-
-        if($dty_ID){
-        //linked from specific record and fields
-        $add_from =  'recDetails bd ';
-        $add_where =  'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$rty_ID.' and bd.dtl_DetailTypeID='.$dty_ID;
-        }else{
-        //linked from specific record type (by any field)
-        $add_from =  'defDetailTypes, recDetails bd ';
-        $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and rd.rec_RecTypeID='.$rty_ID.' ';
-        }
-        }else{ //any linked from
-        $add_from =  'defDetailTypes, recDetails bd ';
-        $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" ';
-        }
-
-        $select = 'exists (select bd.dtl_RecID  ';
-        */
-        //NEW  ---------------------------
+        
+        //---------------------------
 
         if($rty_ID==1){ //special case for relationship records
             $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID ";
@@ -2225,7 +2196,7 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = '';
             }
 
-            $add_where = $add_where . SQL_RL_SOURCE_LINK.SQL_AND;
+            $add_where = $add_where . SQL_RL_SOURCE_LINK . SQL_AND;
 
             if(!empty($dty_IDs)){
                 $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
@@ -2233,34 +2204,34 @@ class LinkedFromParentPredicate extends Predicate {
                 $add_where = $add_where.SQL_RELATION_IS_NULL;
             }
         }
-
+        
         $add_from  = SQL_RECLINK;
 
-        $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
+        $select = 'TOPBIBLIO.rec_ID in (select '.$this->toField.' ';
 
         $pquery = &$this->getQuery();
         if ($pquery->parentquery){
 
             $query = $pquery->parentquery;
-            //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
             $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
             $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
             $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
             $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
-            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where
+            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"]
+                        .SQL_AND.$add_where
                         .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
 
             if(!empty($rty_IDs)){
-                $add_where = predicateId('rl.rl_SourceID',$rty_IDs).SQL_AND;
+                $add_where = predicateId($this->fromField,$rty_IDs).SQL_AND;
             }else{
                 $add_where = '';
             }
 
-            $add_where = $add_where.SQL_RL_TARGET_LINK;
+            $add_where = $add_where.$this->toRLink;
             if($rty_ID!=1){
                 $add_where = $add_where . SQL_AND;
 
@@ -2278,117 +2249,37 @@ class LinkedFromParentPredicate extends Predicate {
     }
 }
 
+//
+// this is special case
+// find records that are linked from parent/top query (resource (record pointer) field in parent record = record ID)
+//
+// 1. take parent query from parent object
+//
+class LinkedFromParentPredicate extends LinkedPredicate {
+    public function __construct(&$parent, $value) {
+        parent::__construct( $parent, $value );
+        
+        $this->fromField = 'rl.rl_SourceID';
+        $this->toField = 'rl.rl_TargetID';
+        
+        $this->toRLink = SQL_RL_TARGET_LINK;
+    }
+}
+
 
 //
 // find records that are linked (have pointers) to  parent/top query
 
 //  resource (record pointer) detail value of parent query equals to record id
 //
-class LinkedToParentPredicate extends Predicate {
-    public function makeSQL() {
-
-        $rty_ID = null;
-        $dty_ID = null;
-        //if value is specified we search linked from specific source type and field
-        if($this->value){
-            $vals = explode('-', $this->value);
-            if(count($vals)>1){
-                $rty_ID = $vals[0];
-                $dty_ID = $vals[1];
-            }else{
-                $rty_ID = $vals[0];
-                $dty_ID = '';
-            }
-        }
-
-        $rty_IDs = prepareIds($rty_ID);
-        $dty_IDs = prepareIds($dty_ID);
-
-        /*
-        //additions for FROM and WHERE
-        if($rty_ID){
-
-        if($dty_ID){
-        //linked from specific record and fields
-        $add_from =  'recDetails bd ';
-        $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$rty_ID.' and bd.dtl_DetailTypeID='.$dty_ID.' and bd.dtl_Value=rd.rec_ID ';
-
-        }else{
-        //linked to specific record type (by any field)
-        $add_from =  'defDetailTypes, recDetails bd ';
-        $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
-        }
-        }else{ //any linked to
-        $add_from =  'defDetailTypes, recDetails bd ';
-        $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
-        }
-
-        $select = 'exists (select bd.dtl_RecID  ';
-        */
-
-        //NEW  ---------------------------
-        if($rty_ID==1){ //special case for relationship records
-            $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID";
-        }else{
-
-            if(!empty($rty_IDs)){
-                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND;
-            }else{
-                $add_where = '';
-            }
-
-            $add_where = $add_where . SQL_RL_TARGET_LINK . SQL_AND;
-
-            if(count($dty_IDs)>1){
-                $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
-            }else{
-                $add_where = $add_where.SQL_RELATION_IS_NULL;
-            }
-        }
-        $add_from  = SQL_RECLINK;
-
-        $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
-
-
-        $pquery = &$this->getQuery();
-        if ($pquery->parentquery){
-
-            $query = $pquery->parentquery;
-            //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
-
-            $query["from"]  = str_replace('TOPBIBLIO', 'rd', $query["from"]);
-            $query["from"]  = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
-            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
-            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
-
-            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
-
-        }else{
-
-            if(!empty($rty_IDs)){
-                $add_where = predicateId('rl.rl_TargetID',$rty_IDs).SQL_AND;  
-            }else{
-                $add_where = '';
-            }
-
-            $add_where = $add_where.SQL_RL_SOURCE_LINK;
-            if($rty_ID!=1){
-                $add_where = $add_where . SQL_AND;
-
-                if(!empty($dty_IDs)){
-                    $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
-                }else{
-                    $add_where = $add_where.SQL_RELATION_IS_NULL;
-                }
-
-            }
-
-
-            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
-
-        }
-
-        return $select;
+class LinkedToParentPredicate extends LinkedPredicate {
+    public function __construct(&$parent, $value) {
+        parent::__construct( $parent, $value );
+        
+        $this->fromField = 'rl.rl_TargetID';
+        $this->toField = 'rl.rl_SourceID';
+        
+        $this->toRLink = SQL_RL_SOURCE_LINK;
     }
 }
 
@@ -2893,7 +2784,15 @@ class SpatialPredicate extends Predicate {
     }
 }
 
-class LatitudePredicate extends Predicate {
+class CoordinatePredicate extends Predicate {
+    
+    private $coordFunction;
+    
+    public function __construct(&$parent, $value, $coordFunction) {
+        parent::__construct( $parent, $value );
+
+        $this->coordFunction = $coordFunction;
+    }    
 
     public function makeSQL() {
         $op = '';
@@ -2910,13 +2809,13 @@ class LatitudePredicate extends Predicate {
             // see if the northernmost point of the bounding box lies south of the given latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
+            and {$this->coordFunction}( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
         }
         elseif($op!='' && $op[0] == '>') {
             // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
+            and {$this->coordFunction}( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
 
         }
         elseif($this->parent->exact) {
@@ -2924,7 +2823,7 @@ class LatitudePredicate extends Predicate {
             // see if there is a Point with this exact latitude
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_Y(bd.dtl_Geo) $op $val limit 1))";
+            and {$this->coordFunction}(bd.dtl_Geo) $op $val limit 1))";
         }
         else {
             //Envelope - Bounding rect
@@ -2932,11 +2831,11 @@ class LatitudePredicate extends Predicate {
 
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $match_pred = 'ST_Y( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
+                $match_pred = $this->coordFunction.'( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
             }else{
                 // see if this latitude passes through the bounding box
-                $match_pred = floatval($this->value)." between ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
-                        and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
+                $match_pred = floatval($this->value)." between {$this->coordFunction}( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
+                        and {$this->coordFunction}( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
             }
 
             return "(exists (select * from recDetails bd
@@ -2945,57 +2844,6 @@ class LatitudePredicate extends Predicate {
         }
     }
 }
-
-
-class LongitudePredicate extends Predicate {
-    public function makeSQL() {
-        $op = '';
-        if ($this->parent->lessthan) {
-            $op = ($this->parent->negate)? '>=' : '<';
-        } elseif($this->parent->greaterthan) {
-            $op = ($this->parent->negate)? '<=' : '>';
-        }
-        
-        $val = floatval($this->value);
-
-        if ($op!='' && $op[0] == '<') {
-            // see if the westernmost point of the bounding box lies east of the given longitude
-            return "(exists (select * from recDetails bd
-            where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
-        }
-        elseif($op!='' && $op[0] == '>') {
-            // see if the EASTERNmost point of the bounding box lies west of the given longitude
-            return "(exists (select * from recDetails bd
-            where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
-
-        }
-        elseif($this->parent->exact) {
-            $op = $this->parent->negate? "!=" : "=";
-            // see if there is a Point with this exact longitude
-            return "(exists (select * from recDetails bd
-            where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_X(bd.dtl_Geo) $op $val limit 1))";
-        }
-        else {
-
-            if (strpos($this->value,"<>")>0) {
-                $vals = explode("<>", $this->value);
-                $match_pred = 'ST_X( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
-            }else{
-                // see if this longitude passes through the bounding box
-                $match_pred = floatval($this->value)." between ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
-                        and ST_X( PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 2 ) )";
-            }
-
-            return "(exists (select * from recDetails bd
-            where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and $match_pred limit 1))";
-        }
-    }
-}
-
 
 class HHashPredicate extends Predicate {
     public function makeSQL() {
