@@ -712,8 +712,57 @@ use hserv\utilities\USanitize;
             return 0;
         }
     }
-
+    
     /**
+     * Returns the target path as relative reference from the base path.
+     *
+     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+     * Both paths must be absolute and not contain relative parts.
+     *
+     * @param string $basePath   The base path
+     * @param string $targetPath The target path
+     *
+     * @return string The relative target path
+     */
+    function getRelativePath($basePath, $targetPath)
+    {
+        // Normalize path separators for cross-platform compatibility
+        $basePath = str_replace('\\', '/', rtrim($basePath, '/'));
+        $targetPath = str_replace('\\', '/', rtrim($targetPath, '/'));
+
+        // If both paths are identical, return an empty string (they are the same)
+        if ($basePath === $targetPath) {
+            return '';
+        }
+
+        // Split both paths into their individual components
+        $baseDirs = explode('/', ltrim($basePath, '/'));
+        $targetDirs = explode('/', ltrim($targetPath, '/'));
+
+        // Remove identical segments from the start of both paths
+        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+            array_shift($baseDirs);
+            array_shift($targetDirs);
+        }
+
+        // Build the relative path by going up for each remaining base directory
+        $relativePath = str_repeat('../', count($baseDirs)) . implode('/', $targetDirs);
+
+        // If the relative path is empty (pointing to the same directory), return './'
+        if ($relativePath === '') {
+            return './';
+        }
+
+        // Special case: ensure the result does not start with a schema-like structure (e.g., "file:colon")
+        if (strpos($relativePath, ':') !== false && strpos($relativePath, '/') === false) {
+            return './' . $relativePath;
+        }
+
+        return $relativePath;
+    }
+    
+
+    /* OLD VERSION
      * Returns the target path as relative reference from the base path.
      *
      * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
@@ -732,7 +781,6 @@ use hserv\utilities\USanitize;
      * @param string $targetPath The target path
      *
      * @return string The relative target path
-     */
     function getRelativePath($basePath, $targetPath)
     {
 
@@ -776,6 +824,7 @@ use hserv\utilities\USanitize;
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? './'.$path : $path;
     }
+     */
 
 
 /**

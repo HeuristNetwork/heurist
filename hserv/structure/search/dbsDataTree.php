@@ -67,14 +67,9 @@
         if ($mode >= 4) {
             set_time_limit(0);
         }
-
-        // Default field types to include if not provided
-        if ($fieldtypes === null) {
-            $fieldtypes = ['integer', 'date', 'freetext', 'year', 'float', 'enum', 'resource', 'relmarker'];
-        } elseif (!is_array($fieldtypes)) {
-            $fieldtypes = explode(",", $fieldtypes);
-        }
-
+            
+        $fieldtypes = __prepareFieldTypes($fieldtypes);
+        
         // Load the plain array of rectypes and lookups
         $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode == 4 || $mode == 5) ? null : $rectypeids, 1); // Load all rectypes if mode is 4 or 5
         $dbs_lookups = dbs_GetDtLookups();
@@ -84,7 +79,9 @@
         $res = [];
 
         // Ensure rectypeids is an array, even if a single ID is provided
-        $rectypeids = is_array($rectypeids) ? $rectypeids : explode(",", $rectypeids);
+        if(!is_string($rectypeids)){
+              $rectypeids = explode(",", $rectypeids);  
+        }
 
         // Create hierarchy tree for each rectype
         foreach ($rectypeids as $rectypeID) {
@@ -116,6 +113,16 @@
         return $res;
     }
 
+    function __prepareFieldTypes($fieldtypes){
+        if ($fieldtypes === null) { 
+            // Default field types to include if not provided
+            $fieldtypes = ['integer', 'date', 'freetext', 'year', 'float', 'enum', 'resource', 'relmarker'];
+        } elseif (!is_array($fieldtypes)) {
+            $fieldtypes = explode(",", $fieldtypes);
+        }
+        return $fieldtypes;
+    }
+    
     //
     // add parent code to children
     //

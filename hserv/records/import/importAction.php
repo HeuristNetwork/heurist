@@ -2880,7 +2880,7 @@ public static function performImport($params, $mode_output){
                                         $geom = geoPHP::load($r_value, 'wkt');
                                         if(!$geom->isEmpty()){
                                             $json = $geojson_adapter->write($geom, true);
-                                            $json = geo_SimplifyAndConvert_JSON($json, false, $gPoint);
+                                            $json = geoSimplifyAndConvertToJSON($json, false, $gPoint);
                                             $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
                                         }
                                     }

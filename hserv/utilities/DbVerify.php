@@ -1855,7 +1855,7 @@ HEADER;
                         if( $is_wrong_long && $need_correct_long){
 
                                 $json = $geojson_adapter->write($geom, true);
-                                $json = geo_CorrectLng_JSON($json);
+                                $json = geoCorrectLngJSON($json);
                                 $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
                                 list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
                                 if($r_type===false){

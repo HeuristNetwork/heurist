@@ -1930,5 +1930,49 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         return $this->generate_response($response, $print_response);
     }
+    
+    
+    public function delete($print_response = true) {
+        // Get file names either from parameters or fallback to a single file param
+        $file_names = $this->get_file_names_params();
+        if (empty($file_names)) {
+            $file_names = array($this->get_file_name_param());
+        }
+
+        // Get the subfolder parameter
+        $subfolder = $this->get_subfolder_param();
+
+        $response = array();
+        foreach ($file_names as $file_name) {
+            // Sanitize file name to avoid security risks
+            $file_name = basename($file_name);  // Prevent directory traversal
+            $file_path = $this->get_upload_path($file_name, $subfolder);
+            
+            // Check if file exists, is valid, and then delete it
+            if (!(is_file($file_path) && $file_name[0] !== '.' && unlink($file_path))) {
+                // File doesn't exist or is invalid, return failure for this file
+                // Log failure to delete main file (e.g., due to permission issues)
+                $response[$file_name] = false;
+                continue;  // Skip further operations for this file  
+            }
+                
+            // If the main file is deleted, attempt to delete its image versions
+            $this->deleteVersions($file_name, $subfolder);
+            $response[$file_name] = true;
+        }
+
+        // Generate response based on the success/failure of deletion
+        return $this->generate_response($response, $print_response);
+    }
+    
+    private function deleteVersions($file_name, $subfolder){
+        foreach ($this->options['image_versions'] as $version => $options) {
+            $versioned_file = $this->get_upload_path($file_name, $subfolder, $version);
+            if (is_file($versioned_file)) {
+                unlink($versioned_file);  // Delete versioned file
+            }
+        }
+    }
+    
 
 }
