@@ -31,70 +31,86 @@
     $dbs_rtStructs = null;
     $dbs_lookups = null; //human readale field type names
 
-    /**
-    * Returns
-    * {
-    *   id          : rectype id, field id in form fNNN, name of default rectype field
-    *   title        : rectype or field display name
-    *   type        : rectype|Relationship|field type|term
-    *   children    : []  // array of fields
-    * }
-    *
-    * @param mixed $system
-    * @param mixed $rectypeids
-    * @param mixed $mode  5 - fields only (no header fields), 3 - all
-    *    4 - for treeview, for faceted search (with type names)
-    *    5 - for treeview, for faceted search (with type names) ONE level only - lazy load
-    *
-    * @param mixed $fieldtypes - field types to be listed
-    * @param mixed $parentcode
-    */
-    function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null, $parentcode=null){
-
+ 
+     /**
+     * Generates a hierarchical structure (tree) of record types and their fields.
+     *
+     * The function creates a structured array that includes record type information, field details, 
+     * and additional metadata based on the provided mode. It supports modes for generating data 
+     * for tree views, faceted search, and lazy loading.
+     *
+     * @param object $system       The system object that handles database interaction and constants.
+     * @param mixed $rectypeids    A single rectype ID or an array of rectype IDs to include in the tree.
+     * @param int $mode            The mode for structuring the tree:
+     *                               - 3: All record types and fields.
+     *                               - 4: Tree view for faceted search, with type names.
+     *                               - 5: Lazy loading for tree view (one level only).
+     * @param mixed $fieldtypes    (Optional) A comma-separated string or array of field types to include.
+     *                             Defaults to certain field types if not provided.
+     * @param string $parentcode   (Optional) The parent code to prefix each record type's code.
+     *
+     * @return array A hierarchical array containing rectype and field information, formatted as:
+     *               [
+     *                 'id' => rectype ID or field ID,
+     *                 'title' => display name of rectype or field,
+     *                 'type' => type (rectype|relationship|field type|term),
+     *                 'children' => [] // array of fields (if applicable)
+     *               ]
+     */
+    function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes = null, $parentcode = null) {
         global $dbs_rtStructs, $dbs_lookups;
 
+        // Define constants used for system interaction
         $system->defineConstant('DT_PARENT_ENTITY');
 
-        if($mode>=4) {set_time_limit(0);}//no limit
-
-        if($fieldtypes==null){
-            $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
-        }elseif(!is_array($fieldtypes)){
-            $fieldtypes = explode(",",$fieldtypes);
+        // Remove time limit if the mode requires it (for faceted search or tree views)
+        if ($mode >= 4) {
+            set_time_limit(0);
         }
 
-        //loads plain array for rectypes
-        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);//need all
+        // Default field types to include if not provided
+        if ($fieldtypes === null) {
+            $fieldtypes = ['integer', 'date', 'freetext', 'year', 'float', 'enum', 'resource', 'relmarker'];
+        } elseif (!is_array($fieldtypes)) {
+            $fieldtypes = explode(",", $fieldtypes);
+        }
+
+        // Load the plain array of rectypes and lookups
+        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode == 4 || $mode == 5) ? null : $rectypeids, 1); // Load all rectypes if mode is 4 or 5
         $dbs_lookups = dbs_GetDtLookups();
 
+        // Prepare the record type structure
         $rtypes = $dbs_rtStructs['names'];
-        $res = array();
+        $res = [];
 
-        $rectypeids = (!is_array($rectypeids)?explode(",", $rectypeids):$rectypeids);
+        // Ensure rectypeids is an array, even if a single ID is provided
+        $rectypeids = is_array($rectypeids) ? $rectypeids : explode(",", $rectypeids);
 
-        //create hierarchy tree
-        foreach ($rectypeids as $rectypeID){
+        // Create hierarchy tree for each rectype
+        foreach ($rectypeids as $rectypeID) {
+            // Add parent record types and modify field types with resource fields
+            __addParentResourceFields($rectypeID);
 
-                //find all parent recordtypes and modify fieldstype (add fake resource (record pointer) fields)
-                __addParentResourceFields($rectypeID);
+            // Retrieve the record type tree structure
+            $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
+            if ($def === null) {
+                continue; // Skip if no structure is defined for the rectype
+            }
 
-                $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
-                if($def==null) {
-                    continue;
+            // Append the parent code (if provided) to the rectype code
+            if ($parentcode !== null) {
+                if (isset($def['code'])) {
+                    $def['code'] = $parentcode . ':' . $def['code'];
+                } else {
+                    $def['code'] = $parentcode;
                 }
-                
-                if($parentcode!=null){
-                    if(@$def['code']){
-                        $def['code'] = $parentcode.':'.$def['code'];
-                    }else{
-                        $def['code'] = $parentcode;
-                    }
-                }
-                //asign codes
-                if(is_array(@$def['children'])){
-                    $def = __assignCodes($def);
-                    array_push($res, $def);
-                }
+            }
+
+            // Assign codes to the children if they exist and add to the result array
+            if (is_array($def['children'])) {
+                $def = __assignCodes($def);
+                $res[] = $def;
+            }
         }
 
         return $res;
