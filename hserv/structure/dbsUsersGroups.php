@@ -498,7 +498,7 @@
             .' and grp.ugr_Type != "user" order by ugl_GroupID';
 
             $res = $mysqli->query($query);
-            if($res){
+            if(!$res){
                 return $result; 
             }
                 while ($row = $res->fetch_row()) {
