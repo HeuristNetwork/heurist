@@ -67,7 +67,7 @@ global $is_api;
         //get error and response
         $system->error_exit_api(null, null, $is_api);//exit from script
     }
-    if(!(@$params['recID']>0)){
+    if(!isPositiveInt(@$params['recID'])){
         $system->error_exit_api('recID parameter value is missing or invalid', null, $is_api);//exit from script
     }
 

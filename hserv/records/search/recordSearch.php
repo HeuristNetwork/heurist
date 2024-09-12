@@ -3682,20 +3682,21 @@ function recordLinksFileContent($system, $record){
 //
 function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_geo_by_linked_dty) {
 
-    $details = array();
+        $details = array();
 
 
         if ($find_geo_by_linked_rty===true && $system->defineConstant('RT_PLACE')){
             $find_geo_by_linked_rty = array(RT_PLACE);
         }
 
-        if(is_array($find_geo_by_linked_rty) && count($find_geo_by_linked_rty)>0){   //search geo in linked records
+        if(isEmptyArray($find_geo_by_linked_rty)){   //search geo in linked records
+           return $details;
+        }
 
-            //$recID = $record["rec_ID"];
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
             .'rl_TargetID,dtl_ID,rl_DetailTypeID,rl_RelationTypeID'
             .' FROM recDetails, recLinks, Records '
-            .' WHERE (dtl_Geo IS NOT NULL) '  //'dtl_DetailTypeID='. DT_GEO_OBJECT
+            .' WHERE (dtl_Geo IS NOT NULL) '  
             .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND '
             .predicateId('rec_RecTypeID',$find_geo_by_linked_rty)
             .' AND rl_SourceID = '.$recID;
@@ -3706,42 +3707,31 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
             }
 
             $squery = $squery.' ORDER BY rl_ID';
-            //'in (' . join(',', $chunk_rec_ids) . ')';
 
             $mysqli = $system->get_mysqli();
             $res = $mysqli->query($squery);
-
-
-            if($res){
-                while ($rd = $res->fetch_assoc()) {
-
-                    if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
-                        $detailValue = array(
-                            "geo" => array(
-                                "type" => $rd["dtl_Value"],
-                                "wkt" => $rd["dtl_Geo"],
-                                "placeID" => $rd["rl_TargetID"],
-                                "pointerDtyID" => $rd["rl_DetailTypeID"],
-                                "relationID" => $rd['rl_RelationTypeID']
-                            )
-                        );
-                        $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
-                    }
-                }
-                $res->close();
-
-                /*
-                if(!@$record["details"]){
-                $record["details"] = $details;
-                }else{
-                $record["details"] = array_merge($record["details"],$details);
-                }
-                */
-
+            if(!$res){
+                return $details;                
             }
-        }
 
-    return $details;
+            while ($rd = $res->fetch_assoc()) {
+
+                if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                    $detailValue = array(
+                        "geo" => array(
+                            "type" => $rd["dtl_Value"],
+                            "wkt" => $rd["dtl_Geo"],
+                            "placeID" => $rd["rl_TargetID"],
+                            "pointerDtyID" => $rd["rl_DetailTypeID"],
+                            "relationID" => $rd['rl_RelationTypeID']
+                        )
+                    );
+                    $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                }
+            }
+            $res->close();
+
+            return $details;
 }
 
 //replace $IDS in $query to $recID

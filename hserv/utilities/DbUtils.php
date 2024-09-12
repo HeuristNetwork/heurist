@@ -1010,23 +1010,44 @@ class DbUtils {
 
         if (is_array($res)){
             self::$system->addErrorArr($res);//can't create
-        }else
-        if($level<1){
+            mysql__drop_database($mysqli, $database_name_full);
+            return false;
+        }elseif($level<1){
             return true; //create empty database
-
-        }else{
-            //restore data from sql dump
-            $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
-            if($res!==true){
-                $res[1] = 'Cannot create database tables. '.$res[1];
-                self::$system->addErrorArr($res);
-            }elseif($level<2){
-                return true;
-            }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
-                return true;
-            }
         }
+        
+        //restore data from sql dump
+        $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
+        if($res!==true){
+            $res[1] = 'Cannot create database tables. '.$res[1];
+            self::$system->addErrorArr($res);
+        }elseif($level<2){
+            return true;  //without constraints and triggers
+        }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
+            return true;
+        }
+//----------------------        
+        
+        if (is_array($res)){
+            self::$system->addErrorArr($res);//can't create
 
+            mysql__drop_database($mysqli, $database_name_full);
+            return false;
+        }elseif($level<1){
+            return true; //create empty database
+        }
+        
+        //restore data from sql dump
+        $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
+        if($res!==true){
+            $res[1] = 'Cannot create database tables. '.$res[1];
+            self::$system->addErrorArr($res);
+        }elseif($level<2){
+            return true;  //without constraints and triggers
+        }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
+            return true;
+        }
+        
         //fails
         mysql__drop_database($mysqli, $database_name_full);
         return false;

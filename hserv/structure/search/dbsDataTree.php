@@ -70,8 +70,6 @@
         $rtypes = $dbs_rtStructs['names'];
         $res = array();
 
-
-
         $rectypeids = (!is_array($rectypeids)?explode(",", $rectypeids):$rectypeids);
 
         //create hierarchy tree
@@ -81,19 +79,21 @@
                 __addParentResourceFields($rectypeID);
 
                 $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
-                if($def!==null) {
-                    if($parentcode!=null){
-                        if(@$def['code']){
-                            $def['code'] = $parentcode.':'.$def['code'];
-                        }else{
-                            $def['code'] = $parentcode;
-                        }
+                if($def==null) {
+                    continue;
+                }
+                
+                if($parentcode!=null){
+                    if(@$def['code']){
+                        $def['code'] = $parentcode.':'.$def['code'];
+                    }else{
+                        $def['code'] = $parentcode;
                     }
-                    //asign codes
-                    if(is_array(@$def['children'])){
-                        $def = __assignCodes($def);
-                        array_push($res, $def);
-                    }
+                }
+                //asign codes
+                if(is_array(@$def['children'])){
+                    $def = __assignCodes($def);
+                    array_push($res, $def);
                 }
         }
 

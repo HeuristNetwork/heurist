@@ -291,7 +291,11 @@ class ElasticSearch {
     * @return bool True if OK, false if Error
     */
     public static function buildAllIndices ($dbName, $print=true) {
-        if(isElasticUp()) {
+        if(!isElasticUp()) {
+            print "ElasticSearch service not detected";
+            return false;
+        }
+        
             if ($print){
                 print "Building all Elasticsearch indices for: $dbName<br>";
             }
@@ -315,12 +319,10 @@ class ElasticSearch {
                 }
                 $res->close();
                 return true;
-            }else{
-                error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
-        }else{
-           print "ElasticSearch service not detected";
-        }
+            
+            
+        error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
         return false;
     } // buildAllIndices
 

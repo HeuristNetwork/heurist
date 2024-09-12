@@ -536,5 +536,10 @@ function isEmptyArray($val){
     return !is_array($val) || empty($val);     
 }
 
+function isPositiveInt($val){
+    //return isset($val) && is_numeric($val) && $val>0;
+    return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0; 
+}
+
 
 ?>

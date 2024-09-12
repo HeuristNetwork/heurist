@@ -851,6 +851,7 @@ function __correctGetEstDate(){
         if (!$res){
             continue;   
         }
+        
             $cnt=0;
             $is_invalid = false;
             while ($row = $res->fetch_row()){
@@ -877,9 +878,9 @@ function __correctGetEstDate(){
 
             }
 
-            if($cnt>0 || $is_invalid){
-                print htmlspecialchars($db_name.'  '.$cnt).'<br>';
-            }
+            //if($cnt>0 || $is_invalid){}
+            print htmlspecialchars($db_name.'  '.$cnt).'<br>';
+            
         
 
     }//for

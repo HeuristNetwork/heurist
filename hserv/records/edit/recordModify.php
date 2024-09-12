@@ -2187,18 +2187,19 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 
     if(is_numeric($rectype_or_mask) && $rectype_or_mask>0){
         $rectype = $rectype_or_mask;
-    }elseif($rectype_or_mask!=null){
+    }elseif(!isEmptyStr($rectype_or_mask)){
         $mask = $rectype_or_mask;
     }
 
     if($mask == null)
     {
-        if(!(isset($rectype) && $rectype>0)){
+        if(!isPositiveInt($rectype)){
             $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
-            if(!($rectype>0)){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
-                return false;
-            }
+        }
+        
+        if(!isPositiveInt($rectype)){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
+            return false;
         }
 
         $mask = mysql__select_value($mysqli, 'select rty_TitleMask from defRecTypes where rty_ID='.$rectype);

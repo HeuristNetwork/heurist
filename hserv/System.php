@@ -238,7 +238,15 @@ class System {
             define($const_name, $value);
         }
     }
-    
+
+    //
+    //  returns constant value, init constant if not defined, if it fails returns default value
+    //
+    public function getConstant($const_name, $def=null) {
+        
+        return $this->defineConstant($const_name) ?constant($const_name) :$def;   
+    }
+
     //
     // init the only constant
     //
@@ -1231,7 +1239,7 @@ class System {
 
     /**
     * Returns array of ID of all groups for current user plus current user ID
-    * $level - admin/emeber
+    * $level - admin/memeber
     */
     public function get_user_group_ids($level=null, $refresh=false){
 
@@ -1484,6 +1492,7 @@ class System {
                             'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
                             'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
+                            
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
 
             //remove credentials for remote repositories
@@ -1809,7 +1818,7 @@ class System {
             */
         }
 
-        if(!($quota>0)){
+        if(!isPositiveInt($quota>0)){
             $quota = 0;
             //$quota = 1073741824; //1GB
         }

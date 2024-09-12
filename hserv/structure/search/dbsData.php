@@ -525,7 +525,7 @@ function dbs_GetRectypeConstraint($system) {
      */
     function dbs_GetTranslations($system, $fields){
 
-        if(empty($fields) || !is_array($fields)){
+        if(isEmptyArray($fields)){
             return array('response' => 'data is in wrong format');
         }
 
@@ -551,8 +551,7 @@ function dbs_GetRectypeConstraint($system) {
 
         foreach ($fields as $key => $field) {
 
-            if(!array_key_exists('trn_Source', $field) || empty($field['trn_Source'])
-                || !array_key_exists('trn_Code', $field) || empty($field['trn_Code'])){
+            if(empty(@$field['trn_Source']) || empty(@$field['trn_Code'])){
                 continue;
             }
 
@@ -577,14 +576,14 @@ function dbs_GetRectypeConstraint($system) {
             $query = str_replace($to_replace, array($trn_Source, $trn_Code), $search_query);
 
             $records = mysql__select_assoc($mysqli, $query);
-            if(!$records || empty($records)){ // no translations found
+            if(isEmptyArray($records)){ // no translations found
                 continue;
             }
             $translations = array_replace($translations, $records);// $translations + $records
             $translations_id_mapping[$key] = array_keys($records);
         }
 
-        if(count($translations) > 0){
+        if(!isEmptyArray($translations)){
             $results['translations'] = $translations;
             $results['key_mapping'] = $translations_id_mapping;
         }
@@ -747,38 +746,42 @@ function dbs_GetRectypeConstraint($system) {
 
         if($parentlist==null) {$parentlist = array($termID);}
         $offspring = array();
-        if ($termID) {
-            $emailsent = false;
+        if (!isPositiveInt($termID)) {
+             return $offspring;
+        }
 
-            $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=".intval($termID));
-            if ($res && $res->num_rows>0 ) { //child nodes exist
-                while ($row = $res->fetch_assoc()) { // for each child node
+        $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=".intval($termID));
+        if (!($res && $res->num_rows>0)) { //child nodes exist
+            return $offspring;
+        }
+        
+        $emailsent = false;
+        
+        while ($row = $res->fetch_assoc()) { // for each child node
 
-                    $subTermID = $row['trm_ID'];
-                    if(array_search($subTermID, $parentlist)===false){
-                        array_push($offspring, $subTermID);
-                        array_push($parentlist, $subTermID);
-                        $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
-                    }else{
-                        $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
+            $subTermID = $row['trm_ID'];
+            if(array_search($subTermID, $parentlist)===false){
+                array_push($offspring, $subTermID);
+                array_push($parentlist, $subTermID);
+                $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
+                
+            }elseif(!$emailsent){
+                
+                    $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
+                    $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
 
-                        $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
+                    $emailsent = true;
+                    $dbowner = user_getDbOwner($mysqli);//info about user #2
 
-                        if(!$emailsent){
-
-                            $emailsent = true;
-                            $dbowner = user_getDbOwner($mysqli);//info about user #2
-
-                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname
-                            .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
-                            'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
-                            .'\nUser was unable to load the database due to a corrupted terms tree. '
-                            .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
-                        }
-                    }
-                }
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname
+                    .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
+                    'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
+                    .'\nUser was unable to load the database due to a corrupted terms tree. '
+                    .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
             }
         }
+            
+        
         return $offspring;
     }
 
@@ -883,31 +886,37 @@ function dbs_GetRectypeConstraint($system) {
         $fi = $dtTerms['fieldNamesToIndex'];
         $parent_id = $term[ $fi['trm_ParentTermID'] ];
 
+        $term_label = $term[ $fi['trm_Label']];
+
+        if(!isPositiveInt($parent_id)){
+            return $term_label;
+        }
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if(!$term_parent){
+            return $term_label;
+        }
+        
         $parent_label = '';
-
-        if($parent_id!=null && $parent_id>0){
-            $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
-            if($term_parent){
-                if(!$withVocab){
-                    $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
-                    if(!($parent_id>0)){
-                        return $term[ $fi['trm_Label']];
-                    }
-                }
-
-                if($parents==null){
-                    $parents = array();
-                }
-
-                if(array_search($parent_id, $parents)===false){
-                    array_push($parents, $parent_id);
-
-                    $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);
-                    if($parent_label) {$parent_label = $parent_label.'.';}
-                }
+        
+        if(!$withVocab){
+            $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+            if(!isPositiveInt($parent_id)){
+                return $term_label;
             }
         }
-        return $parent_label.$term[ $fi['trm_Label']];
+
+        if($parents==null){
+            $parents = array();
+        }
+
+        if(array_search($parent_id, $parents)===false){
+            array_push($parents, $parent_id);
+
+            $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);
+            if($parent_label) {$parent_label = $parent_label.'.';}
+        }
+        
+        return $parent_label.$term_label;
     }
 
     //
@@ -1139,43 +1148,53 @@ function dbs_GetRectypeConstraint($system) {
             return $terms;
         }*/
 
-        if (array_key_exists($childIndex, $terms)) {//check if this child is parent itself
-            if (is_array($terms[$childIndex]) && count($terms[$childIndex])>0) { //has children
+        if (!array_key_exists($childIndex, $terms)) {//check if this child is parent itself
+            return $terms;
+        }
+        
+        if(isEmptyArray($terms[$childIndex])) { //no children
+            $terms[$parentIndex][$childIndex] = null;
+            unset($terms[$childIndex]);
+            return $terms;
+        }
+        
 
-                if($parents==null){
-                    $parents = array($childIndex);
-                }else{
-                    array_push($parents, $childIndex);
+            if($parents==null){
+                $parents = array($childIndex);
+            }else{
+                array_push($parents, $childIndex);
+            }
+
+            $emailsent = false;
+
+            foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
+                if ($gChildID == null) {
+                    continue;   
                 }
+                
+                    if(array_search($gChildID, $parents)===false){
+                        $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
+                    }else{
+                        $dbname = $system->dbname();
+                        $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
+                                .'. Cannot add term '.$gChildID;
+                        USanitize::errorLog($sMsg);
+                        if(!$emailsent){
+                            $dbowner = user_getDbOwner($system->get_mysqli());//info about user #2
+                            $emailsent = true;
 
-                $emailsent = false;
-
-                foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
-                    if ($gChildID != null) {
-                        if(array_search($gChildID, $parents)===false){
-                            $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
-                        }else{
-                            $dbname = $system->dbname();
-                            $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
-                                    .'. Cannot add term '.$gChildID;
-                            USanitize::errorLog($sMsg);
-                            if(!$emailsent){
-                                $dbowner = user_getDbOwner($system->get_mysqli());//info about user #2
-                                $emailsent = true;
-
-                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
-                                    'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
-                                    .'User was unable to load the database due to a corrupted terms tree. '
-                                    .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
-                                    .'  Child:'.$gChildID);
-                            }
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
+                                'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
+                                .'User was unable to load the database due to a corrupted terms tree. '
+                                .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
+                                .'  Child:'.$gChildID);
                         }
                     }
-                }
-            }
+            } //foreach
+        
             $terms[$parentIndex][$childIndex] = $terms[$childIndex];
             unset($terms[$childIndex]);
-        }
+        
         return $terms;
     }
 
