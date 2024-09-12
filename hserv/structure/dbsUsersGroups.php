@@ -1497,5 +1497,123 @@
         return $result;
     }
 
+    
+    
+/**
+* It checks whether a user has access to a certain system level.
+* 
+* @param mixed $system
+* @param mixed $level
+*/
+function userCheckAccess($system, $level=0){
+    
+    // Base login warning message
+    $login_warning = 'To perform this action you must be logged in';
+    $message = ''; // Initialize empty message
+    
+    // Check access based on the user level
+    if ($level == 2 && !$system->is_dbowner()) {
+        // Level 2: Only Database Owners allowed
+        $message = $login_warning . ' as Database Owner';
+    } elseif ($level == 1 && !$system->is_admin()) {
+        // Level 1: Only Administrators allowed
+        $message = $login_warning . ' as Administrator of group \'Database Managers\'';
+    } elseif ($level > 2 && !$system->has_access($level)) {
+        // Levels greater than 2: Check specific access level
+        $message = $login_warning . ' as Administrator of group #' . $level;
+    } elseif ($level == 0 && !$system->has_access()) {
+        // Default check for access without specific level (just logged in)
+        $message = $login_warning;
+    } else {
+        // If all checks pass, return true
+        return true;
+    }
+    
+    // If access is denied, log the error and return false
+    $system->addError(HEURIST_REQUEST_DENIED, $message);
+    return false;
+}  
+
+/**
+ * Checks if a user has the necessary permissions to perform a specified Record action on the system.
+ *
+ * This function first verifies the user's access level through `userCheckAccess`. Then, it retrieves
+ * the user's permissions from the database and determines whether the user can perform the specified 
+ * action (e.g., 'add', 'edit', or 'delete'). Guest users are subject to additional checks such as 
+ * daily limits for adding records.
+ *
+ * @param object $system - The system object that provides access to the current session, user, and 
+ *                         database interaction methods.
+ * @param string $action - The action the user is attempting to perform. Accepted values include 
+ *                         'add', 'edit', 'delete', or other valid actions.
+ * @param int $level - (Optional) The access level required for the action. Defaults to 0, meaning no 
+ *                     special access level is required.
+ *
+ * @return bool - Returns true if the user has the appropriate permissions and is allowed to 
+ *                perform the Record action, otherwise false adds HEURIST_ACTION_BLOCKED error to $system
+ */
+function userCheckPermissions($system, $action, $level=0){
+    
+    if(!userCheckAccess($system, $level)){
+        return false;
+    }
+
+    $mysqli = $system->get_mysqli();
+
+    $user_query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=' . intval($system->get_user_id());
+
+    //'y','n','y_no_add','y_no_delete','y_no_add_delete'
+    $permissions = mysql__select_value($mysqli, $user_query);
+
+    if($permissions==null){
+        $system->addError(HEURIST_DB_ERROR,
+                'Cannot obtain User Permissions.<br>Please contact the Heurist team, if this persists.',
+                $mysqli->error);
+        return false;
+    }
+
+    // Define action message for error
+    $action_msg = match ($action) {
+        'add' => 'create',
+        'edit' => 'modify',
+        'add delete' => 'create or delete',
+        default => $action,
+    };    
+
+    $block_msg = 'Your account does not have permission to ' . $action_msg
+                .' records,<br>please contact the database owner for more details.';
+
+    $result = true; // Default result
+
+    // If user permissions are disabled (n)                
+    if($permissions == 'n'){
+
+        // Guest users are allowed to add records, but have a daily limit
+        if(!($action == 'add' && $system->is_guest_user())){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Only enabled accounts can ' . $action_msg . ' records.');
+            return false;
+        }
+        
+        // Guest user: Check daily limit
+        $cnt_added_by_guests = mysql__select_value($mysqli,
+        'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
+
+        if($cnt_added_by_guests>199){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'The number of records added by guest users for the current database exceeds the allowed daily limit.');
+            $result = false;
+        }
+        
+    }elseif(  ($permissions == 'y_no_add')  // Read-only
+            || ($action == 'add' && strpos($permissions, 'add') !== false)
+            || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+
+        // User doesn't have permission to add or delete
+        $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
+        $res = false;
+    }
+
+    return $res;
+}
+
 
 ?>

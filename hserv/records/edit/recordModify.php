@@ -169,12 +169,8 @@ function recordAddDefaultValues($system, $record=null){
 */
 function recordAdd($system, $record, $return_id_only=false){
 
-    if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to add the record');
-    }
-
     // Check that the user is allowed to create records
-    $is_allowed = checkUserPermissions($system, 'add');
+    $is_allowed = userCheckPermissions($system, 'add');
     if(!$is_allowed){
         return false;
     }
@@ -356,12 +352,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }
     }
 
-    if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to edit the record');
-    }
-
     // Check that the user is allowed to edit records
-    $is_allowed = checkUserPermissions($system, 'edit');
+    $is_allowed = userCheckPermissions($system, 'edit');
     if(!$is_allowed){
         return false;
     }
@@ -874,7 +866,7 @@ function recordDelete($system, $recids, $need_transaction=true,
     $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
 
     // Check that the user is allowed to delete records
-    $is_allowed = checkUserPermissions($system, 'delete');
+    $is_allowed = userCheckPermissions($system, 'delete');
     if($is_allowed !== true){
         return $is_allowed;
     }
@@ -2956,12 +2948,8 @@ function prepareGeoValue($mysqli, $dtl_Value){
 //
 function recordDuplicate($system, $id){
 
-    if ( $system->get_user_id()<1 ) {
-        return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to duplicate the record');
-    }
-
     // Check that the user is allowed to create records
-    $is_allowed = checkUserPermissions($system, 'add');
+    $is_allowed = userCheckPermissions($system, 'add');
     if(!$is_allowed){
         return false;
     }
@@ -3401,69 +3389,4 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
     return $res;
 }
-
-//
-// private
-// whether current user can add or delete record
-//
-function checkUserPermissions($system, $action){
-
-    $mysqli = $system->get_mysqli();
-
-    $user_query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=' . $system->get_user_id();
-
-    $res = mysql__select_value($mysqli, $user_query);
-
-    if($res==null){
-        $system->addError(HEURIST_DB_ERROR,
-                'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.',
-                $mysqli->error);
-        return false;
-    }
-
-    $permissions = $res; //'y','n','y_no_add','y_no_delete','y_no_add_delete'
-    switch($action){
-        case 'add': $action_msg = 'create'; break;
-        case 'edit': $action_msg = 'modify'; break;
-        case 'add delete': $action_msg = 'create or delete'; break;
-        default:        
-            $action_msg = $action;
-            break;
-    }
-
-    $block_msg = 'Your account does not have permission to ' . $action_msg
-                .' records,<br>please contact the database owner for more details.';
-
-    $res = true;
-                
-    if($permissions == 'n'){
-
-        if(!($action == 'add' && $system->is_guest_user())){
-            $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
-            return false;
-        }
-        
-        //addition allowed for not enabled/guest user
-        //verify daily limit for guest users
-        $cnt_added_by_guests = mysql__select_value($mysqli,
-        'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
-
-        if($cnt_added_by_guests>199){
-            $system->addError(HEURIST_ACTION_BLOCKED, 'Number of records added by guest users for the current database exceeds allowed daily limit');
-            $res = false;
-        }
-        
-    }elseif(  ($permissions == 'y_no_add')
-            || ($action == 'add' && strpos($permissions, 'add') !== false)
-            || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
-
-        //  y_no_add - means readonly
-
-        $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
-        $res = false;
-    }
-
-    return $res;
-}
-
 ?>

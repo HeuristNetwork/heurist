@@ -62,6 +62,7 @@ $is_admin = $system->is_admin();
 //
 // to limit access to particular page
 //
+// @todo replacec with userCheckAccess
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
 }elseif(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database

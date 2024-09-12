@@ -95,6 +95,7 @@ require_once dirname(__FILE__).'/../../autoload.php';
     
 require_once dirname(__FILE__).'/../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
+require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
 
 require_once dirname(__FILE__).'/../records/import/importParser.php';//parse CSV, KML and save into import table
 require_once dirname(__FILE__).'/../records/import/importSession.php';//work work with import session
@@ -113,10 +114,7 @@ if(!$system->init(@$_REQUEST['db'])){
     $response = $system->getError();
 }else{
 
-   if(!$system->is_admin()){
-        $response = $system->addError(HEURIST_REQUEST_DENIED, 'Administrator permissions are required');
-
-   }elseif(!checkUserPermissions($system, 'add')){ // Check that the user is allowed to edit records
+    if(!userCheckPermissions($system, 'add', 1)){ // Check that the user is allowed to edit records
 
         $response = $system->getError();
 

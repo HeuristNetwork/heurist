@@ -33,6 +33,7 @@ require_once dirname(__FILE__).'/../../../vendor/autoload.php';
 require_once dirname(__FILE__).'/recordModify.php';
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
+require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 
 define('DEBUG_RUN', false);
 define('ERR_REC_MODDATE','Cannot update record modification date. ');
@@ -172,17 +173,10 @@ class RecordsBatch
     //
     private function _validateParamsAndCounts()
     {
-        if (!( $this->system->get_user_id()>0 )) { //not logged in
-            $this->system->addError(HEURIST_REQUEST_DENIED, 'Not logged in');
-            return false;
-        }
-
         // Check that the user is allowed to edit records
-        $is_allowed = checkUserPermissions($this->system, 'edit');
-        if(!$is_allowed){
+        if(!userCheckPermissions($this->system, 'edit')){
             return false;
         }
-
 
         if(@$this->data['a']!='reset_thumbs' && !$this->_validateDetailType()){
             return false;

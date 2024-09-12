@@ -575,8 +575,24 @@ class Query {
         sort($and_clauses);
         $this->where_clause = join(SQL_AND, $and_clauses);
 
-
         //SORT
+        $this->sort_clause = $this->makeSortClause();
+        
+        //FROM
+        if ($this->search_domain == BOOKMARK) {
+            $this->from_clause = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+        }else{
+            $this->from_clause = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$this->currUserID.' ';
+        }
+
+        $this->from_clause .= join(' ', $this->sort_tables);// sorting may require the introduction of more tables
+
+        //MAKE
+        return $this->from_clause . ' WHERE' . $this->where_clause . $this->sort_clause;
+    }
+    
+    private function makeSortClause() {
+        
         $sort_clause = '';
         $sort_clauses = array();
         for ($i=0; $i < count($this->sort_phrases);++$i) {
@@ -592,20 +608,9 @@ class Query {
             }
         }
         if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
-        $this->sort_clause = $sort_clause;
-
-        //FROM
-        if ($this->search_domain == BOOKMARK) {
-            $this->from_clause = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
-        }else{
-            $this->from_clause = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$this->currUserID.' ';
-        }
-
-        $this->from_clause .= join(' ', $this->sort_tables);// sorting may require the introduction of more tables
-
-        //MAKE
-        return $this->from_clause . ' WHERE' . $this->where_clause . $this->sort_clause;
+        return $sort_clause;
     }
+    
 }
 
 
@@ -1252,7 +1257,22 @@ class Predicate {
         return $res;
     }
 
-
+    
+    /**
+     * Retrieves the inverse term ID for a given relationship type.
+     *
+     * @param int $relation_type_ID The relationship type ID.
+     * @return int|null The inverse term ID, or null if not found.
+     */
+    protected function getInverseTermId($relation_type_ID) {
+        global $mysqli;
+        $res = $mysqli->query("SELECT trm_InverseTermID FROM defTerms WHERE trm_ID = " . intval($relation_type_ID));
+        if ($res) {
+            $inverseTermId = $res->fetch_row();
+            return $inverseTermId[0] ?? null;
+        }
+        return null;
+    }
 }
 
 
@@ -2171,6 +2191,16 @@ abstract class LinkedPredicate extends Predicate {
     protected $toField;
     protected $toRLink;
     
+    /**
+     * Constructs and returns an SQL query for linked records based on specified record types and detail types.
+     *
+     * This method generates an SQL query by analyzing the `value` parameter, which contains information
+     * about the record type (`rty_ID`) and detail type (`dty_ID`). If the value is specified, the query 
+     * searches for linked records from the specific source type and field. If a parent query exists, it 
+     * incorporates it into the final SQL query. Otherwise, it generates a standalone query.
+     *
+     * @return string - Returns the constructed SQL query string.
+     */    
     public function makeSQL() {
 
         $rty_ID = null;
@@ -2178,36 +2208,29 @@ abstract class LinkedPredicate extends Predicate {
         //if value is specified we search linked from specific source type and field
         if($this->value){
             $vals = explode('-', $this->value);
-            if(count($vals)>1){
-                $rty_ID = $vals[0];
-                $dty_ID = $vals[1];
-            }else{
-                $rty_ID = $vals[0];
-                $dty_ID = '';
-            }
+            $rty_ID = @$vals[0] ?? null;
+            $dty_ID = @$vals[1] ?? '';
         }
-
+        
+        // Prepare record and detail type IDs for SQL
         $rty_IDs = prepareIds($rty_ID);
         $dty_IDs = prepareIds($dty_ID);
         
-        //---------------------------
+        // Initialize the additional WHERE clause for the SQL query
+        $add_where = '';
 
         if($rty_ID==1){ //special case for relationship records
             $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID ";
         }else{
 
-            if(!empty($rty_IDs)){
-                $add_where = predicateId('rd.rec_RecTypeID',$rty_IDs).SQL_AND;
-            }else{
-                $add_where = '';
-            }
-
-            $add_where = $add_where . SQL_RL_SOURCE_LINK . SQL_AND;
+            $add_where = $add_where . SQL_RL_SOURCE_LINK 
+                . predicateId('rd.rec_RecTypeID', $rty_IDs, SQL_AND) // Add predicate for record type ID if available
+                . SQL_AND;
 
             if(!empty($dty_IDs)){
-                $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
+                $add_where .= predicateId('rl.rl_DetailTypeID', $dty_IDs);
             }else{
-                $add_where = $add_where.SQL_RELATION_IS_NULL;
+                $add_where .= SQL_RELATION_IS_NULL;
             }
         }
         
@@ -2220,26 +2243,23 @@ abstract class LinkedPredicate extends Predicate {
 
             $query = $pquery->parentquery;
 
-            $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
-            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
-            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
-            $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
-
+            // Adjust FROM and WHERE clauses for parent query
+            $query["from"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["from"]);
+            $query["where"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["where"]);
+            
+            
+            // Construct the full SQL query using the parent query
             $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"]
                         .SQL_AND.$add_where
                         .' '.$query["sort"].$query["limit"].$query["offset"].')';
 
         }else{
 
-            if(!empty($rty_IDs)){
-                $add_where = predicateId($this->fromField,$rty_IDs).SQL_AND;
-            }else{
-                $add_where = '';
-            }
+            $add_where = predicateId($this->fromField,$rty_IDs, SQL_AND);
 
-            $add_where = $add_where.$this->toRLink;
+            $add_where .= $this->toRLink;
             if($rty_ID!=1){
-                $add_where = $add_where . SQL_AND;
+                $add_where .= SQL_AND;
 
                 if(!empty($dty_IDs)){
                     $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
@@ -2248,6 +2268,7 @@ abstract class LinkedPredicate extends Predicate {
                 }
             }
 
+            // Final SELECT clause for standalone query
             $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
         }
 
@@ -2290,89 +2311,233 @@ class LinkedToParentPredicate extends LinkedPredicate {
 }
 
 
-//
-// find records that are related  from (targets) parent/top query
-//
-// 1. take parent query from parent object
-//
-// rule sample: t:10 relatedfrom:29-3318
-//                          [source rectype]-[relation type]
-//
-class RelatedFromParentPredicate extends Predicate {
+abstract class RelatedParentPredicate extends Predicate {
+
+    /**
+     * Constructs the WHERE clause for the SQL query.
+     *
+     * @param int|null $source_rty_ID The source record type ID.
+     * @param string|null $relation_type_ID The relation type ID.
+     * @param string $linkType SQL link type for the relationship.
+     * @return string The WHERE clause.
+     */
+    protected function buildWhereClause($source_rty_ID, $relation_type_ID, $linkType) {
+        return (($source_rty_ID) ? "rd.rec_RecTypeID = $source_rty_ID" . SQL_AND : '') .
+            $linkType . SQL_AND .
+            (($relation_type_ID) ? "rl.rl_RelationTypeID = $relation_type_ID" : SQL_RELATION_IS_NOT_NULL);
+    }
+
+    /**
+     * Builds the full SELECT clause for the SQL query.
+     *
+     * @param string $add_from Additional FROM clause.
+     * @param string $add_where Additional WHERE clause.
+     * @return string The full SELECT clause.
+     */
+    protected function buildSelectClause($add_from, $add_where) {
+        $pquery = &$this->getQuery();
+        if ($pquery->parentquery) {
+            $query = $pquery->parentquery;
+            $query["from"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["from"]);
+            $query["where"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["where"]);
+
+            return $query["from"] . ', ' . $add_from . SQL_WHERE . $query["where"] . SQL_AND . $add_where .
+                ' ' . $query["sort"] . $query["limit"] . $query["offset"] . ')';
+        } else {
+            return SQL_RECORDS . ',' . $add_from . SQL_WHERE . $add_where . ')';
+        }
+    }
+    
+}
+
+/**
+ * Class RelatedFromParentPredicate
+ * 
+ * Constructs SQL for finding records related from a parent record (source).
+ * This predicate finds records linked from a specific source type and relationship field.
+ */
+class RelatedFromParentPredicate extends RelatedParentPredicate {
+    
+    /**
+     * Creates the SQL query for fetching records that are related from a parent source.
+     *
+     * @return string SQL query string for fetching related records.
+     */
     public function makeSQL() {
         global $mysqli;
 
         $select_relto = null;
         $source_rty_ID = null;
-        //if value is specified we search linked from specific source type and field
-        if($this->value){
+
+        // Parse the provided value to get source record type and relation type.
+        if ($this->value) {
             $vals = explode('-', $this->value);
-            if(count($vals)>1){
+            $source_rty_ID = $vals[0] ?? null;
+            $relation_type_ID = $vals[1] ?? '';
 
-                $source_rty_ID = $vals[0];
-                $relation_type_ID = $vals[1];
-
-                if($this->need_recursion){
-                    //there is relationship term - need to find inverse value
-                    $res = $mysqli->query("select trm_InverseTermID from defTerms where trm_ID = ".intval($relation_type_ID));
-                    if($res){
-                        $inverseTermId = $res->fetch_row();
-                        $inverseTermId = @$inverseTermId[0];
-                        $relto = new RelatedToParentPredicate($this, $source_rty_ID.'-'.$inverseTermId);
-                        $relto->stopRecursion();
-                        $select_relto = $relto->makeSQL();
-                    }
+            // If recursion is required, find the inverse relationship term and build the SQL.
+            if ($this->need_recursion && $relation_type_ID) {
+                $inverseTermId = $this->getInverseTermId($relation_type_ID);
+                if ($inverseTermId) {
+                    $relto = new RelatedToParentPredicate($this, $source_rty_ID . '-' . $inverseTermId);
+                    $relto->stopRecursion();
+                    $select_relto = $relto->makeSQL();
                 }
-
-            }else{
-                $source_rty_ID = $vals[0];
-                $relation_type_ID = '';
             }
         }
 
-        //NEW  ---------------------------
-        $add_from  = SQL_RECLINK;
-        $add_where = (($source_rty_ID) ?"rd.rec_RecTypeID=$source_rty_ID".SQL_AND:'')
-        . SQL_RL_SOURCE_LINK . SQL_AND
-        . (($relation_type_ID) ?"rl.rl_RelationTypeID=$relation_type_ID" :SQL_RELATION_IS_NOT_NULL );
+        // Build the SQL query based on the source type and relation type.
+        $add_from = SQL_RECLINK;
+        $add_where = $this->buildWhereClause($source_rty_ID, $relation_type_ID, SQL_RL_SOURCE_LINK);
 
-        $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
+        $select = 'TOPBIBLIO.rec_ID IN (SELECT rl.rl_TargetID ';
+        $select .= $this->buildSelectClause($add_from, $add_where);
 
-        $pquery = &$this->getQuery();
-        if ($pquery->parentquery){
-
-            $query = $pquery->parentquery;
-            //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
-
-            $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
-            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
-            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
-            $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
-
-            $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"].SQL_AND.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
-
-
-        }else{
-
-            $add_where = '';
-            $ids = prepareIds($source_rty_ID);
-            if(!empty($ids)){
-                $add_where = predicateId('rl.rl_SourceID',$ids).SQL_AND; //why rty_ID compared with rec_Id ???
-            }
-
-            $add_where = $add_where . SQL_RL_TARGET_LINK . SQL_AND
-                . (($relation_type_ID) ?"rl.rl_RelationTypeID=$relation_type_ID" :SQL_RELATION_IS_NOT_NULL );
-
-            $select = $select.SQL_RECORDS.','.$add_from.SQL_WHERE.$add_where.')';
+        if ($select_relto !== null) {
+            $select = '(' . $select . ') OR (' . $select_relto . ')';
         }
 
-        if($select_relto!=null){
-            $select = '('.$select.') OR ('.$select_relto.')';
+        return $select;
+    }
+
+}
+
+/**
+ * Class RelatedToParentPredicate
+ * 
+ * Constructs SQL for finding records related to a parent record (target).
+ * This predicate finds records linked to a specific source type and relationship field.
+ */
+class RelatedToParentPredicate extends RelatedParentPredicate {
+    
+    /**
+     * Creates the SQL query for fetching records that are related to a parent target.
+     *
+     * @return string SQL query string for fetching related records.
+     */
+    public function makeSQL() {
+        global $mysqli;
+
+        $select_relto = null;
+        $source_rty_ID = null;
+
+        // Parse the provided value to get source record type and relation type.
+        if ($this->value) {
+            $vals = explode('-', $this->value);
+            $source_rty_ID = $vals[0] ?? null;
+            $relation_type_ID = $vals[1] ?? '';
+
+            // If recursion is required, find the inverse relationship term and build the SQL.
+            if ($this->need_recursion && $relation_type_ID) {
+                $inverseTermId = $this->getInverseTermId($relation_type_ID);
+                if ($inverseTermId) {
+                    $relto = new RelatedFromParentPredicate($this, $source_rty_ID . '-' . $inverseTermId);
+                    $relto->stopRecursion();
+                    $select_relto = $relto->makeSQL();
+                }
+            }
+        }
+
+        // Build the SQL query based on the source type and relation type.
+        $add_from = SQL_RECLINK;
+        $add_where = $this->buildWhereClause($source_rty_ID, $relation_type_ID, SQL_RL_TARGET_LINK);
+
+        $select = 'TOPBIBLIO.rec_ID IN (SELECT rl.rl_SourceID ';
+        $select .= $this->buildSelectClause($add_from, $add_where);
+
+        if ($select_relto !== null) {
+            $select = '(' . $select . ') OR (' . $select_relto . ')';
         }
 
         return $select;
     }
 }
+
+/**
+ * Class RelatedPredicate
+ * 
+ * Constructs SQL for finding records related in both directions (from and to the parent).
+ * This predicate searches relations in both directions for a given source and relationship type.
+ */
+class RelatedPredicate extends Predicate {
+    
+    /**
+     * Creates the SQL query for fetching records that are related in both directions.
+     *
+     * @return string SQL query string for fetching related records.
+     */
+    public function makeSQL() {
+        global $mysqli;
+
+        $related_rty_ID = null;
+        $inverseTermId = 0;
+        $relation_type_ID = 0;
+
+        // Parse the provided value to get related record type and relation type.
+        if ($this->value) {
+            $vals = explode('-', $this->value);
+            $related_rty_ID = $vals[0] ?? null;
+            $relation_type_ID = $vals[1] ?? 0;
+
+            // Find inverse relationship term if needed.
+            if ($relation_type_ID > 0) {
+                $inverseTermId = $this->getInverseTermId($relation_type_ID);
+            }
+        }
+
+        // Return false if no related record type is found.
+        if (!$related_rty_ID) {
+            return false;
+        }
+
+        // Build SQL query for related records.
+        $add_where = $this->buildWhereClause($related_rty_ID, $relation_type_ID, $inverseTermId);
+        return $this->buildRelatedSelect($add_where);
+    }
+
+    /**
+     * Constructs the WHERE clause for related records, including inverse terms.
+     *
+     * @param int $related_rty_ID The related record type ID.
+     * @param int $relation_type_ID The relation type ID.
+     * @param int $inverseTermId The inverse term ID.
+     * @return string The WHERE clause.
+     */
+    private function buildWhereClause($related_rty_ID, $relation_type_ID, $inverseTermId) {
+        $where = "(rd.rec_RecTypeID = $related_rty_ID) AND ";
+        if ($relation_type_ID > 0) {
+            $where .= '(';
+            if ($inverseTermId > 0) {
+                $where .= "(rl.rl_RelationTypeID = $inverseTermId) OR ";
+            }
+            $where .= "(rl.rl_RelationTypeID = $relation_type_ID))";
+        } else {
+            $where .= SQL_RELATION_IS_NOT_NULL;
+        }
+        return $where;
+    }
+
+    /**
+     * Builds the SELECT query for related records in both directions.
+     *
+     * @param string $add_where The WHERE clause.
+     * @return string The full SQL query.
+     */
+    private function buildRelatedSelect($add_where) {
+        $pquery = &$this->getQuery();
+        if ($pquery->parentquery) {
+            $query = $pquery->parentquery;
+            $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+            $select = '(TOPBIBLIO.rec_ID IN (SELECT rl.rl_SourceID ' . $query["from"] . ',recLinks rl ' . SQL_WHERE . $query["where"] . SQL_AND . $add_where . ' AND (' . SQL_RL_TARGET_LINK . ')))';
+            $select .= ' OR (TOPBIBLIO.rec_ID IN (SELECT rl.rl_TargetID ' . $query["from"] . ',recLinks rl ' . SQL_WHERE . $query["where"] . SQL_AND . $add_where . ' AND (' . SQL_RL_SOURCE_LINK . ')))';
+            return $select;
+        }
+        return '';
+    }
+
+}
+
 
 //
 // find records that are related to (sources) parent/top query
@@ -2831,7 +2996,7 @@ class CoordinatePredicate extends Predicate {
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
             and {$this->coordFunction}(bd.dtl_Geo) $op $val limit 1))";
         }
-        else {
+        
             //Envelope - Bounding rect
             //ExteriorRing - exterior ring for polygone
 
@@ -2847,7 +3012,7 @@ class CoordinatePredicate extends Predicate {
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and $match_pred limit 1))";
-        }
+        
     }
 }
 
