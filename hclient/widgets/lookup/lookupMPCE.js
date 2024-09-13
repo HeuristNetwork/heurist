@@ -94,26 +94,18 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         /** Check if selected Work has: project keyword/s, parisian category, and a basis for classification **/
 
-        if(record[this.id_map.DT_Keywords] != null && record[this.id_map.DT_Keywords] != ""){ // Project Keywords
-            this.project_keywords = record[this.id_map.DT_Keywords];
-        }
+        this.project_keywords = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Keywords]) ? record[this.id_map.DT_Keywords] : null; // Project Keywords
 
-        if(record[this.id_map.DT_Category] != null && record[this.id_map.DT_Category] != ""){ // Parisian Category
-            this.parisian_category = record[this.id_map.DT_Category];
-        }
+        this.parisian_category = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Category]) ? record[this.id_map.DT_Category] : null; // Parisian Category
 
-        if(record[this.id_map.DT_Basis] != null && record[this.id_map.DT_Basis] != ""){ // Basis for Classification
-            this.basis_for_classification = record[this.id_map.DT_Basis];
-        }
+        this.basis_for_classification = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Basis]) ? record[this.id_map.DT_Basis] : null; // Basis for Classification
 
-        if(record[this.id_map.DT_Notes] != null && record[this.id_map.DT_Notes] != ""){ // Classification Notes
-            this.classification_notes = record[this.id_map.DT_Notes];
-            $('#notes_field').val(record[this.id_map.DT_Notes]);
-        }
+        this.classification_notes = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Notes]) ? record[this.id_map.DT_Notes] : null; // Classification Notes
+        $('#notes_field').val(record[this.id_map.DT_Notes]);
 
-        if(localStorage.getItem("prev_classify") != null){
-            this.prev_works = window.hWin.HEURIST4.util.isJSON(localStorage.getItem("prev_classify"));
-        }
+        this.prev_works = !window.hWin.HEURIST4.util.isempty(localStorage.getItem("prev_classify")) 
+                            ? window.hWin.HEURIST4.util.isJSON(localStorage.getItem("prev_classify"))
+                            : null;
 
         $('#title_field').text(record[1]); // Work Title
         $('#work-code_field').text(record[this.id_map.DT_MPCEId]);   // Work MPCE_ID
@@ -171,11 +163,8 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 that.assoc_endindex = that.assoc_startindex;
                 that.assoc_startindex = that.assoc_startindex - (jump * 2);
 
-                if(that.assoc_startindex < 0 && that.assoc_endindex < 13){
-                    that.updateAssocDisplay(true);
-                }else{
-                    that.updateAssocDisplay(false);
-                }
+                that.assoc_startindex < 0 && that.assoc_endindex < 13 ? that.updateAssocDisplay(true) : that.updateAssocDisplay(false);
+
                 $('#checkall-assoc').attr('checked', false);            
             }
         });
@@ -216,7 +205,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         // Other
         this._on(this.element.find('#btnEdition').button(),{
-            click:this.lookupEditions
+            click: this.lookupEditions
         });
 
         this._on(this.element.find('#checkall-prev'),{
@@ -326,50 +315,51 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             // onselect Handler for pop-up
             onselect: function(event, data){
 
-                if(window.hWin.HEURIST4.util.isRecordSet(data.selection)){
-
-                    let recordset = data.selection;
-                    let record = recordset.getFirstRecord();
-
-                    if(window.hWin.HEURIST4.util.isempty(record)){
-                        // something is wrong with the record
-
-                        msgToConsole('keywordLookup() Error: Selected Record is Invalid', record, 1);
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: 'The selected keyword is invalid',
-                            error_title: 'Invalid selection',
-                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                        });
-
-                        return;
-                    }
-
-                    let targetID = recordset.fld(record,'rec_ID');
-                    
-                    let keyword_IDs = that.project_keywords;
-
-                    if(!window.hWin.HEURIST4.util.isempty(keyword_IDs)){
-
-                        let result = keyword_IDs.find(row => row == targetID);
-                    
-                        if(result != null){ // Check if Keyword is already a part of Work's Keyword Master List
-                            window.hWin.HEURIST4.msg.showMsgDlg('Project Keyword Already Allocated to Work', null, 'Keyword already assigned');
-
-                            return;
-                        }
-                    }
-
-                    if(that.full_keywords_list == null){
-                        that.getKeywords('add', targetID);
-                        return;
-                    }
-
-                    let title = `Record ID - ${targetID}`;
-                    if(that.full_keywords_list[targetID] !== undefined){
-                        title = that.full_keywords_list[targetID];
-                    }
-                    that.addKeyword(targetID, title); // Add Selected Keyword to Master Table+List
+                if(!window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                    return;
                 }
+
+                let recordset = data.selection;
+                let record = recordset.getFirstRecord();
+
+                if(window.hWin.HEURIST4.util.isempty(record)){
+                    // something is wrong with the record
+
+                    msgToConsole('keywordLookup() Error: Selected Record is Invalid', record, 1);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'The selected keyword is invalid',
+                        error_title: 'Invalid selection',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
+
+                    return;
+                }
+
+                let targetID = recordset.fld(record,'rec_ID');
+                
+                let keyword_IDs = that.project_keywords;
+
+                if(!window.hWin.HEURIST4.util.isempty(keyword_IDs)){
+
+                    let result = keyword_IDs.find(row => row == targetID);
+                
+                    if(result != null){ // Check if Keyword is already a part of Work's Keyword Master List
+                        window.hWin.HEURIST4.msg.showMsgDlg('Project Keyword Already Allocated to Work', null, 'Keyword already assigned');
+
+                        return;
+                    }
+                }
+
+                if(that.full_keywords_list == null){
+                    that.getKeywords('add', targetID);
+                    return;
+                }
+
+                let title = `Record ID - ${targetID}`;
+                if(that.full_keywords_list[targetID] !== undefined){
+                    title = that.full_keywords_list[targetID];
+                }
+                that.addKeyword(targetID, title); // Add Selected Keyword to Master Table+List
             }
         };
 
@@ -469,39 +459,39 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         let that = this;
 
-        if(this.editions_info == null){
-
-            this.editions_info = [];
-
-            let query_request = {q: `t:${this.id_map.RT_Editions} linkedto:${this.options.edit_fields.rec_ID[0]}`, detail: 'detail', limit: 10};
-
-            window.hWin.HAPI4.RecordMgr.search(query_request,
-                function( response ){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-
-                        if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
-
-                        let recordset = new HRecordSet(response.data);
-                        let records = recordset.getRecords();
-
-                        for(let i in records){
-
-                            let record = records[i];
-
-                            that.editions_info.push([record[5], record[2]]);
-                        }
-
-                        if(that.editions_info != null && that.editions_info.length > 0){
-                            that.showEditions();
-                        }
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                }
-            );
-        }else{
+        if(this.editions_info != null){
             this.showEditions();
+            return;
         }
+
+        this.editions_info = [];
+
+        let query_request = {q: `t:${this.id_map.RT_Editions} linkedto:${this.options.edit_fields.rec_ID[0]}`, detail: 'detail', limit: 10};
+
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                let recordset = new HRecordSet(response.data);
+                let records = recordset.getRecords();
+
+                for(let i in records){
+
+                    let record = records[i];
+
+                    that.editions_info.push([record[5], record[2]]);
+                }
+
+                if(that.editions_info != null && that.editions_info.length > 0){
+                    that.showEditions();
+                }
+            }
+        );
     },
 
 
@@ -531,73 +521,56 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         window.hWin.HAPI4.RecordMgr.search(query_request,
             function( response ){
 
-                if(response.status == window.hWin.ResponseStatus.OK){ // Check if Record Search was successful
-
-                    if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
-
-                    let recordset = new HRecordSet(response.data); // Retieve Search Results
-
-                    recordset.each2(function(id, record){
-                        if(record.d && record.d[1]){ // use just the keyword's name
-                            that.full_keywords_list[id] = record.d[1];
-                        }else{ // backup, use rec title
-                            that.full_keywords_list[id] = record['rec_Title'];
-                        }
-                    });
-
-                    switch(next_step){
-                        case 'assigned': // add assigned keywords to html list
-
-                            if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
-
-                                for(const id of that.project_keywords){
-
-                                    let title = `Record ID - ${id}`;
-                                    if(that.full_keywords_list[id] !== undefined){
-                                        title = that.full_keywords_list[id];
-                                    }
-
-                                    that.showKeyword(title, id); // Add to Keyword Table
-                                }
-                            }
-
-                            that.setupRecentWorks(); // initialise recent keywords
-
-                            break;
-                        case 'associated': // retrieve associated keywords
-                            
-                            if(extra_ids != null){
-                                that.setupAssocKeywords(extra_ids);
-                            }
-
-                            break;
-                        case 'recent': // retrieve recent keywords
-
-                            if(extra_ids != null){
-                                that.getRecentKeywords(extra_ids);
-                            }
-
-                            break;
-                        case 'add': // add new assigned keyword
-
-                            if(extra_ids != null){
-
-                                let title = `Record ID - ${extra_ids}`;
-                                if(that.full_keywords_list[extra_ids] !== undefined){
-                                    title = that.full_keywords_list[extra_ids];
-                                }
-                                that.addKeyword(extra_ids, title);
-                            }
-
-                            break;
-                        default:
-                            // Unknown/None, do nothing
-                            break;
-                    }
-
-                    return;
-                }else{ // Record Seach Failed
+                if(response.status != window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                let recordset = new HRecordSet(response.data); // Retieve Search Results
+
+                recordset.each2(function(id, record){
+                    that.full_keywords_list[id] = record.d && record.d[1] ? record.d[1] : record['rec_Title'];
+                });
+
+                if(extra_ids == null && (next_step == 'associated' || next_step == 'recent' || next_step == 'add')){
+                    return;
+                }
+
+                switch(next_step){
+                    case 'assigned': // add assigned keywords to html list
+
+                        if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
+
+                            for(const id of that.project_keywords){
+
+                                let title = `Record ID - ${id}`;
+                                if(that.full_keywords_list[id] !== undefined){
+                                    title = that.full_keywords_list[id];
+                                }
+
+                                that.showKeyword(title, id); // Add to Keyword Table
+                            }
+                        }
+
+                        that.setupRecentWorks(); // initialise recent keywords
+
+                        break;
+                    case 'associated': // retrieve associated keywords
+                        that.setupAssocKeywords(extra_ids);
+                        break;
+                    case 'recent': // retrieve recent keywords
+                        that.getRecentKeywords(extra_ids);
+                        break;
+                    case 'add': // add new assigned keyword
+
+                        let title = that.full_keywords_list[extra_ids] !== undefined ? `Record ID - ${extra_ids}` : that.full_keywords_list[extra_ids];
+                        that.addKeyword(extra_ids, title);
+
+                        break;
+                    default:
+                        // Unknown/None, do nothing
+                        break;
                 }
             }
         );
@@ -859,7 +832,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 item.find(`#${keywords[i][0]}_a`).on('click', function(e){ 
 
                     let id = $(e.target).val();
-                    if($(e.target).is(':checked') == true){
+                    if($(e.target).is(':checked')){
 
                         if(!that.assoc_selected) { that.assoc_selected = []; }
                         

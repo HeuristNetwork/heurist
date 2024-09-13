@@ -160,23 +160,17 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>'
         });
 
-        this.element.parents('.ui-dialog').find('#btnDoAction').hide()
-
-        this._on(this.element.find('#btnLookupLRC18C').button(), {
-            click: this._doSearch
-        });
-
         // Set search button status based on the existence of input
         this._on(this.element.find('input'), {
             keyup: function(event){
-                if($(event.target).val() != ''){
-                    window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
-                }else{
-                    window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
-                }
+
+                let $inputs_with_value = this.element.find('input').filter(function(){ return $(this).val(); });
+
+                let is_empty = window.hWin.HEURIST4.util.isempty($(event.target).val());
+                window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), is_empty && $inputs_with_value.length == 0);
             }
         });
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
+        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), true);
 
         //Populate Bookformat dropdown on lookup page
         let request = {
@@ -199,7 +193,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             if(response.status == window.hWin.ResponseStatus.OK){
                 let recordset = new HRecordSet(response.data);
                 recordset.each2(function(trm_ID, term){
-                     window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                    window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
                 });
             }
         });
@@ -255,81 +249,84 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
 
             response = window.hWin.HEURIST4.util.isJSON(response);
-            if(response.status == window.hWin.ResponseStatus.OK){
 
-                let target_dty_ID = that.options.mapping.fields['properties.edition']
-
-                let cnt = response.data.count_imported;
-                let cnt_ex = response.data.cnt_exist;
-                let cnt_i = response.data.count_ignored;
-                let ids = response.data.ids;  //all
-                let ids_ex  = response.data.exists; //skipped
-                if(!ids_ex) ids_ex = [];
-
-                let rec_ids = ids.concat(ids_ex);
-
-                let query_request = { 
-                    serviceType: 'ESTC',
-                    org_db: window.hWin.HAPI4.database,
-                    db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                    q: `ids:"${rec_ids.join(',')}"`, 
-                    w: 'a',
-                    detail: 'header' 
-                };
-
-                //find record titles
-                window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
-                    function(response){
-
-                        response = window.hWin.HEURIST4.util.isJSON(response);
-
-                        if(response.status == window.hWin.ResponseStatus.OK){                        
-
-                            let sImported = '', sExisted = '';
-
-                            let recordset = new HRecordSet(response.data);
-
-                            if(cnt>0){
-                                for(let i=0; i<ids.length; i++)
-                                if(ids_ex.indexOf(ids[i])<0)
-                                {
-                                    let rec = recordset.getById(ids[i])  
-                                    sImported += (`<li>${ids[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                                }
-                                sImported = `<ul>${sImported}</ul>`;
-                            }
-                            if(cnt_ex>0){
-                                for(let i=0; i<ids_ex.length; i++)
-                                {
-                                    let rec = recordset.getById(ids_ex[i])  
-                                    sExisted += (`<li>{ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                                }
-                                sExisted = `<ul>${sExisted}</ul>`;
-                            }
-
-                            window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
-                                +`${cnt} record${(cnt>1?'s are':' is')} imported.<br>`
-                                    +sImported
-                                +(cnt_ex>0
-                                ?(`${cnt_ex} record${(cnt_ex>1?'s are':' is')} already in database`):'')
-                                    +sExisted
-                                +(cnt_i>0
-                                ?(`${cnt_i} record${(cnt_i>1?'s are':' is')}`
-                                +' skipped. Either record type is not set in mapping or is missing from this database'):'')
-                            );
-
-                        }
-                    }
-                );
-
-                window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
-
-                this.closingAction({[target_dty_ID]: ids[0]});
-
-            }else{
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
             }
+
+            let target_dty_ID = that.options.mapping.fields['properties.edition']
+
+            let cnt = response.data.count_imported;
+            let cnt_ex = response.data.cnt_exist;
+            let cnt_i = response.data.count_ignored;
+            let ids = response.data.ids; //all
+            let ids_ex  = response.data.exists; //skipped
+            if(!ids_ex) ids_ex = [];
+
+            let rec_ids = ids.concat(ids_ex);
+
+            let query_request = { 
+                serviceType: 'ESTC',
+                org_db: window.hWin.HAPI4.database,
+                db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                q: `ids:"${rec_ids.join(',')}"`, 
+                w: 'a',
+                detail: 'header' 
+            };
+
+            //find record titles
+            window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
+                function(response){
+
+                    response = window.hWin.HEURIST4.util.isJSON(response);
+
+                    if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
+                        return;
+                    }
+                    
+                    let sImported = '', sExisted = '';
+
+                    let recordset = new HRecordSet(response.data);
+
+                    if(cnt > 0){
+                        for(let i = 0; i < ids.length; i++){
+                            if(ids_ex.indexOf(ids[i]) < 0){
+                                let rec = recordset.getById(ids[i]);
+                                sImported += (`<li>${ids[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
+                            }
+                        }
+                        sImported = `<ul>${sImported}</ul>`;
+                    }
+                    if(cnt_ex > 0){
+                        for(let i = 0; i < ids_ex.length; i++){
+                            let rec = recordset.getById(ids_ex[i]);
+                            sExisted += (`<li>{ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
+                        }
+                        sExisted = `<ul>${sExisted}</ul>`;
+                    }
+
+                    let imported_extra = cnt > 1 ? 's are' : ' is';
+                    let existed_extra = cnt_ex > 1 ? 's are' : ' is';
+                    let skipped_extra = cnt_i > 1 ? 's are' : ' is';
+
+                    window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
+                        +`${cnt} record${imported_extra} imported.<br>`
+                            +sImported
+                        +(cnt_ex>0
+                        ?(`${cnt_ex} record${existed_extra} already in database`) : '')
+                            +sExisted
+                        +(cnt_i>0
+                        ?(`${cnt_i} record${skipped_extra}`
+                        +' skipped. Either record type is not set in mapping or is missing from this database') : '')
+                    );
+                }
+            );
+
+            window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
+
+            this.closingAction({[target_dty_ID]: ids[0]});
         });
     },
 
@@ -377,8 +374,6 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
         }
 
-        let query_string = query;
-
         let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
@@ -402,18 +397,19 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             response = window.hWin.HEURIST4.util.isJSON(response);
 
-            if(response.status && response.status == window.hWin.ResponseStatus.OK){
-                
-                if(response.data.count>response.data.reccount){
-                    window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
-                    + `Only first ${response.data.reccount} have been retrieved. `
-                    + 'You may specify more restrictive criteria to narrow the result.');
-                    response.data.count = response.data.reccount;
-                }
-                that._onSearchResult(response);
-            }else{
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
             }
+
+            if(response.data.count>response.data.reccount){
+                window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
+                + `Only first ${response.data.reccount} have been retrieved. `
+                + 'You may specify more restrictive criteria to narrow the result.');
+                response.data.count = response.data.reccount;
+            }
+
+            that._onSearchResult(response);
         });
     },    
 

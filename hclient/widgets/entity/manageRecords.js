@@ -5900,9 +5900,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             });
         };
         btn['Skip'] = function(){
-
-            new_terms[cur_term[0]].push('');
-
             $dlg.dialog('close');
             that.processTermFields(completed_fields, new_terms);
         };

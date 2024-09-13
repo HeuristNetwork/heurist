@@ -38,8 +38,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         htmlContent: 'lookupBnFLibrary_bib.html'
     },
 
-    action_timeout: null, // timeout for processing doAction
-
     _forceClose: false, // skip saving additional mapping and close dialog
 
     //  
@@ -48,16 +46,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
     _initControls: function(){
 
         // Extra field styling
-        this.element.find('.header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
+        this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'});
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
-
-        // Action button styling
-        this.element.find('#btnStartSearch').addClass("ui-button-action");
-
-        // Handling for 'Search' button        
-        this._on(this.element.find('#btnStartSearch').button(),{
-            click: this._doSearch
-        });
 
         let $select = this.element.find('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
@@ -72,15 +62,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
                 window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
             }
         });
-
-        this._on(this.element.find('#save-settings').button(), {
-            click: this._saveExtraSettings
-        });
-
-        // Setup settings tab
-        this._setupSettings();
-
-        this.element.find('#inpt_any').focus();
 
         return this._super();
     },
@@ -130,7 +111,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         }
 
         if(need_save){
-            this._saveExtraSettings();
+            this._saveExtraSettings(true, false);
         }
     },
 
@@ -139,23 +120,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
      */
     _getRoleCodes: function(){
 
-        let author_codes = this.element.find('#author-codes').text();
+        let author_codes = this.element.find('#author_codes').text();
         let contributor_codes = '';//this.element.find('#contributor-codes').text()
         const regex = /\d+/;
 
-        if(regex.test(author_codes)){
-            let parts = author_codes.match(regex);
-            author_codes = parts.join(',');
-        }else{
-            author_codes = '';
-        }
-
-        if(regex.test(contributor_codes)){
-            let parts = contributor_codes.match(regex);
-            contributor_codes = parts.join(',');
-        }else{
-            contributor_codes = '';
-        }
+        author_codes = regex.test(author_codes) ? author_codes.match(regex).join(',') : '';
 
         return [ author_codes, contributor_codes ];
     },
@@ -181,52 +150,23 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
     /**
      * Save extra settings
+     * @param {boolean} settings - whether to get settings for saving
      * @param {boolean} close_dlg - whether to close the dialog after saving 
      */
-    _saveExtraSettings: function(close_dlg = false){
+    _saveExtraSettings: function(settings = true, close_dlg = false){
 
-        let that = this;
-
-        let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
         const codes = this._getRoleCodes();
         const rec_dump_settings = this._getRecDumpSetting();
 
-        if(services !== false){
-            services[this.options.mapping.service_id]['options'] = { 
-                'author_codes': codes[0], //'contributor_codes': codes[1]
-                'dump_record': rec_dump_settings[0],
-                'dump_field': rec_dump_settings[1]
+        if(settings === null){
+            settings = {
+                author_codes: codes[0],
+                dump_record: rec_dump_settings[0],
+                dump_field: rec_dump_settings[1]
             };
-
-            let fields = {
-                'sys_ID': 1,
-                'sys_ExternalReferenceLookups': JSON.stringify(services)
-            };
-    
-            // Update sysIdentification record
-            let request = {
-                'a': 'save',
-                'entity': 'sysIdentification',
-                'request_id': window.hWin.HEURIST4.util.random(),
-                'isfull': 0,
-                'fields': fields
-            };
-    
-            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-    
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(services); // update global copy
-                    if(close_dlg === true){
-                        that._as_dialog.dialog('close');
-                    }else{
-                        that.options.mapping = window.hWin.HEURIST4.util.cloneJSON(services[that.options.mapping.service_id]);
-                        window.hWin.HEURIST4.msg.showMsgFlash('Extra lookup settings saved...', 3000);
-                    }
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
         }
+
+        this._super(settings, close_dlg);
     },
 
     /**
@@ -268,32 +208,23 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
                 for(let idx in s){
 
-                    let cur_string = '';
                     let cur_obj = s[idx];
+                    let cur_string = cur_obj;
 
-                    if($.isPlainObject(cur_obj)){
-                        if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
+                    if(window.hWin.HEURIST4.util.isObject(cur_obj)){
+                        if(Object.hasOwn(cur_obj, 'firstname') && cur_obj['firstname'] != ''){
                             cur_string = cur_obj['firstname'];
                         }
-                        if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
-                            cur_string = (cur_string != '') ? `${cur_obj['surname']}, ${cur_string}` : cur_obj['surname'];
+                        if(Object.hasOwn(cur_obj, 'surname') && cur_obj['surname'] != ''){
+                            cur_string = cur_string != '' ? `${cur_obj['surname']}, ${cur_string}` : cur_obj['surname'];
                         }
-                        if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
+                        if(Object.hasOwn(cur_obj, 'active') && cur_obj['active'] != ''){
                             cur_string += ` (${cur_obj['active']})`;
                         }
-
-                        if(cur_string == ''){
-                            Object.values(cur_obj);
-                        }
-                    }else{
-                        cur_string = cur_obj;
                     }
 
-                    if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
-                        creator_val += 'Missing author; ';
-                    }else{
-                        creator_val += cur_string + '; ';
-                    }
+                    creator_val += !cur_string || Array.isArray(cur_string) || window.hWin.HEURIST4.util.isObject(cur_string) 
+                                    ? 'Missing author; ' : `${cur_string}; `;
                 }
 
                 s = creator_val;
@@ -307,38 +238,26 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
                 for(let idx in s){
 
-                    let cur_string = '';
                     let cur_obj = s[idx];
+                    let cur_string = cur_obj;
 
-                    if($.isPlainObject(cur_obj)){
+                    if(window.hWin.HEURIST4.util.isObject(cur_obj)){
                         if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
                             cur_string = cur_obj['name'];
                         }
                         if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
                             cur_string = cur_obj['location'];
                         }
-
-                        if(cur_string == ''){
-                            Object.values(cur_obj);
-                        }
-                    }else{
-                        cur_string = cur_obj;
                     }
 
-                    if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
-                        pub_val += 'Missing publisher; ';
-                    }else{
-                        pub_val += cur_string + '; ';
-                    }
+                    pub_val += !cur_string || Array.isArray(cur_string) || window.hWin.HEURIST4.util.isObject(cur_string) 
+                                ? 'Missing author; ' : `${cur_string}; `;
                 }
 
                 s = pub_val;
-            }else if(Array.isArray(s) && s.length > 1){
-                s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
-            }else if(Array.isArray(s) && s.length == 1){
-                s = window.hWin.HEURIST4.util.htmlEscape(s[0]?s[0]:'');
             }else{
-                s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+                s = Array.isArray(s) ? s.join('; ') : s;
+                s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
             }
 
             let title = s;
@@ -347,11 +266,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
                 s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View bibliographic record';
             }
-            
-            if(width>0){
-                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
-            }
-            return s;
+
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
         
         const recTitle = fld('author', 25) + fld('publisher', 20) + fld('date', 10) + fld('title', 70) + fld('biburl', 12); 
@@ -380,9 +296,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         let field_name, val; // in case timeout completes 
 
         // get selected recordset
-        let recset = this.recordList.resultList('getSelected', false);
-
-        if(!recset || recset.length() != 1){
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
             return;
         }
 
@@ -410,180 +325,144 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         }, 20000); // set timeout to 20 seconds
 
         let res = {};
-        let rec = recset.getFirstRecord(); // get selected record
-
         let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
-        if(this.options.mapping.options.dump_record == true){
-            res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
-        }
-        res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
+        res['BnF_ID'] = recset.fld(record, 'BnF_ID'); // add BnF ID
+        res['ext_url'] = recset.fld(record, 'biburl'); // add BnF URL
 
         // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
         for(const fld_Name of map_flds){
 
+            field_name = fld_Name;
             let dty_ID = this.options.mapping.fields[fld_Name];
-            val = recset.fld(rec, fld_Name);
+            if(dty_ID < 1){
+                continue;
+            }
+
+            val = recset.fld(record, fld_Name);
             let field_type = $Db.dty(dty_ID, 'dty_Type');
 
-            if(val != null && dty_ID != ''){
+            if(window.hWin.HEURIST4.util.isObject(val)){
+                val = Object.values(val).filter((value) => !window.hWin.HEURIST4.util.isempty(value));
+            }else if(!Array.isArray(val)){
+                val = window.hWin.HEURIST4.util.isempty(val) ? '' : val;
+                val = [val];
+            }
 
-                // Convert to array
-                if(window.hWin.HEURIST4.util.isObject(val)){
+            if(window.hWin.HEURIST4.util.isempty(val)){
+                continue;
+            }
+
+            switch(fld_Name){
+                case 'author': // special treatment for author fields
+                case 'contributor':
                     
-                    val = Object.values(val);
-                }else if(!Array.isArray(val)){
-                    val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
-                    val = [val];
-                }
+                    for(const idx in val){
 
-                if(fld_Name == 'author' || fld_Name == 'contributor'){ // special treatment for author field
-
-                    for(const cur_val of val){
-
-                        let value = '';
-                        let search = '';
+                        
+                        const cur_val = val[idx];
+                        let is_object = window.hWin.HEURIST4.util.isObject(cur_val);
+                        
+                        let value = is_object ? cur_val : '';
+                        let search = is_object ? cur_val : '';
                         let role = '';
 
-                        if($.isPlainObject(cur_val)){
-                            if(cur_val['firstname']){
+                        if(is_object){
+                            if(Object.hasOwn(cur_val, 'firstname')){
                                 value = cur_val['firstname'];
                             }
-                            if(cur_val['surname']){
+                            if(Object.hasOwn(cur_val, 'surname')){
                                 value = (value != '') ? `${value} ${cur_val['surname']}` : cur_val['surname'];
                             }
                             search = value;
-                            if(cur_val['active']){
+                            if(Object.hasOwn(cur_val, 'active')){
                                 value = (value != '') ? `${value} [${cur_val['active']}]` : `No Name, years active: ${cur_val['active']}`;
                             }
-                            if(cur_val['id']){
+                            if(Object.hasOwn(cur_val, 'id')){
                                 value = (value != '') ? `${value} (id: ${cur_val['id']})` : `id: ${cur_val['id']}`;
                             }
-                            if(cur_val['role']){
+                            if(Object.hasOwn(cur_val, 'role')){
                                 role = (value != '') ? cur_val['role'] : '';
                             }
+                        }
+
+                        if(window.hWin.HEURIST4.util.isempty(value) || Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
+                            continue;
+                        }
+
+                        if(field_type == 'resource'){
+                            val[idx] = {value: value, search: search};
+                        }else if(field_type == 'relmarker'){
+                            val[idx] = {value: value, search: search, relation: role};
                         }else{
-                            value = cur_val;
-                            search = cur_val;
-                        }
-
-                        if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
-                            if(field_type == 'resource'){
-                                val[i] = {'value': value, 'search': search};
-                            }else if(field_type == 'relmarker'){
-                                val[i] = {'value': value, 'search': search, 'relation': role};
-                            }else{
-                                val[i] = value;
-                            }
+                            val[idx] = value;
                         }
                     }
 
-                    if(!res[dty_ID]){
-                        res[dty_ID] = [];
-                    }
-                    res[dty_ID] = res[dty_ID].concat(val);
+                    break;
+                case 'publisher':
 
-                    continue;
-                }else if(fld_Name == 'publisher'){
-
-                    for(const cur_val of val){
+                    for(const idx in val){
 
                         let value = '';
                         let search = '';
+                        const cur_val = val[idx];
 
-                        if($.isPlainObject(cur_val)){
-                            if(cur_val['name']){
+                        if(window.hWin.HEURIST4.util.isObject(cur_val)){
+                            if(Object.hasOwn(cur_val, 'name')){
                                 value = cur_val['name'];
                                 search = value;
                             }
-                            if(cur_val['location']){
+                            if(Object.hasOwn(cur_val, 'location')){
                                 value = (value != '') ? `${value} ${cur_val['location']}` : cur_val['location'];
                                 search = (search != '') ? search : value;
                             }
                         }
 
-                        if(value != '' && !Array.isArray(value) && !$.isPlainObject(value)){
-
-                            if(field_type == 'resource'){
-                                val[i] = {'value': value, 'search': search};
-                            }else if(field_type == 'relmarker'){
-                                val[i] = {'value': value, 'search': search, 'relation': ''};
-                            }else{
-                                val[i] = value;
-                            }
-                        }
-                    }
-
-                    if(!res[dty_ID]){
-                        res[dty_ID] = [];
-                    }
-                    res[dty_ID] = res[dty_ID].concat(val);
-
-                    continue;
-                }else if(fld_Name == 'language'){ // handle if language equals '###'
-
-                    for(const idx in val){
-                        if(val[idx] == '###' || val[idx] == 'und'){
-                            val[idx] = 'unknown';
-                        }
-                    }
-                }
-
-                if(field_type == 'enum'){ // Match term labels with val, need to return the term's id to properly save its value
-
-                    if(window.hWin.HEURIST4.util.isObject(val)){ 
-                        val = Object.values(val);
-                    }else if(!Array.isArray(val)){
-                        val = [val];
-                    }
-
-                    let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-
-                    for(const idx in val){
-
-                        if(!Number.isInteger(+val[idx])){
+                        if(window.hWin.HEURIST4.util.isempty(value) || Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
                             continue;
                         }
 
-                        let existing_term = $Db.getTermByCode(vocab_ID, +val[idx]);
-                        if(existing_term !== null){
-                            val[idx] = existing_term;
+                        if(field_type == 'resource'){
+                            val[idx] = {'value': value, 'search': search};
+                        }else if(field_type == 'relmarker'){
+                            val[idx] = {'value': value, 'search': search, 'relation': ''};
+                        }else{
+                            val[idx] = value;
                         }
                     }
-                }
+
+                    break;
+                case 'language': // handle if language equals '###'
+
+                    for(const idx in val){
+                        val[idx] = val[idx] == '###' || val[idx] == 'und' ? 'unknown' : val[idx];
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            // Match term labels with val, need to return the term's id to properly save its value
+            if(field_type == 'enum'){
+                val = this._getTermByCode(dty_ID, val);
             }
 
             // Check that val and id are valid, add to response object
-            if(dty_ID > 0 && val){
+            if(!window.hWin.HEURIST4.util.isempty(val)){
 
-                if(!res[dty_ID]){
+                if(!Object.hasOwn(res, dty_ID)){
                     res[dty_ID] = [];
                 }
-
-                if(window.hWin.HEURIST4.util.isObject(val)){
-                    res[dty_ID] = res[dty_ID].concat(Object.values(val));
-                }else{
-                    res[dty_ID] = res[dty_ID].concat(val);    
-                }
+                res[dty_ID] = res[dty_ID].concat(val);
             }
         }
 
         this.closingAction(res);
     },
 
-
-    /**
-     * Clear timeout before returning result
-     *
-     * @param {json} dlg_reponse - mapped values to fields
-     */
-    closingAction: function(dlg_response){
-
-        clearTimeout(this.action_timeout); // clear timeout
-
-        this._super(dlg_response);
-    },
-    
     /**
      * Create search URL using user input within form
      * Perform server call and handle response
@@ -701,20 +580,14 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
 
-            if(window.hWin.HEURIST4.util.isJSON(response)){ 
+            response = window.hWin.HEURIST4.util.isJSON(response);
 
-                if(response.result != null){ // Search result
-                    that._onSearchResult(response);
-                }else if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else{ // No results
-
-                    window.hWin.HEURIST4.msg.showMsgFlash('No results returned', 3000);
-
-                    that.recordList.show();
-                    that.recordList.resultList('updateResultSet', null);
-                }
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
             }
+
+            that._onSearchResult(response);
         });
     },
 

@@ -44,13 +44,6 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         this.element.find('#search_container > div > div > .header.recommended').css({width:'120px', 'min-width':'120px', display: 'inline-block'});
         this.element.find('#search_container > div > div > .header.optional').css({width:'60px', 'min-width':'60px', display: 'inline-block'});
         this.element.find('#btn_container').position({my: 'left bottom', at: 'right bottom', of: '#search_container'});
-        // Action button styling
-        this.element.find('#btnStartSearch').addClass("ui-button-action");
-
-        // Handling for 'Search' button        
-        this._on(this.element.find('#btnStartSearch').button(),{
-            click: this._doSearch
-        });
 
         let request = {
             serviceType: 'nakala',
@@ -130,11 +123,8 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
                 s = '';
             }
 
-            if(Array.isArray(s)){
-                s = s.join('; ');
-            }else if(window.hWin.HEURIST4.util.isObject(s)){
-            	s = Object.values(s).join('; ');
-            }
+            s = window.hWin.HEURIST4.util.isObject(s) ? Object.values(s) : s;
+            s = Array.isArray(s) ? s.join('; ') : s;
 
             let title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
 
@@ -167,49 +157,19 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      * 
      * Param: None
      */
-    doAction: function(recset){
+    doAction: function(){
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        if(!recset){
-            // get selected recordset
-            recset = this.recordList.resultList('getSelected', false);
-        }
-
-        if(!recset || recset.length() != 1){
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
             return;
         }
 
         let res = {};
-        let rec = recset.getFirstRecord(); // get selected record
+        res['ext_url'] = recset.fld(record, 'rec_url');
 
-        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
-
-        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-        for(const fld_Name of map_flds){
-
-            let dty_ID = this.options.mapping.fields[fld_Name];
-            let val = recset.fld(rec, fld_Name);
-            let field_type = $Db.dty(dty_ID, 'dty_Type');
-
-            if(val != null && field_type == 'resource' && !res['ext_url']){
-                res['ext_url'] = recset.fld(rec, 'rec_url');
-            }
-
-            // Check that val and id are valid, add to response object
-            if(dty_ID>0 && val){
-
-                if(!res[dty_ID]){
-                    res[dty_ID] = [];
-                }
-
-                if(window.hWin.HEURIST4.util.isObject(val)){
-                    res[dty_ID] = res[dty_ID].concat(Object.values(val));
-                }else{
-                    res[dty_ID] = res[dty_ID].concat(val);    
-                }
-            }
-        }
+        res = this.prepareValues(recset, record, res);
 
         this.closingAction(res);
     },
@@ -291,17 +251,13 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
 
-            if(window.hWin.HEURIST4.util.isJSON(response)){
+            response = window.hWin.HEURIST4.util.isJSON(response);
 
-                if(response.records != null && response.count > 0){ // Search result
-                    that._onSearchResult(response);
-                }else if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else{ // No results
-                    that.recordList.show();
-                    that.recordList.resultList('updateResultSet', null);
-                }
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
+
+            that._onSearchResult(response);
         });
     },
 

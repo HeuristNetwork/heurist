@@ -41,6 +41,8 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         htmlContent: 'lookupNomisma.html'
     },
 
+    search_button_selector: '#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch',
+
     //  
     // invoked from _init after loading of html content
     //
@@ -48,10 +50,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
-       
 
-        // Action button styling
-        this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch, #btnRdfSearch').addClass("ui-button-action");
         this.element.find('#btnRdfSearch').hide();
 
         // Prepare result list options
@@ -59,11 +58,6 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
             empty_remark: '<div style="padding:1em 0 1em 0">No Results Found<br><br>'
                         + 'This result may also be due to a misconfiguration/failed connection to the Nomisma server.<br>'
                         + 'Please advise the Heurist team if this persists with searches which you are sure should return results.</div>' // For empty results
-        });
-
-        // Handling for 'Search' button        
-        this._on(this.element.find('#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch').button(),{
-            click: this._doSearch
         });
 
         return this._super();
@@ -101,10 +95,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
                 s = `(count: ${s})`;
             }
 
-            if(width>0){
-                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
-            }
-            return s;
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
         
         let recTitle = '';
@@ -123,13 +114,12 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     //
     doAction: function(){
 
-        //detect selection
-        let sel = this.recordList.resultList('getSelected', false);
-        
-        if(sel && sel.length() == 1){
-            //pass mapped values and close dialog
-            this.closingAction(sel);
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
+            return;
         }
+
+        this.closingAction(recset);
     },
     
     //
@@ -148,16 +138,20 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
         let sURL = '';
 
-        if(search_type == 'mint'){
-            sURL = 'https://nomisma.org/apis/getMints?id=';
-        }else if(search_type == 'hoard'){
-            sURL = 'https://nomisma.org/apis/getHoards?id=';
-        }else if(search_type == 'findspots'){
-            sURL = 'https://nomisma.org/apis/getFindspots?id=';
-        }else{
-            return;
+        switch(search_type){
+            case 'mint':
+                sURL = 'https://nomisma.org/apis/getMints?id=';
+                break;
+            case 'hoard':
+                sURL = 'https://nomisma.org/apis/getHoards?id=';
+                break;
+            case 'findspots':
+                sURL = 'https://nomisma.org/apis/getFindspots?id=';
+                break;
+            default:
+                return;
         }
-        
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
         sURL += encodeURI(this.element.find('#inpt_any').val());
@@ -167,14 +161,15 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         // calls /heurist/hserv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
+
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
-                if(response.status && response.status != window.hWin.ResponseStatus.OK){
+
+                if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else if(Array.isArray(response) && response.length == 0){
-                    that.recordList.resultList('updateResultSet', null);
-                }else{
-                    that._onSearchResult(response);
+                    return;
                 }
+    
+                that._onSearchResult(response);
             }
         );
     },
@@ -216,11 +211,11 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
                 let val = feature[fld_Names[0]];
 
-                if(fld_Names[0] == 'when' && val){
+                if(fld_Names[0].startsWith('when') && val){
 
-                    if(fld_Names[2] == 'start' && val['timespans']){
+                    if(fld_Names[2].startsWith('start') && val['timespans']){
                         val = val['timespans'][0]['start'];
-                    }else if(fld_Names[2] == 'end' && val['timespans']){
+                    }else if(fld_Names[2].startsWith('end') && val['timespans']){
                         val = val['timespans'][0]['end'];
                     }
                 }

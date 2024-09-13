@@ -48,17 +48,12 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         if(this._country_vocab_id > 0){
             window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
         }
-
         if(ele.hSelect('instance') != 'undefined'){
             ele.hSelect('widget').css({'max-width':'30em'});
         }
-        
+
         this.options.resultList = $.extend(this.options.resultList, {
             empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>'
-        });
-
-        this._on(this.element.find('#btnStartSearch').button(),{
-            click: this._doSearch
         });
 
         return this._super();
@@ -78,19 +73,16 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         function fld(fldname, width){
 
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
 
             let title = s;
 
-            if(fldname == 'recordLink'){
+            if(fldname == 'ext_url'){
                 s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View geoname record';
             }
 
-            if(width>0){
-                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
-            }
-            return s;
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
         let recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('recordLink', 12);
@@ -113,30 +105,12 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
      */
     doAction: function(){
 
-        // Detect selection
-        let recset = this.recordList.resultList('getSelected', false);
-        if(!recset || recset.length() != 1){
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
             return;
         }
 
-        let res = {};
-        let rec = recset.getFirstRecord();
-
-        let map_flds = Object.keys(this.options.mapping.fields);
-
-        for(const fld_Name of map_flds){
-
-            let dty_ID = this.options.mapping.fields[fld_Name];
-            let val = recset.fld(rec, fld_Name);
-
-            val = fld_Name == 'countryCode' && this._country_vocab_id > 0 
-                    ? $Db.getTermByCode(this._country_vocab_id, val)
-                    : val;
-
-            if(dty_ID > 0 && !window.hWin.HEURIST4.util.isempty(val)){
-                res[dty_ID] = val;    
-            }
-        }
+        let res = this.prepareValues(recset, record, {check_term_codes: this._country_vocab_id});
 
         // Pass mapped values and close dialog
         this.closingAction(res);
@@ -156,11 +130,10 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         }
 
         let sURL = 'http'+'://api.geonames.org/';
-        let xml_response = 0;
+        let is_id_lookup = !window.hWin.HEURIST4.util.isempty(this.element.find('#inpt_id').val());
 
-        if(this.element.find('#inpt_id').val()!=''){
+        if(is_id_lookup){
             sURL += `get?geonameId=${encodeURIComponent(this.element.find('#inpt_id').val())}`;
-            xml_response = 1;
         }else{
 
             sURL += 'searchJSON?';
@@ -169,64 +142,27 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
                 sURL += `&q=${encodeURIComponent(this.element.find('#inpt_query').val())}`;
             }
             if(this.element.find('#inpt_country').val()!=''){
-    
-                let term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
-                let _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
-    
-                if(_countryCode == ''){
-                    
-                    switch (term_label) {
-                        case 'Iran':
-                            _countryCode = 'IR';
-                            break;
-                        case 'Kyrgistan': // Kyrgzstan
-                            _countryCode = 'KG';
-                            break;
-                        case 'Syria':
-                            _countryCode = 'SY';
-                            break;
-                        case 'Taiwan':
-                            _countryCode = 'TW';
-                            break;
-                        case 'UAE':
-                            _countryCode = 'AE';
-                            break;
-                        case 'UK':
-                            _countryCode = 'GB';
-                            break;
-                        case 'USA':
-                            _countryCode = 'US';
-                            break;
-                        case 'Vietnam':
-                            _countryCode = 'VN';
-                            break;
-                        default:
-                            break;
-                    }
-                }
-    
-                if(_countryCode != ''){
-                    sURL += `&country=${_countryCode}`; 
-                }
+                let _countryCode = this._getCountryCode(this.element.find('#inpt_country').val());
+                _countryCode += _countryCode ? `&country=${_countryCode}` : '';
             }
         }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         let that = this;
-        let request = {service:sURL, serviceType:'geonames', is_XML: xml_response};             
+        let request = {service:sURL, serviceType:'geonames', is_XML: is_id_lookup};
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
+
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
 
-                if(response){
-                    if(response.status && response.status != window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }else{
-                        that._onSearchResult(response);
-                    }
+                if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
                 }
+
+                that._onSearchResult(response);
             }
         );
     },
@@ -255,7 +191,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         let map_flds = Object.keys(this.options.mapping.fields);
 
         fields = fields.concat(map_flds);
-        fields = fields.concat('recordLink');
+        fields = fields.concat('ext_url');
 
         if(!json_data.geonames) json_data.geonames = json_data;
         
@@ -275,12 +211,12 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
 
             for(const fld_Name of map_flds){
 
+                val = feature[fld_Name];
+
                 if(fld_Name == 'location'){
                     val = feature['lng'] && feature['lat'] 
                         ? `p POINT(${feature['lng']} ${feature['lat']})`
                         : '';
-                }else{
-                    val = feature[fld_Name];
                 }
 
                 values.push(val);    

@@ -49,14 +49,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
 
-        // Action button styling
-        this.element.find('#btnStartSearch').addClass("ui-button-action");
-
-        // Handling for 'Search' button        
-        this._on(this.element.find('#btnStartSearch').button(),{
-            click: this._doSearch
-        });
-
         let $select = this.element.find('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
         let sel_options = {
@@ -70,15 +62,6 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
                 window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
             }
         });
-
-        this._on(this.element.find('#save-settings').button(), {
-            click: this._saveExtraSettings
-        });
-
-        // Setup settings tab
-        this._setupSettings();
-
-        this.element.find('#inpt_any').focus();
 
         return this._super();
     },
@@ -147,49 +130,21 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
     /**
      * Save extra settings
+     * @param {boolean} settings - whether to get settings for saving 
      * @param {boolean} close_dlg - whether to close the dialog after saving 
      */
-    _saveExtraSettings: function(close_dlg = false){
+    _saveExtraSettings: function(settings = true, close_dlg = false){
 
-        let that = this;
-        let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
         const rec_dump_settings = this._getRecDumpSetting();
 
-        if(services !== false){
-            services[this.options.mapping.service_id]['options'] = { 
-                'dump_record': rec_dump_settings[0],
-                'dump_field': rec_dump_settings[1]
+        if(settings !== false){
+            settings = {
+                dump_record: rec_dump_settings[0],
+                dump_field: rec_dump_settings[1]
             };
-
-            let fields = {
-                'sys_ID': 1,
-                'sys_ExternalReferenceLookups': JSON.stringify(services)
-            };
-    
-            // Update sysIdentification record
-            let request = {
-                'a': 'save',
-                'entity': 'sysIdentification',
-                'request_id': window.hWin.HEURIST4.util.random(),
-                'isfull': 0,
-                'fields': fields
-            };
-
-            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-    
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(services); // update global copy
-                    if(close_dlg === true){
-                        that._as_dialog.dialog('close');
-                    }else{
-                        that.options.mapping = window.hWin.HEURIST4.util.cloneJSON(services[that.options.mapping.service_id]);
-                        window.hWin.HEURIST4.msg.showMsgFlash('Extra lookup settings saved...', 3000);
-                    }
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
         }
+
+        this._super(settings, close_dlg);
     },
 
     /**
@@ -225,28 +180,33 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
                 s = `<a href="${s}" target="_blank"> view here </a>`;
                 title = 'View authoritative record';
             }
+
+            switch(authority_type){
+                case '215':
+                case '216':
+                case '240':
+                case '250':
+                    width = fldname == 'name' ? 75 : 0;
+                    break;
+
+                case '200':
+                    width = fldname == 'location' ? 0 : (fldname == 'name' ? 50 : width);
+                    break;
+
+                case '210':
+                    width = fldname == 'years_active' ? 0 : (fldname == 'name' ? 40 : (fldname == 'location' ? 20 : width));
+                    break;
             
-            if(authority_type == '215' || authority_type == '216' || authority_type == '240' || authority_type == '250'){ // name only
-                width = (fldname == 'name') ? 75 : 0;
-            }else if(authority_type == '200'){
-                width = (fldname == 'location') ? 0 : (fldname == 'name' ? 50 : width);
-            }else if(authority_type == '210'){
-                width = (fldname == 'years_active') ? 0 : (fldname == 'name' ? 40 : (fldname == 'location' ? 20 : width));
+                default:
+                    break;
             }
 
             if(s != ''){
-                if(fldname == 'years_active' || fldname == 'location'){
-                    s = `( ${s} )`;
-                }else if(fldname == 'role'){
-                    s = `[ ${s} ]`;
-                }
+                s = fldname == 'years_active' || fldname == 'location' ? `( ${s} )` : s;
+                s = fldname == 'role' ? `[ ${s} ]` : s;
             }
 
-            if(width>0){
-                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
-            }
-
-            return s;
+            return `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
         }
 
         const recTitle = fld('name', 35) + fld('location', 15) + fld('years_active', 10) + fld('role', 15) + fld('auturl', 10);
@@ -265,102 +225,16 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
 
-        // get selected recordset
-        let recset = this.recordList.resultList('getSelected', false);
-
-        if(!recset || recset.length() != 1){
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
             return;
         }
 
         let res = {};
-        let rec = recset.getFirstRecord(); // get selected record
+        res['BnF_ID'] = recset.fld(record, 'BnF_ID'); // add BnF ID
+        res['ext_url'] = recset.fld(record, 'auturl'); // add BnF URL
 
-        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
-
-        res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
-        res['ext_url'] = recset.fld(rec, 'auturl'); // add BnF URL
-
-        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-        for(const fld_Name of map_flds){
-
-            let dty_ID = this.options.mapping.fields[fld_Name];
-            let val = recset.fld(rec, fld_Name);
-            let field_type = $Db.dty(dty_ID, 'dty_Type');
-
-            if(val != null){
-
-                let val_isArray = Array.isArray(val);
-                let val_isObject = window.hWin.HEURIST4.util.isObject(val);
-
-                // Match term labels with val, need to return the term's id to properly save its value
-                if(field_type == 'enum'){
-
-                    if(val_isObject){ 
-                        val = Object.values(val);
-                    }else if(!val_isArray){
-                        val = [val];
-                    }
-
-                    let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-
-                    for(const idx in val){
-
-                        if(!Number.isInteger(+val[idx])){
-                            continue;
-                        }
-
-                        let existing_term = $Db.getTermByCode(vocab_ID, +val[idx]);
-                        if(existing_term !== null){
-                            val[idx] = existing_term;
-                        }
-                    }
-                }else if(field_type == 'resource'){ // prepare search string for user to select/create a record
-
-                    let search_val = '';
-
-                    if(val_isObject){
-
-                        for(let key in val){
-
-                            if(search_val != ''){
-                                search_val += ', ';
-                            }
-                            search_val += val[key];
-                        }
-                    }else if(val_isArray){
-                        search_val = val.join(', ');
-                    }else{
-                        search_val = val;
-                    }
-
-                    val = search_val;
-                }
-            }
-
-            // Check that val and id are valid, add to response object
-            if(dty_ID>0 && val){
-
-                if(!res[dty_ID]){
-                    res[dty_ID] = [];
-                }
-
-                if(window.hWin.HEURIST4.util.isObject(val)){
-
-                    let complete_val = '';
-                    for(let key in val){
-
-                        if(complete_val != ''){
-                            complete_val += ', ';
-                        }
-                        complete_val += val[key];
-                    }
-                }else if(field_type != 'resource' && Array.isArray(val)){
-                    res[dty_ID].push(val.join(', '));
-                }else{
-                    res[dty_ID].push(val);    
-                }
-            }
-        }
+        res = this.prepareValues(recset, record, res, {check_term_codes: true});
 
         this.closingAction(res);
     },
@@ -415,6 +289,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         // any field
         if(this.element.find('#inpt_any').val()!=''){
+
             query += `aut.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"`;
 
             if(accesspointHasValue || typeHasValue || isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
@@ -500,20 +375,14 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack();
 
-            if(window.hWin.HEURIST4.util.isJSON(response)){
+            response = window.hWin.HEURIST4.util.isJSON(response);
 
-                if(response.result != null){ // Search result
-                    that._onSearchResult(response);
-                }else if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else{ // No results
-
-                    window.hWin.HEURIST4.msg.showMsgFlash('No results returned', 3000);
-
-                    that.recordList.show();
-                    that.recordList.resultList('updateResultSet', null);
-                }
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
             }
+
+            that._onSearchResult(response);
         });
     },
 

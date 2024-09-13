@@ -1074,7 +1074,7 @@
                 $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
                                 $details[$geopoint_idx][0]['value'] : '';
 
-                array_push($results, array('label' => $label, 'desc' => $desc, 'code' => $code, 'uri' => $uri, 'translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint));
+                $results[] = ['term_label' => $label, 'term_desc' => $desc, 'term_code' => $code, 'term_uri' => $uri, 'term_translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint];
             }
         }else{
             $system->error_exit_api('An error occurred while attempting to process the search results from Opentheso', HEURIST_UNKNOWN_ERROR);

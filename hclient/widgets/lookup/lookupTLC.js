@@ -45,11 +45,6 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
-        // adding additional event listeners
-        this._on(this.element.find('#btnStartSearch').button(),{
-            click: this._doSearch
-        });
-
         return this._super();
     },
 
@@ -76,10 +71,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
                 title = 'View tlcmap record';
             }
 
-            if(width>0){
-                s = `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>`;
-            }
-            return s;
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
         const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
@@ -94,23 +86,19 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     doAction: function(){
 
         // retrieve selected record/s
-        let sel = this.recordList.resultList('getSelected', false);
-        if(!sel || sel.length() != 1){
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
             return;
         }
 
-        if(this.options.add_new_record){
-
-            //create new record 
-            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-            let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
-
-            this._addNewRecord(rectype_id, sel);                     
-        }else{
-            //pass mapped values and close dialog
-            this.closingAction(sel);
+        if(!this.options.add_new_record){
+            this.closingAction(recset);
+            return;
         }
+
+        //create new record 
+        let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
+        this._addNewRecord(rectype_id, recset);
     },
     
     //
