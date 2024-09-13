@@ -299,8 +299,8 @@
 /**
  * Write file references out into CSV format
  *
+ * @param hserv\System $system Initialised Heurist system
  * @param string|array $ids File ids to include (comma separated string or array)
- *
  * @return none
  *  Output CSV file containing file references, or error message
  */
@@ -366,7 +366,7 @@ function downloadFileReferences($system, $ids){
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
-    fputcsv($fd, array("ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
+    fputcsv($fd, array("Uploaded_File_ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
 
     /*
         [0] => File Name
