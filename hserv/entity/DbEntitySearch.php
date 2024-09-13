@@ -80,7 +80,7 @@ class DbEntitySearch
      * @param string $fieldname The name of the field to validate.
      * @return bool Returns true if the value is valid, otherwise false.
      */
-    private function _validateEnum($fieldname){
+    private function _validateEnum($fieldname, $data_type=null){
 
         $value = @$this->data[$fieldname];
 
@@ -118,7 +118,7 @@ class DbEntitySearch
     //
     //
     //
-    private function _validateBoolean($fieldname){
+    private function _validateBoolean($fieldname, $data_type=null){
 
         $value = @$this->data[$fieldname];
 
@@ -164,24 +164,22 @@ class DbEntitySearch
                 continue;    
             }
 
+            if($value==SQL_NULL || $value=='-'.SQL_NULL){
+                $this->data[$fieldname] = true;
+            }
+            
                 $data_type = $field_config['dty_Type'];
+                $methodName = $data_type;
                 
-                $is_ids = ($this->primaryField == $fieldname) || (@$field_config['rst_FieldConfig']['entity']!=null);
+                if($this->primaryField == $fieldname || @$field_config['rst_FieldConfig']['entity']!=null){
+                    $methodName = 'ids';
+                }
 
-                if($value==SQL_NULL || $value=='-'.SQL_NULL){
-                    $res = true;
-                }elseif($is_ids=='ids'){
-                    
-                    $res = $this->_validateIds($fieldname, $data_type);
-
-                }elseif($data_type == 'enum' && !$is_ids){
-                    $res = $this->_validateEnum($fieldname);
-
-                }elseif($data_type=='boolean'){
-                    $res = $this->_validateBoolean($fieldname);
-
-                }else{
-                    $res = true;
+                $methodName = '_validate'.ucfirst($methodName);
+                $res = true;
+                
+                if(method_exists($this, $methodName)){ //&& is_callable(array($this, $methodName))){
+                    $res = $this->$methodName($fieldname, $data_type);
                 }
 
                 if(!is_bool($res)){

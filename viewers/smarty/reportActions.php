@@ -334,24 +334,27 @@ class ReportActions {
 
         if(!$dbID){
              $res = array("error"=>"Database must be registered to allow translation of local template to global template");
-        }else {
+             header(CTYPE_JS);
+             print json_encode($res);
+             return;
+        }
 
-            if($filename){
-                if(file_exists($this->dir.$filename)){
-                    $template = file_get_contents($this->dir.$filename);
-                }else{
-                    $res = array('error'=>"File $filename not found");
-                }
+        
+        if($filename){
+            $safeFilename = basename($filename);
+            if(file_exists($this->dir.$safeFilename)){
+                $template = file_get_contents($this->dir.$safeFilename);
+            }else{
+                $res = array('error'=>"File $safeFilename not found");
             }
+        }
 
-            if(!$res){
-                if($template && strlen($template)>0){
-                    $res = $this->convertTemplate($template, 0);
-                }else{
-                    $res = array('error'=>'Template is not defined or empty');
-                }
+        if(!$res){
+            if($template && strlen($template)>0){
+                $res = $this->convertTemplate($template, 0);
+            }else{
+                $res = array('error'=>'Template is not defined or empty');
             }
-
         }
 
         if(is_array($res)){
@@ -362,7 +365,7 @@ class ReportActions {
             if($filename){
                 header('Content-Disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));
             }
-            print $res; //"<hr><br><br><xmp>".$template."</xmp>";
+            print $res; //download converted template
         }
     }
 

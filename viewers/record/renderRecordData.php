@@ -2532,26 +2532,38 @@ function print_relation_details($bib) {
     return $link_cnt;
 }
 
+
+function print_linked_details_header($bib){
+   global $is_map_popup, $is_production; 
+    
+    if($is_map_popup){
+       print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
+       print DIV_MAP_POPUP;//
+    }else{
+       print '<div class="detailRowHeader" style="float:left">Linked from</div><div>';
+       if(!$is_production){
+    ?>
+        <div style="position: relative;top: -7px;margin-bottom: 5px;">
+            <div class=detailType style="width: auto;">Referenced by</div>
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>"
+                    onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
+                <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
+            </div>
+        </div>
+    <?php
+       }
+    }
+
+    
+}
+
 //
 // print reverse link
 //
 function print_linked_details($bib, $link_cnt)
 {
     global $system, $relRT, $ACCESS_CONDITION,
-        $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
-
-    /* old version without recLinks
-    $query = 'select * '.
-    'from recDetails '.
-    'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
-    'left join Records on rec_ID = dtl_RecID '.
-    'where dty_Type = "resource" '.
-    'and dtl_DetailTypeID = dty_ID '.
-    'and dtl_Value = ' . $bib['rec_ID'].' '.
-    'and rec_RecTypeID != '.$relRT.' '.
-    'and '.$ACCESS_CONDITION.
-    ' ORDER BY rec_RecTypeID, rec_Title';
-    */
+        $is_map_popup, $rectypesStructure, $already_linked_ids;
 
     $ignored_ids = '';
     if(!empty($already_linked_ids)){
@@ -2571,29 +2583,12 @@ function print_linked_details($bib, $link_cnt)
 
     if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
 
-    if($is_map_popup){
-       print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
-       print DIV_MAP_POPUP;//
-    }else{
-       print '<div class="detailRowHeader" style="float:left">Linked from</div><div>';
-       if(!$is_production){
-    ?>
-        <div style="position: relative;top: -7px;margin-bottom: 5px;">
-            <div class=detailType style="width: auto;">Referenced by</div>
-            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>"
-                    onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
-                <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
-            </div>
-        </div>
-    <?php
-       }
-    }
-
+    print_linked_details_header($bib);
+    
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
-        $usr_font_size = ($usr_font_size < 8) ? 8
-                                              : (($usr_font_size > 18) ? 18 : $usr_font_size);
+        $usr_font_size = max(8, min(18, $usr_font_size));
         $font_size = "font-size:{$usr_font_size}px;";
     }
 
@@ -2828,7 +2823,9 @@ function linkifyValue($value){
 
     preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches);// only urls that contain a protocol [http|https|ftp|mailto]
 
-    if(is_array($url_matches) && !empty($url_matches[0])){
+    if(isEmptyArray($url_matches)){
+        return $new_value;    
+    }
 
         foreach($url_matches[0] as $url){
             if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
@@ -2841,14 +2838,13 @@ function linkifyValue($value){
                 $url = mb_substr($url, 0, -1);
             }
 
-            if(!empty($url) && is_string($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+            if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
                 $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
                 $new_value = str_replace($url, $linked_url, $new_value);
             }
         }
-    }
-
-    return $new_value;
+    
+        return $new_value;    
 }
 
 //

@@ -31,27 +31,25 @@
      */
     function geoSimplifyAndConvertJSON($json, $need_simplify, &$gPoint = null)
     {
-        // Process GeometryCollection recursively
-        if ($json['type'] == 'GeometryCollection') {
-            foreach ($json['geometries'] as $idx => $geometry) {
-                $json['geometries'][$idx] = geoSimplifyAndConvertJSON($geometry, $need_simplify, $gPoint);
-            }
-            return $json;
+        
+        // Validate input type
+        if (!is_array($json) || !isset($json['type']) || !isset($json['coordinates'])) {
+            return array(); // Return an empty array if the input is not valid GeoJSON
         }
-
-        // Return empty array if no coordinates are present
-        if (empty($json['coordinates'])) {
-            return array();
-        }
+                
+        // Handle GeometryCollection recursively
+        if ($json['type'] === 'GeometryCollection') {
+            return processGeometryCollection($json, $need_simplify, $gPoint);
+        }        
 
         // Process individual geometry types
-        if ($gPoint && $json['type'] == 'Point') {
+        if ($json['type'] == 'Point') { //$gPoint && 
             // Convert a single point
             $point = array($json['coordinates']);
             geoSimplifyAndConvert($point, false, $gPoint);
             $json['coordinates'] = $point[0];
 
-        } elseif ($gPoint && $json['type'] == 'MultiPoint') {
+        } elseif ($json['type'] == 'MultiPoint') { //$gPoint && 
             // Convert multiple points
             geoSimplifyAndConvert($json['coordinates'], false, $gPoint);
 
@@ -68,16 +66,46 @@
 
         } elseif ($json['type'] == 'MultiPolygon' || $json['type'] == 'MultiLineString') {
             // Convert multi-polygons or multi-line strings
-            foreach ($json['coordinates'] as $idx => $shape) {
-                foreach ($shape as $idx2 => $points) {
-                    geoSimplifyAndConvert($points, $need_simplify, $gPoint);
-                    $json['coordinates'][$idx][$idx2] = $points;
-                }
-            }
+             $json['coordinates'] = processMultiShape($json['coordinates'], $need_simplify, $gPoint);
         }
 
         return $json;
     }
+    
+    /**
+     * Processes a GeometryCollection recursively.
+     * 
+     * @param array $json - The GeoJSON GeometryCollection object.
+     * @param bool $need_simplify - Whether the geometry needs simplification.
+     * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
+     * 
+     * @return array - The processed GeometryCollection with simplified geometries.
+     */
+    function processGeometryCollection($json, $need_simplify, &$gPoint) {
+        foreach ($json['geometries'] as $idx => $geometry) {
+            $json['geometries'][$idx] = geoSimplifyAndConvertJSON($geometry, $need_simplify, $gPoint);
+        }
+        return $json;
+    }   
+    
+    /**
+     * Processes multiple shapes for MultiPolygon or MultiLineString geometries.
+     * 
+     * @param array $shapes - The shapes of the geometry.
+     * @param bool $need_simplify - Whether the shapes need simplification.
+     * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
+     * 
+     * @return array - The processed shapes with simplified coordinates.
+     */
+    function processMultiShape($shapes, $need_simplify, &$gPoint) {
+        foreach ($shapes as $idx => $shape) {
+            foreach ($shape as $idx2 => $points) {
+                geoSimplifyAndConvert($points, $need_simplify, $gPoint);
+                $shapes[$idx][$idx2] = $points;
+            }
+        }
+        return $shapes;
+    }     
 
     /**
     * Simplifies a large set of UTM coordinates and convert them to latitude and longitude (WGS84)

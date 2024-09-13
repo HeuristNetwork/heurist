@@ -598,7 +598,7 @@ class DbUtils {
             $database_folder = $upload_root.$database_name.'/';
 
             $warnings = self::databaseCreateFolders($database_name);
-            if(is_array($warnings) && count($warnings)>0){
+            if(!isEmptyArray($warnings)){
                 folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED,
                                             implode("<br>",$warnings));
@@ -616,31 +616,13 @@ class DbUtils {
             if(self::setSessionVal(3)) {return false;}
 
             //switch to new database
-            mysql__usedatabase( $mysqli, $database_name_full );
-
-            if(file_exists($templateFileName) && filesize($templateFileName)>0){
-
-                //import definitions from template file
-                $idef = new \ImportDefinitions();
-                $idef->initialize( $mysqli );
-
-                if(!$idef->doImport( $templateFileName )) {
-
-                    $system->addError(HEURIST_SYSTEM_CONFIG,
-                        'Error importing core definitions from '
-                        . basename($templateFileName)
-                        .' for database '.$database_name_full.'<br>'
-                        .'Check whether this file or database is valid.'.CONTACT_HEURIST_TEAM_PLEASE.' if needed');
-
-                    folderDelete($database_folder);
-                    mysql__drop_database( $mysqli, $database_name_full );
-                    return false;
-                }
-
+            if(!self::importDefinitionsFromTemplate($database_name_full, $templateFileName)){
+                //rollback
+                folderDelete($database_folder);
+                mysql__drop_database( $mysqli, $database_name_full );
+                return false;
             }
-
-            if(self::setSessionVal(4)) {return false;} //import core defs
-
+            
             //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
             //not used
             if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){
@@ -666,6 +648,46 @@ class DbUtils {
 
             return $warnings;
     }
+    
+    /**
+     * Imports core definitions from a template file into the specified database.
+     *
+     * @param string $database_name_full - The full name of the database to import definitions into.
+     * @param string $templateFileName - The path to the template file containing the definitions.
+     * 
+     * @return bool - Returns true on success, false on failure.
+     */    
+    private static function importDefinitionsFromTemplate($database_name_full, $templateFileName){
+    
+        $mysqli = self::$mysqli;
+        $system = self::$system;
+        
+        // Switch to the target database
+        mysql__usedatabase( $mysqli, $database_name_full );
+
+        if(file_exists($templateFileName) && filesize($templateFileName)>0){
+
+            //import definitions from template file
+            $idef = new \ImportDefinitions();
+            $idef->initialize( $mysqli );
+
+            if(!$idef->doImport( $templateFileName )) {
+
+                $system->addError(HEURIST_SYSTEM_CONFIG,
+                    'Error importing core definitions from '
+                    . basename($templateFileName)
+                    .' for database '.$database_name_full.'<br>'
+                    .'Check whether this file or database is valid.'.CONTACT_HEURIST_TEAM_PLEASE.' if needed');
+
+                return false;
+            }
+
+        }
+        if(self::setSessionVal(4)) {return false;} //import core defs
+    }
+
+
+    
 
     /**
     * Updates dbowner, adds default saved searches (for users ##1,2) and lookups (geonames and nakala)

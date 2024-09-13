@@ -1466,47 +1466,54 @@ $mysqli->commit();
         }
     }
 
+    //
+    // fills  $this->inverse_term_pairs
+    //
     private function _getInverseTerms($vocab_ids = null){
 
         $domain = 'relation';
 
-        $inverse_idx = $this->source_defs['terms']['fieldNamesToIndex']["trm_InverseTermID"];
         $inverse_idx = $this->source_defs['terms']['fieldNamesToIndex']["trm_InverseTermID"];
 
         if(empty($vocab_ids)){
             $vocab_ids = $this->imp_terms[$domain];// retrieve existing vocabs
         }
 
+        //array of valid ids
+        if(isEmptyArray($vocab_ids)){
+            return;            
+        }
+        
         $added_vcb_ids = array();
 
-        //array of valid ids
-        if(is_array($vocab_ids) && !empty($vocab_ids)){
-            foreach ($vocab_ids as $vocab_id){
+        foreach ($vocab_ids as $vocab_id){
 
-                $child_terms = $this->sourceTerms->treeData($vocab_id, 3);
-                if(!empty($child_terms)){
+            $child_terms = $this->sourceTerms->treeData($vocab_id, 3);
+            if(isEmptyArray($child_terms)){
+                continue;   
+            }
 
-                    foreach($child_terms as $term_id){
+            foreach($child_terms as $term_id){
 
-                        $term = $this->sourceTerms->getTerm($term_id, $domain);
-                        $inverse_id = $term[$inverse_idx];
-                        $inverse_parent = $this->sourceTerms->getTopMostTermParent($inverse_id, $domain);
+                $term = $this->sourceTerms->getTerm($term_id, $domain);
+                $inverse_id = $term[$inverse_idx];
+                $inverse_parent = $this->sourceTerms->getTopMostTermParent($inverse_id, $domain);
 
-                        if(!empty($inverse_id) && $inverse_id > 0
-                            && !in_array($inverse_id, $this->imp_terms[$domain]) && !in_array($inverse_parent, $this->imp_terms[$domain])){
+                if( isPositiveInt($inverse_id)
+                    && !in_array($inverse_id, $this->imp_terms[$domain]) 
+                    && !in_array($inverse_parent, $this->imp_terms[$domain]))
+                {
 
-                            array_push($this->imp_terms[$domain], $inverse_parent);// import vocab, avoid importing partial vocabs
-                            $this->inverse_term_pairs[$term_id] = $inverse_id; // for correcting later
+                    array_push($this->imp_terms[$domain], $inverse_parent);// import vocab, avoid importing partial vocabs
+                    $this->inverse_term_pairs[$term_id] = $inverse_id; // for correcting later
 
-                            array_push($added_vcb_ids, $inverse_parent);
-
-                        }
-                    }
+                    array_push($added_vcb_ids, $inverse_parent);
                 }
             }
+            
         }
 
-        if(!empty($added_vcb_ids)){
+        if(!isEmptyArray($added_vcb_ids)){
             $this->_getInverseTerms($added_vcb_ids);// get possible inverse terms for new terms
         }
     }

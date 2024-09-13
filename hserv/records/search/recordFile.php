@@ -586,35 +586,39 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
     }
 }
 
-//
-// $fileinfo - data obtained by fileGetFullInfo
-// $rec_ID -  metadata for record_id
-//
+/**
+ * Downloads a file along with metadata as a ZIP file.
+ * 
+ * @param System $system - The system object to interact with the environment.
+ * @param array $fileinfo - Information about the file (obtained by fileGetFullInfo).
+ * @param int $rec_ID - The record ID associated with the file.
+ */
 function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
-    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
-    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
-    $mimeType = $fileinfo['fxm_MimeType'];// fxm_MimeType
+    // Retrieve basic file information
+    $filepath = resolveFilePath($fileinfo['fullPath']);
+    $external_url = $fileinfo['ulf_ExternalFileReference'];
+    $mimeType = $fileinfo['fxm_MimeType'];
     $source_type = $fileinfo['ulf_PreferredSource'];
     $originalFileName = $fileinfo['ulf_OrigFileName'];
-    $fileSize = $fileinfo['ulf_FileSizeKB'];
     $fileExt = $fileinfo['ulf_MimeExt'];
-
-    $filepath = resolveFilePath($filepath);
+    $fileSize = $fileinfo['ulf_FileSizeKB'];
+    
     $is_local = file_exists($filepath);
 
     //name for zip archive
     $downloadFileName = null;
     $record = array("rec_ID"=>$rec_ID);
-    if($system->defineConstant('DT_NAME')){
-        recordSearchDetails($system, $record, array(DT_NAME));
-        if(is_array($record['details'][DT_NAME])){
-                $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
-        }
+    $system->defineConstant('DT_NAME');
+    
+    recordSearchDetails($system, $record, array(DT_NAME));
+    if(is_array($record['details'][DT_NAME])){
+            $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
     }
+    
     if(!$downloadFileName) {$downloadFileName = 'Dataset_'.$rec_ID;}
 
-
+/*
     $finfo = pathinfo($originalFileName);
     $ext = @$finfo['extension'];
     if($ext==null || $ext==''){
@@ -629,13 +633,11 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
             $originalFileName = $originalFileName.'.'.$fileExt;
         }
     }
-
+*/
 
     $_tmpfile = null;
 
-    if($is_local){
-
-    }elseif($external_url && strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled'){
+    if($external_url && strpos($origName, ULF_REMOTE) === 0){ //&& strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled'
 
         $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         $filepath = $_tmpfile;
@@ -648,7 +650,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip = new ZipArchive();
     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
         $system->error_exit_api("Cannot create zip $file_zip_full");
-    }elseif(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled' ) {
+    }elseif(file_exists($filepath)) {
         $zip->addFile($filepath, $originalFileName);
     }
 
