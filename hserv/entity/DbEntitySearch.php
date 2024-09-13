@@ -71,9 +71,15 @@ class DbEntitySearch
         return true;
     }
 
-    //
-    // @todo inherit
-    //
+    /**
+     * Validates that a given field's value is a valid enum.
+     *
+     * If the field is empty, it returns true. Otherwise, it checks whether the value
+     * exists in the corresponding enum array for the field.
+     *
+     * @param string $fieldname The name of the field to validate.
+     * @return bool Returns true if the value is valid, otherwise false.
+     */
     private function _validateEnum($fieldname){
 
         $value = @$this->data[$fieldname];
@@ -82,29 +88,20 @@ class DbEntitySearch
             return true;   
         }
 
-            $enums = $this->fields[$fieldname]['rst_FieldConfig'];
+        $enums = $this->fields[$fieldname]['rst_FieldConfig'];
+        $values = is_array($value) ? $value : explode(',', $value);
+        $isKeyBased = is_array($enums[0]);
 
-            if(!is_array($value)){
-                $values = explode(',', $value);
-            }else{
-                $values = $value;
-            }
-            $iskeybased = (is_array($enums[0]));
-
-            foreach($values as $val){
-                //search in enums
-
-                if(strpos($val, '-') === 0){ // remove negation
-                    $val = substr($val, 1);
-                }
+            foreach($values as $value){
+                // remove negation
+                $value = ltrim('-', $value);
+                //if(strpos($value, '-') === 0){ $value = substr($value, 1); }
 
                 $isNotFound = true;
-                if($iskeybased){
-                    foreach($enums as $enum){
-                        if($enum['key']==$val){
-                            $isNotFound = false;
-                            break;
-                        }
+                if($isKeyBased){
+                    if(findInArray($enums, 'key', $value)!=null){
+                                $isNotFound = false;
+                                break;
                     }
                 }elseif(array_search($value, $enums, true)!==false){
                     $isNotFound = false;
@@ -144,28 +141,32 @@ class DbEntitySearch
     }
 
 
-    //
-    //
-    //
+    /**
+     * Validates the input data based on the field configuration.
+     *
+     * @param array $data The input data to validate.
+     * @return array|bool Returns the validated data or false if validation fails.
+     */
     public function validateParams($data){
 
         $this->data = $data;
 
         //loop for config
-        foreach($this->fields as $fieldname=>$field_config){
-            $value = @$this->data[$fieldname];
+        foreach($this->fields as $fieldname=>$field_config)
+        {
+            $value = $this->data[$fieldname] ?? null;
             
-            $data_role = @$field_config['dty_Role'];
-            if($data_role=='primary'){
+            if($this->isPrimaryField($field_config)){
                 $this->primaryField = $fieldname;
             }
 
-            if($value!=null){
+            if($value==null){
+                continue;    
+            }
 
                 $data_type = $field_config['dty_Type'];
-                $data_role = @$field_config['dty_Role'];
-
-                $is_ids = ($data_role=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+                
+                $is_ids = ($this->primaryField == $fieldname) || (@$field_config['rst_FieldConfig']['entity']!=null);
 
                 if($value==SQL_NULL || $value=='-'.SQL_NULL){
                     $res = true;
@@ -188,7 +189,7 @@ class DbEntitySearch
                 }else{
                     if(!$res) {return false;}
                 }
-            }
+            
         }
 
         return $this->data;
@@ -270,6 +271,15 @@ class DbEntitySearch
 
     }
     
+    /**
+     * Determines if a field is marked as the primary field.
+     *
+     * @param array $field_config The configuration for the field.
+     * @return bool True if the field is primary, otherwise false.
+     */
+    private function isPrimaryField($field_config) {
+        return isset($field_config['dty_Role']) && $field_config['dty_Role'] === 'primary';
+    }
     
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
@@ -282,7 +292,7 @@ class DbEntitySearch
         $field_config = @$this->fields[$fieldname];
         if($field_config==null) {return null;}
         $data_type = $field_config['dty_Type'];
-        $is_ids = ($is_ids || @$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+        $is_ids = ($is_ids || $this->isPrimaryField($field_config) || (@$field_config['rst_FieldConfig']['entity']!=null);
 
         //special case for ids - several values can be used in IN operator
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)

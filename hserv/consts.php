@@ -536,6 +536,23 @@ function isEmptyArray($val){
     return !is_array($val) || empty($val);     
 }
 
+/**
+ * Searches for a value in a two-dimensional array by a specific key.
+ *
+ * @param array $arr The array to search in (2D array).
+ * @param string $key The key to search for within the nested arrays.
+ * @param mixed $keyvalue The value to match against.
+ * @return int|null Returns the index of the found item, or null if not found.
+ */
+function findInArray(array $arr, string $key, $keyvalue): ?int {
+    foreach ($arr as $idx => $item) {
+        if (is_array($item) && array_key_exists($key, $item) && $item[$key] === $keyvalue) {
+            return $idx;
+        }
+    }
+    return null;    
+}
+
 function isPositiveInt($val){
     //return isset($val) && is_numeric($val) && $val>0;
     return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0; 

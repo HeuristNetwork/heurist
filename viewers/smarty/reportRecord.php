@@ -321,21 +321,11 @@ class ReportRecord {
             }
 
             $where = SQL_WHERE;
+            
+            $predicateRty = predicateId('rec_RecTypeID',$rty_ID,SQL_AND);
 
-            if($rty_ID!=null){
-                if(is_int($rty_ID) && $rty_ID>0)
-                {
-                    $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID='.$rty_ID.SQL_AND;
-                }else{
-                    if(!is_array($rty_ID)){
-                        $ids = explode(',', $rty_ID);
-                    }
-                    $ids = array_map('intval', $ids);
-                    if(count($ids)>1){
-                        $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID in ('
-                                 .implode(',', $ids).') and ';
-                    }
-                }
+            if($predicateRty!=''){
+                $where = ', Records WHERE linkID=rec_ID '.$predicateRty.SQL_AND;
             }
 
             $mysqli = $this->system->get_mysqli();

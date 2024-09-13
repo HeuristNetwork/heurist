@@ -1197,9 +1197,11 @@ function add_javascript_wrap4($tpl_source)
 function smarty_function_progress($params, &$smarty){
     global $publishmode, $execution_counter, $execution_total_counter,$session_id,$mysqli;
 
-    $res = false;
+    if($publishmode!=0 || $session_id==null){ //check that this call from ui
+        return false;
+    }
 
-    if($publishmode==0 && $session_id!=null){ //check that this call from ui
+    $res = false;
 
         if(@$params['done']==null){//not set, this is execution from smarty
             $execution_counter++;

@@ -431,8 +431,25 @@ class ReportActions {
         //print json_encode($res);
     }
 
-//if (! function_exists('array_str_replace')) {
 
+    /**
+     * Replaces all occurrences of each search string in the subject with the corresponding replacement string.
+     *
+     * Unlike PHP's built-in `str_replace()`, this function handles an array of search terms correctly,
+     * by avoiding overlapping replacements. It favors lower-indexed search terms.
+     * 
+     * For example:
+     * `str_replace(array("a", "b"), array("b", "x"), "abcd")` would return `"xxcd"`,
+     * while `array_str_replace(array("a", "b"), array("b", "x"), "abcd")` returns `"bxcd"`.
+     *
+     * @param array $search An array of strings to search for.
+     * @param array $replace An array of replacement strings. Each corresponding value in $replace will replace
+     *                       the value in $search. The arrays must be of equal length.
+     * @param string $subject The input string in which to search and replace.
+     * @return string The string with the replacements applied.
+     *
+     * @throws InvalidArgumentException If $search and $replace arrays are not of equal length.
+     */
     private function array_str_replace($search, $replace, $subject) {
         /*
          * PHP's built-in str_replace is broken when $search is an array:
@@ -445,35 +462,47 @@ class ReportActions {
          * array_str_replace returns "bxcd" so that the user values aren't interfered with.
          */
 
-        $val = '';
+        $result = '';
 
-        while ($subject) {
-            $match_idx = -1;
-            $match_offset = -1;
-            for ($i=0; $i < count($search);++$i) {
-                if($search[$i]==null || $search[$i]=='') {continue;}
-                $offset = strpos($subject, $search[$i]);
-                if ($offset === FALSE) {continue;}
-                if ($match_offset == -1  ||  $offset < $match_offset) {
-                    $match_idx = $i;
-                    $match_offset = $offset;
-                }
-            }
+        while ($subject !== '') {
+            list($match_idx, $match_offset) = $this->findNextMatch($search, $subject);
 
-            if ($match_idx != -1) {
-                $val .= substr($subject, 0, $match_offset) . $replace[$match_idx];
+            if ($match_idx !== -1) {
+                // Append the part before the match and the replacement
+                $result .= substr($subject, 0, $match_offset) . $replace[$match_idx];
+                // Move the subject pointer past the matched search string
                 $subject = substr($subject, $match_offset + strlen($search[$match_idx]));
-            } else {    // no matches for any of the strings
-                $val .= $subject;
-                $subject = '';
+            } else {
+                // No matches found, append the rest of the subject
+                $result .= $subject;
                 break;
             }
         }
 
-        return $val;
+        return $result;
     }
 
-//}
+    //
+    // helper
+    //
+    private function findNextMatch($search, $subject) {
+        $match_idx = -1;
+        $match_offset = -1;
+
+        foreach ($search as $i => $term) {
+            if (empty($term)) {
+                continue;
+            }
+
+            $offset = strpos($subject, $term);
+            if ($offset !== false && ($match_offset === -1 || $offset < $match_offset)) {
+                $match_idx = $i;
+                $match_offset = $offset;
+            }
+        }
+
+        return [$match_idx, $match_offset];
+    }
 
 }
 ?>

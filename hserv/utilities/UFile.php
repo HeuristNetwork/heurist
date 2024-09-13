@@ -789,6 +789,7 @@ use hserv\utilities\USanitize;
         $targetPath = str_replace("\0", '', $targetPath);
         $targetPath = str_replace('\\', '/', $targetPath);
 
+        //add last one
         if( substr($targetPath, -1, 1) != '/' )  {$targetPath = $targetPath.'/';}
 
         if ($basePath === $targetPath){
@@ -796,27 +797,27 @@ use hserv\utilities\USanitize;
         }elseif (substr($targetPath,0,1)!='/' && !preg_match('/^[A-Z]:/i',$targetPath)) { //it is already relative
             return $targetPath;
         }
-        
-        
-        //else  if(strpos($basePath, $targetPath)===0){
-        //    $relative_path = $dirname;
 
-
-        $sourceDirs = explode('/', isset($basePath[0]) && '/' === $basePath[0] ? substr($basePath, 1) : $basePath);
-        $targetDirs = explode('/', isset($targetPath[0]) && '/' === $targetPath[0] ? substr($targetPath, 1) : $targetPath);
-        array_pop($sourceDirs);
+        $baseDirs = explode('/', ltrim($basePath,'/'));
+        $targetDirs = explode('/', ltrim($targetPath,'/'));
+        array_pop($baseDirs);
         $targetFile = array_pop($targetDirs);
 
-        foreach ($sourceDirs as $i => $dir) {
+        // Remove identical segments from the start of both paths
+        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+            array_shift($baseDirs);
+            array_shift($targetDirs);
+        }/*
+        foreach ($baseDirs as $i => $dir) {
             if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
-                unset($sourceDirs[$i], $targetDirs[$i]);
+                unset($baseDirs[$i], $targetDirs[$i]);
             } else {
                 break;
             }
-        }
+        }*/
 
         $targetDirs[] = $targetFile;
-        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
+        $path = str_repeat('../', count($baseDirs)).implode('/', $targetDirs);
 
         // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
         // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used

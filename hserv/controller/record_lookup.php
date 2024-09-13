@@ -1316,6 +1316,16 @@
         return $data[$server][$theso];// return group details only
     }
 
+    /**
+     * Retrieves Nakala metadata based on the provided type.
+     *
+     * It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
+     * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
+     *
+     * @param object $system The system object for error handling and other functionality.
+     * @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
+     * @return array The metadata corresponding to the requested type, or an empty array if not found.
+     */    
     function getNakalaMetadata($system, $type){
         // check NAKALA_metadata_values.json
         // if date in file is old (data.last_update), update metadata first (all types)
@@ -1344,7 +1354,6 @@
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
                     $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.', HEURIST_UNKNOWN_ERROR);
-                    exit;
                 }
                 $data = updateNakalaMetadata($system);
             }
@@ -1354,24 +1363,31 @@
             return array();
         }
 
-        $data_rtn = array();
-        if($type == 'types'){
-            $data_rtn = $data['types'];
+        // Return the requested type of data or the entire metadata
+        return getRequestedNakalaData($data, $type);        
+    }
+    
+    /**
+     * Returns the requested Nakala data type or the full data.
+     *
+     * @param array $data The Nakala metadata.
+     * @param string $type The requested type ('types', 'licenses', 'years', or 'all').
+     * @return array The requested metadata or full data if 'all' is specified.
+     */
+    function getRequestedNakalaData($data, $type) {
+        switch ($type) {
+            case 'types':
+                return $data['types'] ?? array();
+            case 'licenses':
+                return $data['licenses'] ?? array();
+            case 'years':
+                return $data['years'] ?? array();
+            default:
+                return $data;
         }
-        if($type == 'licenses'){
-            $data_rtn = $data['licenses'];
-        }
-        if($type == 'years'){
-            $data_rtn = $data['years'];
-        }
-
-        if(isEmptyArray($data_rtn)){ // all
-            return $data;
-        }
-        
-        return $data_rtn;
     }
 
+    
     function updateNakalaMetadata($system){
         // update NAKALA_metadata_values.json
         $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';

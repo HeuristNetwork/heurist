@@ -403,54 +403,52 @@
             return false;
         }
 
-        if(session_status() == PHP_SESSION_ACTIVE){ // all information is stored within the current session
-
-            $db = $system->dbname_full();
-
-            // Check for user
-            $user = user_getByField($mysqli, 'ugr_Name', $username);
-            if($user == null) {
-                $user = user_getByField($mysqli, 'ugr_eMail', $username);
-            }
-            if($user == null) {
-                $system->addError(HEURIST_NOT_FOUND,  'Cannot set new password. Unable to find specified username / email.');
-                return false;
-            }
-
-            $user_id = $user['ugr_ID'];
-
-            // Check reset pin
-            if(!array_key_exists('reset_pins', $_SESSION[$db]) || !array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){ // check that a pin has been requested for this user
-                $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
-                return false;
-            }
-            if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){ // check the pins match
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
-                return false;
-            }
-            if($_SESSION[$db]['reset_pins'][$user_id]['redeemed'] !== true){ // has been handled by user_HandleResetPin
-                $system->addError(HEURIST_ERROR, 'We were unable to verify the reset pin');
-                return false;
-            }
-
-            // Update password
-            $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($password));// prepare record
-            $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
-
-            if(is_numeric($res) > 0){
-
-                unset($_SESSION[$db]['reset_pins'][$user_id]);// remove from session
-
-                return true;
-            }else{
-                $system->addError(HEURIST_ERROR, 'We were unable to reset your password, an error occurred while updating your user account details');
-                return false;
-            }
-        }else{
-
+        if(session_status() != PHP_SESSION_ACTIVE){ // all information is stored within the current session
             $system->addError(HEURIST_ERROR, 'We were unable to reset your password via the pin system, as an error occurred with retrieving your current session');
             return false;
         }
+
+        $db = $system->dbname_full();
+
+        // Check for user
+        $user = user_getByField($mysqli, 'ugr_Name', $username);
+        if($user == null) {
+            $user = user_getByField($mysqli, 'ugr_eMail', $username);
+        }
+        if($user == null) {
+            $system->addError(HEURIST_NOT_FOUND,  'Cannot set new password. Unable to find specified username / email.');
+            return false;
+        }
+
+        $user_id = $user['ugr_ID'];
+
+        // Check reset pin
+        if(!array_key_exists('reset_pins', $_SESSION[$db]) || !array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){ // check that a pin has been requested for this user
+            $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
+            return false;
+        }
+        if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){ // check the pins match
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
+            return false;
+        }
+        if($_SESSION[$db]['reset_pins'][$user_id]['redeemed'] !== true){ // has been handled by user_HandleResetPin
+            $system->addError(HEURIST_ERROR, 'We were unable to verify the reset pin');
+            return false;
+        }
+
+        // Update password
+        $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($password));// prepare record
+        $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
+
+        if(is_numeric($res) > 0){
+
+            unset($_SESSION[$db]['reset_pins'][$user_id]);// remove from session
+
+            return true;
+        }
+        
+        $system->addError(HEURIST_ERROR, 'We were unable to reset your password, an error occurred while updating your user account details');
+        return false;
     }
 
     /**

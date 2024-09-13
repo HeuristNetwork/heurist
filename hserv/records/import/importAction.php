@@ -78,11 +78,11 @@ private static function initialize($fields_correspondence=null)
 
 private static function findDisambResolution($keyvalue, $disamb_resolv){
 
-    foreach($disamb_resolv as $idx => $disamb_pair){
-        if($keyvalue==$disamb_pair['key']){
-            return $disamb_pair['recid'];
-        }
+    $idx = findInArray($disamb_resolv, 'key', $keyvalue);
+    if($idx>0){
+        return @$disamb_resolv[$idx]['recid'];
     }
+    
     return null;
 }
 

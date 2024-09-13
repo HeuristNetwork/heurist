@@ -2334,6 +2334,9 @@ $mysqli->commit();
         $this->source_defs['terms']['trm_Links'] = $links;
     }
 
+    //
+    //
+    //
     private function _importTranslations($def){
 
         if(count($this->def_translations[$def]) == 0){ // no definitions to retrieve
@@ -2374,6 +2377,25 @@ $mysqli->commit();
             $remoteURL = $remote_url
                 .'hserv/controller/sys_structure.php?db='.$remote_dbname.'&'
                 . http_build_query(array('translations' => $this->def_translations[$def]));
+                
+            $translations = _getRemoteTranslations($remoteURL);
+            
+            if(!$translations){
+                return;
+            }
+
+        }
+
+        if(isEmptyArray(@$translations['translations'])){
+            $this->translations_report[$def] = 'No translations found';
+        }else{
+            $this->_handleTranslations($def, $translations);
+        }
+
+        return true;
+    }
+    
+    private function _getRemoteTranslations($remoteURL){
 
             $defs = loadRemoteURLContent($remoteURL);
             if(!$defs){ // unable to connect to remote server
@@ -2384,7 +2406,7 @@ $mysqli->commit();
                     . $error_code . "<br>"
                     ."URL requested: $remoteURL<br><br>";
 
-                return;
+                return false;
             }
 
             $translations = json_decode(gzdecode($defs), true);
@@ -2393,22 +2415,15 @@ $mysqli->commit();
                 $this->translations_report = 'Invalid translation data was retrieved from remote registered database.';
                 $this->def_translations = array();
 
-                return;
+                return false;
             }
-            $translations = $translations['data'];
-        }
-
-        if(is_array(@$translations['translations']) && count($translations['translations']) > 0){
-            $this->_handleTranslations($def, $translations);
-        }else{
-            $this->translations_report[$def] = 'No translations found';
-        }
-
-        return true;
+            
+            return $translations['data'];
     }
 
-    private function _handleTranslations($def, $translations){
 
+    private function _handleTranslations($def, $translations){
+    
         $mysqli = $this->system->get_mysqli();
 
         $delete_stmt = $mysqli->prepare('DELETE FROM defTranslations where trn_Source=? AND trn_Code=?');
