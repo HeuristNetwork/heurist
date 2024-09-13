@@ -73,11 +73,11 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         function fld(fldname, width){
 
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             let title = s;
 
-            if(fldname == 'ext_url'){
+            if(fldname == 'geoname_link'){
                 s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View geoname record';
             }
@@ -85,7 +85,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
             return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
-        let recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('recordLink', 12);
+        let recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('geoname_link', 12);
         recordset.setFld(record, 'rec_Title', recTitle);
 
         return this._super(recordset, record);
@@ -110,7 +110,9 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
             return;
         }
 
-        let res = this.prepareValues(recset, record, {check_term_codes: this._country_vocab_id});
+        let res = {};
+        res['ext_url'] = recset.fld(record, 'geoname_link');
+        res = this.prepareValues(recset, record, res, {check_term_codes: this._country_vocab_id});
 
         // Pass mapped values and close dialog
         this.closingAction(res);
@@ -191,7 +193,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupBase, {
         let map_flds = Object.keys(this.options.mapping.fields);
 
         fields = fields.concat(map_flds);
-        fields = fields.concat('ext_url');
+        fields = fields.concat('geoname_link');
 
         if(!json_data.geonames) json_data.geonames = json_data;
         

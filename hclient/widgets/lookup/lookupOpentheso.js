@@ -353,11 +353,11 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
             let s = recordset.fld(record, fldname);
 
-            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             let title = s;
 
-            if(fldname == 'uri'){
+            if(fldname == 'term_uri'){
                 s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View record';
             }
@@ -388,7 +388,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         }
 
         let res = {};
-        res['ext_url'] = recset.fld(record, 'uri'); // add Opentheso link
+        res['ext_url'] = recset.fld(record, 'term_uri'); // add Opentheso link
 
         res = this.prepareValues(recset, record, res);
 

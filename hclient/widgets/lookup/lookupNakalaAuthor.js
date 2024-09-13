@@ -83,7 +83,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
             s = window.hWin.HEURIST4.util.isObject(s) ? Object.values(s) : s;
             s = Array.isArray(s) ? s.join('; ') : s;
 
-            let title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            let title = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             if(fldname == 'orcid' && s != ''){ // create anchor tag for link to external record
                 s = `<a href="${s}" target="_blank" rel="noopener"> view ORCID record </a>`;
@@ -124,8 +124,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
         }
 
         let res = {};
-        res['ext_url'] = recset.fld(record, 'rec_url');
-
+        res['ext_url'] = recset.fld(record, 'orcid');
         res = this.prepareValues(recset, record, res);
 
         this.closingAction(res);
@@ -200,7 +199,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
 
         // Prepare fields for mapping
         let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-        let map_flds = Object.keys(this.options.mapping.fields).concat('rec_url');
+        let map_flds = Object.keys(this.options.mapping.fields);
         fields = fields.concat(map_flds);
 
         // Parse json to Record Set

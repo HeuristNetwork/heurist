@@ -278,31 +278,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
             switch(field_type){
                 case 'enum':
-
                     // Match term labels with val, need to return the term's id to properly save its value
                     if(Object.hasOwn(extra_settings, 'check_term_codes')){
-                        let trm_ID = extra_settings['check_term_codes'] !== true ? extra_settings['check_term_codes'] : $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-                        values = this._getTermByCode(trm_ID, values);
+                        values = this._getTermByCode(trm_ID, dty_ID, values);
                     }
                     break;
 
                 case 'resource':
                 case 'relmarker':
-
-                    let new_values = [];
-                    for(const idx in values){
-
-                        if(!window.hWin.HEURIST4.util.isNumber(values[idx])){
-                            new_values.push({value: values[idx], search: values[idx], relation: null});
-                            continue;
-                        }
-
-                        if(parseInt(values[idx]) > 0){
-                            new_values.push(values[idx]);
-                        }
-                    }
-
-                    values = new_values;
+                    values = this._processRecordFields(values);
                     break;
 
                 default:
@@ -533,10 +517,19 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * Checks the array of values as term codes from within the provided vocabulary
      *
      * @param {integer} vocab_ID - vocabulary to check for term code
+     * @param {integer} dty_ID - field ID for new value, used to get backup vocab ID if needed
      * @param {array} values - array of values to check
      * @returns array of processed values
      */
-    _getTermByCode: function(vocab_ID, values){
+    _getTermByCode: function(vocab_ID, dty_ID, values){
+
+        if(!vocab_ID || !$Db.trm(vocab_ID)){
+            vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+        }
+
+        if(vocab_ID < 1){
+            return values;
+        }
 
         for(const idx in values){
 
@@ -551,6 +544,32 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         return values;
+    },
+
+    /**
+     * Checks the array of values for record pointer and relationship marker fields
+     *  if the value is a number greater than zero it is assumed to be a record ID
+     *
+     * @param {array} values - array of values
+     * @returns array of converted values
+     */
+    _processRecordFields: function(values){
+
+        let new_values = [];
+
+        for(const idx in values){
+
+            if(!window.hWin.HEURIST4.util.isNumber(values[idx])){
+                new_values.push({value: values[idx], search: values[idx], relation: null});
+                continue;
+            }
+
+            if(parseInt(values[idx]) > 0){
+                new_values.push(values[idx]);
+            }
+        }
+
+        return new_values;
     },
 
     /**

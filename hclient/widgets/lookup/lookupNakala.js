@@ -126,7 +126,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
             s = window.hWin.HEURIST4.util.isObject(s) ? Object.values(s) : s;
             s = Array.isArray(s) ? s.join('; ') : s;
 
-            let title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            let title = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             if(fldname == 'rec_url'){ // create anchor tag for link to external record
                 s = `<a href="${s}" target="_blank" rel="noopener"> view record </a>`;
@@ -168,7 +168,6 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         let res = {};
         res['ext_url'] = recset.fld(record, 'rec_url');
-
         res = this.prepareValues(recset, record, res);
 
         this.closingAction(res);

@@ -78,11 +78,11 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
         function fld(fldname, width){
 
             let s = recordset.fld(record, fldname);
-            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             let title = s;
 
-            if(fldname == 'ext_url'){
+            if(fldname == 'googlemap_link'){
                 s = `<a href="${s}" target="_blank" rel="noopener"> google maps </a>`;
                 title = 'View location via Google Maps';
             }
@@ -115,7 +115,9 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
             return;
         }
 
-        let res = this.prepareValues(recset, record, {check_term_codes: this._country_vocab_id});
+        let res = {};
+        res['googlemap_link'] = recset.fld(record, '');
+        res = this.prepareValues(recset, record, res, {check_term_codes: this._country_vocab_id});
 
         // Pass mapped values and close dialog
         this.closingAction(res);
@@ -190,7 +192,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
         let map_flds = Object.keys(this.options.mapping.fields);
 
         fields = fields.concat(map_flds);
-        fields = fields.concat('ext_url');
+        fields = fields.concat('googlemap_link');
 
         if(!json_data.postalcodes) json_data.postalcodes = json_data;
 

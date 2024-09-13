@@ -172,7 +172,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
             let s = recordset.fld(record, fldname);
             let authority_type = recordset.fld(record, 'authority_type');
 
-            s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
             let title = s;
 
@@ -190,11 +190,15 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
                     break;
 
                 case '200':
-                    width = fldname == 'location' ? 0 : (fldname == 'name' ? 50 : width);
+                    width = fldname == 'location' ? 0 : width;
+                    width = fldname == 'name' ? 50 : width;
                     break;
 
                 case '210':
-                    width = fldname == 'years_active' ? 0 : (fldname == 'name' ? 40 : (fldname == 'location' ? 20 : width));
+                    width = fldname == 'years_active' ? 0 : width;
+                    width = fldname == 'name' ? 40 : width;
+                    width = fldname == 'location' ? 20 : width;
+
                     break;
             
                 default:

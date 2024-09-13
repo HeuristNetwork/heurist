@@ -257,7 +257,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
                 s = pub_val;
             }else{
                 s = Array.isArray(s) ? s.join('; ') : s;
-                s = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+                s = window.hWin.HEURIST4.util.htmlEscape(s || '');
             }
 
             let title = s;
@@ -447,7 +447,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
             // Match term labels with val, need to return the term's id to properly save its value
             if(field_type == 'enum'){
-                val = this._getTermByCode(dty_ID, val);
+                val = this._getTermByCode(null, dty_ID, val);
             }
 
             // Check that val and id are valid, add to response object

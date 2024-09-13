@@ -530,13 +530,14 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 let recordset = new HRecordSet(response.data); // Retieve Search Results
 
                 recordset.each2(function(id, record){
-                    that.full_keywords_list[id] = record.d && record.d[1] ? record.d[1] : record['rec_Title'];
+                    that.full_keywords_list[id] = record?.d[1] ? record.d[1] : record['rec_Title'];
                 });
 
                 if(extra_ids == null && (next_step == 'associated' || next_step == 'recent' || next_step == 'add')){
                     return;
                 }
 
+                let title = null;
                 switch(next_step){
                     case 'assigned': // add assigned keywords to html list
 
@@ -564,7 +565,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                         break;
                     case 'add': // add new assigned keyword
 
-                        let title = that.full_keywords_list[extra_ids] !== undefined ? `Record ID - ${extra_ids}` : that.full_keywords_list[extra_ids];
+                        title = that.full_keywords_list[extra_ids] !== undefined ? `Record ID - ${extra_ids}` : that.full_keywords_list[extra_ids];
                         that.addKeyword(extra_ids, title);
 
                         break;

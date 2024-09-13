@@ -63,10 +63,10 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
                 s = s.lga; 
             }
 
-            s = s ? s : '';
+            s = s || '';
             let title = s;
 
-            if(fldname == 'recordLink'){
+            if(fldname == 'tlc_link'){
                 s = `<a href="${s}" target="_blank"> view here </a>`;
                 title = 'View tlcmap record';
             }
@@ -74,7 +74,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
             return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
-        const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
+        const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('tlc_link', 12); 
         recordset.setFld(record, 'rec_Title', recTitle);
 
         return this._super(recordset, record);
@@ -181,7 +181,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         let fields = ['rec_ID','rec_RecTypeID'];
         let map_flds = Object.keys(this.options.mapping.fields);
         fields = fields.concat(map_flds);
-        fields = fields.concat('recordLink');
+        fields = fields.concat('tlc_link');
 
         for(const idx in map_flds){
             map_flds[idx] = map_flds[idx].split('.'); 
