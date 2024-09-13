@@ -67,64 +67,27 @@ class UploadHandler
     );
 
 
-    protected $image_objects = array();
-
+    protected $image_objects = array();       
+    
     public function __construct($options = null, $initialize = true, $error_messages = null) {
 
-        //ARTEM - take upload folder from request
-        //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
-        //$upload_thumb_url = @$_REQUEST['upload_thumb_url'];
+        if($options==null) {$options=array();}
 
-        $heurist_db = @$options['database'];
-
-        $error = mysql__check_dbname($heurist_db);
-        if($error!=null){
-            //database not defined
-            $this->header(HEADER_403);
-            return;
-        }
-
-        $system = new System();
-        $res = $system->verify_credentials($heurist_db);
-        if(!($res>0)){
-            //not logged in
-            $this->header(HEADER_403);
+        if(!$this->checkSystem( @$options['database'] )){
             return;
         }
 
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']);//defined in form
         if(!($replace_edited_file>0 && $replace_edited_file<4)) {$replace_edited_file = false;}
         $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
-
-        if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
-
-            if($options==null) {$options=array();}
-
-            //get upload subfolder from parameters - this is subfolder of database upload folder
-            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form
-            if(!$upload_dir){
-                $upload_dir = 'insitu/';
-            }
-
-            /*
-                    //NOT ALLOWED
-                    // by default into subfolder files next to script
-                    $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
-                    $upload_url = $this->get_full_url().'/files/';//default - next to script
-            */
-
-            //sanitize
-            $upload_dir = USanitize::sanitizePath($upload_dir);
-            //add last slash
-            if(substr($upload_dir, -1) != "/"){
-                $upload_dir = $upload_dir . "/";
-            }
-
-            $options['upload_subfolder'] = $upload_dir;
+        
+        $upload_url = null;
+        $upload_dir = $this->checkUploadFolder($options); 
+        if($upload_dir!=null){
             $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
             $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
-
         }
+        
 
         $this->response = array();
         $this->options = array(
@@ -282,19 +245,55 @@ class UploadHandler
         if ($error_messages) {
             $this->error_messages = $error_messages + $this->error_messages;
         }
-/*  0519  it is not possible set upload_max_filesize via ini_set. they can be defined in .htaccess or user.ini per folder
-        $max_size = $this->options['max_file_size'];
-        if ($max_size) {
-            $siz = 100*1024*1024;
-            ini_set( 'post_max_size', '12000000' );
-            ini_set( 'upload_max_filesize', '10000000' );
-$siz = USystem::getConfigBytes('upload_max_filesize');
-        }
-*/
+
         if ($initialize) {
             $this->initialize();
         }
     }
+    
+    private function checkSystem($heurist_db){
+
+        $error = mysql__check_dbname($heurist_db);
+        if($error!=null){
+            //database not defined
+            $this->header(HEADER_403);
+            return false;
+        }
+
+        $system = new System();
+        $res = $system->verify_credentials($heurist_db);
+        if(!($res>0)){
+            //not logged in
+            $this->header(HEADER_403);
+            return false;
+        }
+        return true;
+    }
+    
+    private function checkUploadFolder(&$options){
+        
+        $upload_dir = null;
+        
+        if(@$options['upload_dir']==null){  //from UploadHandlerInit.php
+
+            //get upload subfolder from parameters - this is subfolder of database upload folder
+            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form
+            if(!$upload_dir){
+                $upload_dir = 'insitu/';
+            }
+
+            //sanitize
+            $upload_dir = USanitize::sanitizePath($upload_dir);
+            //add last slash
+            if(substr($upload_dir, -1) != "/"){
+                $upload_dir = $upload_dir . "/";
+            }
+
+            $options['upload_subfolder'] = $upload_dir;
+        }
+        return $upload_dir;
+    }
+    
 
     protected function initialize() {
 

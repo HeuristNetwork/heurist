@@ -907,8 +907,11 @@ class HLimb {
         $this->parent = &$parent;
         $this->conjunction = $conjunction;
 
-        if(is_array($query_json)){
-            foreach ($query_json as $key => $value){
+        if(isEmptyArray($query_json)){
+            return;
+        }
+            
+        foreach ($query_json as $key => $value){
 
             if(is_numeric($key) && is_array($value)){  //this is sequental array
                 $key = array_keys($value);
@@ -933,7 +936,7 @@ class HLimb {
                 }
             }
         }
-        }
+        
     }
     
     public function addPredicate($key, $value){

@@ -29,6 +29,8 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 
 class DbSysUsers extends DbEntityBase
 {
+    private $keep_autocommit = false;    
+    private $transaction = false;    
 
     public function __construct( $system, $data=null ) {
        parent::__construct( $system, $data );
@@ -444,120 +446,123 @@ class DbSysUsers extends DbEntityBase
         return $ret;
     }
 
-	/*
-     * Transfer User ID 2 (DB Owner) to the selected User ID, provide the new DB Owner administrator rights to all workgroups
+	/**
+     * Transfer User ID 2 (DB Owner) to the selected User ID, 
+     * and provide the new DB Owner administrator rights to all workgroups.
+     *
+     * @param bool $disable_foreign_checks If true, disables foreign key checks during transfer.
+     * @return bool Returns true if ownership transfer was successful, false on failure.
      */
-    private function transferOwner($disable_foreign_checks = false){
-
-        /* General Variables */
-        $mysqli = $this->system->get_mysqli();// MySQL connection
+    private function transferOwner($disable_foreign_checks = false)
+    {
+        $mysqli = $this->system->get_mysqli(); // MySQL connection
         $return = true; // Control variable
-        $recID = $this->data['ugr_ID'];// Selected User ID
+        $recID = $this->data['ugr_ID']; // Selected User ID
 
         $current_userid = $this->system->get_user_id();
-        if($current_userid != 2){
+        if ($current_userid != 2) {
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only the current database owner can transfer database ownership.');
             return false;
         }
 
-        if(!is_numeric($recID)){    /* Check if ID is a number */
+        if (!is_numeric($recID)) {    /* Check if ID is a number */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Provided ID is Invalid');
             return false;
         }
         $recID = intval($recID);
-        if($recID == 2){   /* Check if selected ID is alreay the Owner */
+        if ($recID == 2) {   /* Check if selected ID is already the Owner */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot transfer Database Ownership to the current Database Owner');
             return false;
         }
 
         /* Check if selected user's account is enabled before proceeding */
-        $query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = ' . $recID;
-        $res = $mysqli->query($query);
-        $row = $res->fetch_row();
+        $usrEnabled = mysql__select_value($mysqli, 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = ' . $recID);
 
-        if($row == null){
+        if ($usrEnabled == null) {
             $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve user account status');
             return false;
-        }elseif($row[0] != 'y'){
+        }
 
-            $msg = $row[0] == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
-                                    'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';
+        if ($usrEnabled != 'y') {
+            $msg = $usrEnabled == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
+                'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';
 
             $this->system->addError(HEURIST_INVALID_REQUEST, $msg);
             return false;
         }
 
-        /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
-        $query = 'SELECT max(ugr_ID)+1 FROM sysUGrps';
-        $res = $mysqli->query($query);
-        $row = $res->fetch_row();
-        if($row == null){
-            $this->system->addError(HEURIST_DB_ERROR, 'Unable to set MAXINT for sysUGrps.ugr_ID');
-            return false;
-        }
-        $MAXINT = intval($row[0]);
-
-        /* Start Transaction, allow for rollback incase of errors */
-        $keep_autocommit = mysql__begin_transaction($mysqli);
-
-        /* Remove all groups associated with the selected User's ID */
-        $query = "DELETE FROM sysUsrGrpLinks WHERE ugl_UserID = " . $recID;
-        $mysqli->query($query);
-        if ($mysqli->affected_rows < 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot remove old workgroups from ID: ' . $recID);
-            $return = false;
-        }
-
-        /* Swapping IDs between DB Owner and Selected User */
-        $query = "UPDATE sysUGrps SET ugr_ID = " . $MAXINT . " WHERE ugr_ID = 2";
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set current Owner\'s ID to MAXINT');
-            $return = false;
-        }
-        $query = "UPDATE sysUGrps SET ugr_ID = 2 WHERE ugr_ID = " . $recID;
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set new Owner\'s ID to 2');
-            $return = false;
-        }
-        $query = "UPDATE sysUGrps SET ugr_ID = " . $recID . " WHERE ugr_ID = " . $MAXINT;
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set original Owner\'s ID to ' . $recID);
-            $return = false;
-        }
-
-
         /* Retrieve List of Workgroup IDs */
         $query = "SELECT ugr_ID FROM sysUGrps WHERE ugr_Type = 'workgroup'";
-        $res = $mysqli->query($query);
+        $groupIds = mysql__select_list2($mysqli, $query);
+        if (isEmptyArray($groupIds)) {
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids', $mysqli->error);
+            return false;
+        }
+
+        /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
+        $maxUsrID = mysql__select_value($mysqli, 'SELECT max(ugr_ID)+1 FROM sysUGrps');
+        $maxUsrID = intval($maxUsrID);
+
+        /* Start Transaction, allow for rollback in case of errors */
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
+        $this->transaction = true;
+
+        /* Remove all groups associated with the selected User's ID */
+        $this->_updateDbTable('DELETE FROM sysUsrGrpLinks WHERE ugl_UserID = ' . $recID, 'Cannot remove old workgroups from ID: ' . $recID);
+
+        /* Perform ID Swapping */
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = $maxUsrID WHERE ugr_ID = 2", 'Cannot set current Owner\'s ID to MAXINT');
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = 2 WHERE ugr_ID = $recID", 'Cannot set new Owner\'s ID to 2');
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = $recID WHERE ugr_ID =  $maxUsrID", 'Cannot set original Owner\'s ID to ' . $recID);
 
         /* Add new DB Owner as admin to retrieved list of IDs */
         $query = "INSERT INTO sysUsrGrpLinks (ugl_UserID, ugl_Role, ugl_GroupID) VALUES ";
-        if($res->num_rows > 0){
-            while($row = $res->fetch_assoc()){
-                if($row['ugr_ID'] == 0) {continue;}
-                $query = $query . "(2, 'admin', " . intval($row['ugr_ID']) . "), ";
+
+        foreach ($groupIds as $groupId) {
+            if ($groupId == 0) {
+                continue;
             }
-        }else{
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids');
-            $return = false;
-        }
-        $query = substr($query, 0, -2);/* Remove last characters, space and comma */
-        $mysqli->query($query);
-        if ($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot assign new owner\'s administrator privilege for each group');
-            $return = false;
+            $query = $query . "(2, 'admin', $groupId), ";
         }
 
-        /* Check if everything has been successful */
-        
-        mysql__end_transaction($mysqli, $return, $keep_autocommit);
-        
-        return $return;
+        $query = substr($query, 0, -2); /* Remove last characters, space, and comma */
+        $this->_updateDbTable($query, 'Cannot assign new owner\'s administrator privilege for each group');
+
+        // Commit
+        if ($this->transaction) {
+            mysql__end_transaction($mysqli, true, $keep_autocommit);
+            return true;
+        }
+
+        return false;
     }
 
+    /**
+     * Helper function to execute a query and handle transaction errors.
+     *
+     * @param string $query The SQL query to execute.
+     * @param string $errorMsg The error message to display if the query fails.
+     * @return bool Returns true if the query succeeds, false on failure.
+     */
+    private function _updateDbTable($query, $errorMsg)
+    {
+        if ($this->transaction) {
+            $mysqli = $this->system->get_mysqli();
+            $mysqli->query($query);
+
+            if ($mysqli->error || $mysqli->affected_rows < 0) {
+                $this->system->addError(HEURIST_DB_ERROR, $errorMsg, $mysqli->error);
+                mysql__end_transaction($mysqli, false, $this->keep_autocommit);
+                $this->transaction = false;
+                return false;
+            }
+        }
+        return true;
+    }
+
+        
+    
+    
     //
     // special and batch action for users
     // 1) import users from another db
