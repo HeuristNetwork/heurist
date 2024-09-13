@@ -102,6 +102,16 @@ class DbRecUploadedFiles extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('ulf_UploaderUGrpID');
         if($pred!=null) {array_push($where, $pred);}
 
+        
+        if(@$this->data['ulf_Referenced']=='yes' || @$this->data['ulf_Referenced']=='no'){
+            array_push($from_table, ' left join recDetails ON  (dtl_UploadedFileID=ulf_ID OR dtl_Value LIKE CONCAT("%",ulf_ObfuscatedFileID,"%"))');
+            if($this->data['ulf_Referenced']=='no'){
+                array_push($where,'(dtl_ID IS NULL)');
+            }else{
+                array_push($where,'(dtl_ID IS NOT NULL)');
+            }
+        }
+         
 
         $value = @$this->data['fxm_MimeType'];
         $needMimeType = !($value==null || $value=='any');
@@ -113,15 +123,6 @@ class DbRecUploadedFiles extends DbEntityBase
             array_push($from_table, ',defFileExtToMimetype');
         }
 
-        if(@$this->data['ulf_Referenced']=='yes' || @$this->data['ulf_Referenced']=='no'){
-            array_push($from_table, ' left join recDetails ON  (dtl_UploadedFileID=ulf_ID OR dtl_Value LIKE CONCAT("%",ulf_ObfuscatedFileID,"%"))');
-            if($this->data['ulf_Referenced']=='no'){
-                array_push($where,'(dtl_ID IS NULL)');
-            }else{
-                array_push($where,'(dtl_ID IS NOT NULL)');
-            }
-        }
-         
         //----- order by ------------
 
         //compose ORDER BY
