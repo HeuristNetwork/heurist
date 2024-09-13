@@ -637,7 +637,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
     $_tmpfile = null;
 
-    if($external_url && strpos($origName, ULF_REMOTE) === 0){ //&& strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled'
+    if($external_url && strpos($originalFileName, ULF_REMOTE) === 0){ //&& strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled'
 
         $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         $filepath = $_tmpfile;
