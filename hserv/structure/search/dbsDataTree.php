@@ -56,6 +56,9 @@
      *                 'type' => type (rectype|relationship|field type|term),
      *                 'children' => [] // array of fields (if applicable)
      *               ]
+     * 
+     * Note: at the moment this tree for UI generated on client side
+     * the only usage remain in import csv (show dependency tree)
      */
     function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes = null, $parentcode = null) {
         global $dbs_rtStructs, $dbs_lookups;

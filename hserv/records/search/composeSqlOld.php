@@ -588,7 +588,7 @@ class Query {
         $this->from_clause .= join(' ', $this->sort_tables);// sorting may require the introduction of more tables
 
         //MAKE
-        return $this->from_clause . ' WHERE' . $this->where_clause . $this->sort_clause;
+        return $this->from_clause . SQL_WHERE . $this->where_clause . $this->sort_clause;
     }
     
     private function makeSortClause() {
@@ -861,9 +861,9 @@ class AndLimb {
             case 'linked_to':
             case 'linkedto':
                 return new LinkedToParentPredicate($this, $pred_val);
-            case 'relatedfrom':
-                return new RelatedFromParentPredicate($this, $pred_val);
-            case 'related_to':
+            case 'relatedfrom': //related from given record type + relation type
+                return new RelatedFromParentPredicate($this, $pred_val);  
+            case 'related_to':  //related to given record type + relation type
                 return new RelatedToParentPredicate($this, $pred_val);
             case 'related':
                 return new RelatedPredicate($this, $pred_val);
@@ -2353,8 +2353,8 @@ abstract class RelatedParentPredicate extends Predicate {
 /**
  * Class RelatedFromParentPredicate
  * 
- * Constructs SQL for finding records related from a parent record (source).
- * This predicate finds records linked from a specific source type and relationship field.
+ * Constructs SQL for finding records related from records
+ * This predicate finds records linked with a specific source type and relationship field.
  */
 class RelatedFromParentPredicate extends RelatedParentPredicate {
     
@@ -2457,7 +2457,7 @@ class RelatedToParentPredicate extends RelatedParentPredicate {
  * Class RelatedPredicate
  * 
  * Constructs SQL for finding records related in both directions (from and to the parent).
- * This predicate searches relations in both directions for a given source and relationship type.
+ * This predicate searches relations in both directions for a given record type and relationship type.
  */
 class RelatedPredicate extends Predicate {
     
@@ -2489,53 +2489,49 @@ class RelatedPredicate extends Predicate {
         if (!$related_rty_ID) {
             return false;
         }
-
-        // Build SQL query for related records.
-        $add_where = $this->buildWhereClause($related_rty_ID, $relation_type_ID, $inverseTermId);
-        return $this->buildRelatedSelect($add_where);
-    }
-
-    /**
-     * Constructs the WHERE clause for related records, including inverse terms.
-     *
-     * @param int $related_rty_ID The related record type ID.
-     * @param int $relation_type_ID The relation type ID.
-     * @param int $inverseTermId The inverse term ID.
-     * @return string The WHERE clause.
-     */
-    private function buildWhereClause($related_rty_ID, $relation_type_ID, $inverseTermId) {
-        $where = "(rd.rec_RecTypeID = $related_rty_ID) AND ";
-        if ($relation_type_ID > 0) {
-            $where .= '(';
-            if ($inverseTermId > 0) {
-                $where .= "(rl.rl_RelationTypeID = $inverseTermId) OR ";
+        
+        //NEW  ---------------------------
+        $add_from  = SQL_RECLINK;
+        $add_where = '';
+        if($relation_type_ID>0){
+            $add_where = $add_where.'(';
+            if($inverseTermId>0){
+                $add_where = $add_where."(rl.rl_RelationTypeID=$inverseTermId) OR ";
             }
-            $where .= "(rl.rl_RelationTypeID = $relation_type_ID))";
-        } else {
-            $where .= SQL_RELATION_IS_NOT_NULL;
+            $add_where = $add_where."(rl.rl_RelationTypeID=$relation_type_ID))";
+        }else{
+            $add_where = $add_where. SQL_RELATION_IS_NOT_NULL;
         }
-        return $where;
-    }
 
-    /**
-     * Builds the SELECT query for related records in both directions.
-     *
-     * @param string $add_where The WHERE clause.
-     * @return string The full SQL query.
-     */
-    private function buildRelatedSelect($add_where) {
         $pquery = &$this->getQuery();
-        if ($pquery->parentquery) {
+        if ($pquery->parentquery){
+            
+            $add_where = '(rd.rec_RecTypeID='.$related_rty_ID.') and '.$add_where;
+
             $query = $pquery->parentquery;
+
             $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
             $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
-            $select = '(TOPBIBLIO.rec_ID IN (SELECT rl.rl_SourceID ' . $query["from"] . ',recLinks rl ' . SQL_WHERE . $query["where"] . SQL_AND . $add_where . ' AND (' . SQL_RL_TARGET_LINK . ')))';
-            $select .= ' OR (TOPBIBLIO.rec_ID IN (SELECT rl.rl_TargetID ' . $query["from"] . ',recLinks rl ' . SQL_WHERE . $query["where"] . SQL_AND . $add_where . ' AND (' . SQL_RL_SOURCE_LINK . ')))';
-            return $select;
-        }
-        return '';
-    }
+            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+            $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
 
+            $select = '(TOPBIBLIO.rec_ID in (select rl.rl_SourceID '.$query["from"].',recLinks rl '
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_TARGET_LINK.'))) OR '
+                      .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
+                      .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_SOURCE_LINK.')))';
+                      
+        }else{
+            
+            $add_where = '(TOPBIBLIO.rec_RecTypeID='.$related_rty_ID.') and '.$add_where;
+            
+            return '(EXISTS (SELECT rl.rl_ID FROM '.SQL_RECLINK.SQL_WHERE . 
+                    '(rl.rl_TargetID=TOPBIBLIO.rec_ID OR rl.rl_SourceID=TOPBIBLIO.rec_ID) AND '
+                    .$add_where . '))';
+        }
+
+
+        return $select;        
+    }
 }
 
 

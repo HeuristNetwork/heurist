@@ -1818,7 +1818,7 @@ class System {
             */
         }
 
-        if(!isPositiveInt($quota>0)){
+        if(!isPositiveInt($quota)){
             $quota = 0;
             //$quota = 1073741824; //1GB
         }
