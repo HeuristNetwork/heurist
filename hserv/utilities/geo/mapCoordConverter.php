@@ -317,7 +317,7 @@ class GpointConverter
 
         // If no LongOrigin is provided, calculate it based on UTM zone
         if ($LongOrigin === null) {
-            $this->getZoneNumber($LongTemp);
+            $ZoneNumber = $this->getZoneNumber($LongTemp);
             
             // Calculate longitude origin for the UTM zone
             $LongOrigin = ($ZoneNumber - 1) * 6 - 180 + 3;
@@ -367,8 +367,7 @@ class GpointConverter
             // Special case for Norway and Svalbard regions
             if ($this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0) {
                 $ZoneNumber = 32;
-            }
-            if ($this->lat >= 72.0 && $this->lat < 84.0) {
+            }elseif ($this->lat >= 72.0 && $this->lat < 84.0) {
                 
                 if ($LongTemp >= 0.0 && $LongTemp < 9.0) {
                     $ZoneNumber = 31;

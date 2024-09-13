@@ -1905,34 +1905,6 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     public function delete($print_response = true) {
-        $file_names = $this->get_file_names_params();
-        //!!!! get_subfolder_name_param
-        if (empty($file_names)) {
-            $file_names = array($this->get_file_name_param());
-        }
-        $subfolder = $this->get_subfolder_param();
-
-        $response = array();
-        foreach($file_names as $file_name) {
-            $file_path = $this->get_upload_path($file_name, $subfolder);
-            $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
-            if ($success) {
-                foreach($this->options['image_versions'] as $version => $options) {
-                    if (!empty($version)) {
-                        $file = $this->get_upload_path($file_name, $subfolder, $version);
-                        if (is_file($file)) {
-                            unlink($file);
-                        }
-                    }
-                }
-            }
-            $response[$file_name] = $success;
-        }
-        return $this->generate_response($response, $print_response);
-    }
-    
-    
-    public function delete($print_response = true) {
         // Get file names either from parameters or fallback to a single file param
         $file_names = $this->get_file_names_params();
         if (empty($file_names)) {
