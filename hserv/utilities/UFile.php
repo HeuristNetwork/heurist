@@ -724,6 +724,7 @@ use hserv\utilities\USanitize;
      *
      * @return string The relative target path
      */
+     /*  does not work 
     function getRelativePath($basePath, $targetPath)
     {
         // Normalize path separators for cross-platform compatibility
@@ -760,9 +761,9 @@ use hserv\utilities\USanitize;
 
         return $relativePath;
     }
-    
+    */
 
-    /* OLD VERSION
+    /**
      * Returns the target path as relative reference from the base path.
      *
      * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
@@ -781,6 +782,7 @@ use hserv\utilities\USanitize;
      * @param string $targetPath The target path
      *
      * @return string The relative target path
+     */
     function getRelativePath($basePath, $targetPath)
     {
 
@@ -824,7 +826,7 @@ use hserv\utilities\USanitize;
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? './'.$path : $path;
     }
-     */
+     
 
 
 /**
