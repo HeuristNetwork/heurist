@@ -1609,10 +1609,10 @@ function userCheckPermissions($system, $action, $level=0){
 
         // User doesn't have permission to add or delete
         $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
-        $res = false;
+        $result = false;
     }
 
-    return $res;
+    return $result;
 }
 
 
