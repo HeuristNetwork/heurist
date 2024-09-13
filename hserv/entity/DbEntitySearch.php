@@ -292,7 +292,7 @@ class DbEntitySearch
         $field_config = @$this->fields[$fieldname];
         if($field_config==null) {return null;}
         $data_type = $field_config['dty_Type'];
-        $is_ids = ($is_ids || $this->isPrimaryField($field_config) || (@$field_config['rst_FieldConfig']['entity']!=null);
+        $is_ids = ($is_ids || $this->isPrimaryField($field_config) || @$field_config['rst_FieldConfig']['entity']!=null);
 
         //special case for ids - several values can be used in IN operator
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)

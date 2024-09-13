@@ -154,7 +154,7 @@ use hserv\structure\ConceptCode;
 
         $res = null;
 
-        if($db_name==null || trim($db_name)==''){
+        if(isEmptyStr($db_name)){
             $res = 'Database parameter not defined';
         }elseif(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
             $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
@@ -253,77 +253,92 @@ use hserv\structure\ConceptCode;
         return array($database_name_full, $database_name);
     }
 
-
     /**
-    * returns list of databases as array
-    * @param    mixed $with_prefix - if false it remove "hdb_" prefix
-    * @param    mixed $email - current user email
-    * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
-    */
-    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with=null,
-                             $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
+     * Returns a list of databases as an array.
+     * 
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param bool $with_prefix - Whether to include the prefix (default: false)
+     * @param string|null $starts_with - Optional string to filter database names by a prefix
+     * @param string|null $email - The email of the current user for role filtering
+     * @param string|null $role - The role to filter by ('admin' or 'user')
+     * @param string $prefix - The prefix used for database names (default: HEURIST_DB_PREFIX)
+     * 
+     * @return array - List of database names matching the criteria
+     * 
+     * @throws Exception - If the SQL query fails
+     */
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with = null, 
+                                  $email = null, $role = null, $prefix = HEURIST_DB_PREFIX) 
     {
+        // Step 1: Validate and construct the `LIKE` clause for database filtering
+        $where = $prefix . '%'; // Default case
+        if ($starts_with && mysql__check_dbname($starts_with) == null) { // && preg_match('/^[A-Za-z0-9_\$]+$/', $starts_with)
+            $where = $prefix . $starts_with . '%';
+        }
+        
+        // Step 2: Execute the database query
+        $query = "SHOW DATABASES WHERE `database` LIKE '" . $mysqli->real_escape_string($where) . "'";
+        $res = $mysqli->query($query);
 
-        if($starts_with!=null)
-        {
-            if(mysql__check_dbname($starts_with)==null
-              && preg_match('/[A-Za-z0-9_\$]/', $starts_with)){
-
-                $where = 'hdb_'.$starts_with.'%';
-            }else{
-                $where = '';//invalid dbname
-            }
-        }else{
-            $where = 'hdb_%';
+        if (!$res) {
+            throw new Exception('Error executing SHOW DATABASES query: ' . $mysqli->error);
         }
 
-        $query = "show databases where `database` like '".$mysqli->real_escape_string($where)."'";
-        $res = $mysqli->query($query);
-        $result = array();
-        $isFilter = ($email != null && $role != null);
+        $databases = [];
 
-        if($res){
-            while ($row = $res->fetch_row()) {
-                $test = strpos($row[0], $prefix);
-                if ($test === 0) {
-                    $database = preg_replace(REGEX_ALPHANUM, "", $row[0]);//for snyk
-                    if ($isFilter) {
-                        $query2 = null;
-                        if ($role == 'user') {
-                            $query2 = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
-                        } elseif($role == 'admin') {
-                            $query2 = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
-                            " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
-                            " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
-                        }
-                        if ($query2!=null) {
-                            $res2 = $mysqli->query($query2);
-                            $cnt = $res2->num_rows; // mysql_num_rows($res2);
-                            $res2->close();
-                            if ($cnt < 1) {
-                                continue;
-                            }
-                        } else {
-                            continue;
-                        }
-                    }
-                    if ($with_prefix) {
-                        array_push($result, $database);
-                    } else {
-                        // delete the prefix
-                        array_push($result, substr($database, strlen($prefix)));
-                    }
-                }
-            }//while
-            $res->close();
-        }//if
+        // Step 3: Filter databases based on role and email, if provided
+        while ($row = $res->fetch_row()) {
+            $database = $row[0];
+            if (strpos($database, $prefix) !== 0) {
+                continue;   
+            }
+            $filtered_db = mysql__checkUserRole($mysqli, $database, $email, $role);
+            if ($filtered_db) {
+                $databases[] = $with_prefix ? $database : substr($database, strlen($prefix));
+            }
+        }
+        $res->close();
 
-        natcasesort($result);// case insensetive order
-        $result = array_values($result);// correct array indexes, for json object
-
-        return $result;
-
+        // Step 4: Sort the result case-insensitively
+        natcasesort($databases);
+        return array_values($databases); // Re-index for JSON compatibility
     }
+
+
+    /**
+     * Checks that given database user has specified role
+     * 
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param string $database - The database name
+     * @param string|null $email - The user's email for filtering
+     * @param string|null $role - The role to filter by ('admin' or 'user')
+     * 
+     * @return bool - True if the database matches the role and email filter, false otherwise
+     */
+    function mysql__checkUserRole($mysqli, $database, $email, $role) {
+        if (!$email || !$role) {
+            return true; // No filtering required
+        }
+
+        $sanitized_db = $mysqli->real_escape_string($database);
+        $query = null;
+
+        // Determine the query based on the role
+        if ($role == 'user') {
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps 
+                      WHERE ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
+        } elseif ($role == 'admin') {
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps 
+                      JOIN `$sanitized_db`.sysUsrGrpLinks ON ugr_ID = ugl_UserID
+                      JOIN sysIdentification ON ugl_GroupID = sys_OwnerGroupID
+                      WHERE ugl_Role = 'admin' AND ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
+        }
+        
+        $value = mysql__select_value($mysqli, $query);
+        
+        return ($value!=null);
+    }
+        
 
 
     function mysql__select($mysqli, $query){
@@ -798,78 +813,82 @@ $mysqli->kill($thread_id);
         return $result;
     }
 
-    //
-    //  For INSERT, UPDATE  return $return_affected_rows or true
-    //         if fails it returns mysql error
-    //  $query with parameters "?"
-    //  $params - array for parameters, first element is string with types "sdi"
-    //
-    function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
+    /**
+     * Executes a MySQL query with optional parameters and returns the result or error.
+     *
+     * For `INSERT` and `UPDATE` queries, returns the affected rows or insert ID.
+     * If the query fails, returns the MySQL error message.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param string $query - The SQL query with placeholders for parameters
+     * @param array|null $params - An array of parameters, first element is a string of types (e.g., 'sdi')
+     * @param bool $return_affected_rows - If true, return affected rows or insert ID (default: false)
+     *
+     * @return mixed - True on success, MySQL error string on failure, affected rows or insert ID if requested
+     */
+    function mysql__exec_param_query($mysqli, $query, $params = null, $return_affected_rows = false) {
 
+        // Determine if the query is an INSERT operation
+        $is_insert = (stripos($query, 'INSERT') === 0);
         $result = false;
 
-        $is_insert = (stripos($query, 'INSERT')===0);
-
-        if (!is_array($params) || count($params) < 1) {// not parameterised
-            if ($result = $mysqli->query($query)) {
-                $result = true;
+        // Non-parameterized query execution
+        if (isEmptyArray($params)) {
+            if ($mysqli->query($query)) {
+                $result = handleResult($mysqli, $is_insert, $return_affected_rows);
             } else {
                 $result = $mysqli->error;
-                if ($result == '') {
-                    if($return_affected_rows){
-                        if($is_insert){
-                            $result = $mysqli->insert_id;
-                        }else{
-                            $result = $mysqli->affected_rows;
-                        }
-                    }else{
-                        $result=true;
-                    }
-                }
             }
-        }else{
+            return $result;
+        } 
+        
+        // Parameterized query execution
+        $stmt = $mysqli->prepare($query);
+        if ($stmt) {
+            call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
 
-            $stmt = $mysqli->prepare($query);
-            if($stmt){
-                //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
-                call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
-                if(!$stmt->execute()){
-                    $result = $mysqli->error;
-                }else{
-                    $result = true;
-
-                    if($return_affected_rows){
-                        if($is_insert){
-                            $result = $mysqli->insert_id;
-                        }else{
-                            $result = $mysqli->affected_rows;
-                        }
-                    }else{
-                        $result=true;
-                    }
-                }
-                $stmt->close();//affected_rows and insert_id will be reset after close
-            }else{
-                $result = $mysqli->error;
+            if (!$stmt->execute()) {
+                $result = $stmt->error;
+            } else {
+                $result = handleResult($mysqli, $is_insert, $return_affected_rows);
             }
+
+            $stmt->close(); // Close the statement
+        } else {
+            $result = $mysqli->error;
         }
 
         return $result;
     }
+
     /**
-    * converts array of values to array of value references for PHP 5.3+
-    * detailed desription
-    * @param    array [$arr] of values
-    * @return   array of values or references to values
-    */
-    function referenceValues($arr) {
-        if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
-        {
-            $refs = array();
-            foreach ($arr as $key => $value) {$refs[$key] = &$arr[$key];}
-            return $refs;
+     * Handles the result of the query, returning the affected rows or insert ID if required.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param bool $is_insert - Whether the query is an INSERT operation
+     * @param bool $return_affected_rows - Whether to return affected rows or insert ID
+     *
+     * @return mixed - True on success, insert ID or affected rows if requested
+     */
+    function handleResult($mysqli, $is_insert, $return_affected_rows) {
+        if ($return_affected_rows) {
+            return $is_insert ? $mysqli->insert_id : $mysqli->affected_rows;
         }
-        return $arr;
+        return true;
+    }
+
+    /**
+     * Converts an array of values to a format suitable for `call_user_func_array`.
+     *
+     * @param array $arr - The array of values (first element is the types string)
+     * @return array - The array with references for binding parameters
+     */
+    function referenceValues($arr) {
+        $refs = [];
+        foreach ($arr as $key => $value) {
+            $refs[$key] = &$arr[$key]; // Make reference for call_user_func_array
+        }
+        return $refs;
     }
 
     /**

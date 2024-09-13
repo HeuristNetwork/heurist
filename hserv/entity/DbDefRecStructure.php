@@ -298,32 +298,27 @@ class DbDefRecStructure extends DbEntityBase
 
         return $ret;
     }
-
-    //
-    // newfields=>array(
-    //        fields=>  array of ids
-    //        reqs=>   array of ids
-    //        values=>  [dty_ID][fieldName]=>value
-    //
+    
+    /**
+     * Adds new fields to the record type. If no fields exist, default fields are added.
+     * 
+     * newfields=>array(
+     *        fields=>  array of ids
+     *        reqs=>   array of ids
+     *        values=>  [dty_ID][fieldName]=>value
+     * 
+     * 
+     * @return bool - Returns true if fields are successfully added, false otherwise.
+     */    
     private function addNewFields(){
 
         $rty_ID = $this->data['rtyID'];
         $newfields = @$this->data['newfields'];
 
-        if(!is_array($newfields) || count($newfields)==0){
+        if (isEmptyArray($newfields) && !$this->addDefaultFields($rty_ID)){
             //if rt structure has zero fields adds 2 default fields: DT_NAME and DT_DESCRIPTION
-            $mysqli = $this->system->get_mysqli();
-            if(mysql__select_value($mysqli,
-                    'SELECT count(*) FROM '.$this->config['tableName']
-                    .' WHERE rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID ))===0){
-
-                        $newfields['fields'] = array(DT_NAME, DT_DESCRIPTION);
-                        $newfields['reqs'] = array(DT_NAME);
-            }else{
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for new fields');
-                return false;
-            }
-        }
+            return false; // If there are no fields, adding default fields fails.
+        }        
 
         $fields = prepareIds($newfields['fields'], false);
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
@@ -335,12 +330,12 @@ class DbDefRecStructure extends DbEntityBase
         $dt_fields = $dt_fields['typedefs'];
         $di = $dt_fields['fieldNamesToIndex'];
 
-
         $records = array();
         foreach($fields as $dty_ID){
-            if(@$dt_fields[$dty_ID])
-            {
-
+                if(!@$dt_fields[$dty_ID]) {
+                    continue; //field not found defDetailTypes
+                }
+                
                 $dt = $dt_fields[$dty_ID]['commonFields'];
 
                 $recvalues = array(
@@ -370,19 +365,43 @@ class DbDefRecStructure extends DbEntityBase
 
                 $records[] = $recvalues;
 
-                if(isset($this->data['order'])){ $order = $this->data['order'];}
-                else { $order = $order+10; }
-            }
+                // Increment the order
+                $order = isset($this->data['order']) ? $this->data['order'] : $order + 10;                
         }
 
         if(count($records)>0){
             $this->data['fields'] = $records;
             $this->is_addition = true;
             return $this->save();
-        }else{
+        }
+        return false;
+        
+    }
+    
+    
+    /**
+     * Adds default fields (DT_NAME and DT_DESCRIPTION) to the record type if no fields exist.
+     *
+     * @param int $rty_ID - The record type ID.
+     * @return bool - Returns true if default fields are added, false otherwise.
+     */
+    private function addDefaultFields($rty_ID) {
+        $mysqli = $this->system->get_mysqli();
+
+        $fieldCount = mysql__select_value(
+            $mysqli,
+            'SELECT count(*) FROM ' . $this->config['tableName'] . ' WHERE rst_RecTypeID=' . intval($rty_ID)
+        );
+
+        if ($fieldCount === 0) {
+            $this->data['newfields']['fields'] = [DT_NAME, DT_DESCRIPTION];
+            $this->data['newfields']['reqs'] = [DT_NAME];
+            return true;
+        } else {
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for new fields');
             return false;
         }
-    }
+    }    
 
     //
     // Counts:

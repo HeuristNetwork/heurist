@@ -79,7 +79,7 @@ private static function initialize($fields_correspondence=null)
 private static function findDisambResolution($keyvalue, $disamb_resolv){
 
     $idx = findInArray($disamb_resolv, 'key', $keyvalue);
-    if($idx>0){
+    if($idx!=null){
         return @$disamb_resolv[$idx]['recid'];
     }
     

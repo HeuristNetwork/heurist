@@ -304,7 +304,7 @@ class DbDefRecTypes extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
-             if(!prepareRecord($idx)){
+             if(!$this->prepareRecord($idx)){
                  break;
              }
         }//foreach
@@ -361,81 +361,109 @@ class DbDefRecTypes extends DbEntityBase
             return true;        
     }
 
-    //
-    //
-    //
-    public function save(){
-
-
+    /**
+     * Saves the record and updates additional fields related to record types.
+     * 
+     * @return bool - Returns false if the parent save fails, otherwise true.
+     */
+    public function save() {
+        // Call the parent save method
         $ret = parent::save();
-
-        if($ret!==false){
-
-            $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) {$dbID = 0;}
-
-            $mysqli = $this->system->get_mysqli();
-
-            foreach($this->records as $idx=>$record){
-                $rty_ID = @$record['rty_ID'];
-                if($rty_ID>0 && in_array($rty_ID, $ret)){
-
-                    $query = null;
-                    if($record['is_new']){
-                        //1. if new add default set of fields TODO!
-                        /*if($isAddDefaultSetOfFields){
-                            //add default set of detail types
-                            addDefaultFieldForNewRecordType($rtyID, $newfields);
-                        }*/
-
-                        //2. set dbid or update modified locally
-                        $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
-                                .', rty_NameInOriginatingDB=rty_Name'
-                                .', rty_IDInOriginatingDB='.$rty_ID
-                                .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.$rty_ID;
-
-                    }else{
-                        $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)'
-                                . ' WHERE rty_ID = '.$rty_ID;
-                    }
-                    $res = $mysqli->query($query);
-
-
-                    //3. update titlemask - from names to ids
-                    $mask = @$record['rty_TitleMask'];
-                    if($mask){
-                            $parameters = array("");
-                            $val = \TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);//convert from human to coded
-                            $parameters = array('s', $val);
-
-                            $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";
-
-                            $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
-                            if(!is_numeric($res)){
-                                $this->system->addError(HEURIST_DB_ERROR,
-                                    'SQL error updating title mask for record type '.$rty_ID, $res);
-                            }
-                    }
-
-
-                    //4. treat thumbnail
-                    $thumb_file_name = @$record['rty_Thumb'];
-                    //rename it to recID.png and copy to entity/defRecTypes
-                    if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $rty_ID, 'thumbnail');
-                    }
-
-                    //treat icon
-                    $icon_file_name = @$record['rty_Icon'];
-                    //rename it to recID.png and copy to entity/defRecTypes
-                    if($icon_file_name){
-                        parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
-                    }
-
-                }
-            }
+        if ($ret === false) {
+            return false;
         }
-        return $ret;
+
+        // Get the database ID
+        $dbID = $this->system->get_system('sys_dbRegisteredID');
+        $dbID = $dbID > 0 ? $dbID : 0;
+
+        // Get MySQLi instance
+        $mysqli = $this->system->get_mysqli();
+
+        // Loop through each record and process accordingly
+        foreach ($this->records as $idx => $record) {
+            $rty_ID = isset($record['rty_ID']) ? $record['rty_ID'] : null;
+            if (!isPositiveInt($rty_ID) || !in_array($rty_ID, $ret)) {
+                continue; // Skip invalid or non-existent record types
+            }
+
+            // Handle new and existing records differently
+            $this->processRecordType($mysqli, $dbID, $record, $rty_ID);
+
+            // Update title mask, if applicable
+            if (isset($record['rty_TitleMask'])) {
+                $this->updateTitleMask($mysqli, $record['rty_TitleMask'], $rty_ID);
+            }
+
+            // Handle thumbnails and icons
+            $this->handleMediaFiles($record, $rty_ID);
+        }
+
+        return true;
+    }
+
+    /**
+     * Processes a record type, either updating its originating DB or marking it as locally modified.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object.
+     * @param int $dbID - The database ID.
+     * @param array $record - The record array with its details.
+     * @param int $rty_ID - The record type ID.
+     */
+    private function processRecordType($mysqli, $dbID, $record, $rty_ID) {
+        if ($record['is_new']) {
+            // For new records, update the originating DB details
+            $query = 'UPDATE defRecTypes SET rty_OriginatingDBID=' . $dbID
+                . ', rty_NameInOriginatingDB=rty_Name'
+                . ', rty_IDInOriginatingDB=' . $rty_ID
+                . ' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID=' . $rty_ID;
+        } else {
+            // For existing records, mark as locally modified if necessary
+            $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0, 1, 0)'
+                . ' WHERE rty_ID=' . $rty_ID;
+        }
+
+        $mysqli->query($query); // Execute the query
+    }
+
+    /**
+     * Updates the title mask for a record type.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object.
+     * @param string $mask - The human-readable title mask to be converted.
+     * @param int $rty_ID - The record type ID.
+     */
+    private function updateTitleMask($mysqli, $mask, $rty_ID) {
+        // Convert the human-readable title mask to the coded one
+        $val = \TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);
+
+        // Prepare the query and parameters
+        $parameters = ['s', $val];
+        $query = "UPDATE defRecTypes SET rty_TitleMask = ? WHERE rty_ID = $rty_ID";
+
+        // Execute the query
+        $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
+        if (!is_numeric($res)) {
+            $this->system->addError(HEURIST_DB_ERROR, 'SQL error updating title mask for record type ' . $rty_ID, $res);
+        }
+    }
+
+    /**
+     * Handles the media files (thumbnail and icon) for the record type.
+     *
+     * @param array $record - The record array with its details.
+     * @param int $rty_ID - The record type ID.
+     */
+    private function handleMediaFiles($record, $rty_ID) {
+        // Handle thumbnail
+        if (isset($record['rty_Thumb'])) {
+            parent::renameEntityImage($record['rty_Thumb'], $rty_ID, 'thumbnail');
+        }
+
+        // Handle icon
+        if (isset($record['rty_Icon'])) {
+            parent::renameEntityImage($record['rty_Icon'], $rty_ID, 'icon');
+        }
     }
 
     //
