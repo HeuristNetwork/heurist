@@ -1581,7 +1581,7 @@ function userCheckPermissions($system, $action, $level=0){
     };
     */    
     
-    $action_msg = $action_msg;
+    $action_msg = $action;
     
     if($action=='add'){
         $action_msg = 'create';    

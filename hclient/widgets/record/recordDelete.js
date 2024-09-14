@@ -292,9 +292,6 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 }   
             }
             
-console.log(scope_val, scope);
-return;
-
             //unique session id    
             let session_id = Math.round((new Date()).getTime()/1000);
         
