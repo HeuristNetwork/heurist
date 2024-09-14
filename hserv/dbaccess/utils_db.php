@@ -336,7 +336,7 @@ use hserv\structure\ConceptCode;
         
         $value = mysql__select_value($mysqli, $query);
         
-        return ($value!=null);
+        return $value!=null;
     }
         
 

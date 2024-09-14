@@ -217,7 +217,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     if ($search_domain != EVERYTHING) {
 
-        if ($where_clause) {$where_clause = '(' . $where_clause . ') and ';}
+        if ($where_clause) {$where_clause = "( $where_clause ) and ";}
 
         if ($search_domain == BOOKMARK) {
             $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not TOPBIBLIO.rec_FlagTemporary) ';
@@ -2506,7 +2506,7 @@ class RelatedPredicate extends Predicate {
         $pquery = &$this->getQuery();
         if ($pquery->parentquery){
             
-            $add_where = '(rd.rec_RecTypeID='.$related_rty_ID.') and '.$add_where;
+            $add_where = "(rd.rec_RecTypeID=$related_rty_ID) and ".$add_where;
 
             $query = $pquery->parentquery;
 
@@ -2522,7 +2522,7 @@ class RelatedPredicate extends Predicate {
                       
         }else{
             
-            $add_where = '(TOPBIBLIO.rec_RecTypeID='.$related_rty_ID.') and '.$add_where;
+            $add_where = "(TOPBIBLIO.rec_RecTypeID=$related_rty_ID) and ".$add_where;
             
             return '(EXISTS (SELECT rl.rl_ID FROM '.SQL_RECLINK.SQL_WHERE . 
                     '(rl.rl_TargetID=TOPBIBLIO.rec_ID OR rl.rl_SourceID=TOPBIBLIO.rec_ID) AND '

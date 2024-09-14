@@ -1231,7 +1231,6 @@ function smarty_function_progress($params, &$smarty){
             //$mysqli->close();
         }
 
-    }
     return $res;
 }
 

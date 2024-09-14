@@ -1571,12 +1571,25 @@ function userCheckPermissions($system, $action, $level=0){
     }
 
     // Define action message for error
+    // PHP8
+    /*
     $action_msg = match ($action) {
         'add' => 'create',
         'edit' => 'modify',
         'add delete' => 'create or delete',
         default => $action,
-    };    
+    };
+    */    
+    
+    $action_msg = $action_msg;
+    
+    if($action=='add'){
+        $action_msg = 'create';    
+    }elseif($action=='edit'){
+        $action_msg = 'modify';    
+    }elseif($action=='add delete'){
+        $action_msg = 'create or delete';    
+    }
 
     $block_msg = 'Your account does not have permission to ' . $action_msg
                 .' records,<br>please contact the database owner for more details.';

@@ -59,10 +59,14 @@ class DbUsrTags extends DbEntityBase
         $this->searchMgr->addPredicate('tag_Text');
         $this->searchMgr->addPredicate('tag_Modified');
         $this->searchMgr->addPredicate('tag_UGrpID');
-        $this->searchMgr->addPredicate('rtl_RecID');
+        
         if(@$this->data['rtl_RecID']){
-            $sup_tables = ',usrRecTagLinks';
-            $sup_where  = '(rtl_TagID=tag_ID)';
+            
+            $where = predicateId('rtl_RecID',$this->data['rtl_RecID'],SQL_AND);
+            if($where!=''){
+                $sup_tables = ',usrRecTagLinks';
+                $sup_where  = '(rtl_TagID=tag_ID)'.$where;
+            }
         }
 
         switch (@$this->data['details']){
