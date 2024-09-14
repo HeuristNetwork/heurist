@@ -382,7 +382,12 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
                 .$db_name.'.defTerms where trm_ID='.intval($fields[2]);
             $vocab = mysql__select_row($mysqli, $query);
-            if($vocab){
+            if(!$vocab){
+                 print error_Div('VOCAB NOT DEFINED');
+                 return;
+            }
+            
+            
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
                     print DIV_S.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).DIV_E;
 
@@ -408,9 +413,6 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                     print TR_S.$list.TR_E;
                 }
                 print TABLE_E;
-            }else{
-                print error_Div('VOCAB NOT DEFINED');
-            }
 
 
 }

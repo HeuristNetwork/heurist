@@ -166,33 +166,40 @@ class DbEntitySearch
 
             if($value==SQL_NULL || $value=='-'.SQL_NULL){
                 $this->data[$fieldname] = true;
+                continue;
             }
 
-                $data_type = $field_config['dty_Type'];
-                $methodName = $data_type;
-
-                if($this->primaryField == $fieldname || @$field_config['rst_FieldConfig']['entity']!=null){
-                    $methodName = 'ids';
-                }
-
-                $methodName = '_validate'.ucfirst($methodName);
-                $res = true;
-
-                if(method_exists($this, $methodName)){ //&& is_callable(array($this, $methodName))){
-                    $res = $this->$methodName($fieldname, $data_type);
-                }
-
-                if(!is_bool($res)){
-                    $this->data[$fieldname] = $res;
-                }else{
-                    if(!$res) {return false;}
-                }
-
+            if(!$this->validateParam($fieldname, $field_config)){
+                return false;
+            }
         }
 
         return $this->data;
     }
 
+    private function validateParam($fieldname, $field_config){
+        
+            $data_type = $field_config['dty_Type'];
+            $methodName = $data_type;
+
+            if($this->primaryField == $fieldname || @$field_config['rst_FieldConfig']['entity']!=null){
+                $methodName = 'ids';
+            }
+
+            $methodName = '_validate'.ucfirst($methodName);
+            $res = true;
+
+            if(method_exists($this, $methodName)){ //&& is_callable(array($this, $methodName))){
+                $res = $this->$methodName($fieldname, $data_type);
+            }
+
+            if(!is_bool($res)){
+                $this->data[$fieldname] = $res;
+                return true;
+            }
+                
+            return $res;
+    }
 
     //
     // remove quoted values and double spaces

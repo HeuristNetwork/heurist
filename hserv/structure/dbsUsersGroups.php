@@ -1405,10 +1405,13 @@
 
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);//ugr_Type
-        $result = array();
+        
+        if(!$res){
+            return array();    
+        }
 
         //2. loop and parse preferences
-        if($res){
+        $result = array();
             while ($row = $res->fetch_row()) { //loop for user/groups
                 //get preferences
                 $usr_ID = intval($row[0]);
@@ -1437,7 +1440,6 @@
 
             }
             $res->close();
-        }
 
         return $result;
     }

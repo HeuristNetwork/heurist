@@ -2385,7 +2385,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     $details2 = array();
     foreach ($details as $dtyID => $pairs) {
 
-        if(isEmptyArray($pairs) || $pairs=='') {continue;} //empty value
+        if( (is_array($pairs) && empty($pairs)) || $pairs=='') {continue;} //empty value
 
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);

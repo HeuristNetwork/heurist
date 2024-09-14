@@ -1052,7 +1052,6 @@ class DbUtils {
 
         if (is_array($res)){
             self::$system->addErrorArr($res);//can't create
-
             mysql__drop_database($mysqli, $database_name_full);
             return false;
         }elseif($level<1){
