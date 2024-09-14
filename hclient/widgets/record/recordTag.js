@@ -28,6 +28,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
         helpContent: 'recordTags.html',
+        scope_types: 'selected',
         groups: 'all',
         modes: ['assign','remove']       //bookmark=assign bookmark_url - just selection of tags - no real action
     },
@@ -41,7 +42,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         
         let sMsg;
         if(this.options.modes=='bookmark_url'){
-            this.element.find('#div_fieldset').hide();
+            this._$('#div_fieldset').hide();
             sMsg = window.hWin.HR('recordTag_hint0');
         }else if (this.options.modes=='bookmark') { 
             sMsg = window.hWin.HR('recordTag_hint1');
@@ -51,7 +52,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         }   
         sMsg = sMsg + window.hWin.HR('recordTag_hint3');
         
-        this.element.find('#div_header')
+        this._$('#div_header')
             //.css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html(sMsg);
@@ -82,7 +83,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         let res = this._super();
         
         //'width':106,'min-width':96,
-        this.element.find('fieldset > div > .header').css({'padding':'0 16 0 0'});
+        this._$('fieldset > div > .header').css({'padding':'0 16 0 0'});
         
         return res;
     },

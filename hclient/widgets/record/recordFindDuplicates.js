@@ -41,7 +41,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     _destroy: function() {
         this._super(); 
         
-        let treediv = this.element.find('.rtt-tree');
+        let treediv = this._$('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -57,17 +57,17 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         this._super();    
 
         //add header and action buttons for container/inline mode
-        if(!this.options.isdialog && this.options.is_h6style)
+        if(!this.options.isdialog)
         {
             
-            this.element.find('.ent_wrapper').css({top:'36px'});
+            this._$('.ent_wrapper').css({top:'36px'});
             
-            let fele = this.element.find('.ent_wrapper:first');
+            let fele = this._$('.ent_wrapper:first');
             
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
             
             //append action buttons
-            this.toolbar =  this.element.find('#div_button-toolbar');
+            this.toolbar =  this._$('#div_button-toolbar');
             let btns = this._getActionButtons();
             for(let idx in btns){
                 this._defineActionButton2(btns[idx], this.toolbar);
@@ -92,13 +92,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         that._ignoreClear();
                     };
         
-        /*
-        if(!this.options.isdialog && this.options.is_h6style){
-            res.shift();
-        }else{
-            
-        }*/
-        
+
         return res;
     },    
         
@@ -136,7 +130,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
             let rty_ID = this.selectRecordScope.val();
 
-            this.element.find('#div_result').empty();
+            this._$('#div_result').empty();
             
             if(rty_ID>0){
 
@@ -208,7 +202,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _hideProgress: function (){
         this._super(); 
-        this.element.find('#div_search').show();  
+        this._$('#div_search').show();  
     },
     
     //
@@ -255,7 +249,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
             //get selected fields from treeview
             let selectedFields = mode_action?{}:[];
-            let tree = this.element.find('.rtt-tree').fancytree("getTree");
+            let tree = this._$('.rtt-tree').fancytree("getTree");
             let fieldIds = tree.getSelectedNodes(false);
             const len = fieldIds.length;
             
@@ -280,9 +274,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             }
         return {
                 fields: selectedFields,
-                distance: this.element.find('#distance').val(),
-                startgroup: this.element.find('#startgroup').val(),
-                sort_field: this.element.find('#sort_field').val()
+                distance: this._$('#distance').val(),
+                startgroup: this._$('#startgroup').val(),
+                sort_field: this._$('#sort_field').val()
                 };
         
     },
@@ -336,7 +330,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //treedata[0].expanded = true; //first expanded
             
             //load treeview
-            let treediv = this.element.find('.rtt-tree');
+            let treediv = this._$('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }
@@ -571,49 +565,49 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         }
 
         this._off(
-            this.element.find('#div_result').find('a[data-action-merge]'),'click');
+            this._$('#div_result').find('a[data-action-merge]'),'click');
 
         
-        this.element.find('#div_result').html(s);
+        this._$('#div_result').html(s);
         
         this._on(
-            this.element.find('#div_result').find('a[data-action-merge]'),
+            this._$('#div_result').find('a[data-action-merge]'),
             {click: this._fixDuplicatesPopup });
 
         this._on(
-            this.element.find('#div_result').find('a[data-action-ignore]'),
+            this._$('#div_result').find('a[data-action-ignore]'),
             {click: this._ignoreGroup });
 
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('.instant_merge_records'), true);
-        this._on(this.element.find('.enable_instant_merge'), {
+        window.hWin.HEURIST4.util.setDisabled(this._$('.instant_merge_records'), true);
+        this._on(this._$('.enable_instant_merge'), {
             change: (e) => {
 
                 let idx = $(e.target).val();
                 let enable = !$(e.target).is(':checked');
 
-                window.hWin.HEURIST4.util.setDisabled(this.element.find(`a[data-action-instant="${idx}"]`), enable);
+                window.hWin.HEURIST4.util.setDisabled(this._$(`a[data-action-instant="${idx}"]`), enable);
 
-                !enable ? this.element.find(`span[data-msg-idx="${idx}"]`).css('display', 'inline-block') : this.element.find(`span[data-msg-idx="${idx}"]`).hide();
-                !enable ? this.element.find(`input[name="instant_merge_${idx}"]`).show() : this.element.find(`input[name="instant_merge_${idx}"]`).hide();
+                !enable ? this._$(`span[data-msg-idx="${idx}"]`).css('display', 'inline-block') : this._$(`span[data-msg-idx="${idx}"]`).hide();
+                !enable ? this._$(`input[name="instant_merge_${idx}"]`).show() : this._$(`input[name="instant_merge_${idx}"]`).hide();
             }
         });
 
-        this._on(this.element.find('.instant_merge_records'), {
+        this._on(this._$('.instant_merge_records'), {
             click: this._instantMergeRecords
         });
 
-        this._on(this.element.find('#download_list'), {
+        this._on(this._$('#download_list'), {
             click: this._downloadList
         });
     },
 
     _fillSortField: function(){
         
-        let tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let tree = this._$('.rtt-tree').fancytree("getTree");
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
         
-        let sel = this.element.find('#sort_field');
+        let sel = this._$('#sort_field');
         let keep_val = sel.val();
         sel.empty();
         
@@ -638,7 +632,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
         let $link = $(event.target);
         let group_idx = $link.attr('data-action-instant');
-        let $parent_record = this.element.find(`input[name="instant_merge_${group_idx}"]:checked`);
+        let $parent_record = this._$(`input[name="instant_merge_${group_idx}"]:checked`);
 
         if($link.hasClass('ui-state-disabled') || $parent_record.length == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('Select the record to keep...', 3000);

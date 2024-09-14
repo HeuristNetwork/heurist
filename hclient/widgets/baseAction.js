@@ -46,7 +46,7 @@ $.widget( "heurist.baseAction", {
         
     },
 
-    _$: $,
+    _$: $, //shorthand for this.element.find
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
@@ -54,9 +54,6 @@ $.widget( "heurist.baseAction", {
     _need_load_content:true, //flag 
     
     _context_on_close:false, //variable to be passed to options.onClose event listener
-    
-    //controls
-    //.....selectRecordScope:null,
     
     // the widget's constructor
     _create: function() {
@@ -83,7 +80,7 @@ $.widget( "heurist.baseAction", {
         
         //init layout
         let that = this;
-        
+console.log(this._need_load_content, this.options.path + this.options.htmlContent);
         //load html from file
         if(this._need_load_content && this.options.htmlContent){  //load general layout      
             
@@ -92,7 +89,6 @@ $.widget( "heurist.baseAction", {
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + this.options.path + this.options.htmlContent
                         +'?t='+window.hWin.HEURIST4.util.random();
-//console.log(url);        
             
             this.element.load(url, 
             function(response, status, xhr){
@@ -103,21 +99,15 @@ $.widget( "heurist.baseAction", {
                         error_title: 'Failed to load HTML content',
                         status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                     });
-                }else{
-                    if(that._initControls()){
-                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
+                }else if(that._initControls() && 
+                        window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
-                        }        
-                    }
                 }
             });
             return;
-        }else{
-            if(that._initControls()){
-                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
+        }else if(that._initControls() &&
+                window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
-                }        
-            }
         }
 
         
@@ -163,36 +153,12 @@ $.widget( "heurist.baseAction", {
 
         }
         
-        
-        
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
         
         return true;
     },
 
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
-        this._superApply( arguments );
-    },
-
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-
-    },
-    
-    // 
-    // custom, widget-specific, cleanup.
-    _destroy: function() {
-        // remove generated elements
-       
-
-    },
-    
     //----------------------
     //
     // array of button defintions
@@ -359,106 +325,9 @@ $.widget( "heurist.baseAction", {
     //  after action event handler
     //
     _afterActionEvenHandler: function( response ){
-        
-            
+       return; 
     },
-    
-    //
-    // Requests reportProgress every t_interval ms 
-    // is_autohide 
-    //    true  - stops progress check if it returns null/empty value
-    //    false - it shows rotating(loading) image for null values and progress bar for n,count values
-    //                  in latter case _hideProgress should be called explicitely
-    //
-/*    
-    _showProgress: function ( session_id, is_autohide, t_interval ){
 
-        if(!(session_id>0)) {
-             this._hideProgress();
-             return;
-        }
-        var that = this;
-       
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-
-        this.element.find('#div_fieldset').hide();
-        this.element.find('.ent_wrapper').hide();
-        var progress_div = this.element.find('.progressbar_div').show();
-        $('body').css('cursor','progress');
-        var btn_stop = progress_div.find('.progress_stop').button({label:window.hWin.HR('Abort')});
-        
-        this._on(btn_stop,{click: function() {
-            
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
-                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    that._hideProgress();
-                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        console.error(response);                   
-                    }
-                });
-            }});
-        
-        var div_loading = progress_div.find('.loading').show();
-        var pbar = progress_div.find('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
-        pbar.progressbar({value:0});
-                
-        this._progressInterval = setInterval(function(){ 
-            
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-               
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    that._hideProgress();
-                }else{
-                    //it may return terminate,done,
-                    var resp = response?response.split(','):[];
-                    if(response=='terminate' || resp.length!=2){
-                        if(response=='terminate' || is_autohide){
-                            that._hideProgress();
-                        }else{
-                            div_loading.show();    
-                           
-                           
-                        }
-                    }else{
-                        div_loading.hide();
-                        if(resp[0]>0 && resp[1]>0){
-                            var val = resp[0]*100/resp[1];
-                            pbar.progressbar( "value", val );
-                            progressLabel.text(resp[0]+' of '+resp[1]);
-                        }else{
-                            progressLabel.text(window.hWin.HR('preparing')+'...');
-                            pbar.progressbar( "value", 0 );
-                        }
-                    }
-                    
-                    progressCounter++;
-                    
-                }
-            },'text');
-          
-        
-        }, t_interval);                
-        
-    },
-    
-    _hideProgress: function (){
-        
-        $('body').css('cursor','auto');
-        
-        if(this._progressInterval!=null){
-            
-            clearInterval(this._progressInterval);
-            this._progressInterval = null;
-        }
-        this.element.find('.progressbar_div').hide();
-        this.element.find('#div_fieldset').show();
-        
-    },
-*/   
   
 });
 

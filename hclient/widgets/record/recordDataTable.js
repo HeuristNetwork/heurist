@@ -53,7 +53,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         this._super();    
 
 
-        this.element.find('#divLoadSettings').configEntity({
+        this._$('#divLoadSettings').configEntity({
             entityName: 'defRecTypes',
             configName: 'datatable',
 
@@ -61,23 +61,23 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
 
             //divLoadSettingsName: this.element
-            divSaveSettings: this.element.find('#divSaveSettings'),  //element
+            divSaveSettings: this._$('#divSaveSettings'),  //element
             showButtons: true,
             buttons: {rename:false, remove:'delete'}, //hide rename button
             saveOnExit: true  //auto save on exit
 
         }).css('display', 'inline-block');
 
-        $(this.element.find('#divLoadSettings').find('div')[0]).css({padding: '0px 16px', width: '510px'});
+        $(this._$('#divLoadSettings').find('div')[0]).css({padding: '0px 16px', width: '510px'});
 
-        this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val(), 
+        this._$('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val(), 
             this.options.initial_cfg?this.options.initial_cfg.cfg_name:null );    
 
         if(this.options.initial_cfg){
             this.setSettings(this.options.initial_cfg);
         }
 
-        this._on(this.element.find('#selectAll'), {
+        this._on(this._$('#selectAll'), {
             click: function(e){
 
                 let treediv = that.element.find('.rtt-tree');
@@ -96,9 +96,9 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 }
             }
         });
-        this.element.find('#selectAll_container').hide();
+        this._$('#selectAll_container').hide();
 
-        this._on(this.element.find('#uncheckAll'), { //.button()
+        this._on(this._$('#uncheckAll'), { //.button()
             click: function(e){
 
                 let treediv = that.element.find('.rtt-tree');
@@ -114,11 +114,13 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             }
         });
 
-        let $ele = $(this.element.find('#divLoadSettings').find('div')[0]).children();
+        let $ele = $(this._$('#divLoadSettings').find('div')[0]).children();
         $($ele[0]).css('flex', '0 0 70px');
         $($ele[2]).css('flex', '0 0 70px');
         $($ele[1]).css('flex', '0 0 350px');
-        this.element.find('label[for="sel_saved_settings"]').css('margin-right', '17px');
+        this._$('label[for="sel_saved_settings"]').css('margin-right', '17px');
+        
+        return true;
     },
 
     //
@@ -168,8 +170,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         if(this.selectedFields && this.selectedFields.length>0){
         
-            let list = this.element.find('div.rtt-list');
-            let tree = this.element.find('div.rtt-tree').fancytree("getTree");
+            let list = this._$('div.rtt-list');
+            let tree = this._$('div.rtt-tree').fancytree("getTree");
             let that = this;
 
             tree.visit(function(node){
@@ -185,7 +187,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     }
                 });
 
-            let cont = this.element.find('div.rtt-list');
+            let cont = this._$('div.rtt-list');
             //set visibility and order   
             for(let i=0; i<that.selectedColumns.length; i++){
                 let dtid = that.selectedColumns[i].data; 
@@ -238,7 +240,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 dtid = rtid+'.'+dtid;
             }
             
-            let container = this.element.find('div.rtt-list');
+            let container = this._$('div.rtt-list');
             
             if(container.find('div[data-key="'+dtid+'"]').length==0){ //avoid duplication
                 $('<div data-code="'+code+'" data-key="'+dtid+'"'+(parentcode?(' data-parent="'+parentcode+'"'):'')+'>'
@@ -349,7 +351,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             
             
             //compare if something changed autosave
-            let ele = this.element.find('#divLoadSettings');
+            let ele = this._$('#divLoadSettings');
             let cfg_name = (ele.configEntity('instance'))?ele.configEntity( 'isSomethingChanged'):'';
             if(cfg_name===true)
             {
@@ -378,7 +380,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         //get selected fields from treeview
         let selectedFields = [];
-        let tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let tree = this._$('.rtt-tree').fancytree("getTree");
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
 
@@ -399,7 +401,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         let selectedCols = [];
         let need_id = true, need_type = true;
 
-        this.element.find('div.rtt-list > div').each(function(idx,item){
+        this._$('div.rtt-list > div').each(function(idx,item){
 
 			let $item = $(item);
             let isVisible = $item.find('input.columnVisibility').is(':checked');
@@ -461,20 +463,20 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         //reload treeview
         this._loadRecordTypesTreeView( rtyID );
         
-        this.element.find('#divSaveSettings').hide();
-        this.element.find('#divLoadSettings').hide();
+        this._$('#divSaveSettings').hide();
+        this._$('#divLoadSettings').hide();
         
         if(rtyID==''){
-            this.element.find('.rtt-tree').parent().hide();
+            this._$('.rtt-tree').parent().hide();
         }else{
-            this.element.find('.rtt-tree').parent().show();
+            this._$('.rtt-tree').parent().show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
         }
         
-        if(this.element.find('#divLoadSettings').configEntity('instance')){
-            this.element.find('#divLoadSettings').configEntity( 'updateList', rtyID );    
+        if(this._$('#divLoadSettings').configEntity('instance')){
+            this._$('#divLoadSettings').configEntity( 'updateList', rtyID );    
         }
         
         return isdisabled;
@@ -491,7 +493,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             
             this._selectedRtyID = rtyID;
             
-            this.element.find('div.rtt-list').empty();
+            this._$('div.rtt-list').empty();
             
             //generate treedata from rectype structure
             let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'] );
@@ -499,7 +501,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             treedata[0].expanded = true; //first expanded
             
             //load treeview
-            let treediv = this.element.find('.rtt-tree');
+            let treediv = this._$('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }

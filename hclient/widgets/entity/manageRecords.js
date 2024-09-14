@@ -1898,7 +1898,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             panel.empty();
                             let recs = (response.data && response.data.records)?response.data.records:[];
-                            
                             window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                                     refreshtags:true, 
                                     isdialog: false,

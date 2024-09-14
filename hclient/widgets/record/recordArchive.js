@@ -46,7 +46,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         let that = this;
         
        
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'120px'})
+        this._$('fieldset > div > .header').css({width:'80px','min-width':'120px'})
         
         this.options.resultList = $.extend(this.options.resultList, 
         {
@@ -72,7 +72,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         });                
 
         //init record list
-        this.recordList = this.element.find('#div_result');
+        this.recordList = this._$('#div_result');
         this.recordList.resultList( this.options.resultList );     
         
         this._on( this.recordList, {        
@@ -91,16 +91,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         
         
-        this._on(this.element.find('#btnStartSearch').button(),{
+        this._on(this._$('#btnStartSearch').button(),{
             'click':this._doSearch
         });
         
-        this._on(this.element.find('input'),{
+        this._on(this._$('input'),{
             'keypress':this.startSearchOnEnterPress
         });
         
         
-        this.element.find('#inpt_date').datepicker({
+        this._$('#inpt_date').datepicker({
                             showOn: "button",
                             showButtonPanel: true,
                             changeMonth: true,
@@ -232,11 +232,11 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_user').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_user').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or user', 500);
             return;
         }
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_date').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_date').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or date', 500);
             return;
         }
@@ -245,17 +245,17 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         let request = {}
     
-        if(this.element.find('#inpt_recid').val()!=''){
-            request['arc_PriKey'] = this.element.find('#inpt_recid').val();
+        if(this._$('#inpt_recid').val()!=''){
+            request['arc_PriKey'] = this._$('#inpt_recid').val();
         }
-        if(this.element.find('#inpt_user').val()!=''){
-            request['arc_ChangedByUGrpID'] = this.element.find('#inpt_user').val();
+        if(this._$('#inpt_user').val()!=''){
+            request['arc_ChangedByUGrpID'] = this._$('#inpt_user').val();
         }
-        if(this.element.find('#inpt_state').val()!=''){
-            request['arc_ContentType'] = this.element.find('#inpt_state').val();
+        if(this._$('#inpt_state').val()!=''){
+            request['arc_ContentType'] = this._$('#inpt_state').val();
         }
-        if(this.element.find('#inpt_date').val()!=''){
-            request['arc_TimeOfChange'] = this.element.find('#inpt_date').val();
+        if(this._$('#inpt_date').val()!=''){
+            request['arc_TimeOfChange'] = this._$('#inpt_date').val();
         }
         
         request['arc_Table'] = 'rec';

@@ -100,7 +100,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             //get selected fields from treeview
             let selectedFields = {};
-            let tree = this.element.find('.rtt-tree').fancytree("getTree");
+            let tree = this._$('.rtt-tree').fancytree("getTree");
             let fieldIds = tree.getSelectedNodes(false);
             const len = fieldIds.length;
             
@@ -143,9 +143,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
             
-            this.element.find('#postdata').val( JSON.stringify(request) );
-            this.element.find('#postform').attr('action', url);
-            this.element.find('#postform').submit();
+            this._$('#postdata').val( JSON.stringify(request) );
+            this._$('#postform').attr('action', url);
+            this._$('#postform').submit();
     },
     
     _initControls: function(){
@@ -160,7 +160,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         let that = this;
 
-        this.element.find('#selectAll').on("click", function(e){
+        this._$('#selectAll').on("click", function(e){
             let treediv = that.element.find('.rtt-tree');
 
             let check_status = $(e.target).is(":checked");
@@ -176,6 +176,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 });
             }
         });
+        
+        return true;
     },
     
     //
@@ -194,7 +196,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             treedata[0].expanded = true; //first expanded
             
             //load treeview
-            let treediv = this.element.find('.rtt-tree');
+            let treediv = this._$('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }
