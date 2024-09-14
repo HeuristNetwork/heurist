@@ -90,7 +90,7 @@ class DbUsrTags extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are tags to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are tags to update/delete
 
             $ugrs = $this->system->get_user_group_ids();
 
@@ -147,7 +147,7 @@ class DbUsrTags extends DbEntityBase
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
-        if(count($this->recordIDs)>0){
+        if(!empty($this->recordIDs)){
 
             $mysqli = $this->system->get_mysqli();
 
@@ -229,14 +229,14 @@ class DbUsrTags extends DbEntityBase
 
         //tags ids
         $this->recordIDs = prepareIds($this->data['tagIDs']);
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
             return false;
         }
 
         // MODE D  replace several old tags (tagIDs) to new ONE
         $this->newTagID = prepareIds(@$this->data['newTagID']);
-        if(count($this->newTagID)>0){
+        if(!empty($this->newTagID)){
             return $this->replaceTags();
         }
 
@@ -246,7 +246,7 @@ class DbUsrTags extends DbEntityBase
 
         //record ids
         $assignIDs = prepareIds($this->data['recIDs']);
-        if(count($assignIDs)==0){
+        if(empty($assignIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
             return false;
         }
@@ -263,7 +263,7 @@ class DbUsrTags extends DbEntityBase
             $assignIDs = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID, 'intval');
             $assignIDs = prepareIds($assignIDs);
-            if($assignIDs==null || count($assignIDs)==0){
+            if($assignIDs==null || empty($assignIDs)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                 return false;
             }

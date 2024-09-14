@@ -398,7 +398,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                 }
 
                 $res = array();
-                if(count($actions)>0){
+                if(!empty($actions)){
 
                     $counter = 0;
                     foreach($actions as $action){
@@ -411,7 +411,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                             if(is_bool($res2) && $res2==false){
                                 //terminated by user
-                                if(count($res)==0){
+                                if(empty($res)){
                                     $res = false;
                                 }
                                 break;
@@ -421,7 +421,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                                 if(DbUtils::setSessionVal($counter)){
                                     //terminated by user
                                     $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
-                                    if(count($res)==0){
+                                    if(empty($res)){
                                         $res = false;
                                     }
                                     break;
@@ -432,7 +432,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                 }
                 if(is_array($res)){
-                    if(!(count($res)>0)){
+                    if(!(!empty($res))){
                         $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");
                         $res = false;
                     }elseif(@$req_params['reload']==1){

@@ -451,7 +451,7 @@ class DbUtils {
                 foreach($dump_options as $opt => $val){
 
                     if($opt=='include-tables'){
-                        if(is_array($val) && count($val)>0){
+                        if(!isEmptyArray($val)){
                             $tables = $val;
                         }
                     }elseif($val===true){
@@ -461,7 +461,7 @@ class DbUtils {
                     }
                 }
 
-                if(count($tables)>0){
+                if(!empty($tables)){
                     $tables = implode(' ', $tables);//'--tables '.
                 }else{
                     $tables = '';
@@ -496,7 +496,7 @@ class DbUtils {
 
                     $msg = 'mysqldump for '.htmlspecialchars($database_name_full)
                             .' failed with a return status: '.($res2!=null?intval($res2):'unknown')
-                            .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
+                            .'. Output: '.(is_array($arr_out)&&!empty($arr_out)?print_r($arr_out, true):'');
 
                     if($verbose) {echo '<br>'.$msg;}
 
@@ -887,7 +887,7 @@ class DbUtils {
         $database_folder = $upload_root.$database_name.'/';
 
         $warnings = self::databaseCreateFolders($database_name);
-        if(is_array($warnings) && count($warnings)>0){
+        if(!isEmptyArray($warnings)){
             folderDelete($database_folder);
             self::$system->addError(HEURIST_ACTION_BLOCKED,
                                     implode('<br>',$warnings));
@@ -1173,7 +1173,7 @@ class DbUtils {
 
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== '';});
-        if(count($warnings)>0){
+        if(!empty($warnings)){
             array_unshift($warnings, "Unable to create the sub directories within the database root directory,<br>Database name: "
                         . $database_name . ",<br><br>Server url: " . HEURIST_BASE_URL . ",<br>Warnings:\n");
         }
@@ -1544,7 +1544,7 @@ class DbUtils {
         if($nodata){
             //limited set of folders
             $warnings = self::databaseCreateFolders($db_target);
-            if(is_array($warnings) && count($warnings)>0){
+            if(!isEmptyArray($warnings)){
                 folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED,
                     'Sorry, we were not able to create all file directories required by the database. '

@@ -98,7 +98,7 @@ if($arg_database=='all'){
     $arg_database = $databases;
 }else{
     $arg_database = explode(',',$arg_database);
-    if(count($arg_database)==0){
+    if(empty($arg_database)){
         exit("Required parameter -db is not defined\n");
     }
     foreach ($arg_database as $db){

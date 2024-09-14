@@ -361,7 +361,7 @@ echo $tabs0.'---'.$eol;
 if($arg_need_action){
     echo $tabs0.'Processed '.$cnt_archived.' databases. Total disk volume cleaned: '.round($tot_size/(1024*1024)).'Mb'.$eol;
     /*
-    if(count($email_list_deleted)>0){
+    if(!empty($email_list_deleted)){
         $sTitle = 'Cleanup databases on '.HEURIST_SERVER_NAME;
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.TABLE_S.implode("\n",$email_list_deleted).TABLE_E,true);
     }
@@ -375,7 +375,7 @@ echo $tabs0.'finished'.$eol;
 if(!$is_command_line) {print '</body></html>';}
 
 /*
-if(is_array($email_list) && count($email_list)>0){
+if(!isEmptyArray($email_list)){
 
 sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
     "List of inactive databases for more than a year with more than 200 records:\n"

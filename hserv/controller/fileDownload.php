@@ -108,7 +108,7 @@ if(mysql__check_dbname($db)==null){
 
         //find
         $listpaths = fileGetFullInfo($system, $fileid);
-        if(is_array($listpaths) && count($listpaths)>0){
+        if(!isEmptyArray($listpaths)){
 
             $fileinfo = $listpaths[0];//
             $filepath = USanitize::sanitizePath($fileinfo['fullPath']);//concat(ulf_FilePath,ulf_FileName as fullPath

@@ -116,7 +116,7 @@ class DbSysBugreport extends DbEntityBase
         $repro_steps = explode("\n", $repro_steps);//split on line break
         $message['type:2-4'] = $repro_steps;
 
-        if(count($repro_steps)>0){
+        if(!empty($repro_steps)){
             $sMessage = $sMessage.'<p>Reproduction steps:<br>'.implode('<br>',$repro_steps).'</p>';
         }
 

@@ -301,7 +301,7 @@ class ReportActions {
                     }
             }//for vars
 
-            if(count($replacements)>0){
+            if(!empty($replacements)){
                    $new_exp = "{".$this->array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
                    if($matches[0][$i] != $new_exp){
                         $replacements_exp[$matches[0][$i]] = $new_exp;
@@ -310,7 +310,7 @@ class ReportActions {
         }//for expressions
 
 
-        if(count($replacements_exp)>0){
+        if(!empty($replacements_exp)){
              $template = $this->array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
 

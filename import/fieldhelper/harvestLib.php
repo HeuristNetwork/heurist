@@ -111,7 +111,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
         {
 
             $files = scandir($dir);
-            if(is_array($files) && count($files)>0)
+            if(!isEmptyArray($files))
             {
                 $subdirs = array();
 
@@ -138,7 +138,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                     }
                 }
 
-                if(count($subdirs)>0){
+                if(!empty($subdirs)){
 
                     doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
                     if($is_report) {flush();}

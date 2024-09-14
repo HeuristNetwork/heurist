@@ -148,7 +148,7 @@ foreach ($databases as $idx=>$db_name){
 
 }//for databases
 
-if(!(is_array($missed) && count($missed)>0)){
+if(isEmptyArray($missed)){
     echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
 }else{
 

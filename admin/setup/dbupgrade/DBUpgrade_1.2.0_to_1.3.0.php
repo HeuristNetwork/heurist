@@ -251,27 +251,27 @@ EXP;
         //validate default values for record type structures
         $list = getInvalidDefaultValues($mysqli);
 
-        if($list && is_array(@$list['rt_defvalues']) && count($list['rt_defvalues'])>0){
+        if($list && !isEmptyArray(@$list['rt_defvalues'])){
             $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';
         }
 
 
         //adds trash groups
-        if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
+        if(!isPostiveInt(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"'))){
 $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
 .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
             $mysqli->query($query);
             $report[] = '"Trash" group has been added to rectype groups';
         }
 
-        if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
+        if(!isPostiveInt(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"'))){
 $query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
 .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
             $mysqli->query($query);
             $report[] = '"Trash" group has been added to vocabulary groups';
         }
 
-        if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
+        if(!isPostiveInt(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"'))){
 $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
             $mysqli->query($query);
@@ -403,7 +403,7 @@ function _prepare_terms($parent_id, $terms){
     $res = array();
     foreach($terms as $trm_ID=>$children){
         array_push($res, array($parent_id, $trm_ID));
-        if(is_array($children) && count($children)>0){
+        if(!isEmptyArray($children)){
             $res2 = _prepare_terms($trm_ID, $children);
             $res = array_merge($res, $res2);
         }

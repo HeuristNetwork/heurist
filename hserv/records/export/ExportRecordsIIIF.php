@@ -175,7 +175,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         //find file info by obfuscation id
         $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
 
-        if(count($info)>0){
+        if(!empty($info)){
             $label = trim(htmlspecialchars(strip_tags($info[0]['ulf_Description'])));
 
             if($label==''){
@@ -220,7 +220,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
     $label = preg_replace('/\r|\n/','\n',trim($label));
 
     //2. get file info
-    if(count($info)>0){
+    if(!empty($info)){
         //$info = fileGetFullInfo($system, $file_ids);
 
         foreach($info as $fileinfo){
@@ -475,7 +475,7 @@ CANVAS3;
 
         }//for info in fileinfo
 
-    }//count($file_ids)>0
+    }//!empty($file_ids)
 
 
     return $canvas;

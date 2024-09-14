@@ -183,7 +183,7 @@
             }
         }
 
-        if(count($parent_Rts)>0){
+        if(!empty($parent_Rts)){
             //$res['recParent'] = 'Record Parent';
             $dtKey = DT_PARENT_ENTITY;
 
@@ -366,7 +366,7 @@
                                 $constraints = $dtValue[$fi_rectypes];
                                 $constraints = explode(",", $constraints);
                                 //verify that selected record type is in this constaint
-                                if(count($constraints)>0 && in_array($rt_ID, $constraints) && !@$arr_rectypes[$recTypeId] ){
+                                if(!empty($constraints) && in_array($rt_ID, $constraints) && !@$arr_rectypes[$recTypeId] ){
                                     $arr_rectypes[$recTypeId] = $dtID;
                                 }
                         }
@@ -474,7 +474,7 @@
 
                             if($mode==4 || $mode==5){
                                 /*
-                                if($pointerRecTypeId=="" || count($rectype_ids)==0){ //TEMP
+                                if($pointerRecTypeId=="" || empty($rectype_ids)){ //TEMP
                                      $dt_title .= ' unconst';
                                 }
                                 */
@@ -483,7 +483,7 @@
                             }
 
 
-                            if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
+                            if($pointerRecTypeId=="" || empty($rectype_ids)){ //unconstrainded
 
                                 $res = __getRecordTypeTree($system, null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                 //$res['constraint'] = 0;

@@ -328,7 +328,7 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
                 $allowed_types = "all";
                 if ($constraints!=null && $constraints != "") {
                     $temp = explode(",",$constraints);//get allowed record types
-                    if (count($temp)>0) {
+                    if (!empty($temp)) {
                         $allowed_types = $temp;
                     }
                 }

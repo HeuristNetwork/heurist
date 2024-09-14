@@ -80,7 +80,7 @@ $.widget( "heurist.baseAction", {
         
         //init layout
         let that = this;
-console.log(this._need_load_content, this.options.path + this.options.htmlContent);
+
         //load html from file
         if(this._need_load_content && this.options.htmlContent){  //load general layout      
             
@@ -104,7 +104,7 @@ console.log(this._need_load_content, this.options.path + this.options.htmlConten
                             that.options.onInitFinished.call(that);
                 }
             });
-            return;
+            
         }else if(that._initControls() &&
                 window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
@@ -128,9 +128,7 @@ console.log(this._need_load_content, this.options.path + this.options.htmlConten
             
             this.popupDialog();
             
-        }else{
-            
-            if(this.options.innerTitle){ 
+        }else if(this.options.innerTitle){ 
 
                 let fele = this.element.children().get(0);
                 
@@ -148,9 +146,6 @@ console.log(this._need_load_content, this.options.path + this.options.htmlConten
                 this.closeBtn.find('.ui-icon-closethick').css({'color': 'rgb(255,255,255)'});
                 
                 $(fele).css('margin-top', '38px');
-                
-            }
-
         }
         
         //show hide hints and helps according to current level

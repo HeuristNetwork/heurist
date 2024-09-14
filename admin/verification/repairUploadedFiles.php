@@ -90,7 +90,7 @@ if(@$req_params['data']){
     if(!is_array($regs_to_remove)){
         $regs_to_remove = @$data['unused_file_remote'];
     }
-    if(is_array($regs_to_remove) && count($regs_to_remove)>0){
+    if(!isEmptyArray($regs_to_remove)){
 
         $mysqli->query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$regs_to_remove).')');
         if ( $mysqli->error ) {
@@ -118,7 +118,7 @@ if(@$req_params['data']){
     //------------------------------------------------------
     // remove missed files
     $file_ids = @$data['files_notfound'];
-    if(is_array($file_ids) && count($file_ids)>0){
+    if(!isEmptyArray($file_ids)){
 
         $mysqli->query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
         if ($mysqli->error) {

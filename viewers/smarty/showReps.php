@@ -635,7 +635,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
         $import_webfonts = '';
         $webfonts = $system->getDatabaseSetting('Webfonts');
-        if(is_array($webfonts) && count($webfonts)>0){
+        if(!isEmptyArray($webfonts)){
             $font_families = array();
 
             foreach($webfonts as $font_family => $src){
@@ -647,7 +647,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 }
                 $font_families[] = $font_family;
             }
-            if(count($font_families)>0){
+            if(!empty($font_families)){
                 $font_families[] = 'sans-serif';
                 $font_styles = 'body{font-family: '.implode(',',$font_families).'} '.$font_styles;
             }
@@ -687,7 +687,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     if($system->defineConstant('DT_CMS_EXTFILES')){
                         array_push($css_fields, DT_CMS_EXTFILES);
                     }
-                    if(count($css_fields)>0){
+                    if(!empty($css_fields)){
                         $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
                         if($record && @$record['details']){
 
@@ -785,7 +785,7 @@ EXP;
                     if($system->defineConstant('DT_CMS_EXTFILES')){
                         array_push($css_fields, DT_CMS_EXTFILES);
                     }
-                    if(count($css_fields)>0){
+                    if(!empty($css_fields)){
                         $record = recordSearchByID($system, $record_with_custom_styles,$css_fields,'rec_ID');
                         if($record && @$record['details']){
 
@@ -805,7 +805,7 @@ EXP;
                                     if(!is_array($external_files)){
                                         $external_files = array($external_files);
                                     }
-                                    if(count($external_files)>0){
+                                    if(!empty($external_files)){
                                         foreach ($external_files as $ext_file){
                                             if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
                                                 $head = $head .$ext_file;

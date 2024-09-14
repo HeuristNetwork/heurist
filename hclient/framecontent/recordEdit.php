@@ -298,7 +298,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         new_record_params['title'] = __param('d');
                         new_record_params['title'] = __param('f');//favicon
 
-                        if(count($details)>0)
+                        if(!empty($details))
                             new_record_params['details'] = $details;
                         */
 

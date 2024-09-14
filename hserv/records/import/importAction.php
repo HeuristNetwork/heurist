@@ -167,7 +167,7 @@ private static function findRecordIds($imp_session, $params){
         }
     }
 
-    if(count($mapped_fields)==0){
+    if(empty($mapped_fields)){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import CSV. Matching step failed. No mapping defined');
         return false;
     }
@@ -310,7 +310,7 @@ private static function findRecordIds($imp_session, $params){
                 //split multivalue field
                 if($multivalue_field_name!=null && $multivalue_field_value!=null && $multivalue_field_name!=='' && $multivalue_field_value!==''){
                     $values = self::getMultiValues($multivalue_field_value, $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
-                    if(!is_array($values) || count($values)==0){
+                    if(isEmptyArray($values)){
                         $values = array('');//at least one value
                     }
                 }
@@ -403,7 +403,7 @@ private static function findRecordIds($imp_session, $params){
                             $resolved_recid = null;
                         }
 
-                        if(count($disamb)==0  || $resolved_recid<0){ //nothing found - insert
+                        if(empty($disamb)  || $resolved_recid<0){ //nothing found - insert
 
                             if($ignore_rectype == 1){ // never create new records when ignoring record type
                                 continue;
@@ -458,7 +458,7 @@ private static function findRecordIds($imp_session, $params){
                 }//for multivalues
 
                 if($imp_session['csv_mvsep']=='none'){
-                    $records[$imp_id] = count($ids)>0?$ids[0]:'';
+                    $records[$imp_id] = !empty($ids)?$ids[0]:'';
                 }else{
                     $records[$imp_id] = implode($imp_session['csv_mvsep'], $ids);//IDS to be added to import table
                 }
@@ -553,7 +553,7 @@ public static function assignRecordIds($params){
             $imp_session['sequence'][$currentSeqIndex]['counts'] = array();
         }
 
-        if(count($disambiguation)>0){
+        if(!empty($disambiguation)){
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
             return $imp_session; //It is not possible to proceed because of disambiguation
         }
@@ -577,7 +577,7 @@ public static function assignRecordIds($params){
     $index = array_search($id_fieldname, $imp_session['columns']);//find it among existing columns
     if($index!==false){ //this is existing field
         $id_field  = "field_".$index;
-        $imp_session['uniqcnt'][$index] = (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'];
+        $imp_session['uniqcnt'][$index] = (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'];
     }
 
     //add new field into import table
@@ -614,7 +614,7 @@ public static function assignRecordIds($params){
         }*/
 
         array_push($imp_session['columns'], $id_fieldname );
-        array_push($imp_session['uniqcnt'], (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'] );
+        array_push($imp_session['uniqcnt'], (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'] );
 
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count );//!!!!
@@ -644,7 +644,7 @@ public static function assignRecordIds($params){
             'disambiguation'=>array()
         );
     }
-    elseif(is_array($records) && count($records)>0)
+    elseif(!isEmptyArray($records))
     {
         //reset index field to '' (means no matching - record will be ignored on update/insert)
         $updquery = "update $import_table set $id_field='' where imp_id>0";
@@ -873,7 +873,7 @@ public static function validateImport($params) {
         $mapping = array();// fieldtype => fieldname in import table
         $sel_query = array();
 
-        if(is_array($mapping_params) && count($mapping_params)>0){
+        if(!isEmptyArray($mapping_params)){
             foreach ($mapping_params as $index => $field_type) {
 
                 $field_name = "field_".$index;
@@ -960,7 +960,7 @@ public static function validateImport($params) {
                 "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".
                 "The import cannot proceed until this is corrected.","Incorrect record types", $id_field);
 
-            if(is_array($wrong_records) && count($wrong_records)>0) {
+            if(!isEmptyArray($wrong_records)) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
                 $imp_session = $wrong_records;
             }elseif($wrong_records) { //error
@@ -1037,7 +1037,7 @@ public static function validateImport($params) {
             ." LEFT JOIN Records on rec_ID=`$id_field` "
             ." WHERE `$id_field`>0 and rec_ID is null LIMIT 5000";//for preview only
             $res = mysql__select_all($mysqli, $select_query);
-            if($res && count($res)>0){
+            if(!isEmptyArra($res)){
                 if(@$imp_session['validation']['recs_insert']){
                     $imp_session['validation']['recs_insert'] = array_merge($imp_session['validation']['recs_insert'], $res);
                 }else{
@@ -1114,10 +1114,10 @@ public static function validateImport($params) {
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
 
-            if(is_array($field_name1) && count($field_name1)>0){
+            if(!isEmptyArray($field_name1)){
                 $field_name1 = $field_name1[0];
             }
-            if(is_array($field_name2) && count($field_name2)>0){
+            if(!isEmptyArray($field_name2)){
                 $field_name2 = $field_name2[0];
             }
             /*
@@ -1260,7 +1260,7 @@ public static function validateImport($params) {
     //ignore_required
 
     //1. Verify that all required field are mapped  =====================================================
-    if(count($missed)>0  &&
+    if(!empty($missed)  &&
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
@@ -1321,7 +1321,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 $cnt2 = count(@$imp_session['validation']['warning']);//now
                 if($cnt2>$cnt){
                     $wrong_recs_ids = $imp_session['validation']['warning'][$cnt]['recs_error_ids'];
-                    if(count($wrong_recs_ids)>0){
+                    if(!empty($wrong_recs_ids)){
                         $badrecs = array();
                         foreach($imp_session['validation']['recs_insert'] as $idx=>$flds){
                             if(in_array($flds[0], $wrong_recs_ids)){
@@ -1517,7 +1517,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //7. Verify geo fields, TODO: Verify geo fields for UTM
-    if(is_array($geo_fields) && count($geo_fields)>0){
+    if(!isEmptyArray($geo_fields)){
 
         foreach($geo_fields as $k=>$fld){ //for snyk
             $geo_fields[$k] = preg_replace(REGEX_ALPHANUM, "", $fld);
@@ -2152,7 +2152,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 //
 private static function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
 
-    if(is_array($newids) && count($newids)>0){
+    if(!isEmptyArray($newids)){
 
     $newids = "'".implode($csv_mvsep, $newids)."'";
 
@@ -2525,7 +2525,7 @@ public static function performImport($params, $mode_output){
     if(@$params['mapping']){    //new way
         $mapping = @$params['mapping'];// idx => fieldtype ID
 
-        if(is_array($mapping) && count($mapping)>0){
+        if(!isEmptyArray($mapping)){
             foreach ($mapping as $index => $field_type) {
                 $field_name = "field_".$index;
                 array_push($field_types, $field_type);
@@ -2701,7 +2701,7 @@ public static function performImport($params, $mode_output){
 
                         //record id is changed - save data
                         //$recordId is already set
-                        if($previos_recordId!=null && count($details)>0){ //perform import action
+                        if($previos_recordId!=null && !empty($details)){ //perform import action
 
                             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
                             if($allow_operation){
@@ -2732,7 +2732,7 @@ public static function performImport($params, $mode_output){
                         if($recordId_in_import>0){ //possible update
                             // find original record in HDB
                             $details_orig = self::findOriginalRecord($recordId_in_import);
-                            if(count($details_orig)==0){
+                            if(empty($details_orig)){
                                 //record not found - this is insert with predefined ID
                                 $recordId = -$recordId_in_import;
 
@@ -3148,7 +3148,7 @@ public static function performImport($params, $mode_output){
                 // || $recordId==null
                 //add - update record for 2 cases: idfield not defined, idfield is multivalue
                                             //$recordId==null
-                if(  ($id_field_not_defined || $ismulti_id) && count($details)>0 ){ //id field not defined - insert for each line
+                if(  ($id_field_not_defined || $ismulti_id) && !empty($details) ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
 
@@ -3190,7 +3190,7 @@ public static function performImport($params, $mode_output){
         $res->close();
 
                                         //&& $recordId!=null
-        if($id_field && count($details)>0){ //action for last record
+        if($id_field && !empty($details)){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
             if($allow_operation){

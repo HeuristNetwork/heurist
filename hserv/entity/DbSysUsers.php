@@ -168,7 +168,7 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          if($orderby!=null){
@@ -194,8 +194,8 @@ class DbSysUsers extends DbEntityBase
         $ugrID = $this->system->get_user_id();
 
         if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
+            ((!isEmptyArray($this->recordIDs))
+            || (!isEmptyArray($this->records)))){ //there are records to update/delete
 
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
 
@@ -407,7 +407,7 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in ('
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
+        if(!isEmptyArray($rec_ids_to_delete)){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) {return false;}
         }
@@ -601,13 +601,13 @@ class DbSysUsers extends DbEntityBase
 
         //user ids
         $userIDs = prepareIds(@$this->data['userIDs']);
-        if(count($userIDs)==0){
+        if(empty($userIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid user identificators');
             return false;
         }
         //group roles
         $roles = @$this->data['roles'];
-        if(!$import_from_login && (!is_array($roles) || count($roles)==0)){
+        if(!$import_from_login && (isEmptyArray($roles))){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
             return false;
         }
@@ -634,7 +634,7 @@ class DbSysUsers extends DbEntityBase
                 'It appears that all users selected to import exist in current database.');
             return false;
         }
-        if(count($userIDs_already_exists)>0){
+        if(!empty($userIDs_already_exists)){
             $userIDs = array_diff($userIDs, array_keys($userIDs_already_exists));
         }
 
@@ -720,14 +720,14 @@ class DbSysUsers extends DbEntityBase
                 foreach ($newUserIDs as $usrID){
                     array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
                 }
-                if(count($userIDs_already_exists)>0){ //apply for user that already exists
+                if(!empty($userIDs_already_exists)){ //apply for user that already exists
                     $remove = array_values($userIDs_already_exists);
                     foreach ($userIDs_already_exists as $srcID=>$usrID){
                         array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
                     }
                 }
 
-                if(is_array($remove) && count($remove)>0){
+                if(!isEmptyArray($remove)){
                     $query = 'DELETE FROM sysUsrGrpLinks WHERE ugl_GroupID='.$groupID.' AND ugl_UserID in ('
                             .implode(',',$remove).')';
                     $res = $mysqli->query($query);
@@ -754,7 +754,7 @@ class DbSysUsers extends DbEntityBase
 
         if($ret){
             $ret = 'Users imported: '.count($newUserIDs);
-            if (count($userIDs_already_exists)>0){
+            if (!empty($userIDs_already_exists)){
                 $ret = $ret.'. Users already exists: '.count($userIDs_already_exists);
             }
 

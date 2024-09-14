@@ -261,7 +261,7 @@ public static function findDupes( $params ){
     //2. equal+leven          - individual search for every loop
     //3. only  equal searches - individual search for every loop
 
-    if(count($compare_fields)>0){
+    if(!empty($compare_fields)){
 
             if($sort_field==null){
                 $sort_field = $compare_fields[0];
@@ -283,7 +283,7 @@ public static function findDupes( $params ){
             $sort_field = null;
             $startgroup = 0; //only exact search - no reason group by first chars
     }
-    if(count($exact_fields)>0){
+    if(!empty($exact_fields)){
         $compare_mode = ($compare_mode==1)?2:3;
 
         if($compare_mode==3){ //each field separately
@@ -678,7 +678,7 @@ private static function _searchInCache(){
             }
         }
 
-        if(count($group)>0){
+        if(!empty($group)){
             array_unshift($group, $curr_recid);//add current
 
             sort($group);

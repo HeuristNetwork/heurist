@@ -253,7 +253,7 @@ class DbEntitySearch
             $this->whereConditions[] = $sup_where;
         }
 
-        if(count($this->whereConditions)>0){
+        if(!empty($this->whereConditions)){
             $query .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
         }
 
@@ -315,7 +315,7 @@ class DbEntitySearch
                 $value = prepareIds($value);
             }
 
-            if(count($value)==0) {return null;}
+            if(empty($value)) {return null;}
 
             if(count($value)>1){
                 // comma-separated list of ids
@@ -443,7 +443,7 @@ class DbEntitySearch
 
         }//for or_values
 
-        if(count($or_predicates)>0){
+        if(!empty($or_predicates)){
             $res = '('.implode(' OR ', $or_predicates).')';
             return $res;
         }else{

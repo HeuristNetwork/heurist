@@ -78,7 +78,7 @@ class DbAnnotations extends DbEntityBase
             }
             $uri = $this->data['uri'];
             $items = $this->findItems_by_Canvas($uri);
-            if(is_array($items) && count($items)>0){
+            if(!isEmptyArray($items)){
 
                 foreach($items as $item){
                     $sjson['items'][] = json_decode($item, true);

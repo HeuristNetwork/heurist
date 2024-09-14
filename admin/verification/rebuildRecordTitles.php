@@ -50,7 +50,7 @@ if(@$_REQUEST['recTypeIDs']){
     $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
 
-    if(count($rty_ids)>0) {$rty_ids_list = implode(',', $rty_ids);}
+    if(!empty($rty_ids)) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
 if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on client side
@@ -197,7 +197,7 @@ if($init_client){
 print '<br><br><b>DONE</b><br><br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
     '&w=all&q=ids:'.join(',', $updates).'">Click to view updated records</a><br>&nbsp;<br>';
 
-if(count($blanks)>0){
+if(!empty($blanks)){
     print '<br>&nbsp;<br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
         '&w=all&q=ids:'.join(',', $blanks).
     '">Click to view records for which the data would create a blank title</a>'.
@@ -353,13 +353,13 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $q_updates = '';
     if(count($updates)>1000){
         $q_updates = 'sortby:-m';
-    }elseif(count($updates)>0){
+    }elseif(!empty($updates)){
         $q_updates = 'ids:'.implode(',',$updates);
     }
     $q_blanks = '';
     if(count($blanks)>2000){
         $q_blanks = 'ids:'.array_slice($blanks, 0, 2000);
-    }elseif(count($blanks)>0){
+    }elseif(!empty($blanks)){
         $q_blanks = 'ids:'.implode(',',$blanks);
     }
 

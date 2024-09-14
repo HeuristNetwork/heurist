@@ -335,7 +335,7 @@ class DbVerify {
         {
                 mysql__safe_updatess($mysqli, false);
 
-                if(is_array($trmWithWrongParents) && count($trmWithWrongParents)>0){
+                if(!isEmptyArray($trmWithWrongParents)){
 
                     $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
 
@@ -359,7 +359,7 @@ class DbVerify {
                     }
                 }
 
-                if(is_array($trmWithWrongInverse) && count($trmWithWrongInverse)>0){
+                if(!isEmptyArray($trmWithWrongInverse)){
                     $query = 'UPDATE defTerms set trm_InverseTermID=NULL '
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
 
@@ -377,7 +377,7 @@ class DbVerify {
                 mysql__safe_updatess($mysqli, true);
         }
 
-        if(count($trmWithWrongParents)==0 && count($trmWithWrongInverse)==0){
+        if(empty($trmWithWrongParents)==0 && count($trmWithWrongInverse)){
                 $resMsg .= '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
 
                 if($wasassigned1>0){
@@ -391,7 +391,7 @@ class DbVerify {
             {
 
                 $resMsg .= DIV_S;
-                if(count($trmWithWrongParents)>0){
+                if(!empty($trmWithWrongParents)){
 
                     $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
                     $cnt = 0;
@@ -405,7 +405,7 @@ class DbVerify {
                     }
                     $resStatus = false;
                 }
-                if(count($trmWithWrongInverse)>0){
+                if(!empty($trmWithWrongInverse)){
 
                     $resMsg .= '<h3>'.count($trmWithWrongInverse).' terms have wrong inverse term references</h3>';
                     $cnt = 0;
@@ -423,7 +423,7 @@ class DbVerify {
                 $resMsg .= '<br><br><button data-fix="dup_terms">Correct wrong parent and inverse term references</button></div>';
         }
 
-        if(count($trmDuplicates)>0){
+        if(!empty($trmDuplicates)){
             $resStatus = false;
 
             $resMsg .= '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
@@ -592,7 +592,7 @@ class DbVerify {
 
         $rstWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-        if (($rstWithInvalidDefaultValues && is_array($rstWithInvalidDefaultValues) && count($rstWithInvalidDefaultValues)>0)){
+        if (!isEmptyArra($rstWithInvalidDefaultValues)){
 
 
             $resMsg = <<<'HEADER'
@@ -664,7 +664,7 @@ class DbVerify {
         }
         $res->close();
 
-        if(count($bibs)==0){
+        if(empty($bibs)){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
 
             if($wasdeleted>0){
@@ -718,7 +718,7 @@ class DbVerify {
         }
         $res->close();
 
-        if(count($bibs)==0){
+        if(empty($bibs)){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to the correct record type</h3></div>';
         }
         else
@@ -870,7 +870,7 @@ ORDER BY child.dtl_RecID";
         }
 
         $wasdeleted2 = 0;
-        if(@$params['fix']==2 && count($det_ids)>0){
+        if(@$params['fix']==2 && !empty($det_ids)){
 
             $query = 'DELETE FROM recDetails WHERE dtl_ID in ('.implode(',',$det_ids).')';
             $res = $mysqli->query( $query );
@@ -887,7 +887,7 @@ ORDER BY child.dtl_RecID";
         $url_icon_placeholder = ICON_PLACEHOLDER;
         $url_icon_extlink = ICON_EXTLINK;
 
-        if(count($bibs1)==0){
+        if(empty($bibs1)){
             $resMsg .= '<div><h3>OK: All parent records are correctly referenced by their child records</h3></div>';
 
             if($wasdeleted1>1){
@@ -1928,7 +1928,7 @@ HEADER;
         }else{
             $resStatus = false;
             $fixMsg = null;
-            if(count($ids2_lng)>0){
+            if(!empty($ids2_lng)){
                 $fixMsg = '<div style="padding:20px 0px">There are '.count($ids2_lng)
                         .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
                         .' <button data-fix="geo_values">Fix longitudes</button></div>';
@@ -2137,7 +2137,7 @@ HEADER;
                 .' WHERE dtl_DetailTypeID = '. DT_WORKFLOW_STAGE
                 .' GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1');
 
-            if(is_array($recsWithManySWF) && count($recsWithManySWF)>0){
+            if(!isEmptyArray($recsWithManySWF)){
 
                 foreach($recsWithManySWF as $rec_ID => $rec){
 
@@ -2196,7 +2196,7 @@ HEADER;
             }
         }
 
-        if(count($completedRecords)==0){
+        if(empty($completedRecords)){
             $resMsg = '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
         }else{
             $resStatus = false;
@@ -2572,11 +2572,11 @@ FIXMSG
         if($cnt>0){
             $resStatus = false;
 
-            if(count($bibs_suggested)>0){
+            if(!empty($bibs_suggested)){
                 $fixMsg = '<div>To fix faulty date values as suggested, mark desired records and please click here: <button data-fix="date_values" data-selected="recCB18">Fix dates</button></div>';
                 $this->printList('Suggestions for date field corrections', $fixMsg, $bibs_suggested, 'recCB18');
             }
-            if(count($bibs_manualfix)>0){
+            if(!empty($bibs_manualfix)){
 
                 $this->printList('Invalid dates that needs to be fixed manually by a user', null, $bibs_manualfix, 'recCB19');
             }

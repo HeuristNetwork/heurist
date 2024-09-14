@@ -183,7 +183,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             $query = "UPDATE `$db_name`.defDetailTypes SET dty_OriginatingDBID = $ver WHERE dty_OriginatingDBID = 0";
             $mysqli->query($query);
         }
-        if(count($det_types)>0){
+        if(!empty($det_types)){
 
 /*
 $query = 'UPDATE '.$db_name.'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID=2'
@@ -224,7 +224,7 @@ $mysqli->query($query);
                 $mysqli->query($query);
             }
           /*
-        if(count($terms)>0){
+        if(!empty($terms)){
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=2'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
@@ -256,7 +256,7 @@ $mysqli->query($query);
 
             print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';
 
-            if(count($rec_types)>0){
+            if(!empty($rec_types)){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     print TR_S.implode(TD,$row).TR_E;
@@ -270,14 +270,14 @@ $mysqli->query($query);
                     }
                 }
             }
-            if(count($det_types)>0){
+            if(!empty($det_types)){
                 print '<tr><td colspan=5>&nbsp;</td></tr>';
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
                     print TR_S.implode(TD,$row).TR_E;
                 }
             }
-            if(count($terms)>0){
+            if(!empty($terms)){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     print TR_S.implode(TD,$row).TR_E;

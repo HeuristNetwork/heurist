@@ -126,7 +126,7 @@ class DbUsrRecPermissions extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM '.$from_table;
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();

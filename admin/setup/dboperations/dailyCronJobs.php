@@ -237,7 +237,7 @@ foreach ($databases as $idx=>$db_name){
     if($do_reminders){
         $reminders->setmysql($mysqli);
         $report = $reminders->batch_action();
-        if(count($report)>0){
+        if(!empty($report)){
             echo $tabs0.htmlspecialchars($db_name);
             echo $tabs.' reminders: ';
             foreach($report as $freq=>$cnt){
@@ -341,7 +341,7 @@ echo $text.' Db '.$last_processed_database.$eol;
                 $text.' It stopped on '.$last_processed_database);
 }
 
-if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
+if(!empty($email_list) || !empty($report_list) || !empty($url_list)){
 
     $errors = 0;
     $created = 0;

@@ -52,7 +52,7 @@ if($system->init($db, true, false)){
 
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
-        if(is_array($listpaths) && count($listpaths)>0){
+        if(!isEmptyArray($listpaths)){
             $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             $allowed_exts = array('obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae', 'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim');
@@ -132,7 +132,7 @@ if($system->init($db, true, false)){
 
                     }
                 }
-                if(count($textures)>0){
+                if(!empty($textures)){
                     $textures = ',"'.implode('","',$textures).'"';
                 }else{
                     $textures = '';

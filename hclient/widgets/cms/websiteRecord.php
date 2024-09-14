@@ -267,7 +267,7 @@ $website_languages_links = '';
 $website_languages = null;
 if(defined('DT_LANGUAGES')){
     $website_languages = @$rec['details'][DT_LANGUAGES];
-    if(is_array($website_languages) && count($website_languages)>0){
+    if(!isEmptyArray($website_languages)){
         $orig_arr = print_r($website_languages,true);
         $website_languages_codes = getTermCodes($mysqli, $website_languages);
         $res = '';

@@ -172,7 +172,7 @@ $failed_exts = array();
                 array_push($notfound, $key);
             }
         }
-        if(count($notfound)>0){
+        if(!empty($notfound)){
             print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".
             implode(", ",$notfound).
             "</b><br>Note: these fields may appear to be present, but do not have the correct origin codes ".
@@ -342,7 +342,7 @@ $failed_exts = array();
 
 
                     $files = scandir($dir);
-                    if($files && count($files)>0)
+                    if($files && !empty($files))
                     {
                         $subdirs = array();
 
@@ -365,7 +365,7 @@ $failed_exts = array();
                             }
                         }
 
-                        if(count($subdirs)>0){
+                        if(!empty($subdirs)){
                             doHarvestFieldHelper($subdirs);
                             flush();
                         }
@@ -553,7 +553,7 @@ $failed_exts = array();
 
                             $recordId = null;
                             $notFoundMessage = null;
-                            if(count($recordIds)>0){ //veify that this record exists
+                            if(!empty($recordIds)){ //veify that this record exists
                                 foreach($recordIds as $recId){
                                     $query2 = 'SELECT rec_ID FROM Records WHERE rec_ID='.$recId;
                                     $res = mysql__select_value($system->get_mysqli(),$query2);

@@ -666,7 +666,7 @@ class HQuery {
                     $wg_ids = array();
                 }
 
-                if($this->currUserID>0 && is_array($wg_ids) && count($wg_ids)>0){
+                if($this->currUserID>0 && !isEmptyArray($wg_ids)){
                     $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID ';
                     if(count($wg_ids)>1){
                         $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';
@@ -874,7 +874,7 @@ class HQuery {
         }//foreach
 
         //
-        if(count($sort_expr)>0){
+        if(!empty($sort_expr)){
             $this->sort_clause = ' ORDER BY '.implode(',',$sort_expr);
         }
 
@@ -923,7 +923,7 @@ class HLimb {
 
             if( array_key_exists($key, $this->allowed) ){ //this is limb
                 $limb = new HLimb($this->parent, $key, $value);
-                if(is_array($limb->limbs) && count($limb->limbs)>0){
+                if(!isEmptyArray($limb->limbs)){
                     //do not add empty limb
                     array_push( $this->limbs, $limb );
                 }
@@ -1005,7 +1005,7 @@ class HLimb {
             }
 
             //IMPORTANT!!!!!!!!
-            if(is_array($wheres) && count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
+            if(!isEmptyArray($wheres)){  //@TODO!  this is temporal solution!!!!!
 //if cnj is OR (any) need to execute each OR section separately - otherwise it kills server (at least for old mySQL versions (5.7))
                 $where = implode($cnj, $wheres);
             }
@@ -1145,7 +1145,7 @@ class HPredicate {
         if( in_array($this->pred_type, $this->allowed) ){
             $this->value = $value;
 
-            if(is_array($value) &&  count($value)>0 &&
+            if(!isEmptyArray($value) &&
                 !(is_numeric(@$value[0]) || is_string(@$value[0])) )
             { //subqueries
                 //special behavior for relation - extract reltypes and record ids
@@ -1215,7 +1215,7 @@ class HPredicate {
                     $value = $this->value;
 
 
-                    if(is_array($this->relation_fields) && count($this->relation_fields)>0){
+                    if(!isEmptyArray($this->relation_fields)){
                         $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);
                     }else{
                         $this->relation_fields = null;
@@ -1234,7 +1234,7 @@ class HPredicate {
                         }
                     }
                 }
-                if(is_array($value) && count($value)>0){
+                if(!isEmptyArray($value)){
 
                     $level = $this->parent->level."_".$this->parent->cnt_child_query;
                     $this->parent->cnt_child_query++;
@@ -1467,14 +1467,14 @@ class HPredicate {
         $p = '';
 
         $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
-        if(is_array($several_ids) && count($several_ids)>0){
+        if(!isEmptyArray($several_ids)){
             $this->field_id = $several_ids[0];
         }else{
             $several_ids = null;
         }
 
         $field_id_filter = '='.$this->field_id;
-        if(is_array($several_ids) && count($several_ids)>0){
+        if(!isEmptyArray($several_ids)){
             $field_id_filter = (count($several_ids)>1
                     ?SQL_IN.implode(',',$several_ids).')'
                     :'='.$several_ids[0]);
@@ -2002,7 +2002,7 @@ class HPredicate {
         }else{
             $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.SQL_WHERE.$this->query->where_clause;
             $ids = mysql__select_list2($mysqli, $sub_query);
-            if(is_array($ids) && count($ids)>0){
+            if(!isEmptyArray($ids)){
                 $val = SQL_IN.implode(',',$ids).')';
             }else{
                 $val = ' =0';
@@ -2234,7 +2234,7 @@ class HPredicate {
         $where_reverce_reltypes = '';
         $where_direct_reltypes = '';
 
-        if(is_array($this->relation_types)&& count($this->relation_types)>0){
+        if(!isEmptyArray($this->relation_types)){
 
             //reverse
             $inverse_reltype_ids = getTermInverseAll($mysqli, $this->relation_types );
@@ -2691,7 +2691,7 @@ class HPredicate {
         $this->case_sensitive = false;
 
         if(is_array($this->value)){
-            if(count($this->value)>0){
+            if(!empty($this->value)){
                 $cs_ids = getCommaSepIds($this->value);
                 if($cs_ids!=null){
                     $this->value = implode(',',$this->value);
@@ -2793,13 +2793,13 @@ class HPredicate {
             */
 
             //search for trm_ID
-            if(is_array($parent_ids) && count($parent_ids)>0 && $this->field_term==null){
+            if(!isEmptyArra($parent_ids) && $this->field_term==null){
 
                 $all_terms = null;
                 if(!$this->exact){
                     $all_terms = getTermChildrenAll($mysqli, $parent_ids);
                 }
-                if(is_array($all_terms) && count($all_terms)>0){
+                if(!isEmptyArray($all_terms)){
                     $all_terms = array_merge($parent_ids, $all_terms);
                 }else{
                     $all_terms = $parent_ids;
@@ -2876,7 +2876,7 @@ class HPredicate {
                     $ids2 = mysql__select_list2($mysqli, $res);
                     $ids = ($ids==null)?$ids2:array_unique(array_merge($ids2, $ids));
                 }
-                if(count($ids)==0){
+                if(empty($ids)){
                     $res = ($this->negate?'>0':'=0');
                 }elseif(count($ids)==1){
                     $res = ($this->negate?'<>':'=').$ids[0];
@@ -3037,7 +3037,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                                         $words[] = $word;
                                     }
                                 }
-                                if(count($words)>0){
+                                if(!empty($words)){
                                     $t_op = $op == ' -' ? ' ' : $op;
                                     $this->value = trim($t_op).implode($t_op, $words);
                                 }else{

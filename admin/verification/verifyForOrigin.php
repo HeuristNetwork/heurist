@@ -124,10 +124,10 @@
 
         //get record structure for origin
         $where = null;
-        if(is_array(@$ids['rty_RecTypeGroupID']) && count($ids['rty_RecTypeGroupID'])>0){
+        if(!isEmptyArray(@$ids['rty_RecTypeGroupID'])){
             $where = 'rty_RecTypeGroupID in ('.implode(',',$ids['rty_RecTypeGroupID']).')';
         }
-        if(is_array(@$ids['rty_ID']) && count($ids['rty_ID'])>0){
+        if(!isEmptyArray(@$ids['rty_ID'])){
             if($where) {$where = $where.' OR ';}
             $where = 'rty_ID in ('.implode(',',$ids['rty_ID']).')';
         }
@@ -363,7 +363,7 @@
                     array_push($missing, '<i'.$red_color.htmlspecialchars($f_code.'  '.$f_name).'</i>');
                 }
             }
-            if(count($missing)>0){
+            if(!empty($missing)){
                 $msg_error = $msg_error."<p style='padding-left:40px'>missing fields: ".implode(', ',$missing)."</p>";
             }
             //2. check constraints
@@ -380,13 +380,13 @@
 
                         }
                     }
-                    if(count($missing)>0){
+                    if(!empty($missing)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
                                     .' '.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .': missing constraint record types '.implode(',',$missing).'</p>';
                     }
                     /*
-                    if(count($missing2)>0){
+                    if(!empty($missing2)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing record types '.implode(',',$missing2).'</p>';
                     }
@@ -411,7 +411,7 @@
                             }
 
                         }
-                        if(count($missing)>0){
+                        if(!empty($missing)){
                                $fileds_differ_terms[$dty_Code] =
                                         "<p style='padding-left:10px'>field ".$dty_Code.' <b>'
                                         .htmlspecialchars($fields[$rty_Code][$dty_Code])
@@ -426,7 +426,7 @@
                     }
 
                     /*heck term presence in this db
-                    if(count($missing2)>0){
+                    if(!empty($missing2)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing terms '.implode(',',$missing2).'</p>';
                     }
@@ -444,8 +444,8 @@
         }//for record types
 
 
-        $has_issues = ($smsg!='' || count($fileds_differ_terms)>0 || count($fileds_missed_rectypes)>0 ||
-            (@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0));
+        $has_issues = ($smsg!='' || !empty($fileds_differ_terms) || !empty($fileds_missed_rectypes) ||
+            (@$_REQUEST['termlists']==1 && !empty($fileds_missed_terms)));
 
 
         //
@@ -466,14 +466,14 @@
 
             if($smsg) {print $smsg;} //main error message
 
-            if(count($fileds_differ_terms)>0){
+            if(!empty($fileds_differ_terms)){
                 print implode('',$fileds_differ_terms);
             }
-            if(@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0){
+            if(@$_REQUEST['termlists']==1 && !empty($fileds_missed_terms)){
                 print "<p style='padding-left:10px'>Missing terms (they are in defined the list of enumeration fields but not found in the terms table): "
                     .implode(', ',$fileds_missed_terms).'</p>';
             }
-            if(count($fileds_missed_rectypes)>0){
+            if(!empty($fileds_missed_rectypes)){
                 print "<p style='padding-left:10px'>Missing record types (however they are present in the constraint of record pointer field(s)):</p>"
                     ."<p style='padding-left:40px'>"
                     .implode('<br>',$fileds_missed_rectypes).'</p>';

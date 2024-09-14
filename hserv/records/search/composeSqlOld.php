@@ -259,7 +259,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
                 $where2_conj = SQL_AND;
             }
 
-            if(is_array($wg_ids) && count($wg_ids)>0){
+            if(!isEmptyArray($wg_ids)){
                 $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
                 if(count($wg_ids)>1){
                     $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';
@@ -287,7 +287,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             $wg_ids = array();
         }
 
-        if(is_array($wg_ids) && count($wg_ids)>0 && $currUserID>0){
+        if(!isEmptyArra($wg_ids) && $currUserID>0){
             //for hidden
             $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
             if(count($wg_ids)>1){
@@ -492,7 +492,7 @@ class Query {
         preg_match_all('/"[^"]+"|(&&|\\bAND\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
         $q_bits = array();
         $offset = 0;
-        if(count($matches[1])>0){
+        if(!empty($matches[1])){
             foreach($matches[1] as $entry){
                 if(is_array($entry)){ //
                     array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
@@ -516,7 +516,7 @@ class Query {
         // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
         preg_match_all('/"[^"]+"|(&&|\\ OR \\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
         $offset = 0;
-        if(count($matches[1])>0){
+        if(!empty($matches[1])){
 
             foreach($matches[1] as $entry){
                 if(is_array($entry)){ //
@@ -1474,7 +1474,7 @@ class FieldPredicate extends Predicate {
 
         //nests are inside parentheses
         preg_match('/\((.+?)(?:\((.+)\))?\)/', $this->value, $matches);
-        if(count($matches)>0 && $matches[0]==$this->value){
+        if(!empty($matches) && $matches[0]==$this->value){
 
             $this->nests = array();
             for ($k=1; $k < count($matches);++$k) {
@@ -2578,7 +2578,7 @@ class AllLinksPredicate  extends Predicate {
             if(count($ids)>1){
                 $add_where1 = $add_where1.' and rl1.rl_TargetID in ('.implode(',',$ids).')';
                 $add_where2 = $add_where2.' and rl2.rl_SourceID in ('.implode(',',$ids).')';
-            }elseif(count($ids)>0){
+            }elseif(!empty($ids)){
                 $add_where1 = $add_where1.' and rl1.rl_TargetID = '.$ids[0];
                 $add_where2 = $add_where2.' and rl2.rl_SourceID = '.$ids[0];
             }else{

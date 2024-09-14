@@ -88,7 +88,7 @@ class DbRecThreadedComments extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) &&  count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -142,7 +142,7 @@ class DbRecThreadedComments extends DbEntityBase
     public function batch_action(){
 
         $recordIDs = prepareIds($this->data['recIDs']);
-        if(count($recordIDs)>0){
+        if(!empty($recordIDs)){
             //find record by ids  - todo
 
         }

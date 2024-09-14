@@ -307,8 +307,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     $csv_dateformat = @$params["csv_dateformat"];
 
-    $check_datefield = (is_array($datefields) && count($datefields)>0);
-    $check_keyfield = (is_array($keyfields) && count($keyfields)>0);
+    $check_datefield = (!isEmptyArray($datefields));
+    $check_keyfield = (!isEmptyArray($keyfields));
 
     $len = 0;
     $header = null;
@@ -726,7 +726,9 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 'fields'=>$header, 'values'=>$parsed_values );
     }else{
 
-        if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
+        if( !empty($err_colnums) 
+            || !empty($err_encoding) 
+            || !empty($err_keyfields)){
             //we have errors - delete temporary prepared file
             if(file_exists($prepared_filename)) {unlink($prepared_filename);}
 
@@ -1174,7 +1176,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
         return false;
     }
 
-    if(count($warnings)>0){
+    if(!empty($warnings)){
         $session['load_warnings'] = $warnings;
     }
     return $session;

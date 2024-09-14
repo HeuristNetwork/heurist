@@ -97,7 +97,7 @@ if(!@$_REQUEST['mail']){
 
     $rep = '';
 
-    if(count($not_exists)>0){
+    if(!empty($not_exists)){
         $rep.='<h3>MISSED HEURIST_FILESTORE_DIR for databases:</h3>';
 
         foreach ($not_exists as $db_name){
@@ -105,7 +105,7 @@ if(!@$_REQUEST['mail']){
         }
         $rep.='<hr>';
     }
-    if(count($not_writeable)>0){
+    if(!empty($not_writeable)){
         $rep.='<h3>NOT WRITEABLE HEURIST_FILESTORE_DIR for databases:</h3>';
 
         foreach ($not_writeable as $db_name){
@@ -114,7 +114,7 @@ if(!@$_REQUEST['mail']){
         $rep.='<hr>';
     }
 
-    if(count($not_exists2)>0){
+    if(!empty($not_exists2)){
         $rep.='<h3>MISSED subfolders</h3>';
 
         foreach ($not_exists2 as $dir){
@@ -126,7 +126,7 @@ if(!@$_REQUEST['mail']){
         }
         $rep.='<hr>';
     }
-    if(count($not_writeable2)>0){
+    if(!empty($not_writeable2)){
         $rep.='<h3>NOT WRITEABLE subfolders</h3>';
 
         foreach ($not_writeable2 as $dir){

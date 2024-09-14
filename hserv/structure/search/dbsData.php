@@ -400,7 +400,7 @@
             $rty_IDs = prepareIds($rty_IDs);
 
             $labels = array();
-            if (is_array($rty_IDs) && count($rty_IDs)>0) {
+            if (!isEmptyArray($rty_IDs)) {
                     $query = $query.' where rty_ID in ('.implode(',', $rty_IDs).')';
             }
         }
@@ -420,7 +420,7 @@
         $labels = array();
         if ($rty_IDs) {
             $query = 'select rty_ID from defRecTypes';
-            if(is_array($rty_IDs) && count($rty_IDs)>0){
+            if(!isEmptyArray($rty_IDs)){
                 $query = $query . ' where rty_ID in ('.implode(',', $rty_IDs).')';
             }
             $labels = mysql__select_list2($mysqli, $query);
@@ -995,7 +995,7 @@ function dbs_GetRectypeConstraint($system) {
         }else{
 
             foreach($tree as $pID => $children){
-                if(is_array($children) && count($children)>0){
+                if(!isEmptyArray($children)){
                     $res = getTermInTree2($children, $term_id);
                     if($res!=null){
                         return $res;
@@ -1238,7 +1238,7 @@ function dbs_GetRectypeConstraint($system) {
             foreach ($childIDs as $childID => $n) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
-                    if (is_array($terms[$childID]) && count($terms[$childID])>0) {//yes then attach it and it's children's branches
+                    if (!isEmptyArray($terms[$childID])) {//yes then attach it and it's children's branches
                         $terms = __attachChild($system, $parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);

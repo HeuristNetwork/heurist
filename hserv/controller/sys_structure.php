@@ -141,7 +141,7 @@ ini_set('max_execution_time', 0);
             //
             // send error report about terms that were failed
             //
-            if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
+            if(@$response['report']['broken_terms'] && !empty($response['report']['broken_terms'])){
 
                 $sText = 'Target database '.HEURIST_DBNAME;
                 $sText .= ("\n".'Source database '.intval(@$req_params["databaseID"]));

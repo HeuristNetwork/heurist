@@ -143,7 +143,7 @@ $mysqli = $system->get_mysqli();
 
         if($is_found){
             print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';
-            if(is_array($rec_types) && count($rec_types)>0){
+            if(!isEmptyArray($rec_types)){
                 print '<tr><td colspan=4><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     //snyk does not see htmlspecialchars above
@@ -151,7 +151,7 @@ $mysqli = $system->get_mysqli();
                     print TR_S.$list.TR_E;
                 }
             }
-            if(is_array($det_types) && count($det_types)>0){
+            if(!isEmptyArray($det_types)){
                 print '<tr><td colspan=4><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
                     //snyk does not see htmlspecialchars above
@@ -159,7 +159,7 @@ $mysqli = $system->get_mysqli();
                     print TR_S.$list.TR_E;
                 }
             }
-            if(is_array($terms) && count($terms)>0){
+            if(!isEmptyArray($terms)){
                 print '<tr><td colspan=4><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     //snyk does not see htmlspecialchars above

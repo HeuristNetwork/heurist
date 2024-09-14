@@ -76,7 +76,7 @@ if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master 
 $bib_ids = prepareIds(filter_var(@$_REQUEST['bib_ids'], FILTER_SANITIZE_STRING));
 $bib_ids_list = implode(',', $bib_ids);
 
-if ( count($bib_ids)==0 ){
+if ( empty($bib_ids) ){
     redirectURL(ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
     exit;
 }
@@ -774,7 +774,7 @@ function do_fix_dupe()
         }elseif(intval($value)>0){
             $prepared_values[] = intval($value);
         }
-        if(count($prepared_values)>0){
+        if(!empty($prepared_values)){
             switch (strtolower($matches[1])){
                 case 'add':
                     $add_dt_ids[$matches[2]] = $prepared_values;
@@ -901,7 +901,7 @@ function do_fix_dupe()
     // otherwise mark it for update to point to the master record
     if($dup_bkm_UGrpIDs){
         foreach ($dup_bkm_UGrpIDs as $dup_bkm_ID => $dup_bkm_UGrpID){
-            if (is_array($master_bkm_UGrpIDs) && count($master_bkm_UGrpIDs)>0 && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs))
+            if (!isEmptyArray($master_bkm_UGrpIDs) && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs))
             {
                 array_push($delete_bkm_IDs, $dup_bkm_ID);
                 $dup_delete_bkm_ID_to_master_bkm_id[$dup_bkm_ID] = $matching_master_bkm_ID;

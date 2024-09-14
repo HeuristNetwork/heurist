@@ -236,7 +236,7 @@
 
                 }
 
-                if(count($mapping)>0){
+                if(!empty($mapping)){
 
                     if(!@$mapping[DT_NAME]){
                         $mapping[DT_NAME] = 'name';
@@ -268,7 +268,7 @@
                             $geojson_adapter = new GeoJSON();
                             $json = $geojson_adapter->write($geom, true);
 
-                            if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
+                            if(!isEmptyArray(@$json['coordinates'])){
 
                                 if(@$params['simplify']){
 

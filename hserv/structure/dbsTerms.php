@@ -283,7 +283,7 @@ class DbsTerms
         }else{
 
             $children = @$this->data['trm_Links'][$parent_id];
-            if(is_array($children) && count($children)>0){
+            if(!isEmptyArray($children)){
 
                 foreach($children as $trm_ID){
 
@@ -309,7 +309,7 @@ class DbsTerms
                     }
 
                     $res2 = $this->treeData($trm_ID, $mode);
-                    if(is_array($res2) && count($res2)>0){
+                    if(!isEmptyArray($res2)){
                         if($mode==1){
                             //tree
                             $res[$trm_ID] = $res2;
@@ -333,7 +333,7 @@ class DbsTerms
 
         if($parent_id>0){
             $children = $this->treeData($parent_id, 3);//ids
-            if(count($children)>0){
+            if(!empty($children)){
                 $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
 
@@ -406,7 +406,7 @@ class DbsTerms
 
                     break;
 
-                }elseif(is_array($children) && count($children)>0){
+                }elseif(!isEmptyArray($children)){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -494,7 +494,7 @@ class DbsTerms
         $name = removeLastNum(trim($term_value));
         $found = 0;
 
-        if(count($same_level_values)>0)
+        if(!empty($same_level_values))
         foreach ($same_level_values as $value){
                 $name1 = removeLastNum(trim($value));
                 if(strcasecmp($name, $name1)==0){

@@ -132,7 +132,7 @@ $is_csv = (@$_REQUEST['html']!=1);
 
 
             $nonTerms = getTermsFromFormat(@$row[2]);
-            $is_idis = (is_array($nonTerms) && count($nonTerms)>0);
+            $is_idis = (!isEmptyArray($nonTerms));
             if($is_idis){
                 $cnt3++;
             }

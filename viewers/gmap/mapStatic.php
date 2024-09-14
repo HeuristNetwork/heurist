@@ -127,7 +127,7 @@
 
                                             ///$json = $geom->out('json');
                                             // $geom->numGeometries()
-                                            if(count($json['coordinates'])>0){
+                                            if(!empty($json['coordinates'])){
                                                 if($json['type']=='Polygon'){
                                                     foreach($json['coordinates'] as $points){
                                                         array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
@@ -158,7 +158,7 @@
         }
 	}
 
-	if(is_array($mapobjects) && count($mapobjects)>0){
+	if(!isEmptyArray($mapobjects)){
 
         if(USE_GOOGLE){
 
@@ -369,7 +369,7 @@
                         }
                     }else{
                         $shapes_cnt++;
-                        if(is_array($points2) && count($points2)>0){
+                        if(!isEmptyArray($points2)){
                             $verties_cnt = $verties_cnt + count($points2);
                             foreach ($points2 as $point) {
                                 $points_to_encode[] = $point[0];

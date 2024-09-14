@@ -1279,7 +1279,7 @@ class System {
     */
     public function is_member($ugs){
 
-        if($ugs==0 || $ugs==null || (is_array($ugs) && count($ugs)==0)){
+        if($ugs==0 || isEmptyArray($ugs)){
             return true;
         }
 
@@ -1935,10 +1935,14 @@ class System {
             if($rawdata){
                 $current_version = explode("|", $rawdata);
 
-                if (count($current_version)>0)
+                if (!empty($current_version))
                 {
                     $curver = explode(".", $current_version[0]);
-                    if( count($curver)>=2 && intval($curver[0])>0 && is_numeric($curver[1]) && intval($curver[1])>=0 ){
+                    if( count($curver)>=2 
+                        && intval($curver[0]) > 0 
+                        && is_numeric($curver[1]) 
+                        && intval($curver[1])>=0 )
+                    {
                         $version_last_check = $current_version[0];
                     }
                 }
@@ -2073,7 +2077,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 }
             }
 
-            if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
+            if($this->send_email_on_error==1 && !empty($logs_to_be_emailed)){
 
                 $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
                 $msg = $msgTitle;

@@ -623,7 +623,7 @@ $mysqli->kill($thread_id);
 
         $rec_ID = prepareIds($rec_ID);
 
-        if(count($rec_ID)>0){
+        if(!empty($rec_ID)){
 
             if (substr($table_prefix, -1) !== '_') {
                 $table_prefix = $table_prefix.'_';
@@ -958,7 +958,7 @@ $mysqli->kill($thread_id);
 
                 if ($res2 != 0) { // $shell_res is either empty or contains $arr_out as a string
                     $error = 'Error. Shell returns status: '.($res2!=null?intval($res2):'unknown')
-                        .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
+                        .'. Output: '.(!isEmptyArray($arr_out)?print_r($arr_out, true):'');
                 }else{
                     $res = true;
                 }

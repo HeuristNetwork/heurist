@@ -261,13 +261,13 @@ class DbDefRecStructure extends DbEntityBase
 
         //dty_ID
         $this->recordIDs = prepareIds(@$this->data['recID']);
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field identificators');
             return false;
         }
 
         $orders = prepareIds(@$this->data['orders'], true);
-        if(count($orders)==0){
+        if(empty($orders)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for fields order');
             return false;
         }
@@ -369,7 +369,7 @@ class DbDefRecStructure extends DbEntityBase
                 $order = isset($this->data['order']) ? $this->data['order'] : $order + 10;
         }
 
-        if(count($records)>0){
+        if(!empty($records)){
             $this->data['fields'] = $records;
             $this->is_addition = true;
             return $this->save();

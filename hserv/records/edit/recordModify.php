@@ -771,15 +771,15 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".RT_RELATION);
 
         $relRecs = recordGetRelationship($system, $recID, null, array('detail'=>'ids'));
-        if(is_array($relRecs) && count($relRecs)>0){
+        if(!isEmptyArray($relRecs)){
             $relRecsIDs = $relRecs;
         }
         $relRecs = recordGetRelationship($system, null, $recID, array('detail'=>'ids'));
-        if(is_array($relRecs) && count($relRecs)>0){
+        if(!isEmptyArray($relRecs)){
             $relRecsIDs = array_merge($relRecsIDs, $relRecs);
         }
         //reset temporary flag for all relationship records
-        if(is_array($relRecsIDs) && count($relRecsIDs)>0){
+        if(!isEmptyArray($relRecsIDs)){
             foreach($relRecsIDs as $relID){
                 $res = recordUpdateTitle($system, $relID, $mask, 'Title Mask for Relationship not defined');
             }
@@ -789,7 +789,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         //recordGetLinkedRecords - get all linked and related records and update them
         $links = recordGetLinkedRecords($system, $recID);
-        if(is_array($links) && count($links)>0){
+        if(!isEmptyArray($links)){
             //find title masks
             $links_rectypes = array_unique(array_values($links));
             $masks = mysql__select_assoc2($mysqli,'select rty_ID, rty_TitleMask from defRecTypes where rty_ID in ('
@@ -872,7 +872,7 @@ function recordDelete($system, $recids, $need_transaction=true,
     }
 
     $recids = prepareIds($recids);
-    if(count($recids)>0){
+    if(!empty($recids)){
 
         if(count($recids)>100){
             ini_set('max_execution_time', '0');
@@ -885,7 +885,7 @@ function recordDelete($system, $recids, $need_transaction=true,
         $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
         .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
 
-        if($recids==null || count($recids)==0){
+        if($recids==null || empty($recids)){
         $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
         return false;
         }
@@ -916,11 +916,11 @@ function recordDelete($system, $recids, $need_transaction=true,
         }
 
         //find reverse links to given set of ids
-        if($check_source_links && count($allowed_recids)>0){
+        if($check_source_links && !empty($allowed_recids)){
             $links = recordSearchRelated($system, $allowed_recids, -1, 'ids', 1);
 
             if($links['status']==HEURIST_OK && @$links['data']['reverse']!=null
-                && is_array(@$links['data']['reverse']) && count($links['data']['reverse'])>0){
+                && !isEmptyArray(@$links['data']['reverse'])){
                 return array('status'=>HEURIST_OK,
                     'data'=> array( 'source_links_count'=>count($links['data']['reverse']),
                         'source_links'=>implode(',',$links['data']['reverse']) ));
@@ -1028,7 +1028,7 @@ function recordGetIncrementedValue($system, $params){
 
         //1. get detail type
         $res = mysql__select_list($mysqli, 'defDetailTypes','dty_Type','dty_ID='.$dt_ID);
-        if(is_array($res) && count($res)>0){
+        if(!isEmptyArray($res)){
             $isNumeric = ($res[0]!='freetext');
 
             //2. get max value for numeric and last value for non numeric
@@ -1134,7 +1134,7 @@ function recordUpdateOwnerAccess($system, $params){
     $recids = @$params['ids'];
 
     $recids = prepareIds($recids);
-    if(count($recids)>0){
+    if(!empty($recids)){
 
         if(@$params['OwnerUGrpID']=='current_user'){
             $params['OwnerUGrpID'] = $system->get_user_id();
@@ -1143,7 +1143,7 @@ function recordUpdateOwnerAccess($system, $params){
         $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
         $access = @$params['NonOwnerVisibility'];
 
-        if((!is_array($owner_grps) || count($owner_grps)==0 || $access==null) && !$system->is_admin()){
+        if((isEmptyArray($owner_grps) || $access==null) && !$system->is_admin()){
             return $system->addError(HEURIST_INVALID_REQUEST, 'Neither owner nor visibility parameters defined');
         }
 
@@ -1155,7 +1155,7 @@ function recordUpdateOwnerAccess($system, $params){
             $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
             $recids = prepareIds($recids);//for snyk
-            if(!is_array($recids) || count($recids)==0){
+            if(isEmptyArray($recids)){
                 return $system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
             }
         }
@@ -1461,7 +1461,7 @@ function deleteOneRecord($system, $id, $rectype){
         }
 
 
-        if(is_array($child_records) && count($child_records)>0){
+        if(!isEmptyArray($child_records)){
             foreach ($child_records as $recid => $rectypeid) {
                 $res = deleteOneRecord($system, $recid, $rectypeid);
                 if( array_key_exists('error', $res) ){
@@ -1549,7 +1549,7 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
         $query = "DELETE FROM recDetails WHERE dtl_Value=$parent_id AND dtl_DetailTypeID=".DT_PARENT_ENTITY;
 
-        if(is_array($recids) && count($recids)>0){
+        if(!isEmptyArray($recids)){
             $recids = prepareIds($recids);//redundant for snyk
             $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
         }
@@ -1583,10 +1583,10 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             .'AND rst_DetailTypeID=dty_ID';
 
             $pointers = mysql__select_assoc2($mysqli, $query);
-            if(is_array($pointers) && count($pointers)>0){
+            if(!isEmptyArray($pointers)){
                 foreach($pointers as $dt_ID=>$ptr){
                     if($ptr) {$ptr = explode(',',$ptr);}
-                    if(count($ptr)>0 && in_array($child_rectype, $ptr)){
+                    if(!empty($ptr) && in_array($child_rectype, $ptr)){
                         $detailTypeId = $dt_ID;
                         break;
                     }
@@ -1646,7 +1646,7 @@ function addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace){
         $target_IDs = mysql__select_assoc2($mysqli, 'SELECT rl_DetailID, rl_TargetID FROM recLinks WHERE rl_SourceID='.$source_id
                 //.' AND rl_TargetID='.$target_id
                 .' AND rl_DetailTypeID='.$dty_ID);
-        if(count($target_IDs)>0){
+        if(!empty($target_IDs)){
             if(in_array($target_id, $target_IDs)){
                 return 0; //such link already exists
             }
@@ -1731,7 +1731,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 
     //$ownerid_old = @$record["rec_OwnerUGrpID"];//current ownership
     //new owners are not defined - take current one
-    if(!is_array($owner_grps) || count($owner_grps)==0 || !($owner_grps[0]>=0)){
+    if(isEmptyArray($owner_grps) || !($owner_grps[0]>=0)){
         $owner_grps = $current_owner_groups;
     }
     if(array_search(0, $owner_grps, true)!==false){ //there is "everyone"
@@ -1826,12 +1826,12 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
     $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs) <> 0';
     $field_ids = mysql__select_list2($mysqli, $query);
 
-    if(is_array($field_ids) && count($field_ids)>0){
+    if(!isEmptyArray($field_ids)){
 
         $query = 'SELECT rst_RecTypeID WHERE rst_CalcFunctionID IN ('.implode(',',$field_ids).')';
         $rectype_ids = mysql__select_list2($mysqli, $query);
 
-        if(is_array($rectype_ids) && count($rectype_ids)>0){
+        if(!isEmptyArray($rectype_ids)){
             recordUpdateCalcFields($system, null, $rectype_ids);
         }
     }
@@ -1849,7 +1849,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
     $rectypes = null;
     $rec_count = 0;
 
-    if($recID!=null && is_array($recID) && count($recID)>0){ //for selected set of records
+    if($recID!=null && !isEmptyArray($recID)){ //for selected set of records
         //group records by rectype
         $query = 'select rec_RecTypeID, rec_ID from Records where rec_ID in ('
                         .implode(',',$recID).') ORDER BY rec_RecTypeID';
@@ -1894,7 +1894,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rty_ID = prepareIds($rty_ID);
         }
 
-        if(!is_array($rty_ID) || count($rty_ID)==0){
+        if(isEmptyArray($rty_ID)){
             //all rectypes - entire database
             $rty_ID = mysql__select_list2($mysqli, 'SELECT rty_ID FROM defRecTypes');
             $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records WHERE (NOT rec_FlagTemporary)');
@@ -1936,7 +1936,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             .' AND cfn_ID=rst_CalcFunctionID');
 
         //there are not calculation fields for this record type
-        if(!is_array($formulae) || count($formulae)==0){
+        if(isEmptyArray($formulae)){
 
             if($record_ids=='*'){
                $cnt = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
@@ -2071,12 +2071,12 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
 
         if(count($updates)>1000){
             $q_updates = 'ids:'.array_slice($updates, 0, 1000);
-        }elseif(count($updates)>0){
+        }elseif(!empty($updates)){
             $q_updates = 'ids:'.implode(',',$updates);
         }
         if(count($cleared)>1000){
             $q_cleared = 'ids:'.array_slice($cleared, 0, 1000);
-        }elseif(count($cleared)>0){
+        }elseif(!empty($cleared)){
             $q_cleared = 'ids:'.implode(',',$cleared);
         }
 
@@ -2385,7 +2385,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     $details2 = array();
     foreach ($details as $dtyID => $pairs) {
 
-        if((is_array($pairs) && count($pairs)==0) || $pairs=='') {continue;} //empty value
+        if(isEmptyArray($pairs) || $pairs=='') {continue;} //empty value
 
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);
@@ -2792,7 +2792,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                 $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
                 $dval['dtl_Geo'] = $dtl_Geo;
                 $dval['dtl_HideFromPublic'] = $dtl_HideFromPublic;
-                if(count($splitValues)>0){
+                if(!empty($splitValues)){
                     foreach($splitValues as $val){
                         $dval['dtl_Value'] = $val;
                         array_push($insertValues, $dval);
@@ -2859,7 +2859,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
 
     }else{
 
-        if (is_array($det_required) && count($det_required)>0) {
+        if (!isEmptyArray($det_required)) {
 
             $missed_req_dty = array_keys($det_required);
             foreach($missed_req_dty as $dty_ID){
@@ -2874,7 +2874,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
             }
         }
 
-        if (is_array($det_required) && count($det_required)>0) {
+        if (!isEmptyArray($det_required)) {
             $isMulti = (count($det_required)>1);
             $query = 'SELECT rty_Name FROM defRecTypes WHERE rty_ID='.$rectype;
             $rty_Name = mysql__select_value($mysqli, $query);
@@ -3028,7 +3028,7 @@ function recordDuplicate($system, $id){
             'SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID='.$recTypeID
             .' AND rst_DefaultValue="increment_new_values_by_1"');
 
-        if(is_array($dty_IDs) && count($dty_IDs)>0){
+        if(!isEmptyArray($dty_IDs)){
             foreach($dty_IDs as $dty_ID){
                 //2. get new incremented value
                 $res = recordGetIncrementedValue($system, array('rtyID'=>$recTypeID, 'dtyID'=>$dty_ID));

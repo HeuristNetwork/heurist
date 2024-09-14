@@ -128,7 +128,7 @@ $mysqli = $system->get_mysqli();
 
             print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';
 
-            if(count($rec_types)>0){
+            if(!empty($rec_types)){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     //snyk does not see htmlspecialchars above
@@ -136,7 +136,7 @@ $mysqli = $system->get_mysqli();
                     print TR_S.$list.TR_E;
                 }
             }
-            if(count($det_types)>0){
+            if(!empty($det_types)){
                 print '<tr><td colspan=5>&nbsp;</td></tr>';
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
@@ -145,7 +145,7 @@ $mysqli = $system->get_mysqli();
                     print TR_S.$list.TR_E;
                 }
             }
-            if(count($terms)>0){
+            if(!empty($terms)){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     //snyk does not see htmlspecialchars above

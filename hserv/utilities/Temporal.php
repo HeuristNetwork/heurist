@@ -405,7 +405,7 @@ class Temporal {
                     if(is_double($timespan)){ //200.15
                         $value = strval(intval($timespan));
                         $timespan = null;
-                    }elseif(is_array($timespan) && count($timespan)>0 && is_numeric(@$timespan[0])){
+                    }elseif(!isEmptyArra($timespan) && is_numeric(@$timespan[0])){
                         if(count($timespan)==1){
                             $value = strval(intval($timespan[0]));
                             $timespan = null;
@@ -1638,7 +1638,7 @@ class Temporal {
                     }
                 }
 
-                if(count($supinfo)>0){
+                if(!empty($supinfo)){
                     $res2 = $res2 . ' (' . implode(', ', $supinfo) . ')';
                 }
 

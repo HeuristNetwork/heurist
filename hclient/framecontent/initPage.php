@@ -83,7 +83,7 @@ if(defined('IS_INDEX_PAGE')){
     $missed = hasAllTables($system->get_mysqli());
 
     if(is_array($missed)){
-        if(count($missed)>0){
+        if(!empty($missed)){
             $message = 'Database <b>'.HEURIST_DBNAME
             .'</b> is missing the following tables:<br><br><i>'
             .implode(', ',$missed)

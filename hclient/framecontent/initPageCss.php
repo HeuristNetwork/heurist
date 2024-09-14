@@ -60,7 +60,7 @@ $font_styles = '';
 if(isset($system) && $system->is_inited()){
 
     $webfonts = $system->getDatabaseSetting('Webfonts');
-    if(is_array($webfonts) && count($webfonts)>0){
+    if(!isEmptyArray($webfonts)){
         foreach($webfonts as $font_family => $src){
             $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
             if(strpos($src,'@import')===0){
@@ -76,7 +76,7 @@ if(isset($system) && $system->is_inited()){
 if(!empty($font_styles)){ // add extra font-faces
     echo "<style> $font_styles </style>";
 
-    if(count($font_families)>0){
+    if(!empty($font_families)){
         $font_families[] = 'sans-serif';
         echo '<style>body,.ui-widget,.ui-widget input,.ui-widget textarea,.ui-widget select{font-family: '
             .implode(',',$font_families).'}</style>';

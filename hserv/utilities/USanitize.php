@@ -76,7 +76,7 @@ class USanitize {
         {
             if($v!=null){
 
-                if(is_array($v) && count($v)>0){
+                if(!isEmptyArray($v)){
                     USanitize::sanitizeRequest($v);
 
                 }else{
@@ -200,7 +200,7 @@ class USanitize {
         {
             if($v!=null){
 
-                if(is_array($v) && count($v)>0){
+                if(!isEmptyArray($v)){
                     USanitize::stripScriptTagInRequest($v);
                 }else{
                     $v = trim($v);//so we are sure it is whitespace free at both ends

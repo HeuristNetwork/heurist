@@ -76,12 +76,12 @@ if(!@$_REQUEST['mail']){
     }
     $cnt = 0;
     $cnt_del = 0;
-    if(count($orphaned)>0){
+    if(!empty($orphaned)){
 
         $to_delete = null;
         if(@$_REQUEST['dbs']){
             $to_delete = $_REQUEST['dbs'];
-            if(!(is_array($to_delete) && count($to_delete)>0)){
+            if(isEmptyArray($to_delete)){
                 $to_delete = null;
             }
 

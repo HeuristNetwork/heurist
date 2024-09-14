@@ -145,7 +145,7 @@ class DbDefDetailTypes extends DbEntityBase
 
                         $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children);});
 
-                        if(count($children)>0){
+                        if(!empty($children)){
                             if(count($children)>1){
                                 $s = 'in ('.implode(',',$children).')';
                             }else{
@@ -269,7 +269,7 @@ class DbDefDetailTypes extends DbEntityBase
             $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "relation" ORDER BY vcg_Order';
             $vcg_rel = mysql__select_value($mysqli, $vcg_query);
 
-            if(count($this->data['fields'])>0){
+            if(!empty($this->data['fields'])){
 
                 $ret = array();
 

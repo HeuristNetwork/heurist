@@ -157,7 +157,7 @@ if($_is_new_cms_editor){
 }
 
 
-if(is_array($external_files) && count($external_files)>0){
+if(!isEmptyArray($external_files)){
     foreach ($external_files as $ext_file){
         if(strpos($ext_file,'<link')===0 || strpos($ext_file,'<script')===0){
             print $ext_file."\n";
@@ -1542,7 +1542,7 @@ $mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';
 
 function _getFld($record,$dty_ID){
     $res = @$record['details'][$dty_ID];
-    $ret = (is_array($res)&&count($res)>0)?array_shift($res):null;
+    $ret = (!isEmptyArray($res))?array_shift($res):null;
     return $ret;
 }
 
@@ -1596,7 +1596,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     //has submenu
                     if(is_array($submenu)){
 
-                        if(count($submenu)>0){
+                        if(!empty($submenu)){
 
                             $subrec = array();
                             foreach($submenu as $id=>$rec){

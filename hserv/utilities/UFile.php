@@ -616,7 +616,7 @@ use hserv\utilities\USanitize;
             $item = array( 'key'=>$folder, 'title'=>$folder,
                         'folder'=>($folder>=0), 'issystem'=>(@$sysfolders[$folder]!=null) );
 
-            if(is_array($children) && count($children)>0){
+            if(!isEmptyArray($children)){
                 $item['children'] = folderTreeToFancyTree($children, $lvl+1);
             }
             $fancytree[] = $item;
@@ -853,7 +853,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                 if (( $file != '.' ) && ( $file != '..' )) {
                     if ( is_dir($src . $file) ) {
 
-                        if(!is_array($folders) || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        if(isEmptyArray($folders) || in_array($src.$file.'/',$folders))
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
@@ -1390,9 +1390,9 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
         $data = fread($handle, 10);
         rewind($handle);
 
-        if(substr_count($data, "\r\n")>0){
+        if(substr_count($data, "\r\n") > 0){
             $eol = "\r\n";
-        }elseif(substr_count($data, "\n")>0){
+        }elseif(substr_count($data, "\n") > 0){
             $eol = "\n";
         }else{
             $eol = "\r";

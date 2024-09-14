@@ -213,7 +213,7 @@ if (@$argv) {
             //$req = $entity->getData();
             $req = array();
 
-            if(@$req['a'] == 'search' && count($res)==0){
+            if(@$req['a'] == 'search' && empty($res)){
                 $code = 404;
             }elseif (@$req['a'] == 'save'){
                 $code = 201;

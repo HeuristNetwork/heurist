@@ -1246,7 +1246,7 @@ $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dt
                     $new_values = $values;
                 }
 
-                if(is_array($new_values) && count($new_values)>0)
+                if(!isEmptyArray($new_values))
                 {
                     if (isset($record['details'][$ftId])){
                         array_push($record['details'][$ftId], ...$new_values);
@@ -1409,7 +1409,7 @@ $query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID
                 }//for
             }
             //create reverse child to parent links if required
-            if(!$is_rollback && is_array($parent_child_links) && count($parent_child_links)>0){
+            if(!$is_rollback && !isEmptyArray($parent_child_links)){
 
                 foreach($parent_child_links as $idx=>$link){
 

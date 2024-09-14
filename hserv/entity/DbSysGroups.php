@@ -138,7 +138,7 @@ class DbSysGroups extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          if($orderby!=null){
@@ -161,7 +161,7 @@ class DbSysGroups extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -274,7 +274,7 @@ class DbSysGroups extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in ('
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
+        if(!isEmptyArray($rec_ids_to_delete)){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) {return false;}
         }
@@ -308,7 +308,7 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $ret = parent::delete();
 
-            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0){
+            if(!isEmptyArray(@$affectedUserIds)){
                 foreach($affectedUserIds as $usrID)  //affected users
                 {
                     if($usrID!=$this->system->get_user_id()){
@@ -343,14 +343,14 @@ class DbSysGroups extends DbEntityBase
 
         //group ids
         $this->recordIDs = prepareIds(@$this->data['groupID']);
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid workgroup identificator');
             return false;
         }
 
         //user ids
         $assignIDs = prepareIds(@$this->data['userIDs']);
-        if(count($assignIDs)==0){
+        if(empty($assignIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid user identificators');
             return false;
         }

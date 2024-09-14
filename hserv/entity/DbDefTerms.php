@@ -79,7 +79,7 @@ class DbDefTerms extends DbEntityBase
                     array_push($files, $id);
                 }
              }
-             if(count($files)==0){
+             if(empty($files)){
                 $this->data['trm_ID'] = 999999999;
              }else{
                 $this->data['trm_ID'] = $files;
@@ -177,7 +177,7 @@ class DbDefTerms extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
@@ -378,7 +378,7 @@ class DbDefTerms extends DbEntityBase
 
         $terms_added = array();
 
-        if(count($this->records)>0){
+        if(!empty($this->records)){
             $ret = $this->save();
             if($ret!==false) {
                 $terms_added = $ret;
@@ -397,7 +397,7 @@ class DbDefTerms extends DbEntityBase
             //go to next level
             foreach($tree as $label => $children)
             {
-                if(is_array($children) && count($children)>0){
+                if(!isEmptyArray($children)){
                     $record_idx = @$this->labels_to_idx[$parentLabel.$label];
                     $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
                     if($ret===false){
@@ -666,7 +666,7 @@ class DbDefTerms extends DbEntityBase
                 //add or remove term to vocabuary by reference
                 $trm_IDs = prepareIds($this->data['trm_ID']);
 
-                if(count($trm_IDs)==0){
+                if(empty($trm_IDs)){
 
                     $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
                     $ret = false;
@@ -703,7 +703,7 @@ class DbDefTerms extends DbEntityBase
                         if($new_parent>0){
                             //get labels and codes for vocabulary
                             $labels = $this->getLabelsAndCodes($new_vocab);
-                            if(!is_array($labels) || count($labels)==0) {$labels = null;}
+                            if(isEmptyArray($labels)) {$labels = null;}
                         }
                         if($new_vocab>0 && $new_vocab!=$old_vocab){
                             $all_children = $this->getChildren($new_vocab);
@@ -762,7 +762,7 @@ class DbDefTerms extends DbEntityBase
                                 }
                             }
                             //4. term is removed from vocabulary - check its usage in recDetails
-                            if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+                            if(!isEmptyArray($check_dty_IDs)){
 
                                $ret = $this->findRecordWhereTermInUse($trm_ID, $check_dty_IDs);
 
@@ -1173,14 +1173,14 @@ class DbDefTerms extends DbEntityBase
         }
 
         // is this used in records (find usage in recDetails)
-        if($indetails && (!is_array($ret['detailtypes']) || count($ret['detailtypes'])==0)){
+        if($indetails && (isEmptyArray($ret['detailtypes']))){
 
            $ret = $this->findRecordWhereTermInUse($trm_ID, null);
 
         }
 
         //$ret['children']>0 ||
-        if((is_array(@$ret['detailtypes']) && count($ret['detailtypes'])>0 )|| $ret['reccount']>0){
+        if((is_array(@$ret['detailtypes']) && !empty($ret['detailtypes']) )|| $ret['reccount']>0){
             return $ret;
         }else{
             return true;
@@ -1233,7 +1233,7 @@ class DbDefTerms extends DbEntityBase
             $check_dty_IDs = $this->getFieldsThatUseVocabulary($real_vocab_id);
         }
 
-        if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+        if(!isEmptyArray($check_dty_IDs)){
             $check_dty_IDs = prepareIds($check_dty_IDs);//for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
             $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '

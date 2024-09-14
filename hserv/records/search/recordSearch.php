@@ -1288,16 +1288,16 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
         }
     }
 
-    if(is_array($res1) && is_array($res2) && count($res1)>0 && count($res2)>0){
+    if(!isEmptyArray($res1) && is_array($res2)){
         $res = array_merge_unique($res1, $res2);
-    }elseif(is_array($res1) && count($res1)>0){
+    }elseif(!isEmptyArray($res1)){
         $res = $res1;
     }else{
         $res = $res2;
     }
 
     //find new level
-    if(is_array($res) && count($res)>0){
+    if(!isEmptyArray($res)){
         $ids = array_merge_unique($ids, $res);
 
         if($limit>0 && count($ids)>=$limit){
@@ -1330,7 +1330,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
     $ids = prepareIds($ids);
 
-    if(count($ids)==0) {return array("status"=>HEURIST_OK, 'data'=>array());}//returns empty array
+    if(empty($ids)) {return array("status"=>HEURIST_OK, 'data'=>array());}//returns empty array
 
     if(!($direction==1||$direction==-1)){
         $direction = 0;
@@ -1722,7 +1722,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
     }
 
     $parents = mysql__select_list2($system->get_mysqli(), $query);
-    if(is_array($parents) && count($parents)>0){
+    if(!isEmptyArray($parents)){
         if($level>5){
             $system->addError(HEURIST_ERROR, 'Cannot find parent CMS Home record. It appears that menu items refers recursively');
             return false;
@@ -1760,7 +1760,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
 function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
     $menuitems = prepareIds($menuitems, true);
-    $isRoot = (count($result)==0);//find any first CMS_HOME (non hidden)
+    $isRoot = (empty($result));//find any first CMS_HOME (non hidden)
     if($isRoot && $find_root_menu){
 
         //if root record is menu - we have to find parent cms home
@@ -1769,7 +1769,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 //find ANY first home record
                 $response = recordSearch($system, array('q'=>'t:'.RT_CMS_HOME, 'detail'=>'ids', 'w'=>'a'));
 
-                if($response['status'] == HEURIST_OK  && is_array(@$response['data']['records']) && count($response['data']['records'])>0){
+                if($response['status'] == HEURIST_OK  && !isEmptyArra(@$response['data']['records']) ){
                     $res = $response['data']['records'][0];
                 }else{
                     return $system->addError(HEURIST_ERROR,
@@ -1820,7 +1820,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
         }
     }
 
-    if(count($rec_IDs)>0){
+    if(!empty($rec_IDs)){
         /*
         $query = 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID in ('
         .implode(',',$rec_IDs).') AND (dtl_DetailTypeID='.DT_CMS_MENU
@@ -1834,7 +1834,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 
         $menuitems2 = prepareIds( $menuitems2 );
 
-        if(is_array($menuitems2) && count($menuitems2)>0){
+        if(!isEmptyArray($menuitems2)){
             recordSearchMenuItems($system, $menuitems2, $result);
         }
     }elseif($isRoot) {
@@ -1916,7 +1916,7 @@ function recordSearch($system, $params, $relation_query=null)
 
         $svsID = null;
         $query_json = is_array(@$params['q']) ?$params['q'] :json_decode(@$params['q'], true);
-        if(is_array($query_json) && count($query_json)>0){
+        if(!isEmptyArray($query_json)){
             $svsID = @$query_json['svs'];
 
             if(@$query_json['any'] || @$query_json['all']){
@@ -2055,7 +2055,7 @@ function recordSearch($system, $params, $relation_query=null)
 
         //get date,year and geo fields from structure
         $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
-        if(!is_array($fieldtypes_ids) || count($fieldtypes_ids)==0){
+        if(isEmptyArray($fieldtypes_ids)){
             //this case nearly impossible since system always has date and geo fields
             $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE);//9,10,11,28';
         }
@@ -2072,7 +2072,7 @@ function recordSearch($system, $params, $relation_query=null)
 
         //find places linked to result records for geo field
         if(@$params['suppres_derivemaplocation']!=1){ //for production sites - such as USyd Book of Remembrance Online or Digital Harlem
-            $find_places_for_geo = count($rectypes_as_place)>0 &&
+            $find_places_for_geo = !empty($rectypes_as_place) &&
             ($system->user_GetPreference('deriveMapLocation', 1)==1);
         }
 
@@ -2085,7 +2085,7 @@ function recordSearch($system, $params, $relation_query=null)
                 $fieldtypes_ids = explode(',', $params['detail']);
             }
 
-            if(is_array($fieldtypes_ids) && count($fieldtypes_ids)>0)
+            if(!isEmptyArray($fieldtypes_ids))
             //(count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) )
             {
                 $f_res = array();
@@ -2104,14 +2104,14 @@ function recordSearch($system, $params, $relation_query=null)
                     }
                 }
 
-                if(is_array($f_res) && count($f_res)>0){
+                if(!isEmptyArray($f_res)){
                     $fieldtypes_ids = implode(',', $f_res);
                     $params['detail'] = 'detail';
                     $needThumbField = true;
                 }else{
                     $fieldtypes_ids = null;
                 }
-                if(count($header_fields)==0){
+                if(empty($header_fields)){
                     $header_fields = null;
                 }else{
                     //always include rec_ID and rec_RecTypeID
@@ -2378,7 +2378,7 @@ function recordSearch($system, $params, $relation_query=null)
                             $ids_party1 = $params3['topids'];//source ids (from top query)
                             $ids_party2 = $is_ids_only?$response['data']['records'] :array_keys($response['data']['records']);
 
-                            if(is_array($ids_party2) && count($ids_party2)>0)
+                            if(!isEmptyArray($ids_party2))
                             {
 
 
@@ -2547,13 +2547,13 @@ function recordSearch($system, $params, $relation_query=null)
                 $query_json = json_decode($q, true);
 
                 //try to parse plain string
-                if( strpos($q,'*')===0 && !(is_array($query_json) && count($query_json)>0)){
+                if( strpos($q,'*')===0 && isEmptyArray($query_json)){
                     $q = substr($q, 1);
                     $query_json = parse_query_to_json( $q );
                 }
             }
 
-            if(is_array($query_json) && count($query_json)>0){
+            if(!isEmptyArray($query_json)){
                 $params['q'] = $query_json;
                 $is_mode_json = true;
             }
@@ -2681,7 +2681,7 @@ function recordSearch($system, $params, $relation_query=null)
                         'reccount'=>count($records),
                         'records'=>$records));
 
-                if(@$params['links_count'] && count($records)>0){
+                if(@$params['links_count'] && !empty($records)){
 
                     $links_counts = recordLinkedCount($system,
                                 $params['links_count']['source'],
@@ -2689,7 +2689,7 @@ function recordSearch($system, $params, $relation_query=null)
                                     $params['links_count']['target'],
                                 @$params['links_count']['dty_ID']);
 
-                    if($links_counts['status']==HEURIST_OK && is_array(@$links_counts['data']) && count($links_counts['data'])>0){
+                    if($links_counts['status']==HEURIST_OK && !isEmptyArra(@$links_counts['data']) ){
 
                         //order output
                         $res = array_keys($links_counts['data']);
@@ -2805,7 +2805,7 @@ function recordSearch($system, $params, $relation_query=null)
                 //LOAD DETAILS
                 if(($istimemap_request ||
                 $params['detail']=='detail' ||
-                $params['detail']=='structure') && count($records)>0){
+                $params['detail']=='structure') && !empty($records)){
 
 
                     //$all_rec_ids = array_keys($records);
@@ -2917,7 +2917,7 @@ function recordSearch($system, $params, $relation_query=null)
                                     }
                                     $fileinfo = $ruf_entity->registerURL($row[1], false, $dtl_ID);
 
-                                    if($fileinfo && is_array($fileinfo) && count($fileinfo)>0){
+                                    if($fileinfo && !isEmptyArra($fileinfo)){
 
                                         if($needCompleteInformation){
                                             $row[3] = $fileinfo['ulf_ID'];
@@ -3018,7 +3018,7 @@ function recordSearch($system, $params, $relation_query=null)
 
                                 foreach ($chunk_rec_ids as $recID) {
                                     $record = $records[$recID];
-                                    if(is_array(@$record['d']) && count($record['d'])>0){
+                                    if(!isEmptyArray(@$record['d'])){
                                         //this record is time enabled
                                         if($istimemap_counter<$search_detail_limit){
                                             $tm_records[$recID] = $record;
@@ -3119,7 +3119,7 @@ function recordSearch($system, $params, $relation_query=null)
                 }//$need_details
 
                 $rectypes = array_keys($rectypes);
-                if( @$params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
+                if( @$params['detail']=='structure' && !empty($rectypes)){ //rarely used in editing.js
                     //description of recordtype and used detail types
                     $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1);//no groups
                 }
@@ -3203,7 +3203,7 @@ function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
                 'results'=>array(),
                 'parent'=>$parent_index,
                 'ignore'=>(@$rule['ignore']==1), //not include in final result
-                'islast'=>(!is_array(@$rule['levels']) || count($rule['levels'])==0)?1:0 );
+                'islast'=>(isEmptyArray(@$rule['levels']))?1:0 );
             array_push($flat_rules, $e_rule );
             _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
         }
@@ -3365,7 +3365,7 @@ function recordSearchByID($system, $id, $need_details = true, $fields = null)
 function recordGetField($record, $field_id){
 
         $value = @$record['details'][$field_id];
-        if(is_array($value) && count($value)>0){
+        if(!isEmptyArray($value)){
             return array_shift($value);
         }else{
             return null;
@@ -3419,7 +3419,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
 
     $relmarker_fields = array();
 
-    if(is_array($detail_types) && count($detail_types)>0 ){
+    if(!isEmptyArra($detail_types) ){
 
         if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
 
@@ -3506,7 +3506,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
                          $fileinfo = $ruf_entity->registerURL($rd['dtl_Value'], false, $rd['dtl_ID']);
                     }else{
                         $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
-                        if(is_array($fileinfo) && count($fileinfo)>0){
+                        if(!isEmptyArray($fileinfo)){
                             $fileinfo = $fileinfo[0];//
                         }
                     }
@@ -3593,7 +3593,7 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
     }
 
     //query for relmarkers
-    if(is_array($relmarker_fields) && count($relmarker_fields)>0){
+    if(!isEmptyArray($relmarker_fields)){
         $terms = new DbsTerms($system, dbs_GetTerms($system));
 
         // both directions (0), need headers
@@ -3604,7 +3604,7 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
 
             $allowed_terms = null; //$terms->treeData($constraints[1], 'set');
             $constr_rty_ids = explode(',', $constraints[2]);
-            if(count($constr_rty_ids)==0) {$constr_rty_ids = false;}
+            if(empty($constr_rty_ids)) {$constr_rty_ids = false;}
 
             //find among related record that satisfy contraints
             foreach ($related_recs['data']['direct'] as $relation){
@@ -3701,7 +3701,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
             .predicateId('rec_RecTypeID',$find_geo_by_linked_rty)
             .' AND rl_SourceID = '.$recID;
 
-            if(is_array($find_geo_by_linked_dty) && count($find_geo_by_linked_dty)>0){
+            if(!isEmptyArray($find_geo_by_linked_dty)){
                 $squery = $squery.' AND '
                 .predicateId('rl_DetailTypeID',$find_geo_by_linked_dty);
             }

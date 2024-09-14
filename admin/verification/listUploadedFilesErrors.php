@@ -78,7 +78,7 @@ $mysqli = $system->get_mysqli();
         </div>
 <?php
         $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
-        $quota_not_defined = (!($quota>0));
+        $quota_not_defined = (!isPostiveInt($quota));
         if($quota_not_defined){
             $quota = 1073741824; //1GB
         }
@@ -294,7 +294,7 @@ $mysqli = $system->get_mysqli();
 
                 //FIX duplicates at once
                 foreach ($dups_files as $ulf_ID=>$file_a){
-                    if(is_array($file_a['dupes']) && count($file_a['dupes'])>0){
+                    if(!isEmptyArray($file_a['dupes'])){
 
                         $dup_ids = array_keys($file_a['dupes']);
 
@@ -470,7 +470,7 @@ $mysqli = $system->get_mysqli();
 
         }
     }
-    if(is_array($files_path_to_correct) && count($files_path_to_correct)>0){
+    if(!isEmptyArray($files_path_to_correct)){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';
             $files_path_to_correct = array();
     }
@@ -486,7 +486,7 @@ $mysqli = $system->get_mysqli();
     $files_notreg = $reg_info['nonreg'];
 
     //count($files_duplicates)+
-    $is_found = (count($files_unused_remote)+count($files_unused_local)+count($files_notfound)+count($files_notreg)>0);
+    $is_found = (count($files_unused_remote)+count($files_unused_local)+count($files_notfound)+count($files_notreg) > 0);
 
             if ($is_found) {
                 ?>
@@ -696,23 +696,23 @@ $mysqli = $system->get_mysqli();
                 if($is_found){
 
                     $smsg = 'Go to: ';
-                /*if(count($files_duplicates)>0){
+                /*if(!empty($files_duplicates)){
                     print '\'<a href="#duplicates" style="white-space: nowrap;padding-right:10px">Duplicated entries</a>\'+';
                 }
-                if(count($files_orphaned)>0){
+                if(!empty($files_orphaned)){
                     print '\'<a href="#orphaned" style="white-space: nowrap;padding-right:10px">Orphaned files</a>\'+';
                 }
                 */
-                if(is_array($files_unused_local) && count($files_unused_local)>0){
+                if(!isEmptyArray($files_unused_local)){
                     $smsg = $smsg.'<a href="#unused_local" style="white-space: nowrap;padding-right:20px">Unused local files</a>';
                 }
-                if(is_array($files_unused_remote) && count($files_unused_remote)>0){
+                if(!isEmptyArray($files_unused_remote)){
                     $smsg = $smsg.'<a href="#unused_remote" style="white-space: nowrap;padding-right:20px">Unused remote files</a>';
                 }
-                if(is_array($files_notfound) && count($files_notfound)>0){
+                if(!isEmptyArray($files_notfound)){
                     $smsg = $smsg.'<a href="#files_notfound" style="white-space: nowrap;padding-right:20px">Files not found</a>';
                 }
-                if(is_array($files_notreg) && count($files_notreg)>0){
+                if(!isEmptyArray($files_notreg)){
                     $smsg = $smsg.'<a href="#files_notreg" style="white-space: nowrap;padding-right:20px">Non-registered files</a>';
                 }
                 }
@@ -723,7 +723,7 @@ $mysqli = $system->get_mysqli();
                 </script>
 
                 <?php
-                if(is_array($files_unused_local) && count($files_unused_local)>0){
+                if(!isEmptyArray($files_unused_local)){
                 ?>
                 <div id="unused_file_local" style="padding-top:20px">
                     <a name="unused_local"></a>
@@ -760,7 +760,7 @@ $mysqli = $system->get_mysqli();
                     <br><br><hr></div>';
                 }
                 //------------------------------------------
-                if(is_array($files_unused_remote) && count($files_unused_remote)>0){
+                if(!isEmptyArray($files_unused_remote)){
                 ?>
                 <div id="unused_file_remote" style="padding-top:20px">
                     <a name="unused_remote"></a>
@@ -801,7 +801,7 @@ $mysqli = $system->get_mysqli();
                 }//if
 
                 //------------------------------------------
-                if(is_array($files_notfound) && count($files_notfound)>0){
+                if(!isEmptyArray($files_notfound)){
                 ?>
                 <div id="files_notfound" style="padding-top:20px">
                     <a name="files_notfound"></a>
@@ -828,7 +828,7 @@ $mysqli = $system->get_mysqli();
                 }//if
 
                 //------------------------------------------
-                if(is_array($files_notreg) && count($files_notreg)>0){
+                if(!isEmptyArray($files_notreg)){
                 ?>
                 <div id="files_notreg" style="padding-top:20px">
                     <a name="files_notreg"></a>

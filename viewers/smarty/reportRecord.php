@@ -206,12 +206,12 @@ class ReportRecord {
                 }
                 array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
 
-                if(is_array($wg_ids) && count($wg_ids)>0){
+                if(!isEmptyArray($wg_ids)){
                     if(!in_array($rec['rec_OwnerUGrpID'],$wg_ids)){
 
                         $query = 'select rcp_UGrpID from usrRecPermissions where rcp_RecID='.$rec['rec_ID'];
                         $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);
-                        if(count($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids)==0)){
+                        if(empty($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids))){
                             $res = false;
                         }
                     }
@@ -542,7 +542,7 @@ class ReportRecord {
                                 "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
                             );
 
-                            if(count($res)>0){
+                            if(!empty($res)){
                                 if($issingle){//no used
                                     $res = array( $dtname =>$res_united );
                                 }else{
@@ -594,7 +594,7 @@ class ReportRecord {
                                 //original value keeps the whole 'file' array
                                 array_push($origvalues, $value['file']);
                             }
-                            if(count($res)==0){
+                            if(empty($res)){
                                 $res = null;
                             }else{
                                 $res = array($dtname=>implode(', ',$res), $dtname."_originalvalue"=>$origvalues);
@@ -647,7 +647,7 @@ class ReportRecord {
                         case 'resource': // link to another record type
 
                             $res = array();
-                            if(count($dtValue)>0){
+                            if(!empty($dtValue)){
 
                             foreach ($dtValue as $key => $value){
                                 $recordID = $value['id'];
@@ -816,7 +816,7 @@ class ReportRecord {
             }
         }
 
-        if(count($select)>0){
+        if(!empty($select)){
 
             if(!$ids || count($ids)<1){
                 $ids = array(0);

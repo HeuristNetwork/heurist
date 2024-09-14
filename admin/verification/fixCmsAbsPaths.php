@@ -47,7 +47,7 @@ $databases = mysql__getdatabases4($mysqli, false);
 
 //
 $servers = array('https:\/\/heuristref.net', 'https:\/\/heurist.sydney.edu.au', 'https:\/\/heuristplus.sydney.edu.au', 'https:\/\/heurist.huma-num.fr', 'https:\/\/heuristest.fdm.uni-hamburg.de:443');
-if (is_array($absolutePathsToRemoveFromWebPages) && count($absolutePathsToRemoveFromWebPages)>0){
+if (!isEmptyArray($absolutePathsToRemoveFromWebPages)){
     foreach($absolutePathsToRemoveFromWebPages as $srv){
         $srv = str_replace("/","\/",$srv);
         $servers[] = $srv;

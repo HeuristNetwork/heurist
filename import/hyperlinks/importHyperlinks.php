@@ -243,7 +243,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		array_push($record_tobebookmarked, $rec_id);
 	}
 
-	if(count($record_tobebookmarked)>0){
+	if(!empty($record_tobebookmarked)){
 
 		if (@$_REQUEST['adding_tags'] == 1) {
 			$kwd = @$_REQUEST['wgTags'];

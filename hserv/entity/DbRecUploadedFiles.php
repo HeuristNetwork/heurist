@@ -215,10 +215,10 @@ class DbRecUploadedFiles extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode('', $from_table);
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
+         if(!empty($order)){
             $query = $query.' ORDER BY '.implode(',',$order);
          }
 
@@ -228,7 +228,7 @@ class DbRecUploadedFiles extends DbEntityBase
          $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
 
         //find related records
-        if($needRelations && !(is_bool($result) && $result==false) && count($result['order'])>0 ){
+        if($needRelations && !(is_bool($result) && $result==false) && !empty($result['order']) ){
 
             $result['relations'] = $this->getMediaRecords($result['order'], 'both', 'rec_full');
             if(!$result['relations']){
@@ -247,7 +247,7 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){
 
             $ugr_ID = $this->system->get_user_id();
 
@@ -809,7 +809,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+            if(!isEmptyArray($this->data['fields'])){
 
                 set_time_limit(0);
 
@@ -1121,7 +1121,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+            if(!isEmptyArray($this->data['fields'])){
 
                 $ret = array();
 

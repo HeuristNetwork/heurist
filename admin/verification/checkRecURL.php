@@ -238,7 +238,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
         }
         $res->close();
 
-        if(count($passed_rec_ids)>0){
+        if(!empty($passed_rec_ids)){
             __updateRecords_lastverified($mysqli);
         }
 
@@ -305,7 +305,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
             preg_match_all("/https?:\/\/[^\s\"'>()\\\\]*/", $value, $urls);
 
-            if(is_array($urls) && count($urls[0]) > 0){
+            if(!isEmptyArray($urls)){
 
                 $rec_cnt ++;
 

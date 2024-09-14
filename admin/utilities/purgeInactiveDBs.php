@@ -443,7 +443,7 @@ if($need_email){
             }
 
 
-            if(count($sif_purge)>0){
+            if(!empty($sif_purge)){
 
 
             $report .= (' ... '.count($sif_purge).' import tables, archive');
@@ -639,10 +639,10 @@ if(!$arg_no_action){
     //report after actual action
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;
 
-    if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
+    if( (!empty($email_list_deleted) || !empty($email_list_failed)) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;
         $sMsg = $sTitle.TABLE_S.implode("\n", $email_list_deleted).TABLE_E;
-        if(count($email_list_failed)>0){
+        if(!empty($email_list_failed)){
              $sMsg = $sMsg.'<br>FAILED on database drop'.TABLE_S.implode("\n", $email_list_failed).TABLE_E;
         }
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);
@@ -651,7 +651,7 @@ if(!$arg_no_action){
 
 echo $tabs0.'finished'.$eol;
 
-if(is_array($email_list) && count($email_list)>0 && $need_email)
+if(!isEmptyArray($email_list) && $need_email)
 {
     sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
         "List of inactive databases for more than a year with more than 200 records:\n"

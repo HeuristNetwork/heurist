@@ -76,7 +76,7 @@ function __checkVersionDatabase(){
                     .$ver['sys_dbSubSubVersion'])>0);
 
             $missed = hasAllTables($mysqli); //, 'hdb_'.$db_name
-            $has_missed = (is_array($missed) && count($missed)>0);
+            $has_missed = (!isEmptyArray($missed));
             if(!is_array($missed)){
                 print 'ERROR '.$missed.'  ';
             }
@@ -320,7 +320,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
 
     }//while  databases
 
-    if(count($db2_with_links)>0){
+    if(!empty($db2_with_links)){
         print '<p>v2 with defTermLinks</p>';
         print htmlspecialchars(print_r($db2_with_links, true));
     }
@@ -486,7 +486,7 @@ function __findLongTermLabels(){
             $list = mysql__select_assoc($mysqli, 'select trm_ID, trm_Label, CHAR_LENGTH(trm_Label) as chars, length(trm_Label) as len '
             .' from defTerms where length(trm_Label)>255');
 
-            if($list && count($list)>0){
+            if($list && !empty($list)){
 
                 print htmlspecialchars($db_name).'<br>';
                 foreach($list as $id=>$row){
@@ -736,7 +736,7 @@ function __addOtherSources(){
             if($rec_ID>0){
 print '<br>'.htmlspecialchars($row[3]);
                 $nids = explode('|',$row[3]);
-                if(count($nids)>0){
+                if(!empty($nids)){
                     $values = array();
                     foreach ($nids as $id=>$nid){
                         $os_rec_ID = mysql__select_value($mysqli, $query_match.$nid);
@@ -754,7 +754,7 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
                             $not_found2[] = $nid;
                         }
                     }
-                    if(count($values)>0){
+                    if(!empty($values)){
                         $res2 = $mysqli->query($query_update.implode(',',$values));
                         $cnt = $cnt + $mysqli->affected_rows;
                     }
@@ -1336,7 +1336,7 @@ AMP =>TS_AMP,
             $matches = array();
             preg_match_all("/\&[0-9a-zA-Z]+;/", $m, $matches);
 
-            if(is_Array(@$matches[0]) && count($matches[0])>0){
+            if(!isEmptyArray(@$matches[0])){
                     $missed = array_merge_unique($missed, $matches[0]);
             }
 
@@ -1540,7 +1540,7 @@ function __getBelegContext(){
 
      $ids = @$res['data']['records'];
 
-     if(is_array($ids) && count($ids)>0){
+     if(!isEmptyArray($ids)){
          foreach($ids as $recID){
              $rec = array('rec_ID'=>$recID);
              recordSearchDetails($system, $rec, array(1094));

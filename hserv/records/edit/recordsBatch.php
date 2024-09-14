@@ -195,7 +195,7 @@ class RecordsBatch
 
             $rty_ID = @$this->data['rtyID'];
             if(is_array($rty_ID)){
-                if(count($rty_ID)>0){
+                if(!empty($rty_ID)){
                     $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
                     $this->rtyIDs = $rty_ID;
                 }
@@ -246,7 +246,7 @@ class RecordsBatch
             $this->result_data = array('passed'=> $passedRecIDCnt>0?$passedRecIDCnt:0,
                                        'noaccess'=> @$inAccessibleRecCnt ?$inAccessibleRecCnt :0);
 
-            if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+            if (isEmptyArray(@$this->recIDs)){
                 $this->result_data['processed'] = 0;
                 return true;
             }
@@ -370,7 +370,7 @@ class RecordsBatch
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
-        if (count($toProcess)>0){
+        if (!empty($toProcess)){
         //3. add reverse pointer field in child record to parent record
         $processedParents = array();
         $childInserted = array();
@@ -479,7 +479,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array($this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray($this->recIDs)){
             return $this->result_data;
         }
 
@@ -693,7 +693,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -830,7 +830,7 @@ class RecordsBatch
             }
         }
 
-        $is_multiline = count($splitValues)>0;
+        $is_multiline = !empty($splitValues);
 
         foreach ($this->recIDs as $recID) {
 
@@ -862,7 +862,7 @@ class RecordsBatch
             if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            //}elseif($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
+            //}elseif(isEmptyArray($valuesToBeReplaced)){  //not found
             //    array_push($undefinedFieldsRecIDs, $recID);
             //    continue;
             }
@@ -899,7 +899,7 @@ class RecordsBatch
                         }else{
                             array_push($undefinedFieldsRecIDs, $recID);
                         }
-                        if(count($valuesToBeDeleted)>0 && !@$this->data['debug']){
+                        if(!empty($valuesToBeDeleted) && !@$this->data['debug']){
                             //remove the rest for replace all occurences
                             $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
                             if ($mysqli->query($sql) === false) {
@@ -1045,7 +1045,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -1057,7 +1057,7 @@ class RecordsBatch
         }
 
 
-        $isDeleteInAllRecords = $this->recIDs[0]=='all' && is_array($this->rtyIDs) && count($this->rtyIDs)>0;
+        $isDeleteInAllRecords = $this->recIDs[0]=='all' && !isEmptyArray($this->rtyIDs);
 
         $partialRemove = @$this->data['subs'] == 1 || @$this->data['substr'] == 1;
         $wholeRemove = @$this->data['wholeval'] == 1;
@@ -1189,7 +1189,7 @@ class RecordsBatch
             if($valuesToBeDeleted==null && $mysqli->error){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            }elseif(!is_array($valuesToBeDeleted) || count($valuesToBeDeleted)==0){  //not found
+            }elseif(isEmptyArray($valuesToBeDeleted)){  //not found
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }
@@ -1325,7 +1325,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -1390,7 +1390,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -1525,7 +1525,7 @@ class RecordsBatch
             if(!$hasPDFs){
                 $skippedNoPDF[] = $recID;
             }else
-            if(count($details)>0){
+            if(!empty($details)){
 
                 /*
                 // 4. remove old 2-652 "Extracted text"
@@ -1603,7 +1603,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -1711,7 +1711,7 @@ class RecordsBatch
     //
     private function _updateUploadedFileIDs($ulf_ID_new, $dtl_IDs, $date_mode){
 
-        if($ulf_ID_new>0 && count($dtl_IDs)>0){
+        if($ulf_ID_new>0 && !empty($dtl_IDs)){
             $mysqli = $this->system->get_mysqli();
             //6. Replace ulf_ID in dtl_UploadedFileID
             $query2 = 'UPDATE recDetails SET dtl_Modified="'.$date_mode
@@ -1737,7 +1737,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -1802,7 +1802,7 @@ public methods
     */
     private function _assignTagsAndReport($type, $recordIds, $baseTag)
     {
-        if (is_array($recordIds) && count($recordIds)>0) {
+        if (!isEmptyArray($recordIds)) {
 
             if($type=='errors' || $type=='parseexception' || $type=='parseempty' || $type=='fails'){
                 $this->result_data[$type.'_list'] = $recordIds;
@@ -1862,12 +1862,12 @@ public methods
                     $tag_ids = $this->_tagGetByName(array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }
-            if( !is_array($record_ids) || count($record_ids)==0 ){
+            if( isEmptyArray($record_ids) ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Record ids are not defined');
                 return false;
             }
 
-            if( !is_array($tag_ids) || count($tag_ids)==0 ){
+            if( isEmptyArray($tag_ids) ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Tags ids either not found or not defined');
                 return false;
             }
@@ -1987,7 +1987,7 @@ public methods
             if(intval(@$tag['tag_ID'])<1){
                 $samename = $this->_tagGetByName($tag['tag_Text'], false, $tag['tag_UGrpID']);
 
-                if(is_array($samename) && count($samename)>0){
+                if(!isEmptyArray($samename)){
                     $tag['tag_ID'] = $samename[0];
                 }
             }
@@ -2254,7 +2254,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -2465,7 +2465,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 
@@ -2630,7 +2630,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (isEmptyArray(@$this->recIDs)){
             return $this->result_data;
         }
 

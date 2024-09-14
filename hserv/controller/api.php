@@ -86,7 +86,7 @@ $entities = array(
 
 
 
-if(count($requestUri)>0){ //splitted path
+if(!empty($requestUri)){ //splitted path
 // api/db/entity/recID
 
     $params = array();

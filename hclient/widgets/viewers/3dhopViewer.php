@@ -50,7 +50,7 @@ if($system->init($db, true, false)){
 
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
-        if(is_array($listpaths) && count($listpaths)>0){
+        if(!isEmptyArray($listpaths)){
             $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             if ($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){

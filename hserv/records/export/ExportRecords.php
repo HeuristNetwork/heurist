@@ -244,7 +244,7 @@ protected function _outputPrepareFields($params){
         }
 
         //header fields
-        if(count($this->retrieve_header_fields)==0){
+        if(empty($this->retrieve_header_fields)){
             $this->retrieve_header_fields = null; //retrieve all header fields
         }else{
             //always include rec_ID and rec_RecTypeID
@@ -254,7 +254,7 @@ protected function _outputPrepareFields($params){
         }
 
         //detail fields  (by default NONE detail fields)  ????
-        $this->retrieve_detail_fields = (count($this->retrieve_detail_fields)>0)?$this->retrieve_detail_fields:$default_all_fields;
+        $this->retrieve_detail_fields = (!empty($this->retrieve_detail_fields))?$this->retrieve_detail_fields:$default_all_fields;
 
 }
 
@@ -460,7 +460,7 @@ public function output($data, $params){
 
             if(@$params['restapi']){
 
-                if(count($this->rt_counts)==0){
+                if(empty($this->rt_counts)){
                     http_response_code(404);
                 }else{
                     http_response_code(200);

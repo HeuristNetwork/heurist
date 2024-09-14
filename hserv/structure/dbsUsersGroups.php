@@ -120,7 +120,7 @@
     function user_getNamesByIds($system, $ugr_IDs){
 
         $ugr_IDs = prepareIds($ugr_IDs);
-        if(count($ugr_IDs)>0){
+        if(!empty($ugr_IDs)){
             $mysqli = $system->get_mysqli();
             $query = 'SELECT ugr_ID, IF(ugr_Type=\'workgroup\',ugr_Name, concat(ugr_FirstName, \' \', ugr_LastName)) '
             .' FROM sysUGrps WHERE ugr_ID in ('.implode(',',$ugr_IDs).')';
@@ -616,7 +616,7 @@
             if(@$prefs['externalRepositories']==null){
                 //get current from database
                 $repositories = user_getRepositoryCredentials($system, false, $ugr_ID);
-                if($repositories!=null && count($repositories)>0){
+                if($repositories!=null && !empty($repositories)){
                     $prefs['externalRepositories'] = $repositories;
                 }
             }
@@ -644,7 +644,7 @@
             $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
             if($res!=null && $res!=''){
                 $res = json_decode($res, true);
-                if($res && count($res)>0){
+                if($res && !empty($res)){
                     return $res;
                 }
             }
@@ -697,7 +697,7 @@
 
                 $recids = @$params['ids'];
                 $recids = prepareIds($recids);
-                if(is_array($recids) && count($recids)>0){
+                if(!isEmptyArray($recids)){
 
                     $filename = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
 
@@ -919,7 +919,7 @@
             }
         }
 
-        if(count($missed)>0){
+        if(!empty($missed)){
             $system->addError(HEURIST_INVALID_REQUEST, "Some required fields are not defined: ".implode(",",$missed));
         }else{
             $res = true;
@@ -1223,8 +1223,7 @@
             $new_prefs = json_decode($new_prefs, true);
         }
 
-        if(!(is_array($new_prefs) && count($new_prefs)>0 ||
-             is_array($to_remove) && count($to_remove)>0)) {
+        if(isEmptyArra($new_prefs) && isEmptyArra($to_remove)) {
 
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
@@ -1280,7 +1279,7 @@
         }
 
         //save into database
-        if(!(count($prepared)>0)){
+        if(!(!empty($prepared))){
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
         }
@@ -1306,7 +1305,7 @@
                     continue; //do not take password from the existing one - it was removed
                 }
                 /*
-                if(is_array($curr_services) && count($curr_services)>0){
+                if(!isEmptyArray($curr_services)){
                     if(@$curr_services[$service_id]['params']['writePwd']){ //old passsword exists
                         if(!@$service['params']['writePwd']){ //new password not defined
                             $services[$service_id]['params']['writePwd'] = $curr_services[$service_id]['params']['writePwd'];
@@ -1320,7 +1319,7 @@
                 }*/
             }
 
-            if(count($services)==0){
+            if(empty($services)){
                 if(@$prefs['externalRepositories']){
                     unset($prefs['externalRepositories']);
                 }
@@ -1334,7 +1333,7 @@
 
             $res = mysql__exec_param_query($mysqli,
                     'UPDATE `sysUGrps` set ugr_Preferences=? WHERE ugr_ID='.$usr_ID,
-                    array('s', (count($prefs)==0?'':json_encode($prefs))));
+                    array('s', (empty($prefs)?'':json_encode($prefs))));
 
             if(!$res){
                 break;
@@ -1417,9 +1416,9 @@
 
                 if($prefs!=null && $prefs!=''){
                     $prefs = json_decode($prefs, true);
-                    if(is_array($prefs) && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                    if(!isEmptyArra($prefs) && array_key_exists('externalRepositories',$prefs)){
                         $prefs = $prefs['externalRepositories'];
-                        if(is_array($prefs) && count($prefs)>0){
+                        if(!isEmptyArray($prefs)){
                             if($serviceName==null || $serviceName=='all'){
                                 //all services
                                 $result = array_merge($result, $prefs);
@@ -1472,7 +1471,7 @@
                     $prefs = $row[2];
                     if($prefs!=null && $prefs!=''){
                         $prefs = json_decode($prefs, true);
-                        if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                        if(!isEmptyArra($prefs) && array_key_exists('externalRepositories',$prefs)){
                                 $prefs = $prefs['externalRepositories'];
                                 if(is_array($prefs)){
                                     foreach($prefs as $service_id=>$service){

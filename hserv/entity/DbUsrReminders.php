@@ -95,7 +95,7 @@ class DbUsrReminders extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -159,11 +159,11 @@ class DbUsrReminders extends DbEntityBase
     public function batch_action(){
 
         $rec_IDs = prepareIds(@$this->data['rec_IDs']);
-        $is_notification = (count($rec_IDs)>0);//sends emails for given set of records
+        $is_notification = (!empty($rec_IDs));//sends emails for given set of records
         $query = null;
         $record = null;
 
-        if( (count($rec_IDs)>0) || (@$this->data['fields']['rem_RecID']>0) )
+        if( (!empty($rec_IDs)) || (@$this->data['fields']['rem_RecID']>0) )
         {
             //sends emails for given set of records
             $ugrID = $this->system->get_user_id();
@@ -175,7 +175,7 @@ class DbUsrReminders extends DbEntityBase
             }
             $is_notification = true;
 
-            if(count($rec_IDs)==0){
+            if(empty($rec_IDs)){
                 $rec_IDs = array($this->data['fields']['rem_RecID']);
             }
             $record = $this->data['fields'];
@@ -285,7 +285,7 @@ exit;
             //
             //
             //
-            if(count($recipients)>0){
+            if(!empty($recipients)){
 
                 if(!@$report[$record['rem_Freq']]) {$report[$record['rem_Freq']] = 0;}
                 $report[$record['rem_Freq']] = $report[$record['rem_Freq']] + count($recipients);

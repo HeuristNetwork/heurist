@@ -203,7 +203,7 @@ class DbsImport {
                 $this->system->addError(HEURIST_ERROR, "Not possible to determine an origin database id (source of import)");
                 return false;
             }
-            if(!(count($local_ids)>0 || $cCode)){
+            if(!(!empty($local_ids) || $cCode)){
                 $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
                 return false;
             }
@@ -262,7 +262,7 @@ class DbsImport {
             $def_ids[] = 'all';
         }elseif($this->prime_defType=='term'){
 
-            if(is_array($local_ids) && count($local_ids)>0){
+            if(!isEmptyArray($local_ids)){
                 foreach($local_ids as $local_id){
                     $rt = $this->sourceTerms->getTerm($local_id);
                     if($rt!=null){
@@ -277,7 +277,7 @@ class DbsImport {
             }
         }else{
 
-            if(is_array($local_ids) && count($local_ids)>0){
+            if(!isEmptyArray($local_ids)){
                 foreach($local_ids as $local_id){ //$local_id either id in source db or concept code
 
                     if($this->prime_defType=='rt' || $this->prime_defType=='rectypes' || $this->prime_defType=='rectype'){
@@ -302,7 +302,7 @@ class DbsImport {
             }
         }
 
-        if (count($def_ids)==0 || $wrong_id>0) { //definition not found in source database
+        if (empty($def_ids) || $wrong_id>0) { //definition not found in source database
             $smsg = ($wrong_id!=null) ?$wrong_id :'concept code '.$cCode;
             $this->system->addError(HEURIST_ERROR, 'Unable to get '.$this->prime_defType. ' definition with '.$smsg.' from registered database #'.$db_reg_id);
             return false; //see $system->getError
@@ -393,7 +393,7 @@ class DbsImport {
                     $this->_findDependentRecordTypes($def_id, 0);
                 }
 
-                if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0 && count($this->imp_terms)==0){
+                if(empty($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0 && count($this->imp_terms)){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one entity to be imported found');
                     return false;
                 }
@@ -405,7 +405,7 @@ class DbsImport {
                     $this->_findDependentRecordTypesByFieldId($def_id);
                 }
 
-                if(count($this->imp_fieldtypes)==0 && count($this->imp_terms)==0){
+                if(empty($this->imp_fieldtypes)==0 && count($this->imp_terms)){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one field or vocabulary to be imported found');
                     return false;
                 }
@@ -460,7 +460,7 @@ class DbsImport {
             //5. some field types may not belong to recordtypes, they should be imported too
             // {id: '1', name: 'Titre', code: '2-1'}
             $all_fieldtypes = @$data['fieldtypes'];//[$local_id]['name']
-            if(is_array($all_fieldtypes) && count($all_fieldtypes)>0){
+            if(!isEmptyArray($all_fieldtypes)){
                 foreach ($all_fieldtypes as $ftId => $field){
                     if(!(@$this->fields_correspondence[$ftId] || in_array($ftId, $this->imp_fieldtypes) )){
 
@@ -536,7 +536,7 @@ class DbsImport {
             return false;
         }
 
-        if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
+        if(empty($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)){
             $mysqli->commit();
             $this->system->cleanDefCache();
             return true;
@@ -1012,7 +1012,7 @@ TitleMask::set_fields_correspondence(null);
 // ------------------------------------------------------------------------------------------------
 
 // VII. Import calculated fields
-if(is_array($cfn_tobeimported) && count($cfn_tobeimported)>0){
+if(!isEmptyArray($cfn_tobeimported)){
 
 $cfn_entity = new DbDefCalcFunctions($this->system);
 
@@ -2200,7 +2200,7 @@ $mysqli->commit();
             ];
         }
 
-        if(count($this->broken_terms_reason)>0){
+        if(!empty($this->broken_terms_reason)){
             $resp['report']['broken_terms'] = $this->broken_terms;
             $resp['report']['broken_terms_reason'] = $this->broken_terms_reason;
         }

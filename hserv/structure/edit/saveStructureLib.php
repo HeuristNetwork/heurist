@@ -405,7 +405,7 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
 
     $ret = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $colNames = join(",",$commonNames);
 
@@ -519,7 +519,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
 
     $query="";
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $parameters = array("");//list of field date types
         foreach ($commonNames as $colName) {
@@ -707,7 +707,7 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
     }
     $order = 10;
 
-    if(is_array($newfields) && count($newfields)>0){
+    if(!isEmptyArray($newfields)){
 
         //find two separators
         $seps = array();
@@ -778,7 +778,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     $query2 = "";
 
-    if (is_array($dtFieldNames) && count($dtFieldNames)>0 && count($rt['dtFields']))
+    if (!isEmptyArra($dtFieldNames) && !empty($rt['dtFields']))
     {
 
         //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that
@@ -868,7 +868,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     } //if column names
 
-    if (count($ret[$rtyID])==0) {
+    if (empty($ret[$rtyID])) {
         array_push($ret[$rtyID], "no data supplied for updating record structure - $rtyID");
     }
 
@@ -913,7 +913,7 @@ function createRectypeGroups($columnNames, $rt) {
 
     $rtg_Name = null;
     $ret = array();
-    if (is_array($columnNames) && count($columnNames)>0 ) {
+    if (!isEmptyArra($columnNames) ) {
 
         $colNames = join(",",$columnNames);
         foreach ( $rt as $newRT) {
@@ -985,7 +985,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
     $ret = array();
     $query = "";
     $rtg_Name = null;
-    if ( is_array($columnNames) && count($columnNames)>0 ) {
+    if ( !isEmptyArra($columnNames) ) {
 
         $vals = $rt;
         $parameters = array("");//list of field date types
@@ -1095,7 +1095,7 @@ function createDettypeGroups($columnNames, $rt)
 
     $dtg_Name = null;
     $ret = array();
-    if (is_array($columnNames) && count($columnNames)>0) {
+    if (!isEmptyArray($columnNames)) {
 
         $colNames = join(",",$columnNames);
         foreach ( $rt as $newRT) {
@@ -1168,7 +1168,7 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
     $ret = array();
     $dtg_Name = null;
     $query = "";
-    if (is_array($columnNames) && count($columnNames)>0) {
+    if (!isEmptyArray($columnNames)) {
 
         $vals = $rt;
         $parameters = array("");//list of field date types
@@ -1269,7 +1269,7 @@ function createDetailTypes($commonNames, $dt) {
 
     $ret = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
 
         $colNames = join(",",$commonNames);
@@ -1380,7 +1380,7 @@ function updateDetailType($commonNames,$dtyID,$dt) {
     $query = "";
     $dty_Name = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $vals = $dt['common'];
         $parameters = array("");//list of field date types
@@ -1481,7 +1481,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
     $ret = null;
 
-    if (is_array($colNames) && count($colNames)>0 && is_array($values) && count($values)>0)
+    if (!isEmptyArray($colNames) && is_array($values))
     {
         $isInsert = ($trmID==null || (!is_numeric($trmID) && (strrpos($trmID, "-")>0)));
 
@@ -1696,7 +1696,7 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
     //4. update term $retain_id
     $res = updateTerms( $colNames, $retain_id, $dt, null );
     if(!($res>0)){
-        if(!(count($system->getError())>0)){
+        if(!(!empty($system->getError()))){
             $system->addError(HEURIST_ACTION_BLOCKED, $res);
         }
         $ret = false;
@@ -2147,7 +2147,7 @@ function deleteRelConstraint($srcID, $trgID, $trmID){
     $trmID = prepareIds($trmID);
     if ( count($trmID)>1 ) {
         $query = $query." and rcs_TermID in (".implode(',',$trmID).")";
-    }elseif(count($trmID)==0){
+    }elseif(empty($trmID)){
         $query = $query." and rcs_TermID is null";
     }else{
         $query = $query." and rcs_TermID=".intval($trmID[0]);

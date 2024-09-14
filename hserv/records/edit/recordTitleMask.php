@@ -673,7 +673,7 @@ private static function __get_file_name($ulf_ID){
 
     if($ulf_ID>0){
         $fileinfo = fileGetFullInfo(self::$system, $ulf_ID);
-        if(is_array($fileinfo) && count($fileinfo)>0){
+        if(!isEmptyArray($fileinfo)){
             return $fileinfo[0]['ulf_OrigFileName'] == ULF_REMOTE ?
                     $fileinfo[0]['ulf_ExternalFileReference'] : $fileinfo[0]['ulf_OrigFileName'];
             //  array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
@@ -754,7 +754,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
         }
 
-        if(count($res)==0){
+        if(empty($res)){
             return "";
         /*}elseif($dt_type == 'file'){
             return count($res)." file".(count($res)>1?"s":"");*/
@@ -958,7 +958,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         //parse human readable with double fullstops
         $matches = explode($fullstop, $field_name);
 
-        if (count($matches)>0) {
+        if (!empty($matches)) {
             // fix rare case when we have more than 2 fullstops
             // in this case redundant fullstops are added to previous field
             //  AAA...BBB  =>  AAA. and BB
@@ -1195,7 +1195,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
                 $inner_rec_type = explode(",", $inner_rec_type);
             }
-            if(count($inner_rec_type)>0){ //constrained
+            if(!empty($inner_rec_type)){ //constrained
                 $field_not_found = null;
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);

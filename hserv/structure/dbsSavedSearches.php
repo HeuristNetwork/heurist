@@ -34,7 +34,7 @@
 
             $rec_ids = prepareIds($rec_ids);
 
-            if (count($rec_ids)>0) {
+            if (!empty($rec_ids)) {
 
                 $mysqli = $system->get_mysqli();
                 $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_ID in ('
@@ -112,7 +112,7 @@
                 }
             }
 
-            if(count($order)>0){
+            if(!empty($order)){
                 $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
             }
         }
@@ -345,7 +345,7 @@
             }
         }
 
-        if(count($personal_data)>0){
+        if(!empty($personal_data)){
 
                 $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr',
                    array( 'ugr_ID'=>$ugrID, 'ugr_NavigationTree'=>implode(',', $personal_data)));

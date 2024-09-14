@@ -66,7 +66,7 @@ class DbUsrBookmarks extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             //$ugrs = $this->system->get_user_group_ids();
             $ugrID = $this->system->get_user_id();
@@ -145,7 +145,7 @@ class DbUsrBookmarks extends DbEntityBase
         $rec_IDs = prepareIds(@$this->data['bkm_RecID']);//these are rec_IDs from Record table
         $bkm_IDs = prepareIds(@$this->data['bkm_ID']);
 
-        if(count($rec_IDs)==0 && count($bkm_IDs)==0){
+        if(empty($rec_IDs)==0 && count($bkm_IDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
         }
@@ -153,7 +153,7 @@ class DbUsrBookmarks extends DbEntityBase
         $mysqli = $this->system->get_mysqli();
 
         //bookmarks id not defined - find them by record ids
-        if(count($bkm_IDs)==0){
+        if(empty($bkm_IDs)){
             $query =  'bkm_RecID in (' . join(',', $rec_IDs).')';
 
             $rec_RecTypeID = @$this->data['rec_RecTypeID'];
@@ -175,7 +175,7 @@ class DbUsrBookmarks extends DbEntityBase
         if($is_unbookmark){
             //remove bookmarks and detach personal tags
 
-            if(count($bkm_IDs)>0){
+            if(!empty($bkm_IDs)){
 
                 $keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -225,7 +225,7 @@ class DbUsrBookmarks extends DbEntityBase
                 return false;
             }
 
-            if(count($bkm_IDs)>0){
+            if(!empty($bkm_IDs)){
                 $query =  'bkm_ID in (' . join(',', $bkm_IDs).')';
 
                 $query =  'update usrBookmarks set bkm_Rating = ' . $rating . SQL_WHERE.$query

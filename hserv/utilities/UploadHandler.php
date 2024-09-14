@@ -1416,7 +1416,7 @@ class UploadHandler
                 $failed_versions[$version ? $version : 'original'] = $res;
             }
         }
-        if (count($failed_versions)>0) {
+        if (!empty($failed_versions)) {
 
             if(@$failed_versions['original']){
                 $file->error = $failed_versions['original'];

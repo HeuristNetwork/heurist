@@ -226,7 +226,7 @@ exit;
 
         $ret = null;
 
-        if (is_array($colNames) && is_array($values) && count($colNames)>0 && count($values)>0){
+        if (!isEmptyArray($colNames) && is_array($values)){
 
             $isInsert = ($recID<0);
 

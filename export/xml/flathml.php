@@ -1050,7 +1050,7 @@ function outputRecords($result) {
 
                 $related_rec_ids = $res['related'];
 
-                if(count($res['relationRecs'])>0){
+                if(!empty($res['relationRecs'])){
                     $relations_rec_ids[$current_depth] = array_merge($relations_rec_ids[$current_depth], $res['relationRecs']);
                 }
 
@@ -1896,7 +1896,7 @@ if($rectype_templates){
     }else{
         $error_msg = @$result['message'];
         $error_msg = $system->getError();
-        if(count($error_msg)>0){
+        if(!empty($error_msg)){
             $error_msg = $error_msg[0]['message'];
         }else{
             $error_msg = 'Unknown error on record search. Search parmeters: '.print_r($params,true);

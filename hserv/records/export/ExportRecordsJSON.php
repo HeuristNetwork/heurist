@@ -134,7 +134,7 @@ protected function _outputPrepareFields($params){
             }
         }
 
-        if(!is_array($this->retrieve_detail_fields) || count($this->retrieve_detail_fields)==0){
+        if(isEmptyArray($this->retrieve_detail_fields)){
             $this->retrieve_detail_fields = false;
         }
 
@@ -590,7 +590,7 @@ private static function _getMediaViewerData($record){
     }
 
     //2. get file info
-    if(count($info)>0){
+    if(!empty($info)){
 
         foreach($info as $fileinfo){
 
@@ -631,7 +631,7 @@ private static function _getMediaViewerData($record){
             }
         }//for
 
-    }//count($file_ids)>0
+    }//!empty($file_ids)
 
 
     return $res;

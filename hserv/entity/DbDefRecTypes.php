@@ -191,7 +191,7 @@ class DbDefRecTypes extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-        if(count($where)>0){
+        if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
         }
         if($orderby!=null){
@@ -486,7 +486,7 @@ class DbDefRecTypes extends DbEntityBase
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+            if(!isEmptyArray($this->data['fields'])){
 
                 $ret = array();
                 foreach($this->data['fields'] as $idx => $record){

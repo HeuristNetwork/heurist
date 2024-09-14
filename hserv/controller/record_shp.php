@@ -227,7 +227,7 @@ global $is_api;
 
 
                         $geo = @$feature['geometry'];
-                        if(is_array(@$geo['coordinates']) && count(@$geo['coordinates'])>0){
+                        if(!isEmptyArray(@$geo['coordinates'])){
 
                             if($geo['type']=='LineString'){
 

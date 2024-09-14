@@ -120,7 +120,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
                 .' FROM defFileExtToMimetype';
 
-         if(count($where)>0){
+         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
 

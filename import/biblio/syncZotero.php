@@ -311,14 +311,16 @@ foreach ($fh_data->children() as $f_gen){
 
 if($step=="1"){  // info about current status
     // show mapping and transfer issues report, also show the success mappings+transfers
-    if(count($mapping_rt_errors2)>0 || count($mapping_errors)>0 || count($transfer_errors)>0){
+    if(!empty($mapping_rt_errors2) 
+    || !empty($mapping_errors) 
+    || !empty($transfer_errors)){
 
-        if(count($mapping_errors)>0){
+        if(!empty($mapping_errors)){
             print "<strong>Data not mapped</strong><br>";
             print "<em>The following data has not been mapped for transfer from Zotero to Heurist.<br>If you require these record types or fields to be mapped,<br>please email a list to the Heurist team (support at HeuristNetwork.org).</em><br><br>";
             print TABLE_S.implode("",$mapping_errors).TABLE_E."<br>";
         }
-        if(count($transfer_errors)>0){
+        if(!empty($transfer_errors)){
             print "<strong>Data not transfered</strong><br>";
             print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>"
                 . "not be saved as the record type does not contain a field to hold them. If you feel that<br>"
@@ -326,7 +328,7 @@ if($step=="1"){  // info about current status
                 . "type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br><br>";
             print TABLE_S.implode("", $transfer_errors).TABLE_E."<br>";
         }
-        if(count($mapping_rt_errors2)>0){
+        if(!empty($mapping_rt_errors2)){
             print "<p style='color:red'><br>No proper field mapping found for record types:";
             print "<br><br>".implode("<br>",$mapping_rt_errors2).'</p>';
         }
@@ -334,7 +336,7 @@ if($step=="1"){  // info about current status
         print "<p style='color: red;margin-top: 0px;'>Please import them from the Heurist_Bibliographic database (# 6) using Design > Browse templates</p>";
     }
 
-    if(count($successful_rows)>0){
+    if(!empty($successful_rows)){
 
         print "<div id='success-accordion'><h3><strong>Data mapped for transfer</strong></h3>";
         print DIV_S.TABLE_S.implode("", $successful_rows).TABLE_E.DIV_E."</div><br><br>";
@@ -756,7 +758,7 @@ if($step=="1"){  //first step - info about current status
                 }else{
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $totalitems);
                     if($new_recid){
-                        if(count($unresolved_records)>0){
+                        if(!empty($unresolved_records)){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
                         if(!@$cnt_report[$recordType]) {$cnt_report[$recordType] = array('added'=>array(), 'updated'=>array());}
@@ -847,7 +849,7 @@ if($step=="1"){  //first step - info about current status
             .',null,"Zotero synchronisation warnings");</script>';
     }
 
-    if(count($unresolved_pointers)>0){
+    if(!empty($unresolved_pointers)){
         //print "<div><br>Create/update resource records</div>";//ij: need hide this info
         print "<br>";
 
@@ -1377,7 +1379,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
     $new_recid = null;
 
-    if( count($details)>0){
+    if( !empty($details)){
 
         if($zotero_itemid){
             $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);

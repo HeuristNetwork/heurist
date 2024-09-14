@@ -43,7 +43,7 @@ use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../viewers/smarty/showReps.php';
 
-if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCronJobs
+if(isset($_REQUEST) && !empty($_REQUEST)){ //if set it is included in dailyCronJobs
 
     //system is defined in showReps
     if(!$system->is_inited()){

@@ -223,7 +223,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         $file_ids = array($file_ids);
     }
 
-    if(is_array($file_ids) && count($file_ids)>0){
+    if(!isEmptyArray($file_ids)){
 
         $mysqli = $system->get_mysqli();
 

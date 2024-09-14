@@ -522,11 +522,11 @@ public static function output($data, $params){
             }
         }
 
-        if(is_array(@$details[$rty_ID]) && count($details[$rty_ID])>0){
+        if(!isEmptyArray(@$details[$rty_ID])){
             //fils $record
             recordSearchDetails(self::$system, $record, $details[$rty_ID]);
         }
-        if(is_array(@$relmarker_details[$rty_ID]) && count($relmarker_details[$rty_ID])>0){
+        if(!isEmptyArray(@$relmarker_details[$rty_ID])){
             $related_recs = recordSearchRelated(self::$system, array($recID), 0);
             if(@$related_recs['status']==HEURIST_OK){
                 $related_recs = $related_recs['data'];
@@ -693,7 +693,7 @@ public static function output($data, $params){
                             }
                         }elseif($dt_type=='enum' || $dt_type=='relationtype'){
 
-                            if(!empty($defTerms) && is_array($values) && count($values)>0){
+                            if(!empty($defTerms) && !isEmptyArray($values) ){
                                 foreach($values as $val){
                                     $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
                                     // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
@@ -765,7 +765,7 @@ public static function output($data, $params){
             if($value===null) {$value = ''; }
 
 
-            if(is_array($enum_label) && count($enum_label)>0){
+            if(!isEmptyArray($enum_label)){
                 if(!$term_ids_only) {$record_row[] = implode($csv_mvsep,$enum_label);}
                 if($include_term_ids) {$record_row[] = $value;}
                 if($include_term_codes) {$record_row[] = implode($csv_mvsep,$enum_code);}
@@ -773,30 +773,30 @@ public static function output($data, $params){
                 $record_row[] = $value;
 
                 // Additional Date Field
-                if(count($date_temporals)>0){
+                if(!empty($date_temporals)){
                     $record_row[] = implode($csv_mvsep, $date_temporals);
                 }
 
                 // Additional File Fields
-                if (count($file_ids)>0){
+                if (!empty($file_ids)){
                     $record_row[] = implode($csv_mvsep,$file_ids);
                 }
-                if (count($file_names)>0){
+                if (!empty($file_names)){
                     $record_row[] = implode($csv_mvsep,$file_names);
                 }
-                if (count($file_paths)>0){
+                if (!empty($file_paths)){
                     $record_row[] = implode($csv_mvsep,$file_paths);
                 }
 
-                if (count($resource_titles)>0){
+                if (!empty($resource_titles)){
                     $record_row[] = implode($csv_mvsep,$resource_titles);
-                }elseif (count($file_urls)>0){
+                }elseif (!empty($file_urls)){
                     $record_row[] = implode($csv_mvsep,$file_urls);
-                }elseif (count($record_urls)>0){
+                }elseif (!empty($record_urls)){
                     $record_row[] = implode($csv_delimiter,$record_urls);// two separate columns
                 }
 
-                if($value == '' && $dt_type=="resource" && $include_resource_titles && count($resource_titles)==0){ // to avoid mismatched rows when adding details
+                if($value == '' && $dt_type=="resource" && $include_resource_titles && empty($resource_titles)){ // to avoid mismatched rows when adding details
                     $record_row[] = $value;
                 }
             }
@@ -804,7 +804,7 @@ public static function output($data, $params){
         }//for fields
 
         // write the data to csv
-        if(is_array($record_row) && count($record_row)>0) {
+        if(!isEmptyArray($record_row)) {
             if($has_advanced){
                 $csvData[$rty_ID][] = $record_row;
 
@@ -1085,7 +1085,7 @@ public static function output_header($data, $params)
     }
 
 
-    if(is_array($terms_pickup) && count($terms_pickup)>0) {
+    if(!isEmptyArray($terms_pickup)) {
         $defTerms = dbs_GetTerms(self::$system);
         $defTerms = new DbsTerms(self::$system, $defTerms);
     }
@@ -1216,7 +1216,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         $out = false;
         $rty_ID = 0;
 
-        if(count($streams)==0){
+        if(empty($streams)){
             if($error_log) {array_push($error_log, "Streams are not defined");}
         }else{
             $rty_ID = array_keys($streams);
@@ -1319,7 +1319,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                 }
             }
 
-            if(is_array($error_log) && count($error_log)>0){
+            if(!isEmptyArray($error_log)){
                 $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
             }
 

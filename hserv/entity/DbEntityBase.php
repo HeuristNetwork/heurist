@@ -127,7 +127,7 @@ abstract class DbEntityBase
     // fields is not empty array
     //
     public function isvalid(){
-        return is_array($this->config) && is_array($this->fields) && count($this->fields)>0;
+        return is_array($this->config) && !isEmptyArray($this->fields);
     }
 
     //
@@ -568,7 +568,7 @@ abstract class DbEntityBase
             }
 
             //update translations
-            if(is_array(@$this->translation[$rec_idx]) && count($this->translation[$rec_idx])>0)
+            if(!isEmptyArray(@$this->translation[$rec_idx]))
             {
                 foreach($this->multilangFields as $fieldname){
                     //delete previous translations for this record
@@ -594,7 +594,7 @@ abstract class DbEntityBase
                     }
                 }
 
-            }elseif(!$isinsert && count($this->multilangFields)>0){
+            }elseif(!$isinsert && !empty($this->multilangFields)){
                 //remove all translation for this record
 
                 $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
@@ -625,7 +625,7 @@ abstract class DbEntityBase
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         }
 
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
         }
@@ -689,7 +689,7 @@ abstract class DbEntityBase
         // delete from translation table all fields that starts with current table prefix and with given record ids
         // array('rty','dty','ont','vcb','trm','rst','rtg')
         //
-        if(count($this->multilangFields)>0)
+        if(!empty($this->multilangFields))
         {
             $mysqli->query(SQL_DELETE.'defTranslations where trn_Source LIKE "'
                                 .$this->config['tablePrefix'].'%" AND '
@@ -760,8 +760,8 @@ abstract class DbEntityBase
 
         if($this->requireAdminRights &&
             !$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
+            ((!isEmptyArray($this->recordIDs))
+            || (!isEmptyArray($this->records)))){ //there are records to update/delete
 
             $ent_name = @$this->config['entityTitlePlural']?$this->config['entityTitlePlural']:'this entity';
 
@@ -828,7 +828,7 @@ abstract class DbEntityBase
             $value = @$fieldvalues[$fieldname];
 
             if(@$field_config['rst_MultiLang'] && is_array($value)){
-                $value = count($value)>0?$value[0]:'';
+                $value = !empty($value)?$value[0]:'';
             }
 
             if( isEmptyStr($value) ){
@@ -868,7 +868,7 @@ abstract class DbEntityBase
 
             if(@$field['dtID']==$id){
                 return $field;
-            }elseif(is_array(@$field['children']) && count($field['children'])>0){
+            }elseif(!isEmptyArray(@$field['children'])){
                 $res = $this->_getFieldByID($id, $field['children']);
                 if($res){
                     return $res;
@@ -885,7 +885,7 @@ abstract class DbEntityBase
 
         foreach($fields as $idx=>$field){
 
-            if(is_array(@$field['children']) && count($field['children'])>0){
+            if(!isEmptyArray(@$field['children'])){
 
                 $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
                 if($fld_loc && @$fld_loc['groupHeader']){
@@ -921,7 +921,7 @@ abstract class DbEntityBase
 
         foreach($fields as $field){
 
-            if(is_array(@$field['children']) && count($field['children'])>0){
+            if(!isEmptyArray(@$field['children'])){
                 $this->_readFields($field['children']);
 
             }else{

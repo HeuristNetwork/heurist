@@ -73,7 +73,7 @@ if($is_own_domain){
     //'dicobiosport'
     //detect databasename
     $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);//remove .huma-num.fr
-    if(count($requestUri)==0 || $requestUri[0]!=$database_name_from_domain){
+    if(empty($requestUri) || $requestUri[0]!=$database_name_from_domain){
         array_unshift($requestUri, $database_name_from_domain);
     }
 }
@@ -261,7 +261,7 @@ $requestUri:
 
                     $ids = prepareIds(@$requestUri[3]);
 
-                    if(count($ids)>0){
+                    if(!empty($ids)){
                         $redirect .= ('ids:'.$requestUri[3]);
                     }else{
                         $redirect .= $requestUri[3];
@@ -284,7 +284,7 @@ $requestUri:
                 $query = null;
                 if(@$requestUri[3]){
                     $ids = prepareIds(@$requestUri[3]);
-                    if(count($ids)>0){
+                    if(!empty($ids)){
                         $query = ('ids:'.$requestUri[3]);
                     }else{
                         $query = urldecode($requestUri[3]);
@@ -309,7 +309,7 @@ $requestUri:
                         $redirect .= ('viewers/smarty/showReps.php?db='.$database.'&template='.basename($requestUri[3]).'&publish=1&w=a&q=');
 
                         $ids = prepareIds(@$requestUri[4]);
-                        if(count($ids)>0){
+                        if(!empty($ids)){
                             $query = ('ids:'.$requestUri[4]);
                         }else{
                             $query = $requestUri[4];

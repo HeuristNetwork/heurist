@@ -104,7 +104,7 @@ class SystemEmailExt {
             }
 		}
 
-        if(!(is_array($this->databases) && count($this->databases)>0)){
+        if(isEmptyArray($this->databases)){
 			// Here databases is not an array
 			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . htmlspecialchars($data["databases"]);
 			$this->set_error('No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values.'
@@ -112,7 +112,7 @@ class SystemEmailExt {
 			return -1;
 		}
 
-		if(!(is_array($this->databases) && count($this->databases)>0)){
+		if(isEmptyArray($this->databases)){
 			// No valid databases found
 			$this->set_error('All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.');
 			return -1;
@@ -166,7 +166,7 @@ class SystemEmailExt {
 
 		if ($rtn != 0) {
 			return $rtn;
-		}elseif(is_array($this->user_details) && count($this->user_details) == 0){
+		}elseif(isEmptyArray($this->user_details)){
 
 			$this->set_error('No users have been retrieved, no emails have been sent');
 			return -1;
@@ -778,7 +778,7 @@ class SystemEmailExt {
 		}
 		$user_list .= "}";
 
-        if(count($this->user_invalid_email)>0){
+        if(!empty($this->user_invalid_email)){
             $user_list .= "<br>Users with invalid emails: {<br>";
             foreach ($this->user_invalid_email as $info) {
                 $user_list .= "&nbsp;&nbsp;". $info[0] ." ". $info[1]. '  '. $info[2] .' ('.$info[3].')'.": ". $info[4] ."<br>";

@@ -105,7 +105,7 @@ protected function _outputPrepare($data, $params){
                     if(is_String($_geofields)){
                         $_geofields = explode(',', $_geofields);
                     }
-                    if(is_Array($_geofields) && count($_geofields)>0){
+                    if(!isEmptyArray($_geofields)){
 
                         foreach($_geofields as $idx=>$code){
                             if($code=='all'){
@@ -129,10 +129,10 @@ protected function _outputPrepare($data, $params){
                 }
 
 
-                if(is_array($this->find_geo_by_pointer_dty) && count($this->find_geo_by_pointer_dty)==0){
+                if(isEmptyArray($this->find_geo_by_pointer_dty)){
                     $this->find_geo_by_pointer_dty = null;
                 }
-                if(is_array($this->find_by_geofields) && count($this->find_by_geofields)==0){
+                if(isEmptyArray($this->find_by_geofields)){
                     $this->find_by_geofields = null;
                 }
 
@@ -475,7 +475,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         unset($res['properties']['details']);
     }
 
-    if(is_array($this->find_by_geofields) && count($this->find_by_geofields)>0){
+    if(!isEmptyArray($this->find_by_geofields)){
         //find geo values in linked records
         foreach ($this->find_by_geofields as $idx => $code){
             if(is_array($code) && @$code['id'] && @$code['q']){
@@ -506,8 +506,8 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
     }else
     //record does not contains geo field - search geo in linked records
-    if( (!is_array($geovalues) || count($geovalues)==0) &&
-        ($this->find_geo_by_pointer_rty===true || (is_array($this->find_geo_by_pointer_rty) && count($this->find_geo_by_pointer_rty)>0)) ){
+    if( (isEmptyArray($geovalues)) &&
+        ($this->find_geo_by_pointer_rty===true || (!isEmptyArray($this->find_geo_by_pointer_rty))) ){
 
         //this record does not have geo value - find it in related/linked places
         $point0 = array();
@@ -553,7 +553,9 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         //special case
         //create link path from begin to end place
-        if (count($point1)>0 && count($point0)>0 || count($points)>0){
+        if ((!empty($point1) 
+            && !empty($point0)) 
+            || !empty($points)){
             //$geovalues = array();
 
             //many start points and transition points - star from start points to first transition
@@ -561,10 +563,10 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 $path = array('type'=>'MultiLineString', 'coordinates'=>array());
 
 
-                if(count($points)>0){
+                if(!empty($points)){
 
                     //adds lines from start to first transition
-                    if(count($point0)>0){
+                    if(!empty($point0)){
                         foreach($point0 as $pnt){
                             $path['coordinates'][] = array($pnt['coordinates'], $points[0]['coordinates']);
                         }
@@ -577,7 +579,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     $path['coordinates'][] = $path_t;
 
                     //lines from last transition to end points
-                    if(count($point1)>0){
+                    if(!empty($point1)){
                         $lidx = count($points)-1;
                         foreach($point1 as $pnt){
                             $path['coordinates'][] = array($points[$lidx]['coordinates'], $pnt['coordinates']);
@@ -595,19 +597,19 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
             }else{
                 $path = array('type'=>'LineString', 'coordinates'=>array());
 
-                if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
+                if(!empty($point0)) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
-                if(count($points)>0){
+                if(!empty($points)){
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }
                 }
-                if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
+                if(!empty($point1)) {$path['coordinates'][] = $point1[0]['coordinates'];}
 
             }
 
 
-            if(count($path['coordinates'])>0){
+            if(!empty($path['coordinates'])){
                 $geovalues[] = $path;
                 $geovalues_dty[] = 'Path';
             }
@@ -656,7 +658,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         }
     }
 
-    if(count($timevalues)>0){
+    if(!empty($timevalues)){
 
 //profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient
 //determination: Unknown(0), Conjecture(2), Measurment(3), Attested(1)  - color depth
@@ -694,7 +696,7 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
             $geojson_adapter = new \GeoJSON();
             $json = $geojson_adapter->write($geom, true);
 
-            if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
+            if(!isEmptyArray(@$json['coordinates'])){
 
                 if($simplify){
                     if($json['type']=='LineString'){
