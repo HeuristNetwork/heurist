@@ -2793,7 +2793,7 @@ class HPredicate {
             */
 
             //search for trm_ID
-            if(!isEmptyArra($parent_ids) && $this->field_term==null){
+            if(!isEmptyArray($parent_ids) && $this->field_term==null){
 
                 $all_terms = null;
                 if(!$this->exact){

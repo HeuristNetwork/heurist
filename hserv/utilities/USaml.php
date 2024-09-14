@@ -77,7 +77,7 @@ function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
     //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
 
     //find user in sysUGrps by email and/or uid
-    if(!isEmptyArra($attr) && ($system->is_inited() || $system->init( $dbname )) ){
+    if(!isEmptyArray($attr) && ($system->is_inited() || $system->init( $dbname )) ){
 
             $mysqli = $system->get_mysqli();
 

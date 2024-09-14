@@ -1769,7 +1769,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                 //find ANY first home record
                 $response = recordSearch($system, array('q'=>'t:'.RT_CMS_HOME, 'detail'=>'ids', 'w'=>'a'));
 
-                if($response['status'] == HEURIST_OK  && !isEmptyArra(@$response['data']['records']) ){
+                if($response['status'] == HEURIST_OK  && !isEmptyArray(@$response['data']['records']) ){
                     $res = $response['data']['records'][0];
                 }else{
                     return $system->addError(HEURIST_ERROR,
@@ -2689,7 +2689,7 @@ function recordSearch($system, $params, $relation_query=null)
                                     $params['links_count']['target'],
                                 @$params['links_count']['dty_ID']);
 
-                    if($links_counts['status']==HEURIST_OK && !isEmptyArra(@$links_counts['data']) ){
+                    if($links_counts['status']==HEURIST_OK && !isEmptyArray(@$links_counts['data']) ){
 
                         //order output
                         $res = array_keys($links_counts['data']);
@@ -2917,7 +2917,7 @@ function recordSearch($system, $params, $relation_query=null)
                                     }
                                     $fileinfo = $ruf_entity->registerURL($row[1], false, $dtl_ID);
 
-                                    if($fileinfo && !isEmptyArra($fileinfo)){
+                                    if($fileinfo && !isEmptyArray($fileinfo)){
 
                                         if($needCompleteInformation){
                                             $row[3] = $fileinfo['ulf_ID'];
@@ -3419,7 +3419,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
 
     $relmarker_fields = array();
 
-    if(!isEmptyArra($detail_types) ){
+    if(!isEmptyArray($detail_types) ){
 
         if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
 

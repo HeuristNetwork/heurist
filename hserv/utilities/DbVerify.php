@@ -592,7 +592,7 @@ class DbVerify {
 
         $rstWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-        if (!isEmptyArra($rstWithInvalidDefaultValues)){
+        if (!isEmptyArray($rstWithInvalidDefaultValues)){
 
 
             $resMsg = <<<'HEADER'

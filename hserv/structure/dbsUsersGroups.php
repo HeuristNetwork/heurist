@@ -1223,7 +1223,7 @@
             $new_prefs = json_decode($new_prefs, true);
         }
 
-        if(isEmptyArra($new_prefs) && isEmptyArra($to_remove)) {
+        if(isEmptyArray($new_prefs) && isEmptyArray($to_remove)) {
 
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
@@ -1416,7 +1416,7 @@
 
                 if($prefs!=null && $prefs!=''){
                     $prefs = json_decode($prefs, true);
-                    if(!isEmptyArra($prefs) && array_key_exists('externalRepositories',$prefs)){
+                    if(!isEmptyArray($prefs) && array_key_exists('externalRepositories',$prefs)){
                         $prefs = $prefs['externalRepositories'];
                         if(!isEmptyArray($prefs)){
                             if($serviceName==null || $serviceName=='all'){
@@ -1471,7 +1471,7 @@
                     $prefs = $row[2];
                     if($prefs!=null && $prefs!=''){
                         $prefs = json_decode($prefs, true);
-                        if(!isEmptyArra($prefs) && array_key_exists('externalRepositories',$prefs)){
+                        if(!isEmptyArray($prefs) && array_key_exists('externalRepositories',$prefs)){
                                 $prefs = $prefs['externalRepositories'];
                                 if(is_array($prefs)){
                                     foreach($prefs as $service_id=>$service){

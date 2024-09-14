@@ -1037,7 +1037,7 @@ public static function validateImport($params) {
             ." LEFT JOIN Records on rec_ID=`$id_field` "
             ." WHERE `$id_field`>0 and rec_ID is null LIMIT 5000";//for preview only
             $res = mysql__select_all($mysqli, $select_query);
-            if(!isEmptyArra($res)){
+            if(!isEmptyArray($res)){
                 if(@$imp_session['validation']['recs_insert']){
                     $imp_session['validation']['recs_insert'] = array_merge($imp_session['validation']['recs_insert'], $res);
                 }else{

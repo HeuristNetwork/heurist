@@ -287,7 +287,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             $wg_ids = array();
         }
 
-        if(!isEmptyArra($wg_ids) && $currUserID>0){
+        if(!isEmptyArray($wg_ids) && $currUserID>0){
             //for hidden
             $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
             if(count($wg_ids)>1){

@@ -778,7 +778,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     $query2 = "";
 
-    if (!isEmptyArra($dtFieldNames) && !empty($rt['dtFields']))
+    if (!isEmptyArray($dtFieldNames) && !empty($rt['dtFields']))
     {
 
         //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that
@@ -913,7 +913,7 @@ function createRectypeGroups($columnNames, $rt) {
 
     $rtg_Name = null;
     $ret = array();
-    if (!isEmptyArra($columnNames) ) {
+    if (!isEmptyArray($columnNames) ) {
 
         $colNames = join(",",$columnNames);
         foreach ( $rt as $newRT) {
@@ -985,7 +985,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
     $ret = array();
     $query = "";
     $rtg_Name = null;
-    if ( !isEmptyArra($columnNames) ) {
+    if ( !isEmptyArray($columnNames) ) {
 
         $vals = $rt;
         $parameters = array("");//list of field date types
