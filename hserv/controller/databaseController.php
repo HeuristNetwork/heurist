@@ -432,7 +432,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                 }
                 if(is_array($res)){
-                    if(!(!empty($res))){
+                    if(empty($res)){
                         $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");
                         $res = false;
                     }elseif(@$req_params['reload']==1){

@@ -1695,8 +1695,8 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
 
     //4. update term $retain_id
     $res = updateTerms( $colNames, $retain_id, $dt, null );
-    if(!($res>0)){
-        if(!(!empty($system->getError()))){
+    if(!isPositiveInt($res)){
+        if(empty($system->getError())){
             $system->addError(HEURIST_ACTION_BLOCKED, $res);
         }
         $ret = false;

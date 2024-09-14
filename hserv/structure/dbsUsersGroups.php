@@ -1279,7 +1279,7 @@
         }
 
         //save into database
-        if(!(!empty($prepared))){
+        if(empty($prepared)){
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
         }
