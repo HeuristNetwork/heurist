@@ -295,7 +295,7 @@ class ElasticSearch {
             print "ElasticSearch service not detected";
             return false;
         }
-        
+
             if ($print){
                 print "Building all Elasticsearch indices for: $dbName<br>";
             }
@@ -320,8 +320,8 @@ class ElasticSearch {
                 $res->close();
                 return true;
             }
-            
-            
+
+
         error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
         return false;
     } // buildAllIndices

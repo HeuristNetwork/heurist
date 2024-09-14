@@ -2,7 +2,7 @@
 use hserv\utilities\USanitize;
 
 global $rep_counter, $rep_issues, $reg_info;
-  
+
 $rep_counter = null;
 $rep_issues = null;
 $reg_info = array('reg'=>array(),'nonreg'=>array());
@@ -60,7 +60,7 @@ function getMediaFolders($mysqli) {
 function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
     global $rep_counter, $rep_issues, $reg_info;
-    
+
     $reg_info = array('reg'=>array(),'nonreg'=>array());
 
     $system_folders = $system->getSystemFolders();
@@ -82,9 +82,9 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
         }else{
 
             $dir = USanitize::sanitizePath($dir);
-            
+
             $real_path = isPathInHeuristUploadFolder($dir, true);
-            
+
             if(!$real_path){
                 if($is_report){
                     print error_Div(htmlspecialchars($dir).' is ignored. Folder '
@@ -179,7 +179,7 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
 
     foreach ($all_files as $filename){
 
-        if(is_dir($dir.$filename) || $filename=="." || $filename==".." 
+        if(is_dir($dir.$filename) || $filename=="." || $filename==".."
             || $filename=="fieldhelper.xml" || $filename=="index.html" || $filename==".htaccess"){
             continue;
         }

@@ -69,28 +69,28 @@ function __checkVersionDatabase(){
             print htmlspecialchars($db_name.'  >>> '.$mysqli->error);
         }else{
 
-            
+
             $is_old_version = (version_compare($min_version,
                     $ver['sys_dbVersion'].'.'
                     .$ver['sys_dbSubVersion'].'.'
                     .$ver['sys_dbSubSubVersion'])>0);
-                                
+
             $missed = hasAllTables($mysqli); //, 'hdb_'.$db_name
             $has_missed = (is_array($missed) && count($missed)>0);
             if(!is_array($missed)){
                 print 'ERROR '.$missed.'  ';
             }
 
-            if($is_old_version || $has_missed){            
+            if($is_old_version || $has_missed){
                 print DIV_S.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
-            
+
                 if($has_missed){
                     print '<br>Missed: '.implode(', ',$missed);
                 }
-                
+
                 if(@$_REQUEST['upgrade'] && $is_old_version && $ver['sys_dbSubVersion']==3 && $ver['sys_dbSubSubVersion']>=0){
                         $rep = updateDatabseTo_v1_3_16($system);
-                        
+
                         if($rep!==false && $ver['sys_dbSubSubVersion']<14){ //for db_utils.php
                             $rep2 = recreateRecDetailsDateIndex($system, true, true);
                             if($rep2){
@@ -106,16 +106,16 @@ function __checkVersionDatabase(){
                             }
                             break;
                         }
-                        
-                        
+
+
                         print implode('<br>',$rep);
                 }
-                
-                
-            
+
+
+
                 print DIV_E;
             }else{
-               
+
             }
         }
     }
@@ -139,7 +139,7 @@ function __updateDatabase(){
         }
 
             if(!hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-               
+
                 //alter table
                 $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
                 ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
@@ -149,9 +149,9 @@ function __updateDatabase(){
                     print $db_name.' Cannot modify defRecStructure to add rst_SemanticReferenceURL: '.$mysqli->error;
                     return false;
                 }
-                    
+
                 print $db_name.'<br>';
-                
+
             }
 
             if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
@@ -166,12 +166,12 @@ function __updateDatabase(){
                     print $db_name.' Cannot modify defRecStructure to add rst_TermsAsButtons: '.$mysqli->error;
                     return false;
                 }
-                
+
                 print $db_name.'<br>';
-                
+
             }
 
-        
+
     }
 }
 
@@ -185,7 +185,7 @@ function __renameDegreeToKM(){
 
 
     //$query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
-   
+
 
     $query1 = 'UPDATE defRecStructure SET rst_DisplayName = REPLACE(rst_DisplayName, "degrees", "km"), rst_DefaultValue="" '
     .'where rst_DetailTypeID in (select dty_ID from defDetailTypes where dty_OriginatingDBID=3 and dty_IDInOriginatingDB in (1085,1086))';
@@ -283,21 +283,21 @@ function findMissedTermLinks() {
                 if(!(mysql__select_value($mysqli, 'select rtg_ID FROM '.$db_name.'.defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
         .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
-                   
+
                     $report[] = '"Trash" group has been added to rectype groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select vcg_ID FROM '.$db_name.'.defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
         .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
-                   
+
                     $report[] = '"Trash" group has been added to vocabulary groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select dtg_ID FROM '.$db_name.'.defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
         .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
-                   
+
                     $report[] = '"Trash" group has been added to field groups';
                 }
 */
@@ -311,11 +311,11 @@ Hide layer outside zoom range 3-1087  ( 2-6257 )  3-5081, 3-5082
 Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
         */
         //from fields to vocabs to terms - assign proper ccodes
-       
-       
-       
-       
-       
+
+
+
+
+
 
 
     }//while  databases
@@ -329,7 +329,7 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
 
     foreach ($db2_with_terms as $db_name=>$value){
         print $db_name.'<br>';
-       
+
     }
 
 
@@ -411,8 +411,8 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             }else{
                 print error_Div('VOCAB NOT DEFINED');
             }
-        
-        
+
+
 }
 
 //
@@ -453,7 +453,7 @@ function __findWrongChars(){
                     }
                 }//foreach
 
-            
+
             if($isOK){
                     print $db_name.' OK<br>';
             }
@@ -552,7 +552,7 @@ The local IDs in record details will continue to point to those terms
 function __setTermYesNo(){
 
     global $mysqli, $databases;
-    
+
     define('UPDATE_QUERY','INSERT INTO defTermsLinks (trl_ParentID,trl_TermID) VALUES(');
 
     print '[Fix Yes/No terms]<br>';
@@ -762,7 +762,7 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
 
             }else{
                 $not_found1[] = $nid;
-               
+
             }
 
         }
@@ -838,7 +838,7 @@ function __correctGetEstDate(){
 
     global $mysqli, $databases;
 
-   
+
     print '__correctGetEstDate<br>';
 
     foreach ($databases as $idx=>$db_name){
@@ -849,9 +849,9 @@ function __correctGetEstDate(){
         $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100';
         $res = $mysqli->query($query);
         if (!$res){
-            continue;   
+            continue;
         }
-        
+
             $cnt=0;
             $is_invalid = false;
             while ($row = $res->fetch_row()){
@@ -866,7 +866,7 @@ function __correctGetEstDate(){
 
                     $query = 'UPDATE recDetails SET dtl_Value="'.
                                                     $mysqli->real_escape_string($dtl_NewValue).'" WHERE dtl_ID='.$dtl_ID;
-                   
+
                     print htmlspecialchars($rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue).'<br>';
 
                     $cnt++;
@@ -880,8 +880,8 @@ function __correctGetEstDate(){
 
             //if($cnt>0 || $is_invalid){}
             print htmlspecialchars($db_name.'  '.$cnt).'<br>';
-            
-        
+
+
 
     }//for
 }
@@ -924,13 +924,13 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeD
             declare nameDate varchar(20) default '';
             declare strDate varchar(15) default '';
             declare estDate decimal(15,4);
-            
--- error handler for date conversion            
+
+-- error handler for date conversion
             DECLARE EXIT HANDLER FOR 1292
             BEGIN
                 RETURN 0;
             END;
-            
+
 -- find the temporal type might not be a temporal format, see else below
             IF (TRIM(sTemporal) REGEXP '^-?[0-9]+$') THEN
                 RETURN CAST(TRIM(sTemporal) AS DECIMAL(15,4));
@@ -940,7 +940,7 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeD
             if iBegin = 1 THEN
                 SET sTemporal = getTemporalDateString(sTemporal);
             END IF;
-            
+
             IF (typeDate = 0) THEN
                 set nameDate = '"estMinDate":';
             ELSE
@@ -950,12 +950,12 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeD
             SET iBegin = LOCATE(nameDate,sTemporal);
             IF iBegin = 0 THEN
 -- it will work for valid CE dates only, dates without days or month will fail
-                IF DATE(sTemporal) IS NULL THEN 
+                IF DATE(sTemporal) IS NULL THEN
                     RETURN 0;
-                ELSE    
+                ELSE
                     RETURN CAST(CONCAT(YEAR(sTemporal),'.',LPAD(MONTH(sTemporal),2,'0'),LPAD(DAY(sTemporal),2,'0')) AS DECIMAL(15,4));
-                END IF; 
-                 
+                END IF;
+
             ELSE
                 SET iBegin = iBegin + 13;
                 SET iEnd = LOCATE(',', sTemporal, iBegin);
@@ -966,12 +966,12 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getEstDate`(sTemporal varchar(4095), typeD
                     SET strDate =  substring(sTemporal, iBegin, iEnd - iBegin);
                     RETURN CAST(TRIM(strDate) AS DECIMAL(15,4));
                 END IF;
-                RETURN 0;    
+                RETURN 0;
             END IF;
     END$$
 
 DELIMITER ;
-*/            
+*/
             // recreate getEstDate function
             if(db_script('hdb_'.$db_name, dirname(__FILE__).'/../setup/dbcreate/getEstDate.sql', false)){
 
@@ -1077,16 +1077,16 @@ function __removeDuplicationValues(){
 
         $q = 'DELETE FROM recDetails WHERE dtl_RecID='.intval($row[0]).' AND dtl_DetailTypeID='.intval($row[1])
             .' AND dtl_Value=? LIMIT '.(intval($row[3])-1);
-        
+
         $ret = mysql__exec_param_query($mysqli,$q,array('s',$row[2],true));
         if(is_string($ret)){
             print 'ERROR. '.$ret;
             break;
         }else{
-            $cnt = $cnt + $ret;    
+            $cnt = $cnt + $ret;
         }
-        
-        
+
+
     }
     $res->close();
 
@@ -1114,7 +1114,7 @@ function __listOfAdminUsers(){
         if($vals){
             if(strpos($vals['ugr_Modified'],'2019')!==0 && $vals['ugr_Modified']<$mind)
             {
-               $mind = $vals['ugr_Modified'];     
+               $mind = $vals['ugr_Modified'];
             }
             echo '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);
         }
@@ -1138,9 +1138,9 @@ function __convertTustep(){
     $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
 
     // Convert the codepoints to entities
-   
 
-   
+
+
 
     $matches = array();
     preg_match_all("/\&[0-9a-zA-Z]+;/", $s, $matches);
@@ -1151,19 +1151,19 @@ function __convertTustep(){
 
     print '<xmp>'.$m.'</xmp>';
     print '<br>';
-   
+
     print '<br>';
     print print_r($matches, true);
     print '<br>';
     print print_r($matches2, true);
 
-   
+
 */
-   
-    
+
+
     define('AMP', '&amp;');
     define('TS_AMP', '#%#%#');
-    
+
 $tustep_to_html = array(
 AMP =>TS_AMP,
 '^u'    =>'&uuml;',
@@ -1293,7 +1293,7 @@ AMP =>TS_AMP,
     //
     $query = 'SELECT dtl_ID, dtl_Value, dtl_DetailTypeID, dtl_RecID FROM recDetails, Records '
     .'WHERE dtl_RecID=rec_ID AND rec_RecTypeID NOT IN (51,52) AND dtl_DetailTypeID in ('.implode(',',$txt_field_types).')';
-   
+
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){
@@ -1359,7 +1359,7 @@ AMP =>TS_AMP,
         }//while
         $res->close();
     }
-    
+
     mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
 
     print '<br>Replaced in '.$cnt.' fields';
@@ -1386,12 +1386,12 @@ function __findRDF(){
 
         $r1 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes'));
         $d1 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes'));
-       
+
         $t1 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms'));
 
         $r2 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null'));
         $d2 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null'));
-       
+
         $t2 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null'));
 
         if($r2>0 && $d2>1){
@@ -1451,18 +1451,18 @@ function __findBelegSpan($context){
     $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context,
             LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-   
+
 
     $finder = new DomXPath($dom);
-   
+
     $nodes = $finder->query("//span[contains(concat(' ', normalize-space(@class), ' '), ' Beleg ')]");
 
     foreach ($nodes as $idsx=>$node)
     {
         $nvals[] = $dom->saveHTML($node);
         //if(strpos($nval))
-       
-       
+
+
     }
 
     //if there no characters between spans they merge without space <span>a</span><span>dam</span> => adam
@@ -1512,12 +1512,12 @@ function __findBelegSpan($context){
                     mb_convert_encoding($str, "UTF-8").'<br>';
         */
 
-       
+
         $res = $res.$space.$nodes[$idx]->nodeValue;
     }
 
-   
-   
+
+
 
     print $res."\t";
     print htmlspecialchars($context_original)."\n";
@@ -1576,7 +1576,7 @@ function __fixDirectPathImages(){
 
     global $system, $mysqli, $databases;
 
-   
+
     $databases = array('efeo_khmermanuscripts');
 
     $doc = new DOMDocument();
@@ -1677,7 +1677,7 @@ function __fixDirectPathImages(){
                     $val_orig = str_replace($img,$img2,$val_orig);
 
                     $val = substr($val, $end+1);//rest
-                   
+
 
                 }else{
                     $success = false;
@@ -1701,7 +1701,7 @@ function __fixDirectPathImages(){
                 }
                 */
 
-               
+
                 $cnt2++;
             }
 
@@ -1720,7 +1720,7 @@ function __fixDirectPathImages(){
                     print $rec_ID.' '.$surl.'<br>';
 
                     $val = substr($val, $k+$m+1);//rest
-                   
+
 
                 }else{
                     print 'end of url not found '.substr($val, $k, 50);

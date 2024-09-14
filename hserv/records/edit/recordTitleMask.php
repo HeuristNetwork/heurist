@@ -331,7 +331,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
 
             $puncts = '-:;,.@#|+=&(){}';// These are stripped from begining and end of title
             $puncts2 = '-:;,@#|+=&';// same less period
-            
+
             $regex_ = '/\\s]*(.*?)[';
             $regex_2 = '!\\([';
 
@@ -599,7 +599,7 @@ private static function __get_record_value($rec_id, $reset=false) {
         }
 
         self::$records[$rec_id] = $ret;
-    
+
     return self::$records[$rec_id];
 }
 
@@ -623,8 +623,8 @@ private static function __get_enum_value($enum_id, $enum_param_name)
     if(!$ress){
         return null;
     }
-    
-        
+
+
         $relval = $ress->fetch_assoc();
         $ress->close();
 
@@ -632,11 +632,11 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 
         // If trm_label then construct is: "branch_trm_label. ... .leaf_term_label", ignore root label
         if(!(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null)){
-        
+
             return @$relval['trm_'.$get_param];
-            
+
         }
-        
+
         $ret = null;
 
         $trm_id = @$relval['trm_parenttermid'];
@@ -647,7 +647,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
             $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
 
             if(!$parent_ress){
-                break;   
+                break;
             }
 
             $parent_trm = $parent_ress->fetch_assoc();
@@ -655,7 +655,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
                 $parent_ress->close();
                 break;
             }
-            
+
             $ret = $parent_trm['trm_label'] . "." . $ret;
 
             $trm_id = $parent_trm['trm_ParentTermID'];
@@ -850,13 +850,13 @@ private static function __get_rt_id( $rt_search ){
 
         if(!$res){
             return array(0, '', '');
-        
+
         }
-        
+
         $row = $res->fetch_assoc();
         $res->close();
         if(!$row){
-            return array(0, '', '');    
+            return array(0, '', '');
         }
 
         if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
@@ -1296,7 +1296,7 @@ if (! function_exists('array_str_replace')) {
                 if(isEmptyStr($search[$i])) {continue;}
                 $offset = mb_strpos($subject, $search[$i]);
                 if ($offset === false) {continue;}
-                
+
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
                     $match_offset = $offset;
@@ -1309,7 +1309,7 @@ if (! function_exists('array_str_replace')) {
                 $subject = '';
                 break;
             }
-            
+
             $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
             $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
         }

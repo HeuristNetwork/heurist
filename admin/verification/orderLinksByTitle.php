@@ -77,7 +77,7 @@ if($res){
         }
         $ids[]  = intval($row[0]);
         $vals[] = intval($row[2]);
-       
+
     }
     $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);
 }
@@ -92,7 +92,7 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
         $k = 0;
         foreach ($ids as $dt) { //sorted dtl_ID
             $query = "update recDetails set dtl_Value=".$vals[$k].' where dtl_ID='.$ids[$k];
-           
+
             $res = $mysqli->query($query);
             if ($mysqli->error) {
                     print 'Error for query '.htmlspecialchars($query).' '.htmlspecialchars($mysqli->error);

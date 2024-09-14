@@ -110,7 +110,7 @@ class UImage {
     public static function makeURLScreenshot($siteURL){
 
         if(!filter_var($siteURL, FILTER_VALIDATE_URL)){
-            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');            
+            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
         }
 
             //$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);

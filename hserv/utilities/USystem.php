@@ -40,7 +40,7 @@ class USystem {
         $host_params = array();
 
         $localhost = '127.0.0.1';
-        
+
         $installDir = '';
         $codeFolders = array('heurist','h6-alpha','h6-ao');//need to cli and short url
 
@@ -123,7 +123,7 @@ class USystem {
             }
 
             $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
-            
+
             $matches = array();
             preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
             if($matches){
@@ -329,12 +329,12 @@ class USystem {
 
         return $ret;
     }
-    
+
     //
     //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
     //
     public static function getHostLogoAndUrl(){
-        
+
         //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
         $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.jpg");
         $mime_type = 'jpg';
@@ -345,7 +345,7 @@ class USystem {
         $host_url = null;
         if($host_logo!==false &&  file_exists($host_logo)){
             $host_logo = defined('HEURIST_BASE_URL')?HEURIST_BASE_URL.'?logo=host':null;
-            
+
             $host_url = realpath(dirname(__FILE__)."/../../../organisation_url.txt");
             if($host_url!==false && file_exists($host_url)){
                 $host_url = file_get_contents($host_url);
@@ -355,10 +355,10 @@ class USystem {
         }else{
             $host_logo = null;
         }
-    
+
         return array($host_logo, $host_url, $mime_type);
     }
-    
+
     //======================= session routines =================================
     //
     //
@@ -378,38 +378,38 @@ class USystem {
                 }
             }
         }
-        return $dbrecent; 
+        return $dbrecent;
     }
-    
+
     //
     //
     //
     public static function sessionCheckFolder(){
-        
+
         if(!ini_get('session.save_handler')=='files') { return true; }
-        
+
         $folder = session_save_path();
         if(file_exists($folder) && is_writeable($folder)){ return true; }
-            
+
         sendEmailToAdmin('Session folder access', 'The sessions folder has become inaccessible', true);
-            
+
         return false;
     }
-    
+
     //
     //
     //
     public static function sessionUpdateCookies($lifetime=null){
-    
+
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
 
         //update cookie - to keep it alive for next 30 days
         if($lifetime==null){
                 $lifetime = time() + 30*24*60*60;
         }
-        
+
         $session_id = session_id(); //ID of current session $cookie_session_id
-        
+
         if (strnatcmp(phpversion(), '7.3') >= 0) {
             $cres = setcookie('heurist-sessionid', $session_id, array(
                 'expires' => $lifetime,
@@ -423,11 +423,11 @@ class USystem {
             //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
             $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
         }
-        
+
         return $cres;
     }
 
-    
-    
+
+
 }
 ?>

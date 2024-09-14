@@ -32,7 +32,7 @@ class DbSysDashboard extends DbEntityBase
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
-        
+
     /**
     *  search groups
     *
@@ -49,15 +49,15 @@ class DbSysDashboard extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $this->searchMgr->addPredicate('dsh_ID');
         $this->searchMgr->addPredicate('dsh_Label');
         $this->searchMgr->addPredicate('dsh_Enabled');
         $this->searchMgr->addPredicate('dsh_ShowIfNoRecords');
-        
+
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('dsh_ID'); break;  
-            case 'name': $this->searchMgr->setSelFields('dsh_ID,dsh_Label'); break;  
+            case 'id': $this->searchMgr->setSelFields('dsh_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('dsh_ID,dsh_Label'); break;
             default: $this->searchMgr->setSelFields('dsh_ID,dsh_Order,dsh_Label,dsh_Description,dsh_Enabled,dsh_ShowIfNoRecords,dsh_CommandToRun,dsh_Parameters');
         }
 

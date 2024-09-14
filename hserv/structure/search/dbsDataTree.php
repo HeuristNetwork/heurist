@@ -31,12 +31,12 @@
     $dbs_rtStructs = null;
     $dbs_lookups = null; //human readale field type names
 
- 
+
      /**
      * Generates a hierarchical structure (tree) of record types and their fields.
      *
-     * The function creates a structured array that includes record type information, field details, 
-     * and additional metadata based on the provided mode. It supports modes for generating data 
+     * The function creates a structured array that includes record type information, field details,
+     * and additional metadata based on the provided mode. It supports modes for generating data
      * for tree views, faceted search, and lazy loading.
      *
      * @param object $system       The system object that handles database interaction and constants.
@@ -56,7 +56,7 @@
      *                 'type' => type (rectype|relationship|field type|term),
      *                 'children' => [] // array of fields (if applicable)
      *               ]
-     * 
+     *
      * Note: at the moment this tree for UI generated on client side
      * the only usage remain in import csv (show dependency tree)
      */
@@ -70,9 +70,9 @@
         if ($mode >= 4) {
             set_time_limit(0);
         }
-            
+
         $fieldtypes = __prepareFieldTypes($fieldtypes);
-        
+
         // Load the plain array of rectypes and lookups
         $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode == 4 || $mode == 5) ? null : $rectypeids, 1); // Load all rectypes if mode is 4 or 5
         $dbs_lookups = dbs_GetDtLookups();
@@ -83,7 +83,7 @@
 
         // Ensure rectypeids is an array, even if a single ID is provided
         if(!is_string($rectypeids)){
-              $rectypeids = explode(",", $rectypeids);  
+              $rectypeids = explode(",", $rectypeids);
         }
 
         // Create hierarchy tree for each rectype
@@ -117,7 +117,7 @@
     }
 
     function __prepareFieldTypes($fieldtypes){
-        if ($fieldtypes === null) { 
+        if ($fieldtypes === null) {
             // Default field types to include if not provided
             $fieldtypes = ['integer', 'date', 'freetext', 'year', 'float', 'enum', 'resource', 'relmarker'];
         } elseif (!is_array($fieldtypes)) {
@@ -125,7 +125,7 @@
         }
         return $fieldtypes;
     }
-    
+
     //
     // add parent code to children
     //

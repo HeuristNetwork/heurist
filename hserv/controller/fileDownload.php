@@ -97,7 +97,7 @@ if(mysql__check_dbname($db)==null){
             //Obfuscated id is allowed only
             exit;
         }
-        
+
         $need_session = (@$req_params['mode']==null && @$req_params['metadata']==null);
 
         if(!$system->init($db, true, $need_session)){
@@ -197,7 +197,7 @@ if(mysql__check_dbname($db)==null){
                     }
 
                     $is_download = (@$req_params['download']==1);
-                    
+
                     $is_image = (strpos($mimeType, DIR_IMAGE)===0);
                     $get_blurred_image = $is_image && !$all_can_view && !$system->has_access();
 
@@ -206,7 +206,7 @@ if(mysql__check_dbname($db)==null){
 
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
-                        
+
                         if($get_blurred_image){ //!$all_can_view
 
                             $blurred_url = getBlurredImage($system, $fileinfo);
@@ -216,7 +216,7 @@ if(mysql__check_dbname($db)==null){
 
                             $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
                             if($cache_url){
-                                $direct_url = $cache_url;    
+                                $direct_url = $cache_url;
                             }
                         }
 

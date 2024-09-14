@@ -1325,7 +1325,7 @@
      * @param object $system The system object for error handling and other functionality.
      * @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
      * @return array The metadata corresponding to the requested type, or an empty array if not found.
-     */    
+     */
     function getNakalaMetadata($system, $type){
         // check NAKALA_metadata_values.json
         // if date in file is old (data.last_update), update metadata first (all types)
@@ -1364,9 +1364,9 @@
         }
 
         // Return the requested type of data or the entire metadata
-        return getRequestedNakalaData($data, $type);        
+        return getRequestedNakalaData($data, $type);
     }
-    
+
     /**
      * Returns the requested Nakala data type or the full data.
      *
@@ -1387,7 +1387,7 @@
         }
     }
 
-    
+
     function updateNakalaMetadata($system){
         // update NAKALA_metadata_values.json
         $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';

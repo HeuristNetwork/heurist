@@ -118,7 +118,7 @@ function recordSearchDistinctValue($system, $params){
                         .predicateId('rec_ID',$rec_IDs_chunk)
                         .SQL_AND
                         .predicateId('dtl_DetailTypeID',$params['dty_ID']);
-                    
+
                         $detail_count = $detail_count+mysql__select_value($mysqli, $query);
                     }
 
@@ -147,7 +147,7 @@ function recordSearchDistinctValue($system, $params){
                     .predicateId('rec_RecTypeID',$params['rty_ID'])
                     .SQL_AND
                     .predicateId('dtl_DetailTypeID',$params['dty_ID']);
-                    
+
                 $res = mysql__select_value($mysqli, $query);
                 if ($res==null){
                     return $system->addError(HEURIST_DB_ERROR, 'Search query error on unique values count. Query '.$query, $mysqli->error);
@@ -205,7 +205,7 @@ function recordSearchMatchedValues($system, $params){
             }else{
                 $result = 0;
             }
-            
+
             $iteration = 1;
             $is_completed_without_error = true;
 
@@ -248,10 +248,10 @@ function recordSearchMatchedValues($system, $params){
                 }else{
                     $res = mysql__select_value($mysqli, $query);
                 }
-                
+
                 if ($res == null) {
                     if(is_array($res)){
-                        //error_log('Empty array on interation '.$iteration);                        
+                        //error_log('Empty array on interation '.$iteration);
                     }else{
                         $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. '
                         .'<br> Records given: '.$total_cnt
@@ -265,7 +265,7 @@ function recordSearchMatchedValues($system, $params){
                 }else{
                     if($need_nonmatches || $need_ids){
                         if(!empty($res)){
-                            $result = array_merge($result, $res);    
+                            $result = array_merge($result, $res);
                         }
                     }else{
                         $result = $result + $res;
@@ -3153,7 +3153,7 @@ function recordSearch($system, $params, $relation_query=null)
 
 
 
-        
+
     }
 
     return $response;
@@ -3422,7 +3422,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
     if(is_array($detail_types) && count($detail_types)>0 ){
 
         if(is_numeric($detail_types[0]) && $detail_types[0]>0){ //by id
-        
+
             $swhere .= SQL_AND.predicateId('dtl_DetailTypeID', $detail_types);
             $qr = SQL_RELMARKER_CONSTR.predicateId('dty_ID', $detail_types);
             $relmarker_fields =  mysql__select_all($mysqli, $qr);
@@ -3696,7 +3696,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
             $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
             .'rl_TargetID,dtl_ID,rl_DetailTypeID,rl_RelationTypeID'
             .' FROM recDetails, recLinks, Records '
-            .' WHERE (dtl_Geo IS NOT NULL) '  
+            .' WHERE (dtl_Geo IS NOT NULL) '
             .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND '
             .predicateId('rec_RecTypeID',$find_geo_by_linked_rty)
             .' AND rl_SourceID = '.$recID;
@@ -3711,7 +3711,7 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
             $mysqli = $system->get_mysqli();
             $res = $mysqli->query($squery);
             if(!$res){
-                return $details;                
+                return $details;
             }
 
             while ($rd = $res->fetch_assoc()) {

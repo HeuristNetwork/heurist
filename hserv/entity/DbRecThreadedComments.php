@@ -44,33 +44,33 @@ class DbRecThreadedComments extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $needRecords = false;
-        
+
         $this->searchMgr->addPredicate('cmt_ID');
         $this->searchMgr->addPredicate('cmt_OwnerUgrpID');
         $this->searchMgr->addPredicate('cmt_RecID');
         $this->searchMgr->addPredicate('cmt_Text');
-        
+
         switch (@$this->data['details']){
-            case 'id': $fieldList = 'cmt_ID'; break;  
+            case 'id': $fieldList = 'cmt_ID'; break;
             case 'list':
                 $needRecords = true;
-                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified'; 
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
                 break;
             case 'name':
-                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified'; 
-                break;  
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
+                break;
             default:   //'full'
                 $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
                 break;
         }
-        
+
         $orderby = $this->searchMgr->setOrderBy();
         if($orderby!=null && strpos('recTitle',$orderby)===0){
             $needRecords = true;
         }
-        
+
         if($needRecords){ //return rec_Title for comment
               $fieldList .= ', rec_Title as cmt_RecTitle';
               $sup_tables = ', Records';
@@ -78,7 +78,7 @@ class DbRecThreadedComments extends DbEntityBase
         }
 
         $this->searchMgr->setSelFields($fieldList);
-        
+
         return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 

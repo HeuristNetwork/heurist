@@ -22,17 +22,17 @@
 if (session_status() != PHP_SESSION_ACTIVE) {
 
     require_once 'USystem.php';
-    
+
     session_name('heurist-sessionid');
     session_cache_limiter('none');
 
     /*
     //get session id from cookes
-    if (@$_COOKIE['heurist-sessionid']) { 
+    if (@$_COOKIE['heurist-sessionid']) {
             session_id($_COOKIE['heurist-sessionid']);
     }
     }*/
-        
+
     @session_start();
     if (!@$_COOKIE['heurist-sessionid']) {
         hserv\utilities\USystem::sessionUpdateCookies(0);

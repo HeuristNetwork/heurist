@@ -454,7 +454,7 @@ foreach ($databases as $idx=>$db_name){
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);
 
-   
+
 
     //Write to file
     $fname = $index_dir.'/'.$db_name.'.html';

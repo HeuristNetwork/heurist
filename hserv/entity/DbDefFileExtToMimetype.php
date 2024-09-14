@@ -137,7 +137,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
     // Since in this table primary key is varchar need special treatment
     //
     public function delete($disable_foreign_checks = false){
-        
+
         $rec_ID = @$this->data[$this->primaryField];
         if($rec_ID==null){
             $this->system->addError(HEURIST_INVALID_REQUEST,
@@ -145,7 +145,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
                                  'Record ID provided is an invalid value');
             return false;
         }
-        
+
         $this->recordIDs = array($rec_ID);
         if(!$this->_validatePermission()){
             return false;

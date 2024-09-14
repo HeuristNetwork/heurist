@@ -176,7 +176,7 @@ define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
 
 define('CONTACT_SYSADMIN_ABOUT_PERMISSIONS',
         'Please ask your system administrator to correct the path and/or permissions for this directory');
-            
+
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 
@@ -193,7 +193,7 @@ define('REGEX_EOL', '/[\r\n]/');
 
 define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
 define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
-define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');     
+define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');
 define('CTYPE_JS', 'Content-type: text/javascript');
 define('CONTENT_LENGTH', 'Content-Length: ');
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
@@ -511,7 +511,7 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
     }
 }
 
-// 
+//
 // Common functions
 //
 function error_WrongParam($param){
@@ -524,7 +524,7 @@ function error_Div($text){
 
 
 function redirectURL($url){
-    header('Location: '.$url);   
+    header('Location: '.$url);
 }
 
 function isEmptyStr($val){
@@ -533,7 +533,7 @@ function isEmptyStr($val){
 }
 
 function isEmptyArray($val){
-    return !is_array($val) || empty($val);     
+    return !is_array($val) || empty($val);
 }
 
 /**
@@ -550,12 +550,12 @@ function findInArray(array $arr, string $key, $keyvalue): ?int {
             return $idx;
         }
     }
-    return null;    
+    return null;
 }
 
 function isPositiveInt($val){
     //return isset($val) && is_numeric($val) && $val>0;
-    return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0; 
+    return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0;
 }
 
 

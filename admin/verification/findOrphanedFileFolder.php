@@ -84,7 +84,7 @@ if(!@$_REQUEST['mail']){
             if(!(is_array($to_delete) && count($to_delete)>0)){
                 $to_delete = null;
             }
-           
+
         }
 
         $rep.='<h3>ORPHANED FOLDERS in HEURIST_FILESTORE_DIR</h3>';

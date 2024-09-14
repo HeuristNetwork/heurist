@@ -54,32 +54,32 @@ class DbDefRecStructure extends DbEntityBase
         if(parent::search()===false){
             return false;
         }
-        
+
         $is_structure = false;
-        
+
         $this->searchMgr->addPredicate('rst_ID');
         $this->searchMgr->addPredicate('rst_RecTypeID');
         $this->searchMgr->addPredicate('rst_DetailTypeID');
         $this->searchMgr->addPredicate('rst_CalcFunctionID');
-        
+
         switch (@$this->data['details']){
             case 'id': $this->searchMgr->setSelFields('rst_ID'); break;
             case 'name': $this->searchMgr->setSelFields('rst_ID,rst_DisplayName'); break;
             case 'rectype': $this->searchMgr->setSelFields('rst_ID,rst_RecTypeID,rst_DetailTypeID'); break;
-            case 'list': 
+            case 'list':
                 $is_structure = true;
                 $this->searchMgr->setSelFields('rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription'
             .',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
             .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ');
-                break;  
-            case 'full': 
+                break;
+            case 'full':
                 $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
-                break;  
-            case 'structure': 
+                break;
+            case 'structure':
                 $is_structure = true;
-                
+
             $colNames = array("rst_RecTypeID", "rst_DetailTypeID",
             //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
             "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
@@ -106,7 +106,7 @@ class DbDefRecStructure extends DbEntityBase
             "dty_Type");
 
                 $this->searchMgr->setSelFields(implode(',', $colNames));
-                break;  
+                break;
             default:
                 if(!isEmptyArray(@$this->data['details'])){ //specific list of fields
                     $fields = implode(',', $this->data['details']);
@@ -118,14 +118,14 @@ class DbDefRecStructure extends DbEntityBase
                 }
                 $this->searchMgr->setSelFields($fields);
         }
-        
+
         $orderby = 'rst_DisplayOrder ASC';
 
         $sup_tables = null;
         if($is_structure){
             $sup_tables = ' left join defDetailTypes on rst_DetailTypeID = dty_ID ';
         }
-        
+
         return $this->searchMgr->composeAndExecute($orderby, $sup_tables);
     }
 
@@ -166,7 +166,7 @@ class DbDefRecStructure extends DbEntityBase
             if($this->records[$idx]['rst_DefaultValue']=='tabs' && isEmptyStr(@$this->records[$idx]['rst_DisplayName'])){
                 $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
             }
-            
+
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
@@ -212,9 +212,9 @@ class DbDefRecStructure extends DbEntityBase
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for given record and field type');
                 return false;
             }
-            
+
             $this->recordIDs = array($this->recordIDs);
-            
+
         }elseif(@$this->data['dtyID']){
             $dty_ID = $this->data['dtyID'];
 
@@ -229,7 +229,7 @@ class DbDefRecStructure extends DbEntityBase
                 return false;
             }
         }
-        
+
         $this->isDeleteReady = false;
 
         return parent::delete();
@@ -285,7 +285,7 @@ class DbDefRecStructure extends DbEntityBase
                     .predicateId('rst_DetailTypeID',$dty_ID)
                     .SQL_AND
                     .predicateId('rst_RecTypeID',$rty_ID);
-                    
+
             $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
@@ -293,23 +293,23 @@ class DbDefRecStructure extends DbEntityBase
                     break;
                 }
         }
-        
+
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
-    
+
     /**
      * Adds new fields to the record type. If no fields exist, default fields are added.
-     * 
+     *
      * newfields=>array(
      *        fields=>  array of ids
      *        reqs=>   array of ids
      *        values=>  [dty_ID][fieldName]=>value
-     * 
-     * 
+     *
+     *
      * @return bool - Returns true if fields are successfully added, false otherwise.
-     */    
+     */
     private function addNewFields(){
 
         $rty_ID = $this->data['rtyID'];
@@ -318,7 +318,7 @@ class DbDefRecStructure extends DbEntityBase
         if (isEmptyArray($newfields) && !$this->addDefaultFields($rty_ID)){
             //if rt structure has zero fields adds 2 default fields: DT_NAME and DT_DESCRIPTION
             return false; // If there are no fields, adding default fields fails.
-        }        
+        }
 
         $fields = prepareIds($newfields['fields'], false);
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
@@ -335,7 +335,7 @@ class DbDefRecStructure extends DbEntityBase
                 if(!@$dt_fields[$dty_ID]) {
                     continue; //field not found defDetailTypes
                 }
-                
+
                 $dt = $dt_fields[$dty_ID]['commonFields'];
 
                 $recvalues = array(
@@ -366,7 +366,7 @@ class DbDefRecStructure extends DbEntityBase
                 $records[] = $recvalues;
 
                 // Increment the order
-                $order = isset($this->data['order']) ? $this->data['order'] : $order + 10;                
+                $order = isset($this->data['order']) ? $this->data['order'] : $order + 10;
         }
 
         if(count($records)>0){
@@ -375,10 +375,10 @@ class DbDefRecStructure extends DbEntityBase
             return $this->save();
         }
         return false;
-        
+
     }
-    
-    
+
+
     /**
      * Adds default fields (DT_NAME and DT_DESCRIPTION) to the record type if no fields exist.
      *
@@ -401,7 +401,7 @@ class DbDefRecStructure extends DbEntityBase
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for new fields');
             return false;
         }
-    }    
+    }
 
     //
     // Counts:

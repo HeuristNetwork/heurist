@@ -67,7 +67,7 @@ if($res){
 	                $valid = true;
 	                $errs = array();
 
-	               
+
 
 	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . intval($woot["woot_ID"]) . " and chunk_IsLatest and not chunk_Deleted");
                     if($res){
@@ -82,7 +82,7 @@ if($res){
                     }
 
 	                if ($valid) {
-		               
+
 	                } else {
                         print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
 		                print $woot["woot_Title"] . "'>";
@@ -94,7 +94,7 @@ if($res){
                 }
 
                 function check($html) {
-               
+
 	                $descriptorspec = array(
 		                0 => array("pipe", "r"),
 		                2 => array("pipe", "w"),
@@ -108,8 +108,8 @@ if($res){
 	                fclose($pipes[2]);
 
 	                $rv = proc_close($proc);
-               
-               
+
+
 
 	                if ($rv != 0) {
 		                return $out;

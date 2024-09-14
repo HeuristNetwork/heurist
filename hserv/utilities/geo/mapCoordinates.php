@@ -22,34 +22,34 @@
 
     /**
      * Simplifies and converts GeoJSON from UTM to WGS84 coordinates.
-     * 
+     *
      * @param array   $json          The GeoJSON to process
      * @param boolean $need_simplify Flag indicating whether to simplify the geometry
      * @param object  $gPoint        Reference to the geographic point object for conversion
-     * 
+     *
      * @return array                 The processed GeoJSON
      */
     function geoSimplifyAndConvertJSON($json, $need_simplify, &$gPoint = null)
     {
-        
+
         // Validate input type
         if (!is_array($json) || !isset($json['type']) || !isset($json['coordinates'])) {
             return array(); // Return an empty array if the input is not valid GeoJSON
         }
-                
+
         // Handle GeometryCollection recursively
         if ($json['type'] === 'GeometryCollection') {
             return processGeometryCollection($json, $need_simplify, $gPoint);
-        }        
+        }
 
         // Process individual geometry types
-        if ($json['type'] == 'Point') { //$gPoint && 
+        if ($json['type'] == 'Point') { //$gPoint &&
             // Convert a single point
             $point = array($json['coordinates']);
             geoSimplifyAndConvert($point, false, $gPoint);
             $json['coordinates'] = $point[0];
 
-        } elseif ($json['type'] == 'MultiPoint') { //$gPoint && 
+        } elseif ($json['type'] == 'MultiPoint') { //$gPoint &&
             // Convert multiple points
             geoSimplifyAndConvert($json['coordinates'], false, $gPoint);
 
@@ -71,14 +71,14 @@
 
         return $json;
     }
-    
+
     /**
      * Processes a GeometryCollection recursively.
-     * 
+     *
      * @param array $json - The GeoJSON GeometryCollection object.
      * @param bool $need_simplify - Whether the geometry needs simplification.
      * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
-     * 
+     *
      * @return array - The processed GeometryCollection with simplified geometries.
      */
     function processGeometryCollection($json, $need_simplify, &$gPoint) {
@@ -86,15 +86,15 @@
             $json['geometries'][$idx] = geoSimplifyAndConvertJSON($geometry, $need_simplify, $gPoint);
         }
         return $json;
-    }   
-    
+    }
+
     /**
      * Processes multiple shapes for MultiPolygon or MultiLineString geometries.
-     * 
+     *
      * @param array $shapes - The shapes of the geometry.
      * @param bool $need_simplify - Whether the shapes need simplification.
      * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
-     * 
+     *
      * @return array - The processed shapes with simplified coordinates.
      */
     function processMultiShape($shapes, $need_simplify, &$gPoint) {
@@ -105,13 +105,13 @@
             }
         }
         return $shapes;
-    }     
+    }
 
     /**
     * Simplifies a large set of UTM coordinates and convert them to latitude and longitude (WGS84)
-    * using a geographic point object ($gPoint). It simplifies geometries only when needed 
+    * using a geographic point object ($gPoint). It simplifies geometries only when needed
     * (if the points exceed 1000) and converts them to lat/lon when $gPoint is provided.
-    * 
+    *
     * @param mixed $orig_points
     * @param boolean $need_simplify Flag indicating whether to simplify the geometry
     * @param object  $gPoint        Reference to the geographic point object for conversion
@@ -174,9 +174,9 @@
 
     /**
      * Corrects longitude values in GeoJSON if abs(lng) > 180.
-     * 
+     *
      * @param array $json The GeoJSON object to correct
-     * 
+     *
      * @return array The corrected GeoJSON
      */
     function geoCorrectLngJSON($json)

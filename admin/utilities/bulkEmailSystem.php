@@ -139,7 +139,7 @@ class SystemEmailExt {
 		} else {
 
 			$this->set_error('No email body has been provided');//, the Heurist team has been notified
-		
+
 			return -1;
 		}
 
@@ -411,9 +411,9 @@ class SystemEmailExt {
 		  		$date_obj = new DateTime($row[0]);
 		  		$date = $date_obj->format("Y-m-d");
                 $this->records[$db] = array($count, $date);// save results
-                
+
                 continue;
-		  	} 
+		  	}
 
 		  	// Get newest edit to definitions
 		  	$query = "SELECT max(newest)
@@ -851,7 +851,7 @@ class SystemEmailExt {
 		}
 
 		if (isEmptyStr($this->receipt)) {
-            return 0;   
+            return 0;
         }
 
 		// Save receipt to note record
@@ -880,7 +880,7 @@ class SystemEmailExt {
 
 			$this->set_error("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), TRUE));
             return -1;
-			
+
 		} else {
 
 			$this->set_error("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));

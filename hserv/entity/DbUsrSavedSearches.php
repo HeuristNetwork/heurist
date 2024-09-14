@@ -44,16 +44,16 @@ class DbUsrSavedSearches extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $this->searchMgr->addPredicate('svs_ID');
         $this->searchMgr->addPredicate('svs_Name');
         $this->searchMgr->addPredicate('svs_UGrpID');
-        
+
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('svs_ID'); break;  
+            case 'id': $this->searchMgr->setSelFields('svs_ID'); break;
             case 'name':
-                $this->searchMgr->setSelFields('svs_ID,svs_Name'); 
-                break;  
+                $this->searchMgr->setSelFields('svs_ID,svs_Name');
+                break;
             default:   // list, full
                 $this->searchMgr->setSelFields('svs_ID,svs_Name,svs_UGrpID,svs_Query');
         }
@@ -105,7 +105,7 @@ class DbUsrSavedSearches extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
-            
+
             $this->records[$idx]['svs_Modified'] = date(DATE_8601);//reset
 
             $tbl = $this->config['tableName'];

@@ -82,7 +82,7 @@ private static function findDisambResolution($keyvalue, $disamb_resolv){
     if($idx!=null){
         return @$disamb_resolv[$idx]['recid'];
     }
-    
+
     return null;
 }
 
@@ -709,7 +709,7 @@ public static function assignRecordIds($params){
 
     }elseif($match_mode==1){
         //find records to insert and update if matching is skipped AND WE USE current key field
-        
+
         $cnt_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table`";
 
         // find records to update
@@ -954,7 +954,7 @@ public static function validateImport($params) {
             $query = "SELECT imp_id, `$fields`, `$id_field` FROM `$import_table` "
             ." LEFT JOIN Records on rec_ID=`$id_field`"
             ." WHERE rec_RecTypeID<>".$recordType;
-            
+
             // TPDO: I'm not sure whether message below has been correctly interpreted
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".
@@ -2141,7 +2141,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
             array_push($nv, super_trim($value));
         }
     }
-    
+
     return $nv;
 }
 
@@ -2186,8 +2186,8 @@ private static function findOriginalRecord($recordId){
     if(!$dets){
         return $details;
     }
-    
-    
+
+
     foreach ($dets as $row){
         $bd_id = $row[0];
         $field_type = $row[1];
@@ -2201,7 +2201,7 @@ private static function findOriginalRecord($recordId){
         if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
         $details["t:".$field_type]["bd:".$bd_id] = $value;
     }
-    
+
     return $details;
 }
 
@@ -3211,7 +3211,7 @@ public static function performImport($params, $mode_output){
             if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
         }
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-        mysql__supress_trigger(self::$mysqli, false);        
+        mysql__supress_trigger(self::$mysqli, false);
 
         /*
                 if($use_transaction){
@@ -3344,7 +3344,7 @@ public static function importTerms($params){
 
     $total = 0;
 
-    // $fields -  array(field id in import table, $dty_ID, vocabulary ID) 
+    // $fields -  array(field id in import table, $dty_ID, vocabulary ID)
     foreach($fields as $idx => $field){
 
         $tab_num = $idx + 1;
@@ -3375,7 +3375,7 @@ public static function importTerms($params){
         $terms = mysql__select_assoc2(self::$mysqli, $query);
 
         $results['success'][$idx] = [];
-        
+
         if(empty($terms)){
             continue;
         }
@@ -3438,13 +3438,13 @@ public static function importTerms($params){
                 'fields' => $new_terms,
                 'term_separator' => $trm_Separator
             ]);
-            
+
             $res = $def_terms->batch_action();
             if(!$res){
                 $results['error'][$idx] = 'batch_action(2): '.self::$system->getErrorMsg();
                 continue;
             }
-            
+
             if(!empty($res)){
                 $results['success'][$idx] = array_merge($results['success'][$idx], $res);
                 $total += count($res);

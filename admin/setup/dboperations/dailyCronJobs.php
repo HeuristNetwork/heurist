@@ -223,7 +223,7 @@ foreach ($databases as $idx=>$db_name){
 
         if($is_ok){
             $report_list[$db_name] = $report;
-            
+
             echo $eol.htmlspecialchars($db_name).$tabs;
             echo ' reports errors:'.$report[0].' created:'.$report[1].' updated:'.$report[2].' unchanged:'.$report[3].$eol;
         }
@@ -250,15 +250,15 @@ foreach ($databases as $idx=>$db_name){
     }
 
     $do_url_check = false; //DISABLED TEMP 2024-08-27
-    if($do_url_check){ 
+    if($do_url_check){
 
         $perform_url_check = mysql__select_value($mysqli, 'SELECT sys_URLCheckFlag FROM sysIdentification');
         if(!$perform_url_check || $perform_url_check == 0){ // check for flag setting
             continue;
         }
-        
+
         $url_results = checkURLs($system, true);// [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
-        
+
         if(is_array($url_results)){
 
         $invalid_rec_urls = $url_results[0];
@@ -322,11 +322,11 @@ foreach ($databases as $idx=>$db_name){
                 }
             }
         }
-        
+
         }else{
             sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.' Check url fails.',
                 $url_results.' It stopped on '.$db_name);
-            
+
         }
     }
 }//foreach database

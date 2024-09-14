@@ -468,7 +468,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     // init db lookup - open dropdown list on keypress in search database input
     //
     function _initControls(){
-        
+
         if(window.hWin.HAPI4){
             window.hWin.HR = window.hWin.HAPI4.setLocale('ENG');
         }

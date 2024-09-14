@@ -472,7 +472,7 @@ if(!($max_size>0)) {$max_size = 0;}
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files',
                         yes:window.hWin.HR('Create Media Records'), no:window.hWin.HR('Exit without Indexing')});
-                } else 
+                } else
                 if ($(event.target).is('button')){
                         $('#btnCancel').trigger('click');
                         setTimeout(function(){ window.close();}, 100);
@@ -499,7 +499,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 //let base_folder = base_path.split('/');
                 //base_folder = base_folder[base_folder.length-1];
                 let base_folder = base_path;
-                
+
                 if(files && files.length > 0){
 
                     for(let i = 0; i < files.length; i++){
@@ -554,7 +554,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 window.hWin.HEURIST4.filesWereUploaded = false;
 
                 //ART 2021-09-17 $(document).on("mouseleave", closeCheck);
-                
+
                 function __calculateTotalSizeToBeUploaded(){
                         //verify that all files are processed and show total size to be uploaded
                         var ele = $('tbody.files');
@@ -585,7 +585,7 @@ if(!($max_size>0)) {$max_size = 0;}
                                 }
                             }
                         });
-                        
+
                         if(size>0){
 
                             window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);

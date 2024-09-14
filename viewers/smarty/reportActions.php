@@ -339,7 +339,7 @@ class ReportActions {
              return;
         }
 
-        
+
         if($filename){
             $safeFilename = basename($filename);
             if(file_exists($this->dir.$safeFilename)){
@@ -440,7 +440,7 @@ class ReportActions {
      *
      * Unlike PHP's built-in `str_replace()`, this function handles an array of search terms correctly,
      * by avoiding overlapping replacements. It favors lower-indexed search terms.
-     * 
+     *
      * For example:
      * `str_replace(array("a", "b"), array("b", "x"), "abcd")` would return `"xxcd"`,
      * while `array_str_replace(array("a", "b"), array("b", "x"), "abcd")` returns `"bxcd"`.

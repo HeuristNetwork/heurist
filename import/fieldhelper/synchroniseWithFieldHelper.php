@@ -150,10 +150,10 @@ $failed_exts = array();
         <p style="font-weight:bold;font-size:larger;padding:10 0">Create Digital Media records from uploaded files (often images)</p>
 
         <p>Note: Use with caution, this function can create a lot of extra records if there are many images</p>
-        
-        <p>This function creates, updates and reads XML manifest files in the folders (and their descendants) 
-        listed in Design > Properties (Paths which contain files to be indexed as multimedia records) 
-        and creates Digital Media records for all files uploaded to the database, with pointers back to the files. 
+
+        <p>This function creates, updates and reads XML manifest files in the folders (and their descendants)
+        listed in Design > Properties (Paths which contain files to be indexed as multimedia records)
+        and creates Digital Media records for all files uploaded to the database, with pointers back to the files.
         New files are added to existing manifests. </p>
 
          <p>
@@ -604,7 +604,7 @@ $failed_exts = array();
                                 if(!$file_id){
                                     continue; //add with valid file only
                                 }
-                                
+
                                 if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
                                     $details["t:".$geoDT] = array("1"=>"p POINT ($lon $lat)");
                                 }
@@ -652,9 +652,9 @@ $failed_exts = array();
                                         $rep_added++;
                                     }
                                 }
-                                                                
+
                                 if($new_recordID>0){
-                                    
+
                                     if($new_md5==null){
                                         $new_md5 = md5_file($filename);
                                     }
@@ -740,9 +740,9 @@ XML;
 
             //for files in folder that are not specified in the manifest file
             foreach ($all_files as $filename){
-                if($filename=="." || $filename==".." || is_dir($dir.$filename) 
+                if($filename=="." || $filename==".." || is_dir($dir.$filename)
                         || $filename=="fieldhelper.xml" || $filename=="index.html"){
-                        continue;            
+                        continue;
                 }
 
                     $filename_base = $filename;
@@ -769,7 +769,7 @@ XML;
                             $file_id = null;
                             continue;
                         }
-                        
+
                         $details["t:".$titleDT] = array("1"=>$flleinfo['basename']);
                         /* TODO - extract these data from exif
                         $details["t:".$descriptionDT] = array("1"=>$file_id);
@@ -845,9 +845,9 @@ XML;
                             $record['no_validation'] = true;
                             $record['URL'] = null;
                             $record['ScratchPad'] = $recordNotes;
-                            $record['details'] = $details;                            
+                            $record['details'] = $details;
                             $out = recordSave($system, $record);//see recordModify.php
-                            
+
                             if ( @$out['status'] != HEURIST_OK ) {
                                 print error_Div('File: <i>'.htmlspecialchars($filename_base).' Error: '.htmlspecialchars($out["message"]));
                             }else{
@@ -855,7 +855,7 @@ XML;
                                 $cnt_added++;
                             }
                         }
-                        
+
                         if($new_recordID>0){
                             $f_item->addChild("heurist_id", $new_recordID);
                         }

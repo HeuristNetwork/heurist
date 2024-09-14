@@ -76,11 +76,11 @@ if(!$islist){
         if ($kml_file!=null) {
             $kml_file = resolveFilePath($kml_file);
         }else{
-            
+
             $kml_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "kml");
             //$tmp_destination = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
             $kml_file_stream = fopen($kml_file, 'w');
-            
+
             //kml snippet
             $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = "
                             . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".$dtKML);
@@ -96,12 +96,12 @@ if(!$islist){
             fwrite($kml_file_stream, KML_CLOSE);
             fclose($kml_file_stream);
         }
-        
+
         if(file_exists($kml_file)){
             //todo: use readfile_by_chunks
             print file_get_contents($kml_file);
         }
-        
+
 
     }
     exit;
@@ -162,12 +162,12 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             if($limit>0){
                 $rec_ids = array_slice($rec_ids,0,$limit);
             }
-            
+
             $squery = _composeQuery($squery, $detTable, $rec_ids, $ourwhere);
             $squery2 = _composeQuery($squery2, $detTable2, $rec_ids, $ourwhere2);
 
     }else{
-        
+
         $squery = _composeQuery($squery, $detTable, $_REQUEST["id"], $ourwhere);
         $squery2 = _composeQuery($squery2, $detTable2, $_REQUEST["id"], $ourwhere2);
     }
@@ -268,15 +268,15 @@ print file_get_contents($kml_file);
 //
 //
 function _composeQuery($select,$from,$rec_ids,$where){
-    
+
    if(is_array($rec_ids)){
         $where_ids = 'in ('.implode(',', prepareIds($rec_ids)).')';
    }else{
         $where_ids = '='.intval($rec_ids);
    }
-    
-   $squery = "$select from Records $from WHERE rec_ID $where_ids $where"; 
-    
+
+   $squery = "$select from Records $from WHERE rec_ID $where_ids $where";
+
    return $squery;
 }
 ?>

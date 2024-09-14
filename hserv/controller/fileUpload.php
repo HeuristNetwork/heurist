@@ -102,7 +102,7 @@ if($system->init(@$_REQUEST['db'])){
             $error = 'The allowed disk quota ('.($quota/1048576).'Mb) for this database is reached';
             $response = $system->addError(HEURIST_ACTION_BLOCKED, $error);
             $response['message'] = $error . '<br><br>If you need more disk space please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
-            
+
             sendEmailToAdmin('Allowed disk quota reached', 'Database '.$system->dbname().'. '.$error, false);
 
         }else

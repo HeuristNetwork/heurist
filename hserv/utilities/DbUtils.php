@@ -622,7 +622,7 @@ class DbUtils {
                 mysql__drop_database( $mysqli, $database_name_full );
                 return false;
             }
-            
+
             //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
             //not used
             if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){
@@ -648,20 +648,20 @@ class DbUtils {
 
             return $warnings;
     }
-    
+
     /**
      * Imports core definitions from a template file into the specified database.
      *
      * @param string $database_name_full - The full name of the database to import definitions into.
      * @param string $templateFileName - The path to the template file containing the definitions.
-     * 
+     *
      * @return bool - Returns true on success, false on failure.
-     */    
+     */
     private static function importDefinitionsFromTemplate($database_name_full, $templateFileName){
-    
+
         $mysqli = self::$mysqli;
         $system = self::$system;
-        
+
         // Switch to the target database
         mysql__usedatabase( $mysqli, $database_name_full );
 
@@ -687,7 +687,7 @@ class DbUtils {
     }
 
 
-    
+
 
     /**
     * Updates dbowner, adds default saved searches (for users ##1,2) and lookups (geonames and nakala)
@@ -1037,7 +1037,7 @@ class DbUtils {
         }elseif($level<1){
             return true; //create empty database
         }
-        
+
         //restore data from sql dump
         $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
         if($res!==true){
@@ -1048,8 +1048,8 @@ class DbUtils {
         }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
             return true;
         }
-//----------------------        
-        
+//----------------------
+
         if (is_array($res)){
             self::$system->addErrorArr($res);//can't create
 
@@ -1058,7 +1058,7 @@ class DbUtils {
         }elseif($level<1){
             return true; //create empty database
         }
-        
+
         //restore data from sql dump
         $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
         if($res!==true){
@@ -1069,7 +1069,7 @@ class DbUtils {
         }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
             return true;
         }
-        
+
         //fails
         mysql__drop_database($mysqli, $database_name_full);
         return false;

@@ -51,11 +51,11 @@ if (@$argv) {
     require_once dirname(__FILE__).'/../../autoload.php';
 
     require_once 'entityScrudSrv.php';
-    
+
     if(!isset($req_params)){ //if set array has been already modified in api.php
         $req_params = USanitize::sanitizeInputArray();
     }
-    
+
     $dbname = @$req_params['db'];
 
     $system_init_failed = false;

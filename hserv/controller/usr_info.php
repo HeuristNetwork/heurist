@@ -24,9 +24,9 @@
     //use hserv\utilities as utils;
     use hserv\utilities\USanitize;
     //use hserv\utilities\Temporal;
-    
+
     require_once dirname(__FILE__).'/../../autoload.php';
-    
+
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
 
@@ -34,7 +34,7 @@
     $res = false;
 
     $req_params = USanitize::sanitizeInputArray();
-    
+
     $action = @$req_params['a'];
 
     $system = new hserv\System();

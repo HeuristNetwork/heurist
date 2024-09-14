@@ -577,7 +577,7 @@ class Query {
 
         //SORT
         $this->sort_clause = $this->makeSortClause();
-        
+
         //FROM
         if ($this->search_domain == BOOKMARK) {
             $this->from_clause = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
@@ -590,9 +590,9 @@ class Query {
         //MAKE
         return $this->from_clause . SQL_WHERE . $this->where_clause . $this->sort_clause;
     }
-    
+
     private function makeSortClause() {
-        
+
         $sort_clause = '';
         $sort_clauses = array();
         for ($i=0; $i < count($this->sort_phrases);++$i) {
@@ -610,7 +610,7 @@ class Query {
         if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
         return $sort_clause;
     }
-    
+
 }
 
 
@@ -862,7 +862,7 @@ class AndLimb {
             case 'linkedto':
                 return new LinkedToParentPredicate($this, $pred_val);
             case 'relatedfrom': //related from given record type + relation type
-                return new RelatedFromParentPredicate($this, $pred_val);  
+                return new RelatedFromParentPredicate($this, $pred_val);
             case 'related_to':  //related to given record type + relation type
                 return new RelatedToParentPredicate($this, $pred_val);
             case 'related':
@@ -1101,7 +1101,7 @@ class Predicate {
     public $need_recursion = true;
 
     public $query;
-    
+
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
@@ -1257,7 +1257,7 @@ class Predicate {
         return $res;
     }
 
-    
+
     /**
      * Retrieves the inverse term ID for a given relationship type.
      *
@@ -1506,7 +1506,7 @@ class FieldPredicate extends Predicate {
         global $mysqli;
 
         $not = ($this->parent->negate)? SQL_NOT : '';
-        
+
         $and_link = ' and link';
         $sql_detail_exists = 'exists (select rd.dtl_ID from recDetails rd ';
         $sql_recdetail_link = ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ';
@@ -1816,10 +1816,10 @@ class FieldPredicate extends Predicate {
             . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
             .'link.rec_Title ' . $match_pred . ', '     //THEN
 //see 1377            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
-            . ($dateindex_clause!=null 
+            . ($dateindex_clause!=null
                 ? 'if(rdt.dty_Type = "date", (rdi_DetailTypeID=rd.dtl_DetailTypeID AND '.$dateindex_clause.') , '
                 . "rd.dtl_Value $match_pred)"
-                : "rd.dtl_Value $match_pred" 
+                : "rd.dtl_Value $match_pred"
               ) . ')'
             . $rd_type_clause . '))';
         }
@@ -2021,46 +2021,46 @@ class TagPredicate extends Predicate {
         if (! $any_wg_values) {$this->wg_value = array();}
         $this->query = null;
     }
-    
+
     private function tagWhereExp(){
         global $mysqli;
-        
+
         $query = '';
-        
+
         $sql_tag_eq = 'kwd.tag_Text ="';
         $sql_tag_like = 'kwd.tag_Text like "';
-        
+
         for ($i=0; $i < count($this->value);++$i) {
                 if ($i > 0) {$query .= 'or ';}
 
                 $value = $this->value[$i];
                 $wg_value = $this->wg_value[$i];
-                
+
                 $sql_tags = ($this->parent->exact? $sql_tag_eq.$mysqli->real_escape_string($value).'" '
-                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');                
+                        : $sql_tag_like.$mysqli->real_escape_string($value).'%" ');
 
                 if ($wg_value) {
                     $query .= '( '. $sql_tags .' and ugr_Name = "'.$mysqli->real_escape_string($wg_value).'") ';
-                    
+
                 } elseif (is_numeric($value)) {
                     $query .= "kwd.tag_ID=$value ";
                 } else {
                     $query .= '( '.$sql_tags;
-                        
+
                     $pquery = &$this->getQuery();
                     if($pquery->search_domain != BOOKMARK){
                         $query .= ' and ugr_ID is null ';
                     }
                     $query .= ') ';
                 }
-        }        
-        
+        }
+
         return null;
-    } 
+    }
 
     public function makeSQL() {
         global $mysqli;
-        
+
         $sql_where = 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
         $sql_tag_eq = 'kwd.tag_Text ="';
         $sql_tag_like = 'kwd.tag_Text like "';
@@ -2186,21 +2186,21 @@ class BibIDPredicate extends Predicate {
 
 
 abstract class LinkedPredicate extends Predicate {
-    
+
     protected $fromField;
     protected $toField;
     protected $toRLink;
-    
+
     /**
      * Constructs and returns an SQL query for linked records based on specified record types and detail types.
      *
      * This method generates an SQL query by analyzing the `value` parameter, which contains information
-     * about the record type (`rty_ID`) and detail type (`dty_ID`). If the value is specified, the query 
-     * searches for linked records from the specific source type and field. If a parent query exists, it 
+     * about the record type (`rty_ID`) and detail type (`dty_ID`). If the value is specified, the query
+     * searches for linked records from the specific source type and field. If a parent query exists, it
      * incorporates it into the final SQL query. Otherwise, it generates a standalone query.
      *
      * @return string - Returns the constructed SQL query string.
-     */    
+     */
     public function makeSQL() {
 
         $rty_ID = null;
@@ -2211,11 +2211,11 @@ abstract class LinkedPredicate extends Predicate {
             $rty_ID = @$vals[0] ?? null;
             $dty_ID = @$vals[1] ?? '';
         }
-        
+
         // Prepare record and detail type IDs for SQL
         $rty_IDs = prepareIds($rty_ID);
         $dty_IDs = prepareIds($dty_ID);
-        
+
         // Initialize the additional WHERE clause for the SQL query
         $add_where = '';
 
@@ -2223,7 +2223,7 @@ abstract class LinkedPredicate extends Predicate {
             $add_where = "rd.rec_RecTypeID=$rty_ID and rl.rl_RelationID=rd.rec_ID ";
         }else{
 
-            $add_where = $add_where . SQL_RL_SOURCE_LINK 
+            $add_where = $add_where . SQL_RL_SOURCE_LINK
                 . predicateId('rd.rec_RecTypeID', $rty_IDs, SQL_AND) // Add predicate for record type ID if available
                 . SQL_AND;
 
@@ -2233,7 +2233,7 @@ abstract class LinkedPredicate extends Predicate {
                 $add_where .= SQL_RELATION_IS_NULL;
             }
         }
-        
+
         $add_from  = SQL_RECLINK;
 
         $select = 'TOPBIBLIO.rec_ID in (select '.$this->toField.' ';
@@ -2246,8 +2246,8 @@ abstract class LinkedPredicate extends Predicate {
             // Adjust FROM and WHERE clauses for parent query
             $query["from"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["from"]);
             $query["where"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["where"]);
-            
-            
+
+
             // Construct the full SQL query using the parent query
             $select = $select.$query["from"].', '.$add_from.SQL_WHERE.$query["where"]
                         .SQL_AND.$add_where
@@ -2285,10 +2285,10 @@ abstract class LinkedPredicate extends Predicate {
 class LinkedFromParentPredicate extends LinkedPredicate {
     public function __construct(&$parent, $value) {
         parent::__construct( $parent, $value );
-        
+
         $this->fromField = 'rl.rl_SourceID';
         $this->toField = 'rl.rl_TargetID';
-        
+
         $this->toRLink = SQL_RL_TARGET_LINK;
     }
 }
@@ -2302,10 +2302,10 @@ class LinkedFromParentPredicate extends LinkedPredicate {
 class LinkedToParentPredicate extends LinkedPredicate {
     public function __construct(&$parent, $value) {
         parent::__construct( $parent, $value );
-        
+
         $this->fromField = 'rl.rl_TargetID';
         $this->toField = 'rl.rl_SourceID';
-        
+
         $this->toRLink = SQL_RL_SOURCE_LINK;
     }
 }
@@ -2347,17 +2347,17 @@ abstract class RelatedParentPredicate extends Predicate {
             return SQL_RECORDS . ',' . $add_from . SQL_WHERE . $add_where . ')';
         }
     }
-    
+
 }
 
 /**
  * Class RelatedFromParentPredicate
- * 
+ *
  * Constructs SQL for finding records related from records
  * This predicate finds records linked with a specific source type and relationship field.
  */
 class RelatedFromParentPredicate extends RelatedParentPredicate {
-    
+
     /**
      * Creates the SQL query for fetching records that are related from a parent source.
      *
@@ -2404,12 +2404,12 @@ class RelatedFromParentPredicate extends RelatedParentPredicate {
 
 /**
  * Class RelatedToParentPredicate
- * 
+ *
  * Constructs SQL for finding records related to a parent record (target).
  * This predicate finds records linked to a specific source type and relationship field.
  */
 class RelatedToParentPredicate extends RelatedParentPredicate {
-    
+
     /**
      * Creates the SQL query for fetching records that are related to a parent target.
      *
@@ -2455,12 +2455,12 @@ class RelatedToParentPredicate extends RelatedParentPredicate {
 
 /**
  * Class RelatedPredicate
- * 
+ *
  * Constructs SQL for finding records related in both directions (from and to the parent).
  * This predicate searches relations in both directions for a given record type and relationship type.
  */
 class RelatedPredicate extends Predicate {
-    
+
     /**
      * Creates the SQL query for fetching records that are related in both directions.
      *
@@ -2489,7 +2489,7 @@ class RelatedPredicate extends Predicate {
         if (!$related_rty_ID) {
             return false;
         }
-        
+
         //NEW  ---------------------------
         $add_from  = SQL_RECLINK;
         $add_where = '';
@@ -2505,7 +2505,7 @@ class RelatedPredicate extends Predicate {
 
         $pquery = &$this->getQuery();
         if ($pquery->parentquery){
-            
+
             $add_where = "(rd.rec_RecTypeID=$related_rty_ID) and ".$add_where;
 
             $query = $pquery->parentquery;
@@ -2519,18 +2519,18 @@ class RelatedPredicate extends Predicate {
                       .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_TARGET_LINK.'))) OR '
                       .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
                       .SQL_WHERE.$query["where"].SQL_AND.$add_where.' and ('.SQL_RL_SOURCE_LINK.')))';
-                      
+
         }else{
-            
+
             $add_where = "(TOPBIBLIO.rec_RecTypeID=$related_rty_ID) and ".$add_where;
-            
-            return '(EXISTS (SELECT rl.rl_ID FROM '.SQL_RECLINK.SQL_WHERE . 
+
+            return '(EXISTS (SELECT rl.rl_ID FROM '.SQL_RECLINK.SQL_WHERE .
                     '(rl.rl_TargetID=TOPBIBLIO.rec_ID OR rl.rl_SourceID=TOPBIBLIO.rec_ID) AND '
                     .$add_where . '))';
         }
 
 
-        return $select;        
+        return $select;
     }
 }
 
@@ -2796,14 +2796,14 @@ class SpatialPredicate extends Predicate {
 }
 
 class CoordinatePredicate extends Predicate {
-    
+
     private $coordFunction;
-    
+
     public function __construct(&$parent, $value, $coordFunction) {
         parent::__construct( $parent, $value );
 
         $this->coordFunction = $coordFunction;
-    }    
+    }
 
     public function makeSQL() {
         $op = '';
@@ -2813,7 +2813,7 @@ class CoordinatePredicate extends Predicate {
         } elseif($this->parent->greaterthan) {
             $op = ($this->parent->negate)? '<=' : '>';
         }
-        
+
         $val = floatval($this->value);
 
         if ($op!='' && $op[0] == '<') {
@@ -2836,7 +2836,7 @@ class CoordinatePredicate extends Predicate {
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
             and {$this->coordFunction}(bd.dtl_Geo) $op $val limit 1))";
         }
-        
+
             //Envelope - Bounding rect
             //ExteriorRing - exterior ring for polygone
 
@@ -2852,7 +2852,7 @@ class CoordinatePredicate extends Predicate {
             return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and $match_pred limit 1))";
-        
+
     }
 }
 

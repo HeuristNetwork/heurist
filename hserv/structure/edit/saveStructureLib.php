@@ -1774,7 +1774,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
                     array_push($links, $row[0]);
                 }
             }
-            
+
             $recIDs_list = implode(',',$recIDs);
             $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
             .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
@@ -1865,7 +1865,7 @@ function checkTerms($termID){
                                 array_push($rtyIDs, $row[1]);
                             }
                         }
-                        
+
                         $recIDs_list = implode(',',$recIDs);
                         $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
                         .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"

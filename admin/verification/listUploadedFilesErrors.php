@@ -159,7 +159,7 @@ $mysqli = $system->get_mysqli();
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
-                   
+
                 }
                 $res3->close();
 
@@ -174,9 +174,9 @@ $mysqli = $system->get_mysqli();
 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                
+
                 filestoreReplaceDuplicatesInDetails($mysqli, $max_ulf_id, $dups_ids);
-                
+
                 $fix_dupes = $fix_dupes + count($dups_ids);
             }
 
@@ -207,7 +207,7 @@ $mysqli = $system->get_mysqli();
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
-                   
+
                 }
                 $res3->close();
 
@@ -217,9 +217,9 @@ $mysqli = $system->get_mysqli();
 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                
+
                 filestoreReplaceDuplicatesInDetails($mysqli, $max_ulf_id, $dups_ids);
-                
+
                 $fix_dupes = $fix_dupes + count($dups_ids);
                 $fix_url++;
             }
@@ -254,7 +254,7 @@ $mysqli = $system->get_mysqli();
 
                 if(!$res3){
                     //$this->system->addError(HEURIST_DB_ERROR, 'Unable to query recUploadedFiles for file '
-                   
+
                     continue;
                 }
 
@@ -279,7 +279,7 @@ $mysqli = $system->get_mysqli();
                             //files are the same
                             $is_unique = false;
                             $dups_files[$id]['dupes'][ $res4['ulf_ID'] ] = $res_fullpath;
-                           
+
                             break;
                         }
                     }
@@ -297,9 +297,9 @@ $mysqli = $system->get_mysqli();
                     if(is_array($file_a['dupes']) && count($file_a['dupes'])>0){
 
                         $dup_ids = array_keys($file_a['dupes']);
-                        
+
                         filestoreReplaceDuplicatesInDetails($mysqli, $ulf_ID, $dup_ids);
-                        
+
                         $cnt_dupes = $cnt_dupes + count($dup_ids);
                         $cnt_unique++;
 
@@ -502,7 +502,7 @@ $mysqli = $system->get_mysqli();
                             if(window.hWin.HEURIST4.util.isnull(context) || window.hWin.HEURIST4.util.isnull(context['result'])){
                                 window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
-                                
+
                                 var url = window.hWin.HAPI4.baseURL + 'admin/verification/listDatabaseErrorsInit.php?type=files&db='+window.hWin.HAPI4.database;
 
                                 if(window.parent.parent.addDataMenu)
@@ -860,14 +860,14 @@ $mysqli = $system->get_mysqli();
             }else{
                 print "<br><br><p><h3>All uploaded file entries are valid</h3></p>";
             }
-            
+
 function out_checkbox($ele_class, $ulf_id, $text){
-    
+
     $ulf_id = intval($ulf_id);
     print <<<EXP
 <div class="msgline"><label><input type=checkbox class="$ele_class" data-id="$ulf_id">&nbsp;<b>$ulf_id</b> $text</label></div>
 EXP;
-}            
+}
             ?>
 
 

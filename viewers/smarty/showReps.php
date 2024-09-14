@@ -662,7 +662,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
 
         if($is_jsallowed){
-            
+
             $script_tag = '<script type="text/javascript" src="'.HEURIST_BASE_URL;
 
             if(!$is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
@@ -753,7 +753,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
-                    
+
                     $head = <<<EXP
 {$script_tag}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 {$script_tag}external/jquery-ui-1.12.1/jquery-ui.js"></script>
@@ -995,7 +995,7 @@ function save_report_into_file($tpl_source){
             $dirname = USanitize::sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
 
             $dirname = isPathInHeuristUploadFolder($dirname);
-            
+
             //if folder is not defined - output into generated-reports
             if(!$dirname){
                 $dirname = $system->getSysDir('generated-reports');

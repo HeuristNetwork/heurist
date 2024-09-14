@@ -158,7 +158,7 @@ protected function _outputRecord($record){
     if(is_array($this->retrieve_detail_fields)){
         $this->retrieve_detail_fields = array();
     }
-    
+
     $att_id = 4;
     foreach($this->retrieve_detail_fields as $dty_ID){
 
@@ -178,7 +178,7 @@ protected function _outputRecord($record){
 
         $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
     }
-    
+
             $gephi_node = <<<XML
 <node id="{$recID}" label="{$name}">
     <attvalues>
@@ -198,7 +198,7 @@ XML;
     if($links['status']!=HEURIST_OK){
         return false;
     }
-    
+
     if(@$links['data']['direct']){
         fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
     }

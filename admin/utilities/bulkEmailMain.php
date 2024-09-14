@@ -319,7 +319,7 @@ if(!$has_emails || empty($emails)) {
                 isFormSubmit = true;
 
                 var action = $("#emailOptions").attr("onsubmit");
-               
+
                 $("input[name='exportCSV']").val(1);
 
                 /*
@@ -333,7 +333,7 @@ if(!$has_emails || empty($emails)) {
                 getDbList();
                 $("#emailOptions").submit();
 
-               
+
                 $("input[name='exportCSV']").val('');
 
                 setTimeout('isFormSubmit=false', 5000);
@@ -626,11 +626,11 @@ if(!$has_emails || empty($emails)) {
 
                         if($(event.target).val()==='ALL') {
                             window.hWin.HEURIST4.util.setDisabled($("#recModified"), true);
-                            
+
                             window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), true);
                         } else {
                             window.hWin.HEURIST4.util.setDisabled($("#recModified"), false);
-                            
+
                             window.hWin.HEURIST4.util.setDisabled($("#recModifiedLogic"), false);
                         }
                     }
@@ -695,7 +695,7 @@ if(!$has_emails || empty($emails)) {
                                 if(response.status == "ok"){
                                     setupDBSelection(response.data);
                                     applyDBSort($('input[name="dbSortBy"]:checked').attr('id'));
-                                   
+
                                 } else {
 
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
@@ -777,7 +777,7 @@ if(!$has_emails || empty($emails)) {
                             database_details = response.data.details;
                             setupDBSelection(response.data.list);
                             //applyDBSort('name'); already in alphabetic order by default
-                           
+
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){

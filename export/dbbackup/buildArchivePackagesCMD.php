@@ -185,7 +185,7 @@ foreach ($arg_database as $idx=>$db_name){
         $folders_to_copy = folderSubs($database_folder, array('backup', 'scratch', 'file_uploads', 'filethumbs', 'webimagecache', 'blurredimagescache'));
 
         // this is limited set of folder
-       
+
     }
 
     if(!$arg_skip_files){
@@ -198,7 +198,7 @@ foreach ($arg_database as $idx=>$db_name){
         $copy_files_in_root = false;
     }
 
-   
+
 
     if($folders_to_copy==null){
         $folders_to_copy = array('no copy folders');

@@ -73,7 +73,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
         $mysqli = $system->get_mysqli();
-       
+
 
         if($res['rec_RecTypeID']==RT_MAP_ANNOTATION){
             //find parent record with iiif image - it returns obfuscation id
@@ -159,7 +159,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }else{
     if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
-       
+
     }elseif(!@$_REQUEST['q']){ //query not defined
         exit('Need to define either query or file ID');
     }else{
@@ -172,7 +172,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }
 
 
-   
+
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
 $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');

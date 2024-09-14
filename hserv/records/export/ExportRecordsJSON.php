@@ -68,7 +68,7 @@ protected function _outputPrepare($data, $params){
 
         $this->records_cnt = intval(@$params['recordsTotal']);
         $this->records_cnt_filtered = intval(@$params['recordsFiltered']);
-        
+
     }
     return $res;
 }
@@ -203,14 +203,14 @@ protected function _outputHeader(){
 
         fwrite($this->fd, '{"records":[');
 
-        /*        
+        /*
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');
         }else{
             fwrite($fd, '{"records":[');
         }
         */
-        
+
 
     }else {
 

@@ -82,7 +82,7 @@ protected function _outputPrepare($data, $params)
         $this->include_resource_term_label = ($ext_info[1]==1);
         $this->include_resource_rec_title = ($ext_info[2]==1);
         $this->include_resource_file_info = ($ext_info[3]==1);
-        
+
     }
 
     return $res;
@@ -456,7 +456,7 @@ private function _setResourceProps($record, &$resource){
                     list($lang, $value) = extractLangPrefix($value);
                     $dtype = 'xsd:string';
                     if($lang!=null) {
-                        $lang = 'fr'; 
+                        $lang = 'fr';
                     }
                     */
                 }

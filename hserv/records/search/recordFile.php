@@ -588,7 +588,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 
 /**
  * Downloads a file along with metadata as a ZIP file.
- * 
+ *
  * @param System $system - The system object to interact with the environment.
  * @param array $fileinfo - Information about the file (obtained by fileGetFullInfo).
  * @param int $rec_ID - The record ID associated with the file.
@@ -603,19 +603,19 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $fileExt = $fileinfo['ulf_MimeExt'];
     $fileSize = $fileinfo['ulf_FileSizeKB'];
-    
+
     $is_local = file_exists($filepath);
 
     //name for zip archive
     $downloadFileName = null;
     $record = array("rec_ID"=>$rec_ID);
     $system->defineConstant('DT_NAME');
-    
+
     recordSearchDetails($system, $record, array(DT_NAME));
     if(is_array($record['details'][DT_NAME])){
             $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
     }
-    
+
     if(!$downloadFileName) {$downloadFileName = 'Dataset_'.$rec_ID;}
 
 /*
@@ -751,7 +751,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
             //preload="none"
             $f_id = $external_url?'':$fileid;
-            
+
             $result = <<<EXP
 <video $autoplay $size $style controls="controls">
     <source type="$mimeType" src="$filepath" data-id="$f_id"/>
@@ -786,15 +786,15 @@ EXP;
             }
 
             $f_id = $external_url?'':$fileid;
-            
+
             $result = <<<EXP
 <audio controls="controls" $autoplay>
     <source type="$mimeType" src="$filepath" data-id="$f_id"/>
     Your browser does not support the audio element
 </audio>
 EXP;
-                
-                
+
+
         }
 
     }else
@@ -816,7 +816,7 @@ EXP;
         }
 
         $result = "<iframe $size $style src=\"$miradorViewer\" frameborder=\"0\"></iframe>";
-        
+
     }else
     if($is_image){
 
@@ -892,7 +892,7 @@ function getPlayerURL($mimeType, $url, $params=null){
             $autoplay = 'true';
         }
         $autoplay = '&amp;auto_play='.$autoplay;
-        
+
         $show_artwork = 'true';
         if($params && @$params['show_artwork']==0){
             $show_artwork = 'false';
@@ -975,10 +975,10 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
 /**
  * Create a blurred png version of an image that is not for public view
  *  Also overlays hclient/assests/100x100-login-required.png
- * 
+ *
  * @param hserv\System $system - initialised Heurist system object
  * @param array $file_info - data obtained by fileGetFullInfo
- * @param bool $return_url - return url to file instead of file path 
+ * @param bool $return_url - return url to file instead of file path
  * @return bool | string - false on failure, otherwise either the url or pathway to the image
  */
 function getBlurredImage($system, $file_info, $return_url = true){
@@ -1139,7 +1139,7 @@ function fileGetMetadata($fileinfo){
 
     $image = null;
     $alt_image = null;
-    
+
     $res = array();
 
     if(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $sourceType!='tiled' && $type_media=='image'){
@@ -1432,9 +1432,9 @@ function filestoreGetUsageByDb($system){
 
 
 function filestoreReplaceDuplicatesInDetails($mysqli, $ulf_id, $ulf_ids_replaced){
-    
+
     $ulf_ids_replaced = prepareIds($ulf_ids_replaced);//for snyk
-    
+
     $ids = implode(',', $ulf_ids_replaced);
 
     $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($ulf_id).' WHERE dtl_UploadedFileID in ('.$ids.')';

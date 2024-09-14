@@ -45,7 +45,7 @@
     */
 
  define('APOSTROPHE','&#039;');
-    
+
 if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')&& !@$_REQUEST['embed'])  {
 ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -387,7 +387,7 @@ function onPageInit(success)
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 
         var itop = $('#main-header').height();
-       
+
 
     },300);
 
@@ -532,7 +532,7 @@ function loadPageContent(pageid, eventdata){
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
-                $('body').find('#main-content').css('min-height', '');// remove min height                
+                $('body').find('#main-content').css('min-height', '');// remove min height
 
                 if(!window.hWin.HAPI4.is_admin()){
                     isCMS_active = false;
@@ -780,7 +780,7 @@ function afterPageLoad(document, pageid, eventdata){
             setTimeout(function(){ afterPageLoad(document, pageid, eventdata) },500);
             return;
         }else{
-            
+
         }
     }
 
@@ -1050,7 +1050,7 @@ function initLinksAndImages($container, search_data){
         if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 ||
 
                 var query = $(link).attr('data-query');
-                       
+
 
                 var current_template = '__def';
                 var request = {detail:'ids', neadall:1, w:'a', q:query};
@@ -1066,7 +1066,7 @@ function initLinksAndImages($container, search_data){
 
                 if(!href || href=='#' || href.indexOf('q=')===0){
                     //change href for right click - to open this link in new tab
-                   
+
                     href = [window.hWin.HAPI4.baseURL,window.hWin.HAPI4.database,'web',
                             home_page_record_id, current_page_id,encodeURIComponent(query)];
                     href = href.join('/');
@@ -1222,7 +1222,7 @@ function onHapiInit(success){
 
             if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
 
-               
+
                 $('<div><a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
                             +'<label>at: </label>'
@@ -1230,7 +1230,7 @@ function onHapiInit(success){
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
-           
+
 
 
 <?php
@@ -1437,7 +1437,7 @@ function _openCMSeditor(event){
             //close
             isCMS_active = false;
             editCMS_instance2.closeCMS();
-           
+
         }else{
             $('#main-recordview').hide();
             $('#main-content').show();
@@ -1559,7 +1559,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                 if(in_array($page_id, $ids_was_added)){
                     //already was included - recursion
-                   
+
                 }else{
 
                     $record = recordSearchByID($system,$page_id,$fields,'rec_ID,rec_RecTypeID');
@@ -1570,7 +1570,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                     //target and position
                     $pageTarget = _getFld($record,DT_CMS_TARGET);
-                   
+
                     $showTitle = _getFld($record,DT_CMS_PAGETITLE);
 
                     $showTitle = true;

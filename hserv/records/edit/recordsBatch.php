@@ -268,16 +268,16 @@ class RecordsBatch
 
     //
     //
-    //    
+    //
     private function getDetailType($dty_ID){
         return mysql__select_value($this->system->get_mysqli(),
                  'select dty_Type from defDetailTypes where dty_ID = '.$dty_ID);
     }
-    
-    
+
+
     //
     //
-    //    
+    //
     private function _removeScriptTag($value){
         $value = trim($value);
         return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $value);
@@ -725,7 +725,7 @@ class RecordsBatch
                     $dtl_Value = $this->data['rVal'];
 
                     $dtl_Value = $this->_removeScriptTag($dtl_Value);
-                    
+
                     //$dtl_Value =  $this->purifier->purify($dtl_Value);
                     //$dtl_Value = htmlspecialchars_decode( $dtl_Value );
 
@@ -761,7 +761,7 @@ class RecordsBatch
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
 
         }else{
-            
+
             $searchClause = null;
             $is_like = false;
 
@@ -787,7 +787,7 @@ class RecordsBatch
                     $dtl_Value = Temporal::getValueForRecDetails( @$this->data['sVal'], $useNewTemporalFormatInRecDetails );
 
                     $searchClause = $mysqli->real_escape_string($dtl_Value);
-                    
+
                     $partialReplace = false;
                     break;
                 case "relmarker":
@@ -798,15 +798,15 @@ class RecordsBatch
                     $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
                     return false;
             }
-            
+
             if($searchClause!=null){
                 if($is_like){
-                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';        
+                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';
                 }else{
-                    $searchClause = 'dtl_Value = "'.$searchClause.'"';        
+                    $searchClause = 'dtl_Value = "'.$searchClause.'"';
                 }
             }
-            
+
 
             $replace_all_occurences = false;
         }
@@ -879,14 +879,14 @@ class RecordsBatch
                 if($get_next_row) {$row = $res->fetch_row();}
                 $get_next_row = true;
                 $inserting_value = $insert_new_value && $res->num_rows == 0;
-                
-                if(!$row || ($recID>0 && $row[1]!=$recID) ){ 
 
-                    //next record - update changed record and 
+                if(!$row || ($recID>0 && $row[1]!=$recID) ){
+
+                    //next record - update changed record and
                     if($recID>0){
 
                         if ($recDetailWasUpdated) {
-                            //only put in processed if a detail was processed, 
+                            //only put in processed if a detail was processed,
                             // obscure case when record has multiple details we record in error array also
                             array_push($processedRecIDs, $recID);
 
@@ -922,7 +922,7 @@ class RecordsBatch
 
                 $dtlID = $inserting_value ? -1 : intval($row[0]);
                 $recID = $inserting_value ? $keep_recID : intval($row[1]);
-                
+
                 if($is_multiline){ //replace with several values (long text)
 
                     foreach($splitValues as $val){
@@ -972,7 +972,7 @@ class RecordsBatch
                     }
 
                     if(!@$this->data['debug']){
-                        
+
                         if($insert_new_value){
                             $dtl['dtl_RecID'] = $recID;
                             $dtl['dtl_DetailTypeID'] = $dtyID;
@@ -999,12 +999,12 @@ class RecordsBatch
                     $recDetailWasUpdated = true;
 
                 }
-                
+
                 if($replace_all_occurences || $is_multiline){
 
                     if($is_multiline && $dtlID > 0){
-                        array_push($valuesToBeDeleted, intval($dtlID));  
-                    } 
+                        array_push($valuesToBeDeleted, intval($dtlID));
+                    }
 
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){
@@ -1070,7 +1070,7 @@ class RecordsBatch
 
             $searchClause=null;
             $is_like=false;
-            
+
             $basetype = $this->getDetailType($dtyID);
             switch ($basetype) {
                 case "freetext":
@@ -1080,7 +1080,7 @@ class RecordsBatch
                         $is_like = true;
                     }
                     $searchClause = $mysqli->real_escape_string($this->data['sVal']);
-                    
+
                     break;
                 case "enum":
                 case "relationtype":
@@ -1102,12 +1102,12 @@ class RecordsBatch
                     $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");
                     return false;
             }
-            
+
             if($searchClause!=null){
                 if($is_like){
-                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';        
+                    $searchClause = 'dtl_Value LIKE "%'.$searchClause.'%"';
                 }else{
-                    $searchClause = 'dtl_Value = "'.$searchClause.'"';        
+                    $searchClause = 'dtl_Value = "'.$searchClause.'"';
                 }
             }else{
                 $searchClause = "(1=1)";

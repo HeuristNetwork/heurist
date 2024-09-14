@@ -31,9 +31,9 @@
     if(isset($req_params)){
         $params = $req_params; //from api.php
     }else{
-        $params = $_REQUEST;    
+        $params = $_REQUEST;
     }
-    
+
 
     if(!isset($system) || $system==null){
 
@@ -56,7 +56,7 @@
 
 
     }
-    
+
     $res = hserv\records\export\ExportRecordsIIIF::getIiifResource($system, null, 3, $params['id'], @$params['resource']);
 
     $system->dbclose();

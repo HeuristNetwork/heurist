@@ -95,11 +95,11 @@ if(isset($message)){
 }
 
 function echo_flush($msg){
-   
+
     print $msg;
-   
-   
-   
+
+
+
 }
 
 //

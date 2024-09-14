@@ -247,12 +247,12 @@ class DbUsrRecPermissions extends DbEntityBase
                 $this->system->addError(HEURIST_DB_ERROR,
                         'Cannot save data in table '.$this->config['entityName'], $mysqli->error);
             }else{
-                $res = array($mysqli->insert_id);    
+                $res = array($mysqli->insert_id);
             }
         }
 
         mysql__end_transaction($mysql, $res, $keep_autocommit);
-        
+
         return $res;
 
     }
@@ -309,7 +309,7 @@ class DbUsrRecPermissions extends DbEntityBase
             $query = SQL_DELETE.$this->config['tableName']
                                 .SQL_WHERE
                                 .predicateId('rcp_UGrpID',$group_ids_to_delete);
-                
+
             $res = $mysqli->query( $query );
             if(!$res){
                  $this->system->addError(HEURIST_DB_ERROR,

@@ -49,7 +49,7 @@ $rty_ids_list = null;
 if(@$_REQUEST['recTypeIDs']){
     $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
-   
+
     if(count($rty_ids)>0) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
@@ -303,7 +303,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             $unchanged_count++;
 
         }elseif (! preg_match('/^\\s*$/', $new_title)) {    // if new title is blank, leave the existing title
-           
+
             $updates[] = $rec_id;
             $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
                 $mysqli->real_escape_string($new_title).'" where rec_ID='.$rec_id);

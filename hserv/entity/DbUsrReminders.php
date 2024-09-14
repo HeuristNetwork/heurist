@@ -57,10 +57,10 @@ class DbUsrReminders extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $sup_tables = null;
         $sup_where = null;
-        
+
         $this->searchMgr->addPredicate('rem_ID');
         $this->searchMgr->addPredicate('rem_OwnerUGrpID');
         $this->searchMgr->addPredicate('rem_RecID');
@@ -68,17 +68,17 @@ class DbUsrReminders extends DbEntityBase
         $this->searchMgr->addPredicate('rem_ToWorkgroupID');
         $this->searchMgr->addPredicate('rem_ToUserID');
         $this->searchMgr->addPredicate('rem_ToEmail');
-        
+
         switch (@$this->data['details']){
             case 'id': $this->searchMgr->setSelFields('rem_ID'); break;
-            case 'list': 
-            case 'name': 
+            case 'list':
+            case 'name':
                 $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName,rec_Title as rem_RecTitle');
-                
+
                 $sup_tables = ' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
                              .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID, Records ';
                 $sup_where = '(rec_ID=rem_RecID)';
-                
+
                 break;
             default: //case 'full':
                 $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq');

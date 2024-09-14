@@ -231,7 +231,7 @@ protected function _outputPrepareFields($params){
 
             foreach($params['columns'] as $col_name){
                 if(is_array($col_name)){
-                    $col_name = $col_name['data']; 
+                    $col_name = $col_name['data'];
                 }
 
                 if(is_numeric($col_name) && $col_name>0){
@@ -277,7 +277,7 @@ public function output($data, $params){
     }
 
     $this->_outputPrepareFields($params);
-    
+
     $this->_outputHeader();
 
     //MAIN LOOP  ----------------------------------------

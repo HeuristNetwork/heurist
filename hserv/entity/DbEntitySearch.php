@@ -28,16 +28,16 @@ class DbEntitySearch
 
     //name of primary key field from $config  by dty_Role="primary"
     private $primaryField;
-    
+
     private $whereConditions;
-    
+
     //data types: ids, int, float, date, bool, enum
     //structure
     private $fields = array(); //fields from configuration
 
     private $config = array(); //configuration
-    
-    
+
+
     public function __construct( $system, $config, $fields) {
        $this->system = $system;
        $this->fields = $fields;
@@ -67,7 +67,7 @@ class DbEntitySearch
                 }
             }
             //return $values;
-        
+
         return true;
     }
 
@@ -85,7 +85,7 @@ class DbEntitySearch
         $value = @$this->data[$fieldname];
 
         if($value==null){
-            return true;   
+            return true;
         }
 
         $enums = $this->fields[$fieldname]['rst_FieldConfig'];
@@ -111,7 +111,7 @@ class DbEntitySearch
                     return false;
                 }
             }//for
-        
+
         return true;
     }
 
@@ -123,7 +123,7 @@ class DbEntitySearch
         $value = @$this->data[$fieldname];
 
         if($value==null){
-            return true;   
+            return true;
         }
 
         if(is_bool($value)){
@@ -155,29 +155,29 @@ class DbEntitySearch
         foreach($this->fields as $fieldname=>$field_config)
         {
             $value = $this->data[$fieldname] ?? null;
-            
+
             if($this->isPrimaryField($field_config)){
                 $this->primaryField = $fieldname;
             }
 
             if($value==null){
-                continue;    
+                continue;
             }
 
             if($value==SQL_NULL || $value=='-'.SQL_NULL){
                 $this->data[$fieldname] = true;
             }
-            
+
                 $data_type = $field_config['dty_Type'];
                 $methodName = $data_type;
-                
+
                 if($this->primaryField == $fieldname || @$field_config['rst_FieldConfig']['entity']!=null){
                     $methodName = 'ids';
                 }
 
                 $methodName = '_validate'.ucfirst($methodName);
                 $res = true;
-                
+
                 if(method_exists($this, $methodName)){ //&& is_callable(array($this, $methodName))){
                     $res = $this->$methodName($fieldname, $data_type);
                 }
@@ -187,7 +187,7 @@ class DbEntitySearch
                 }else{
                     if(!$res) {return false;}
                 }
-            
+
         }
 
         return $this->data;
@@ -212,32 +212,32 @@ class DbEntitySearch
 
 
     public function addPredicate($fieldname, $is_ids=false) {
-        
+
         $pred = $this->getPredicate($fieldname, $is_ids);
         if($pred!=null) {array_push($this->whereConditions, $pred);}
-        
+
     }
-    
+
     public function setSelFields($fields){
         if(!is_array(@$this->data['details'])){
             $this->data['details'] = $fields;
         }
     }
-    
-    
+
+
     public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
-        
+
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
+
         //ID field is mandatory and MUST be first in the list
         $idx = array_search($this->primaryField, $this->data['details']);
         if($idx>0){ //remove from list if not on first place
             unset($this->data['details'][$idx]);
             $idx = false;
         }
-        if($idx===false){ 
+        if($idx===false){
             array_unshift($this->data['details'], $this->primaryField); //insert first
         }
         $is_ids_only = (count($this->data['details'])==1);
@@ -245,7 +245,7 @@ class DbEntitySearch
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.$this->config['tableName'];
-        
+
         if($sup_tables!=null){
             $query .= $sup_tables;
         }
@@ -256,19 +256,19 @@ class DbEntitySearch
         if(count($this->whereConditions)>0){
             $query .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
         }
-        
-         
+
+
         if($orderBy!=null){
-            $query .= ' ORDER BY '.$orderBy;   
+            $query .= ' ORDER BY '.$orderBy;
         }
-         
+
         $query .= ' '.$this->getLimit().$this->getOffset();
 
         $res = $this->execute($query, $is_ids_only);
         return $res;
 
     }
-    
+
     /**
      * Determines if a field is marked as the primary field.
      *
@@ -278,7 +278,7 @@ class DbEntitySearch
     private function isPrimaryField($field_config) {
         return isset($field_config['dty_Role']) && $field_config['dty_Role'] === 'primary';
     }
-    
+
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
     //
@@ -479,7 +479,7 @@ class DbEntitySearch
             }
         }
     }
-    
+
     //
     //
     //
@@ -487,18 +487,18 @@ class DbEntitySearch
         $orderby = null;
         foreach($this->data as $key=>$value){
             if(strpos($key,'sort:')===0){
-                $field = substr($key,5);                    
+                $field = substr($key,5);
                 $orderby = $field.' '.($value==1?'ASC':'DESC');
                 break;
             }
         }
-        
+
         if($orderby==null && $default!=null){
             $orderby = $default;
         }
         return $orderby;
     }
-    
+
 
     //
     //
@@ -507,14 +507,14 @@ class DbEntitySearch
     public function execute($query, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
 
         $mysqli = $this->system->get_mysqli();
-        
+
         $res = $mysqli->query($query);
         if (!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
         }
         $total_count_rows = mysql__found_rows($mysqli);
-        
+
         if($entityName==null){
             $entityName = $this->config['entityName'];
         }
@@ -627,7 +627,7 @@ class DbEntitySearch
                     }
 
                 }//$is_ids_only
-            
+
         return $response;
     }
 

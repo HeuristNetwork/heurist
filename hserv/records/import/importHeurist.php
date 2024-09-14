@@ -515,7 +515,7 @@ public static function importRecordsFromDatabase($params){
                 'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
         return false;
     }
-    
+
         //read temp file, import records
         $params2 = array(
             'session' => @$params['session'],

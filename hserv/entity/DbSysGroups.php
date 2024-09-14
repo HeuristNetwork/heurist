@@ -33,7 +33,7 @@ class DbSysGroups extends DbEntityBase
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
-    
+
     /**
     *  search groups
     *
@@ -49,7 +49,7 @@ class DbSysGroups extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $needCheck = false;
         $needRole = false;
         $needCount = false;  //find members count
@@ -201,7 +201,7 @@ class DbSysGroups extends DbEntityBase
 
             //validate duplication
             if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'Workgroup cannot be saved. The provided name already exists')){
-                    return false;                           
+                    return false;
             }
 
         }
@@ -253,15 +253,15 @@ class DbSysGroups extends DbEntityBase
     // delete group
     //
     public function delete($disable_foreign_checks = false){
-        
+
         $this->recordIDs = null; //reset to obtain ids from $data
-        
+
         $this->foreignChecks = array(
                     array('SELECT FIND_IN_SET(1, "#IDS#")','Cannot remove "Database Owners" group'),
                     array('SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary=0 AND rec_OwnerUGrpID IN (#IDS#) LIMIT 1',
                           'Deleting Group with existing Records not allowed')
                 );
-        
+
         if(!$this->deletePrepare()){
             return false;
         }
@@ -284,7 +284,7 @@ class DbSysGroups extends DbEntityBase
         //find affected users
         $query = 'SELECT ugl_UserID FROM sysUsrGrpLinks'
             . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs);
-            
+
         $affectedUserIds = mysql__select_list2($mysqli, $query);
 
         //remove from roles table
@@ -420,7 +420,7 @@ class DbSysGroups extends DbEntityBase
             }//foreach
 
         }
-        
+
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;

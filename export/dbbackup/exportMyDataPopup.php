@@ -512,7 +512,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                           'term-images', 'webimagecache', 'blurredimagescache'));//except these folders - some of them may exist in old databases only
 
                 //limited set
-               
+
 
                 echo_flush2("<br><br>Exporting system folders<br>");
             }
@@ -561,12 +561,12 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                if(@$_REQUEST['allrecs']!="1"){
                    $userid = $system->get_user_id();
                    $q = "owner:$userid";//user:$userid OR
-                  
+
                    $hml_url = $hml_url.'&depth=5';
                }else{
                    $q = "sortby:-m";
-                  
-                  
+
+
                    $hml_url = $hml_url.'&depth=0&linkmode=none';
                }
                $hml_url = $hml_url.'&q='.$q;

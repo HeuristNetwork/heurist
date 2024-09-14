@@ -1481,16 +1481,16 @@ $mysqli->commit();
 
         //array of valid ids
         if(isEmptyArray($vocab_ids)){
-            return;            
+            return;
         }
-        
+
         $added_vcb_ids = array();
 
         foreach ($vocab_ids as $vocab_id){
 
             $child_terms = $this->sourceTerms->treeData($vocab_id, 3);
             if(isEmptyArray($child_terms)){
-                continue;   
+                continue;
             }
 
             foreach($child_terms as $term_id){
@@ -1500,7 +1500,7 @@ $mysqli->commit();
                 $inverse_parent = $this->sourceTerms->getTopMostTermParent($inverse_id, $domain);
 
                 if( isPositiveInt($inverse_id)
-                    && !in_array($inverse_id, $this->imp_terms[$domain]) 
+                    && !in_array($inverse_id, $this->imp_terms[$domain])
                     && !in_array($inverse_parent, $this->imp_terms[$domain]))
                 {
 
@@ -1510,7 +1510,7 @@ $mysqli->commit();
                     array_push($added_vcb_ids, $inverse_parent);
                 }
             }
-            
+
         }
 
         if(!isEmptyArray($added_vcb_ids)){
@@ -2384,9 +2384,9 @@ $mysqli->commit();
             $remoteURL = $remote_url
                 .'hserv/controller/sys_structure.php?db='.$remote_dbname.'&'
                 . http_build_query(array('translations' => $this->def_translations[$def]));
-                
+
             $translations = _getRemoteTranslations($remoteURL);
-            
+
             if(!$translations){
                 return;
             }
@@ -2401,7 +2401,7 @@ $mysqli->commit();
 
         return true;
     }
-    
+
     private function _getRemoteTranslations($remoteURL){
 
             $defs = loadRemoteURLContent($remoteURL);
@@ -2424,13 +2424,13 @@ $mysqli->commit();
 
                 return false;
             }
-            
+
             return $translations['data'];
     }
 
 
     private function _handleTranslations($def, $translations){
-    
+
         $mysqli = $this->system->get_mysqli();
 
         $delete_stmt = $mysqli->prepare('DELETE FROM defTranslations where trn_Source=? AND trn_Code=?');

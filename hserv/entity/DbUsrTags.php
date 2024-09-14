@@ -51,17 +51,17 @@ class DbUsrTags extends DbEntityBase
         if(parent::search()===false){
               return false;
         }
-        
+
         $sup_tables = null;
         $sup_where = null;
-        
+
         $this->searchMgr->addPredicate('tag_ID');
         $this->searchMgr->addPredicate('tag_Text');
         $this->searchMgr->addPredicate('tag_Modified');
         $this->searchMgr->addPredicate('tag_UGrpID');
-        
+
         if(@$this->data['rtl_RecID']){
-            
+
             $where = predicateId('rtl_RecID',$this->data['rtl_RecID'],SQL_AND);
             if($where!=''){
                 $sup_tables = ',usrRecTagLinks';
@@ -75,11 +75,11 @@ class DbUsrTags extends DbEntityBase
             case 'name':  $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_UGrpID'); break;
             default: //case 'full':
                 $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID'
-                    .',(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage'); 
+                    .',(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
         }
 
         $orderby = $this->searchMgr->setOrderBy();
-        
+
         return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
@@ -184,7 +184,7 @@ class DbUsrTags extends DbEntityBase
         }
 
         $ret = false;
-        
+
             $newTagID = $this->newTagID[0];
 
             $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
@@ -210,7 +210,7 @@ class DbUsrTags extends DbEntityBase
                     }
                 }
             }
-            
+
         return $ret;
     }
 

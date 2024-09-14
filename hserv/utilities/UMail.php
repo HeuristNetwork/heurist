@@ -285,27 +285,27 @@ use PHPMailer\PHPMailer\Exception;
       return true;
     }
 
-    
+
     //
     // Send warning email to admin once per 4 hours
-    //                                  
+    //
     // $is_global - true - check global lastWarningSent in file upload root
-    //              false - check lastWarningSent in database folder 
+    //              false - check lastWarningSent in database folder
     //
     function sendEmailToAdmin($title, $message, $is_global){
         global $system;
-        
+
         if(isset($system)){
             $folder = $system->getFileStoreRootFolder();
             if(!$is_global){
-                $folder .= $system->dbname().'/';   
+                $folder .= $system->dbname().'/';
             }
         }else{
             $folder = dirname(__FILE__).'/../../../'; //$defaultRootFileUploadPath;
         }
-        
+
         $fname = $folder."lastWarningSent.ini";
-            
+
         $needSend = true;
         if (file_exists($fname)){//check if warning is already sent
             $datetime1 = date_create(file_get_contents($fname));
@@ -321,8 +321,8 @@ use PHPMailer\PHPMailer\Exception;
                 file_put_contents($fname, date_create('now')->format(DATE_8601));
             }
         }
-        
-        
-        
+
+
+
     }
 ?>

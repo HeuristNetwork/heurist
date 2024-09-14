@@ -155,7 +155,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         $locale = '';
     }
-    
+
     $help_folder = 'context_help/';
 
     $asset = $help_folder.$locale.'/'.urlencode($name);
@@ -173,9 +173,9 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }
 
 }elseif (@$_REQUEST['logo']){
-    
+
     list($host_logo, $host_url, $mime_type) = USystem::getHostLogoAndUrl();
-    
+
     if($host_logo!=null && file_exists($host_logo)){
         header('Content-type: image/'.$mime_type);
         readfile($host_logo);
@@ -338,13 +338,13 @@ if($isLocalHost){
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.js"></script>
--->     
+-->
 
     <link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js"></script>    
-    
+    <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js"></script>
+
     <?php
 }
 ?>

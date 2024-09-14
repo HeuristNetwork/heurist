@@ -60,7 +60,7 @@ if($filename){ //download from scratch (for csv import)
         $filename = USanitize::sanitizeFileName($filename, false);
 
         $file_read = HEURIST_FILESTORE_DIR.DIR_SCRATCH.$filename;
-        
+
         $file_read = isPathInHeuristUploadFolder( $file_read );
 
         if(!$file_read || is_dir($file_read))

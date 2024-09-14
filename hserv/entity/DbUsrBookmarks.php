@@ -44,18 +44,18 @@ class DbUsrBookmarks extends DbEntityBase
               return false;
         }
 
-        
+
         $this->searchMgr->addPredicate('bkm_ID');
         $this->searchMgr->addPredicate('bkm_UGrpID');
         $this->searchMgr->addPredicate('bkm_RecID');
         $this->searchMgr->addPredicate('bkm_Rating');
-        
+
         if(@$this->data['details']=='id'){
             $this->searchMgr->setSelFields('bkm_ID');
         }else{
             $this->searchMgr->setSelFields('bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes');
         }
-        
+
         return $this->searchMgr->composeAndExecute(null);
     }
 
@@ -123,14 +123,14 @@ class DbUsrBookmarks extends DbEntityBase
 
         $this->recordIDs = null; //reset to obtain ids from $data
         $this->isDeleteReady = false;
-        
+
         $this->foreignChecks = array(
                     array('SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks '
                     .'WHERE tag_ID=rtl_TagID AND tag_UGrpID='.$this->system->get_user_id()
                     .' AND rtl_RecID=bkm_RecID AND bkm_ID',
                     'It is not possible to remove bookmark. Bookmarked record has personal tags')
                 );
-        
+
         return parent::delete();
     }
 

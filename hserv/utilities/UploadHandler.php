@@ -67,8 +67,8 @@ class UploadHandler
     );
 
 
-    protected $image_objects = array();       
-    
+    protected $image_objects = array();
+
     public function __construct($options = null, $initialize = true, $error_messages = null) {
 
         if($options==null) {$options=array();}
@@ -80,14 +80,14 @@ class UploadHandler
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']);//defined in form
         if(!($replace_edited_file>0 && $replace_edited_file<4)) {$replace_edited_file = false;}
         $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
-        
+
         $upload_url = null;
-        $upload_dir = $this->checkUploadFolder($options); 
+        $upload_dir = $this->checkUploadFolder($options);
         if($upload_dir!=null){
             $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
             $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
         }
-        
+
 
         $this->response = array();
         $this->options = array(
@@ -250,7 +250,7 @@ class UploadHandler
             $this->initialize();
         }
     }
-    
+
     private function checkSystem($heurist_db){
 
         $error = mysql__check_dbname($heurist_db);
@@ -269,11 +269,11 @@ class UploadHandler
         }
         return true;
     }
-    
+
     private function checkUploadFolder(&$options){
-        
+
         $upload_dir = null;
-        
+
         if(@$options['upload_dir']==null){  //from UploadHandlerInit.php
 
             //get upload subfolder from parameters - this is subfolder of database upload folder
@@ -293,7 +293,7 @@ class UploadHandler
         }
         return $upload_dir;
     }
-    
+
 
     protected function initialize() {
 
@@ -1918,15 +1918,15 @@ class UploadHandler
             // Sanitize file name to avoid security risks
             $file_name = basename($file_name);  // Prevent directory traversal
             $file_path = $this->get_upload_path($file_name, $subfolder);
-            
+
             // Check if file exists, is valid, and then delete it
             if (!(is_file($file_path) && $file_name[0] !== '.' && unlink($file_path))) {
                 // File doesn't exist or is invalid, return failure for this file
                 // Log failure to delete main file (e.g., due to permission issues)
                 $response[$file_name] = false;
-                continue;  // Skip further operations for this file  
+                continue;  // Skip further operations for this file
             }
-                
+
             // If the main file is deleted, attempt to delete its image versions
             $this->deleteVersions($file_name, $subfolder);
             $response[$file_name] = true;
@@ -1935,7 +1935,7 @@ class UploadHandler
         // Generate response based on the success/failure of deletion
         return $this->generate_response($response, $print_response);
     }
-    
+
     private function deleteVersions($file_name, $subfolder){
         foreach ($this->options['image_versions'] as $version => $options) {
             $versioned_file = $this->get_upload_path($file_name, $subfolder, $version);
@@ -1944,6 +1944,6 @@ class UploadHandler
             }
         }
     }
-    
+
 
 }

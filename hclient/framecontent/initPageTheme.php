@@ -76,13 +76,13 @@ define('CLR_HOVER_COLOR', '#2b2b2b');
 define('CLR_SP_BORDER', '#003eff'); //clickable pressed
 define('CLR_SD_BG', '#f2f2f2'); //disabled bg
 
-define('CLR_DESIGN_BG', '#DAD0E4'); 
+define('CLR_DESIGN_BG', '#DAD0E4');
 define('CLR_IMPORT_BG', '#307D96');
 define('CLR_IMPORT_FADE_BG', '#e3f0f0');
 define('CLR_PUBLISH_BG', '#627E5D');
 define('CLR_PUBLISH_FASE_BG', '#CCEAC5');
 define('CLR_ADMIN_BG', '#676E80');
-define('CLR_EXPLORE_FADE_BG', '#D4DBEA'); 
+define('CLR_EXPLORE_FADE_BG', '#D4DBEA');
 define('CLR_EXPLORE_BG', '#4477B9');
 
 if(!isset($ut) || !is_array($ut)){

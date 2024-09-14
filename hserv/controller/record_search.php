@@ -28,9 +28,9 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     use hserv\utilities\USanitize;
-    
+
     require_once dirname(__FILE__).'/../../autoload.php';
 
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
@@ -77,7 +77,7 @@
     //these are internal parameters, they cannot be sent from client side
     if( @$req_params['sql'] ) {unset( $req_params['sql'] );}
     if( @$req_params['parentquery'] ) {unset ($req_params['parentquery'] );}
-    
+
     //get list of registered database and master index db on the same server
     if(@$req_params['remote'] == 'master' &&
        strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //the same server  - switch database only

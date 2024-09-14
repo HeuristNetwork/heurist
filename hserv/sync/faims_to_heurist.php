@@ -250,7 +250,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         $stmt->close();
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
-                        
+
                         $trm_ID = intval($trm_ID);
                         print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added $trm_ID based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
                     }//add terms

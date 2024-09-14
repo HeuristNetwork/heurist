@@ -247,9 +247,9 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     }*/
 
     if(empty($allowed_labels)){
-        return false;   
+        return false;
     }
-    
+
     $term_ID = array_search($label, $allowed_labels, true);
     if(!($term_ID>0)){
         $term_ID = array_search($label, $allowed_labels_plain, true);

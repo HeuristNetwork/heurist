@@ -209,7 +209,7 @@ class DbDefRecTypes extends DbEntityBase
     //
     //
     public function delete($disable_foreign_checks = false){
-        
+
         if(!$this->deletePrepare()){
             return false;
         }
@@ -287,7 +287,7 @@ class DbDefRecTypes extends DbEntityBase
         if($res){
             $res = parent::delete(true);
         }
-        
+
         mysql__end_transaction($mysqli, $res, $keep_autocommit);
 
         return $res;
@@ -312,7 +312,7 @@ class DbDefRecTypes extends DbEntityBase
         return $ret;
 
     }
-    
+
     private function prepareRecord($idx){
 
             //validate duplication
@@ -324,10 +324,10 @@ class DbDefRecTypes extends DbEntityBase
 
                 //validate duplication
                 if(!$this->doDuplicationCheck($idx, 'rty_Name', 'Record type cannot be saved. The provided name already exists')){
-                        return false;                           
+                        return false;
                 }
             }
-            
+
             $is_new = !(@$this->records[$idx]['rty_ID']>0);
 
             if($is_new){
@@ -336,11 +336,11 @@ class DbDefRecTypes extends DbEntityBase
                 if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                     $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
                 }
-                
+
                 if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
                     $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
                 }
-            
+
             }else{
 
                 if (@$this->records[$idx]['rty_IDInOriginatingDB']==''){
@@ -358,12 +358,12 @@ class DbDefRecTypes extends DbEntityBase
 
             $this->records[$idx]['is_new'] = $is_new;
 
-            return true;        
+            return true;
     }
 
     /**
      * Saves the record and updates additional fields related to record types.
-     * 
+     *
      * @return bool - Returns false if the parent save fails, otherwise true.
      */
     public function save() {
@@ -553,7 +553,7 @@ class DbDefRecTypes extends DbEntityBase
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
         }
-        
+
         mysql__end_transaction($mysqli, $res, $keep_autocommit);
 
         return $ret;
@@ -570,12 +570,12 @@ class DbDefRecTypes extends DbEntityBase
         $where2 = '';
         $where2_conj = '';
         $wg_ids = array();//all groups for admin
-        
+
         if($ugr_ID!=2){ //by default always exclude "hidden" for not database owner
 
                 array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
                 $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
-        
+
                 if($ugr_ID>0){  //logged in
 
                     $currentUser = $this->system->getCurrentUser();
@@ -599,7 +599,7 @@ class DbDefRecTypes extends DbEntityBase
 
                 $where2_conj = ' or ';
         }
-        
+
         if($ugr_ID>0 && !empty($wg_ids)){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
@@ -617,7 +617,7 @@ class DbDefRecTypes extends DbEntityBase
         {
 
             $res = $this->countsUsage();
-            
+
         }elseif(@$this->data['mode']=='cms_record_count'){
 
             $res = $this->countsUsageCMS();
@@ -626,12 +626,12 @@ class DbDefRecTypes extends DbEntityBase
 
         return $res;
     }
-    
+
     //
     //
     //
     private function countsUsage(){
-        
+
 
             $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = '';
@@ -650,7 +650,7 @@ class DbDefRecTypes extends DbEntityBase
             $query = $query . SQL_WHERE.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
 
             $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
-        
+
             return $res;
     }
 
@@ -691,10 +691,10 @@ class DbDefRecTypes extends DbEntityBase
 
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3),
                 'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);
-                
+
             return $res;
-        
+
     }
-    
+
 }
 ?>

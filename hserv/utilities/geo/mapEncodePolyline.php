@@ -72,9 +72,9 @@ function dpEncode($points)
 
     if(count($points) < 3)
     {
-        return encodedPoints($points, $dists, $absMaxDist);   
+        return encodedPoints($points, $dists, $absMaxDist);
     }
-    
+
 	    $stack[] = array(0, count($points)-1);
 	    while(count($stack) > 0)
 	    {

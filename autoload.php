@@ -1,6 +1,6 @@
 <?php
     /**
-    * Registers autload function to enable for classes and interfaces to be 
+    * Registers autload function to enable for classes and interfaces to be
     * automatically loaded if they are currently not defined (by include/require).
     *
     * Includes common scripts: config, const, db access and 3 static classes
@@ -21,12 +21,12 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    
- 
- 
+
+
+
 
 spl_autoload_register(function ($class) {
-    
+
     $prefix = 'hserv\\';
     if (strpos($class, $prefix) !== 0) {
         //$prefix = __NAMESPACE__ . $class;
@@ -35,7 +35,7 @@ spl_autoload_register(function ($class) {
 
     $filename = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
     $filepath = __DIR__ . DIRECTORY_SEPARATOR . $filename;
-    
+
     if (!is_readable($filepath)) {
         return;
     }

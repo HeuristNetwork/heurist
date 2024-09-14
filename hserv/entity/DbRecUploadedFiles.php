@@ -40,7 +40,7 @@ require_once dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php';
 class DbRecUploadedFiles extends DbEntityBase
 {
     private $error_ext;
-    
+
     //
     // constructor - load configuration from json file
     //
@@ -102,7 +102,7 @@ class DbRecUploadedFiles extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('ulf_UploaderUGrpID');
         if($pred!=null) {array_push($where, $pred);}
 
-        
+
         if(@$this->data['ulf_Referenced']=='yes' || @$this->data['ulf_Referenced']=='no'){
             array_push($from_table, ' left join recDetails ON  (dtl_UploadedFileID=ulf_ID OR dtl_Value LIKE CONCAT("%",ulf_ObfuscatedFileID,"%"))');
             if($this->data['ulf_Referenced']=='no'){
@@ -111,7 +111,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 array_push($where,'(dtl_ID IS NOT NULL)');
             }
         }
-         
+
 
         $value = @$this->data['fxm_MimeType'];
         $needMimeType = !($value==null || $value=='any');
@@ -781,7 +781,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //    merge_duplicates
     //    get_media_records
     //    create_media_records
-    //    bulk_reg_filestore  
+    //    bulk_reg_filestore
     //    import_data
     public function batch_action(){
 
@@ -885,9 +885,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
         }
         elseif(@$this->data['delete_selected']){ // delete file records not in use
-            
+
             $ret = $this->deleteSelected();
-            
+
         }
         elseif(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
 
@@ -980,12 +980,12 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $ret = $this->mergeDuplicates();
         }
         elseif(@$this->data['create_media_records']){ // create Multi Media records for files without one
-        
+
             $ret = $this->createMediaRecords();
 
         }
         elseif(@$this->data['get_media_records']){ // retruns ids of referencing Multi Media records for given files
-        
+
             $ret = $this->getMediaRecords($this->data['get_media_records'], @$this->data['mode'], @$this->data['return']);
 
         }
@@ -1258,7 +1258,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     public function delete($keep_uploaded_files=false, $check_referencing=true){ //$disable_foreign_checks = false
 
         $this->recordIDs = null;
-    
+
         if(!$this->deletePrepare()){
             return false;
         }
@@ -1266,7 +1266,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $mysqli = $this->system->get_mysqli();
 
         if($check_referencing){
-            
+
             $cnt = $this->getMediaRecords($this->recordIDs, 'both', 'rec_cnt');
 
             if($cnt>0){
@@ -1649,74 +1649,74 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                //get full file info
                $ulf_ID = fileGetFullInfo($this->system, $ulf_ID);
        }
-       
+
        if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
        return $ulf_ID;
 
     }
-    
+
     //
     // $is_concatente - true, concatenate all unique values, otherwise takes first non empty
     //
     private function mergeDuplicatesFields($fieldName, $ulf_ID, $dup_IDs, $is_concatenate=false){
-        
+
         $mysqli = $this->system->get_mysqli();
-        
+
         $ulf_ID = intval($ulf_ID);
-        
+
         $query = "SELECT $fieldName FROM recUploadedFiles WHERE ulf_ID=$ulf_ID AND $fieldName != ''";
         $main_value = mysql__select_value($mysqli, $query);
 
         if(!$is_concatenate && $main_value){
-            return; //value is already set   
+            return; //value is already set
         }
-        
+
         $query = "SELECT DISTINCT $fieldName FROM recUploadedFiles WHERE ulf_ID IN ($dup_IDs) AND $fieldName != ''";
         $values = mysql__select_list2($mysqli, $query);
 
         if(empty($values)){
             return; //nothing found
-        }    
+        }
 
         $new_value = $main_value;
-        
+
         foreach($values as $val){
             if($main_value!=$val){
                 $new_value = ($new_value?($new_value."\n"):'').$val;
                 if(!$is_concatenate){
-                    break; //one non empty value is enough  
+                    break; //one non empty value is enough
                 }
             }
         }
-        
+
         if($new_value){
             $upd_query = "UPDATE recUploadedFiles SET $fieldName=? WHERE ulf_ID=$ulf_ID";
             mysql__exec_param_query($mysqli, $upd_query, array('s', $new_value));
         }
-        
+
     }
 
     //
     // actions on set of files (called from butch_action)
     //
     private function mergeDuplicates(){
-        
+
             set_time_limit(0);
-        
+
             define('SPECIAL_FOR_LIMC_FRANCE', true); //remove unlinked ref records and files from upload_files/...thumbnail
             define('TERMINATED_BY_USER', 'Merging Duplications has been terminated by user');
 
             $ret = true;
-        
+
             $mysqli = $this->system->get_mysqli();
-    
+
             $session_id = intval(@$this->data['session']);
             if($session_id>0){
                 DbUtils::initialize();
                 DbUtils::setSessionId($session_id);//start progress session
             }
 
-    
+
             $ids = prepareIds($this->data['merge_duplicates']);
             $where_ids = '';
 
@@ -1724,42 +1724,42 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $cnt_local_fixes_by_checksum  = 0;
             $cnt_remote_fixes = 0;
             $cnt_thumbnails = 0;
-            
+
             $to_delete_ids_with_files = array();//for files with different upload names and same md5 and original name
             $to_delete_ids = array();
-            
+
             $to_delete = array();
 
             if(is_array($ids) && count($ids) > 1){ // multiple
                 $where_ids .= SQL_AND.predicateId('ulf_ID',$ids);
-                //elseif(is_int($ids) && $ids > 0){ 
+                //elseif(is_int($ids) && $ids > 0){
                 // single
                 //$where_ids .= ' AND ulf_ID = ' . intval($ids);
             }
             // else use all
-  
- /*           
+
+ /*
             if(SPECIAL_FOR_LIMC_FRANCE){
                 //remove files from thumbnail
 $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_files/%" AND ulf_FilePath LIKE "%/thumbnail/"';
                 $to_delete_thumbs = mysql__select_list2($mysqli, $query);
-                
+
 if($is_verbose) {
         $msg = 'found  thumbs '.count($to_delete_thumbs);
         error_log($msg);
         echo $msg.'<br>';
-}         
+}
 
                 if(!empty($to_delete_thumbs)){
-                    
+
                     mysql__foreign_check($mysqli, false);
-                    
+
                     $total_cnt = count($to_delete_thumbs);
                     $offset = 0;
                     while ($offset<$total_cnt){
 
                         $to_delete_thumbs_chunk = array_slice($to_delete_thumbs, $offset, 250);
-                        
+
                         $records_without_links = mysql__select_list2($mysqli,
         'SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)'
         .' WHERE dtl_UploadedFileID IN ('.implode(',',$to_delete_thumbs_chunk).') GROUP BY dtl_RecID HAVING cnt=0');
@@ -1768,12 +1768,12 @@ if($is_verbose) {
         $msg = 'found  records '.count($records_without_links);
         error_log($msg);
         echo $msg.'<br>';
-}         
+}
 
                         if(!empty($records_without_links)){
-                            //recordDelete($this->system, $records_without_links);   
+                            //recordDelete($this->system, $records_without_links);
                             $records_without_links = '('.implode(',',$records_without_links).')';
-                            
+
                             $mysqli->query('delete from recDetails where dtl_RecID IN ' . $records_without_links);
                             if ($mysqli->error) {
                                     $ret = false;
@@ -1788,7 +1788,7 @@ if($is_verbose) {
                                     break;
                             }
                         }
-                        
+
                         //exclud thumbnails that still have references
                         $list = mysql__select_assoc2($mysqli, 'SELECT dtl_UploadedFileID, dtl_RecID '
                             .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $to_delete_thumbs_chunk).')');
@@ -1797,53 +1797,53 @@ if($is_verbose) {
                                     $msg = 'found ref records '.count($list);
                                     error_log($msg);
                                     echo $msg.'<br>'.implode(',',$list).'<br>';
-                            }         
-                            //remove 
+                            }
+                            //remove
                             foreach($list as $ulf_ID=>$rec_ID){
                                 $idx = array_search($ulf_ID, $to_delete_thumbs_chunk);
                                 if($idx!==false){
-                                    unset($to_delete_thumbs_chunk[$idx]);                           
+                                    unset($to_delete_thumbs_chunk[$idx]);
                                 }
                             }
-                            
+
                             if($is_verbose) {
                                 echo 'Removed '.count($to_delete_thumbs_chunk).'<br>';
                             }
                         }
-                        //remove ulf entries 
+                        //remove ulf entries
                         $this->data[$this->primaryField] = $to_delete_thumbs_chunk;
                         $ret = $this->delete();
-                        
+
                         if(!$ret) { break; }
-                        
+
                         $offset = $offset + 250;
 
                         $mysqli->commit();
                         mysql__begin_transaction($mysqli);
-                        
-                        //break; //remove first 250 only                        
+
+                        //break; //remove first 250 only
                     }//while
 
                     mysql__foreign_check($mysqli, true);
-                    
+
                     if($ret===false){
                         $mysqli->rollback();
                     }
-                    
+
                     $cnt_thumbnails = $cnt_thumbnails + $total_cnt;
                 }
-if($is_verbose) {echo 'Thumnails DONE<br>';}         
+if($is_verbose) {echo 'Thumnails DONE<br>';}
 
-                //return $ret;    
+                //return $ret;
             }
 */
-            
-            
+
+
             //1. ---------------------------------------------------------------
-            //search for duplicated local files - with the same name and path 
+            //search for duplicated local files - with the same name and path
             $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
             $local_dups = $mysqli->query($query);
-            
+
             $cnt = 0;
             $tot_cnt = $local_dups->num_rows;
 
@@ -1868,7 +1868,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
 
                     //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
                     //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
-                    
+
                     //find IDS with the same name and path
                     $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath'
                         .  $path
@@ -1887,12 +1887,12 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                         $res->close();
                     }
 
-                    //update references in recDetails    
+                    //update references in recDetails
                     $new_ulf_id = intval(array_shift($dups_ids)); //get first
                     $to_delete[$new_ulf_id] = $dups_ids;
                     $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
-                    
-                    if(DbUtils::setSessionVal('0,'.$cnt.','.$tot_cnt)){            
+
+                    if(DbUtils::setSessionVal('0,'.$cnt.','.$tot_cnt)){
                             //terminated by user
                             $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
@@ -1905,8 +1905,8 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                 }//while
                 $local_dups->close();
             }
-            
-            
+
+
             if($ret){
             //2. ---------------------------------------------------------------
             // Check dup local file's size and checksum against each other
@@ -1931,9 +1931,9 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
 
                     while ($file_dtls = $dup_local_files->fetch_assoc()) {
-                        
+
                         $file_id = intval($file_dtls['ulf_ID']);
-                        
+
                         if(array_key_exists($file_id, $to_delete) || in_array($file_id, $to_delete_ids))
                         {
                             continue; //already detected as duplicated in previous step
@@ -1966,19 +1966,19 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     }//while
                     $dup_local_files->close();
 
-                    
+
                     foreach ($dups_files as $ulf_ID => $file_arr) {
                         if(!empty($file_arr['dups'])){
 
                             $to_delete[$ulf_ID] = $file_arr['dups'];
                             $to_delete_ids_with_files = array_merge($to_delete_ids_with_files, $file_arr['dups']);
-                            
+
                             $cnt_local_fixes_by_checksum = $cnt_local_fixes_by_checksum + count($file_arr['dups']);
                         }
                     }//foreach
-                    
+
                     if($cnt%10==0){
-                    if(DbUtils::setSessionVal('1,'.$cnt.','.$tot_cnt)){            
+                    if(DbUtils::setSessionVal('1,'.$cnt.','.$tot_cnt)){
                             //terminated by user
                             $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
@@ -1986,12 +1986,12 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     }
                     }
                     $cnt++;
-                    
+
                 }//while main
             }
 
             }
-            
+
             if($ret){
 
             //3. ---------------------------------------------------------------
@@ -2022,11 +2022,11 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
 
                     $new_ulf_id = intval(array_shift($dups_ids));
                     $to_delete[$new_ulf_id] = $dups_ids;
-                    
+
                     $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
-                    
-                    
-                    if(DbUtils::setSessionVal('2,'.$cnt.','.$tot_cnt)){            
+
+
+                    if(DbUtils::setSessionVal('2,'.$cnt.','.$tot_cnt)){
                             //terminated by user
                             $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
@@ -2042,16 +2042,16 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                 $remote_dups->close();
             }
             }
-            
+
             //4. ------------------------------------------------------------------
             // Merge description fields to new main record, remove references in recDetails, then delete
             $cnt = 0;
             $tot_cnt = count($to_delete);
-            
+
             if($ret &&  $tot_cnt > 0){
-                
+
                 DbUtils::setSessionVal('3');
-                
+
                 foreach ($to_delete as $ulf_ID => $d_ids) {
 
                     $dup_ids = $d_ids;
@@ -2061,22 +2061,22 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     }else{
                         $d_ids = array($d_ids);
                     }
-                    
+
                     //merge other fields ulf_Caption, ulf_Description, ulf_Copyright, ulf_Copyowner
                     $this->mergeDuplicatesFields('ulf_Description', $ulf_ID, $dup_ids, true);
                     $this->mergeDuplicatesFields('ulf_Caption', $ulf_ID, $dup_ids);
                     $this->mergeDuplicatesFields('ulf_Copyright', $ulf_ID, $dup_ids);
                     $this->mergeDuplicatesFields('ulf_Copyowner', $ulf_ID, $dup_ids);
-                    
-/*                    
-                    if(SPECIAL_FOR_LIMC_FRANCE){                    
+
+/*
+                    if(SPECIAL_FOR_LIMC_FRANCE){
                     //remove referencing records if they are not linked anywhere
                     $records_without_links = mysql__select_list2($mysqli,
 "SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)"
 ." WHERE dtl_UploadedFileID IN ($dup_ids) GROUP BY dtl_RecID HAVING cnt=0");
                     recordDelete($this->system, $records_without_links);
                     }
-*/                    
+*/
                     //remove references in recDetails
                     $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.intval($ulf_ID)
                                     .' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
@@ -2087,9 +2087,9 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                         $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
                         break;
                     }
-                    
+
                     if($cnt%10==0){
-                    if(DbUtils::setSessionVal('3,'.$cnt.','.$tot_cnt)){            
+                    if(DbUtils::setSessionVal('3,'.$cnt.','.$tot_cnt)){
                             //terminated by user
                             $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
@@ -2097,21 +2097,21 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     }
                     }
                     $cnt++;
-                    
+
                 }//for
 
                 if($ret){
-                
+
                     if(!empty($to_delete_ids)){
                         // Delete files - except local by path - remove only table entry and thumbnail!!!!!
                         $this->data[$this->primaryField] = $to_delete_ids;
                         $ret = $this->delete(true, false); //keep uploaded files
-                        
+
                         foreach($to_delete_ids as $id){
                             $key = array_search($id, $to_delete_ids_with_files);
                             if($key!==false){
                                 unset($to_delete_ids_with_files[$key]);
-                            }    
+                            }
                         }
                     }
                     if(!empty($to_delete_ids_with_files)){
@@ -2122,25 +2122,25 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             }
 
             if($ret){
-                $ret = array('local' => $cnt_local_fixes_by_path, 
-                            'local_checksum' => $cnt_local_fixes_by_checksum, 
+                $ret = array('local' => $cnt_local_fixes_by_path,
+                            'local_checksum' => $cnt_local_fixes_by_checksum,
                             'remote' => $cnt_remote_fixes,
                             'tumbnails'=>$cnt_thumbnails);
             }
-            
+
             DbUtils::setSessionVal('REMOVE');
-            
+
             return $ret;
-        
+
     }
-    
+
     //
     //
     //
     private function createMediaRecords()
     {
             $ret = false;
-        
+
             $ids = prepareIds(@$this->data['create_media_records']);
 
             $cnt_skipped = 0;
@@ -2188,7 +2188,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             }
 
             if($rty_id > 0 && $dty_file > 0 && $dty_title > 0){
-                
+
                 $mysqli = $this->system->get_mysqli();
 
                 $rec_search = 'SELECT count(DISTINCT rec_ID) AS cnt '
@@ -2279,17 +2279,17 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
 
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
             }
-            
+
             return $ret;
     }
-    
+
     //
     // Returns either IDs of referencing records OR file ulf_ID with referencing records
     // $search_mode -   both
     //                  file_fields - referenced by field "file" (dtl_UploadedFileID)
     //                  text_fields - referenced in value (dtl_Value)
     // $return_mode rec_ids - record ids
-    //              rec_full - record ids, title 
+    //              rec_full - record ids, title
     //              rec_cnt   - count of recrds
     //              file_ids   - file ids
     //
@@ -2303,24 +2303,24 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
         if($return_mode==null){
             $return_mode = 'rec_ids';
         }
-        
+
         if($return_mode=='rec_cnt'){
-            $ret = 0;    
+            $ret = 0;
         }else{
             $ret = array();
-        }        
-        
+        }
+
         $where_clause = '';
-        $mysqli = $this->system->get_mysqli();      
+        $mysqli = $this->system->get_mysqli();
 
         if($search_mode!='text_fields'){
-        
+
             if($return_mode=='file_ids'){
                 $fieldName = 'DISTINCT dtl_UploadedFileID';
             }elseif($return_mode=='rec_cnt'){
                 $fieldName = 'count(DISTINCT rec_ID)';
             }elseif($return_mode=='rec_full'){
-                $fieldName = 'dtl_UploadedFileID as recID, dtl_RecID as targetID, dtl_ID as dtID'; 
+                $fieldName = 'dtl_UploadedFileID as recID, dtl_RecID as targetID, dtl_ID as dtID';
             }else{
                 $fieldName = 'DISTINCT rec_ID';
             }
@@ -2329,7 +2329,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                             . ' FROM Records, recDetails '
                             . ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 '
                             . SQL_AND . predicateId('dtl_UploadedFileID', $ids);
-                            
+
             if($return_mode=='rec_full'){
                 $ret = mysql__select_assoc($mysqli, $query, 0);
             }elseif($return_mode=='rec_cnt'){
@@ -2340,21 +2340,21 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
         }
         if($search_mode!='file_fields'){
 
-            $query = 'SELECT DISTINCT ulf_ID, ulf_ObfuscatedFileID  FROM ' 
-                        . $this->config['tableName'] 
+            $query = 'SELECT DISTINCT ulf_ID, ulf_ObfuscatedFileID  FROM '
+                        . $this->config['tableName']
                         . SQL_WHERE
                         . predicateId('ulf_ID', $ids);
-                        
+
             $to_check = mysql__select_assoc2($mysqli, $query);
 
             if(count($to_check) > 0){
-                
+
                 if($return_mode=='rec_cnt'){
                     $fieldName = 'count(DISTINCT dtl_RecID)';
                 }else{
                     $fieldName = 'DISTINCT dtl_RecID';
                 }
-                
+
                 // Check if Obfuscated ID is referenced in values
                 foreach ($to_check as $ulf_ID => $ulf_ObfuscatedFileID) {
 
@@ -2362,93 +2362,93 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                         continue;
                     }
                     if($return_mode=='rec_full'){
-                        $fieldName = $ulf_ID.' as recID, dtl_RecID as targetID, dtl_ID as dtID'; 
+                        $fieldName = $ulf_ID.' as recID, dtl_RecID as targetID, dtl_ID as dtID';
                     }
-                    
+
                     $query = "SELECT $fieldName FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'";
 
                     if($return_mode=='rec_full'){
                         $res = mysql__select_assoc($mysqli, $query, 0);
                         if(!empty($res)){
-                            $ret = array_merge($ret, $res);    
+                            $ret = array_merge($ret, $res);
                         }
                     }elseif($return_mode=='rec_ids'){
                         //record ids
                         $res = mysql__select_list2($mysqli, $query);
                         if(!empty($res)){
-                            $ret = array_merge($ret, $res);    
+                            $ret = array_merge($ret, $res);
                         }
-                    }else{                        
-                        
+                    }else{
+
                         $cnt = intval(mysql__select_value($mysqli, $query));
                         if($cnt>0){
                             if($return_mode=='file_ids'){
                                 if(!in_array($ulf_ID,$ret)){
-                                    array_push($ret, $ulf_ID);       
+                                    array_push($ret, $ulf_ID);
                                 }
                             }else{
-                                $ret = $ret + $cnt;    
+                                $ret = $ret + $cnt;
                             }
                         }
                     }
-                }//foreach    
-            }        
+                }//foreach
+            }
         }
-        
+
         if($return_mode=='rec_full')
         {
             $direct = $ret;
             $headers = array();
-            
+
             if(!empty($ret)){
                 $rec_ids = array();
                 foreach($direct as $links){
                     if(!in_array($links['targetID'], $rec_ids)){
-                        array_push($rec_ids, $links['targetID']);    
+                        array_push($rec_ids, $links['targetID']);
                     }
                 }
-                
+
                 $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID FROM Records WHERE rec_ID IN ('.implode(',',$rec_ids).')';
-                
+
                 $headers = mysql__select_all($mysqli, $query, 1);
             }
 
             $ret = array("direct"=>$direct, "headers"=>$headers);
-        }  
-        
+        }
+
         return $ret;
     }
 
     //
     //
-    //    
+    //
     private function deleteSelected()
     {
-            
+
             $ids = prepareIds($this->data['delete_selected']);
             $mode = $this->data['mode'];
-            
+
             //find files with referencing records
             $ulf_IDs_in_use = $this->getMediaRecords($ids, 'both', 'file_ids'); //returns file ids referenced in records
             $cnt_in_use = count($ulf_IDs_in_use);
             $cnt_ref_recs = $this->getMediaRecords($ids, 'both', 'rec_cnt');
-            
+
             $to_delete = array();
             $cnt_deleted = 0;
-            
+
             //exclude files in use from list of selected
             $ids = array_diff($ids, $ulf_IDs_in_use);
-            
+
             if(!empty($ids)){
 
                 $mysqli = $this->system->get_mysqli();
-                
-                //, ulf_ObfuscatedFileID 
-                $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM ' 
-                            . $this->config['tableName'] 
+
+                //, ulf_ObfuscatedFileID
+                $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM '
+                            . $this->config['tableName']
                             . SQL_WHERE
                             . predicateId('ulf_ID',$ids);
-                            
+
                 $to_delete = mysql__select_assoc($mysqli, $query);
 
                 if(!empty($to_delete)){
@@ -2457,7 +2457,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     foreach ($to_delete as $ulf_ID => $details) {
 
                         $ulf_ObfuscatedFileID = $details['ulf_ObfuscatedFileID'];
-                        
+
                         if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
                             unset($to_delete[$ulf_ID]);
                             continue;
@@ -2485,14 +2485,14 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                     }
                 }
             }
-            
+
             if($mode == 'delete'){
                 $ret = $cnt_deleted;
             }else{
-                $ret = array('files'=>$to_delete, 'cnt_in_use'=>$cnt_in_use, 
+                $ret = array('files'=>$to_delete, 'cnt_in_use'=>$cnt_in_use,
                                                         'cnt_ref_recs'=>$cnt_ref_recs);
             }
-            
+
             return $ret;
 
     }

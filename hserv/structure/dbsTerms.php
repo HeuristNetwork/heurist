@@ -142,7 +142,7 @@ class DbsTerms
             if(!$with_hierarchy){
                 return @$term[$idx_term_label]?$term[$idx_term_label]:'';
             }
-            
+
                 $labels = '';
                 $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
                 $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];

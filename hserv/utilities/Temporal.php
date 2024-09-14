@@ -215,7 +215,7 @@ class Temporal {
     // dates are not validated
     //
     private static function _parseTemporal( $value, $is_for_search=false ){
-        
+
         $regex_after_year = '/^\d{4}-$/i'; //find "year-" that means "after year"
 
         $timespan = null;
@@ -738,7 +738,7 @@ class Temporal {
         $date = strval($date);
         $k = strpos($date,'.');
         if($k>0){
-            
+
             $res = substr($date,0,$k);//year
             $mmdd = substr($date,$k+1);
             if(strlen($mmdd)<3){
@@ -757,7 +757,7 @@ class Temporal {
             }
 
             $res = $res.'-'.$month.'-'.$day;
-            
+
         }elseif($date=='0'){
                 $res = '0000-01-01';
         }else{
@@ -1189,7 +1189,7 @@ class Temporal {
             //years only
             return array('years'=>intval($dt2['year']) - intval($dt1['year']));
         }
-        
+
 
             if(count($dt1) == 1){ // only year, add -01-01 for ISO format
                 $dt1['month'] = 1;
@@ -1362,11 +1362,11 @@ class Temporal {
     private static function _deviationToText($value, $prefix){
 
         if(!$value){
-            return '';    
+            return '';
         }
-        
+
         $ret = '';
-        
+
         try{
             $i = new DateInterval($value);
             if($i){
@@ -1377,7 +1377,7 @@ class Temporal {
         } catch (Exception  $e){
             $ret = '';
         }
-        
+
         return $ret;
     }
 
@@ -1468,7 +1468,7 @@ class Temporal {
     // Outputs human readable representation of temporal object
     //
     public function toReadableExt($separator, $is_compact=false, $out_calendar=null){
-        
+
         $tSimpleRange = 'Simple Range';
         $tEarliestEstimate = 'Earliest estimate';
         $tLatestEstimate = 'Latest estimate';

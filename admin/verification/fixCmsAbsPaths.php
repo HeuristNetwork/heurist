@@ -66,9 +66,9 @@ function __correctAbsPaths(){
 
     $dbRecDetails = new RecordsBatch($system, null);
 
-   
-   
-   
+
+
+
 
     foreach ($databases as $idx=>$db_name){
 
@@ -140,7 +140,7 @@ function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
 
-   
+
 
     $paths0 = array('\/HEURIST', '\/html', '');
     $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
@@ -151,12 +151,12 @@ function replaceAbsPathinCMS($recID, $val){
         foreach ($paths0 as $path0) {
             foreach ($paths as $path) {
                 $absPath = '/'.$srv.$path0.'\/'.$path.'\//i';
-                
+
                 $cnt = $cnt + replaceAbsPath($s, $val);
             }
         }
     }
-   
+
 
     //report if anything has been fixed
     if($cnt > 0){

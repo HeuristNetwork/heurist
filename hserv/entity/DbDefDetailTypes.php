@@ -43,7 +43,7 @@ class DbDefDetailTypes extends DbEntityBase
         $this->searchMgr->addPredicate('dty_Status');
         $this->searchMgr->addPredicate('dty_Modified');
         $this->searchMgr->addPredicate('dty_DetailTypeGroupID');
-        
+
         switch (@$this->data['details']){
             case 'id': $this->searchMgr->setSelFields('dty_ID'); break;
             case 'name':
@@ -118,7 +118,7 @@ class DbDefDetailTypes extends DbEntityBase
                 //validate duplication
                 if(!$this->doDuplicationCheck($idx, 'dty_Name', 'Field type cannot be saved. The provided name already exists')){
 //$this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists', array('dty_id' => $res));
-                        return false;                           
+                        return false;
                 }
             }
 
@@ -468,9 +468,9 @@ class DbDefDetailTypes extends DbEntityBase
             }
         }
 
-        
+
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
-        
+
         return $ret;
     }
 

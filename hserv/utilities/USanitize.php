@@ -37,7 +37,7 @@ namespace hserv\utilities;
 class USanitize {
 
     private static $purifier = null;
-    
+
     //
     // sysadmin protection - reset from request to avoid exposure in possible error/log messages
     //
@@ -66,7 +66,7 @@ class USanitize {
         }
         return $req_params;
     }
-    
+
     //
     //
     //

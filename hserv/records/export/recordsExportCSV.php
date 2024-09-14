@@ -31,7 +31,7 @@ require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 if(!defined('H_ID')){
-    define('H_ID',' H-ID');   
+    define('H_ID',' H-ID');
 }
 
 /**
@@ -102,7 +102,7 @@ public static function output($data, $params){
         print print_r($data, true);//print out error array
         return;
     }
-    
+
     $data = $data['data'];
 
     if(!(@$data['reccount']>0)){
@@ -1113,7 +1113,7 @@ public static function output_header($data, $params)
                 $placeholders = array();
 
                 foreach($terms_pickup[$rty_ID] as $dtid => $field){
-                    
+
                     $placeholders[] = strtoupper($field['name']);
                     $ph_help[] = '<Use to create value control lists>';
                     //get list of terms
@@ -1529,11 +1529,11 @@ private static function createJointCSVTables($csvData, &$columnInfo, $mainRecord
             if (!isset($csvRowLookups[$recordTypeID])) {
                 $csvRowLookups[$recordTypeID] = [];
             }
-            
+
             if ($includeHeader) {
                 $csvRowLookups[$recordTypeID]['header'] = array_shift($rows); //$rows[0];
             }
-            
+
             foreach ($rows as $row) {
                 $csvRowLookups[$recordTypeID][$row[0]] = $row;
             }

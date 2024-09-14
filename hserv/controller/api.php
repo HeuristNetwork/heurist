@@ -78,13 +78,13 @@ $entities = array(
 
 //auth
     //usr_info
-    
+
 // http://127.0.0.1/h6-alpha/hserv/controller/entityScrud.php?db=osmak_9a&entity=rst&a=search&details=structure&rst_ID=12
 // http://127.0.0.1/h6-alpha/api/osmak_9a/rst/12
 // http://127.0.0.1/h6-alpha/api/osmak_9a/rem/1
 // http://127.0.0.1/h6-alpha/api/osmak_9a/tag?rtl_RecID=9
-        
-    
+
+
 
 if(count($requestUri)>0){ //splitted path
 // api/db/entity/recID

@@ -76,7 +76,7 @@ class DbVerify {
         $this->keep_autocommit = null;
         $this->out = null;
     }
-    
+
     //
     // compose record edit url
     //
@@ -87,7 +87,7 @@ class DbVerify {
     private function getAllURL($rec_IDs){
         return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $rec_IDs);
     }
-    
+
     //
     //
     //
@@ -196,7 +196,7 @@ class DbVerify {
      *
      * @param array|null $params The input parameters, which may contain a 'fix' flag.
      * @return bool Returns true if 'fix' mode is enabled, false otherwise.
-     */    
+     */
     private function isFixMode($params)
     {
         return is_array($params) && @$params['fix'] == 1;
@@ -206,7 +206,7 @@ class DbVerify {
      * Checks that all records have valid Owner and Added By User references.
      *
      * This function verifies that all records in the database have valid 'Added By' and 'Owner' references.
-     * If invalid references are found (users that don't exist), it provides an option to attribute those records 
+     * If invalid references are found (users that don't exist), it provides an option to attribute those records
      * to the Database OwnerM (user ID #2). Additionally, it can auto-fix these issues in "fix mode."
      *
      * @param array|null $params An associative array of parameters. If 'fix' is set to 1, it will attempt to fix invalid references.
@@ -224,14 +224,14 @@ class DbVerify {
         if($this->isFixMode($params)){
 
             mysql__safe_updatess($this->mysqli, false);
-            
+
             // Attempt to update invalid 'Added By' and 'Owner' references
             $resMsg = $this->updateGroupIds('rec_AddedByUGrpID', 'reference (Added By)');
             $resMsg .= $this->updateGroupIds('rec_OwnerUGrpID', 'ownership');
 
             mysql__safe_updatess($this->mysqli, true);
         }
-        
+
         // If any error messages are generated during the repair, set status to false.
         if ($resMsg != '') {
             $resStatus = false;
@@ -276,7 +276,7 @@ class DbVerify {
         // Return the status and message as an associative array.
         return array('status'=>$resStatus,'message'=>$resMsg);
     }
-    
+
     /**
      * Updates invalid user group references in the Records table.
      *
@@ -290,9 +290,9 @@ class DbVerify {
      */
     private function updateGroupIds($column, $msg) {
         // SQL query to update the specified column in Records where the user group reference is invalid (ugr_ID is NULL)
-        $query = "UPDATE Records 
-                  LEFT JOIN sysUGrps ON $column = ugr_ID 
-                  SET $column = 2 
+        $query = "UPDATE Records
+                  LEFT JOIN sysUGrps ON $column = ugr_ID
+                  SET $column = 2
                   WHERE ugr_ID IS NULL";
 
         // Execute the query and check for errors
@@ -444,14 +444,14 @@ class DbVerify {
     /**
      * Check field types for inconsistencies or invalid data and optionally repair them.
      *
-     * This function checks the validity of field types in terms of terms, non-selectable terms, 
+     * This function checks the validity of field types in terms of terms, non-selectable terms,
      * and record type constraints. It can also auto-repair invalid fields if in fix mode.
      *
-     * @param array|null $params An associative array of parameters. 
+     * @param array|null $params An associative array of parameters.
      *                           'data' or 'show' can be used to check or display field types.
      *                           'rt' for the record type ID.
-     * @return array Returns an associative array with 'status' and 'message'. 
-     *               'status' is true if valid or repairable, false otherwise. 
+     * @return array Returns an associative array with 'status' and 'message'.
+     *               'status' is true if valid or repairable, false otherwise.
      *               'message' contains success/error or repair information.
      */
     public function check_field_type($params=null){
@@ -466,22 +466,22 @@ class DbVerify {
 
             $lists = getInvalidFieldTypes($mysqli, intval(@$params['rt']));//in verifyFieldTypes.php
         }
-        
+
         $resMsgSuccess = '<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
 
         if (isEmptyArray(@$lists["terms"]) &&
             isEmptyArray(@$lists["terms_nonselectable"]) &&
             isEmptyArray(@$lists["rt_contraints"])){
-            
+
                 return array('status'=>true, 'message'=>DIV_S.$resMsgSuccess);
         }
-        
+
         $resStatus = true;
         $resMsg = '';
 
         // Check if fix mode is enabled
         if($this->isFixMode($params)){
-            
+
             try {
                 $k = $this->repairInvalidFields(@$lists['terms'], 'dty_JsonTermIDTree', 'validTermsString');
                 $k += $this->repairInvalidFields(@$lists['terms_nonselectable'], 'dty_TermIDTreeNonSelectableIDs', 'validNonSelTermsString');
@@ -490,13 +490,13 @@ class DbVerify {
                 $resMsg = $k.' field'.($k>1?'s have':' has')
                 .' been repaired. If you have unsaved data in an edit form, save your changes and reload the page to apply revised/corrected field definitions';
                 return array('status'=>true,'message'=>DIV_S.$resMsg.$resMsgSuccess);
-                
+
             } catch (\Exception $e) {
                 $resMsg = '<div class="error">SQL error updating field type '.$e->getMessage().DIV_E;
-            }            
+            }
 
         }else{
-            
+
             $contact_us = CONTACT_HEURIST_TEAM;
             $resMsg = <<<HEADER
             <br><h3>Warning: Inconsistent field definitions</h3><br>&nbsp;<br>
@@ -508,7 +508,7 @@ class DbVerify {
             $resMsg .= $this->generateFieldMessages(@$lists["terms"], 'invalidTermIDs', 'term ID');
             $resMsg .= $this->generateFieldMessages(@$lists["terms_nonselectable"], 'invalidNonSelectableTermIDs', 'non selectable term ID');
             $resMsg .= $this->generateFieldMessages(@$lists["rt_contraints"], 'invalidRectypeConstraint', 'record type constraint');
-            
+
         }
 
         return array('status'=>false, 'message'=>$resMsg);
@@ -527,12 +527,12 @@ class DbVerify {
      * @throws \Exception If there is an error during the update operation.
      */
     private function repairInvalidFields($fieldList, $column, $validField){
-        
+
         if(isEmptyArray($fieldList)){
             return 0;
         }
         $k = 0;
-        
+
         foreach ($fieldList as $row) {
             $query="UPDATE defDetailTypes SET $column=? WHERE dty_ID=".intval($row['dty_ID']);
             $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row[$validField]), true );
@@ -541,10 +541,10 @@ class DbVerify {
             }
             $k++;
         }
-        
-        return $k;                
+
+        return $k;
     }
-    
+
     /**
      * Generate messages for fields with invalid data.
      *
@@ -554,16 +554,16 @@ class DbVerify {
      * @param string $invalid_ids The key for the invalid data (term IDs, non-selectable term IDs, etc.).
      * @param string $msgType The type of message to generate (term ID, record type constraint, etc.).
      * @return string The generated HTML error messages for each invalid field.
-     */    
+     */
     private function generateFieldMessages($fieldList, $invalid_ids, $msgType)
     {
         $resMsg = '';
         if (is_array($fieldList)) {
             foreach ($fieldList as $row) {
                 $cnt = count($row[$invalid_ids]);
-                
+
                 $resMsg .= '<div class="msgline"><b>' . htmlspecialchars($row['dty_Name']) . '</b> field (code ' .
-                            intval($row['dty_ID']) . ') has ' . $cnt . ' invalid ' . $msgType 
+                            intval($row['dty_ID']) . ') has ' . $cnt . ' invalid ' . $msgType
                             . ($cnt>1?'s':'')
                             . ' (code: ' . htmlspecialchars(implode(',', $row[$invalid_ids])) . ')</div>';
             }
@@ -752,7 +752,7 @@ class DbVerify {
         $mysqli = $this->mysqli;
         $this->system->defineConstant('DT_PARENT_ENTITY');
         $dt_parent_entity_field_id = DT_PARENT_ENTITY;
-        
+
         $error_msg = 'Cannot delete invalid pointers from Records';
 
         if(false && $this->isFixMode($params)){ //OLD WAY DISABLED
@@ -1283,9 +1283,9 @@ HEADER;
             $except_ids[] = DT_ORIGINAL_RECORD_ID;
         }
         if(!empty($except_ids)){
-            $query .= ' AND dtl_DetailTypeID NOT IN ('.implode(',',$except_ids).')';    
+            $query .= ' AND dtl_DetailTypeID NOT IN ('.implode(',',$except_ids).')';
         }
-        
+
         $query .= ' order by rec_ID';
 
         $res = $mysqli->query( $query );
@@ -1673,7 +1673,7 @@ HEADER;
         $resMsg = '';
 
         $mysqli = $this->mysqli;
-        
+
         $div_valid = '<div><h3 class="res-valid">';
         $div_found = '<div><h3 class="error">Found ';
 
@@ -2030,7 +2030,7 @@ HEADER;
 
                         $upd_query = 'UPDATE recDetails SET dtl_Value = ? WHERE dtl_ID = ' . intval($row['dtl_ID']);
                         mysql__exec_param_query($mysqli,$upd_query,array('s',$new_val));
-                        
+
                         if($fixed_multi && !in_array($rec_id, $fixed2)){
                             $fixed2[] = $rec_id;
                         }elseif(!in_array($rec_id, $ids1)){
@@ -2607,8 +2607,8 @@ FIXMSG
 
         return array('status'=>$resStatus, 'message'=>$resMsg);
     }
-    
-    
+
+
 }
 
 

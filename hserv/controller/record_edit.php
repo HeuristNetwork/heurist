@@ -114,9 +114,9 @@
                 }
 
                 $response = recordDuplicate($system, $_REQUEST['id']);
-                
+
                 $isOK = $response && @$response['status']==HEURIST_OK;
-                
+
                 mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
 
             } else {

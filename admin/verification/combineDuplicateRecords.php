@@ -303,7 +303,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
                             //    foreach($records as $index) {
                             foreach($records as $record) {
-                                   
+
                                 $rec_ID = intval($record['rec_ID']);
                                 $is_master = ($rec_ID== $master_rec_id);
                                 print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$rec_ID.'">';
@@ -477,7 +477,7 @@ EXP;
 
                                                 if($m_detail['dtl_Geo']){
                                                     if(trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])){
-                                                       
+
                                                         array_push($removeIndices,$i);
                                                     }
                                                 }elseif($m_detail['dtl_UploadedFileID']) {
@@ -661,16 +661,16 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
 }
 
 function edit_link($rec_id, $label, $id_only=false){
-    
+
     $link = '<a target="edit" href="'
             .HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'">';
-    
+
     if($id_only){
         $link .= "<span title=\"$label\">$rec_id</span></a> ";
     }else{
         $link .= "$label</a>";
     }
-    
+
     return $link;
 }
 
@@ -687,7 +687,7 @@ function detail_str($rd_type, $rd_val)
         if (is_array($rd_val)) {
             $titles = mysql__select_assoc2($mysqli, 'select rec_ID, rec_Title from Records where rec_ID in ('
                     .implode(',',$rd_val).')');
-                    
+
             $rv = array();
             foreach ($rd_val as $val){
                 $rv[] = edit_link($val, $titles[$val], true);
@@ -717,7 +717,7 @@ function detail_str($rd_type, $rd_val)
                 return $res;
             }
     }
-    
+
     return $rd_val;
 }
 
@@ -929,7 +929,7 @@ function do_fix_dupe()
 
         if(!($master_pers_record && $delete_dup_pers_record)) {continue;}
 
-       
+
         if(strlen(@$delete_dup_pers_record['bkm_PwdReminder'])>0){
             $master_pers_record['bkm_PwdReminder'] = $master_pers_record['bkm_PwdReminder'].";". $delete_dup_pers_record['bkm_PwdReminder'];
         }

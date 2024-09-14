@@ -236,7 +236,7 @@ class DbDefTerms extends DbEntityBase
 
         //create tree array $record['trm_ParentTermID']
         if(isEmptyArray($this->records)){
-            return array();   
+            return array();
         }
 
             if(@$this->records[0]['trm_VocabularyGroupID']>0){
@@ -254,7 +254,7 @@ class DbDefTerms extends DbEntityBase
                         $records_by_prent_id[$record['trm_ParentTermID']] = array();
                     }
                     $records_by_prent_id[$record['trm_ParentTermID']][] = $record;
-                
+
             }
 
             $terms_added = array();
@@ -283,7 +283,7 @@ class DbDefTerms extends DbEntityBase
                     $terms_added = array_merge($terms_added, $ret);
                 }
             }
-       
+
         return $terms_added;
     }
 
@@ -294,11 +294,11 @@ class DbDefTerms extends DbEntityBase
         $result = array();
 
         $trm_sep = @$this->data['term_separator'];
-        
+
         if($trm_sep==null){
              $trm_sep = '.';
         }
-        
+
         //(!array_key_exists('term_separator', $this->data))
         //                ? '.'
         //                : ((empty($this->data['term_separator'])) ? false : $this->data['term_separator']);
@@ -421,7 +421,7 @@ class DbDefTerms extends DbEntityBase
     protected function prepareRecords($ignore_duplications=false){
 
         $ret = parent::prepareRecords();
-        
+
         $duplications = [];
 
         //add specific field values
@@ -464,10 +464,10 @@ class DbDefTerms extends DbEntityBase
                                     {
                                         $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
                                     }
-                                    
+
                                     if($s2!==null){ //duplication
                                          if($ignore_duplications){
-                                            $duplications[] = $idx;    
+                                            $duplications[] = $idx;
                                             $s2 = null;
                                          }else{
                                              break;
@@ -532,7 +532,7 @@ class DbDefTerms extends DbEntityBase
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
         }//foreach
-        
+
         if(!empty($duplications)){
             foreach($duplications as $idx){
                 unset($this->records[$idx]);
@@ -923,7 +923,7 @@ class DbDefTerms extends DbEntityBase
                 //import terms (from csv)
                 $ret = $this->_importTerms();
             }
-            
+
             mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
             return $ret;
@@ -1223,7 +1223,7 @@ class DbDefTerms extends DbEntityBase
         //find all children terms (including by reference)
         $children = $this->getChildren($trm_ID);
         $children[] = $trm_ID;  //itself
-        
+
         $s = predicateId('dtl_Value', $children, SQL_AND);
 
         $mysqli = $this->system->get_mysqli();
@@ -1261,13 +1261,13 @@ class DbDefTerms extends DbEntityBase
 
             $res->close();
         }
-        
+
         if($mysqli->error){
             $this->system->addError(HEURIST_DB_ERROR,
                 'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
         }
-        
+
         $ret['recID'] = $trm_ID;
         $ret['fields'] = $check_dty_IDs;
         $ret['reccount'] = $total_count_rows;

@@ -27,7 +27,7 @@
  * @link https://gist.github.com/840476#file_gpointconverter.class.php
  */
 define('WGS_84','WGS 84');
- 
+
 class GpointConverter
 {
 
@@ -318,7 +318,7 @@ class GpointConverter
         // If no LongOrigin is provided, calculate it based on UTM zone
         if ($LongOrigin === null) {
             $ZoneNumber = $this->getZoneNumber($LongTemp);
-            
+
             // Calculate longitude origin for the UTM zone
             $LongOrigin = ($ZoneNumber - 1) * 6 - 180 + 3;
             $this->utmZone = sprintf("%d%s", $ZoneNumber, $this->UTMLetterDesignator());
@@ -359,16 +359,16 @@ class GpointConverter
             $this->utmNorthing += 10000000.0; // Southern hemisphere offset
         }
     }
-    
-    private function getZoneNumber($LongTemp){            
-    
+
+    private function getZoneNumber($LongTemp){
+
             $ZoneNumber = (int)(($LongTemp + 180) / 6) + 1;
 
             // Special case for Norway and Svalbard regions
             if ($this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0) {
                 $ZoneNumber = 32;
             }elseif ($this->lat >= 72.0 && $this->lat < 84.0) {
-                
+
                 if ($LongTemp >= 0.0 && $LongTemp < 9.0) {
                     $ZoneNumber = 31;
                 } elseif ($LongTemp >= 9.0 && $LongTemp < 21.0) {
@@ -379,7 +379,7 @@ class GpointConverter
                     $ZoneNumber = 37;
                 }
             }
-            
+
             return $ZoneNumber;
     }
 

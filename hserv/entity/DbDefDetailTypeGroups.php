@@ -32,25 +32,25 @@ class DbDefDetailTypeGroups extends DbEntityBase
                           'Cannot delete non empty group')
                 );
     }
-    
+
     /**
     *  search field gruops
     */
     public function search(){
 
         if(parent::search()===false){
-              return false;                                                                              
+              return false;
         }
-        
+
         $this->searchMgr->addPredicate('dtg_ID');
         $this->searchMgr->addPredicate('dtg_Name');
-        
+
         define('CNT_DTG',', (select count(dty_ID) from defDetailTypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount ');
 
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('dtg_ID'); break;  
-            case 'name': $this->searchMgr->setSelFields('dtg_ID,dtg_Name'); break;  
-            case 'list': $this->searchMgr->setSelFields('dtg_ID,dtg_Name,dtg_Description,dtg_Order'.CNT_DTG); break;  
+            case 'id': $this->searchMgr->setSelFields('dtg_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('dtg_ID,dtg_Name'); break;
+            case 'list': $this->searchMgr->setSelFields('dtg_ID,dtg_Name,dtg_Description,dtg_Order'.CNT_DTG); break;
             default: $this->searchMgr->setSelFields(implode(',', $this->fieldNames).CNT_DTG);
         }
 

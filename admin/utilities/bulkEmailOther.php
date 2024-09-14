@@ -80,7 +80,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		}
 
 		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
-	
+
 		$rtn = json_encode($response);
 
 		print $rtn;
@@ -183,7 +183,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$lastmod_logic = $mysqli->real_escape_string( filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING) );
 		$lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
 		$lastmod_period = intval($db_request['lastmod_period']);
-	
+
         //to avoid injection
         $lastmod_unit = 'ALL';
         switch (strtoupper(@$db_request['lastmod_unit'])) {
@@ -378,13 +378,13 @@ function getDatabaseDetails($mysqli, $db_list){
         $db_data['rec_count'] = mysql__select_value($mysqli, "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1");
 
         $last_recent = mysql__select_value($mysqli, "SELECT CONVERT_TZ(MAX(rec_Modified), @@session.time_zone, "+00:00") FROM `$database`.Records WHERE rec_FlagTemporary != 1");
-        
+
         if(!$last_recent){
             $last_recent = date_create($last_recent);
         }
-        
+
         $last_struct = getDefinitionsModTime($mysqli, true);
-        
+
         if(!$last_recent || $last_struct>$last_recent){
             $last_recent = $last_struct;
         }

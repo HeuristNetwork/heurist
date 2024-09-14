@@ -36,7 +36,7 @@ use hserv\structure\ConceptCode;
     *  mysql__delete
     *  mysql__begin_transaction
     *  mysql__script - executes sql script file
-    * 
+    *
     *
     *  getSysValues - Returns values from sysIdentification
     *  isFunctionExists - verifies that mysql stored function exists
@@ -47,7 +47,7 @@ use hserv\structure\ConceptCode;
     *  prepareIds
     * prepareStrIds
     *  predicateId - prepare field compare with one or more ids
-    * 
+    *
     *  checkMaxLength - check max length for TEXT field
     *  getDefinitionsModTime - returns timestamp of last update of db denitions
     *
@@ -204,28 +204,28 @@ use hserv\structure\ConceptCode;
 
         return $mysqli->query('DROP DATABASE `'.$db_name.'`');
     }
-    
+
     //
-    // on / off foreign indexes verification    
+    // on / off foreign indexes verification
     //
     function mysql__foreign_check( $mysqli, $is_on ){
         $mysqli->query('SET FOREIGN_KEY_CHECKS = '.($is_on?'1':'0'));
     }
-    
+
     //
     //
     //
     function mysql__supress_trigger($mysqli, $is_on ){
         $mysqli->query('SET @SUPPRESS_UPDATE_TRIGGER='.($is_on?'1':'NULL'));
     }
-    
+
     //
     //
     //
     function mysql__safe_updatess($mysqli, $is_on ){
         $mysqli->query('SET SQL_SAFE_UPDATES='.($is_on?'1':'0'));
     }
-    
+
     //
     // FOUND_ROWS function are deprecated; expect them to be removed in a future version of MySQL
     //
@@ -255,27 +255,27 @@ use hserv\structure\ConceptCode;
 
     /**
      * Returns a list of databases as an array.
-     * 
+     *
      * @param mysqli $mysqli - The MySQLi connection object
      * @param bool $with_prefix - Whether to include the prefix (default: false)
      * @param string|null $starts_with - Optional string to filter database names by a prefix
      * @param string|null $email - The email of the current user for role filtering
      * @param string|null $role - The role to filter by ('admin' or 'user')
      * @param string $prefix - The prefix used for database names (default: HEURIST_DB_PREFIX)
-     * 
+     *
      * @return array - List of database names matching the criteria
-     * 
+     *
      * @throws Exception - If the SQL query fails
      */
-    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with = null, 
-                                  $email = null, $role = null, $prefix = HEURIST_DB_PREFIX) 
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with = null,
+                                  $email = null, $role = null, $prefix = HEURIST_DB_PREFIX)
     {
         // Step 1: Validate and construct the `LIKE` clause for database filtering
         $where = $prefix . '%'; // Default case
         if ($starts_with && mysql__check_dbname($starts_with) == null) { // && preg_match('/^[A-Za-z0-9_\$]+$/', $starts_with)
             $where = $prefix . $starts_with . '%';
         }
-        
+
         // Step 2: Execute the database query
         $query = "SHOW DATABASES WHERE `database` LIKE '" . $mysqli->real_escape_string($where) . "'";
         $res = $mysqli->query($query);
@@ -290,7 +290,7 @@ use hserv\structure\ConceptCode;
         while ($row = $res->fetch_row()) {
             $database = $row[0];
             if (strpos($database, $prefix) !== 0) {
-                continue;   
+                continue;
             }
             $filtered_db = mysql__checkUserRole($mysqli, $database, $email, $role);
             if ($filtered_db) {
@@ -307,12 +307,12 @@ use hserv\structure\ConceptCode;
 
     /**
      * Checks that given database user has specified role
-     * 
+     *
      * @param mysqli $mysqli - The MySQLi connection object
      * @param string $database - The database name
      * @param string|null $email - The user's email for filtering
      * @param string|null $role - The role to filter by ('admin' or 'user')
-     * 
+     *
      * @return bool - True if the database matches the role and email filter, false otherwise
      */
     function mysql__checkUserRole($mysqli, $database, $email, $role) {
@@ -325,20 +325,20 @@ use hserv\structure\ConceptCode;
 
         // Determine the query based on the role
         if ($role == 'user') {
-            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps 
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps
                       WHERE ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
         } elseif ($role == 'admin') {
-            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps 
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps
                       JOIN `$sanitized_db`.sysUsrGrpLinks ON ugr_ID = ugl_UserID
                       JOIN sysIdentification ON ugl_GroupID = sys_OwnerGroupID
                       WHERE ugl_Role = 'admin' AND ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
         }
-        
+
         $value = mysql__select_value($mysqli, $query);
-        
+
         return $value!=null;
     }
-        
+
 
 
     function mysql__select($mysqli, $query){
@@ -417,13 +417,13 @@ $mysqli->kill($thread_id);
     */
     function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
-        
+
         if(!($mysqli && $query)){
             return array();
         }
-        
+
         $matches = array();
-        
+
         $res = $mysqli->query($query);
 
         if ($res){
@@ -521,11 +521,11 @@ $mysqli->kill($thread_id);
     * @return []
     */
     function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
-        
+
         if(!$mysqli){
-            return null;   
+            return null;
         }
-        
+
         $result = array();
         $res = $mysqli->query($query);
         if ($res){
@@ -545,7 +545,7 @@ $mysqli->kill($thread_id);
         }elseif($mysqli->error){
             return null;
         }
-        
+
         return $result;
     }
 
@@ -840,8 +840,8 @@ $mysqli->kill($thread_id);
                 $result = $mysqli->error;
             }
             return $result;
-        } 
-        
+        }
+
         // Parameterized query execution
         $stmt = $mysqli->prepare($query);
         if ($stmt) {
@@ -963,7 +963,7 @@ $mysqli->kill($thread_id);
                     $res = true;
                 }
 
-            
+
             }else{ //3d party function that uses PDO
 
                 if(!function_exists('execute_db_script')){
@@ -1536,7 +1536,7 @@ $mysqli->kill($thread_id);
         if($ids==null){
             return array();
         }
-        
+
         if(!is_array($ids)){
             if(is_numeric($ids)){
                 $ids = array($ids);
@@ -1573,15 +1573,15 @@ $mysqli->kill($thread_id);
         return $ids;
 
     }
-    
+
     //
-    // if $operation not null it returns empty string for empty $ids and 
-    //    full predictate  
+    // if $operation not null it returns empty string for empty $ids and
+    //    full predictate
     //
     function predicateId($field, $ids, $operation=null)
     {
         $ids = prepareIds($ids);
-        
+
         $cnt = count($ids);
         if($cnt==0){
             return isEmptyStr($operation)?SQL_FALSE:''; // (1=0) none
@@ -1590,7 +1590,7 @@ $mysqli->kill($thread_id);
         }elseif($cnt>1){
             $q = SQL_IN.implode(',',$ids).')';
         }
-        
+
         return (!isEmptyStr($operation)?" $operation ":'').'('.$field.$q.')';
     }
 
@@ -1683,7 +1683,7 @@ $mysqli->kill($thread_id);
         if($recstructure_only){
             $last_mod = $rst_mod;
         }else{
-            
+
             $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
             $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
             $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
@@ -1716,9 +1716,9 @@ $mysqli->kill($thread_id);
 
         return $keep_autocommit;
     }
-    
+
     function mysql__end_transaction($mysqli, $res, $keep_autocommit){
-    
+
         if($res){
             $mysqli->commit();
         }else{
@@ -1726,7 +1726,7 @@ $mysqli->kill($thread_id);
         }
         if($keep_autocommit===true) {$mysqli->autocommit(true);}
     }
-    
+
 
     //
     // returns value of session file
@@ -1766,7 +1766,7 @@ $mysqli->kill($thread_id);
     // This method updates from 1.3.14 to 1.3.xxxx
     //
     function updateDatabaseToLatest($system){
-        
+
         $sysValues = $system->get_system(null, true);
         /*
         $dbVer = $system->get_system('sys_dbVersion');
@@ -1774,7 +1774,7 @@ $mysqli->kill($thread_id);
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
 
         if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>16){
-        
+
         }
         */
         return true;
@@ -1800,9 +1800,9 @@ $mysqli->kill($thread_id);
 
         $mysql_gone_away_error = $mysqli && $mysqli->errno==2006;
         if($mysql_gone_away_error){
-        
+
             return 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
-        
+
         }elseif($mysqli->error){
 
             return $mysqli->error;
@@ -1839,13 +1839,13 @@ $mysqli->kill($thread_id);
     }
 
     function createTable($system, $table_name, $query, $recreate = false){
-    
+
         $mysqli = $system->get_mysqli();
-    
+
         if($recreate || !hasTable($mysqli, $table_name)){
-            
+
             $res = $mysqli->query('DROP TABLE IF EXISTS '.$table_name);
-            
+
             $res = $mysqli->query($query);
             if(!$res){
                 $msg = "Cannot create $table_name";
@@ -1858,16 +1858,16 @@ $mysqli->kill($thread_id);
         }
         return $res;
     }
-    
+
     function alterTable($system, $table_name, $field_name, $query, $modify_if_exists = false){
-    
+
         $mysqli = $system->get_mysqli();
-        
+
         $column_exists = hasColumn($mysqli, $table_name, $field_name);
-        
+
         $rep1 = 'add';
         $rep2 = 'added';
-        
+
         if($column_exists && $modify_if_exists){
             $query = str_replace('ADD COLUMN','MODIFY',$query);
             if(stripos($query,' AFTER `')>0){
@@ -1877,7 +1877,7 @@ $mysqli->kill($thread_id);
             $rep1 = 'alter';
             $rep2 = 'altered';
         }
-        
+
         if(!$column_exists){ //column not defined
             $res = $mysqli->query($query);
             if(!$res){
@@ -1889,10 +1889,10 @@ $mysqli->kill($thread_id);
         }else{
             $res = array(false, "$table_name: $field_name already exists");
         }
-    
+
         return $res;
     }
-    
+
 
     /**
     * Returns true if table exists in database

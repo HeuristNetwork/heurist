@@ -321,7 +321,7 @@ class ReportRecord {
             }
 
             $where = SQL_WHERE;
-            
+
             $predicateRty = predicateId('rec_RecTypeID',$rty_ID,SQL_AND);
 
             if($predicateRty!=''){

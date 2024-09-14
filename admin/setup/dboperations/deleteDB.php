@@ -40,7 +40,7 @@ if($sysadmin_pwd==null){
 }else{
 
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
-    
+
     $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, 2);
 
     if ($sErrorMsg!=null) {

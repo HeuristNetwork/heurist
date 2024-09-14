@@ -24,16 +24,16 @@ use hserv\entity\DbEntityBase;
 
 class DbDefCalcFunctions extends DbEntityBase
 {
-    
+
     public function init(){
         $this->duplicationCheck = array('cfn_Name'=>'Field calculation cannot be saved. The provided name already exists');
-                     
+
         $this->foreignChecks = array(
                     array('select count(rst_DetailTypeID) from defRecStructure where rst_CalcFunctionID',
                           'Cannot delete calculation that in use in record types')
                 );
     }
-    
+
     /**
     *  search claculcated fields
     */
@@ -45,13 +45,13 @@ class DbDefCalcFunctions extends DbEntityBase
 
         $this->searchMgr->addPredicate('cfn_ID');
         $this->searchMgr->addPredicate('cfn_Name');
-        
+
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('cfn_ID'); break;  
-            case 'name': $this->searchMgr->setSelFields('cfn_ID,cfn_Name'); break;  
+            case 'id': $this->searchMgr->setSelFields('cfn_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('cfn_ID,cfn_Name'); break;
             default: $this->searchMgr->setSelFields('cfn_ID,cfn_Name,cfn_FunctionSpecification,cfn_RecTypeIDs');
         }
-        
+
         return $this->searchMgr->composeAndExecute('cfn_Name');
     }
 

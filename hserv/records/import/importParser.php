@@ -776,7 +776,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 }
 
 /**
- * Saves the encoded filename during the CSV import session. 
+ * Saves the encoded filename during the CSV import session.
  * Creates a session table if it doesn't exist and cleans up old entries.
  *
  * @param string $encoded_filename The name of the encoded file to be saved.
@@ -790,18 +790,18 @@ private static function _saveEncodedFilename($encoded_filename)
     }
 
     $mysqli = self::$system->get_mysqli();
-    
+
     // Check if the session table exists
     $is_exist = hasTable($mysqli, 'import_tmp_file');
     if (!$is_exist) {
         // Create the session table if it doesn't exist
         $query = "CREATE TABLE `import_tmp_file` (
-            `imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, 
-            `imp_Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-            `imp_filename` VARCHAR(500) NOT NULL, 
+            `imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `imp_Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `imp_filename` VARCHAR(500) NOT NULL,
             PRIMARY KEY (`imp_ID`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        
+
         if (!$mysqli->query($query)) {
             self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);
             return false;
@@ -809,13 +809,13 @@ private static function _saveEncodedFilename($encoded_filename)
     } else {
         // Retrieve filenames older than 2 days for cleanup
         $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date < NOW() - INTERVAL 2 DAY');
-        
+
         // Cleanup old files
         foreach ($filenames as $fname) {
             $fname = HEURIST_SCRATCH_DIR . basename($fname);
             fileDelete($fname);
         }
-        
+
         // Delete old entries from the session table
         $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date < NOW() - INTERVAL 2 DAY';
         $mysqli->query($query);
@@ -823,7 +823,7 @@ private static function _saveEncodedFilename($encoded_filename)
 
     // Insert the new encoded filename into the session table
     $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename' => basename($encoded_filename)));
-    
+
     if (isPositiveInt($res)) {
         return $res;
     }
@@ -877,7 +877,7 @@ private static function prepareDateField($field, $csv_dateformat){
 }
 
 /**
- * Prepares and validates integer field values by checking for non-integer values, 
+ * Prepares and validates integer field values by checking for non-integer values,
  * negative values, or values that exceed MySQL's maximum integer size.
  * Updates the error key fields and integer fields arrays accordingly.
  *
@@ -897,15 +897,15 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
     $values = explode('|', $field);
     foreach($values as $value){
         if($value=='' || $value==0) {continue;}
-        
+
         if(!isPositiveInt($value)){ //noy integer
-            $idx = 1;            
+            $idx = 1;
         }elseif(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
             $idx = 0;
         }else{
-            continue;    
+            continue;
         }
-        
+
         if($check_keyfield_K){
 
             if(!is_array(@$err_keyfields[$k])){
@@ -915,7 +915,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
                 $err_keyfields[$k][$idx][] = $value;
             }
         }
-        
+
         //exclude from array of fields with integer values
         if(@$int_fields[$k]) {$int_fields[$k]=null;}
     }//foreach
@@ -928,7 +928,7 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
 
         $nodeText = '#text';
         $regex_space = '/\n\s+/';
-    
+
         $wkt = new WKT();
         $properties = array();
         $textnodes = array($nodeText, 'lookat', 'style', 'styleurl');
@@ -1214,8 +1214,8 @@ public static function simpleCsvParser($params){
             return $temp;
     }
 
-    $response = array();    
-    
+    $response = array();
+
         if($csv_linebreak=="auto"){
             //ini_set('auto_detect_line_endings', true);
             $lb = "\n";

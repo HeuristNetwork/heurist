@@ -116,7 +116,7 @@ VALUE
 4)  Query     "linked_to:15": [{ t:4 }, {"f:1":"Alex" } ]
 "f:10": {"any":[ {t:4}, {} ] }
 
-5) Find all records without field  "f:5":"NULL"  
+5) Find all records without field  "f:5":"NULL"
 6) Find all records with any value in field  "f:5":""
 7) Find all records with value not equal ABC  "f:5":"-ABC"
 
@@ -234,7 +234,7 @@ $dty_id_relation_type = 6; // $system->defineConstant('DT_RELATION_TYPE')
 
 /**
 * Parses simplified heurist query and returns it in  json format
-* 
+*
 * (t 10 Peter) => [{"t":10},{"title":"Peter"}]
 *
 * @param String $query - heurist query in simplified notation
@@ -243,14 +243,14 @@ function parse_query_to_json($query){
 
     $res = array();
     $subres = array();//parsed subqueries
-    
+
                     //     /\(([^[\)]|(?R))*\)/'
     $regex_get_subquery = '/\(([^[\)])*\)/'; // extracts (aaaa) from string
     $regex_remove_parenthesis = '/(?:^[\s\(]+)|(?:[\s\)]+$)/';
 
     if($query!=null && $query!=''){
 
-        //1) get subqueries   
+        //1) get subqueries
         $cnt = preg_match_all($regex_get_subquery, $query, $subqueries);
 
 
@@ -586,7 +586,7 @@ class HQuery {
         global $publicOnly, $wg_ids, $is_admin;
 
         $res = $this->top_limb->makeSQL();//it creates where_clause and fill tables array
-        
+
         $from_records = 'Records r'.$this->level.' ';
 
         if($this->top_limb->error_message){
@@ -840,7 +840,7 @@ class HQuery {
                         if($field_type!=null){ //field type found
 
                             $where_exp = ' WHERE dtl_RecID=r'.$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID;
-                        
+
                             if($field_type=='enum'){
                                 $sortby = 'ifnull((select trm_OrderInBranch from recDetails left join defTerms on trm_ID=dtl_Value '
                                     . $where_exp
@@ -910,7 +910,7 @@ class HLimb {
         if(isEmptyArray($query_json)){
             return;
         }
-            
+
         foreach ($query_json as $key => $value){
 
             if(is_numeric($key) && is_array($value)){  //this is sequental array
@@ -918,7 +918,7 @@ class HLimb {
                 $key = $key[0];
                 $value = $value[$key];
             }
-            
+
             $key = strtolower($key);
 
             if( array_key_exists($key, $this->allowed) ){ //this is limb
@@ -936,12 +936,12 @@ class HLimb {
                 }
             }
         }
-        
+
     }
-    
+
     public function addPredicate($key, $value){
         $predicate = new HPredicate($this->parent, $key, $value, count($this->limbs) );
-        
+
         if($predicate->valid){
             array_push( $this->limbs,  $predicate);
         }
@@ -1157,7 +1157,7 @@ class HPredicate {
 
                     $this->relation_fields = array();
                     $this->value = array();
-                    
+
                     $REL_FLD = 'relf:'; //old predicate for relationship record field
 
                     // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
@@ -1460,7 +1460,7 @@ class HPredicate {
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
 
-        //not used 
+        //not used
         //$p_alias = "rd".$this->qlevel;
         //$p = $p_alias.".";
         $p_alias = '';
@@ -1661,12 +1661,12 @@ class HPredicate {
 
                     $field_name = '';
                     //$val = $this->getFieldValue();
-                    
+
                     $res .= $field_id_filter;
 
                 }elseif($this->fulltext){
-                    
-                    
+
+
                     if($this->relation_prefix){
                             $rty_id_relation = 1;
                             if(defined('RT_RELATION')){
@@ -1676,10 +1676,10 @@ class HPredicate {
                         $res = 'SELECT rec_ID FROM Records LEFT JOIN recDetails ON dtl_RecID=rec_ID AND dtl_DetailTypeID'.$field_id_filter
                         .' WHERE rec_RecTypeID='.$rty_id_relation;
                     }else{
-                        $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';    
+                        $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
                         $res .= $field_id_filter;
                     }
-                    
+
                 }else{
                     $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
                     .$p.'dtl_DetailTypeID';
@@ -1695,7 +1695,7 @@ class HPredicate {
                     //execute fulltext search query
                     $res2 = $res.SQL_AND.($this->negate ? SQL_NOT : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
                     $list_ids = mysql__select_list2($mysqli, $res2);
-                    
+
                     $res = predicateId($recordID,$list_ids);
 
                 }else{
@@ -1778,12 +1778,12 @@ class HPredicate {
             . ' left join defRecStructure on dtl_DetailTypeID=rst_DetailTypeID '
             .' where if(dty_Type != "resource", '
                 .' if(dty_Type="enum", dtl_Value'.$val_enum
-                    .', '. ($this->negate ? SQL_NOT : '') 
+                    .', '. ($this->negate ? SQL_NOT : '')
                     ."MATCH(dtl_Value) $val), $field_name2 LIKE '%{$val_wo_prefixes}%')"
                 .$field_condition;
 
             $list_ids = mysql__select_list2($mysqli, $res);
-            
+
             $res = predicateId('r'.$this->qlevel.'.rec_ID',$list_ids);
 
         }else{
@@ -1986,16 +1986,16 @@ class HPredicate {
     related_to:
     links: recordtype
     */
-    
+
     //
     //
     //
     private function getDistinctRecIds()
     {
         global $mysqli, $params_global, $top_query;
-        
+
         $not_nested = (@$params_global['nested']===false);
-        
+
         if($not_nested){
             $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
             $top_query->top_limb->addTable($this->query->from_clause);
@@ -2011,7 +2011,7 @@ class HPredicate {
 
         return $val;
     }
-    
+
 
     /**
     * find records that have pointers to specified records
@@ -2107,8 +2107,8 @@ class HPredicate {
         $this->field_type = "link";
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
-        
-        
+
+
         if($this->isEmptyValue()){
             //find records without reverse pointers
 
@@ -2126,15 +2126,15 @@ class HPredicate {
             if(is_array($several_ids) && !empty($several_ids)){
                 $field_compare .= SQL_AND.predicateId("$rl.rl_DetailTypeID", $several_ids);
             }
-            
+
             $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
             ." IN (select rl_TargetID from recLinks $rl where $field_compare)";
-                
+
 
             return array("where"=>$where);
 
         }else{
-        
+
 
             if($this->query){
 
@@ -2173,7 +2173,7 @@ class HPredicate {
             }else{
 
                 $field_compare = "$rl.rl_RelationID IS NULL";
-                
+
                 $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
                 if(is_array($several_ids) && !empty($several_ids)){
                     $field_compare .= SQL_AND.predicateId("$rl.rl_DetailTypeID", $several_ids);
@@ -2319,7 +2319,7 @@ class HPredicate {
     private function predicateRelatedDirect($is_reverse){
 
         global $mysqli;
-        
+
         if($is_reverse){
             $part1 = 'rl_TargetID';
             $part2 = 'rl_SourceID';
@@ -2353,7 +2353,7 @@ class HPredicate {
                 list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
 
                 if($rty_constraints!=null && !empty($rty_constraints)){
-                    
+
                     $rty_constraints = predicateId('rec_RecTypeID', $rty_constraints);
 
                     $rty_constraints = ', Records where '.$rty_constraints.SQL_AND;
@@ -2431,7 +2431,7 @@ class HPredicate {
             return array("from"=>"recLinks $rl", "where"=>$where);
         }
     }
-    
+
 
     /**
     * find records that any links (both pointers and relations) to specified records
@@ -3079,7 +3079,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
                 if( !($this->relation_prefix && $this->fulltext) &&
                    ($this->field_type == 'freetext' || $this->field_type == 'blocktext') && intval($this->field_id) > 0){ // filter language
-                    
+
 
                     if(empty($lang)){ // default only
                         $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{3}:'";

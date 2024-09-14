@@ -113,12 +113,12 @@ class DbDefVocabularyGroups extends DbEntityBase
     public function delete($disable_foreign_checks = false){
 
         $this->isDeleteReady = false;
-        
+
         $this->foreignChecks = array(
                     array('SELECT count(trm_ID) FROM defTerms WHERE (trm_ParentTermID IS NULL OR trm_ParentTermID=0) AND `trm_VocabularyGroupID`',
                           'Cannot delete non empty group')
                 );
-                
+
         return parent::delete();
     }
 

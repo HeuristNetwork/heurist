@@ -29,7 +29,7 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     $sysadmin_pwd = USanitize::getAdminPwd('pwd');
     $req_params = USanitize::sanitizeInputArray();
-    
+
     $res = false;
 
     $action = @$req_params['action'];

@@ -133,7 +133,7 @@ if (@$argv) {
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
     $tabs = DIV_E.$tabs0;
-   
+
 }
 
 use hserv\utilities\DbUtils;
@@ -151,8 +151,8 @@ if(!$is_shell){
     $sysadmin_pwd = USanitize::getAdminPwd();
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-       
-       
+
+
         exit;
     }
 }
@@ -193,7 +193,7 @@ if(!$arg_no_action){
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
     }else{
-       
+
     }
 
     echo 'Deleted databases: '.$backup_root."\n";
@@ -385,8 +385,8 @@ if($need_email){
 
             $report =  $diff.' months, n='.$vals['cnt'].' INACTIVE';
         }else{
-           
-           
+
+
         }
 /*
 * Dump and bz2 import tables that are
@@ -459,7 +459,7 @@ if($need_email){
 
             $cnt_dumped = 0;
 
-           
+
             $arc_cnt = 0;
             $cnt_dumped = 0;
             if(ALLOW_PURGE_IMPORTTABLES){
@@ -562,9 +562,9 @@ if($need_email){
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
                             $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
 
-                           
+
                             $dump->start($dumpfile);
-                           
+
                             $res = true;
                         } catch (Exception $e) {
                             $report .= ("Error: ".$e->getMessage()."\n");
@@ -586,7 +586,7 @@ if($need_email){
 
                             $destination = $destination.'.tar';
 
-                           
+
 
                             $archOK = UArchive::createBz2($dumpfile, null, $destination, false);
                         }else{
@@ -663,10 +663,10 @@ function exclusion_list(){
 
     $res = array();
     $fname_ = dirname(__FILE__)."/../../../databases_not_to_purge.txt";
-   
+
     $fname = realpath($fname_);
     if($fname==false || !file_exists($fname)){
-        
+
         $sMsg = 'The file with purge exclustion list (databases_not_to_purge.txt) '
             .'was not found and please create it. '.($fname?$fname:$fname_);
         if($arg_no_action){
@@ -675,17 +675,17 @@ function exclusion_list(){
         sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg);
         return false;
     }
-    
-   
+
+
     $handle = @fopen($fname, "r");
     while (!feof($handle)) {
         $line = trim(fgets($handle, 100));
-        
+
         if(strpos($line,'#')!==false){
             $line = trim(strstr($line,'#',true));
         }
         if($line=='') {continue;}
-        
+
         $res[] = $line;
     }
     fclose($handle);
@@ -693,8 +693,8 @@ function exclusion_list(){
         print '<br>Exclusion list:<br>';
         print implode('<br>', $res).'<br><br>';
     }
-    
-    
+
+
     return $res;
 }
 

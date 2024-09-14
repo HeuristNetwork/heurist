@@ -131,11 +131,11 @@ if(!defined('PDIR')){
                                     include_once $filename;
                                     $rep = updateDatabseTo_v3($system);//PHP
                                 }elseif($src_min==3 && $src_sub<$trg_sub){
-                                    
+
                                     if($src_sub<16){
                                         include_once $filename;
                                         $rep = updateDatabseTo_v1_3_16($system);
-                                        
+
                                         if($rep!==false && $src_sub<14){ //for db_utils.php
                                             $rep2 = recreateRecDetailsDateIndex($system, true, true);
                                             if($rep2){
@@ -144,7 +144,7 @@ if(!defined('PDIR')){
                                                 $rep = false;
                                             }
                                         }
-                                        
+
                                     }else{
                                         $rep = array('');
                                     }
@@ -162,7 +162,7 @@ if(!defined('PDIR')){
                                         }
                                     }
                                     if($trg_min==3 && $trg_sub>0){ //to 1.3.16
-                                       
+
                                     }else{
                                         print "<p>Upgraded to $src_maj.$src_min.0</p>";
                                     }

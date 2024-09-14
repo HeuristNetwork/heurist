@@ -43,13 +43,13 @@ use hserv\structure\ConceptCode;
         $dbVerSubSub = intval($system->get_system('sys_dbSubSubVersion'));
 
         $report = array();
-        
+
         $report[] = 'Db version : '.$dbVer.'.'.$dbVerSub.'.'.$dbVerSubSub;
 
         if(!($dbVer==1 && $dbVerSub==3 && $dbVerSubSub<16)) {return $report;}
 
        try{
-            
+
        if($dbVerSubSub<1){
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_SemanticReferenceURL', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
@@ -59,21 +59,21 @@ use hserv\structure\ConceptCode;
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_TermsAsButtons', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_TermsAsButtons` TinyInt DEFAULT '0' "
                     ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
                     ." AFTER `rst_SemanticReferenceURL`");
-                    
+
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_Label', "ALTER TABLE `defTerms` ADD COLUMN `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank'", true);
 
-            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);             
+            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);
             $report[] = 'Upgraded to 1.3.1';
        }
        if($dbVerSubSub<2){
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_PointerMode', "ALTER TABLE `defRecStructure` "
-                ."ADD COLUMN `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'", true);             
+                ."ADD COLUMN `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'", true);
             $report[] = 'Upgraded to 1.3.2';
        }
 
        if($dbVerSubSub<4){
-            
+
             $query = <<<EXP
 CREATE TABLE sysWorkflowRules  (
   swf_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key',
@@ -96,12 +96,12 @@ EXP;
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_PreferredSource',
 <<<EXP
-ALTER TABLE `recUploadedFiles` 
-ADD COLUMN `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled') 
+ALTER TABLE `recUploadedFiles`
+ADD COLUMN `ulf_PreferredSource` enum('local','external','iiif','iiif_image','tiled')
 NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'
 EXP
-            , true);          
-           
+            , true);
+
 
             $query = <<<EXP
 CREATE TABLE defCalcFunctions (
@@ -124,14 +124,14 @@ EXP;
        }
 
        if($dbVerSubSub<7){
-           
+
             list($is_added,$report[]) = alterTable($system, 'recDetails', 'dtl_HideFromPublic', "ALTER TABLE `recDetails` ADD COLUMN `dtl_HideFromPublic` tinyint unsigned default null Comment 'If set, the value is not shown in Record View, column lists, custom reports or anywhere the value is displayed. It may still be used in filter or analysis'");
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_NonOwnerVisibility', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_NonOwnerVisibility` enum('hidden','viewable','public','pending') NOT NULL default 'public' COMMENT 'Allows restriction of visibility of a particular field in a specified record type'", true);
-            
+
             $query = "UPDATE `defRecStructure` SET `rst_NonOwnerVisibility`='public' WHERE rst_ID>0";
             $res = $mysqli->query($query);
-            
+
             $report[] = 'Upgraded to 1.3.7';
        }
 
@@ -140,7 +140,7 @@ EXP;
        if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 &&
 
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_NakalaKey', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'");
-       
+
             $usr_prefs = user_getPreferences($system);
             if($is_added && array_key_exists('nakala_api_key', $usr_prefs)){
                 $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
@@ -164,56 +164,56 @@ CREATE TABLE defTranslations (
 EXP;
             list($is_created,$report[]) = createTable($system, 'defTranslations', $query, true);
 
-            
+
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'usr_ExternalAuthentication', "ALTER TABLE `sysUGrps` ADD COLUMN `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'");
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Caption',
 <<<EXP
-ALTER TABLE `recUploadedFiles` 
+ALTER TABLE `recUploadedFiles`
 ADD COLUMN `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`
 EXP
-            );             
-            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright', 
+            );
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright',
 <<<EXP
-ALTER TABLE `recUploadedFiles` 
-ADD COLUMN `ulf_Copyright` varchar(255) 
+ALTER TABLE `recUploadedFiles`
+ADD COLUMN `ulf_Copyright` varchar(255)
 COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`
 EXP
-            );  
+            );
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyowner',
 <<<EXP
-ALTER TABLE `recUploadedFiles` ADD COLUMN `ulf_Copyowner` varchar(255) 
+ALTER TABLE `recUploadedFiles` ADD COLUMN `ulf_Copyowner` varchar(255)
 COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`
 EXP
-            );  
-            
+            );
+
             $report[] = 'Upgraded to 1.3.15';
-            
+
        }
        if($dbVerSubSub<16){
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_WhoCanView', <<<EXP
-ALTER TABLE `recUploadedFiles` 
-ADD COLUMN `ulf_WhoCanView` enum('viewable','loginrequired') NULL 
+ALTER TABLE `recUploadedFiles`
+ADD COLUMN `ulf_WhoCanView` enum('viewable','loginrequired') NULL
 COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all'
 EXP
-            , true);             
+            , true);
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_MD5Checksum', <<<EXP
-ALTER TABLE `recUploadedFiles` 
-ADD COLUMN `ulf_MD5Checksum` text(32) NULL 
+ALTER TABLE `recUploadedFiles`
+ADD COLUMN `ulf_MD5Checksum` text(32) NULL
 COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates'
 EXP
-            , true);             
-       
+            , true);
+
             $report[] = 'Upgraded to 1.3.16';
        }
-            
+
        }catch(Exception $exception){
             return false;
        }
-            
+
 
             if($dbVerSubSub<12){
                 if(!checkUserStatusColumn($system)){
@@ -247,7 +247,7 @@ EXP
                 $to_be_imported['2-1080'] = 'Field 2-1080 "Workflow stages"';
             }
 
-            
+
             if(!empty($to_be_imported)){
                     $importDef = new DbsImport( $system );
                     if($importDef->doPrepare(  array(
@@ -261,7 +261,7 @@ EXP
                         $report[] = 'Field 2-1098 "IIIF Annonation" and 2-1080 "Workflow stages" are imported';
                     }
             }
-            
+
         return $report;
     }
 ?>

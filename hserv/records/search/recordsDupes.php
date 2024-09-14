@@ -771,7 +771,7 @@ public static function exportList($params){
         $instant_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&instant_merge=1&db=" . HEURIST_DBNAME . "&master_rec_id=record_to_keep";
 
         foreach($records as $rec_ID => $rec_Title) {
-            
+
             $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . HEURIST_DBNAME;
             fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL, $instant_URL], "\t");
 

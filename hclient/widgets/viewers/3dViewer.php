@@ -61,14 +61,14 @@ if($system->init($db, true, false)){
 
                 $system->initPathConstants($db);
 
-               
+
                 $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];//need extension
                 $textures = array();
 
                 //find related mtl and texture files by original file name
                 if($fileExt=='obj'){
                     $filename = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
-                   
+
                     $file_obj = realpath($filename);
                     $file_mtl = null;
                     //find mtl file name  'mtllib name_of_file.mtl'
@@ -129,7 +129,7 @@ if($system->init($db, true, false)){
 
                     foreach($textures as $idx=>$fname) {
                         $textures[$idx] = HEURIST_FILESTORE_URL.'file_uploads/'.$fname;
-                       
+
                     }
                 }
                 if(count($textures)>0){
@@ -139,11 +139,11 @@ if($system->init($db, true, false)){
                 }
 
 
-               
-               
 
-               
-               
+
+
+
+
                 $is_not_inited = false;
 
             }else{

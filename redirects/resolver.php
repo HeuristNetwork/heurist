@@ -514,6 +514,6 @@ if($database_url!=null){ //redirect to resolver for another database
 redirectURL2($redirection_path.$redirect);
 
 function redirectURL2($url){
-    header('Location: '.$url);   
+    header('Location: '.$url);
 }
 ?>

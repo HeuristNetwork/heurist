@@ -20,8 +20,8 @@ function updateDatabseTo_v3($system, $dbname=null){
         if($dbname){
             mysql__usedatabase($mysqli, $dbname);
         }
-        
-        
+
+
         $report = array();
 
         try{
@@ -39,7 +39,7 @@ EXP;
                 $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
                 $res = $mysqli->query($query);
             }
-            
+
             $query = <<<EXP
 CREATE TABLE sysDashboard (
   dsh_ID tinyint unsigned NOT NULL auto_increment,
@@ -54,7 +54,7 @@ CREATE TABLE sysDashboard (
 ) ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
 EXP;
             list($is_created,$report[]) = createTable($system, 'sysDashboard',$query);
-            
+
             $query = <<<EXP
 CREATE TABLE usrWorkingSubsets (
   wss_ID mediumint unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',
@@ -80,7 +80,7 @@ CREATE TABLE defVocabularyGroups (
 ) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
 EXP;
             list($is_created,$report[]) = createTable($system, 'defVocabularyGroups',$query);
-            
+
             if($is_created){
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
@@ -92,7 +92,7 @@ EXP;
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
             }
-        
+
 
             $query = <<<EXP
 CREATE TABLE defTermsLinks (
@@ -104,7 +104,7 @@ CREATE TABLE defTermsLinks (
 ) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms';
 EXP;
             list($needFillTermsLinks, $report[]) = createTable($system, 'defTermsLinks',$query);
-        
+
         //--------------------------- FIELDS -----------------------------------
 
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_TreatAsPlaceRefForMapping', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'");
@@ -112,7 +112,7 @@ EXP;
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_ExternalReferenceLookups', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'");
 
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_NavigationTree', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters' AFTER `ugr_Modified`", true);
-            
+
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Preferences', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences' AFTER `ugr_NavigationTree`", true);
 
             list($is_added,$report[]) = alterTable($system, 'usrBookmarks', 'bkm_Notes', "ALTER TABLE `usrBookmarks` ADD COLUMN `bkm_Notes` mediumtext COMMENT 'Personal notes'");
@@ -130,9 +130,9 @@ EXP;
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);
 
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_VocabularyGroupID', "ALTER TABLE `defTerms` ADD COLUMN `trm_VocabularyGroupID` smallint unsigned NULL default '0' COMMENT ' group to which this term belongs, if a top level term (vocabulary)");
-            
+
             if($is_added){
-                
+
                 $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
 
                 //Semantic web
@@ -169,10 +169,10 @@ EXP;
                 .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
 
 
-                $report[] = 'defTerms: trm_VocabularyGroupID filled';                
+                $report[] = 'defTerms: trm_VocabularyGroupID filled';
             }
 
-        
+
         }catch(Exception $exception){
             return false;
         }
@@ -283,10 +283,10 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 }
 
 //
-// to reduce cognitive complexity 
+// to reduce cognitive complexity
 //
 function createTermsLink( $mysqli, $row, $db_regid ){
- 
+
     $domain = ($row[4]=='enum')?'enum':'relation';
     $name = $row[0].' - selection';
 
@@ -311,7 +311,7 @@ function createTermsLink( $mysqli, $row, $db_regid ){
 
     $id_orig = 0;
     if($row[5]==3){  //dty_OriginatingDBID
-        
+
         switch($row[6]){
             case 1079: $id_orig = 6255; break;
             case 1080: $id_orig = 6256; break;
@@ -348,7 +348,7 @@ function createTermsLink( $mysqli, $row, $db_regid ){
     $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
                 .intval($vocab_id).' WHERE dty_ID='.intval($row[3]);
     $mysqli->query($query);
-    
+
     return null;
 }
 
@@ -390,7 +390,7 @@ function fillTermsLinks( $mysqli ){
                     $report[] = 'Create vocabularies with references for "custom selections terms"';
                     $is_first = false;
                 }
-                
+
                 $rep = createTermsLink($mysqli, $row, $db_regid);
                 if($rep!=null) {$report[] = $rep;}
             }//while

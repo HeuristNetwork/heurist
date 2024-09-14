@@ -372,7 +372,7 @@ $system->defineConstants();
                 }
             }
 
-            
+
             $pref_li = '<li rtid="';
 
             $items = '';

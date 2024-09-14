@@ -89,15 +89,15 @@ abstract class DbEntityBase
     // Name of table
     //
     private $entityName;
-    
+
     //
     //
     protected $foreignChecks = null; //array of queries to validate references (before delete)
-    
+
     protected $isDeleteReady = false;
-    
+
     protected $requireAdminRights = true;
-    
+
     protected $duplicationCheck = null;
 
     //
@@ -107,11 +107,11 @@ abstract class DbEntityBase
        $this->system = $system;
 
        if(method_exists($this,'init')){
-            $this->init();    
+            $this->init();
        }
 
        $reflect = new \ReflectionClass($this);
-       
+
        $this->entityName = lcfirst(substr($reflect->getShortName(),2));
        if($data){
            $this->setData($data);
@@ -176,8 +176,8 @@ abstract class DbEntityBase
 
 
     //
-    // 
-    // abstract 
+    //
+    // abstract
     public function init(){}
 
     //
@@ -413,13 +413,13 @@ abstract class DbEntityBase
     public function run(){
 
         if(!$this->isvalid()){
-            return false;    
+            return false;
         }
-        
+
         $res = false;
-        
+
         $action =@$this->data['a'];
-        
+
         switch ($action) {
            case 'search':
                 $res = $this->search();
@@ -463,8 +463,8 @@ abstract class DbEntityBase
                         $this->_cleanDbDefCache();
                 }
                 break;
-           default: 
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed"); 
+           default:
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         }
         return $res;
     }
@@ -615,12 +615,12 @@ abstract class DbEntityBase
         }
         return $results;
     }//save
-    
+
     //
     // prepare and check ids
     //
     protected function deletePrepare(){
-        
+
         if(!@$this->recordIDs){
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         }
@@ -633,26 +633,26 @@ abstract class DbEntityBase
         if(!$this->_validatePermission()){
             return false;
         }
-        
+
         $this->isDeleteReady = true;
-        
+
         if(empty($this->foreignChecks)){
             $this->isDeleteReady = true;
             return true;
         }
-        
+
         $compare = (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
-            
+
         foreach($this->foreignChecks as $check){
-            
+
             $query = $check[0];
-            
+
             if(strpos($query,'#IDS#')>0){
                 $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
             }else{
                 $query .= $compare;
             }
-            
+
             $ret = mysql__select_value($this->system->get_mysqli(), $query);
 
             if($ret>0){
@@ -661,7 +661,7 @@ abstract class DbEntityBase
                 return false;
             }
         }
-        
+
         $this->isDeleteReady = true;
         return true;
     }
@@ -672,7 +672,7 @@ abstract class DbEntityBase
     // returns - deleted:[], no_rights:[], in_use:[]
     //
     public function delete($disable_foreign_checks=false){
-        
+
         if(!$this->isDeleteReady && !$this->deletePrepare()){
             return false;
         }
@@ -681,7 +681,7 @@ abstract class DbEntityBase
 
         mysql__foreign_check($mysqli, false);
         $query = SQL_DELETE.$this->config['tableName'].SQL_WHERE.predicateId($this->primaryField, $this->recordIDs);
-                
+
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;
 
@@ -694,7 +694,7 @@ abstract class DbEntityBase
             $mysqli->query(SQL_DELETE.'defTranslations where trn_Source LIKE "'
                                 .$this->config['tablePrefix'].'%" AND '
                                 .predicateId('trn_Code', $this->recordIDs));
-            
+
         }
 
         mysql__foreign_check($mysqli, true);
@@ -756,23 +756,23 @@ abstract class DbEntityBase
     // Validates permission for delete and update operations
     //
     protected function _validatePermission(){
-        
-        
+
+
         if($this->requireAdminRights &&
             !$this->system->is_admin() &&
             ((is_array($this->recordIDs) && count($this->recordIDs)>0)
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-            
+
             $ent_name = @$this->config['entityTitlePlural']?$this->config['entityTitlePlural']:'this entity';
 
             $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You are not admin and can\'t edit '.$ent_name
                     .'. Insufficient rights (logout/in to refresh) for this operation '
                     .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
-            // You have to be Administrator of group \'Database Managers\' for this operation                    
+            // You have to be Administrator of group \'Database Managers\' for this operation
             return false;
         }
-        
+
         if(!$this->system->has_access()){
              $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You must be logged in. Insufficient rights (logout/in to refresh) for this operation');
@@ -781,7 +781,7 @@ abstract class DbEntityBase
 
         return true;
     }
-    
+
     //
     // @todo
     //
@@ -814,7 +814,7 @@ abstract class DbEntityBase
         $isinsert = ($rec_ID<1);
 
         foreach($this->fields as $fieldname=>$field_config){
-            if (@$field_config['dty_Role']=='virtual' || 
+            if (@$field_config['dty_Role']=='virtual' ||
                 @$field_config['dty_Role']=='primary' ||
                 @$field_config['rst_RequirementType'] != 'required')
             {
@@ -822,9 +822,9 @@ abstract class DbEntityBase
             }
 
             if(!(array_key_exists($fieldname, $fieldvalues) || $isinsert)){
-                continue;   
+                continue;
             }
-            
+
             $value = @$fieldvalues[$fieldname];
 
             if(@$field_config['rst_MultiLang'] && is_array($value)){
@@ -1053,26 +1053,26 @@ abstract class DbEntityBase
     // validate duplication
     //
     protected function doDuplicationCheck($idx, $field, $message){
-        
+
             if(@$this->records[$idx][$field]){
                 $mysqli = $this->system->get_mysqli();
                 $res = mysql__select_value($mysqli,
                         "SELECT {$this->primaryField} FROM ".$this->config['tableName']."  WHERE $field='"
                         .$mysqli->real_escape_string( $this->records[$idx][$field] )."'");
                 if($res>0 && $res!=@$this->records[$idx][$this->primaryField]){
-                    
+
                     $sup_info = null;
                     if($this->config['tableName']=='defDetailTypes'){ //special case
                         $sup_info = array($this->primaryField=>$res);
                     }
-                    
+
                     $this->system->addError(HEURIST_ACTION_BLOCKED, $message, $sup_info);
                     return false;
                 }
             }
             return true;
     }
-    
+
     //
     // extracts records from "data" parameter and fills $this->recordIDs and $this->records
     // it is used in delete, save
@@ -1147,7 +1147,7 @@ abstract class DbEntityBase
             if(!empty($this->duplicationCheck)){
                 foreach($this->duplicationCheck as $field=>$msg){
                     if(!$this->doDuplicationCheck($idx, $field, $msg)){
-                         return false;                           
+                         return false;
                     }
                 }
             }

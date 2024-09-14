@@ -114,7 +114,7 @@ function verify_credentials( show_warning ){
         }else if(requiredLevel==2){
            msg += ' as database onwer';
         //}else if(requiredLevel!=0){
-       
+
         }
         if(msg!=''){
             var win_mappreview = window.parent.hWin;
@@ -123,17 +123,17 @@ function verify_credentials( show_warning ){
                 var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
                     {OK:
                     function(){
-                       
+
                         $dlg2.dialog( "close" );
-                        
+
                         showLoginDialog(false, function( is_logged ) {
-                            
+
                         }, win_mappreview, 'heurist-clearinghouse-login-dialog');
                     }});
             }else{
                 //show login dialog at once
                 showLoginDialog(false, function(is_logged){
-                            
+
                         }, win_mappreview, 'heurist-clearinghouse-login-dialog');
             }
 

@@ -29,14 +29,14 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 
 class DbSysUsers extends DbEntityBase
 {
-    private $keep_autocommit = false;    
-    private $transaction = false;    
+    private $keep_autocommit = false;
+    private $transaction = false;
 
     public function __construct( $system, $data=null ) {
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
-    
+
     /**
     *  search users
     *
@@ -283,10 +283,10 @@ class DbSysUsers extends DbEntityBase
             //validate duplication
             //validate duplication
             if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'User cannot be saved. The provided name already exists')){
-                    return false;                           
+                    return false;
             }
             if(!$this->doDuplicationCheck($idx, 'ugr_eMail', 'User cannot be saved. The provided email already exists')){
-                    return false;                           
+                    return false;
             }
 
             //find records to be approved and new ones
@@ -367,16 +367,16 @@ class DbSysUsers extends DbEntityBase
     //
     //
     public function delete($disable_foreign_checks = false){
-        
-        
+
+
         $this->recordIDs = null; //reset to obtain ids from $data
-        
+
         $this->foreignChecks = array(
                     array('SELECT FIND_IN_SET(2, "#IDS#")','Cannot remove "Database Owner" user'),
                     array('SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary=0 AND rec_OwnerUGrpID IN (#IDS#) LIMIT 1',
                           'Deleting User with existing Records not allowed')
                 );
-        
+
         if(!$this->deletePrepare()){
             return false;
         }
@@ -440,14 +440,14 @@ class DbSysUsers extends DbEntityBase
         }
 
         //@todo - remove assosiated images
-        
+
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
 
 	/**
-     * Transfer User ID 2 (DB Owner) to the selected User ID, 
+     * Transfer User ID 2 (DB Owner) to the selected User ID,
      * and provide the new DB Owner administrator rights to all workgroups.
      *
      * @param bool $disable_foreign_checks If true, disables foreign key checks during transfer.
@@ -560,9 +560,9 @@ class DbSysUsers extends DbEntityBase
         return true;
     }
 
-        
-    
-    
+
+
+
     //
     // special and batch action for users
     // 1) import users from another db
@@ -762,9 +762,9 @@ class DbSysUsers extends DbEntityBase
                 user_EmailAboutNewUser($this->system, $newUserIDs[0], true);
             }
         }
-        
+
         mysql__end_transaction($mysqli, $ret, $keep_autocommit);
-        
+
 
         return $ret;
     }

@@ -1085,11 +1085,11 @@ function recordGetAllIncremenetedValues($system, $params){
     $ignore_dtys = @$params['ignore_dtys'];
 
     if(!($rty_ID > 0)){
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Get all ] incremented values. Record type is missing');   
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Get all ] incremented values. Record type is missing');
     }
 
     $ret = array();
-    
+
         if(!empty($ignore_dtys) && !is_array($ignore_dtys)){
             $ignore_dtys = explode(',', $ignore_dtys);
         }
@@ -1358,7 +1358,7 @@ function deleteOneRecord($system, $id, $rectype){
     //get list if child records
     $query = 'SELECT dtl_Value FROM recDetails, defRecStructure '
     ." WHERE dtl_RecID=$id AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=$rectype";
-    
+
     $child_records = mysql__select_list2($mysqli, $query);
     if(is_array($child_records) && !empty($child_records)){
         $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE '.predicateId('rec_ID',$child_records);
@@ -1494,7 +1494,7 @@ function deleteOneRecord($system, $id, $rectype){
 function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedByImport=0, $allow_multi_parent=false){
 
     if(!defined('DT_PARENT_ENTITY')){
-        return 0;    
+        return 0;
     }
 
     $res = 0;
@@ -1525,7 +1525,7 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
             if($mysqli->error) {$res = -1; }
             return $res;
         }
-            
+
         $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) '.
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
         if(!($mysqli->insert_id>0)) {$res=-1;}
@@ -2188,7 +2188,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         if(!isPositiveInt($rectype)){
             $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
         }
-        
+
         if(!isPositiveInt($rectype)){
             $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
             return false;
@@ -2208,15 +2208,15 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     }
 
     $new_title = trim($new_title);
-    
+
     if(isEmptyStr($new_title)){
         return 'Can\'t get title for #'.$recID;
     }
-    
+
     if(mb_strlen($new_title)>1023){
         $new_title = mb_substr($new_title,0,1023);
     }
-            
+
     $res = mysql__exec_param_query($mysqli, 'UPDATE Records set rec_Title=? where rec_ID='.intval($recID), array('s',$new_title) );
     if($res!==true){
         $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $res);
@@ -2984,7 +2984,7 @@ function recordDuplicate($system, $id){
 
     $system->defineConstant('DT_TARGET_RESOURCE');
     $system->defineConstant('DT_PRIMARY_RESOURCE');
-    
+
     $prefixDbErrorMsg = 'database error - ';
 
     while (true) {
@@ -3137,8 +3137,8 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
     if(isEmptyArray($recIDs)){
         return;
     }
-        
-        
+
+
         $access_grps = prepareIds($access_grps);
         $owner_grps = prepareIds($owner_grps, true);
 
@@ -3157,15 +3157,15 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
         if(!($has_access_values || $has_owner_values)){
             return;
         }
-        
+
         //add group record permissions
         $values = array();
         foreach($recIDs as $recID){
-            
+
                 foreach ($owner_grps as $grp_id){
                     array_push($values,'('.intval($grp_id).','.$recID.',"edit")');
                 }
-            
+
                 foreach ($access_grps as $grp_id){
                     array_push($values,'('.intval($grp_id).','.$recID.',"view")');
                 }
@@ -3311,13 +3311,13 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
     $current_value = 0;
     $emails = null;
-    
+
     $res = array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
 
     if (!($new_value>0 && @$record['FlagTemporary']!=1)) {
-        return $res;   
-    }            
-        
+        return $res;
+    }
+
 
     $recID = intval(@$record['ID']);
     $recID = abs($recID);
@@ -3331,11 +3331,11 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
         $current_value = mysql__select_value($mysqli, $query);
         $res['curr_value'] = $current_value;
     }
-    
+
     if($current_value==$new_value){
         return $res;
     }
-    
+
 
         //if stage is changed - assign new values for rec_OwnerUGrpID and rec_NonOwnerVisibility
             $query = 'SELECT swf_StageRestrictedTo, swf_SetOwnership, swf_SetVisibility, swf_SendEmail FROM sysWorkflowRules '
@@ -3378,14 +3378,14 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
                     $query = 'SELECT ugr_eMail FROM sysUGrps '
                     .'WHERE ugr_ID IN ('.$rule['swf_SendEmail'].')';
-                    
+
                     $res['emails'] = mysql__select_list2($mysqli, $query);
                 }
 
             }else{
                 $res['new_value'] = 0; //not allowed
             }
-        
+
 
     return $res;
 }

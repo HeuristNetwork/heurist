@@ -28,7 +28,7 @@ class DbSysImportFiles extends DbEntityBase
 
 
     public function init(){
-        
+
         $this->requireAdminRights = false;
 
         $mysqli = $this->system->get_mysqli();
@@ -242,7 +242,7 @@ class DbSysImportFiles extends DbEntityBase
         }
 
         return true;
-        
+
     }
 
 

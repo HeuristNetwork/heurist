@@ -289,7 +289,7 @@ class DbRegis {
         }
 
         //recordDelete(self:$system,$dbID);
-        mysql__supress_trigger($mysqli, false);        
+        mysql__supress_trigger($mysqli, false);
         ConceptCode::setSystem(self::$system);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
@@ -380,7 +380,7 @@ class DbRegis {
                     'Failed to update database registration: ' . $err_msg, $mysqli->error));
             return false;
         }
-        
+
 
         ConceptCode::setSystem($sys);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
@@ -415,7 +415,7 @@ class DbRegis {
         }
 
         if(!isPositiveInt(@$params['dbID'])){
-            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');   
+            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
             return false;
         }
 
@@ -442,8 +442,8 @@ class DbRegis {
                 }
                 return $database_url;
             }
-            
-            
+
+
             $err = $mysqli->error;
             if($err){
                 self::addError(HEURIST_DB_ERROR,

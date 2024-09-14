@@ -24,17 +24,17 @@ use hserv\entity\DbEntityBase;
 
 class DbDefRecTypeGroups extends DbEntityBase
 {
-    
+
     public function init(){
         $this->duplicationCheck = array('rtg_Name'=>'Record type group cannot be saved. The provided name already exists');
-        
+
         $this->foreignChecks = array(
                     array('select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID`',
                           'Cannot delete non empty group')
                 );
 
     }
-    
+
     /**
     *  search rectype groups
     */
@@ -43,16 +43,16 @@ class DbDefRecTypeGroups extends DbEntityBase
         if(parent::search()===false){ //init search mgr
               return false;
         }
-        
+
         $this->searchMgr->addPredicate('rtg_ID');
         $this->searchMgr->addPredicate('rtg_Name');
-        
+
         define('CNT_RTG',', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ');
 
         switch (@$this->data['details']){
-            case 'id': $this->searchMgr->setSelFields('rtg_ID'); break;  
-            case 'name': $this->searchMgr->setSelFields('rtg_ID,rtg_Name'); break;  
-            case 'list': $this->searchMgr->setSelFields('rtg_ID,rtg_Name,rtg_Description,rtg_Order'.CNT_RTG); break;  
+            case 'id': $this->searchMgr->setSelFields('rtg_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('rtg_ID,rtg_Name'); break;
+            case 'list': $this->searchMgr->setSelFields('rtg_ID,rtg_Name,rtg_Description,rtg_Order'.CNT_RTG); break;
             default: $this->searchMgr->setSelFields(implode(',', $this->fieldNames).CNT_RTG);
         }
 

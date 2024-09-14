@@ -159,7 +159,7 @@ $is_admin = $system->is_admin();
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
-   
+
     exit;
 }elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
@@ -273,13 +273,13 @@ if($isLocalHost){
     // overwrite the standard jquery show method
     // apply listener in widgets on this page to refresh content on show
     // example
-   
+
     //        this.element.on("myOnShowEvent", function(event){
     //            if( event.target.id == that.element.attr('id')){
-   
+
     //            }
-   
-   
+
+
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
@@ -434,7 +434,7 @@ if($isLocalHost){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
         }
         //add version to title
-        
+
     }
 
 </script>

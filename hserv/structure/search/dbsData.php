@@ -59,7 +59,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     use hserv\utilities\USanitize;
-    
+
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
     require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
 
@@ -338,16 +338,16 @@
 
 
         if(!$load_rectypes){
-            return $rtGroups;   
+            return $rtGroups;
         }
-        
+
             $query = 'select rty_ID, rty_RecTypeGroupID, rty_ShowInLists from defRecTypes order by rty_OrderInGroup, rty_Name';
 
             $res = $mysqli->query($query);
             if(!$res){
                 return $rtGroups;
             }
-            
+
                 while ($row = $res->fetch_row()) {
 
                     $rtg_ID = $row[1];
@@ -754,9 +754,9 @@ function dbs_GetRectypeConstraint($system) {
         if (!($res && $res->num_rows>0)) { //child nodes exist
             return $offspring;
         }
-        
+
         $emailsent = false;
-        
+
         while ($row = $res->fetch_assoc()) { // for each child node
 
             $subTermID = $row['trm_ID'];
@@ -764,9 +764,9 @@ function dbs_GetRectypeConstraint($system) {
                 array_push($offspring, $subTermID);
                 array_push($parentlist, $subTermID);
                 $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
-                
+
             }elseif(!$emailsent){
-                
+
                     $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
                     $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
 
@@ -780,8 +780,8 @@ function dbs_GetRectypeConstraint($system) {
                     .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
             }
         }
-            
-        
+
+
         return $offspring;
     }
 
@@ -840,7 +840,7 @@ function dbs_GetRectypeConstraint($system) {
     // get inverse term and all its children terms
     //
     function getTermInverseAll($mysqli, $parent_ids, $all_levels=true){
-    
+
         //compose query
         $query = 'SELECT trm_InverseTermID FROM defTerms WHERE '
             .predicateId('trm_ID', $parent_ids);
@@ -864,7 +864,7 @@ function dbs_GetRectypeConstraint($system) {
                 .predicateId('trl_ParentID', $parent_ids);
 
         $ids = mysql__select_list2($mysqli, $query, 'intval');
-        
+
         if($all_levels && !empty($ids)){
             $ids = array_merge($ids, getTermChildrenAll($mysqli, $ids, true));
         }
@@ -895,9 +895,9 @@ function dbs_GetRectypeConstraint($system) {
         if(!$term_parent){
             return $term_label;
         }
-        
+
         $parent_label = '';
-        
+
         if(!$withVocab){
             $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
             if(!isPositiveInt($parent_id)){
@@ -915,7 +915,7 @@ function dbs_GetRectypeConstraint($system) {
             $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);
             if($parent_label) {$parent_label = $parent_label.'.';}
         }
-        
+
         return $parent_label.$term_label;
     }
 
@@ -1151,13 +1151,13 @@ function dbs_GetRectypeConstraint($system) {
         if (!array_key_exists($childIndex, $terms)) {//check if this child is parent itself
             return $terms;
         }
-        
+
         if(isEmptyArray($terms[$childIndex])) { //no children
             $terms[$parentIndex][$childIndex] = null;
             unset($terms[$childIndex]);
             return $terms;
         }
-        
+
 
             if($parents==null){
                 $parents = array($childIndex);
@@ -1169,9 +1169,9 @@ function dbs_GetRectypeConstraint($system) {
 
             foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
                 if ($gChildID == null) {
-                    continue;   
+                    continue;
                 }
-                
+
                     if(array_search($gChildID, $parents)===false){
                         $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
                     }else{
@@ -1191,10 +1191,10 @@ function dbs_GetRectypeConstraint($system) {
                         }
                     }
             } //foreach
-        
+
             $terms[$parentIndex][$childIndex] = $terms[$childIndex];
             unset($terms[$childIndex]);
-        
+
         return $terms;
     }
 

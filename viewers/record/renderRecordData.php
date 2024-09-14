@@ -445,8 +445,8 @@ if($isLocalHost){
             //
             //
             function showHidePrivateInfo( event ){
-                
-             
+
+
 
                 let ele = $('#link_showhide_private');
 
@@ -455,12 +455,12 @@ if($isLocalHost){
                 }
 
                 let prefVal = 1;
-                
+
                 if(event!=null){
                     prefVal = ele.attr('data-expand')>=0?ele.attr('data-expand'):prefVal;
                     prefVal = (prefVal!=1)?1:0;
 
-                    //save in prefs                    
+                    //save in prefs
                     if(event!=null && window.hWin && window.hWin.HAPI4){
                         window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
                     }
@@ -468,7 +468,7 @@ if($isLocalHost){
                     prefVal = window.hWin.HAPI4.get_prefs_def('recordData_PrivateInfo',1);
                 }
                 ele.attr('data-expand',prefVal);
-                
+
                 if(prefVal==0){
                     ele.text('less...');
                     $('.morePrivateInfo').show();
@@ -481,8 +481,8 @@ if($isLocalHost){
                     ele.text('more...');
                     $('.morePrivateInfo').hide();
                 }
-                
-                
+
+
                 return false;
             }
 
@@ -745,7 +745,7 @@ if($isLocalHost){
 
             /**
              * Show/Hide media and linked media
-             * 
+             *
              * @param {boolean} [show_all=false] Force the display of all images
              */
             function displayImages(show_all = false){
@@ -1195,7 +1195,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                     ?>
                     <div class="detailRow"><div class="detailType">
                         <a href="#more" oncontextmenu="return false;"
-                            onClick="$('.placeRow').show();$(event.target).hide();return false;" 
+                            onClick="$('.placeRow').show();$(event.target).hide();return false;"
                             style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
                         <div class="detail"></div>
                     </div>
@@ -1376,7 +1376,7 @@ function print_private_details($bib) {
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
-    //show or hide private details depends on preferences 
+    //show or hide private details depends on preferences
     //0 collapsed 1 show
     ?>
     <div class="detailRowHeader" style="float:left;padding:10px">
@@ -1682,7 +1682,7 @@ function print_public_details($bib) {
                 $trm_label = htmlspecialchars($trm_label, ENT_NOQUOTES);
                 $trm_label = str_replace('&lt;', '<', $trm_label);
                 $trm_label = str_replace('&gt;', '>', $trm_label);
-                
+
                 $bd['val'] = output_chunker($trm_label);
 
             }elseif($bd['dty_Type'] == 'date') {
@@ -1747,8 +1747,8 @@ function print_public_details($bib) {
                                     ($system->has_access() &&  //logged in
                                     ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS)));//viewable or owner
 
-                                    
-                    $rec_title = USanitize::sanitizeString($rec_title,ALLOWED_TAGS);                                    
+
+                    $rec_title = USanitize::sanitizeString($rec_title,ALLOWED_TAGS);
 
                     if($hasAccess){
 
@@ -2509,7 +2509,7 @@ function print_relation_details($bib) {
 				if (@$bd['RelatedRecID']) {
 
 					print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
-                    
+
 					print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
 				} else {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
@@ -2534,8 +2534,8 @@ function print_relation_details($bib) {
 
 
 function print_linked_details_header($bib){
-   global $is_map_popup, $is_production; 
-    
+   global $is_map_popup, $is_production;
+
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
        print DIV_MAP_POPUP;//
@@ -2554,7 +2554,7 @@ function print_linked_details_header($bib){
        }
     }
 
-    
+
 }
 
 //
@@ -2584,7 +2584,7 @@ function print_linked_details($bib, $link_cnt)
     if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
 
     print_linked_details_header($bib);
-    
+
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
@@ -2603,7 +2603,7 @@ function print_linked_details($bib, $link_cnt)
             print '<div style="display: table-cell;vertical-align:top;'
             .($is_map_popup?'max-width:250px;':'').'" class="truncate">'
             .composeRecLink($row['rec_ID'], $row['rec_Title']).DIV_E;
-            
+
         print DIV_E;
     }
 
@@ -2824,7 +2824,7 @@ function linkifyValue($value){
     preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches);// only urls that contain a protocol [http|https|ftp|mailto]
 
     if(isEmptyArray($url_matches)){
-        return $new_value;    
+        return $new_value;
     }
 
         foreach($url_matches[0] as $url){
@@ -2843,8 +2843,8 @@ function linkifyValue($value){
                 $new_value = str_replace($url, $linked_url, $new_value);
             }
         }
-    
-        return $new_value;    
+
+        return $new_value;
 }
 
 //
@@ -2852,19 +2852,19 @@ function linkifyValue($value){
 //
 function composeRecTypeIcon($rty_ID){
     global $rectypesStructure;
-    
+
     $rty_Name = $rectypesStructure['names'][$rty_ID];
-    
+
     return '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON
                             .$rty_ID.')" title="'
                             .$rty_Name.'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
-}                            
+}
 //
 //
 //
 function composeRecLink($rec_ID, $rec_Title){
     global $system;
-    
+
     return '<a target="_popup" href="'.$system->recordLink($rec_ID)
                             .'" onclick="return link_open(this);">'
                             .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';

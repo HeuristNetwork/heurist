@@ -712,7 +712,7 @@ use hserv\utilities\USanitize;
             return 0;
         }
     }
-    
+
     /**
      * Returns the target path as relative reference from the base path.
      *
@@ -724,7 +724,7 @@ use hserv\utilities\USanitize;
      *
      * @return string The relative target path
      */
-     /*  does not work 
+     /*  does not work
     function getRelativePath($basePath, $targetPath)
     {
         // Normalize path separators for cross-platform compatibility
@@ -827,7 +827,7 @@ use hserv\utilities\USanitize;
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? './'.$path : $path;
     }
-     
+
 
 
 /**
@@ -930,7 +930,7 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
 
     if($check_existance && !$r_path) { //does not exist
         return null;
-    } 
+    }
 
     if($r_path){
         $r_path = str_replace('\\','/',$r_path);
@@ -1584,7 +1584,7 @@ function uploadFileToNakala($system, $params) {
     $missing_key = '<br><br>Your Nakala API key is either missing or invalid, please ';
     $missing_key .= $system->is_admin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
     $missing_key .= ' Database properties';
-    
+
     $unknow_error_msg = 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.';
 
     if(!function_exists("curl_init"))  {

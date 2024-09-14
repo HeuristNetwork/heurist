@@ -26,7 +26,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
     use hserv\utilities\USanitize;
-    
+
     if(!@$_REQUEST['db']) {$_REQUEST['db'] = 'Heurist_Bibliographic';}
 
     if(@$_REQUEST['verbose']!=1){
@@ -180,7 +180,7 @@
                  //convert constraints to concept codes
                  $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                  $codes = array();
-                
+
                  foreach($rids as $rty_id){
                      $codes[] = $rty_Codes[$rty_id];
                  }
@@ -264,8 +264,8 @@
                 if($stmt->execute()){
                     $res = $stmt->get_result();
                 }
-               
-               
+
+
 
                 if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error); return; }
                 $row = $res->fetch_assoc();
@@ -301,7 +301,7 @@
                      //convert constraints to concept codes
                      $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                      $codes = array();
-                    
+
                      foreach($rids as $r_id){
                          $code = @$rty_Codes2[$r_id];
                          if($code){
@@ -377,7 +377,7 @@
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
                             $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);
-                           
+
                         }
                     }
                     if(count($missing)>0){

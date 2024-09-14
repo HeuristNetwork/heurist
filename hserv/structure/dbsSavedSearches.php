@@ -304,7 +304,7 @@
                     $system->addError(HEURIST_DB_ERROR,'Cannot delete saved search', $query.' '.$mysqli->error );
                     return false;
                 }
-                
+
                 $cnt = $mysqli->affected_rows;
                 if($cnt>0){
                     return array("status"=>HEURIST_OK, "data"=> $cnt);

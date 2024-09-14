@@ -102,7 +102,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     print DIV_S;
     $k = 1;
 
-   
+
 
     foreach ($databases as $idx=>$db_name){
 
@@ -129,7 +129,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
                 $dtl_ID = intval($row[0]);
                 $url = $row[1];
 
-               
+
 
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
                 $ext = ($type_==ULF_REMOTE) ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source

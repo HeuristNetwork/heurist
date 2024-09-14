@@ -32,7 +32,7 @@ class DbSysBugreport extends DbEntityBase
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
-    
+
     /**
     *  search users
     *

@@ -114,7 +114,7 @@ $mysqli = $system->get_mysqli();
     }elseif($metod=="savereport"){ //-----------------
 
         $data  = @$_REQUEST['data'];
-       
+
 
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
