@@ -47,7 +47,7 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
                 $databases[] = $row[0];
         }
@@ -72,7 +72,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -83,7 +83,7 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($rec_types, array_map('htmlspecialchars',$row2));
                }
         }
@@ -99,7 +99,7 @@ $mysqli = $system->get_mysqli();
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
         $not_found = true;
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -110,7 +110,7 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($det_types, array_map('htmlspecialchars',$row2));
                }
         }
@@ -125,7 +125,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -136,7 +136,7 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($terms, array_map('htmlspecialchars',$row2));
                }
         }

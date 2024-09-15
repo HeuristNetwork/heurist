@@ -380,7 +380,7 @@ function fillTermsLinks( $mysqli ){
                      .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';//except relationtype which is one dty_ID=6
 
             $res = $mysqli->query($query);
-            while (($row = $res->fetch_row())) {
+            while ($row = $res->fetch_row()) {
                 //if the only numeric - assume this is vocabulary
                 if(@$row[1]>0 && is_numeric(@$row[1])){
                     continue;

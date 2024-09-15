@@ -71,8 +71,8 @@ class DbUsrSavedSearches extends DbEntityBase
     protected function _validatePermission(){
 
         if(!$this->system->is_admin() &&
-            ((!isEmptyArray($this->recordIDs))
-            || (!isEmptyArray($this->records)))){ //there are records to update/delete
+            (!isEmptyArray($this->recordIDs)
+            || !isEmptyArray($this->records))){ //there are records to update/delete
 
 
             $grpIDs = $this->system->get_user_group_ids('admin');

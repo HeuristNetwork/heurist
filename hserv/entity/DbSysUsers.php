@@ -194,8 +194,8 @@ class DbSysUsers extends DbEntityBase
         $ugrID = $this->system->get_user_id();
 
         if(!$this->system->is_admin() &&
-            ((!isEmptyArray($this->recordIDs))
-            || (!isEmptyArray($this->records)))){ //there are records to update/delete
+            ( !isEmptyArray($this->recordIDs)
+            || !isEmptyArray($this->records))){ //there are records to update/delete
 
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
 

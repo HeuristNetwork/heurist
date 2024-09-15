@@ -87,7 +87,7 @@
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         $databases = array();
-        while (($row = $res->fetch_assoc())) {
+        while ($row = $res->fetch_assoc()) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
                     $databases[] = $row[0];
             }
@@ -162,7 +162,7 @@
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
         //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-        while (($row = $res->fetch_assoc())) {
+        while ($row = $res->fetch_assoc()) {
 
              $rty_Code = $rty_Codes[$row['rst_RecTypeID']];
              $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
@@ -290,7 +290,7 @@
             $fields2 = array();//per record type
 
             //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-            while (($row = $res->fetch_assoc())) {
+            while ($row = $res->fetch_assoc()) {
 
                  $rty_Name = $row['rty_Name'];
                  $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];

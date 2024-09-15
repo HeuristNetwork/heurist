@@ -1075,7 +1075,7 @@ function __removeDuplicationValues(){
 
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
 
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
 
         $q = 'DELETE FROM recDetails WHERE dtl_RecID='.intval($row[0]).' AND dtl_DetailTypeID='.intval($row[1])
             .' AND dtl_Value=? LIMIT '.(intval($row[3])-1);

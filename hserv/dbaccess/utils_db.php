@@ -557,7 +557,7 @@ $mysqli->kill($thread_id);
         if (!$res) {return null;}
         $matches = array();
         if($res){
-            while (($row = $res->fetch_row())) {array_push($matches, $row[0]);}
+            while ($row = $res->fetch_row()) {array_push($matches, $row[0]);}
 
             $res->close();
         }

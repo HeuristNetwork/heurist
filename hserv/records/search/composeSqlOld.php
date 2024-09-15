@@ -790,9 +790,9 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
-                    elseif (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
-                        elseif (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
+                    if ($colon_pos = strpos($raw_pred_val, '=')) {$this->exact = true;}
+                    elseif ($colon_pos = strpos($raw_pred_val, '<')) {$this->lessthan = true;}
+                        elseif ($colon_pos = strpos($raw_pred_val, '>')) {$this->greaterthan = true;}
                 }
 
                 $fieldtype_id = null;
@@ -821,9 +821,9 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
-                    elseif (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
-                        elseif (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
+                    if ($colon_pos = strpos($raw_pred_val, '=')) {$this->exact = true;}
+                    elseif ($colon_pos = strpos($raw_pred_val, '<')) {$this->lessthan = true;}
+                        elseif ($colon_pos = strpos($raw_pred_val, '>')) {$this->greaterthan = true;}
                             //elseif (($colon_pos = strpos($raw_pred_val, '@'))) {$this->fulltext = true;}
                 }
                 if ($colon_pos === false){

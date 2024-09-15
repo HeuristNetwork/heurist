@@ -93,7 +93,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
                 $databases[] = $row[0];
         }

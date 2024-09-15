@@ -48,7 +48,7 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
                 $databases[] = $row[0];
         }
@@ -125,7 +125,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
             $is_found = true;
             array_push($rec_types, array_map('htmlspecialchars',$row));
         }
@@ -152,7 +152,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             .$db_name.'.defRecTypes WHERE (rty_OriginatingDBID '.$dbid.' AND rty_OriginatingDBID>0)';
 
         $res = $mysqli->query($query);
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $row[1] = strtolower($row[1]);
                array_push($all_rty_regs, $row);
         }
@@ -170,7 +170,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $is_found = true;
                array_push($det_types, array_map('htmlspecialchars',$row));
         }
@@ -210,7 +210,7 @@ $mysqli->query($query);
             $res = $mysqli->query($query);
             if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-            while (($row = $res->fetch_row())) {
+            while ($row = $res->fetch_row()) {
                    $is_found = true;
                    array_push($terms, array_map('htmlspecialchars',$row));
             }

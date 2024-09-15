@@ -48,7 +48,7 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_DEF19')===0 || strpos($row[0], 'hdb_def19')===0) {continue;}
 
         if( strpos($row[0], 'hdb_')===0 ){
@@ -80,7 +80,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $is_found = true;
                array_push($rec_types, array_map('htmlspecialchars',$row));
         }
@@ -96,7 +96,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $is_found = true;
                array_push($det_types, array_map('htmlspecialchars',$row));
    /*
@@ -116,7 +116,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $is_found = true;
                array_push($terms, array_map('htmlspecialchars',$row));
         }

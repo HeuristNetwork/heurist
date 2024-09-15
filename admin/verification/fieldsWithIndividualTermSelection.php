@@ -40,7 +40,7 @@ $is_csv = (@$_REQUEST['html']!=1);
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
                 $databases[] = htmlspecialchars($row[0]);
         }
@@ -86,7 +86,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             print '<tr><td colspan=7><i>'.substr($db_name,4).'</i></td></tr>';
         }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
             /*
             $key = intval(@$row[1]);
