@@ -171,7 +171,6 @@ if(@$_REQUEST['ids']){
 }
 if(!($is_map_popup || $without_header)){
 
-$isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -181,7 +180,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
         <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 <?php
-if($isLocalHost){
+if(isLocalHost()){
 ?>
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>external/jquery-ui-1.12.1/jquery-ui.js"></script>

@@ -185,7 +185,7 @@ $params['guest_data'] = (@$_REQUEST['guest_data']==1);
 
 print '<script>var prepared_params = '.json_encode($params).';</script>';
 
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+if(isLocalHost()){
         print '<script type="text/javascript" src="'.PDIR.'external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
 }else{
         print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';

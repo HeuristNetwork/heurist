@@ -36,8 +36,6 @@ if(defined('IS_INDEX_PAGE')){
 }else{
     if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-
-    $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 }
 
 $error_msg = '';
@@ -225,7 +223,7 @@ if(defined('IS_INDEX_PAGE')){
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php
-if($isLocalHost){
+if(isLocalHost()){
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>

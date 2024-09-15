@@ -21,7 +21,7 @@
 
 define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+if(isLocalHost()){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>

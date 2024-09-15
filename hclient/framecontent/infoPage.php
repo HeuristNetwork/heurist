@@ -97,7 +97,7 @@ if(!isset($message)){
     <?php
     if(isset($try_login) && $try_login === true){ // Does a login link need to be handled
 
-        if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))  {
+        if (isLocalHost())  {
         ?>
 
             <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>

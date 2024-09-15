@@ -558,5 +558,7 @@ function isPositiveInt($val){
     return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0;
 }
 
-
+function isLocalHost(){
+    return ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
+}
 ?>

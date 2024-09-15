@@ -22,7 +22,7 @@ use hserv\utilities\USystem;
 
 require_once dirname(__FILE__).'/autoload.php';
 
-$isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
+$isLocalHost = isLocalHost();
 
 //validate that instance is ok and database is accessible
 if( @$_REQUEST['isalive']==1){
