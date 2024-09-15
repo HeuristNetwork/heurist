@@ -2812,7 +2812,7 @@ public static function performImport($params, $mode_output){
                             $value = null;
                             $r_value = super_trim($r_value);
 
-                            if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
+                            if($fieldtype_type == "enum" || $fieldtype_type == "relationtype"){
 
                                 $r_value = trim_lower_accent($r_value);
 

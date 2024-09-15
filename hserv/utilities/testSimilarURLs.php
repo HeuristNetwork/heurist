@@ -80,7 +80,7 @@ function similar_urls($mysqli, $url) {
         }
 		if (count($matches) >= 10) {return $matches;}
 	}
-	while (($spos = strrpos($noproto_url, '/'))) {
+	while ($spos = strrpos($noproto_url, '/')) {
 		$noproto_url = substr($noproto_url, 0, $spos);
         $new_matches = get_matches($mysqli, $noproto_url);
 		if (count($new_matches) >= 20) {

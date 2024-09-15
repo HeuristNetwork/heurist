@@ -1630,7 +1630,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         } else {
             makeTag('detail', $attrs, $value['id']);
         }
-    } elseif (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype')) {
+    } elseif ($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype') {
         if($human_readable_names){
             $attrs['termID'] = $value;
         }

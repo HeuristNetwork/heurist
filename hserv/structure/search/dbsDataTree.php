@@ -360,7 +360,7 @@
 
                 foreach ($details as $dtID => $dtValue){
 
-                        if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
+                        if($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker'){
 
                                 //find constraints
                                 $constraints = $dtValue[$fi_rectypes];

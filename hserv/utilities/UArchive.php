@@ -497,7 +497,9 @@ class UArchive {
             }
         }
 
-        if ((!file_exists($out) && !is_writeable(dirname($out)) || (file_exists($out) && !is_writable($out)) )){
+        if (  (!file_exists($out) && !is_writeable(dirname($out)))
+            || 
+              (file_exists($out) && !is_writable($out)) ){
             return 'Destination folder is not writeable';
         }
 
@@ -528,7 +530,7 @@ class UArchive {
              throw new \Exception('Archive file doesn\'t exists');
         }
 
-        if ((!file_exists ($out) && !is_writeable (dirname ($out)) || (file_exists($out) && !is_writable($out)) )){
+        if (!file_exists ($out) && !is_writeable (dirname ($out)) || (file_exists($out) && !is_writable($out)) ){
              throw new \Exception('Destination folder or file is not writeable');
         }
 

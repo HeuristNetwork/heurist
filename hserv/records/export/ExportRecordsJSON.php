@@ -27,8 +27,6 @@ use hserv\records\export\ExportRecords;
 
 /**
 *
-*  setSession - switch current datbase
-*  output - main method
 *
 */
 class ExportRecordsJSON extends ExportRecords {
@@ -459,7 +457,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
                     $field_value = @$field_value['geo']['wkt'];
 
-                }elseif (($field_type=='enum' || $field_type=='relationtype')){
+                }elseif ($field_type=='enum' || $field_type=='relationtype'){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
 
