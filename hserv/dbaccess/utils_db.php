@@ -581,7 +581,7 @@ $mysqli->kill($thread_id);
 
         if($idfield!=null && $newid!=null){
 
-            $idx = array_search($idfield, $columns3);
+            $idx = array_search('`'.$idfield.'`', $columns3);
             $columns2 = $columns3;
             $columns2[$idx] = intval($newid);
             $columns2 = implode(',',$columns2);

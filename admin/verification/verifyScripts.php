@@ -1289,7 +1289,7 @@ AMP =>TS_AMP,
 
     $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');
     $keep_autocommit = mysql__begin_transaction($mysqli);
-    $isOk = true;
+    $isOK = true;
 
     // dtl_RecID=18 AND   dtl_RecID=85057 AND
     //
@@ -1350,7 +1350,7 @@ AMP =>TS_AMP,
             $res33 = $update_stmt->execute();
             if(! $res33 )
             {
-                $isOk = false;
+                $isOK = false;
                 print error_Div('Record #'.$row[3].'. Cannot replace value in record details. SQL error: '.$mysqli->error);
                 $mysqli->rollback();
                 break;
@@ -1362,7 +1362,7 @@ AMP =>TS_AMP,
         $res->close();
     }
 
-    mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
+    mysql__end_transaction($mysqli, $isOK, $keep_autocommit);
 
     print '<br>Replaced in '.$cnt.' fields';
 

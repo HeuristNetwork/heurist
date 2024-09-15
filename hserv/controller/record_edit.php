@@ -107,17 +107,13 @@
 
 
                 $mysqli = $system->get_mysqli();
-                $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-                if($keep_autocommit===true) {$mysqli->autocommit(FALSE);}
-                if (strnatcmp(phpversion(), '5.5') >= 0) {
-                    $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
-                }
+                $keep_autocommit = mysql__begin_transaction($mysqli);
 
                 $response = recordDuplicate($system, $_REQUEST['id']);
 
                 $isOK = $response && @$response['status']==HEURIST_OK;
 
-                mysql__end_transaction($mysqli, $isOk, $keep_autocommit);
+                mysql__end_transaction($mysqli, $isOK, $keep_autocommit);
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);

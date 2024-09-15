@@ -2944,7 +2944,7 @@ function prepareGeoValue($mysqli, $dtl_Value){
 
 }
 //
-// @todo transaction
+// 
 //
 function recordDuplicate($system, $id){
 

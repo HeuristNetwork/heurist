@@ -1797,7 +1797,7 @@ HEADER;
             $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
             $this->keep_autocommit = mysql__begin_transaction($mysqli);
         }
-        $isOk = true;
+        $isOK = true;
 
         while ($row = $res->fetch_assoc()){
 
@@ -1859,7 +1859,7 @@ HEADER;
                                 $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
                                 list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
                                 if($r_type===false){
-                                    $isOk = false;
+                                    $isOK = false;
                                     $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. '.$r_value);
                                     $mysqli->rollback();
                                     break;
@@ -1869,7 +1869,7 @@ HEADER;
                                 $res33 = $update_stmt->execute();
                                 if(! $res33 )
                                 {
-                                    $isOk = false;
+                                    $isOK = false;
                                     $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error);
                                     $mysqli->rollback();
                                     break;
@@ -1897,7 +1897,7 @@ HEADER;
         } //while
         if($res) {$res->close();}
 
-        if($isOk){
+        if($isOK){
             $mysqli->commit();
         }
         if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
