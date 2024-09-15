@@ -1139,9 +1139,6 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
                 array_push($warnings, $e->message);//$e->errno.": ".
             } while ($e->next());
         }
-        /*if(strpos("$info", "Warnings: 0")===false){
-        $mysqli->query("SHOW WARNINGS");
-        }*/
     }
 
     //calculate unique values

@@ -1142,11 +1142,6 @@ if ($bkm_ID>0 || $rec_id>0) {
             .$rec_id.' and not rec_FlagTemporary');
         }
 
-        /*if($is_map_popup){
-            print '<div data-recid="'.$bibInfo['rec_ID'].'" style="max-height:250px;overflow-y:auto;">';// style="font-size:0.8em"
-        }else{
-        }*/
-
             print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
 	        print DIV_E;
@@ -1202,14 +1197,6 @@ if ($bkm_ID>0 || $rec_id>0) {
                     <?php
                 }
                 print DIV_E;
-
-                /*Multiple entries here<br><br>
-                print '<div style="font-size:0.8em"><select style="font-size:0.9em"'
-                .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '
-                .'>'.$opts;
-                print '</select></div>';*/
-
-
 
             }
         } else {

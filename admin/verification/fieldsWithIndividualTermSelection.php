@@ -115,9 +115,6 @@ $is_csv = (@$_REQUEST['html']!=1);
                     $vocabs[$vocabid] = 1;
                 }
             }
-            /*if($row[3]==197){
-                print '<tr><td colspan=5>'.print_r($vocabs,true).TR_E;
-            }*/
 
             $vocab_count = count(array_keys($vocabs));
 

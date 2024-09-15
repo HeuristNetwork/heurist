@@ -476,10 +476,6 @@
         if(array_key_exists('author_codes', $params) && !empty($params['author_codes']) && $params['author_codes'] != 'all'){
             $author_codes = explode(',', $params['author_codes']);
         }
-        /*if(array_key_exists('contributor_codes', $params) && !empty($params['contributor_codes'])){
-            $contributor_codes = explode(',', $params['contributor_codes']);
-        }*/
-
         $results = array();
 
         // Create xml object

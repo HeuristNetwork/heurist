@@ -311,10 +311,6 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
                 foreach ($urls[0] as $url) {
 
-                    /*if($return_output){
-                        $results[1]['count'] ++;
-                    }*/
-
                     if($url[-1] == '.'){
                         $url = substr($url, 0, -1);
                     }
@@ -391,10 +387,6 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
             $url = $row[1];
             $dty_id = $row[2];
             $data = null;
-
-            /*if($return_output){
-                $results[2]['count'] ++;
-            }*/
 
             if($list_only){
                 $rec_url = htmlentities($rec_url);

@@ -499,11 +499,6 @@ if($database_url!=null){ //redirect to resolver for another database
     if(@$_REQUEST['depth']>0){
         $redirect .= '&depth='.intval($_REQUEST['depth']);
     }
-    /*if(@$_REQUEST['linkmode']!=null){
-        //direct, direct_links, none, all
-        $redirect .= '&linkmode='.$_REQUEST['linkmode'];
-    }*/
-
 }else{
     if(!isset($error_msg)){
         $error_msg = 'Can\'t resolve the given URI: '.$_SERVER['REQUEST_URI'];

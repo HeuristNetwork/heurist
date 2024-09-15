@@ -380,11 +380,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     if($this->find_by_geofields==null || in_array($dty_ID, $this->find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
-                        /*if($value['geo']['type']=='r'){
-                        //@todo convert rect to polygone
-                        }elseif($value['geo']['type']='c'){
-                        //@todo convert circle to polygone
-                        }*/
+                        
                         try{
                             $json = self::_getJsonFromWkt($wkt, $simplify);
                             if($json){

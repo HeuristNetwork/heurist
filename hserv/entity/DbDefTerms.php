@@ -828,11 +828,6 @@ class DbDefTerms extends DbEntityBase
                             'Cannot merge '.$merge_id.'. This term has references', $ret);
                     $ret = false;
                 }
-                /*if($ret===false){ //sql error
-                    $ret = false;
-                }else{
-                    $ret = true;
-                }*/
 
                 if($ret){
                     //1. change parent id for all children terms

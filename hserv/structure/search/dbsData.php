@@ -1144,10 +1144,6 @@ function dbs_GetRectypeConstraint($system) {
     */
     function __attachChild($system, $parentIndex, $childIndex, $terms, $parents) {
 
-        /*if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
-            return $terms;
-        }*/
-
         if (!array_key_exists($childIndex, $terms)) {//check if this child is parent itself
             return $terms;
         }

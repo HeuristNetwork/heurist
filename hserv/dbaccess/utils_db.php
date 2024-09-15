@@ -1541,9 +1541,6 @@ $mysqli->kill($thread_id);
             if(is_numeric($ids)){
                 $ids = array($ids);
             }else{
-                /*if(substr($ids, -1) === ','){//remove last comma
-                    $ids = substr($ids,0,-1);
-                }*/
                 $ids = explode(',', $ids);
             }
         }

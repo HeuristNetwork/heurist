@@ -391,11 +391,6 @@ class DbUtils {
             // dump will be created in database upload folder
             if($database_dumpfile==null){
                 $directory = HEURIST_FILESTORE_ROOT.$database_name;
-                /*if(!folderCreate($directory, true)){
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');
-                    if($verbose) {echo 'Unable to create folder '.$directory;}
-                    return false;
-                }*/
 
                 // Define dump file name
                 $database_dumpfile = $directory.'/'.$database_name_full.'_'.time().'.sql';

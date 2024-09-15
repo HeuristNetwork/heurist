@@ -525,18 +525,12 @@ abstract class DbEntityBase
 
         foreach($this->records as $rec_idx => $record){
 
-            //$primary_field_type = 'integer';
-
             //exclude virtual fields
             $fieldvalues = $record;
             $values = array();
             foreach($this->fields as $fieldname=>$field_config){
                 if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) {continue;}
                 $values[$fieldname] = $record[$fieldname];
-
-                /*if(@$field_config['dty_Role']=='primary'){
-                    $primary_field_type = $field_config['dty_Type'];
-                }*/
             }
 
             $isinsert = (intval(@$record[$this->primaryField])<1);

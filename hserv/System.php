@@ -391,9 +391,6 @@ class System {
     private function rectypeLocalIDLookup($rtID, $dbID = 2, $reset=false) {
         static $RTIDs;
 
-        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
-            return $rtID;
-        }else*/
         if (!$RTIDs || $reset) {
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -457,9 +454,6 @@ class System {
     private function detailtypeLocalIDLookup($dtID, $dbID = 2, $reset=false) {
         static $DTIDs;
 
-        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
-            return $dtID;
-        }else*/
         if (!$DTIDs || $reset) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {

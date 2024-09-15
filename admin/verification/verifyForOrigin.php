@@ -169,10 +169,6 @@
 
              if(!@$fields[$rty_Code]) {$fields[$rty_Code] = array();}
 
-              /*if($row['rst_RecTypeID']==17){
-                print $rty_Code.' '.$dty_Code.'  '.$row['rst_DisplayName'].'<br>';
-              }*/
-
              $fields[$rty_Code][$dty_Code] = $row['rst_DisplayName'];
              $fields_req[$rty_Code][$dty_Code] = $row['rst_RequirementType'];
 

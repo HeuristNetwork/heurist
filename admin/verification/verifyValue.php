@@ -212,9 +212,6 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           /*if($withHierarchy){
-           }else{
-           }*/
            $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
            $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];
            //remove last point
@@ -241,10 +238,6 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     //check if given label among allowed
     $label = trim(mb_strtolower($label));
     $label = trim($label,'.');
-    /*if(strpos($label,'.')>0){
-        $label = explode('.',$label);
-        $label = array_pop($label);
-    }*/
 
     if(empty($allowed_labels)){
         return false;

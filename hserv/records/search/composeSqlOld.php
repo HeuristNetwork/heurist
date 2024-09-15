@@ -629,9 +629,6 @@ class OrLimb {
         //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
 
         //"geo:\"POLYGON((37.5
-        /*if(strpos($text,"geo:")===0){
-            $this->addAndLimb($text);
-        }else*/
         // split by spaces - exclude text inside quotes and parentheses
         if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
 

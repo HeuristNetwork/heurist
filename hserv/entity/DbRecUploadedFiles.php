@@ -1425,11 +1425,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         }else{
 
-            /*if(is_a($file,'stdClass')){
-                $errorMsg = 'Cant find temporary uploaded file: '.$file->name
-                            .' for db = ' . $this->system->dbname().' ('.HEURIST_SCRATCH_DIR
-                            .')';
-            }else{ */
             $errorMsg = 'Cant find file to be registred : '.$tmp_name
                            .' for db = ' . $this->system->dbname();
 

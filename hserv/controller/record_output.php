@@ -152,9 +152,6 @@
 
 
     $is_csv = (@$params['format'] == 'csv');
-    /*if(@$params['format']=='json' && @$params['detail']!=null){
-        $search_params['detail'] = $params['detail'];
-    }else */
     if(@$params['format']){
         //search only ids - all
         $search_params['detail'] = 'ids';
@@ -162,8 +159,6 @@
 
     if(@$params['prefs']['csv_headeronly']===true){
         $response = array('status'=>HEURIST_OK,'data'=>array());
-        //$search_params['limit'] = 1;
-        //$search_params['needall'] = 0;
     }else{
 
 //    datatable -   datatable session id  - returns json suitable for datatable ui component

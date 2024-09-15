@@ -715,13 +715,6 @@ public static function assignRecordIds($params){
         // find records to update
         $select_query = $cnt_query." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
         $cnt_update = mysql__select_value($mysqli, $select_query);
-        /*if( $cnt_insert>0 ){
-
-                $imp_session['validation']['count_update'] = $cnt;
-                $imp_session['validation']['count_update_rows'] = $cnt;
-
-                $imp_session['validation']['recs_update'] = array();//do not send all records to client side
-        } */
 
         // find records to insert
         $select_query = $cnt_query." WHERE `$id_field`<0";

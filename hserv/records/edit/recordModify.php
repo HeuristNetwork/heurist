@@ -668,27 +668,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                     if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 }
 
-                /** REMOVED BY IAN 20/3/2022 - this is an instant email in a low level loop
-                    which could cause a self-inflicted DOS if it happened in a loop eg. a file import. Errors go in the log in any case, which is a better place to
-                    deal with them.
-                //$email_to, $email_title, $email_text, $email_header
-                sendEmail(HEURIST_MAIL_TO_ADMIN,
-                    'DATABASE ERROR :'.$system->dbname().'Cannot save value - possibly bad encoding.',
-                    ($syserror?'. System message:'.$syserror:'')."\n Record#: $recID \n"
-                    .print_r($values,true));
-                **/
-
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$syserror.').', $syserror);
 
             }
-
-            /*if($dtl_Geo){
-            $stmt_geo->bind_param('iss', $dtyID, $dtl_Value, $dtl_Geo);
-            $stmt_geo->execute();
-            }else{
-            $stmt->bind_param('isi', $dtyID, $dtl_Value, $dtl_UploadedFileID);
-            $stmt->execute();
-            }*/
 
             //add reverce field "Parent Entity" (#247) in child resource record
             if(defined('DT_PARENT_ENTITY') && !$suppress_parent_child){

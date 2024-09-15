@@ -612,12 +612,6 @@ function recordSearchFacets($system, $params){
                     $query =  $select_clause.$qclauses['from'].$detail_link.SQL_WHERE.$qclauses['where'].$d_where;
                 }
 
-                /*if($limit>0){
-                $query = $query.' LIMIT '.$limit;
-                }*/
-
-
-                //$res = $mysqli->query($query);
                 $res = mysql__select($mysqli, $query);
                 if (!$res){
                     return $system->addError(HEURIST_DB_ERROR, $savedSearchName
@@ -2721,12 +2715,6 @@ function recordSearch($system, $params, $relation_query=null)
                 $all_rec_ids = array();
                 $memory_warning = null;
                 $limit_warning = false;
-
-                /*if($istimemap_request){ //special case need to scan all result set and pick up only timemap enabled
-
-                $tm_records = _getTimemapRecords($res);
-
-                }else{ */
 
                 // read all field names
                 $_flds =  $res->fetch_fields();

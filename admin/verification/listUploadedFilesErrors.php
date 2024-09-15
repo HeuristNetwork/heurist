@@ -696,13 +696,7 @@ $mysqli = $system->get_mysqli();
                 if($is_found){
 
                     $smsg = 'Go to: ';
-                /*if(!empty($files_duplicates)){
-                    print '\'<a href="#duplicates" style="white-space: nowrap;padding-right:10px">Duplicated entries</a>\'+';
-                }
-                if(!empty($files_orphaned)){
-                    print '\'<a href="#orphaned" style="white-space: nowrap;padding-right:10px">Orphaned files</a>\'+';
-                }
-                */
+
                 if(!isEmptyArray($files_unused_local)){
                     $smsg = $smsg.'<a href="#unused_local" style="white-space: nowrap;padding-right:20px">Unused local files</a>';
                 }
