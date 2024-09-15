@@ -397,7 +397,7 @@ function postmode_file_selection() {
             }
 
 
-            $content_length = fix_integer_overflow((int)@$_SERVER['CONTENT_LENGTH']);
+            $content_length = USystem::fixIntegerOverflow((int)@$_SERVER['CONTENT_LENGTH']);
 
             $post_max_size = USystem::getConfigBytes('post_max_size');
             if ($post_max_size && ($content_length > $post_max_size)) {

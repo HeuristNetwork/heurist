@@ -239,11 +239,17 @@ class USystem {
                 $val *= 1024; break;
             default;
         }
-        //_fix_integer_overflow
-        if ($val < 0) {
-            $val += 2.0 * (PHP_INT_MAX + 1);
+        return self::fixIntegerOverflow($val);
+    }
+    
+
+    // Fix for overflowing signed 32 bit integers,
+    // works for sizes up to 2^32-1 bytes (4 GiB - 1):
+    public static function fixIntegerOverflow($size) {
+        if ($size < 0) {
+            $size += 2.0 * (PHP_INT_MAX + 1);
         }
-        return $val;
+        return $size;
     }
 
     /**

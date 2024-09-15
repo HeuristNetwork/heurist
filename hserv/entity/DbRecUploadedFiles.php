@@ -1380,7 +1380,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //name with ext
                 $file->original_name = $newname?$newname:$fileinfo['basename'];//was filename
                 $file->name = $file->original_name;
-                $file->size = filesize($tmp_name);//fix_integer_overflow
+                $file->size = getFileSize($tmp_name);//UFile
                 $file->type = @$fileinfo['extension'];
 
                 $file->thumbnailName = $tmp_thumb;
@@ -1942,7 +1942,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                         }
 
                         if(file_exists($res_fullpath)){
-                            $f_size = filesize($res_fullpath);
+                            $f_size = getFileSize($res_fullpath);//UFile
                             $f_md5 = md5_file($res_fullpath);
 
 
