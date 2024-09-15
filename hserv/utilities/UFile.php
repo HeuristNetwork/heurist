@@ -31,7 +31,10 @@ use hserv\utilities\USystem;
     * getRelativePath
     * folderRecurseCopy
     * folderSubs - list of subfolders
-    *
+    * 
+    * 
+    * fileReadByChunks - Reads a file in chunks and outputs it to the client in a memory-efficient manner.
+    * getFileSize - Retrieves the size of a file, with an optional cache-clearing mechanism.
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -1858,40 +1861,80 @@ function flush_buffers($start=true){
     if($start) {@ob_start();}
 }
 
-
-
-//
-// read file by 10MB chunks
-//
-function readfile_by_chunks($file_path)
+/**
+ * Reads a file in chunks and outputs it to the client in a memory-efficient manner.
+ * 
+ * This method is particularly useful for large files, as it reads the file in 10 MB chunks
+ * and outputs it directly to the client to avoid exhausting memory.
+ * 
+ * @param string $file_path The path to the file to be read and output.
+ * 
+ * @return int|false Returns the size of the file in bytes if successful, or false on failure.
+ */
+function fileReadByChunks($file_path)
 {
+    // Get the size of the file
     $file_size = getFileSize($file_path);
-    $chunk_size = 10 * 1024 * 1024; // 10 MiB
+
+    // Set the chunk size to 10 MB (10 * 1024 * 1024 bytes)
+    $chunk_size = 10 * 1024 * 1024;
+
+    // Check if the file is larger than the chunk size
     if ($chunk_size && $file_size > $chunk_size) {
+        // Open the file in binary read mode
         $handle = fopen($file_path, 'rb');
+
+        // Loop through the file and read it in chunks
         while (!feof($handle)) {
-            echo fread($handle, $chunk_size);
-            @ob_flush();
-            @flush();
+            echo fread($handle, $chunk_size); // Output the current chunk
+            @ob_flush(); // Flush the output buffer
+            @flush();    // Flush the system buffers
         }
+
+        // Close the file handle
         fclose($handle);
+
+        // Return the file size after reading
         return $file_size;
     }
+
+    // If the file is smaller than the chunk size, output the entire file
     return readfile($file_path);
 }
 
+/**
+ * Retrieves the size of a file, with an optional cache-clearing mechanism.
+ * 
+ * This function checks the existence of the file and returns its size in bytes. It can optionally
+ * clear the file status cache to ensure the most up-to-date file size is retrieved, which is useful
+ * if the file is being modified during runtime.
+ * 
+ * @param string $file_path The path to the file whose size is to be determined.
+ * @param bool $clear_stat_cache (Optional) If true, clears the file status cache before checking the file size. 
+ *                               Default is false.
+ * 
+ * @return int The size of the file in bytes. Returns 0 if the file does not exist.
+ */
 function getFileSize($file_path, $clear_stat_cache = false) {
+    // If cache clearing is enabled, clear the file status cache
     if ($clear_stat_cache) {
-        if (version_compare(phpversion(), '5.3.0') >= 0) { //strnatcmp(phpversion(), '5.3.0') >= 0
+        if (version_compare(phpversion(), '5.3.0') >= 0) {
+            // Clear cache for the specific file (PHP 5.3.0 or higher)
             clearstatcache(true, $file_path);
         } else {
+            // Clear entire cache (for versions lower than 5.3.0)
             clearstatcache();
         }
     }
-    if(file_exists($file_path)){
+
+    // Check if the file exists
+    if (file_exists($file_path)) {
+        // Return the file size, handling potential integer overflow on 32-bit systems
         return USystem::fix_integer_overflow(filesize($file_path));
-    }else{
+    } else {
+        // Return 0 if the file does not exist
         return 0;
     }
 }
+
 ?>
