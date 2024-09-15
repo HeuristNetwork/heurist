@@ -7,6 +7,8 @@ namespace hserv\utilities;
 * getHostParams
 * isMemoryAllowed
 * getConfigBytes
+* fixIntegerOverflow
+* getUserAgent
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

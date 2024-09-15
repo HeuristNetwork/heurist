@@ -1930,7 +1930,7 @@ function getFileSize($file_path, $clear_stat_cache = false) {
     // Check if the file exists
     if (file_exists($file_path)) {
         // Return the file size, handling potential integer overflow on 32-bit systems
-        return USystem::fix_integer_overflow(filesize($file_path));
+        return USystem::fixIntegerOverflow(filesize($file_path));
     } else {
         // Return 0 if the file does not exist
         return 0;
