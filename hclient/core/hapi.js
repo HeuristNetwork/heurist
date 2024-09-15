@@ -500,7 +500,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             verify_credentials: function (callback, requiredLevel, password_protected, password_entered, requiredPermission) {
 
-                let requiredMembership = 0;
+                let requiredMembership = 0; //membership in group
 
                 if (typeof requiredLevel === 'string' && requiredLevel.indexOf(';') > 0) {
 

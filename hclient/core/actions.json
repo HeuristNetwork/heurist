@@ -1,0 +1,563 @@
+[
+    {
+        "id": "menu-database-browse",
+        "href": "#",
+        "data": {
+            "user-admin-status": "-1",
+            "logaction": "db_Browse",
+            "icon": "ui-icon-database",
+            "container": "admin"
+        },
+        "text": "Open"
+    },
+    {
+        "id": "menu-database-create",
+        "href": "#",
+        "data": {
+            "user-admin-status": "0",
+            "logaction": "db_New",
+            "icon": "ui-icon-plus",
+            "header": "Create new database",
+            "container": "admin"
+        },
+        "text": "New"
+    },
+    {
+        "id": "menu-database-clone",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Clone",
+            "icon": "ui-icon-databases",
+            "header": "Clone database",
+            "container": "admin"
+        },
+        "text": "Clone"
+    },
+    {
+        "id": "menu-database-rename",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Rename",
+            "icon": "ui-icon-rename",
+            "header": "Rename database",
+            "container": "admin"
+        },
+        "text": "Rename"
+    },
+    {
+        "id": "menu-database-restore",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Restore",
+            "icon": "ui-icon-file-zip",
+            "pwd": "ServerFunctions",
+            "header": "Resotore database",
+            "container": "admin"
+        },
+        "text": "Restore"
+    },
+    {
+        "id": "menu-database-properties",
+        "href": "#",
+        "data": {
+            "entity": "sysIdentification",
+            "user-admin-status": "1",
+            "logaction": "db_Properties",
+            "icon": "ui-icon-wrench",
+            "container": "design"
+        },
+        "text": "Properties"
+    },
+    {
+        "id": "menu-lookup-config",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "configure_ExternalLookups",
+            "icon": "ui-icon-search",
+            "container": "design"
+        },
+        "text": "External lookups"
+    },
+    {
+        "id": "menu-repository-config",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "configure_ExternalRepositories",
+            "icon": "ui-icon-cloud-upload",
+            "container": "design"
+        },
+        "text": "External repositories"
+    },
+    {
+        "id": "menu-database-register",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Register",
+            "pwd-nonowner": "ServerFunctions",
+            "icon": "ui-icon-star",
+            "header": "Register database",
+            "container": "design"
+        },
+        "text": "Register"
+    },
+    {
+        "id": "menu-database-delete",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "user-experience-level": "1",
+            "pwd-nonowner": "DatabaseDeletion",
+            "icon": "ui-icon-trash",
+            "container": "admin"
+        },
+        "text": "Delete"
+    },
+    {
+        "id": "menu-database-clear",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "user-experience-level": "1",
+            "pwd-nonowner": "DatabaseDeletion",
+            "logaction": "db_Clear",
+            "icon": "ui-icon-erase",
+            "container": "admin"
+        },
+        "text": "Clear"
+    },
+    {
+        "id": "menu-database-rollback",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "user-experience-level": "1",
+            "icon": "ui-icon-undo"
+        },
+        "text": "Rollback"
+    },
+    {
+        "id": "menu-database-verify",
+        "href": "#",
+        "data": {
+            "container": "admin",
+            "logaction": "verify_st",
+            "user-admin-status": "1",
+            "user-experience-level": "1",
+            "icon": "ui-icon-check",
+            "header": "Verify > Errors in database structure"
+        },
+        "text": "Verify integrity"
+    },
+    
+    {
+        "href": "#",
+        "id": "menu-admin-server",
+        "data": {
+            "icon": "ui-icon-databases",
+            "pwd": "ServerFunctions",
+            "user-admin-status": "1"
+        },
+        "title": "Manage databases",
+        "text": "Manage databases"
+    },
+              
+    {
+        "text": "--------------------------------------------------------  CMS"
+    },
+    
+    {
+        "id": "menu-cms-create",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "cms_new",
+            "header": "Create new website",
+            "icon": "ui-icon-circle-b-plus",
+            "container": "publish"
+        },
+        "text": "Create"
+    },
+    {
+        "id": "menu-cms-edit",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "cms_edit",
+            "header": "Edit website",
+            "icon": "ui-icon-pencil",
+            "container": "publish"
+        },
+        "text": "Edit"
+    },
+    {
+        "id": "menu-cms-view",
+        "href": "#",
+        "data": {
+            "user-admin-status": "0",
+            "logaction": "cms_edit",
+            "icon": "ui-icon-eye"
+        },
+        "text": "View"
+    },
+    {
+        "id": "menu-cms-embed",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "cms_edit",
+            "header": "Standalone webpage",
+            "icon": "ui-icon-document",
+            "container": "publish"
+        },
+        "text": "Standalone web page"
+    },
+    {
+        "id": "menu-cms-create-page",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "header": "Create new webpage",
+            "icon": "ui-icon-circle-b-plus",
+            "container": "publish"
+        },
+        "text": "Create"
+    },
+    {
+        "id": "menu-cms-edit-page",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "header": "Edit webpage",
+            "icon": "ui-icon-pencil",
+            "container": "publish"
+        },
+        "text": "Edit"
+    },
+    {
+        "id": "menu-cms-view-page",
+        "href": "#",
+        "data": {
+            "user-admin-status": "0",
+            "icon": "ui-icon-eye"
+        },
+        "text": "View"
+    },
+    
+    {
+        "text": "---------------------------------------------------- PROFILE "
+    },
+    
+    {
+        "id": "menu-profile-preferences",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Prefs",
+            "icon": "ui-icon-settings",
+            "container": "design"
+        },
+        "text": "My Preferences"
+    },
+    {
+        "id": "menu-profile-tags",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Tags"
+        },
+        "title": "Delete, combine, rename your personal and workgroup tags",
+        "text": "Manage tags"
+    },
+    {
+        "id": "menu-profile-reminders",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Reminders"
+        },
+        "title": "View and delete automatic notification emails sent from the records you have bookmarked",
+        "text": "Manage reminders"
+    },
+    {
+        "text": "-"
+    },
+    {
+        "id": "menu-profile-info",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Userinfo"
+        },
+        "title": "User personal information",
+        "text": "My user info"
+    },
+    {
+        "id": "menu-profile-groups",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Workgroups",
+            "icon": "ui-icon-users",
+            "container": "admin",
+            "user-admin-status": "1"
+        },
+        "title": "List of groups you are member of",
+        "text": "Workgroups"
+    },
+    {
+        "id": "menu-profile-users",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Users",
+            "icon": "ui-icon-user",
+            "user-admin-status": "1",
+            "container": "admin"
+        },
+        "text": "Users"
+    },
+    {
+        "id": "menu-profile-import",
+        "href": "#",
+        "data": {
+            "logaction": "prof_ImportUser",
+            "icon": "ui-icon-download",
+            "user-admin-status": "1",
+            "container": "admin"
+        },
+        "text": "Import user"
+    },
+    {
+        "id": "menu-profile-logout",
+        "href": "#",
+        "title": "Log out Heurist",
+        "text": "Log out"
+    },
+    
+    {
+        "text": "---------------------------------------------------- STRUCTURE"
+    },
+
+    {
+        "id": "menu-structure-rectypes",
+        "href": "#",
+        "data": {
+            "entity": "defRecTypes",
+            "user-admin-status": "1",
+            "icon": "ui-icon-list",
+            "container": "design"
+        },
+        "text": "Record Types"
+    },
+    {
+        "id": "menu-structure-vocabterms",
+        "href": "#",
+        "data": {
+            "entity": "defTerms",
+            "user-admin-status": "1",
+            "icon": "ui-icon-list",
+            "container": "design"
+        },
+        "text": "Vocabularies"
+    },
+    {
+        "id": "menu-structure-fieldtypes",
+        "href": "#",
+        "data": {
+            "entity": "defDetailTypes",
+            "user-admin-status": "1",
+            "icon": "ui-icon-list",
+            "container": "design"
+        },
+        "text": "Base Fields"
+    },
+    {
+        "id": "menu-structure-workflowstages",
+        "href": "#",
+        "data": {
+            "entity": "sysWorkflowRules",
+            "user-admin-status": "1",
+            "icon": "ui-icon-list",
+            "container": "design"
+        },
+        "text": "Workflow Stages"
+    },
+    {
+        "id": "menu-structure-import",
+        "href": "#",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "imp_st",
+            "container": "design",
+            "icon": "ui-icon-cloud-download"
+        },
+        "text": "Browse templates"
+    },
+    {
+        "id": "menu-structure-summary",
+        "href": "viewers/visualize/databaseSummary.php",
+        "data": {
+            "user-admin-status": "-1",
+            "logaction": "st_Vis",
+            "icon": "ui-icon-eye",
+            "container": "design",
+            "header": "Structure > Visualization of links between record types"
+        },
+        "text": "Visualise"
+    },
+    {
+        "id": "menu-structure-mimetypes",
+        "href": "#",
+        "data": {
+            "entity": "defFileExtToMimetype",
+            "user-admin-status": "1",
+            "user-experience-level": "1",
+            "header": "Structure > Define mime types"
+        },
+        "title": "Define file mime types and extensions",
+        "text": "Define mime types"
+    },
+    {
+        "text": "---------------------------------------------------- MANAGE"
+    },
+    {
+        "id": "menu-manage-dashboards",
+        "href": "#",
+        "data": {
+            "icon": "ui-icon-redo",
+            "container": "design"
+        },
+        "text": "Shortcuts bar"
+    },
+    {
+        "id": "menu-structure-refresh",
+        "href": "#",
+        "data": {
+            "icon": "ui-icon-refresh",
+            "user-admin-status": "0",
+            "logaction": "refresh_st"
+        },
+        "text": "Refresh memory"
+    },
+    {
+        "id": "menu-structure-duplicates",
+        "href": "#",
+        "data": {
+            "icon": "ui-icon-grip-solid-vertical",
+            "user-permissions": "add delete",
+            "container": "admin"
+        },
+        "text": "Find duplicate records"
+    },
+    {
+        "id": "menu-interact-log",
+        "href": "admin/utilities/downloadInteractionLog.php",
+        "data": {
+            "user-admin-status": "1",
+            "size": "medium",
+            "header": "Download the interaction log",
+            "icon": "ui-icon-note",
+            "container": "admin"
+        },
+        "text": "Interaction log"
+    },
+    {
+        "id": "menu-manage-archive",
+        "href": "export/dbbackup/exportMyDataPopup.php",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Archive",
+            "icon": "ui-icon-file-zip",
+            "help": "",
+            "container": "publish"
+        },
+        "title": "Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink",
+        "text": "Safeguard file - download"
+    },
+    {
+        "id": "menu-manage-archive-upload",
+        "href": "export/dbbackup/exportMyDataPopup.php?repository=1",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "db_Archive_Repository",
+            "icon": "ui-icon-file-zip",
+            "help": "",
+            "container": "publish"
+        },
+        "title": "Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which is then uploaded to the selected repository",
+        "text": "Safeguard file - to repository"
+    },
+    {
+        "id": "menu-profile-files",
+        "href": "#",
+        "data": {
+            "logaction": "prof_Files",
+            "icon": "ui-icon-files",
+            "help": "",
+            "container": "populate"
+        },
+        "text": "Manage files"
+    },
+    {
+        "id": "menu-manage-rectitles",
+        "href": "admin/verification/longOperationInit.php?type=titles",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "st_RebuildTitles",
+            "header": "Management > Rebuild record titles",
+            "icon": "ui-icon-tags",
+            "container": "admin"
+        },
+        "text": "Rebuild record titles"
+    },
+    {
+        "id": "menu-manage-calcfields",
+        "href": "admin/verification/longOperationInit.php?type=calcfields",
+        "data": {
+            "user-admin-status": "1",
+            "logaction": "st_RebuildFields",
+            "header": "Management > Rebuild calculated fields",
+            "icon": "ui-icon-calculator-b",
+            "container": "admin"
+        },
+        "text": "Rebuild calculated fields"
+    },
+    {
+        "id": "menu-manage-lucene",
+        "href": "admin/verification/rebuildLuceneIndices.php",
+        "data": {
+            "user-admin-status": "1",
+            "header": "Management > Rebuild Lucene index",
+            "user-experience-level": "1"
+        },
+        "title": "Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration",
+        "text": "Rebuild Lucene index"
+    },
+    {
+        "data": {
+            "user-experience-level": "1"
+        },
+        "text": "-"
+    },
+    {
+        "id": "menu-manage-structure-asxml",
+        "href": "hserv/structure/export/getDBStructureAsXML.php",
+        "target": "_blank",
+        "data": {
+            "user-experience-level": "1",
+            "icon": "ui-icon-extlink"
+        },
+        "text": "Structure (XML)"
+    },
+    {
+        "id": "menu-manage-structure-assql",
+        "href": "hserv/structure/export/getDBStructureAsSQL.php?pretty=1",
+        "target": "_blank",
+        "data": {
+            "user-experience-level": "1",
+            "icon": "ui-icon-extlink"
+        },
+        "title": "Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)",
+        "text": "Structure (Text)"
+    }
+]

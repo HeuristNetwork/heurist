@@ -233,6 +233,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/search/searchBuilderItem.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/searchBuilderSort.js"></script>
 
+<script type="text/javascript" src="hclient/core/ActionHandler.js"></script>
 <script type="text/javascript" src="hclient/widgets/dropdownmenus/buttonsMenu.js"></script>
 <script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu.js"></script>
 <script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu6.js"></script>

@@ -17,6 +17,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+
+/*
+todo 
+
+1. Move list of all actions to actions.js
+2. New Class that manage all actions   menuActionById
+3. init mainMenu from this list (grouped by id menu-xxx)
+4. check missed actions ???
+5. 
+
+
+*/
+
+
 /*
 
     Main menu is list of Heurist operations. They are grouped in several sections:
@@ -68,11 +82,15 @@ $.widget( "heurist.mainMenu", {
     _retrieved_notifications: false,
 
     version_message: null, // container for message about available alpha/stable version
+    
+    actioHandler: null,
 
     // the widget's constructor
     _create: function() {
 
         let that = this;
+        
+        this.actioHandler = new ActionHandler();
         
         this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
 
@@ -235,7 +253,6 @@ $.widget( "heurist.mainMenu", {
 
         if(__include('Database')) this._initMenu('Database', -1);            
         if(__include('Structure')) this._initMenu('Structure', 0, null, 3); //3 means hidden
-        if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
         if(__include('Website')) this._initMenu('Website', 0);
         if(__include('Export')) {
@@ -247,7 +264,7 @@ $.widget( "heurist.mainMenu", {
         
         if(__include('Admin')) this._initMenu('Admin', 0, null, 0);
         
-        if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
+//2024-09-15        if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
         
         if(!this.options.is_h6style){
             if(__include('Help')) this._initMenu('Help', -1);    
@@ -785,7 +802,15 @@ $.widget( "heurist.mainMenu", {
     // dialog_options - not used
     // parameters from dialog are taken from data- attributes of li element in menu html
     //
+    
+    // item is li element and now it action from json
+    
     menuActionHandler: function(event, item, dialog_options){
+        
+        if (this.actioHandler.executeActionById(item.attr('id'))){
+            return;
+        }
+        
         
         let that = this;
         
@@ -873,76 +898,7 @@ $.widget( "heurist.mainMenu", {
                 window.hWin.HAPI4.SystemMgr.user_log(action_log);
             }
             
-        if(action == "menu-database-browse"){
-
-                let options = $.extend(entity_dialog_options, {
-                    select_mode:'select_single',
-                    onselect:function(event, data){
-
-                        if(data && data.selection && data.selection.length==1){
-                            let db = data.selection[0];
-                            if(db.indexOf('hdb_')===0) db = db.substr(4);
-                            window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
-                        }
-                    }
-                });
-
-                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
-
-        }
-        else if(action == "menu-database-create"){
-        
-            popup_dialog_options.title = window.hWin.HR('Create New Database');
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbCreate', popup_dialog_options);
-        
-        }
-        else if(action == "menu-database-restore"){
-
-            popup_dialog_options.title = window.hWin.HR('Restore Database');
-            popup_dialog_options.entered_password = entered_password;
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRestore', popup_dialog_options);
-        
-        }
-        else if(action == "menu-database-delete"){
-        
-            popup_dialog_options.title = window.hWin.HR('Delete Database');
-            popup_dialog_options.entered_password = entered_password;
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbDelete', popup_dialog_options);
-        
-        }
-        else if(action == "menu-database-clear"){
-        
-            popup_dialog_options.title = window.hWin.HR('Clear Database');
-            popup_dialog_options.entered_password = entered_password;
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClear', popup_dialog_options);
-        
-        }
-        else if(action == "menu-database-rename"){
-        
-            popup_dialog_options.title = window.hWin.HR('Rename Database');
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRename', popup_dialog_options);
-            
-        } 
-        else if(action == "menu-database-clone"){
-        
-            popup_dialog_options.title = window.hWin.HR('Clone Database');
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClone', popup_dialog_options);
-        
-        }  
-        else if(action == "menu-database-register"){
-        
-            popup_dialog_options.title = window.hWin.HR('Register database');
-            popup_dialog_options.entered_password = entered_password;
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRegister', popup_dialog_options);
-        
-        }
-        else if(action == "menu-database-verify"){
-        
-            popup_dialog_options.title = window.hWin.HR('Verify Database Integrity');
-            window.hWin.HEURIST4.ui.showRecordActionDialog('dbVerify', popup_dialog_options);
-        
-        }
-        else if(action == "menu-cms-create"){
+        if(action == "menu-cms-create"){
 
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
 
@@ -1135,107 +1091,6 @@ $.widget( "heurist.mainMenu", {
                                 {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
             
         }
-        else if(action == "menu-database-properties"){
-
-            window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', entity_dialog_options);
-            
-        }
-        else if(action == "menu-lookup-config"){
-
-            popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
-            popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
-            popup_dialog_options['title'] = "Lookup service configuration";
-            popup_dialog_options['path'] = 'widgets/lookup/';
-
-            window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
-
-        }
-        else if(action == "menu-repository-config"){
-
-            popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
-            popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
-            popup_dialog_options['title'] = "Repository service configuration";
-            popup_dialog_options['path'] = 'widgets/admin/';
-
-            window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
-
-        }
-        else if(action == "menu-database-rollback"){
-
-            window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
-                                    + 'there is currently no end-user interface way of rolling '
-                                    + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
-
-        }
-        else if(action == "menu-structure-rectypes"){
-
-            window.hWin.HEURIST4.defRecTypes_calls = 0;
-            
-            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', entity_dialog_options);
-                                    
-        }
-        else if(action == "menu-structure-fieldtypes"){
-
-            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', entity_dialog_options);
-                                    
-        }
-        else if(action == "menu-structure-workflowstages"){
-
-            window.hWin.HEURIST4.ui.showEntityDialog('sysWorkflowRules', entity_dialog_options);
-                                    
-        }
-        else if(action == "menu-structure-vocabterms"){
-
-            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', entity_dialog_options);
-                                    
-        }
-        else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
-
-            let opts = {};
-            if(action == "menu-structure-import-express"){
-                opts['source_database_id'] = 3;    
-                opts['title'] = 'Import structural definitions into current database from Heurist Reference Set';
-            }
-            
-            if(popup_dialog_options){
-
-                opts = $.extend(popup_dialog_options, opts);
-                $(opts.container).empty();
-                opts.container.importStructure( opts );
-                
-            }else{
-                
-                opts['isdialog'] = true;
-                
-                let manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
-                    .appendTo( $('body') )
-                    .importStructure( opts );
-                
-            }
-            
-        }
-        else if(action == "menu-structure-mimetypes"){
-            
-                window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
-                                                {edit_mode:'inline', width:900});
-
-        }
-        else if(action == "menu-structure-refresh"){
-            
-                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
-                window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
-                                                
-        }
-        else if(action == "menu-records-archive"){
-            
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
-        
-        }
-        else if(action == "menu-structure-duplicates"){
-            
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates',popup_dialog_options);
-        
-        }
         else if(action == "menu-export-csv"){
             
             popup_dialog_options.format = 'csv';
@@ -1280,20 +1135,6 @@ $.widget( "heurist.mainMenu", {
             popup_dialog_options.format = 'iiif';
             that._exportRecords(popup_dialog_options);
             
-        }
-        else if(action == "menu-import-add-record"){
-            
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
-            
-        }
-        else if(action == "menu-import-email" || 
-           action == "menu-faims-import" || action == "menu-faims-export"
-           ){
-
-            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('New_Function_Conversion')
-                    + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
-                 
-                 
         }
         else if(action == "menu-import-get-template"){
             that._generateHeuristTemplate();
@@ -1525,7 +1366,7 @@ $.widget( "heurist.mainMenu", {
                         :$("#heurist-dialog").addClass('ui-heurist-bg-light');
         $dlg.empty();
 
-        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/admin/manage_server.html?t="+(new Date().time), function(){
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/admin/manageServer.html?t="+(new Date().time), function(){
            
             
             $dlg.find('li').css({padding:'10px 0px'});

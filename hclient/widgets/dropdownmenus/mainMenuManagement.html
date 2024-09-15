@@ -27,6 +27,27 @@
         Shortcuts bar</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
+<li>
+    <a href="#" id="menu-structure-refresh" data-icon="ui-icon-refresh"
+        data-user-admin-status="0" data-logaction="refresh_st">
+        Refresh memory</a> <!-- Holding value, substituted from localisation file using id -->
+</li>
+
+<li>
+    <a href="#" id="menu-structure-duplicates"
+        data-icon="ui-icon-grip-solid-vertical"
+        data-user-permissions="add delete"
+        data-container="admin">
+        Find duplicate records</a> <!-- Holding value, substituted from localisation file using id -->
+</li>
+
+<li>
+    <a href="admin/utilities/downloadInteractionLog.php" id="menu-interact-log"
+        data-user-admin-status="1" data-size="medium"
+        data-header="Download the interaction log" data-icon="ui-icon-note"
+        data-container="admin">
+        Interaction log</a> <!-- Holding value, substituted from localisation file using id -->
+</li>
 
 
 <li>
@@ -48,23 +69,6 @@
         Safeguard file - to repository</a>
 </li>
 
-<li data-user-admin-status="1">-</li>
-<!--
-<li>
-    <a href="#" id="menu-records-archive"
-        data-user-admin-status="1" data-user-experience-level="1"
-        title="Search for updated and removed records in archive with opportunity to restore values">
-        Lookup/restore records in archive
-    </a>
-</li>
--->
-<li>
-    <a href="admin/verification/removeDatabaseLocks.php"
-        data-user-admin-status="1" data-header="Management &gt; Remove database locks" data-user-experience-level="1"
-        title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">
-        Clear database locks
-    </a>
-</li>
 <li>
     <a href="#"
         id="menu-profile-files" data-logaction="prof_Files" 
@@ -97,22 +101,6 @@
 
 
 <li data-user-experience-level="1">-</li>
-
-            <li>
-                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium" data-user-experience-level="1"
-                    title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
-                    Simple fields schema</a>
-            </li>
-            <li>
-                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium" data-user-experience-level="1"
-                    title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
-                    Relationships schema</a>
-            </li>
-            <li>
-                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium" data-user-experience-level="1"
-                    title="Display/print a listing of the record types and all fields, including usage counts">
-                    Combined schema</a>
-            </li>
 
             <li>
                 <a  href="hserv/structure/export/getDBStructureAsXML.php" id="menu-manage-structure-asxml"

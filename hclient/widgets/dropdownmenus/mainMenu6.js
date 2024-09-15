@@ -3,7 +3,7 @@
 * 
 * It loads mainMenu6_xxx.html for every section
 * They took icons, titles and rollovers from mainMenu.js widget. Namely from mainMenuXXX.html files wish describe dropdown menues
-* Action handlers are in mainManu.js as well. See menuActionById
+* Action handlers are in mainMenu.js as well. See menuActionById
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

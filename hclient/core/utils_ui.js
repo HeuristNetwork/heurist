@@ -2438,17 +2438,19 @@ window.hWin.HEURIST4.ui = {
                             
         let widgetName = 'manage'+entityName;
         
-        if(!options) options = {};
-        if(options.isdialog!==false) options.isdialog = true; //by default popup      
-
         
         if(window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
+            return window.hWin.HEURIST4.ui.showWdigetDialog(widgetName, options);
+            /*
             let manage_dlg;
+
+            if(!options) options = {};
+            if(options.isdialog!==false) options.isdialog = true; //by default popup      
             
             if(!options.container){ //container not defined - add new one to body
             
-                manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') );
                 manage_dlg[widgetName]( options );
             }else{
@@ -2466,7 +2468,7 @@ window.hWin.HEURIST4.ui = {
             }
             
             return manage_dlg;
-        
+            */
         }else{
             
             let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
@@ -2498,18 +2500,42 @@ window.hWin.HEURIST4.ui = {
             
         }
     },
-
-    //
-    // show record action dialog
-    //
-    showImportStructureDialog: function(options){
     
-            let  doc_body = $(window.hWin.document).find('body');
-            let manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
-                .appendTo( doc_body )
-                .importStructure( options );
-                
+    //
+    //
+    //    
+    showWdigetDialog: function( widgetName, options ){
         
+        if(!window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){
+            window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+            return null;
+        }
+
+        let manage_dlg = null; 
+        
+        if(!options) options = {};
+        if(options.isdialog!==false) options.isdialog = true; //by default popup      
+        
+        if(!options.container){ //container not defined - add new one to body
+        
+            manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                .appendTo( $('body') );
+            manage_dlg[widgetName]( options );
+        }else{
+            if($(options.container)[widgetName]('instance')){
+                $(options.container)[widgetName]('destroy');
+            }
+            $(options.container).empty();
+            $(options.container).show();
+            
+            if(!$(options.container).attr('id')){
+                $(options.container).uniqueId()
+            }
+            
+            manage_dlg = $(options.container)[widgetName]( options );
+        }
+        
+        return manage_dlg;        
     },
     
     //
