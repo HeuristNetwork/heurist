@@ -12,8 +12,11 @@ use hserv\entity\DbEntitySearch;
 */
 
 /**
+* Base class for all database entities.
+* 
+* This abstract class handles core functionalities such as reading configurations, handling
+* field data, and providing save, delete, and search operations for database entities.
 * Base class for all db entities
-*
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -24,85 +27,75 @@ use hserv\entity\DbEntitySearch;
 */
 abstract class DbEntityBase
 {
+    /** @var mixed $system System handler for operations */
     protected $system;
 
-    // set transaction in save,delete action - otherwise transaction is set on action above (batch action)
+    /** @var bool $need_transaction Set to true if the action requires a transaction */
     protected $need_transaction = true;
 
-    //reset all primary fields to zero - to force addition (POST request via API)
+    /** @var bool $is_addition Flag to reset all primary fields to zero to force addition (POST request) */
     protected $is_addition = false;
 
-    /*
-        request from client side - contains field values for search and update
-
-        data[fields] - values for particular record
-                 initiated in prepareRecords
-    */
+    /** 
+     * @var array|null $data Field values used for search and update.
+     * Contains `data[fields]` for particular records, initiated in prepareRecords().
+     * usually this is $_REQUEST
+     */
     protected $data = null;
 
-    /*
-        configuration form json file
-    */
+    /** @var array|null $config Configuration loaded from a JSON file */
     protected $config;
 
-    //name of primary key field from $config  by dty_Role="primary"
+    /** @var string $primaryField Name of the primary key field from $config marked with dty_Role="primary" */
     protected $primaryField;
 
-
-    //names of multilang fields from $config by rst_MultiLang=1
+    /** @var array $multilangFields Names of multi-language fields from $config with rst_MultiLang=1 */
     protected $multilangFields = array();
 
-    /*
-        fields structure description from json (used in validataion and access)
-    */
+    /** @var array $fields Fields structure description from JSON, used for validation and access */
     protected $fields;
 
-    protected $fieldsNames; //non virtual field names
+    /** @var array $fieldsNames Non-virtual field names */
+    protected $fieldsNames;
 
     /**
-    * keeps several records for delete,update actions
-    * it is extracted from $data in prepareRecords
-    *
-    * @var array
-    */
+     * @var array $records Holds several records for delete/update actions.
+     * Extracted from $data in prepareRecords().
+     */
     protected $records = array();
 
-
     /**
-    * keeps translated values for fields that are extracted from request in prepareRecords
-    *
-    * @var array
-    */
+     * @var array $translation Translated values for fields extracted from the request in prepareRecords().
+     */
     protected $translation = array();
 
-
     /**
-    * IDs of records to update,delete
-    * it is extracted from $data in prepareRecords
-    * need for permissions validation
-    *
-    * @var array
-    */
+     * @var array $recordIDs IDs of records to update/delete, extracted from $data in prepareRecords().
+     * Necessary for permission validation.
+     */
     protected $recordIDs = array();
 
-    //
-    // Name of table
-    //
+    /** @var string $entityName The name of the table or entity */
     private $entityName;
 
-    //
-    //
-    protected $foreignChecks = null; //array of queries to validate references (before delete)
+    /** @var array|null $foreignChecks Array of queries to validate references before deletion */
+    protected $foreignChecks = null;
 
+    /** @var bool $isDeleteReady Flag indicating if the entity is ready for deletion */
     protected $isDeleteReady = false;
 
+    /** @var bool $requireAdminRights Set to true if admin rights are required for the operation */
     protected $requireAdminRights = true;
 
-    protected $duplicationCheck = null;
+    /** @var array|null $duplicationCheck Check for duplication */
+    protected $duplicationCheck = null;    
 
-    //
-    // constructor - loads configuration from json file
-    //
+     /**
+     * Constructor - Loads configuration from JSON file.
+     * 
+     * @param mixed $system The system instance.
+     * @param array|null $data The data to be initialized.
+     */
     public function __construct( $system, $data=null ) {
        $this->system = $system;
 
@@ -121,33 +114,26 @@ abstract class DbEntityBase
     }
 
 
-    //
-    // verifies that entity is valid
-    // configuration is loaded
-    // fields is not empty array
-    //
+    /**
+     * Verify if the entity is valid (configuration loaded and fields not empty).
+     * 
+     * @return bool True if valid, otherwise false.
+     */
     public function isvalid(){
         return is_array($this->config) && !isEmptyArray($this->fields);
     }
 
-    //
-    //
-    //
+    /**
+     * Read configuration from the JSON file.
+     * 
+     * @return void
+     */
     private function _readConfig(){
-
-        /*
-        if(is_array($this->config)){ //config may be predefined as part of code
-            $this->fields = array();
-            $this->_readFields($this->config['fields']);
-            return;
-        }*/
 
         if(@$this->data['entity']){
             $this->entityName = lcfirst(@$this->data['entity']);
         }
 
-
-        //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
         $entity_file = dirname(__FILE__).'/'.basename($this->entityName.'.json'); //HEURIST_DIR.'hserv/entity
 
         if(file_exists($entity_file)){
@@ -174,15 +160,19 @@ abstract class DbEntityBase
         }
     }
 
-
-    //
-    //
-    // abstract
+    /**
+     * Initialize the entity (abstract method to be implemented in subclasses).
+     * 
+     * @return void
+     */
     public function init(){}
 
-    //
-    // assign parameters on server side
-    //
+    /**
+     * Set data for the entity from the client request.
+     * 
+     * @param array $data Data to be set.
+     * @return void
+     */
     public function setData($data){
         $this->data = $data;
         $this->records = null;
@@ -200,36 +190,52 @@ abstract class DbEntityBase
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Get the current data of the entity.
+     * 
+     * @return array|null Returns the current data.
+     */
     public function getData(){
         return $this->data;
     }
 
-    //
-    //
-    //
+    /**
+     * Set records for deletion or update actions.
+     * 
+     * @param array $records Records to be set.
+     * @return void
+     */
     public function setRecords($records){
         $this->records = $records;
     }
 
-    //
-    //
-    //
+
+    /**
+     * Get the current records.
+     * 
+     * @return array Returns the current records.
+     */
     public function records(){
         return $this->records;
     }
 
 
-
+     /**
+     * Set whether a transaction is required.
+     * 
+     * @param bool $value True if transaction is required, false otherwise.
+     * @return void
+     */
     public function setNeedTransaction($value){
         $this->need_transaction = $value;
     }
 
-    //
-    // config getter
-    //
+     /**
+     * Get the configuration.
+     * 
+     * @param string $locale Locale for configuration.
+     * @return array|null Configuration data.
+     */
     public function config( $locale='en' ){
 
         if(!@$this->config['locale']){
@@ -407,9 +413,11 @@ abstract class DbEntityBase
     }
 
 
-    //
-    //
-    //
+    /**
+     * Perform actions based on the current data request.
+     * 
+     * @return mixed Result of the action.
+     */
     public function run(){
 
         if(!$this->isvalid()){
@@ -481,10 +489,11 @@ abstract class DbEntityBase
         }
     }
 
-    //
-    // save one or several records
-    // returns false or array of record IDs
-    //
+    /**
+     * Save the records to the database.
+     * 
+     * @return array|false An array of saved record IDs or false on failure.
+     */
     public function save(){
 
         //extract records from $_REQUEST data
@@ -610,10 +619,12 @@ abstract class DbEntityBase
         return $results;
     }//save
 
-    //
-    // prepare and check ids
-    //
-    protected function deletePrepare(){
+    /**
+     * Prepare records for deletion by checking their IDs and permissions.
+     * 
+     * @return bool True if the records are ready for deletion, false otherwise.
+     */
+     protected function deletePrepare(){
 
         if(!@$this->recordIDs){
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
@@ -660,11 +671,12 @@ abstract class DbEntityBase
         return true;
     }
 
-    //
-    // @todo multirecords and transaction
-    //
-    // returns - deleted:[], no_rights:[], in_use:[]
-    //
+    /**
+     * Delete records from the database.
+     * 
+     * @param bool $disable_foreign_checks Disable foreign key checks.
+     * @return bool True on successful deletion, false otherwise.
+     */
     public function delete($disable_foreign_checks=false){
 
         if(!$this->isDeleteReady && !$this->deletePrepare()){
@@ -707,18 +719,20 @@ abstract class DbEntityBase
         return true;
     }
 
+    /**
+     * Batch action handler (to be implemented in subclasses).
+     * 
+     * @return mixed Result of the batch action.
+     */
+    public function batch_action(){
+        return false;
+    }
+
     //
     // various counts(aggregations) request - implementation depends on entity
     //
     public function counts(){
         return 0;
-    }
-
-    //
-    // see specific implemenation for every class
-    //
-    public function batch_action(){
-        return false;
     }
 
     //
@@ -777,7 +791,7 @@ abstract class DbEntityBase
     }
 
     //
-    // @todo
+    // 
     //
     protected function _validateValues(){
 
@@ -1171,9 +1185,11 @@ abstract class DbEntityBase
 
     }
 
-    //
-    //
-    //
+    /**
+     * Perform search on the database records.
+     * 
+     * @return mixed Result of the search.
+     */
     public function search(){
 
         if($this->isvalid()){
