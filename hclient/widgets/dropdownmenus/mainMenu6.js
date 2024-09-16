@@ -1,5 +1,5 @@
 /**
-* mainMenu6.js : main menu for v6
+* mainMenu6.js : main menu for v6  RENAME to sideSlidersMenu
 * 
 * It loads mainMenu6_xxx.html for every section
 * They took icons, titles and rollovers from mainMenu.js widget. Namely from mainMenuXXX.html files wish describe dropdown menues

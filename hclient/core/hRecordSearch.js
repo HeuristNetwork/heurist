@@ -215,6 +215,7 @@ function HRecordSearch() {
         },
         
        // originator - widget that initiated the search
+       // returns result in global event  ON_REC_SEARCH_FINISH
         doSearch:function( originator, request ){
             _doSearch( originator, request );
         },

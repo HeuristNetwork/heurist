@@ -1,8 +1,6 @@
 /**
-*  appInitAll - main function which initialises everything
+*  ActionHandler
 *
-*  @see ext/layout
-*  @see layout_defaults.js - configuration file
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -82,7 +80,7 @@ class ActionHandler {
             dialog_options = {};
         }
         
-        dialog_options.verification_passed = true; //bypass
+        //temp bypass dialog_options.verification_passed = true;
         
         if(!dialog_options?.verification_passed && adata){
             
@@ -100,7 +98,7 @@ class ActionHandler {
             let action_user_permissions = adata['user-permissions']; 
             
             // Determine the required level of access
-            let requiredLevel = (action_level == -1 || action_level >= 0) ? action_level : 0;
+            let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
             
             
             if(action_passworded || requiredLevel>0){ 
@@ -109,7 +107,7 @@ class ActionHandler {
                         requiredLevel += ';' + action_member_level;
                     }
                 
-                    window.hWin.HAPI4.SystemMgr.verify_credentials(entered_password=>{
+                    window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password)=>{
                         dialog_options.entered_password = entered_password;
                         dialog_options.verification_passed = true;
                         this.executeActionById(id, dialog_options);              
@@ -158,7 +156,6 @@ class ActionHandler {
             };
 
         let popup_dialog_options = {
-                title: window.hWin.HR(actionid+'-title'),
                 innerTitle: true,
                 is_h6style: true,
                 isdialog: !container,
@@ -172,6 +169,9 @@ class ActionHandler {
 
             if (dialog_options?.record_id > 0) {
                 popup_dialog_options.record_id = dialog_options['record_id'];
+            }
+            if(window.hWin.HR(actionid+'-title')!=actionid+'-title'){
+                popup_dialog_options.title = window.hWin.HR(actionid+'-title');
             }
         
         popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
@@ -224,7 +224,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
                 
-            case "menu-records-archive":  // find invocation
+            case "menu-records-archive":  // not used
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
                 break;
             case "menu-import-add-record": // hidden action at the moment (for dashboard)
@@ -233,6 +233,10 @@ class ActionHandler {
             case "menu-structure-duplicates":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
                 break;
+            case "menu-import-get-template":
+                popup_dialog_options['path'] = 'widgets/admin/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('rtyDownloadTemplate', popup_dialog_options);
+                break;
                 
             case "menu-structure-refresh":
             
@@ -240,16 +244,35 @@ class ActionHandler {
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                 break;
 
+            case "menu-profile-info":
+                entity_dialog_options['edit_mode'] = 'editonly';
+                entity_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
+                
             case "menu-database-properties":
             case "menu-structure-rectypes":
             case "menu-structure-fieldtypes":
             case "menu-structure-vocabterms":
             case "menu-structure-workflowstages":
             case "menu-structure-mimetypes":
-            
+            case "menu-help-bugreport":
+            case "menu-profile-tags":
+            case "menu-profile-reminders":
+            case "menu-profile-files":
+
+            case "menu-profile-groups":
+            case "menu-profile-users":
                 window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, entity_dialog_options);
                 break;
-                
+            case "menu-manage-dashboards":
+                entity_dialog_options['isViewMode'] = false;
+                entity_dialog_options['is_iconlist_mode'] = false;
+                entity_dialog_options['onClose'] = function(){
+                    setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
+                }; 
+                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, entity_dialog_options);
+
+                break;
+
             case "menu-database-browse":
                 let options = $.extend(entity_dialog_options, {
                     select_mode: 'select_single',
@@ -264,17 +287,74 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
                 break;
 
-                
+
             case "menu-structure-import":
 
                 window.hWin.HEURIST4.ui.showWdigetDialog('importStructure', popup_dialog_options);
                 break;
+                
+            case "menu-profile-preferences":
+                popup_dialog_options['path'] = 'widgets/profile/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('profilePreferences', popup_dialog_options);
+                break;
+            case "menu-profile-import":
+                this._importUsers( entity_dialog_options ); //for admin only
+                break;
+            case "menu-profile-logout":
+                window.hWin.HAPI4.SystemMgr.logout();
+                break;
+            case "menu-admin-server":                                       
+                popup_dialog_options['path'] = 'widgets/admin/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('manageServer', popup_dialog_options);
+                break;
+                
+/*
+            that._showAdminServer({entered_password:entered_password});
+        }else if(action == "menu-help-quick-tips"){
+            $('.ui-menu6').mainMenu6('showQuickTips');
+        }else if(action == "menu-manage-rectitles"){
+            let dlg_options = $.extend(popup_dialog_options, {});
+            dlg_options['title'] = item.attr('data-header') ? item.attr('data-header') : 'Rebuild record titles';
+            that._rebuildRecordTitles(dlg_options);
+*/        
+                
                 
             //case "menu-cms-create":
             //    //this._handleCMSCreate(popup_dialog_options);
                 break;
 
            
+            case "menu-help-acknowledgements":
+            
+                var contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
+                break;
+
+            case "menu-help-about":
+
+                var contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
+                    open: function( event, ui ) {
+                        $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
+                        
+                        if(window.hWin.HAPI4.sysinfo.host_logo){
+
+                            $('<div style="height:40px;padding-left:4px;float:right"><a href="'
+                                +(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                                +'" target="_blank" style="text-decoration:none;color:black;">'
+                                +'<label>at: &nbsp;</label>'
+                                +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo+'" height="35" align="center"></a></div>')
+                            .appendTo($dlg.find('div.host_info'));
+                        }                       
+                    }                
+                });
+                break;
+
+            case "menu-help-online":
+            
+                action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website';
+                
 
             default:
                 // Handle the case where the action is a link or needs to open a dialog
@@ -313,10 +393,103 @@ class ActionHandler {
         if (target) {
             window.open(href, target);
         } else {
+            
+            if(!popup_dialog_options.title){
+                popup_dialog_options.title = action.text;
+            }
             let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
             window.hWin.HEURIST4.msg.showDialog(href, options);
         }
     }
+    
+    //
+    // @todo - fix layeours for select user and groups (disable edit,delete)
+    //
+    _importUsers( entity_dialog_options ){
+        
+        if(!entity_dialog_options) entity_dialog_options = {};
+        
+        let options = $.extend(entity_dialog_options, {
+            subtitle: 'Step 1. Select database with users to be imported',
+            title: 'Import users', 
+            select_mode: 'select_single',
+            pagesize: 300,
+            edit_mode: 'none',
+            use_cache: true,
+            except_current: true,
+            keep_visible_on_selection: true,
+            onselect:function(event, data){
+                if(data && data.selection && data.selection.length>0){
+                        let selected_database = data.selection[0].substr(4);
+                        
+                        let options2 = $.extend(entity_dialog_options, {
+                            subtitle: 'Step 2. Select users in '+selected_database+' to be imported',
+                            title: 'Import users', 
+                            database: selected_database,
+                            select_mode: 'select_multi',
+                            edit_mode: 'none',
+                            keep_visible_on_selection: true,
+                            onselect:function(event, data){
+                                if(data && data.selection &&  data.selection.length>0){
+                                    let selected_users = data.selection;
+
+                                    let options3 = $.extend(entity_dialog_options, {
+                                        subtitle: 'Step 3. Allocate imported users to work groups',
+                                        title: 'Import users', 
+                                        select_mode: 'select_roles',
+                                        selectbutton_label: 'Allocate roles',
+                                        sort_type_int: 'recent',
+                                        edit_mode: 'none',
+                                        keep_visible_on_selection: false,
+                                        onselect:function(event, data){
+                                            if(data && !$.isEmptyObject(data.selection)){
+                                                //selection is array of object
+                                                // [grp_id:role, ....]
+                                                /*
+                                                var s = '';
+                                                for(grp_id in data.selection)
+                                                if(grp_id>0 && data.selection[grp_id]){
+                                                    s = s + grp_id+':'+data.selection[grp_id]+',';
+                                                }
+                                                if(s!='')
+                                                    alert( selected_database+'  '+selected_users.join(',')
+                                                        +' '+s);  
+                                                */        
+                                                        
+                                            let request = {};
+                                            request['a']         = 'action';
+                                            request['entity']    = 'sysUsers';
+                                            request['roles']     = data.selection;
+                                            request['userIDs']   = selected_users;
+                                            request['sourceDB']  = selected_database;
+                                            request['request_id'] = window.hWin.HEURIST4.util.random();
+
+                                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                                function(response){             
+                                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+                                                    }else{
+                                                        window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                                    }
+                                            });
+                                                        
+                                            }
+                                        }
+                                    });              
+                                    
+                                    window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
+                                }
+                            }
+                        });
+                        
+                        
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+                }
+            }
+        });    
+    
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+    }    
     
 }
 

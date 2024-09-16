@@ -69,7 +69,7 @@ $.widget( "heurist.manageEntity", {
         modal:  true,
         title:  '',
         isFrontUI: false,  //special behaviour for front interface
-        innerTitle: false, //show title as top panel 
+        innerTitle: false, //show title as top panel (for non dialog)
         
         //LIST section 
         pagesize: 200,      // page size in resultList 
@@ -246,22 +246,21 @@ $.widget( "heurist.manageEntity", {
         
        
         let fele = this.element.find('.ent_wrapper:first');
-        
-        if(this.options.innerTitle){ 
-            
-            fele.children(0).css('top', '38px'); //down manager div to 38
-			
-            if(this.options.innerTitle===true){
-                this._innerTitle = $('<div>').addClass('ui-heurist-header')
-                .html('<span class="title">'+this.options['title']+'</span>')
-                .insertBefore($(fele.children()[0])); //insert before first wrapper
-            }else{
-                $(this.options.innerTitle).css({'max-height':'38px'}).insertBefore($(fele.children()[0]));
-            }
-            
-        }
-            
+
         if(!this.options.isdialog){
+            
+            if(this.options.innerTitle){ 
+                fele.children(0).css('top', '38px'); //down manager div to 38
+			    
+                if(this.options.innerTitle===true){
+                    this._innerTitle = $('<div>').addClass('ui-heurist-header')
+                    .html('<span class="title">'+this.options['title']+'</span>')
+                    .insertBefore($(fele.children()[0])); //insert before first wrapper
+                }else{
+                    $(this.options.innerTitle).css({'max-height':'38px'}).insertBefore($(fele.children()[0]));
+                }
+            }
+        
             if(this.options.layout_mode=='editonly'){
                     //add div at bottom for control buttons
                     $('<div>').addClass('ent_footer editForm-toolbar')

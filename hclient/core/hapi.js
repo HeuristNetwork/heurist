@@ -469,7 +469,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @param {callserverCallback} callback
              */
             logout: function (callback) {
-                _callserver('usr_info', { a: 'logout' }, callback);
+                _callserver('usr_info', { a: 'logout' }, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HAPI4.setCurrentUser(null);
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+                            
+                            if(window.hWin.HEURIST4.util.isFunction(callback)){
+                                callback(response);  
+                            } 
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
             },
 
             /**
@@ -1665,8 +1677,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             , search_new: function (request, callback) {
                 // start search
-                
-
                 _callserver('record_output', request, callback);    //standard search
             }
 

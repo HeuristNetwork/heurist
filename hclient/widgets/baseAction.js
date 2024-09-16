@@ -125,16 +125,26 @@ $.widget( "heurist.baseAction", {
         //find and activate event listeners for elements
         
         if(this.options.isdialog){
+            this._$('.ui-dialog-buttonset').hide();
+            this._$('.ui-heurist-header').hide();
             
             this.popupDialog();
             
-        }else if(this.options.innerTitle){ 
+        }else {
+            this._innerTitle = this._$('.ui-heurist-header');
+            
+            if(this.options.innerTitle){ 
 
                 let fele = this.element.children().get(0);
                 
-                //titlebar            
-                this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
-                .insertBefore(fele);
+                if(this._innerTitle.length==0){
+                    //titlebar            
+                    this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;"></div>')
+                                        .insertBefore(fele);
+                    $(fele).css('margin-top', '38px');
+                }
+                
+                this._innerTitle.text(this.options.title);
 
                 this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:window.hWin.HR('Close')}) 
                 .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
@@ -145,7 +155,19 @@ $.widget( "heurist.baseAction", {
                 }});
                 this.closeBtn.find('.ui-icon-closethick').css({'color': 'rgb(255,255,255)'});
                 
-                $(fele).css('margin-top', '38px');
+                
+            }else{
+                this._innerTitle.hide();
+            }
+         
+            // bottom bar buttons
+            let btnPanel = this._$('.ui-dialog-buttonset');
+            if(btnPanel.length>0){
+                let btn_array = this._getActionButtons();
+                btn_array.forEach(function(btn){
+                     $('<button>',btn).button().appendTo(btnPanel);
+                });
+            }
         }
         
         //show hide hints and helps according to current level

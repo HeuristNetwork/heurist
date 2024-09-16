@@ -156,12 +156,16 @@ foreach ($rectype_ids as $rty_id) {
         foreach ($rectype_structure['details'] as $dt => $details) {
 
             foreach ($details as $value) {
-                if(array_key_exists('file', $value)){ // file field
-                    $value = $file_field;
-                }elseif(array_key_exists('geo', $value)){ // geo field
-                    $value = $geo_field;
-                }elseif(array_key_exists('id', $value) && $value['id'] == 'RECORD_REFERENCE'){
-                    $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+                if(is_array($value)){
+                    if(array_key_exists('file', $value)){ // file field
+                        $value = $file_field;
+                    }elseif(array_key_exists('geo', $value)){ // geo field
+                        $value = $geo_field;
+                    }elseif(array_key_exists('id', $value) && strpos($value['id'],'RECORD_REFERENCE')===0){
+                        $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+                    }else{
+                        $value = '"' . json_encode($value) . '"';
+                    }
                 }elseif(strpos($value, 'VALUE') !== false){ //$value == 'VALUE'
                     $value = '"TRM_ID"';
                 }elseif(strpos($value, 'SEE NOTES AT START') !== false){ //$value == 'SEE NOTES AT START'

@@ -1,5 +1,6 @@
 /**
-* navigation.js : menu for CMS
+* navigation.js : menu based on RT_CMS_MENU records
+* it is used for CMS
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

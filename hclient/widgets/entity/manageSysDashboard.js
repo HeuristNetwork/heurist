@@ -22,7 +22,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     
     options: {
         is_iconlist_mode: true,  //show in compact mode
-        isViewMode: true
+        isViewMode: true   // true - production mode, false - edit mode 
     },
 
     _entityName:'sysDashboard',

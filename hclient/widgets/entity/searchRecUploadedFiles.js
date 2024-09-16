@@ -234,6 +234,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['sort:ulf_OrigFileName'] = '-1';   
             }
             
+console.log(request['ulf_ExternalFileReference']);            
+            
             this._search_request = request;
             this._super();
     },

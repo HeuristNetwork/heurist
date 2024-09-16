@@ -1,42 +1,42 @@
 [
     {
         "id": "menu-database-browse",
-        "href": "#",
+        "text": "Open",
+        
         "data": {
             "user-admin-status": "-1",
             "logaction": "db_Browse",
             "icon": "ui-icon-database",
             "container": "admin"
-        },
-        "text": "Open"
+        }
     },
     {
         "id": "menu-database-create",
-        "href": "#",
+        "text": "New",
+
         "data": {
             "user-admin-status": "0",
             "logaction": "db_New",
             "icon": "ui-icon-plus",
             "header": "Create new database",
             "container": "admin"
-        },
-        "text": "New"
+        }
     },
     {
         "id": "menu-database-clone",
-        "href": "#",
+        "text": "Clone",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "db_Clone",
             "icon": "ui-icon-databases",
             "header": "Clone database",
             "container": "admin"
-        },
-        "text": "Clone"
+        }
     },
     {
         "id": "menu-database-rename",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "db_Rename",
@@ -48,7 +48,7 @@
     },
     {
         "id": "menu-database-restore",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "db_Restore",
@@ -61,7 +61,7 @@
     },
     {
         "id": "menu-database-properties",
-        "href": "#",
+        
         "data": {
             "entity": "sysIdentification",
             "user-admin-status": "1",
@@ -73,7 +73,7 @@
     },
     {
         "id": "menu-lookup-config",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "configure_ExternalLookups",
@@ -84,7 +84,7 @@
     },
     {
         "id": "menu-repository-config",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "configure_ExternalRepositories",
@@ -95,7 +95,7 @@
     },
     {
         "id": "menu-database-register",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "db_Register",
@@ -108,7 +108,7 @@
     },
     {
         "id": "menu-database-delete",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "user-experience-level": "1",
@@ -120,7 +120,7 @@
     },
     {
         "id": "menu-database-clear",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "user-experience-level": "1",
@@ -133,7 +133,7 @@
     },
     {
         "id": "menu-database-rollback",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "user-experience-level": "1",
@@ -143,7 +143,7 @@
     },
     {
         "id": "menu-database-verify",
-        "href": "#",
+        
         "data": {
             "container": "admin",
             "logaction": "verify_st",
@@ -156,7 +156,7 @@
     },
     
     {
-        "href": "#",
+        
         "id": "menu-admin-server",
         "data": {
             "icon": "ui-icon-databases",
@@ -173,7 +173,7 @@
     
     {
         "id": "menu-cms-create",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "cms_new",
@@ -185,7 +185,7 @@
     },
     {
         "id": "menu-cms-edit",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "cms_edit",
@@ -197,7 +197,7 @@
     },
     {
         "id": "menu-cms-view",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "0",
             "logaction": "cms_edit",
@@ -207,7 +207,7 @@
     },
     {
         "id": "menu-cms-embed",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "cms_edit",
@@ -219,7 +219,7 @@
     },
     {
         "id": "menu-cms-create-page",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "header": "Create new webpage",
@@ -230,7 +230,7 @@
     },
     {
         "id": "menu-cms-edit-page",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "header": "Edit webpage",
@@ -241,7 +241,7 @@
     },
     {
         "id": "menu-cms-view-page",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "0",
             "icon": "ui-icon-eye"
@@ -252,63 +252,65 @@
     {
         "text": "---------------------------------------------------- PROFILE "
     },
-    
+
+
     {
-        "id": "menu-profile-preferences",
-        "href": "#",
-        "data": {
-            "logaction": "prof_Prefs",
-            "icon": "ui-icon-settings",
-            "container": "design"
-        },
-        "text": "My Preferences"
+      
+      "id": "menu-profile-preferences",
+      "text": "My Preferences",
+      "data": {
+        "logaction": "prof_Prefs",
+        "icon": "ui-icon-settings",
+        "container": "design"
+      }
     },
     {
-        "id": "menu-profile-tags",
-        "href": "#",
-        "data": {
+      "id": "menu-profile-tags",
+      "text": "Manage tags",
+      "title": "Delete, combine, rename your personal and workgroup tags",
+      "data": {
+            "entity": "usrTags",
             "logaction": "prof_Tags"
-        },
-        "title": "Delete, combine, rename your personal and workgroup tags",
-        "text": "Manage tags"
+      }
     },
     {
         "id": "menu-profile-reminders",
-        "href": "#",
-        "data": {
-            "logaction": "prof_Reminders"
-        },
+        "text": "Manage reminders",
         "title": "View and delete automatic notification emails sent from the records you have bookmarked",
-        "text": "Manage reminders"
-    },
-    {
-        "text": "-"
+        
+        "data": {
+            "entity": "usrReminders",
+            "logaction": "prof_Reminders"
+        }
     },
     {
         "id": "menu-profile-info",
-        "href": "#",
-        "data": {
-            "logaction": "prof_Userinfo"
-        },
+        "text": "My user info",
         "title": "User personal information",
-        "text": "My user info"
+        
+        "data": {
+            "entity": "sysUsers",
+            "logaction": "prof_Userinfo"
+        }
     },
     {
-        "id": "menu-profile-groups",
-        "href": "#",
-        "data": {
-            "logaction": "prof_Workgroups",
-            "icon": "ui-icon-users",
-            "container": "admin",
-            "user-admin-status": "1"
-        },
-        "title": "List of groups you are member of",
-        "text": "Workgroups"
+      "id": "menu-profile-groups",
+      "text": "Workgroups",
+      "title": "List of groups you are member of",
+      
+      "data": {
+        "entity": "sysGroups",
+        "logaction": "prof_Workgroups",
+        "icon": "ui-icon-users",
+        "container": "admin",
+        "user-admin-status": "1"
+      }
     },
     {
         "id": "menu-profile-users",
-        "href": "#",
+        
         "data": {
+            "entity": "sysUsers",
             "logaction": "prof_Users",
             "icon": "ui-icon-user",
             "user-admin-status": "1",
@@ -317,30 +319,32 @@
         "text": "Users"
     },
     {
-        "id": "menu-profile-import",
-        "href": "#",
-        "data": {
-            "logaction": "prof_ImportUser",
-            "icon": "ui-icon-download",
-            "user-admin-status": "1",
-            "container": "admin"
-        },
-        "text": "Import user"
+      
+      "id": "menu-profile-import",
+      "text": "Import user",
+      
+      "data": {
+        "logaction": "prof_ImportUser",
+        "icon": "ui-icon-download",
+        "help": "",
+        "user-admin-status": "1",
+        "container": "admin"
+      }
     },
     {
         "id": "menu-profile-logout",
-        "href": "#",
+        
         "title": "Log out Heurist",
         "text": "Log out"
     },
-    
+
     {
         "text": "---------------------------------------------------- STRUCTURE"
     },
 
     {
         "id": "menu-structure-rectypes",
-        "href": "#",
+        
         "data": {
             "entity": "defRecTypes",
             "user-admin-status": "1",
@@ -351,7 +355,7 @@
     },
     {
         "id": "menu-structure-vocabterms",
-        "href": "#",
+        
         "data": {
             "entity": "defTerms",
             "user-admin-status": "1",
@@ -362,7 +366,7 @@
     },
     {
         "id": "menu-structure-fieldtypes",
-        "href": "#",
+        
         "data": {
             "entity": "defDetailTypes",
             "user-admin-status": "1",
@@ -373,7 +377,7 @@
     },
     {
         "id": "menu-structure-workflowstages",
-        "href": "#",
+        
         "data": {
             "entity": "sysWorkflowRules",
             "user-admin-status": "1",
@@ -384,7 +388,7 @@
     },
     {
         "id": "menu-structure-import",
-        "href": "#",
+        
         "data": {
             "user-admin-status": "1",
             "logaction": "imp_st",
@@ -407,7 +411,7 @@
     },
     {
         "id": "menu-structure-mimetypes",
-        "href": "#",
+        
         "data": {
             "entity": "defFileExtToMimetype",
             "user-admin-status": "1",
@@ -422,16 +426,17 @@
     },
     {
         "id": "menu-manage-dashboards",
-        "href": "#",
+        "text": "Shortcuts bar",
+        
         "data": {
+            "entity": "sysDashboard",
             "icon": "ui-icon-redo",
             "container": "design"
-        },
-        "text": "Shortcuts bar"
+        }
     },
     {
         "id": "menu-structure-refresh",
-        "href": "#",
+        
         "data": {
             "icon": "ui-icon-refresh",
             "user-admin-status": "0",
@@ -441,7 +446,7 @@
     },
     {
         "id": "menu-structure-duplicates",
-        "href": "#",
+        
         "data": {
             "icon": "ui-icon-grip-solid-vertical",
             "user-permissions": "add delete",
@@ -489,14 +494,14 @@
     },
     {
         "id": "menu-profile-files",
-        "href": "#",
+        "text": "Manage files",
+        
         "data": {
+            "entity": "recUploadedFiles",
             "logaction": "prof_Files",
             "icon": "ui-icon-files",
-            "help": "",
             "container": "populate"
-        },
-        "text": "Manage files"
+        }
     },
     {
         "id": "menu-manage-rectitles",
@@ -559,5 +564,236 @@
         },
         "title": "Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)",
         "text": "Structure (Text)"
+    },
+    {
+        "text": "---------------------------------------------------- ABOUT/Help"
+    },
+    {
+        
+        "target": "_blank",
+        "id": "menu-help-online",
+        "data": {
+            "logaction": "hlp_Online"
+        },
+        "text": "Documentation"
+    },
+    {
+        "href": "https://HeuristNetwork.org",
+        "target": "_blank",
+        "data": {
+            "logaction": "hlp_Tips"
+        },
+        "id": "menu-help-quick-tips",
+        "text": "Understanding Heurist"
+    },
+    {
+        "href": "https://HeuristNetwork.org",
+        "target": "_blank",
+        "id": "menu-help-website",
+        "data": {
+            "logaction": "hlp_Website"
+        },
+        "text": "Heurist Network website"
+    },
+    {
+        "href": "Heurist_RoadMap.html",
+        "target": "_blank",
+        "id": "menu-help-roadmap",
+        "data-logaction": "hlp_RoadMap",
+        "text": "RoadMap"
+    },
+    {
+        "href": "Heurist_Development_History.html",
+        "target": "_blank",
+        "id": "menu-help-devhist",
+        "data": {
+            "logaction": "hlp_DevHist"
+        },
+        "text": "Feature history"
+    },
+    {
+        "id": "menu-help-bugreport",
+        "text": "Bug report/feature request",
+        
+        "data": {
+            "entity": "sysBugreport",
+            "user-admin-status": "0"
+        }
+    },
+    {
+        "href": "mailto:info@HeuristNetwork.org",
+        "target": "_blank",
+        "id": "menu-help-emailteam",
+        "data": {
+            "user-admin-status": "0",
+            "ext": "1"
+        },
+        "text": "Heurist Team"
+    },
+    {
+        "id": "menu-help-emailadmin",
+        "data": {
+            "user-admin-status": "0"
+        },
+        "text": "System Administrator"
+    },
+    {
+        "id": "menu-help-acknowledgements",
+        "text": "Acknowledgements"
+    },
+    {
+        "id": "menu-help-about",
+        "text": "About"
+    },
+    {
+        "text": "---------------------------------------------------- IMPORT"
+    },
+    {
+      "display": "none",
+      "id": "menu-import-add-record",
+      "title": "Add new record of specified record type",
+      "text": "Add record",
+      "data": {
+        "logaction": "add_Record",
+        "header": "Add new record",
+        "icon": "ui-icon-file-plus"
+      }
+    },
+    {
+      "href": "import/delimited/importRecordsCSV.php",
+      "id": "menu-import-csv",
+      "text": "Delimited text / CSV",
+      "data": {
+        "user_member_status": "1",
+        "logaction": "imp_Delimed",
+        "size": "large",
+        "header": "Import > Records from CSV/TSV",
+        "help": "importRecordsCSV",
+        "icon": "ui-icon-file-table",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/biblio/syncZotero.php",
+      "id": "menu-import-zotero",
+      "text": "Zotero bibliography sync",
+      "data": {
+        "logaction": "sync_Zotero",
+        "size": "portrait",
+        "header": "Import > Synchronise with a Zotero web library",
+        "help": "syncZotero",
+        "icon": "ui-icon-book-b",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/delimited/importRecordsCSV.php?format=kml",
+      "id": "menu-import-kml",
+      "text": "KML",
+      "data": {
+        "user_member_status": "1",
+        "logaction": "imp_KML",
+        "size": "large",
+        "header": "Import > Records from KML",
+        "help": "importRecordsKML",
+        "icon": "ui-icon-globe-b",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/utilities/importRecords.php",
+      "id": "menu-import-xml",
+      "text": "Heurist XML/JSon",
+      "data": {
+        "user_member_status": "1",
+        "logaction": "imp_Records",
+        "header": "Import > XML or JSON file",
+        "help": "importRecordsXML",
+        "dialog_width": "760",
+        "dialog_height": "570",
+        "icon": "ui-icon-script",
+        "container": "populate"
+      }
+    },
+    {
+      "id": "menu-import-get-template",
+      "text": "Download template (XML)"
+    },
+    {
+      "href": "import/utilities/manageFilesUpload.php",
+      "id": "menu-files-upload",
+      "text": "Upload media files/images",
+      "data": {
+        "user_admin_status": "1",
+        "size": "medium",
+        "class": "upload_files",
+        "header": "Populate > Upload media files/images",
+        "icon": "ui-icon-upload",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/fieldhelper/synchroniseWithFieldHelper.php",
+      "id": "menu-files-index",
+      "text": "Create media records",
+      "data": {
+        "user_admin_status": "1",
+        "size": "medium",
+        "header": "Import > Create media records",
+        "icon": "ui-icon-list",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/delimited/importMedia.php",
+      "id": "menu-files-csv",
+      "text": "Register files from CSV",
+      "data": {
+        "user_admin_status": "1",
+        "size": "medium",
+        "header": "Import > Media files",
+        "icon": "ui-icon-file-table",
+        "container": "populate"
+      }
+    },
+    {
+      "href": "import/delimited/importFileData.php",
+      "id": "menu-files-data",
+      "text": "Import file data from CSV",
+      "data": {
+        "user_admin_status": "1",
+        "size": "medium",
+        "header": "Import > Media data for existing files",
+        "icon": "ui-icon-file-table",
+        "container": "populate"
+      }
+    },
+    {
+      "id": "menu-subset-set",
+      "text": "Set as subset",
+      "data": {
+        "user_experience_level": "3",
+        "icon": "ui-icon-lightning-explore"
+      }
+    },
+    {
+      "id": "menu-extract-pdf",
+      "text": "Extract text from PDF (experimental)",
+      "title": "Extract text from PDF files",
+      "data": {
+        "user_experience_level": "0",
+        "icon": "ui-icon-file-pdf"
+      }
+    },
+    {
+      "href": "import/hyperlinks/importHyperlinks.php",
+      "text": "Harvest hyperlinks",
+      "title": "Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online",
+      "data": {
+        "logaction": "imp_Hyperlinks",
+        "size": "medium",
+        "user_experience_level": "1",
+        "header": "Import > Records from bookmakrs file or web page hyperlinks"
+      }
     }
 ]

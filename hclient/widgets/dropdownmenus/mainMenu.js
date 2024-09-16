@@ -83,14 +83,14 @@ $.widget( "heurist.mainMenu", {
 
     version_message: null, // container for message about available alpha/stable version
     
-    actioHandler: null,
+    actionHandler: null,
 
     // the widget's constructor
     _create: function() {
 
         let that = this;
         
-        this.actioHandler = new ActionHandler();
+        this.actionHandler = new ActionHandler();
         
         this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
 
@@ -300,21 +300,6 @@ $.widget( "heurist.mainMenu", {
         }
         
         // LISTENERS --------------------------------------------------
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
-            function(e, data) {
-                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-                    if(data && !data.search_realm) {
-                        let query_request = data;
-
-                        that._current_query_string = '&w='+query_request.w;
-                        if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
-                            that._current_query_string = that._current_query_string
-                            + '&q=' + encodeURIComponent(query_request.q);
-                        }
-                    }
-                }
-        });
-
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS
             +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
             that._refresh();
@@ -404,21 +389,6 @@ $.widget( "heurist.mainMenu", {
         }   
     },
     
-
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
-    _init: function() {
-
-    },
-
-
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
-        this._superApply( arguments );
-    },
-
-
 
     /*
     * private function
@@ -807,7 +777,11 @@ $.widget( "heurist.mainMenu", {
     
     menuActionHandler: function(event, item, dialog_options){
         
-        if (this.actioHandler.executeActionById(item.attr('id'))){
+        let action = item.attr('id');
+        
+        if (action.indexOf('menu-cms')<0){
+            this.actionHandler.executeActionById(action);
+            if(event) window.hWin.HEURIST4.util.stopEvent(event);
             return;
         }
         
@@ -818,7 +792,6 @@ $.widget( "heurist.mainMenu", {
           return;  
         } 
         
-        let action = item.attr('id');
         let action_log = item.attr('data-logaction');
         let action_level = item.attr('data-user-admin-status');
         let action_member_level = item.attr('data-user-member-status');
@@ -1136,19 +1109,14 @@ $.widget( "heurist.mainMenu", {
             that._exportRecords(popup_dialog_options);
             
         }
-        else if(action == "menu-import-get-template"){
-            that._generateHeuristTemplate();
-        }
-        else if(action == 'menu-extract-pdf'){
-            
+        else if(action == 'menu-extract-pdf'){ //not used
             //this menu should not be in main menu. IJ request
             let app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_resultList');
             if(app && app.widget){
                 $(app.widget).resultList('callResultListMenu', 'menu-selected-extract-pdf'); //call method
             }
-            
         }
-        else if(action == 'menu-subset-set'){
+        else if(action == 'menu-subset-set'){  //not used   Set current result as a working subset
             
             let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
@@ -1160,69 +1128,7 @@ $.widget( "heurist.mainMenu", {
                 widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
-        }
-        else if(action == "menu-manage-dashboards"){
-           
-           entity_dialog_options['is_iconlist_mode'] = false;
-           entity_dialog_options['isViewMode'] = false;
-           entity_dialog_options['onClose'] = function(){
-                            setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
-                        }; 
-            
-           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard', entity_dialog_options);
-        
-        }
-        else if(action == "menu-help-online"){
-            
-            window.open( window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website', target );
-            
-        }
-        else if(action == "menu-help-bugreport"){
-            
-           window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');
         }else 
-        if(action == "menu-profile-tags"){
-            window.hWin.HEURIST4.ui.showEntityDialog('usrTags');
-        }else 
-        if(action == "menu-profile-reminders"){
-            window.hWin.HEURIST4.ui.showEntityDialog('usrReminders');
-        }else 
-        if(action == "menu-profile-files"){
-            //{width:950}
-            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles',entity_dialog_options);
-        }else 
-        if(action == "menu-profile-groups"){
-            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', entity_dialog_options);
-        }else 
-        if(action == "menu-profile-info"){
-            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', 
-                {edit_mode:'editonly', rec_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
-        }else 
-        if(action == "menu-profile-users"){ //for admin only
-            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', entity_dialog_options);
-        }else 
-        if(action == "menu-profile-preferences"){
-            that._editPreferences( popup_dialog_options );
-        }else
-        if(action == "menu-profile-import"){  //for admin only
-            that._importUsers( entity_dialog_options );
-        }else
-        if(action == "menu-profile-logout"){ 
-            that.logout();
-        }else 
-        if(action == "menu-database-refresh"){
-            that._refreshLists( true );
-        }else if(action == "menu-admin-server"){
-            that._showAdminServer({entered_password:entered_password});
-        }else if(action == "menu-help-quick-tips"){
-            $('.ui-menu6').mainMenu6('showQuickTips');
-        }else if(action == "menu-manage-rectitles"){
-
-            let dlg_options = $.extend(popup_dialog_options, {});
-            dlg_options['title'] = item.attr('data-header') ? item.attr('data-header') : 'Rebuild record titles';
-
-            that._rebuildRecordTitles(dlg_options);
-        }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
             
             
@@ -1438,384 +1344,8 @@ $.widget( "heurist.mainMenu", {
 
     },
 
-
-    /**
-    * Open Edit Preferences dialog (@todo: ? move into separate file?)
-    */
-    _editPreferences: function( popup_options )
-    {
-        let that = this;
-        
-        if(!popup_options) popup_options = {};
-
-        let $dlg = (popup_options.container)  //if ther is container - this is not a popup
-                        ?popup_options.container
-                        :$("#heurist-dialog").addClass('ui-heurist-bg-light');
-        $dlg.empty();
-
-        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_preferences.html?t="+(new Date().time), function(){
-
-            
-            //find all labels and apply localization
-            $dlg.find('label').each(function(){
-                $(this).html(window.hWin.HR($(this).html()));
-            })
-            $dlg.find('.header').css({'min-width':'300px', 'width':'300px'});
-
-            //fill list of languages
-            //fill list of layouts
-            initProfilePreferences();
-
-            //assign values to form fields from window.hWin.HAPI4.currentUser['ugr_Preferences']
-            let prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
-            
-            let allFields = $dlg.find('input,select');
-
-            let currentTheme = prefs['layout_theme'];
-            /* @todo later
-            var themeSwitcher = $("#layout_theme").themeswitcher(
-                {initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
-                currentTheme:currentTheme,
-                onSelect: function(){
-                    currentTheme = this.currentTheme;
-            }});
-            */
-
-            //default
-            prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-            prefs['userFontSize'] = window.hWin.HAPI4.get_prefs_def('userFontSize', 12);
-            prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
-            prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
-            prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
-            prefs['entity_btn_on'] = window.hWin.HAPI4.get_prefs_def('entity_btn_on', 1);
-            
-            let map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
-            map_controls = map_controls.split(',');
-            prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;
-            prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
-            prefs['mctrl_publish'] = 0;
-            for(let i=0;i<map_controls.length;i++){
-                prefs['mctrl_'+map_controls[i]] = 1;
-            }
-
-            // Map popup record view
-            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), 
-                [{key:'',title:'Standard map popup template'},
-                 {key:'standard',title:'Standard record info (in popup)'},
-                 {key:'none',title:'Disable popup'}
-                 ],
-                 window.hWin.HAPI4.get_prefs_def('map_template', null));
-
-            // Main record view
-            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#main_recview'), [{key:'default',title:'Standard record view'}],
-                            window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
-
-            //from prefs to ui
-            allFields.each(function(){
-                if(prefs[this.id]){
-                    if(this.type=="checkbox"){
-                        this.checked = (prefs[this.id]=="1" || prefs[this.id]=="true")
-                    }else{
-                        $(this).val(prefs[this.id]);
-                    }
-                };
-            });
-            
-            //change font size example
-            $dlg.find('#userFontSizeExample')
-                .css('font-size', prefs['userFontSize']+'px')
-                .position({
-                    my: 'left+15 center',
-                    at: 'right center',
-                    of: $dlg.find('#userFontSize')
-                });
-
-            $dlg.find('#userFontSize').on('change', function(){ 
-                let size = $dlg.find('#userFontSize').val();
-                $dlg.find('#userFontSizeExample')
-                    .css('font-size', size+'px')
-                    .position({
-                        my: 'left+15 center',
-                        at: 'right center',
-                        of: $dlg.find('#userFontSize')
-                    });
-            });
-
-            //custom/user heurist theme
-            let custom_theme_div = $dlg.find('#custom_theme_div');
-            
-            let $btn_edit_clear2 = $('<span>')
-            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
-            .attr('tabindex', '-1')
-            .attr('title', 'Reset default color settings')
-            .appendTo( custom_theme_div )
-            .css({'line-height': '20px',cursor:'pointer',
-                outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
-                .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                    function(){$dlg.find('#custom_theme').val('');}); }});
-                
-            let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
-                .addClass('smallbutton')
-                .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'})
-                .appendTo( custom_theme_div );
-                
-                
-            function __openThemeDialog(){
-                    let current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find('#custom_theme').val() );
-                    if(!current_val) current_val = {};
-                    window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
-                        $dlg.find('#custom_theme').val(JSON.stringify(new_value));
-                    });
-            }
-                
-            $dlg.find('#custom_theme').attr('readonly','readonly').on({ click: __openThemeDialog });
-            $btn_edit_switcher2.on( { click: __openThemeDialog });
-            
-            
-            //map symbology editor            
-            window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_default_style'));
-            window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'));
-            
-            
-            let ele = $dlg.find('#mapcluster_on');
-            $dlg.find('#mapcluster_grid').on('change', function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_count').on('change', function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_zoom').on('change', function(){ ele.prop('checked', true)});
-
-            //save to preferences
-            function __doSave(){
-
-                let request = {};
-                let val;
-                let map_controls = [];
-
-                allFields.each(function(){
-                    if(this.type=="checkbox"){
-                        if(this.id.indexOf('mctrl_')<0){
-                            request[this.id] = this.checked?"1":"0";
-                        }else if(this.checked){
-                            map_controls.push(this.value);
-                        }
-                    }else{
-                        request[this.id] = $(this).val();
-                    }
-                });
-                request['mapcontrols'] = map_controls.length==0?'none':map_controls.join(',');
-                
-                request.layout_theme = currentTheme;
-                
-                //save preferences in session
-                window.hWin.HAPI4.SystemMgr.save_prefs(request,
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            let prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
-                            
-                            let ask_reload = (prefs['layout_language'] != request['layout_language'] ||
-                                //prefs['layout_theme'] != request['layout_theme'] ||
-                                prefs['layout_id'] != request['layout_id']);
-                                
-                            let reload_color_css = (prefs['custom_theme'] != request['custom_theme']);
-
-                            let reload_map = (prefs['mapcluster_grid'] != request['mapcluster_grid'] ||    
-                                prefs['mapcluster_on'] != request['mapcluster_on'] || 
-                                prefs['search_detail_limit'] != request['search_detail_limit'] ||
-                                prefs['mapcluster_count'] != request['mapcluster_count'] ||   
-                                prefs['mapcluster_zoom'] != request['mapcluster_zoom'] ||
-                                prefs['deriveMapLocation'] != request['deriveMapLocation'] || 
-                                prefs['map_rollover'] != request['map_rollover'] || 
-                                prefs['mapcontrols'] != request['mapcontrols']);
-                                
-                            //check help toggler and bookmark search - show/hide
-                            window.hWin.HEURIST4.ui.applyCompetencyLevel(request['userCompetencyLevel']);
-                            
-                            if(prefs['bookmarks_on'] != request['bookmarks_on']){
-                                $('.heurist-bookmark-search').css('display',
-                                    (request['bookmarks_on']=='1')?'inline-block':'none');
-                            }
-                            if(prefs['entity_btn_on'] != request['entity_btn_on']){
-                                let is_vis = (request['entity_btn_on']=='1');
-                                $('.heurist-entity-filter-buttons').css({'visibility':
-                                    is_vis?'visible':'hidden',
-                                    'height':is_vis?'auto':'10px'});
-                            }
-                            
-                            $.each(request, function(key,value){
-                                window.hWin.HAPI4.currentUser['ugr_Preferences'][key] = value;    
-                            });
-
-                            //window.hWin.HAPI4.currentUser['ugr_Preferences'] = request; //wrong since request can have only part of peferences!!!!!
-                            /*allFields.each(function(){
-                            window.hWin.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
-                            });*/
-
-                            if(popup_options.container){    
-                                popup_options.container.hide();
-                            }else{
-                                $dlg.dialog( "close" );
-                            }
-
-                            if(ask_reload){
-                                window.hWin.HEURIST4.msg.showMsgFlash('Reloading page to apply new settings', 2000);
-                                setTimeout(function(){
-                                        window.location.reload();
-                                    },2100);
-
-                                /*window.hWin.HEURIST4.msg.showMsgDlg('Reload page to apply new settings?',
-                                    function(){
-                                        window.location.reload();
-                                    }, 'Confirmation');*/
-                            }else {
-                            
-                                if(reload_map){
-                                    //reload map frame forcefully
-                                    let app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map2');
-                                    if(app && app.widget){
-                                        $(app.widget).app_timemap('reloadMapFrame'); //call method
-                                    }
-                                }
-                                
-                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                                
-                                //reload color scheme
-                                if(reload_color_css){
-                                    $('head').find('#heurist_color_theme')
-                                        .load( window.hWin.HAPI4.baseURL 
-                                        + 'hclient/framecontent/initPageTheme.php?db='
-                                        + window.hWin.HAPI4.database);
-                                }
-                                
-                                window.hWin.HEURIST4.msg.showMsgFlash('Preferences are saved');
-                            }
-
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);      
-                        }
-                    }
-                );
-            }
-            
-            
-            if(popup_options.container){
-                
-                $dlg.find('.ui-heurist-header').html('Personal preferences (for this database)');
-                
-                $dlg.find('.ui-dialog-buttonpane').show();
-                $dlg.find('.btn-ok').button().on({click:__doSave});
-                $dlg.find('.btn-cancel').button().on({click:function(){
-                        popup_options.container.hide();
-                }});
-                
-            }else{
-
-                $dlg.dialog({
-                    autoOpen: true,
-                    height: 'auto', //600,
-                    width: 'auto', //800,
-                    modal: true,
-                    resizable: false,
-                    draggable: true,
-                    title: window.hWin.HR("Preferences"),
-                    buttons: [
-                        {text:window.hWin.HR('Save'), click: __doSave},
-                        {text:window.hWin.HR('Cancel'), click: function() {
-                            $( this ).dialog( "close" );
-                        }}
-                    ]
-                });
-            }
-        });
-
-    } //end _editPreferences
-
-    
-    , _importUsers: function ( entity_dialog_options ){
-        
-        if(!entity_dialog_options) entity_dialog_options = {};
-        
-        let options = $.extend(entity_dialog_options, {
-            subtitle: 'Step 1. Select database with users to be imported',
-            title: 'Import users', 
-            select_mode: 'select_single',
-            pagesize: 300,
-            edit_mode: 'none',
-            use_cache: true,
-            except_current: true,
-            keep_visible_on_selection: true,
-            onselect:function(event, data){
-                if(data && data.selection && data.selection.length>0){
-                        let selected_database = data.selection[0].substr(4);
-                        
-                        let options2 = $.extend(entity_dialog_options, {
-                            subtitle: 'Step 2. Select users in '+selected_database+' to be imported',
-                            title: 'Import users', 
-                            database: selected_database,
-                            select_mode: 'select_multi',
-                            edit_mode: 'none',
-                            keep_visible_on_selection: true,
-                            onselect:function(event, data){
-                                if(data && data.selection &&  data.selection.length>0){
-                                    let selected_users = data.selection;
-
-                                    let options3 = $.extend(entity_dialog_options, {
-                                        subtitle: 'Step 3. Allocate imported users to work groups',
-                                        title: 'Import users', 
-                                        select_mode: 'select_roles',
-                                        selectbutton_label: 'Allocate roles',
-                                        sort_type_int: 'recent',
-                                        edit_mode: 'none',
-                                        keep_visible_on_selection: false,
-                                        onselect:function(event, data){
-                                            if(data && !$.isEmptyObject(data.selection)){
-                                                //selection is array of object
-                                                // [grp_id:role, ....]
-                                                /*
-                                                var s = '';
-                                                for(grp_id in data.selection)
-                                                if(grp_id>0 && data.selection[grp_id]){
-                                                    s = s + grp_id+':'+data.selection[grp_id]+',';
-                                                }
-                                                if(s!='')
-                                                    alert( selected_database+'  '+selected_users.join(',')
-                                                        +' '+s);  
-                                                */        
-                                                        
-                                            let request = {};
-                                            request['a']         = 'action';
-                                            request['entity']    = 'sysUsers';
-                                            request['roles']     = data.selection;
-                                            request['userIDs']   = selected_users;
-                                            request['sourceDB']  = selected_database;
-                                            request['request_id'] = window.hWin.HEURIST4.util.random();
-
-                                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                                function(response){             
-                                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
-                                                    }else{
-                                                        window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                    }
-                                            });
-                                                        
-                                            }
-                                        }
-                                    });              
-                                    
-                                    window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
-                                }
-                            }
-                        });
-                        
-                        
-                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
-                }
-            }
-        });    
-    
-        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     
     
-    },
 
 
     // @todo - move to editCMS_Records
@@ -2031,28 +1561,6 @@ $.widget( "heurist.mainMenu", {
     
     //------------------------ LOGIN / LOGOUT --------------------
 
-    //
-    //
-    //
-    logout: function(){
-
-        let that = this;
-
-        window.hWin.HAPI4.SystemMgr.logout(
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    that._initial_search_already_executed = false;
-                    window.hWin.HAPI4.setCurrentUser(null);
-                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-                   
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            }
-        );
-
-    },
-    
     //
     // show login popup dialog if not logged in
     // if login fails show list of databases
@@ -2272,130 +1780,6 @@ $.widget( "heurist.mainMenu", {
         }
     },
      
-    //
-    // create popup to guide user for creating a template file w/ rectypes
-    //
-    _generateHeuristTemplate: function(){
-
-        let $dlg;
-
-        let content = "<div style='display: table'>"
-                        + "<div style='margin-bottom: 10px'>"
-                            + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Download template: </div>"
-                            + "<div style='display: table-cell'>"
-                                + "<label for='template-xml'><input name='template-type' id='template-xml' type='radio' value='xml' checked='checked'> XML</label>"
-                                + "<label for='template-json'><input name='template-type' id='template-json' type='radio' value='json'> JSON</label>"
-                            + "</div>"
-                        + "</div>"
-
-                        + "<div>"
-                            + "<div class='header' style='display: table-cell;max-width: 125px; min-width: 125px;'>Record types: </div>"
-                            + "<div style='display: table-cell'>"
-                                + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox' checked='checked'> All Rectypes</label>"
-                                + "<div style='margin: 5px 0px'>or</div>"
-                                + "<button id='rectypes-select'>Select record types</button>"
-                                + "<div style='margin: 10px 0px'>Selected Record Types: </div>"
-                                + "<div "
-                                    + "style='min-width:165px;max-width:165px;max-height:200px;min-height:200px;border: black solid 1px;padding:5px;margin-top:5px;overflow-y:auto;'"
-                                    + " id='rectypes-list' data-ids=''>"
-                                        + "<span style='display: inline-block;margin: 5px 0px;'> None </span>"
-                                + "</div>"
-                            + "</div>"
-                        + "</div>"
-                    + "</div>";
-
-        let btns = {};
-        btns['Download'] = function(){
-
-            let template_type = $dlg.find('input[name="template-type"]:checked').attr('id');
-            let rectype_ids = $dlg.find('div#rectypes-list').attr('data-ids');
-            let is_all_rectypes = $dlg.find('input#rectypes-all').is(':checked');
-
-            if(is_all_rectypes) { rectype_ids = 'y'; } // get all rectypes
-
-            if(rectype_ids == null){
-                window.hWin.HEURIST4.msg.showMsgFlash('Please select some record types...', 2000);
-                return;
-            }
-
-            if(template_type == 'template-xml'){
-
-                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                        +'export/xml/flathml.php?file=1&'
-                        +'rectype_templates='+ rectype_ids
-                        +'&db='+window.hWin.HAPI4.database);
-            }else if(template_type == 'template-json'){
-
-                window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
-                    +'export/json/recordTemplate.php?'
-                    +'rectype_ids='+ rectype_ids
-                    +'&db='+window.hWin.HAPI4.database);
-            }else{
-                window.hWin.HEURIST4.msg.showMsgFlash('Please select what type of template you want...', 2000);
-            }
-
-            window.hWin.HEURIST4.msg.showMsgFlash('Downloading File...', 3000);
-            $dlg.dialog('close');
-        };
-        btns['Close'] = function(){
-            $dlg.dialog('close');
-        };
-
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, 
-            {title: 'Download XML or JSON template', yes: 'Download', no: 'Close'},
-            {default_palette_class: 'ui-heurist-publish', dialogId: 'template_popup', width: 400, height: 500});
-
-        $dlg.find('button#rectypes-select').button();
-
-        $dlg.find('button#rectypes-select, div#rectypes-list').on('click', function(){
-
-            let $selected_rectypes = $dlg.find('div#rectypes-list');
-
-            let popup_options = {
-                select_mode: 'select_multi',
-                edit_mode: 'popup',
-                isdialog: true,
-                width: 440,
-                title: 'Select record types',
-                selection_on_init: $selected_rectypes.attr('data-ids').split(','),
-                default_palette_class: 'ui-heurist-publish',
-
-                onselect:function(event, data){
-
-                    let ids = data.selection;
-
-                    if(ids != null && window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
-
-                        $selected_rectypes.attr('data-ids', data.selection.join(',')).text('');
-
-                        for(let i = 0; i < ids.length; i++){
-
-                            let name = $Db.rty(ids[i], 'rty_Name');
-
-                            $selected_rectypes.append(
-                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 2.5px 0px" title="'+ name +'">'
-                                    + name +
-                                '</span>');
-
-                            if((i+1) != ids.length){
-                                $selected_rectypes.append('<br>');
-                            }
-                        }
-                    }else{
-                        $selected_rectypes.attr('data-ids', '').text('<span style="display: inline-block;margin: 5px 0px;"> None </span>');
-                    }
-                }
-            };
-
-            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
-        });
-
-        $dlg.find('input#rectypes-all').on('change', function(event){
-            window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
-        }).trigger('change');
-
-        return false;
-    },
 
     //
     // Display message next to DB name, about available stable/alpha version
