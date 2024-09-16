@@ -1516,7 +1516,7 @@ $mysqli->kill($thread_id);
     }
 
     function is_true($val){
-        return $val===true || in_array(strtolower($val), array('y','yes','true','t','ok'));
+        return $val===true || (is_string($val) && in_array(strtolower($val), array('y','yes','true','t','ok')));
     }
     //
     //
