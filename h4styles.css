@@ -1465,6 +1465,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     margin: 0px 2px;
 }
 
+.horizontalmenu  a.ui-state-active{
+    margin:0px;
+}
+
 /* List view - Datatable */
 table.dataTable th{
     text-align: left;

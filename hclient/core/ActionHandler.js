@@ -129,6 +129,15 @@ class ActionHandler {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }        
         
+        if (actionid.indexOf('menu-cms')==0){
+            if(!this.cmsManager){
+                this.cmsManager = new CmsManager();
+            }
+            this.cmsManager.executeAction(actionid);
+            return true;
+        }
+        
+        
         // Prepare entity and popup dialog options
         let container, menu_container;
         
@@ -316,12 +325,15 @@ class ActionHandler {
             case "menu-manage-rectitles":                                       
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordsTitles', popup_dialog_options);
                 break;
-*/                
-            //case "menu-cms-create":
-            //    //this._handleCMSCreate(popup_dialog_options);
-                break;
 
-           
+            case "menu-cms-embed":
+
+            window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
+                                {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
+                                break;
+
+*/
+
             case "menu-help-quick-tips":
                 contentURL = window.hWin.HAPI4.baseURL+'context_help/quickTips.html';
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
@@ -338,7 +350,7 @@ class ActionHandler {
                 contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
-                        $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
+                        let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
                         $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
@@ -372,12 +384,6 @@ class ActionHandler {
                 break;
         }
   
-        if(is_supported){
-            console.log("Action executed successfully:", actionid);
-        }else{
-            console.log("Action not supportede:", actionid);
-        }
-      
         return is_supported;
     }
     
@@ -401,6 +407,29 @@ class ActionHandler {
                 popup_dialog_options.title = action.text;
             }
             let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
+            
+/*                if (item.hasClass('upload_files')) {
+                    //beforeClose
+                    options['afterclose'] = function( event, ui ) {
+
+                            if(window.hWin.HEURIST4.filesWereUploaded){
+                                
+                                let buttons = {};
+                                buttons[window.hWin.HR('OK')]  = function() {
+                                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                    $dlg.dialog( "close" );
+                                        
+                                    that.actionHandler.executeActionById('menu-index-files');
+                                };                                 
+                                
+                                window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
+                                +' until you run Import > index multimedia This function will open when you click OK.',buttons);
+                            }
+                    }
+                }
+*/
+            
+            
             window.hWin.HEURIST4.msg.showDialog(href, options);
         }
     }
@@ -495,17 +524,3 @@ class ActionHandler {
     }    
     
 }
-
-/*
-// Instantiate the class
-const actioHandler = new ActionHandler(actions);
-
-// Load and display available actions
-actioHandler.loadActions();
-
-// Execute an action by its ID
-actioHandler.executeActionById("menu-structure-refresh");  // Test by ID
-
-// Execute another action
-actioHandler.executeActionById("menu-interact-log");
-*/

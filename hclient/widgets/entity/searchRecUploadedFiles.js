@@ -49,7 +49,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<ul id="menu-file-add-local" link-style="background:#ededed" title="Select file to upload" data-icon="ui-icon-plus"></ul>'
                     +'<ul id="menu-file-add-ext" link-style="background:#ededed" title="Select external file/URL" data-icon="ui-icon-plus"></ul>'
                     +'<ul id="menu-file-import-csv" link-style="background:#ededed" title="Import file data from CSV" data-icon="ui-icon-file-table"></ul>'
-                    +'<ul title="Selected" style="margin-left:150px">'
+                    +'<ul title="Selected" link-style="width:100px" style="margin-left:150px">'
                     +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
                     +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
                     +'<li>---------------</li>'
@@ -58,7 +58,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<li id="menu-file-refrec-add"><a href="#">Create multimedia records for selection</a></li>'
                     +'<li id="menu-file-delete-selected"><a href="#">Delete files in selection</a></li>'
                     +'</ul>'
-                    +'<ul title="Integrity">'
+                    +'<ul title="Integrity" link-style="width:100px">'
                     +'<li id="menu-file-merge-dupes"><a href="#">Combine duplicates</a></li>'
                     +'<li id="menu-file-refresh-index"><a href="#">Refresh index</a></li>'
                     +'<li id="menu-file-check-files"><a href="#">Check files</a></li></ul></div>',
@@ -233,8 +233,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             }else{
                 request['sort:ulf_OrigFileName'] = '-1';   
             }
-            
-console.log(request['ulf_ExternalFileReference']);            
             
             this._search_request = request;
             this._super();

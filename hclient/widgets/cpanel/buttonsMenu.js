@@ -53,7 +53,8 @@ $.widget( "heurist.buttonsMenu", {
             
             that.divMainMenuItems.menu();
 
-            that.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'100px', 'text-align':'center'}); // center, place gap and setting width
+            // 'width':'100px', 
+            that.divMainMenuItems.find('li').css({'padding':'0 3px 3px','text-align':'center'}); // center, place gap and setting width
             
             that.divMainMenuItems.find('li.autowidth').css('width','auto');
 
@@ -64,7 +65,7 @@ $.widget( "heurist.buttonsMenu", {
                 that.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
             }
            
-            that.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
+            that.divMainMenuItems.children('li').children('a').children('.ui-icon-right').css({right: '2px', left:'unset'});
 
             that._refresh();
         });
@@ -137,7 +138,8 @@ $.widget( "heurist.buttonsMenu", {
 
                 //init top level buttons
                 const top_level = $(top_levels[i]);
-                const menuID = top_level.attr('id');
+                let menuID = top_level.attr('id');
+                menuID = menuID?`data-action="${menuID}"`:'';
                 const menuName =  window.hWin.HR(top_level.attr('title'));
                 let menuCss =  top_level.attr('style');
                 menuCss = menuCss?` style="${menuCss}"`:'';
@@ -148,16 +150,25 @@ $.widget( "heurist.buttonsMenu", {
                 const menuTitle =  window.hWin.HR(top_level.attr('title'));
                 const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
 
-                let link = $(`<a id="${menuID}" href="#" style="padding-right:22px !important;${linkCss}" title="${menuTitle}">${menuLabel}</a>`);
 
-                let sicon = top_level.attr('data-icon');
-                if(!sicon){
-                    sicon = 'ui-icon-carat-d';    
+                let right_padding = '2px';
+                let icon_left = top_level.attr('data-icon-left');
+                if(icon_left){
+                    icon_left = `<span class="ui-icon ${icon_left}"></span>`;
+                    right_padding = '22px';
+                }else{
+                    icon_left = '';
                 }
-                if(sicon!='none'){
-                    $(`<span class="ui-icon ${sicon}">`).appendTo(link);  //caret-1-s
+                
+                let icon_righ = top_level.attr('data-icon');
+                if(!icon_righ){
+                    icon_righ = 'ui-icon-carat-d';    
                 }
+                icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
 
+                let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
+                
+                
                 this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
 
                 /*
@@ -173,16 +184,7 @@ $.widget( "heurist.buttonsMenu", {
                 if(submenu.length==0){ //without children
                     
                     this._on( this.menuBtns[menuName], {
-                        click : function(event){
-                            event.preventDefault(); 
-                            let action_id = $(event.target).attr('data-action');
-                            if(!action_id){
-                                action_id = $(event.target).attr('id');
-                            }
-                            this.menuActionHandler(); 
-                            return false; 
-                        }
-                    });
+                        click : this.menuActionHandler });
                     this.menuBtns[menuName].addClass('autowidth');
                     
                 }else{
@@ -197,12 +199,9 @@ $.widget( "heurist.buttonsMenu", {
                     //.addClass('ui-menu-divider-heurist')
                     .menu({
                         icons: { submenu: "ui-icon-circle-triangle-e" },
-                        select: function(event, ui){ 
-                            event.preventDefault(); 
-                            that.menuActionHandler(ui.item.attr('id')); 
-                            return false; 
-                    }});
+                        select: function(event, ui){ that.menuActionHandler(event, ui) } });
 
+                    /* not tested
                     if(window.hWin.HAPI4.has_access()){
                         this.menuSubs[menuName].find('.logged-in-only').show();
                     }else{
@@ -228,6 +227,7 @@ $.widget( "heurist.buttonsMenu", {
                             item.attr('title',hint);    
                         }
                     });
+                    */
 
                     this.menuSubs[menuName].find('li').css('padding-left',0);
 
@@ -259,11 +259,29 @@ $.widget( "heurist.buttonsMenu", {
     //
     // callback function
     //
-    menuActionHandler: function(action){
-        let that = this;
-        if(this.options.manuActionHandler){
-            this.options.manuActionHandler.call(this, action);
+    menuActionHandler: function(event, ui) {
+
+        event.preventDefault(); 
+        let ele;
+        
+        if(ui?.item){
+            ele = ui.item;
+        }else{
+            ele = $(event.target);
+            if(ele.is('span')){
+                ele = ele.parent();
+            }
         }
+        
+        let action_id = ele.attr('data-action');
+        if(!action_id){
+            action_id = ele.attr('id');
+        }
+        if(this.options.manuActionHandler){
+            this.options.manuActionHandler.call(this, action_id);
+        }
+        
+        return false; 
     },
     
     //
@@ -273,7 +291,7 @@ $.widget( "heurist.buttonsMenu", {
                         
         item = $(item);
         let action_id = item.attr('data-action');
-console.log(action_id);        
+        
         if( !action_id ){
             return
         }
