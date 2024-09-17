@@ -6817,7 +6817,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let rty_request = {
             rectypes: this._source_db.id == $Db.rty(rty_ID, 'rty_OriginatingDBID') ? org_ID : rty_ConceptCode,
             mode: 2,
-            remote: this._source_db.url.replace("/heurist/", "/h6-bm/")
+            remote: this._source_db.url
         };
 
         window.hWin.HAPI4.SystemMgr.get_defs(rty_request, (response) => {

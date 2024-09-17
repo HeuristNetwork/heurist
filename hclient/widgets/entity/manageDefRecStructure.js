@@ -1385,7 +1385,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             let basefield_name = $Db.dty(id, 'dty_Name');
 
-            sel_fields['values'][id] = {dty_Name: basefield_name};
+            sel_fields['values'][id] = $.extend({dty_Name: basefield_name}, rst_fields);
         }
 
         // Request to add all new base fields to rectype structure, this will place all new fields at the top
