@@ -129,9 +129,9 @@ class HImportMedia extends HImportBase{
             }
 
             let url_count = -1;
-            for(let _url of _urls){
+            for(let url of _urls){
 
-                _url = _url.trim();
+                const _url = url.trim();
                 url_count ++;
 
                 // also verify duplication in parent term and in already added

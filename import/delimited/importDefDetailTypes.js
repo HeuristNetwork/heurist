@@ -102,7 +102,7 @@ class HImportDetailTypes extends HImportBase{
             let last = missing.pop();
             missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
 
-            msg = `<span style="color:red">${msg} must be defined</span>`;
+            msg = `<span style="color:red">${missing} must be defined</span>`;
 
             $('#preparedInfo').html(msg);
             window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);

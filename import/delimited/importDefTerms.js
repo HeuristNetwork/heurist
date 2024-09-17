@@ -229,7 +229,6 @@ class HImportTerms extends HImportBase{
             return;
         }
 
-        //let field_ref_id = $('#field_ref_id').val();
         let field_trn_term = $('#field_trn_term').val();
         let field_trn_desc = $('#field_trn_desc').val();
 

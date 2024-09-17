@@ -209,7 +209,6 @@ class HImportBase{
      */
     doPrepare(){
         this._showError('UNKNOWN_ERROR', 'Failed to prepare data, as the function has not been created', 'Unable to prepare data');
-        return;
     }
 
     /**
@@ -269,7 +268,7 @@ class HImportBase{
             }
 
             let entities_refresh = group_entity.refresh;
-            entities_refresh += response.data['refresh_terms'] == true ? ',trm' : '';
+            entities_refresh += response.data['refresh_terms'] ? ',trm' : '';
 
             if(this._return_results){
 
