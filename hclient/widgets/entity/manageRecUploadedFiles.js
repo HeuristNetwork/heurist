@@ -166,9 +166,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         
                     }else if(action=='menu-file-import-csv'){ 
 
-                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                        widget.mainMenu('menuActionById','menu-files-data');
-                        
+                        window.hWin.HAPI4.actionHandler.executeActionById('menu-files-data');
                         
                     }else if(action=='menu-file-select-all'){ 
                         this._selectAllFiles = true;

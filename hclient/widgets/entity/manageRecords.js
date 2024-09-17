@@ -2457,7 +2457,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     $dlg.dialog( "close" ); 
                                     that.closeEditDialog();
                                     //open design menu
-                                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
+                                    window.hWin.HAPI4.actionHandler.executeActionById('menu-structure-rectypes');
                                 }},
                                 {text:'Create relationship record', click: function(){ 
                                     $dlg.dialog( "close" );                    
@@ -4044,7 +4044,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                     that.closeEditDialog();
                                     // Open Design->Browse Templates
-                                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-import');
+                                    window.hWin.HAPI4.actionHandler.executeActionById('menu-structure-import');
 
                                     return;
                                 }								

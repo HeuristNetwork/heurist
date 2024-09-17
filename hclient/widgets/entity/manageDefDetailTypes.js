@@ -2144,7 +2144,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
                 + 'The base fields editing function is provided for completeness and for<br>advanced data management. Most users will not need to use it.<br><br>'
                 + '<strong>We strongly recommend NOT using this function to create new<br>base fields. It is much more intuitive to create them <em>in situ</em> while<br>designing your record structure.</strong><br></br>'
-                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="window.hWin.HAPI4.LayoutMgr.executeCommand(\'mainMenu\', \'menuActionById\', \'menu-structure-rectypes\');">Record Types</span><br><br>'
+                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" '
+                +'onclick="window.hWin.HAPI4.actionHandler.executeActionById(\'menu-structure-rectypes\');">Record Types</span><br><br>'
                 + 'Click outside this box for access to base fields manager'
                 + '</div></div>'); // Add message
 

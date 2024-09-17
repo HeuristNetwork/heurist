@@ -63,7 +63,7 @@ $mysqli = $system->get_mysqli();
         $ver = mysql__select_value($mysqli, $query);
 
 
-        if( (!isPostiveInt($ver)) || $ver<3){
+        if( (!isPositiveInt($ver)) || $ver<3){
 
             if(!hasTable($mysqli, 'sysIdentification',$db_name)){
                 $db_undef[] = $db_name;

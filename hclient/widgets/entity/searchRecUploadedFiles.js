@@ -46,10 +46,10 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.element.find('#btn_menu').buttonsMenu({
                 menuContent:
                     '<div>'
-                    +'<ul id="menu-file-add-local" link-style="background:#ededed" name="Select file to upload" data-icon="ui-icon-plus"></ul>'
-                    +'<ul id="menu-file-add-ext" link-style="background:#ededed" name="Select external file/URL" data-icon="ui-icon-plus"></ul>'
-                    +'<ul id="menu-file-import-csv" link-style="background:#ededed" name="Import file data from CSV" data-icon="ui-icon-file-table"></ul>'
-                    +'<ul name="Selected" style="margin-left:150px">'
+                    +'<ul id="menu-file-add-local" link-style="background:#ededed" title="Select file to upload" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-add-ext" link-style="background:#ededed" title="Select external file/URL" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-import-csv" link-style="background:#ededed" title="Import file data from CSV" data-icon="ui-icon-file-table"></ul>'
+                    +'<ul title="Selected" style="margin-left:150px">'
                     +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
                     +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
                     +'<li>---------------</li>'
@@ -58,11 +58,11 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<li id="menu-file-refrec-add"><a href="#">Create multimedia records for selection</a></li>'
                     +'<li id="menu-file-delete-selected"><a href="#">Delete files in selection</a></li>'
                     +'</ul>'
-                    +'<ul name="Integrity">'
+                    +'<ul title="Integrity">'
                     +'<li id="menu-file-merge-dupes"><a href="#">Combine duplicates</a></li>'
                     +'<li id="menu-file-refresh-index"><a href="#">Refresh index</a></li>'
                     +'<li id="menu-file-check-files"><a href="#">Check files</a></li></ul></div>',
-                actionHandler:function(action){
+                manuActionHandler:function(action){
                     that._trigger('onaction', null, action);   
                 }
             });

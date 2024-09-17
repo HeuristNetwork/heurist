@@ -319,10 +319,10 @@ $.widget( "heurist.search", {
             .appendTo(this.div_buttons);
 
             this._on(this.btn_saved_filters, {click: function(){
-                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                 if(widget){
                     let ele = this.btn_saved_filters;
-                    widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
+                    widget.slidersMenu('show_ExploreMenu', null, 'search_filters', 
                         {top:ele.position().top+18 , left:ele.offset().left });
                 }            
             }});
@@ -350,10 +350,10 @@ $.widget( "heurist.search", {
             .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
 
-                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                 if(widget){
                     let ele = this.btn_faceted_wiz;
-                    widget.mainMenu6('show_ExploreMenu', null, 'svsAddFaceted', 
+                    widget.slidersMenu('show_ExploreMenu', null, 'svsAddFaceted', 
                         {top:ele.offset().top , left:ele.offset().left });
                 }            
             }});
@@ -367,11 +367,11 @@ $.widget( "heurist.search", {
             + window.hWin.HR('Save filter for re-use') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
             this._on(this.btn_save_filter, {click: function(){
-                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                 if(widget){
                     let ele = this.btn_saved_filters;
 
-                    widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', 
+                    widget.slidersMenu('show_ExploreMenu', null, 'svsAdd', 
                         {top:ele.offset().top , left:ele.offset().left-300 });
                 }            
             }});
@@ -1037,10 +1037,10 @@ $.widget( "heurist.search", {
 
 
         if(this.options.is_h6style){
-            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
             if(widget){
                 let pos = this.element.offset();
-                widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
+                widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
             }
         }else{
 

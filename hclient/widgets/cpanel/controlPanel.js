@@ -1,5 +1,6 @@
 /**
-* mainMenu.js : Top Main Menu panel
+* controlPanel.js : Header panel with logo, main menu and dashboard (optionally)
+*                   It inits actionHandler object
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -17,95 +18,90 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-/*
-todo 
-
-1. Move list of all actions to actions.js
-2. New Class that manage all actions   menuActionById
-3. init mainMenu from this list (grouped by id menu-xxx)
-4. check missed actions ???
-5. 
-
-
-*/
-
-
 /*
 
     Main menu is list of Heurist operations. They are grouped in several sections:
-    Admin, Database, Export, Import, Help, Profile, Management etc. Each menu entry defined as <li> element
+    Admin, Database, Export, Import, Help, Profile, Management etc. 
+    
+    Each menu entry defined in action.json
     with the following attributes:
-    data-user-admin-status - accessibility according to user level (2 db owner, 1 - db admin, 0 - logged in, -1 - all)
-    data-logaction  - log tag 
-    data-icon - icon in menu
-    data-container - target element where to load dialog/form
+    id:  unique id of action  (like "id":"menu-database-clone")
+    data:{
+        user-admin-status - accessibility according to user level (2 db owner, 1 - db admin, 0 - logged in, -1 - all)
+        logaction  - log tag 
+        icon - icon in menu
+        container - target element where to load dialog/form
+        header  - title for container/popup dialog
+        }
+    text - default label in menu    
+    title - default hint (mouseover) for menu item
     
-    Action is defined by "id" attribute (like id="menu-database-clone")
+    Localized versions for menu label and hint, dialog header are taken from localization files
+    menu-database-clone#
+    menu-database-clone-hint#
+    menu-database-clone-header#
     
-    Menu Title and Hint are taken from localization files via id (dashes are replace to underscores: menu_database_clone).
-    If there is not localised version it takes title and hint from <li><a>
-    
-    Main menu can be visible as standard horizontal menu (as in previous layout) or can be hidden. 
-    Even if it is hidden, this widget is main hadler for execution of operation via methods: menuActionById or menuActionHandler.
-    Other widgets, dialogs and functions (for example: menu v6, dashboard, export menu) calls Heurist actions via this widget.
-    
-    For example, the new menu groups the actions in different groups and in different order, however it uses menu actions id and 
-    calls this widget methods to execute an operation.
-
-    menuGetAllActions - returns array of {key:id,title:topmenu>name}
-    menuActionById - finds and executes menu entry by id
     menuActionHandler - main event handler
-    menuGetActionLink - returns link 
 */
 
-/* global initProfilePreferences,doRegister */ 
-
-$.widget( "heurist.mainMenu", {
+$.widget( "heurist.controlPanel", {
 
     // default options
     options: {
         host_logo:null,
         login_inforced: true,
-        is_h6style: false
+        is_h6style: true
     },
     
     menues:{},
+    actionHandler: null,
+    
+    //move widgets/cms/manageCms
     cms_home_records_count:0,
     cms_home_private_records_ids:0,
     sMsgCmsPrivate:'',
 
-    _current_query_string:'',
-    
+    //glags    
     _initial_search_already_executed: false,
-    _rendered_db_overview: false,
     _retrieved_notifications: false,
 
     version_message: null, // container for message about available alpha/stable version
     
-    actionHandler: null,
-
-    // the widget's constructor
-    _create: function() {
+    _init: function() {
 
         let that = this;
         
-        this.actionHandler = new ActionHandler();
+        this.actionHandler = window.hWin.HAPI4.actionHandler;
         
-        this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
-
+        const url = window.hWin.HAPI4.baseURL
+                        +'hclient/widgets/cpanel/controlPanel.html?t=' 
+                        +window.hWin.HEURIST4.util.random()
+        
+        //load content
+        this.element.load(url, 
+            function(response, status, xhr){
+                that._need_load_content = false;
+                if ( status == "error" ) {
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
+                }else{
+                    that._initControls()
+                }
+            });
+        
+    },
+    
+    _initControls:function(){
+        
+        let that = this;
+        
         this.element.css({'height':'100%'}).addClass('ui-heurist-header2')
             .disableSelection();// prevent double click to select text
 
-        this.div_logo = $( "<div>")
-        .addClass('logo')   //width was 198
-        .css({'width':'150px', 'float':'left', 'margin':'6px 10px', cursor:'pointer'}) //'height':'56px', 
-        .attr('title', 'Click to reload page and return to the default search for your database')
-        .appendTo( this.element );
-
-        if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
-            this.div_logo.button();
-        }
+        this.div_logo = $('div.logo');
 
         //validate server side version  - compare version of code in server where main index database and this server version
         let res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
@@ -113,20 +109,13 @@ $.widget( "heurist.mainMenu", {
         let mr = 45;
         if(res==-2){ // -2=newer code on server
             mr = 55;
-            sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer">';
+            sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer"></span>';
         }
-
-        this.div_version = $("<div>")                                               
-            .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>')
-            .appendTo( this.div_logo );
-        if(this.options.is_h6style){
-            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 
-                'padding-top':'12px', 'margin-right':'-'+mr+'px'});
-                
-        }else{
-            this.div_version.css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 
-                'padding-left':'20px', 'width':'100%'});
-        }
+        
+        this.div_logo.find('div.version')
+            .css('margin-right','-'+mr+'px')
+            .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>');
+            
         // bind click events
         this._on( this.div_logo, {
             click: function(event){
@@ -136,7 +125,7 @@ $.widget( "heurist.mainMenu", {
                     +window.hWin.HAPI4.sysinfo.version_new+") is available from <a target=_blank href='https://github.com/HeuristNetwork/heurist'>GitHub</a> or "
                     +"<a target=_blank href='https://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed "
                     +"(or better still with any change of version).<br><br>"
-                    +"Heurist is copyright (C) 2005-2023 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
+                    +"Heurist is copyright (C) 2005-2024 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
                     +"Beta versions of the software with new features may also be available at the GitHub repository or linked from the HeuristNetwork home page.");
                 }else{
                     //reload without query string
@@ -147,30 +136,7 @@ $.widget( "heurist.mainMenu", {
         });
 
 
-        this.divProfileMenu = $( "<div>")
-        .css({'float':'right', 'margin-top':'1em', 'font-size':'1.1em'})  //one rows 'padding-right':'2em', 
-        //.css({'position':'absolute', 'right':10, 'padding-right':'2em', 'padding-top':'1em' })  //one rows
-        //.addClass('logged-in-only')
-        .appendTo(this.element);
-
-        //dashboard button                
-        this.btn_dashboard = $('<div>').button({label:'Open dashboard'})
-        .css({'float':'right', margin:'1.1em', 'font-size':'0.9em'})
-        .addClass('ui-heurist-header2')
-        .appendTo( this.element )
-        .click(
-            function(){
-                that.btn_dashboard.hide();
-
-                let prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:0, show_as_ribbon:0});
-                prefs['show_on_startup'] = 1;
-                window.hWin.HAPI4.save_pref('prefs_sysDashboard', prefs);     
-                
-                that.menuActionById('menu-manage-dashboards');
-            }
-        ); 
-
-        
+        // current and last databases dropdown
         this.div_dbname = $( "<div>")
             //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
             .css({'float':'left', 'margin-top':'0.9em', 'margin-left':'5em'})
@@ -230,13 +196,63 @@ $.widget( "heurist.mainMenu", {
             .css({'position':'absolute', 'left':24, bottom:he/8, 'text-align':'left'})  //one rows
             //.addClass('logged-in-only')
             .appendTo(this.element);
-        
+        this.divMainMenu.hide();                
+            
+        this.divProfileMenu = $( "<div>")
+        .css({'float':'right', 'margin-top':'1em', 'font-size':'1.1em'})  
+        .appendTo(this.element);
+
+            
+        this.divProfileMenu.buttonsMenu({
+           menuContent:
+                    '<div>'
+                    +'<ul title="Help" class+"horizontalmenu" style="margin-left:150px" data-icon="ui-icon-circle-b-help">'
+                    +'<li data-action="menu-help-online"/>'
+                    +'<li data-action="menu-help-quick-tips"/>'
+                    +'<li data-action="menu-help-website"/>'
+                    +'<li data-action="menu-help-roadmap"/>'
+                    +'<li data-action="menu-help-devhist"/>'
+                    +'<li>---------------</li>'
+                    +'<li data-action="menu-help-bugreport"/>'
+                    +'<li data-action="menu-help-emailteam"/>'
+                    +'<li data-action="menu-help-emailadmin"/>'
+                    +'<li data-action="menu-help-acknowledgements"/>'
+                    +'<li data-action="menu-help-about"/>'
+                    +'</ul>'
+                    +'<ul title="Profile" class+"horizontalmenu" data-icon="ui-icon-user">'
+                    +'<li data-action="menu-profile-preferences"/>'
+                    +'<li data-action="menu-profile-tags"/>'
+                    +'<li data-action="menu-profile-reminders"/>'
+                    +'<li>---------------</li>'
+                    +'<li data-action="menu-profile-info"/>'
+                    +'<li data-action="menu-profile-groups"/>'
+                    +'<li data-action="menu-profile-users"/>'
+                    +'<li data-action="menu-profile-import"/>'
+                    +'<li data-action="menu-profile-logout"/>'
+                    +'</ul>'
+           /*
+            [{text:'Help', icon:'ui-icon-circle-b-help', items:
+                    ['menu-help-online','menu-help-quick-tips','menu-help-website','menu-help-roadmap','menu-help-devhist',
+                     '-',   
+                     'menu-help-bugreport','menu-help-emailteam','menu-help-emailadmin','menu-help-acknowledgements','menu-help-about']
+                },
+                {text:'Profile', icon:'ui-icon-user', items:[
+                     'menu-profile-preferences','menu-profile-tags','menu-profile-reminders',
+                     '-',
+                     'menu-profile-info','menu-profile-groups',
+                     'menu-profile-users','menu-profile-import','menu-profile-logout'
+                ]}]*/
+           , 
+           manuActionHandler:function(action){
+                that.actionHandler.executeActionById('menu-manage-dashboards')
+           }
+        });
+            
+/*        
         this.divMainMenuItems = $('<ul>')
                 .addClass('horizontalmenu')
                 .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em', 'font-size':'0.9em'})
                 .appendTo( this.divMainMenu );
-
-        /* new entityfeatures*/
         this.divProfileItems = $( "<ul>")
                 .css('float','right')
                 .addClass('horizontalmenu')
@@ -248,46 +264,19 @@ $.widget( "heurist.mainMenu", {
         }
         if(this.options.is_h6style){
             if(__include('Help')) this._initMenu('Help', -1, this.divProfileItems);
-        }
-        if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
-
-        if(__include('Database')) this._initMenu('Database', -1);            
-        if(__include('Structure')) this._initMenu('Structure', 0, null, 3); //3 means hidden
-        if(__include('Import')) this._initMenu('Import', 0);
-        if(__include('Website')) this._initMenu('Website', 0);
-        if(__include('Export')) {
-            this._initMenu('Export', 2, null, 3); //invisible in main menu   
-           
-        }
-            
-        if(__include('Management')) this._initMenu('Management', 0);
-        
-        if(__include('Admin')) this._initMenu('Admin', 0, null, 0);
-        
-//2024-09-15        if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
-        
-        if(!this.options.is_h6style){
+        }else{
             if(__include('Help')) this._initMenu('Help', -1);    
         }
-        
+        if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
         
         this.divMainMenuItems.menu();
         this.divProfileItems.menu().removeClass('ui-menu-icons');
-            
-        // Dashboard - shortcuts ---------------------------------------
-        if(this.options.is_h6style){
-/*            
-            //show dashboard as a ribbon
-            this.divShortcuts = $( "<div>")            
-                .css({'position':'absolute', left:0, right:0, height:'36px', bottom:-5})
-                .appendTo(this.element)
-                .manageSysDashboard({is_iconlist_mode:true});
-*/                
-            this.divMainMenu.hide();
-        }
-            
-
+*/            
         //host logo and link -----------------------------------    
+        /*
+        window.hWin.HAPI4.sysinfo.host_logo = 'https://t3.ftcdn.net/jpg/03/74/19/26/360_F_374192621_mCSB5FIskwdMEJZou3DuMN8N2Z6IzXqb.jpg'
+        window.hWin.HAPI4.sysinfo.host_url = 'https://t3.ftcdn.net'l
+        
         if(window.hWin.HAPI4.sysinfo.host_logo){
             
             $('<div style="height:40px;background:none;padding-left:4px;float:right;color:white">'
@@ -298,6 +287,7 @@ $.widget( "heurist.mainMenu", {
                         +'" height="40" align="center"></a></div>')
             .appendTo( this.divMainMenu );
         }
+        */
         
         // LISTENERS --------------------------------------------------
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS
@@ -398,15 +388,6 @@ $.widget( "heurist.mainMenu", {
 
         let that = this;
 
-        /*
-        if(window.hWin.HAPI4.has_access()){
-            $(this.element).find('.logged-in-only').show();
-            $(this.element).find('.logged-out-only').hide();
-        }else{
-            $(this.element).find('.logged-in-only').hide();
-            $(this.element).find('.logged-out-only').show();
-        }*/
-        
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
                 let lvl_user = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
@@ -485,6 +466,8 @@ $.widget( "heurist.mainMenu", {
         //  0 - logged in                 
         //  1 - db admin (admin of group #1)
         //  2 - db owner
+        //loop top level menu
+        /* disabled
         for (let key in this.menues){
             let menu = this.menues[key];
             if(menu.is('li')){
@@ -493,52 +476,19 @@ $.widget( "heurist.mainMenu", {
                 $(menu).find('li,a').each(___set_menu_item_visibility); //enable/disbale dropdown items
             }
         }
-            
-            
-
-
-        /* new
-        if(window.hWin.HAPI4.is_admin()){
-            this.menu_Profile.find('.admin-only').show();
-        }else{
-            this.menu_Profile.find('.admin-only').hide();    
-        }
         */
         
+        // Replace "Profile" label for menu to current user name
         $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
-        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0 && !this.options.is_h6style){
-            this.btn_dashboard.show();  
-        }else{
-            this.btn_dashboard.hide();  
-        }
-        
         if(this.options.login_inforced && !window.hWin.HAPI4.has_access()){
             this.doLogin();
         }else {
             this._show_version_message();
             this._performInitialSearch();
             this._getUserNotifications();
-
-            // Setup user favourite filters, give mainMenu time to load completely
-            setTimeout(function(){ $('.ui-menu6').mainMenu6('populateFavouriteFilters'); }, 2000);
-
-            let query = window.hWin.location.search.substring(1);
-            let vars = query.split('&');
-            //!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
-            if( vars && vars.length==1
-				&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
-                // Wait a bit for the main menu to be initialised
-                setTimeout(function(){
-                    $('.ui-menu6').mainMenu6('showDatabaseOverview');
-                    that._rendered_db_overview = true;
-                }, 1000);
-            }
         }
-
-       
     },
-
 
     //
     // custom, widget-specific, cleanup.
@@ -549,7 +499,8 @@ $.widget( "heurist.mainMenu", {
         
         this.div_logo.remove();
         this.divMainMenu.remove();
-        if(this.divShortcuts) this.divShortcuts.remove();
+        this.divProfileMenu.remove();
+
         /* remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
@@ -654,7 +605,7 @@ $.widget( "heurist.mainMenu", {
 
         this.menues[section] = $('<ul>')
         .load(
-            window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name+'.html',
+            window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/mainMenu'+name+'.html',
           function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
         
             let content = that.menues[section].find('ul');
@@ -713,62 +664,6 @@ $.widget( "heurist.mainMenu", {
 
     },
     
-    //
-    //
-    //
-    menuGetActionLink: function(menu_entry_id){
-
-        for (let key in this.menues){
-            let menu = this.menues[key];
-            let link = $(menu).find('a[id="'+menu_entry_id+'"]');
-            if(link.length>0){
-                link.attr('data-parent',key);
-                return link;
-            }
-        }
-        return null;
-    },
-    
-    //
-    // returns all menu entries as array - used in dropdown command selector in dashboard editor
-    //
-    menuGetAllActions: function(){
-        
-        let res = [];    
-            
-        for (let key in this.menues){
-            let menu = this.menues[key];
-            let links = $(menu).find('a');
-            $.each(links, function(idx, link){
-                link = $(link);
-                if(link.attr('id').indexOf('menu-')==0){
-                    res.push({key:link.attr('id'), title: ( key.substring(5)+' > '+link.text().trim() ) });
-                }
-            });
-        }
-        
-        return res;
-    },
-
-    //
-    // finds and executes menu entry by link id
-    // 
-    menuActionById: function(menu_entry_id, dialog_options){
-        
-        if( !window.hWin.HEURIST4.util.isempty(menu_entry_id) ){
-        
-            for (let key in this.menues){
-                let menu = this.menues[key];
-                let ele = $(menu).find('#'+menu_entry_id);
-                if(ele.length>0 && ele.is('a')){
-                    this.menuActionHandler(null, ele, dialog_options);            
-                    break;
-                }
-            }
-            
-        }
-    },
-    
     // dialog_options - not used
     // parameters from dialog are taken from data- attributes of li element in menu html
     //
@@ -813,7 +708,7 @@ $.widget( "heurist.mainMenu", {
             }else if(action_container){
                 let section = action_container;
                 //activate specified menu and container
-                $('.ui-menu6').mainMenu6('switchContainer', section, true);
+                $('.ui-menu6').slidersMenu('switchContainer', section, true);
                 container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
                 container.removeClass('ui-suppress-border-and-shadow');
                 menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
@@ -1064,51 +959,6 @@ $.widget( "heurist.mainMenu", {
                                 {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
             
         }
-        else if(action == "menu-export-csv"){
-            
-            popup_dialog_options.format = 'csv';
-            that._exportRecords(popup_dialog_options);
-
-        }
-        else if(action == "menu-export-hml-resultset"){
-            
-            popup_dialog_options.format = 'xml';
-            that._exportRecords(popup_dialog_options);
-            
-        }
-        else if(action == "menu-export-hml-multifile"){
-           
-        }
-        else if(action == "menu-export-json"){ 
-            
-            popup_dialog_options.format = 'json';
-            that._exportRecords(popup_dialog_options);
-            
-        }
-        else if(action == "menu-export-geojson"){ 
-            
-            popup_dialog_options.format = 'geojson';
-            that._exportRecords(popup_dialog_options);
-            
-        }
-        else if(action == "menu-export-gephi"){    
-            
-            popup_dialog_options.format = 'gephi';
-            that._exportRecords(popup_dialog_options);
-            
-        }
-        else if(action == "menu-export-kml"){
-            
-            popup_dialog_options.format = 'kml';
-            that._exportRecords(popup_dialog_options);
-            
-        }
-        else if(action == "menu-export-iiif"){
-            
-            popup_dialog_options.format = 'iiif';
-            that._exportRecords(popup_dialog_options);
-            
-        }
         else if(action == 'menu-extract-pdf'){ //not used
             //this menu should not be in main menu. IJ request
             let app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_resultList');
@@ -1120,11 +970,7 @@ $.widget( "heurist.mainMenu", {
             
             let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
             if(widget){
-
-                if(that._rendered_db_overview){
-                    $('.ui-menu6').mainMenu6('hideDatabaseOverview');
-                }
-
+                $('.ui-menu6').slidersMenu('hideDatabaseOverview');
                 widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
@@ -1133,18 +979,6 @@ $.widget( "heurist.mainMenu", {
             
             
             if(href.indexOf('mailto:')==0){
-                  /*var t;
-                  $(window).blur(function() {
-                        // The browser apparently responded, so stop the timeout.
-                        clearTimeout(t);
-                  });
-
-                  t = setTimeout(function() {
-                        // The browser did not respond after 500ms, so open an alternative URL.
-                        window.hWin.HEURIST4.msg.showMsgErr('mailto_fail');
-                  }, 500);
-                  window.open( href );*/
-                  
                   let win = window.open(href, 'emailWindow');
                   if (win && win.open && !win.closed) win.close();                  
                   return;
@@ -1217,7 +1051,8 @@ $.widget( "heurist.mainMenu", {
                                 buttons[window.hWin.HR('OK')]  = function() {
                                     let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                                     $dlg.dialog( "close" );
-                                    that.menuActionById('menu-index-files');
+                                        
+                                    that.actionHandler.executeActionById('menu-index-files');
                                 };                                 
                                 
                                 window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
@@ -1244,110 +1079,6 @@ $.widget( "heurist.mainMenu", {
         if(event) window.hWin.HEURIST4.util.stopEvent(event);
     },
     
-    //
-    // similar in resultListMenu
-    //
-    isResultSetEmpty: function(){
-        let recIDs_all = window.hWin.HAPI4.getSelection("all", true);
-        if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
-            window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
-            +'Please modify search/filter to return at least one result record.');
-            return true;
-        }else{
-            return false;
-        }
-    },
-    
-    //
-    //
-    //
-    _showAdminServer: function( popup_options ){
-        
-        let that = this;
-        
-        if(!popup_options) popup_options = {};
-
-        let $dlg = (popup_options.container)
-                        ?popup_options.container
-                        :$("#heurist-dialog").addClass('ui-heurist-bg-light');
-        $dlg.empty();
-
-        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/admin/manageServer.html?t="+(new Date().time), function(){
-           
-            
-            $dlg.find('li').css({padding:'10px 0px'});
-            
-            $.each($dlg.find('a'), function(i,item){
-                
-                let href = $(item).attr('href');
-                
-                if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
-                    href = window.hWin.HAPI4.baseURL + href;// + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
-                }
-                
-               
-                /*
-                if(!window.hWin.HEURIST4.util.isempty(popup_options.entered_password)){
-                         href =  href + '&pwd=' + popup_options.entered_password;
-                }
-                */
-                $(item).attr('href', href);
-
-            });
-
-            that._on($dlg.find('a'),{click:function(event){
-                    let surl = $(event.target).attr('href');
-                    
-                    
-                    if(popup_options.entered_password){
-                        $('#mainForm').find('input[name="pwd"]').val(popup_options.entered_password);   
-                    }
-                    $('#mainForm').find('input[name="db"]').val(window.hWin.HAPI4.database);
-                    $('#mainForm').attr('action',surl);
-                    $('#mainForm').submit();
-
-                    //window.open( surl, '_blank'); 
-                    window.hWin.HEURIST4.util.stopEvent(event);   
-                    return false;
-                }});
-                
-                
-                if(popup_options.container){
-                    
-                    $dlg.find('.ui-heurist-header').html(window.hWin.HR('Server manager'));
-                    
-                    $dlg.find('.ui-dialog-buttonpane').show();
-                    $dlg.find('.btn-cancel').button().on({click:function(){
-                            popup_options.container.hide();
-                    }});
-                    
-                }else{
-
-                    $dlg.dialog({
-                        autoOpen: true,
-                        height: 640,
-                        width: 600,
-                        modal: true,
-                        resizable: false,
-                        draggable: true,
-                        title: window.hWin.HR("Server manager"),
-                        buttons: [
-                            {text:window.hWin.HR('Close'), click: function() {
-                                $( this ).dialog( "close" );
-                            }}
-                        ]
-                    });
-                }
-            
-            
-        });
-
-    },
-
-    
-    
-
-
     // @todo - move to editCMS_Records
     //
     //
@@ -1572,37 +1303,16 @@ $.widget( "heurist.mainMenu", {
         window.hWin.HEURIST4.ui.checkAndLogin( isforced, function(is_logged)
             { 
                 if(is_logged) {
-
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
                     that._show_version_message();
                     that._performInitialSearch();
                     that._getUserNotifications();
 
-                    $('.ui-menu6').mainMenu6('populateFavouriteFilters'); // show user's favourite filters
-
-                    let query = window.hWin.location.search.substring(1);
-                    let vars = query.split('&');
-                    //!window.hWin.HEURIST4.util.getUrlParameter('nometadatadisplay', window.hWin.location.search) 
-                    if( vars && vars.length==1
-						&& window.hWin.HAPI4.sysinfo['db_total_records']>0){
-                        // Wait a bit for the main menu to be initialised
-                        setTimeout(function(){
-                            $('.ui-menu6').mainMenu6('showDatabaseOverview');
-                            that._rendered_db_overview = true;
-                        }, 1000);
-                    }
                 } else if(that.options.login_inforced){
                     window.hWin.location  = window.HAPI4.baseURL
                 }
             }); 
-    },
-
-    //
-    // Check if the Database Overview has been rendered
-    //
-    hasOverviewRendered: function(){
-        return this._rendered_db_overview;
     },
     
     //
@@ -1623,53 +1333,63 @@ $.widget( "heurist.mainMenu", {
         let cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         let cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
         if(cms_record_id>0 || !window.hWin.HEURIST4.util.isempty(cmd)){
-            //ignore initial search of some menu command is called from url or need to open cms editor
+                //ignore initial search of some menu command is called from url or need to open cms editor
+            
+                //initial parameters 
+                //1. open CMS edit
+                let cms_record_id = urlParams.get('cms'); 
+                if(cms_record_id>0){
+                    this.actionHandler.executeActionById('menu-cms-edit',{record_id:cms_record_id});
+                }else{
+                //2. executes arbitrary command
+                    let cmd = urlParams.get('cmd'); 
+                    if(cmd){
+                        this.actionHandler.executeActionById(cmd);
+                    }
+                }
             
         }else 
-        if(!window.hWin.HAPI4.is_publish_mode){
+        if(!window.hWin.HAPI4.is_publish_mode && window.hWin.HAPI4.sysinfo['db_total_records']>0){
 
-                if(window.hWin.HAPI4.sysinfo['db_total_records']>0){      
-                    
-                    let request = {};
+                let request = {};
 
-                    if(window.hWin.HAPI4.postparams && window.hWin.HAPI4.postparams['q']){
-                        request = window.hWin.HAPI4.postparams;
+                if(window.hWin.HAPI4.postparams && window.hWin.HAPI4.postparams['q']){
+                    request = window.hWin.HAPI4.postparams;
+                }else{
+                    let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
+                    let qdomain;
+                    let rules = null;
+                    if(init_search){
+                        qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
+                        rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
                     }else{
-                        let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
-                        let qdomain;
-                        let rules = null;
-                        if(init_search){
-                            qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
-                            rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
-                        }else{
-                            init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
-                        }
-                        if(!qdomain) qdomain = 'a';
-                        request = {q: init_search, w: qdomain}
-                        if(rules) request['rules'] = rules;
+                        init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
                     }
-                    
-                    if(!window.hWin.HEURIST4.util.isempty(request['q'])){
-                        request['f'] = 'map';
-                        request['source'] = 'init';
-
-                        setTimeout(function(){
-                            window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
-                            }, 1000);
-                    }else{
-                        //trigger search finish to init some widgets
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
-                    }
-                    
-                    window.hWin.HAPI4.postparams = null;
-
+                    if(!qdomain) qdomain = 'a';
+                    request = {q: init_search, w: qdomain}
+                    if(rules) request['rules'] = rules;
                 }
+                
+                if(!window.hWin.HEURIST4.util.isempty(request['q'])){
+                    request['f'] = 'map';
+                    request['source'] = 'init';
+
+                    setTimeout(function(){
+                        window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
+                        }, 1000);
+                }else{
+                    //trigger search finish to init some widgets
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
+                }
+                
+                window.hWin.HAPI4.postparams = null;
+
                 this._dashboardVisibility( true ); //after login
-            }
+        }
     },
 
     //
-    //
+    //  show/hide dashboard panel
     //    
     _dashboardVisibility: function(is_startup){
 
@@ -1712,7 +1432,7 @@ $.widget( "heurist.mainMenu", {
     },
     
     //
-    //
+    //  adjust header and main panel after dashboard visibility on/off
     //
     _adjustHeight: function(){
 
@@ -1740,47 +1460,7 @@ $.widget( "heurist.mainMenu", {
         }
         
     },
-
-    //
-    //
-    //
-    _doRegister: function(){
-        /*
-        if(false && !window.hWin.HEURIST4.util.isFunction(doRegister)){  // already loaded in index.php
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
-        }else{}
-        */
-        doRegister();
-        
-    },
     
-    //------------------------ EXPORT ------------------------------------------
-    //
-    // opts: {format, isAll, includeRelated, multifile, save_as_file}
-    //
-    _exportRecords: function(popup_dialog_options){ // isAll = resultset, false = current selection only
-    
-    
-        // for publish export actions    
-        if(popup_dialog_options.container){
-           popup_dialog_options.need_reload = true; 
-           popup_dialog_options.onClose = function() { 
-               popup_dialog_options.container.hide() 
-           };
-           
-           popup_dialog_options.menu_container.find('ul').show();
-           popup_dialog_options.menu_container.find('ul.for_web_site').hide();
-           popup_dialog_options.menu_container.find('ul.for_web_page').hide();
-           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-close').hide();
-           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-help').show();
-        }
-        if(!this.isResultSetEmpty()){
-            let action = 'recordExport'+(popup_dialog_options.format=='csv'?'CSV':'');
-            window.hWin.HEURIST4.ui.showRecordActionDialog(action, popup_dialog_options);
-        }
-    },
-     
-
     //
     // Display message next to DB name, about available stable/alpha version
     //
@@ -1895,109 +1575,11 @@ $.widget( "heurist.mainMenu", {
             let notifications = response.data;
 
             if(Object.keys(notifications).length == 1 && notifications['bug_report']){
-                that.menuActionById('menu-help-bugreport');
+                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
                 return;
             }
         });
     },
 
-    /**
-     * Popup to select record types to be rebuilt, or rebuild all
-     * 
-     * @param popup_options - popup/dialog options from menuActionHandler
-     * 
-     * @return none
-     */
-    _rebuildRecordTitles: function(popup_options){
-
-        let $dlg, selected_rectypes = [];
-        let base_url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=titles&db=${window.hWin.HAPI4.database}`;
-
-        let msg = "Please select which options to use for rebuilding record titles:<br><br>"
-                + "<div>"
-                    + "<label for='rectypes-all'><input id='rectypes-all' type='checkbox' checked='checked'> All record titles</label>"
-                    + "<div style='margin: 5px 0px'>or</div>"
-                    + "<button id='rectypes-select'>Select record types</button>"
-                    + "<div style='margin: 10px 0px'>Selected Record Types: </div>"
-                    + "<div "
-                        + "style='min-width:165px;max-width:165px;max-height:200px;min-height:200px;border: black solid 1px;padding:5px;margin-top:5px;overflow-y:auto;'"
-                        + " id='rectypes-list' data-ids=''>"
-                            + "<span style='display: inline-block;margin: 5px 0px;'> None </span>"
-                    + "</div>"
-                + "</div>";
-
-        let btn = {};
-        btn[window.HR('Proceed')] = () => {
-
-            let all_rectypes = $dlg.find('#rectypes-all').is(':checked');
-            if(!all_rectypes && selected_rectypes.length == 0){
-                return;
-            }
-
-            const rectypes = !all_rectypes ? `&recTypeIDs=${selected_rectypes.join(',')}` : '';
-
-            $dlg.dialog('close');
-
-            window.hWin.HEURIST4.msg.showDialog( `${base_url}${rectypes}`, popup_options );
-        };
-        btn[window.HR('Close')] = () => {
-            $dlg.dialog('close');
-        };
-
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, 
-            {title: 'Rebuild record titles', yes: window.HR('Proceed'), no: window.HR('Close')}, 
-            {default_palette_class: 'ui-heurist-admin', dialogId: 'rebuild_titles', width: 400, height: 450}
-        );
-
-        $dlg.find('button#rectypes-select').button();
-
-        $dlg.find('button#rectypes-select, div#rectypes-list').on('click', function(){
-
-            let $selected_rectypes = $dlg.find('div#rectypes-list');
-
-            let popup_options = {
-                select_mode: 'select_multi',
-                edit_mode: 'popup',
-                isdialog: true,
-                width: 440,
-                title: 'Select record types',
-                selection_on_init: selected_rectypes,
-                default_palette_class: 'ui-heurist-publish',
-
-                onselect:function(event, data){
-
-                    const ids = data.selection;
-
-                    if(ids != null && window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
-
-                        selected_rectypes = ids;
-                        $selected_rectypes.text('');
-
-                        for(let i = 0; i < ids.length; i++){
-
-                            const name = $Db.rty(ids[i], 'rty_Name');
-
-                            $selected_rectypes.append(
-                                '<span class="truncate" style="display: inline-block;width: 155px; max-width: 155px;margin: 2.5px 0px; cursor: default;" title="'+ name +'">'
-                                    + name +
-                                '</span>');
-
-                            if((i+1) != ids.length){
-                                $selected_rectypes.append('<br>');
-                            }
-                        }
-                    }else{
-                        selected_rectypes = [];
-                        $selected_rectypes.text('<span style="display: inline-block;margin: 5px 0px;"> None </span>');
-                    }
-                }
-            };
-
-            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
-        });
-
-        $dlg.find('input#rectypes-all').on('change', function(event){
-            window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
-        }).trigger('change');
-    }
 });
+

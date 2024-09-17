@@ -1,9 +1,9 @@
 /**
-* mainMenu6.js : main menu for v6  RENAME to sideSlidersMenu
+* slidersMenu.js : side menu with sections as popup sliders
 * 
-* It loads mainMenu6_xxx.html for every section
-* They took icons, titles and rollovers from mainMenu.js widget. Namely from mainMenuXXX.html files wish describe dropdown menues
-* Action handlers are in mainMenu.js as well. See menuActionById
+* It loads slidersMenuXxx.html for every section
+* They took icons, titles and rollovers in core/actions.json via window.hWin.HAPI4.actionHandler
+* This object handles all actions via executeActionById method
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -22,7 +22,7 @@
 */
 
 /* global HSvsEdit */
-$.widget( "heurist.mainMenu6", {
+$.widget( "heurist.slidersMenu", {
 
     // default options
     options: {
@@ -85,6 +85,7 @@ $.widget( "heurist.mainMenu6", {
 
         let that = this;
         
+        //make it wider for Deutsch
         this._left_position = ('de'== window.hWin.HAPI4.getLocale())?115:91;
 
         
@@ -99,14 +100,14 @@ $.widget( "heurist.mainMenu6", {
             .appendTo( this.element );
         //91 200    
         this.divMainMenu = $('<div>')
-        .addClass('mainMenu6')
+        .addClass('slidersMenu')
         .css({position:'absolute',width: (this._left_position+'px'),
                 top:'2px',left:'0px',bottom:'4px', 
                 cursor:'pointer','z-index':104})
         .appendTo( this.element );
         
         this.divMainMenu.load(
-            window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6.html',
+            window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/slidersMenu.html',
             function(){ 
                 
                 window.hWin.HAPI4.HRA(that.divMainMenu);
@@ -133,7 +134,7 @@ $.widget( "heurist.mainMenu6", {
                 
                 const urlParams = new URLSearchParams(window.hWin.location.search);
                 
-                if(urlParams.has('welcome')){ //window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)
+                if(urlParams.has('welcome')){ //window.hWin.HEURIST4.util.getUrlParameter('welcome')
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
                     that.switchContainer( 'design' );
@@ -144,8 +145,6 @@ $.widget( "heurist.mainMenu6", {
                 }
 
                 //init menu items in ui-heurist-quicklinks
-                that._createListOfGroups(); //add list of groups for saved filters
-                
                 //init ui-heurist-quicklinks menu items
                 that._on(that.divMainMenu.find('.menu-explore'),{
                     mouseenter: that._mousein_ExploreMenu,
@@ -215,25 +214,6 @@ $.widget( "heurist.mainMenu6", {
                     }
                 });
                     
-                    
-                
-                
-                //keep main menu open on document mouse leave
-               
-                
-                let cms_record_id = urlParams.get('cms'); 
-                if(cms_record_id>0){
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                    widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
-                }else{
-                    //action 
-                    let cmd = urlParams.get('cmd'); 
-                    if(cmd){
-                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                        widget.mainMenu('menuActionById',cmd);
-                    }
-                }
-                
 /*                
                 that._on(that.divMainMenu.find('.menu-explore[data-action-onclick="svsAdd"]'), 
                 {click: function(e){
@@ -321,6 +301,14 @@ $.widget( "heurist.mainMenu6", {
                         that._updateDefaultAddRectype( data.preferences );
                     }else{
                         that._updateDefaultAddRectype();
+                    }
+                    if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
+console.log('ON_CREDENTIALS', e);
+                        /* todo
+                        that.populateFavouriteFilters();
+                        // if there is no search parameter
+                        that.showDatabaseOverview();
+                        */
                     }
                 }else{  //ON_STRUCTURE_CHANGE
                     //refresh list of rectypes after structure edit
@@ -619,7 +607,7 @@ $.widget( "heurist.mainMenu6", {
         clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on collapse main menu (_expandMainMenuPanel/_collapseMainMenuPanel)
     },
     //
-    // show explore menu popup (show_ExploreMenu) next to mainMenu6_explore or mainMany quick links
+    // show explore menu popup (show_ExploreMenu) next to slidersMenu_explore or mainMany quick links
     //
     _mousein_ExploreMenu: function(e) {
 
@@ -828,7 +816,7 @@ $.widget( "heurist.mainMenu6", {
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
                 /*
-                var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
                         explore_top = widget.position().top + 100;
                         if(explore_top+600>that.element.innerHeight()){
@@ -1297,7 +1285,7 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
-    // loads content of section from mainMenu6_section.html
+    // loads content of section from slidersMenuXxx.html
     //
     _loadSectionMenu: function( section ){
         
@@ -1362,7 +1350,7 @@ $.widget( "heurist.mainMenu6", {
         
         let that = this;
         this.menues[section].load(
-                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
+                window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/slidersMenu'+section.capitalize()+'.html',
                 function(){ 
                     
                     window.hWin.HAPI4.HRA( that.menues[section] );
@@ -1379,7 +1367,7 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
-    // special behaviour form mainMenu6_explore
+    // special behaviour form slidersMenuExplore
     //
     _initSectionMenuExplore: function(){
         
@@ -1430,32 +1418,35 @@ $.widget( "heurist.mainMenu6", {
     },
 
     //
-    // finds menu actions and assigns icon and title 
-    // source of all actions in mainMenu widget 
-    // see mainMenuXXX.html snippets for descriptions of actions
+    // finds menu actions via actionsHandler and assigns icon and title 
+    // 
+    // see sildersMenuXXX.html snippets for list of action for particular section 
+    // and actions.json for list of all actions
     //
     _initSectionMenu: function( section ){
-        
-        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-        if(!widget) return;
 
+        //loop by <li> elements - search action and init item        
         $.each(this.menues[section].find('li[data-action]'),
             function(i, item){
                 item = $(item);
                 let action_id = item.attr('data-action');
                 if( action_id ){
-                    item.addClass('fancytree-node');
-                    let link = widget.mainMenu('menuGetActionLink', action_id);    
                     
-                    if(link!=null){
+                    let action = window.hWin.HAPI4.actionHandler.findActionById(action_id);
+                    
+                    item.addClass('fancytree-node');
+                    
+                    if(action!=null){
                         
-                        let title = window.hWin.HR( action_id );
-                        if(!title){
-                            title = link.text();
+                        let action_icon = action.data?.icon?action.data.icon:'';
+
+                        let action_label = window.hWin.HR( action_id ); 
+                        if(!action_label){ //localized version not found
+                            action_label = action.text;
                         }
                     
-                        $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
-                         +'<span class="menu-text truncate" style="max-width: 109px;">'+title+'</span>')
+                        $('<span class="ui-icon '+action_icon+'"/>'
+                         +'<span class="menu-text truncate" style="max-width: 109px;">'+action_label+'</span>')
                         .appendTo(item);
 
                         if(action_id=='menu-import-get-template'){
@@ -1464,9 +1455,14 @@ $.widget( "heurist.mainMenu6", {
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
-                        
-                        item.attr('title',window.hWin.HR(action_id+'-hint')); //link.attr('title')
-                        
+
+                        let action_hint = window.hWin.HR( action_id+'-hint' ); 
+                        if(!action_hint){ //localized version not foind
+                            action_hint = action.title;
+                        }
+                        if(!action_hint){
+                            item.attr('title',action_hint);
+                        }
                     }
                 }
             });
@@ -1499,10 +1495,8 @@ $.widget( "heurist.mainMenu6", {
                     $(this.containers[section])
                         .css({left:(this._left_position+211)+'px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
             }
-            
-           
-            widget.mainMenu('menuActionById', li.attr('data-action')); 
-            //{container:this.containers[section]}
+
+            window.hWin.HAPI4.actionHandler.executeActionById(li.attr('data-action')); 
         }});
         
         if(section=='publish'){
@@ -1512,8 +1506,6 @@ $.widget( "heurist.mainMenu6", {
                 
                 this.menues[section].find('li').removeClass('ui-state-active');
                 li.addClass('ui-state-active');
-                
-               
                 
                 let btn = this.containers['publish'].find('#'
                                                     +li.attr('data-cms-action'));
@@ -1634,7 +1626,7 @@ $.widget( "heurist.mainMenu6", {
 
             if(this._show_quick_tips){
                 this._show_quick_tips = false; //show once
-                this.showQuickTips();
+                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-quick-tips');
             }
 
             this.populateFavouriteFilters(null, true); // resize favourite filters section
@@ -1645,51 +1637,6 @@ $.widget( "heurist.mainMenu6", {
     //-----------------------------------------------------------------
     //
     // SAVED FILTERS
-    //
-    _createListOfGroups: function(){
-        
-        //IJ 2020-11-13 always show in explore menu only
-        return;
-/* DISABLED 2020-11-13 always show in explore menu only        
-        var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
-        
-        
-        var s = '<li class="menu-explore" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'  //data-action="svs_list" 
-            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
-            +'</span></li>'
-            +'<li class="menu-explore" data-id="all">'  //data-action="svs_list" 
-            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
-            +'</span></li>'            
-        
-        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-        for (var groupID in groups)
-        {
-            if(groupID>0){
-                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
-                var sicon = 'users';
-                var struncate =  ' truncate" style="max-width: 109px;';
-                if(groupID==1){
-                    sicon = 'database';
-                    struncate = '';
-                }else if(groupID==5){
-                    sicon = 'globe';
-                }
-                
-                s = s + '<li class="menu-explore" data-id="'+groupID+'">' // data-action="svs_list" 
-                    +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text'+struncate+'">'
-                    +name
-                    +'</span></li>';
-            }
-        }
-        
-        var cont = this.divMainMenu.find('#filter_by_groups');
-        cont.children().remove(); //.not(':first')
-        $(s).appendTo(cont);
-*/
-    },
-
-    //
-    //
     //
     closeSavedSearch: function(){
         if(this.edit_svs_dialog){
@@ -1878,18 +1825,12 @@ $.widget( "heurist.mainMenu6", {
     },
 
     //
-    // Landing Page when not loading the Welcome page
+    // Landing Page when not loading the Welcome page - change to widgets/admin/databaseOverview
     //
     showDatabaseOverview: function(){
 
         let that = this;
         let editingProperties = false;
-
-        // Check that the mainMenu widget has been created
-        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-        if(!widget){
-            return;
-        }
 
         // Move to explore section
         if(this._active_section != 'explore'){
@@ -2108,7 +2049,7 @@ $.widget( "heurist.mainMenu6", {
         }
 
         // Check if the page already exists
-        if(widget.mainMenu('hasOverviewRendered')){
+        if(this.containers['explore'].find('div#db_overview').length>0){
 
             this.containers['explore'].find('div#db_overview').css('z-index', '10').show();
 
@@ -2124,7 +2065,8 @@ $.widget( "heurist.mainMenu6", {
             .appendTo(this.containers['explore']);
         
         // Load Content
-        $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/database_overview.html',
+        // @todo - implement as widgets/admin/databaseOverview (on baseAction)
+        $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/database_overview.html',
             function(){
 
                 // Section headers within Content
@@ -2188,7 +2130,7 @@ $.widget( "heurist.mainMenu6", {
                     cursor: 'pointer'
                 })
                 .on('click', function(){
-                    that.showQuickTips();
+                    window.hWin.HAPI4.actionHandler.executeActionById('menu-help-quick-tips');
                 });
 
                 // Commonly used entities/rectypes
@@ -2337,7 +2279,7 @@ $.widget( "heurist.mainMenu6", {
                     // Load Welcome Content
                     let $container = $('<div class="gs-box">')
 						.css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
-						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html', function(){
+						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/welcome.html', function(){
 							
 							// Bookmark Link
 							let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
@@ -2360,16 +2302,5 @@ $.widget( "heurist.mainMenu6", {
 
     closeContainer: function(section){
         this.containers[section].empty().hide();
-    },
-
-    showQuickTips: function(is_popup = true){
-
-        let url = window.hWin.HAPI4.baseURL+'context_help/quick_tips.html';
-
-        if(is_popup){
-            window.hWin.HEURIST4.msg.showMsgDlgUrl(url, null, '.', {isPopupDlg:true, use_doc_title: true});
-        }else{
-            window.open(url, '_blank');
-        }
     }
 });

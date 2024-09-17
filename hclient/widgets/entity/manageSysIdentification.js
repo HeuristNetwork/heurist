@@ -184,7 +184,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             that.closeDialog(true); //force to avoid warning    
             
             //close populate section
-            $('.ui-menu6').mainMenu6('closeContainer', 'populate');
+            $('.ui-menu6').slidersMenu('closeContainer', 'populate');
 
             
         });

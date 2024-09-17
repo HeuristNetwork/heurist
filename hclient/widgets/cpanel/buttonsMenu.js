@@ -27,7 +27,7 @@ $.widget( "heurist.buttonsMenu", {
         menuContent:null, //html snippet with ul/li menu items
         menuContentFile:null, //html snippet file with menu
         // callbacks
-        
+        manuActionHandler:null
     },
     
     menuBtns:[],
@@ -63,11 +63,8 @@ $.widget( "heurist.buttonsMenu", {
             }else{
                 that.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
             }
-
            
             that.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
-           
-            
 
             that._refresh();
         });
@@ -124,7 +121,6 @@ $.widget( "heurist.buttonsMenu", {
             return false;
         };
 
-        //load menu content
         if(this.options.menuContent){
 
             let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
@@ -142,7 +138,7 @@ $.widget( "heurist.buttonsMenu", {
                 //init top level buttons
                 const top_level = $(top_levels[i]);
                 const menuID = top_level.attr('id');
-                const menuName =  window.hWin.HR(top_level.attr('name'));
+                const menuName =  window.hWin.HR(top_level.attr('title'));
                 let menuCss =  top_level.attr('style');
                 menuCss = menuCss?` style="${menuCss}"`:'';
                 let linkCss =  top_level.attr('link-style');
@@ -172,18 +168,26 @@ $.widget( "heurist.buttonsMenu", {
                     }
                 }*/
                 
-                if(top_level.find('li').length==0){ //without children
+                let submenu = top_level.find('li');
+                
+                if(submenu.length==0){ //without children
                     
                     this._on( this.menuBtns[menuName], {
                         click : function(event){
                             event.preventDefault(); 
-                            this.menuActionHandler($(event.target).attr('id')); 
+                            let action_id = $(event.target).attr('data-action');
+                            if(!action_id){
+                                action_id = $(event.target).attr('id');
+                            }
+                            this.menuActionHandler(); 
                             return false; 
                         }
                     });
                     this.menuBtns[menuName].addClass('autowidth');
                     
                 }else{
+                    
+                    $.each(submenu, this._initActionItem);
 
                     this.menuSubs[menuName] = top_level.hide();
 
@@ -238,7 +242,7 @@ $.widget( "heurist.buttonsMenu", {
                 }
             }//for
             
-            callback.call();
+            callback.call(); //init completed
 
         }else if(this.options.menuContentFile){
 
@@ -253,12 +257,46 @@ $.widget( "heurist.buttonsMenu", {
     },
 
     //
-    //
+    // callback function
     //
     menuActionHandler: function(action){
         let that = this;
-        if(this.options.actionHandler){
-            this.options.actionHandler.call(this, action);
+        if(this.options.manuActionHandler){
+            this.options.manuActionHandler.call(this, action);
         }
     },
+    
+    //
+    //
+    //
+    _initActionItem: function(idx, item){
+                        
+        item = $(item);
+        let action_id = item.attr('data-action');
+console.log(action_id);        
+        if( !action_id ){
+            return
+        }
+            
+        let action = window.hWin.HAPI4.actionHandler.findActionById(action_id);
+            
+        if(!action){
+            return;   
+        }
+                
+        let action_icon = action.data?.icon?action.data.icon:'';
+
+        let action_label = window.hWin.HR( action_id ); 
+        if(!action_label){ //localized version not found
+            action_label = action.text;
+        }
+        let action_hint = window.hWin.HR( action_id+'-hint' ); 
+        if(!action_hint){ //localized version not foind
+            action_hint = action.title;
+        }
+
+        $(`<a data-action="${action_id}" href="#" title="${action_hint}">${action_label}</a>`)
+                .appendTo(item);
+    }
+    
 });

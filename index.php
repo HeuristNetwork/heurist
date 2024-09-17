@@ -234,9 +234,11 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/search/searchBuilderSort.js"></script>
 
 <script type="text/javascript" src="hclient/core/ActionHandler.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/buttonsMenu.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu6.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/controlPanel.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/buttonsMenu.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/slidersMenu.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/navigation.js"></script>
+
 <script type="text/javascript" src="hclient/widgets/search/svs_edit.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
@@ -245,10 +247,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/viewers/resultListDataTable.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/navigation.js"></script>
-
 <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
-
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
 
 <!-- edit entity -->
@@ -259,6 +258,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_Manager.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/ui.tabs.paging.js"></script>
@@ -276,18 +276,20 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDashboard.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDashboard.js"></script>
+
+<!-- autoload
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDashboard.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDashboard.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypeGroups.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefVocabularyGroups.js"></script>
-
+-->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
@@ -496,7 +498,6 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                         }
                     }
 
-
                     //add new record
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
 
@@ -504,7 +505,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                     /*
                     var _supress_dashboard = (window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search)>0);
                     if(_supress_dashboard!==true){
-                    //show dashboard (another place - _performInitialSearch in mainMenu)
+                    //show dashboard (another place - _performInitialSearch in controlPanel)
                     var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
                     if(prefs.show_on_startup==1 && prefs.show_as_ribbon!=1)
                     {
@@ -527,7 +528,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         }
 
 
-        //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
+        //perform search in the case that parameter "q" is defined - see controlPanel.js function _performInitialSearch
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='WebSearch'){

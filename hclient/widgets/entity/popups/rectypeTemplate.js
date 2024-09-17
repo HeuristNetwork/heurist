@@ -1,5 +1,5 @@
 /**
-* rtyDownloadTemplate.js - download xml or json record type template
+* rectypeTemplate.js - download xml or json record type template
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.rtyDownloadTemplate", $.heurist.baseAction, {
+$.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
 
     // default options
     options: {
@@ -25,7 +25,8 @@ $.widget( "heurist.rtyDownloadTemplate", $.heurist.baseAction, {
         width:  400,
         title:  'Download XML or JSON template',
         default_palette_class: 'ui-heurist-populate',
-        actionName: 'rtyDownloadTemplate'
+        path: 'widgets/entity/popups/', //location of this widget
+        actionName: 'rectypeTemplate'
     },
     
     //  

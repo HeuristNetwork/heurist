@@ -21,17 +21,19 @@
 
 class ActionHandler {
     
-    constructor(actions) {
-        this.actions = actions;  // Store the actions from the JSON
-        if(!Array.isArray(actions)){
-            this.actions = this.loadActionsFromFile();
+    constructor(arg) {
+        if(Array.isArray(arg)){
+            this.actions = actions;
+        }else{
+            const baseURL = arg?arg:window.hWin.HAPI4.baseURL;    
+            const url = baseURL + 'hclient/core/actions.json';
+            this.actions = this.loadActionsFromFile(url);
         }
     }
     
     // Method to fetch and load actions from a remote JSON file
-    async loadActionsFromFile() {
+    async loadActionsFromFile(url) {
         try {
-            const url = window.hWin.HAPI4.baseURL + 'hclient/core/actions.json';
             const response = await fetch(url);
             // or $.getJSON(url, function(res){  this.actions =  res;  });
 
@@ -64,6 +66,7 @@ class ActionHandler {
     // Method to execute an action by id
     executeActionById(id, dialog_options) {
         const action = this.findActionById(id);
+        
         if (!action) {
             console.log(`Action with ID "${id}" not found.`);            
             return;
@@ -135,7 +138,7 @@ class ActionHandler {
             let section = action_container;
             // find global widget
             // Activate the specified menu and container
-            $('.ui-menu6').mainMenu6('switchContainer', section, true);
+            $('.ui-menu6').slidersMenu('switchContainer', section, true);
             
             container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
             container.removeClass('ui-suppress-border-and-shadow');
@@ -170,9 +173,10 @@ class ActionHandler {
             if (dialog_options?.record_id > 0) {
                 popup_dialog_options.record_id = dialog_options['record_id'];
             }
-            if(window.hWin.HR(actionid+'-title')!=actionid+'-title'){
-                popup_dialog_options.title = window.hWin.HR(actionid+'-title');
-            }
+        //caption for dialog/panel
+        if(window.hWin.HR(actionid+'-header')!=actionid+'-header'){
+            popup_dialog_options.title = window.hWin.HR(adata.header?adata.header:action.text);
+        }
         
         popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
 
@@ -187,6 +191,7 @@ class ActionHandler {
 //Verify Database Integrity  
 
         let is_supported = true;
+        let contentURL;
         
         switch (actionid) {
             //action dialogs
@@ -200,7 +205,7 @@ class ActionHandler {
             case "menu-database-verify":
             
                 const s = actionid.substr(actionid.lastIndexOf('-')+1);
-                const actionName = 'db'+s.charAt(0).toUpperCase() + s.slice(1);;
+                const actionName = 'db'+s.capitalize();
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
             
@@ -234,8 +239,8 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
                 break;
             case "menu-import-get-template":
-                popup_dialog_options['path'] = 'widgets/admin/';
-                window.hWin.HEURIST4.ui.showRecordActionDialog('rtyDownloadTemplate', popup_dialog_options);
+                popup_dialog_options['path'] = 'widgets/entity/popups/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
                 break;
                 
             case "menu-structure-refresh":
@@ -307,32 +312,30 @@ class ActionHandler {
                 popup_dialog_options['path'] = 'widgets/admin/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('manageServer', popup_dialog_options);
                 break;
-                
-/*
-            that._showAdminServer({entered_password:entered_password});
-        }else if(action == "menu-help-quick-tips"){
-            $('.ui-menu6').mainMenu6('showQuickTips');
-        }else if(action == "menu-manage-rectitles"){
-            let dlg_options = $.extend(popup_dialog_options, {});
-            dlg_options['title'] = item.attr('data-header') ? item.attr('data-header') : 'Rebuild record titles';
-            that._rebuildRecordTitles(dlg_options);
-*/        
-                
-                
+/* NOT USED. At the moment it rebuilds titles for entire database or per rty after titlemask edit
+            case "menu-manage-rectitles":                                       
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordsTitles', popup_dialog_options);
+                break;
+*/                
             //case "menu-cms-create":
             //    //this._handleCMSCreate(popup_dialog_options);
                 break;
 
            
+            case "menu-help-quick-tips":
+                contentURL = window.hWin.HAPI4.baseURL+'context_help/quickTips.html';
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
+                break;
+           
             case "menu-help-acknowledgements":
             
-                var contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
+                contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
                 break;
 
             case "menu-help-about":
 
-                var contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
+                contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
@@ -446,7 +449,7 @@ class ActionHandler {
                                                 //selection is array of object
                                                 // [grp_id:role, ....]
                                                 /*
-                                                var s = '';
+                                                let s = '';
                                                 for(grp_id in data.selection)
                                                 if(grp_id>0 && data.selection[grp_id]){
                                                     s = s + grp_id+':'+data.selection[grp_id]+',';

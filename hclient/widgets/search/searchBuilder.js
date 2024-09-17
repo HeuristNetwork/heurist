@@ -1141,13 +1141,13 @@ $.widget( "heurist.searchBuilder", {
     //
     ,_doSaveSearch: function(prevent_real_save=false){
 
-        const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+        const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
         if(widget && !prevent_real_save){
 
             const top = this.element.parent().css('top');
             const left = this.element.parent().css('left');
             setTimeout(() => {
-                widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', {'top': top, 'left': left});
+                widget.slidersMenu('show_ExploreMenu', null, 'svsAdd', {'top': top, 'left': left});
             }, 2000);
         }
 

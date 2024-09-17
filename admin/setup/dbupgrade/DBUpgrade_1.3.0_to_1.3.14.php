@@ -239,11 +239,11 @@ EXP
 
             $to_be_imported = array();
             // import IIIF Annonation field
-            if(!isPostiveInt(ConceptCode::getDetailTypeLocalID('2-1098'))){
+            if(!isPositiveInt(ConceptCode::getDetailTypeLocalID('2-1098'))){
                 $to_be_imported['2-1098'] = 'Field 2-1098 "IIIF Annonation"';
             }
             //import field 2-1080 Workflowstages
-            if(!isPostiveInt(ConceptCode::getDetailTypeLocalID('2-1080'))){
+            if(!isPositiveInt(ConceptCode::getDetailTypeLocalID('2-1080'))){
                 $to_be_imported['2-1080'] = 'Field 2-1080 "Workflow stages"';
             }
 

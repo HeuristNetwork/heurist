@@ -18,7 +18,7 @@
             "user-admin-status": "0",
             "logaction": "db_New",
             "icon": "ui-icon-plus",
-            "header": "Create new database",
+            "header": "Create New Database",
             "container": "admin"
         }
     },
@@ -30,7 +30,7 @@
             "user-admin-status": "1",
             "logaction": "db_Clone",
             "icon": "ui-icon-databases",
-            "header": "Clone database",
+            "header": "Clone Database",
             "container": "admin"
         }
     },
@@ -41,7 +41,7 @@
             "user-admin-status": "1",
             "logaction": "db_Rename",
             "icon": "ui-icon-rename",
-            "header": "Rename database",
+            "header": "Rename Database",
             "container": "admin"
         },
         "text": "Rename"
@@ -54,7 +54,7 @@
             "logaction": "db_Restore",
             "icon": "ui-icon-file-zip",
             "pwd": "ServerFunctions",
-            "header": "Resotore database",
+            "header": "Resotore Database",
             "container": "admin"
         },
         "text": "Restore"
@@ -651,8 +651,8 @@
     {
       "display": "none",
       "id": "menu-import-add-record",
-      "title": "Add new record of specified record type",
       "text": "Add record",
+      "title": "Add new record of specified record type",
       "data": {
         "logaction": "add_Record",
         "header": "Add new record",

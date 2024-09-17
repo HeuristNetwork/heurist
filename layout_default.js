@@ -42,12 +42,12 @@ window.cfg_widgets = [
     {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js', minh:80, minw:150},
     {id:'heurist_SearchInput', name:'Filter', widgetname:'searchInput', script:'hclient/widgets/search/searchInput.js', minh:27, minw:150},
     {id:'heurist_SearchTree', name:'Saved searches', widgetname:'svs_list', script:'hclient/widgets/search/svs_list.js', minh:300, minw:200},
-    {id:'heurist_Navigation', name:'Navigation', widgetname:'navigation', script:'hclient/widgets/dropdownmenus/navigation.js'},
+    {id:'heurist_Navigation', name:'Navigation', widgetname:'navigation', script:'hclient/widgets/cpanel/navigation.js'},
     {id:'heurist_Groups', name:'Groups'},{id:'heurist_Cardinals', name:'Cardinal layout'},
 
 
-    {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
-    {id:'heurist_mainMenu6', name:'Main Side Menu', widgetname:'mainMenu6', script:'hclient/widgets/dropdownmenus/mainMenu6.js'},
+    {id:'heurist_controlPanel', name:'Control Panel', widgetname:'controlPanel', script:'hclient/widgets/cpanel/controlPanel.js'},
+    {id:'heurist_slidersMenu', name:'Main Side Menu', widgetname:'slidersMenu', script:'hclient/widgets/cpanel/slidersMenu.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js', minh:150, minw:150},
     {id:'heurist_resultListDataTable', name:'List View', widgetname:'resultListDataTable', script:'hclient/widgets/viewers/resultListDataTable.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
@@ -96,7 +96,7 @@ window.cfg_layouts = [
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
                      'min-width':'75em'}, 
-            apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
+            apps:[{appid:'heurist_controlPanel', hasheader:false, css:{height:'100%', border:'solid'}}] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
@@ -112,11 +112,11 @@ window.cfg_layouts = [
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'50px',right:'-2px', 
                      'min-width':'77em'}, 
-            apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
+            apps:[{appid:'heurist_controlPanel', hasheader:false, css:{height:'100%', border:'solid'}}] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'50px',left:0,bottom:'0.1em',right:'2px'},
-            apps:[{appid:'heurist_mainMenu6', hasheader:false, css:{width:'100%'}}]
+            apps:[{appid:'heurist_slidersMenu', hasheader:false, css:{width:'100%'}}]
         }    
     },
     
@@ -199,7 +199,7 @@ window.cfg_layouts = [
         }
     },
 
-    // Heurist v6 version. It is inited in mainMenu6.js
+    // Heurist v6 version.
     {id:'SearchAnalyze3', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
         center:{minsize:156, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'

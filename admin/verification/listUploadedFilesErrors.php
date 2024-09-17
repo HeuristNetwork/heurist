@@ -78,7 +78,7 @@ $mysqli = $system->get_mysqli();
         </div>
 <?php
         $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
-        $quota_not_defined = (!isPostiveInt($quota));
+        $quota_not_defined = (!isPositiveInt($quota));
         if($quota_not_defined){
             $quota = 1073741824; //1GB
         }

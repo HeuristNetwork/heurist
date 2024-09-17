@@ -33,7 +33,8 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
     // invoked from _init after loading of html content
     //
     _initControls: function(){
-        
+            let that = this;
+             
             //find all labels and apply localization
             this._$('label').each(function(){
                 $(this).html(window.hWin.HR($(this).html()));
@@ -121,7 +122,7 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
                 outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'});
                 
             this._on($btn_edit_clear2, { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                    function(){this._$('#custom_theme').val('');}); }});
+                    function(){that._$('#custom_theme').val('');}); }});
                 
             let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
                 .addClass('smallbutton')
@@ -130,10 +131,11 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
                 
                 
             let openThemeDialog = { click: function (){
-                    let current_val = window.hWin.HEURIST4.util.isJSON( this._$('#custom_theme').val() );
+                    let current_val = window.hWin.HEURIST4.util.isJSON( that._$('#custom_theme').val() );
                     if(!current_val) current_val = {};
+                    
                     window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
-                        this._$('#custom_theme').val(JSON.stringify(new_value));
+                        that._$('#custom_theme').val(JSON.stringify(new_value));
                     });
             }};
                 
@@ -146,7 +148,7 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
             window.hWin.HEURIST4.ui.initEditSymbologyControl(this._$('#map_select_style'));
             
             
-            let useMapcluster = {change: function(){ this._$('#mapcluster_on').prop('checked', true); }};
+            let useMapcluster = {change: function(){ that._$('#mapcluster_on').prop('checked', true); }};
             this._on(this._$('#mapcluster_grid'), useMapcluster);
             this._on(this._$('#mapcluster_count'), useMapcluster);
             this._on(this._$('#mapcluster_zoom'), useMapcluster);        

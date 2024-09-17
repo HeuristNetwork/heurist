@@ -24,7 +24,6 @@ $.widget( "heurist.svs_list", {
     options: {
         is_h6style: false,
 
-        btn_visible_dbstructure: false,  //button to open database structure graph
         btn_visible_filter: false, //filter for treeview
         btn_visible_save: false,
 
@@ -621,24 +620,6 @@ $.widget( "heurist.svs_list", {
 */
 
         this.refreshSubsetSign();
-        
-        //add db summary as a first entry
-        if(this.options.btn_visible_dbstructure && !this.isPublished)
-        {
-            if(islogged){
-                if(!this.btn_dbdesign){
-                    let ele = $('<div>').css({padding:'30px 10px 30px 40px'}).insertBefore($(this.div_header.children()[0]));
-                    this.btn_dbdesign = $('<button>').button({label:window.hWin.HR('Design schema'),icon:'ui-icon-gear',iconPosition:'end'})
-                        .css({'font-size':'1.4em','font-weight':'bold'})
-                        .appendTo(ele);
-                    this._on(this.btn_dbdesign,{click:this._showRecTypeManager});
-                    this.btn_dbdesign.find('.ui-icon').css({'font-size':'1.3em'});
-                }
-                this.btn_dbdesign.parent().show();
-            }else if(this.btn_dbdesign){
-                this.btn_dbdesign.parent().hide();
-            }
-        }
         
         this._adjustAccordionTop();
         
@@ -2453,18 +2434,8 @@ $.widget( "heurist.svs_list", {
 
         this.search_tree.remove();
         this.search_faceted.remove();
-        
-        if(this.btn_dbdesign)  this.btn_dbdesign.remove()
     }
 
-    , _showDbSummary: function(){
-        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-summary');
-    }
-    
-    , _showRecTypeManager: function(){
-        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
-    }
-    
     //
     //
     //

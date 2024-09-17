@@ -119,7 +119,7 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
 
 <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/dropdownmenus/navigation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchInput.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>

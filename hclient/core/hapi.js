@@ -68,6 +68,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _last_check_dbcache_relevance = 0,
 
         _use_debug = true;
+        
+        actionHandler = null;
                 
 
     /**
@@ -164,9 +166,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
         if (that.database) {
+            
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                    
+                    //loads list of actions
+                    that.actionHandler = new ActionHandler(that.baseURL);
+                    
                     let lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
@@ -179,13 +186,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
 
+        window.hWin.HAPI4.sysinfo.host_logo = 'https://t3.ftcdn.net/jpg/03/74/19/26/360_F_374192621_mCSB5FIskwdMEJZou3DuMN8N2Z6IzXqb.jpg';
+        window.hWin.HAPI4.sysinfo.host_url = 'https://t3.ftcdn.net';
+                    
                 }
                 _oninit(success);
             });
         } else if (_oninit) {
                 _oninit(false);
         }
-
     }
     
     let _key_count;
@@ -1363,7 +1372,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.sysinfo['version']) < 0);
                             if (need_exit) { // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
                                 // show lock popup that forces to clear cache
-                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionCheckMsg.html',
                                     {}/* no buttons */, null,
                                     {
                                         hideTitle: true, closeOnEscape: false,
@@ -1384,7 +1393,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HAPI4.sysinfo.db_version);
                         if (res == -2) { //-2= db_version_req newer
                             // show lock popup that forces to upgrade database
-                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
+                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionDbCheckMsg.html',
                                 {
                                     'Upgrade': function () {
                                         top.location.href = (window.hWin.HAPI4.baseURL + 'admin/setup/dbupgrade/upgradeDatabase.php?db=' + window.hWin.HAPI4.database);
