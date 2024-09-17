@@ -24,6 +24,7 @@ define('PDIR','../../');
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
+        <script type="text/javascript" src="importBase.js"></script>
         <script type="text/javascript" src="importDefTerms.js"></script>
 
         <script type="text/javascript">
@@ -35,7 +36,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     var trm_ID = urlParams.get('trm_ID');
                     var vcg_ID = urlParams.get('vcg_ID');
                     var isTranslation = (urlParams.get('trn')==1);
-                    var importDefTerms = new hImportDefTerms(trm_ID, vcg_ID, isTranslation);
+                    var importDefTerms = new HImportDefTerms(trm_ID, vcg_ID, isTranslation);
                 }
             }
 

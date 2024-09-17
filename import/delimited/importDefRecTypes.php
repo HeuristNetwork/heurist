@@ -25,6 +25,7 @@
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     ?>
+	    <script type="text/javascript" src="importDefinitions.js"></script>
 	    <script type="text/javascript" src="importDefRecTypes.js"></script>
 
 	    <script type="text/javascript">
@@ -32,7 +33,7 @@
             	if(success){
             		const urlParams = new URLSearchParams(window.location.search);
             		let rtg_ID = urlParams.get('rtg_ID');
-            		let importDefRecTypes = new hImportDefRecTypes(rtg_ID);
+            		let importDefRecTypes = new HImportRecordTypes(rtg_ID);
             	}
             }
         </script>

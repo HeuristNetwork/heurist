@@ -24,6 +24,7 @@ define('PDIR','../../');
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
+        <script type="text/javascript" src="importBase.js"></script>
         <script type="text/javascript" src="importMedia.js"></script>
 
         <script type="text/javascript">
@@ -31,7 +32,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
-                    var importMedia = new hImportMedia();
+                    var importMedia = new HImportMedia();
                 }
             }
 
@@ -207,7 +208,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 </div>
 
 <div style="margin-top:10px;">
-    <div style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px;">
+    <div style="height:4em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px;">
         <br><b>Preview of the data as it will be imported</b> <br>(check that columns have been separated with | symbols and that column headings have been read correctly - should be shown in bold, data in normal font)<br>
         <div id="preparedInfo" style="float:right;padding-right:10px"> <!-- div to show results of data preparation --></div>
     </div>

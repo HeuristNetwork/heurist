@@ -25,6 +25,7 @@
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     ?>
+	    <script type="text/javascript" src="importDefinitions.js"></script>
 	    <script type="text/javascript" src="importDefDetailTypes.js"></script>
 
 	    <script type="text/javascript">
@@ -32,7 +33,7 @@
             	if(success){
             		const urlParams = new URLSearchParams(window.location.search);
             		let dtg_ID = urlParams.get('dtg_ID');
-            		let importDefDetailTypes = new hImportDefDetailTypes(dtg_ID);
+            		let importDefDetailTypes = new HImportDetailTypes(dtg_ID);
             	}
             }
         </script>

@@ -25,12 +25,13 @@
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     ?>
+	    <script type="text/javascript" src="importBase.js"></script>
 	    <script type="text/javascript" src="importFileData.js"></script>
 
 	    <script type="text/javascript">
             function onPageInit(success){
             	if(success){
-            		var importFileData = new hImportFileData();
+            		var importFileData = new HImportFileData();
             	}
             }
         </script>
