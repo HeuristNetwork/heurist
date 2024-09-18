@@ -1,5 +1,5 @@
 /**
-*  ActionHandler
+*  CmsManager - select CMS to view and edit, addition new website or page
 *
 *
 * @package     Heurist academic knowledge management system
@@ -18,7 +18,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global hLayoutMgr */
 
+//
+//  CmsManager - select CMS to view and edit, addition new website or page
+//
 class CmsManager {
     
     cms_home_counts = null;    
@@ -281,7 +285,7 @@ class CmsManager {
     //
     #createWebSite() {
 
-        var that = this;
+        let that = this;
         
         if(this.cms_home_counts==null){
             this.#getCountWebSiteRecords(function(){
@@ -573,9 +577,11 @@ class CmsManager {
         $.getJSON(sURL, 
         function( new_element_json ){
             
-            if(!layoutMgr) hLayoutMgr();
+            if(!window.layoutMgr){
+                hLayoutMgr();
+            } 
             
-            layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+            window.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
 
                 //replace content of blog webpage
                 let request = {a: 'replace',

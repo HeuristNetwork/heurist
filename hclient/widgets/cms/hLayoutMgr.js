@@ -441,10 +441,6 @@ function hLayoutMgr(){
             layout.css['minHeight'] = app.minh;
         }
 
-        if(isEditMode) {
-           
-        }
-        
         if(layout.css && !$.isEmptyObject(layout)){
             
             $d.removeAttr('style');
@@ -956,10 +952,7 @@ function hLayoutMgr(){
                         content: s };
                 }else{
 
-                    if(ele[0].nodeName=='TABLE'){
-                        
-                       
-                    }
+                    //if(ele[0].nodeName=='TABLE'){}
 
                     //there are widgets among children
                     child = {name:"Group "+lvl+'.'+idx,

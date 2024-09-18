@@ -18,58 +18,91 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * Class: ActionHandler
+ * 
+ * The ActionHandler class is responsible for managing a list of actions fetched from a remote JSON file or provided directly as an array. 
+ * It offers methods for executing actions based on their ID and performing verification tasks where necessary.
+ */
 class ActionHandler {
-    
+
+    /**
+     * Constructor: Initializes the ActionHandler instance.
+     * 
+     * If `arg` is an array, it sets the `actions` property directly. 
+     * If `arg` is a string or undefined, it constructs a URL to load actions from a JSON file.
+     * 
+     * @param {Array|String|undefined} arg - Can be an array of actions, a string URL, or undefined (default URL used).
+     */
     constructor(arg) {
         if(Array.isArray(arg)){
             this.actions = actions;
-        }else{
-            const baseURL = arg?arg:window.hWin.HAPI4.baseURL;    
+        } else {
+            const baseURL = arg ? arg : window.hWin.HAPI4.baseURL;    
             const url = baseURL + 'hclient/core/actions.json';
             this.actions = this.loadActionsFromFile(url);
         }
     }
     
-    // Method to fetch and load actions from a remote JSON file
+    /**
+     * Method: loadActionsFromFile
+     * 
+     * Fetches actions from the given URL in JSON format and sets the `actions` property.
+     * 
+     * @param {string} url - The URL to fetch actions from.
+     * @returns {Promise<void>} No return value. Sets `this.actions` internally.
+     * @throws {Error} If the fetch operation fails or the response is not OK.
+     */
     async loadActionsFromFile(url) {
         try {
             const response = await fetch(url);
-            // or $.getJSON(url, function(res){  this.actions =  res;  });
-
             if (!response.ok) {
                 throw new Error(`Failed to load actions from ${url}: ${response.statusText}`);
             }
-
             this.actions = await response.json();
-            //console.log("Actions loaded successfully:", this.actions);
-
         } catch (error) {
             console.error("Error loading actions:", error);
         }
     }
     
-
-    // Method to get all available actions
+    /**
+     * Method: getActions
+     */
     getActions() {
-        console.log("Available actions:");
+        return this.actions;
+        /*console.log("Available actions:");
         this.actions.forEach(action => {
             console.log(`ID: ${action.id}, Text: ${action.text}`);
-        });
+        });*/
     }
 
-    // Method to find an action by id
+    /**
+     * Method: findActionById
+     * 
+     * Finds and returns an action object by its ID.
+     * 
+     * @param {string} id - The ID of the action to find.
+     * @returns {Object|undefined} The action object or `undefined` if not found.
+     */
     findActionById(id) {
         return this.actions.find(action => action.id === id);
     }
 
-    // Method to execute an action by id
+    /**
+     * Method: executeActionById
+     * 
+     * Executes the action with the specified ID. Verifies credentials if required and handles dialogs or popups.
+     * 
+     * @param {string} id - The ID of the action to execute.
+     * @param {Object} dialog_options - Optional parameters for dialog customization.
+     * @returns {boolean} True if the action is supported, otherwise false.
+     */
     executeActionById(id, dialog_options) {
         const action = this.findActionById(id);
         
         if (!action) {
             console.log(`Action with ID "${id}" not found.`);            
-            return;
+            return false;
         }
         
         let adata = action?.data;
@@ -82,76 +115,60 @@ class ActionHandler {
         if(!dialog_options){
             dialog_options = {};
         }
-        
-        //temp bypass dialog_options.verification_passed = true;
-        
+
         if(!dialog_options?.verification_passed && adata){
-            
-            // is passworded
+            // Handle password and permission verification
             let action_passworded = adata?.pwd;
             if (!action_passworded && !window.hWin.HAPI4.has_access(2)) {
                 action_passworded = adata['pwd-nonowner'];
             }
             
-            // requires admin level in certain group
-            let action_admin_level = adata['user-admin-status']; 
-            // requires memeberlevel in certain group
-            let action_member_level = adata['user-memebr-status']; 
-            // certain actions: add delete edit
+            let action_admin_level = adata['user-admin-status'];
+            let action_member_level = adata['user-memebr-status'];
             let action_user_permissions = adata['user-permissions']; 
-            
-            // Determine the required level of access
             let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
             
-            
-            if(action_passworded || requiredLevel>0){ 
-
-                    if (action_member_level > 0) {
-                        requiredLevel += ';' + action_member_level;
-                    }
+            if(action_passworded || requiredLevel > 0){ 
+                if (action_member_level > 0) {
+                    requiredLevel += ';' + action_member_level;
+                }
                 
-                    window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password)=>{
-                        dialog_options.entered_password = entered_password;
-                        dialog_options.verification_passed = true;
-                        this.executeActionById(id, dialog_options);              
-                    },
-                    requiredLevel, action_passworded, null, action_user_permissions);
+                window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password) => {
+                    dialog_options.entered_password = entered_password;
+                    dialog_options.verification_passed = true;
+                    this.executeActionById(id, dialog_options);              
+                },
+                requiredLevel, action_passworded, null, action_user_permissions);
                     
-                    return;
+                return;
             }
-        }//verification_passed
-       
+        }
+
         let actionid = action?.id;
         let action_log = adata?.logaction; 
-        let action_container = adata?.container; //target container
+        let action_container = adata?.container;
         
         if (action_log) {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
-        }        
-        
-        if (actionid.indexOf('menu-cms')==0){
-            if(!this.cmsManager){
+        }
+
+        if (actionid.indexOf('menu-cms') == 0) {
+            if (!this.cmsManager) {
                 this.cmsManager = new CmsManager();
             }
             this.cmsManager.executeAction(actionid);
             return true;
         }
-        
-        
-        // Prepare entity and popup dialog options
+
+        // Prepare dialog options
         let container, menu_container;
-        
         if (dialog_options?.container) {
-            container = dialog_options['container'];  //selector
+            container = dialog_options['container'];
         } else if (action_container) {
             let section = action_container;
-            // find global widget
-            // Activate the specified menu and container
             $('.ui-menu6').slidersMenu('switchContainer', section, true);
-            
             container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
             container.removeClass('ui-suppress-border-and-shadow');
-            
             menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-' + section);
             menu_container.find('li').removeClass('ui-state-active');
             menu_container.find('li[data-action="' + actionid + '"]').addClass('ui-state-active');
@@ -160,41 +177,39 @@ class ActionHandler {
         let pos = dialog_options?.position || null;
 
         let entity_dialog_options = {
-                isdialog: !container,
-                innerTitle: true,
-                isFrontUI: true,
-                menu_container: menu_container,
-                container: container
-            };
+            isdialog: !container,
+            innerTitle: true,
+            isFrontUI: true,
+            menu_container: menu_container,
+            container: container
+        };
 
         let popup_dialog_options = {
-                innerTitle: true,
-                is_h6style: true,
-                isdialog: !container,
-                resizable: false,
-                draggable: false,
-                menu_container: menu_container,
-                container: container,
-                position: pos,
-                maximize: true,
-            };
+            innerTitle: true,
+            is_h6style: true,
+            isdialog: !container,
+            resizable: false,
+            draggable: false,
+            menu_container: menu_container,
+            container: container,
+            position: pos,
+            maximize: true,
+        };
 
-            if (dialog_options?.record_id > 0) {
-                popup_dialog_options.record_id = dialog_options['record_id'];
-            }
-        //caption for dialog/panel
-        if(window.hWin.HR(actionid+'-header')!=actionid+'-header'){
-            popup_dialog_options.title = window.hWin.HR(adata.header?adata.header:action.text);
+        if (dialog_options?.record_id > 0) {
+            popup_dialog_options.record_id = dialog_options['record_id'];
         }
-        
-        popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
 
+        if (window.hWin.HR(actionid+'-header') != actionid+'-header') {
+            popup_dialog_options.title = window.hWin.HR(adata.header ? adata.header : action.text);
+        }
+
+        popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
 
         let is_supported = true;
         let contentURL;
         
         switch (actionid) {
-            //action dialogs
             case "menu-database-create":
             case "menu-database-restore":
             case "menu-database-delete":
@@ -203,22 +218,17 @@ class ActionHandler {
             case "menu-database-clone":
             case "menu-database-register":
             case "menu-database-verify":
-            
-                const s = actionid.substr(actionid.lastIndexOf('-')+1);
-                const actionName = 'db'+s.capitalize();
+                const s = actionid.substr(actionid.lastIndexOf('-') + 1);
+                const actionName = 'db' + s.capitalize();
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
-            
             case "menu-lookup-config":
-            
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
                 popup_dialog_options['title'] = window.hWin.HR('Lookup service configuration');
                 popup_dialog_options['path'] = 'widgets/lookup/';
-
                 window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
                 break;
-            
             case "menu-repository-config":
 
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
@@ -353,26 +363,31 @@ class ActionHandler {
             case "menu-help-online":
             
                 action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website';
-                
-
+            
             default:
-                // Handle the case where the action is a link or needs to open a dialog
-                const href = action.href;// action?.href;
+                const href = action.href;
                 const target = action?.target;
-                
                 if (!window.hWin.HEURIST4.util.isempty(href) && href !== '#') {
                     this._handleHrefAction(action, href, target, popup_dialog_options);
-                }else{
+                } else {
                     is_supported = false;
                 }
                 break;
         }
-  
+
         return is_supported;
     }
     
-    
-    // Helper method to handle link-based actions
+    /**
+     * Helper Method: _handleHrefAction
+     * 
+     * Handles actions that involve opening a URL or external link.
+     * 
+     * @param {Object} action - The action object.
+     * @param {string} href - The URL to open.
+     * @param {string} target - The target window for the URL.
+     * @param {Object} popup_dialog_options - Additional dialog options.
+     */
     _handleHrefAction(action, href, target, popup_dialog_options) {
         if (href.indexOf('mailto:') === 0) {
             window.open(href, 'emailWindow');
@@ -386,8 +401,7 @@ class ActionHandler {
         if (target) {
             window.open(href, target);
         } else {
-            
-            if(!popup_dialog_options.title){
+            if (!popup_dialog_options.title) {
                 popup_dialog_options.title = action.text;
             }
             let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
@@ -411,20 +425,20 @@ class ActionHandler {
                             }
                     }
                 }
-*/
-            
-            
+*/            
             window.hWin.HEURIST4.msg.showDialog(href, options);
         }
     }
     
-    //
-    // @todo - fix layeours for select user and groups (disable edit,delete)
-    //
-    _importUsers( entity_dialog_options ){
-        
-        if(!entity_dialog_options) entity_dialog_options = {};
-        
+    /**
+     * Helper Method: _importUsers
+     * 
+     * Handles the import of users into the system through a series of dialog steps.
+     * 
+     * @param {Object} entity_dialog_options - Configuration options for the dialogs during the import process.
+     */
+    _importUsers(entity_dialog_options) {
+        if (!entity_dialog_options) entity_dialog_options = {};
         let options = $.extend(entity_dialog_options, {
             subtitle: 'Step 1. Select database with users to be imported',
             title: 'Import users', 
@@ -434,77 +448,55 @@ class ActionHandler {
             use_cache: true,
             except_current: true,
             keep_visible_on_selection: true,
-            onselect:function(event, data){
-                if(data && data.selection && data.selection.length>0){
-                        let selected_database = data.selection[0].substr(4);
-                        
-                        let options2 = $.extend(entity_dialog_options, {
-                            subtitle: 'Step 2. Select users in '+selected_database+' to be imported',
-                            title: 'Import users', 
-                            database: selected_database,
-                            select_mode: 'select_multi',
-                            edit_mode: 'none',
-                            keep_visible_on_selection: true,
-                            onselect:function(event, data){
-                                if(data && data.selection &&  data.selection.length>0){
-                                    let selected_users = data.selection;
-
-                                    let options3 = $.extend(entity_dialog_options, {
-                                        subtitle: 'Step 3. Allocate imported users to work groups',
-                                        title: 'Import users', 
-                                        select_mode: 'select_roles',
-                                        selectbutton_label: 'Allocate roles',
-                                        sort_type_int: 'recent',
-                                        edit_mode: 'none',
-                                        keep_visible_on_selection: false,
-                                        onselect:function(event, data){
-                                            if(data && !$.isEmptyObject(data.selection)){
-                                                //selection is array of object
-                                                // [grp_id:role, ....]
-                                                /*
-                                                let s = '';
-                                                for(grp_id in data.selection)
-                                                if(grp_id>0 && data.selection[grp_id]){
-                                                    s = s + grp_id+':'+data.selection[grp_id]+',';
+            onselect: function(event, data){
+                if (data && data.selection && data.selection.length > 0) {
+                    let selected_database = data.selection[0].substr(4);
+                    let options2 = $.extend(entity_dialog_options, {
+                        subtitle: 'Step 2. Select users in ' + selected_database + ' to be imported',
+                        title: 'Import users', 
+                        database: selected_database,
+                        select_mode: 'select_multi',
+                        edit_mode: 'none',
+                        keep_visible_on_selection: true,
+                        onselect: function(event, data){
+                            if (data && data.selection &&  data.selection.length > 0) {
+                                let selected_users = data.selection;
+                                let options3 = $.extend(entity_dialog_options, {
+                                    subtitle: 'Step 3. Allocate imported users to work groups',
+                                    title: 'Import users', 
+                                    select_mode: 'select_roles',
+                                    selectbutton_label: 'Allocate roles',
+                                    sort_type_int: 'recent',
+                                    edit_mode: 'none',
+                                    keep_visible_on_selection: false,
+                                    onselect: function(event, data){
+                                        if (data && !$.isEmptyObject(data.selection)){
+                                            let request = {
+                                                a: 'action',
+                                                entity: 'sysUsers',
+                                                roles: data.selection,
+                                                userIDs: selected_users,
+                                                sourceDB: selected_database,
+                                                request_id: window.hWin.HEURIST4.util.random()
+                                            };
+                                            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+                                                if (response.status == window.hWin.ResponseStatus.OK) {
+                                                    window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+                                                } else {
+                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
                                                 }
-                                                if(s!='')
-                                                    alert( selected_database+'  '+selected_users.join(',')
-                                                        +' '+s);  
-                                                */        
-                                                        
-                                            let request = {};
-                                            request['a']         = 'action';
-                                            request['entity']    = 'sysUsers';
-                                            request['roles']     = data.selection;
-                                            request['userIDs']   = selected_users;
-                                            request['sourceDB']  = selected_database;
-                                            request['request_id'] = window.hWin.HEURIST4.util.random();
-
-                                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                                function(response){             
-                                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
-                                                    }else{
-                                                        window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                    }
                                             });
-                                                        
-                                            }
                                         }
-                                    });              
-                                    
-                                    window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
-                                }
+                                    }
+                                });              
+                                window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
                             }
-                        });
-                        
-                        
-                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+                        }
+                    });
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
                 }
             }
-        });    
-    
+        });
         window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     }    
-    
 }
