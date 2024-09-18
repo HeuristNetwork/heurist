@@ -286,10 +286,10 @@ $.widget( "heurist.searchInput", {
 
         
         if(this.options.is_h6style){
-            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
             if(widget){
                     let pos = this.element.offset();
-                    widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
+                    widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
             }
         }else{
             

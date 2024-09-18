@@ -68,6 +68,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _last_check_dbcache_relevance = 0,
 
         _use_debug = true;
+        
+        actionHandler = null;
                 
 
     /**
@@ -114,14 +116,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
+            //replace devlopment folder to production one (ie h6-ij to heurist)
             installDir = installDir.split('/');
-            for (let i = installDir.length - 1; i >= 0; i--) {
-                if (installDir[i] != '') {
-                    installDir[i] = 'heurist';
-                    break;
-                }
-            }
+            let i = installDir.length-1;
+            while(i>0 && installDir[i]=='') i--;
+            installDir[i] = 'heurist';
             installDir = installDir.join('/');
+            
             that.baseURL_pro = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         } else {
             that.baseURL_pro = _baseURL;
@@ -164,9 +165,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
         if (that.database) {
+            
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                    
+                    //loads list of actions                 window.hWin.document
+                    if(typeof ActionHandler !== 'undefined'){
+                    //window.hWin.HEURIST4.util.isFunction($('body')['ActionHandler'])){
+                        that.actionHandler = new ActionHandler(that.baseURL);    
+                    }
+                    
                     let lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
@@ -185,7 +194,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         } else if (_oninit) {
                 _oninit(false);
         }
-
     }
     
     let _key_count;
@@ -469,7 +477,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @param {callserverCallback} callback
              */
             logout: function (callback) {
-                _callserver('usr_info', { a: 'logout' }, callback);
+                _callserver('usr_info', { a: 'logout' }, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HAPI4.setCurrentUser(null);
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+                            
+                            if(window.hWin.HEURIST4.util.isFunction(callback)){
+                                callback(response);  
+                            } 
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
             },
 
             /**
@@ -500,7 +520,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             verify_credentials: function (callback, requiredLevel, password_protected, password_entered, requiredPermission) {
 
-                let requiredMembership = 0;
+                let requiredMembership = 0; //membership in group
 
                 if (typeof requiredLevel === 'string' && requiredLevel.indexOf(';') > 0) {
 
@@ -1351,7 +1371,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.sysinfo['version']) < 0);
                             if (need_exit) { // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
                                 // show lock popup that forces to clear cache
-                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionCheckMsg.html',
                                     {}/* no buttons */, null,
                                     {
                                         hideTitle: true, closeOnEscape: false,
@@ -1372,7 +1392,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HAPI4.sysinfo.db_version);
                         if (res == -2) { //-2= db_version_req newer
                             // show lock popup that forces to upgrade database
-                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
+                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionDbCheckMsg.html',
                                 {
                                     'Upgrade': function () {
                                         top.location.href = (window.hWin.HAPI4.baseURL + 'admin/setup/dbupgrade/upgradeDatabase.php?db=' + window.hWin.HAPI4.database);
@@ -1665,8 +1685,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             , search_new: function (request, callback) {
                 // start search
-                
-
                 _callserver('record_output', request, callback);    //standard search
             }
 

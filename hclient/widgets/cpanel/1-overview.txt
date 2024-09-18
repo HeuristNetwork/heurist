@@ -1,9 +1,9 @@
 
-Directory:	/hclient/widgets/dropdownmenus
+Directory:	/hclient/widgets/cpanel
 
-Overview:   Dropdown menus for major functions, formerly displayd at top right of the search/filter page, now replaced with framecontent/tabmenus
+Overview:   Control panel (header), Dropdown and Slider menus for major functions,
 
-Updated: 	18 Oct 2015
+Updated: 	17 Sep 2024
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 

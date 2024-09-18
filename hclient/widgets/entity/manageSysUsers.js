@@ -729,11 +729,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         window.hWin.HAPI4.SystemMgr.logout(
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.setCurrentUser(null);
                     window.location.reload();  // page reload
-                }else{
-                    response.message += ' <br> Heurist is unable to refresh the page!'
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );

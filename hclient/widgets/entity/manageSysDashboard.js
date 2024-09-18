@@ -22,7 +22,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     
     options: {
         is_iconlist_mode: true,  //show in compact mode
-        isViewMode: true
+        isViewMode: true   // true - production mode, false - edit mode 
     },
 
     _entityName:'sysDashboard',
@@ -533,21 +533,15 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         command = 'menu-import-csv';
                     }else if(command=='menu-import-add-record'){
                         
-                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                         if(widget){
                              let ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
-                             widget.mainMenu6('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
+                             widget.slidersMenu('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
                              return;
                         }
                     }
 
-                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', command);
-                    /*
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                    if(widget){
-                        widget.mainMenu('menuActionById', command);
-                    }
-                    */
+                    window.hWin.HAPI4.actionHandler.executeActionById(command);
 
                 }else if(command=='action-AddRecord'){ //add new record
                     let params = window.hWin.HEURIST4.util.isJSON( this._selection.fld(record, 'dsh_Parameters') );
@@ -582,10 +576,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 
                     this.closeDialog();
 
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                     if(widget){
                          let ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
-                         widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:0, left:ele.offset().left });
+                         widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:0, left:ele.offset().left });
                     }else{
                         widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
                         if(widget){

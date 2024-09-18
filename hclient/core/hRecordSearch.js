@@ -108,9 +108,8 @@ function HRecordSearch() {
             //window.hWin.HEURIST4.current_query_request,  window.hWin.HAPI4.currentRecordset !!!!! @todo get rid these global vars 
             // they are used in old parts: smarty, diagram
             
-            //clone - to use mainMenu.js
             if(window.hWin.HEURIST4.util.isempty(request.search_realm)){
-                window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+                window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request);
             }
 
             window.hWin.HAPI4.currentRecordset = null;
@@ -215,6 +214,7 @@ function HRecordSearch() {
         },
         
        // originator - widget that initiated the search
+       // returns result in global event  ON_REC_SEARCH_FINISH
         doSearch:function( originator, request ){
             _doSearch( originator, request );
         },

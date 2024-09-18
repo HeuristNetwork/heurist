@@ -87,9 +87,9 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
     if($dtyID==null || !@self::$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
 
-        self::$system->defineConstant('DT_RELATION_TYPE');
+        //self::$system->defineConstant('DT_RELATION_TYPE');
 
-        if ( $dtyID == DT_RELATION_TYPE) {
+        if ( $dtyID == self::$system->getConstant('DT_RELATION_TYPE')) {
             $parent_id = 'relation';
         }elseif(is_array($defs) && count($defs)==1){
             $parent_id = $defs[0];

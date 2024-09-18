@@ -456,7 +456,8 @@ function hLayoutMgr(){
     }
     
     //
-    //
+    // returns widget descrition/definitions from cfg_widgets
+    // this object contains name of widget, path to js, some default options
     //
     function _getWidgetById(id){
 

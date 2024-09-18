@@ -90,7 +90,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //this.options.edit_mode=='popup'
         if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){ //special compact case
-            this.options.width = 440;
+            this.options.width = 540;
         }
             
             
@@ -663,7 +663,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(w_desc<30) w_desc = 30;
             html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'Description', 'text-align:left'))
         }
-        let name_width = 250;
+        let name_width = (this.options.select_mode=='select_multi')?400:250;
         html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'Name', 'text-align:left'))
         
         return html;
@@ -867,7 +867,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     'min-width:'+w_desc+'px;max-width:'+w_desc+'px;font-style:italic;font-size:smaller')); 
         }
         
-        let name_width = 250;
+        let name_width = (this.options.select_mode=='select_multi')?400:250;
         html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))
 
         html = '<div class="recordDiv rt_draggable white-borderless" recid="'
@@ -1023,7 +1023,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     window.hWin.HAPI4.RecordSearch.doSearch( this, 
                         {q:'{"t":"'+recID+'"}',detail:'ids', source:this.element.attr('id')} );
                     if(this.options.parent_dialog == null){
-                        $('.ui-menu6').mainMenu6('switchContainer', 'explore', true);
+                        $('.ui-menu6').slidersMenu('switchContainer', 'explore', true);
                     }
                    
                     

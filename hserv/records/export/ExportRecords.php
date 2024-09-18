@@ -441,7 +441,7 @@ abstract class ExportRecords {
 
             header('Content-Type: application/zip');
             header($contentDispositionField);
-            header(CONTENT_LENGTH . self::get_file_size($file_zip_full));
+            header(CONTENT_LENGTH . getFileSize($file_zip_full));
             fileReadByChunks($file_zip_full);
 
             // remove the zip archive and temp files
@@ -475,7 +475,7 @@ abstract class ExportRecords {
             }
 
             header('Content-Disposition: attachment; filename='.$filename);
-            header(CONTENT_LENGTH . self::get_file_size($this->tmp_destination));
+            header(CONTENT_LENGTH . getFileSize($this->tmp_destination));
         }
 
         if(@$params['restapi']){

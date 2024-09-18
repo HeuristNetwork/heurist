@@ -1388,9 +1388,9 @@ console.error('Cardinal layout widget does not have proper options');
         getWidgetByName: function( widgetname ){
             
             if(widgetname=='svs_list'){
-                let app2 = _appGetWidgetByName('mainMenu6');
+                let app2 = _appGetWidgetByName('slidersMenu');
                 if(app2.widget){
-                    return $(app2.widget).mainMenu6('getSvsList');
+                    return $(app2.widget).slidersMenu('getSvsList');
                 }
             }  
             
@@ -1402,6 +1402,7 @@ console.error('Cardinal layout widget does not have proper options');
             }
         },
         
+        //not used
         executeCommand: function( widgetname, method, command ){
             let app = _appGetWidgetByName( widgetname );
             if(app && app.widget)

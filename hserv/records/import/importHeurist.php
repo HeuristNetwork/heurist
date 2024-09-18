@@ -610,7 +610,7 @@ public static function importRecords($filename, $params){
     $is_debug = @$params['dbg'] == 1;
     $session_id  = @$params['session'];
     $is_cms_init = (@$params['is_cms_init']===true || @$params['is_cms_init']==1);
-    $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
+    $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']==0);
     $owner_id = @$params['onwer_id']>0 ?$params['onwer_id'] :1;
     $mapping_defs = @$params['mapping_defs'];
 
@@ -1012,7 +1012,7 @@ $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dt
                     //@todo - add to report
                     continue;
                 }
-                if($dty_ID==DT_PARENT_ENTITY){ //ignore
+                if($dty_ID==self::$system->getConstant('DT_PARENT_ENTITY',0)){ //ignore
                     continue;
                 }
 

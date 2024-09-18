@@ -94,12 +94,11 @@ class DbEntitySearch
 
             foreach($values as $value){
                 // remove negation
-                $value = ltrim('-', $value);
-                //if(strpos($value, '-') === 0){ $value = substr($value, 1); }
+                if(strpos($value, '-') === 0){ $value = substr($value, 1); }
 
                 $isNotFound = true;
                 if($isKeyBased){
-                    if(findInArray($enums, 'key', $value)!=null){
+                    if(findInArray($enums, 'key', $value)!==null){
                                 $isNotFound = false;
                                 break;
                     }
@@ -165,7 +164,6 @@ class DbEntitySearch
             }
 
             if($value==SQL_NULL || $value=='-'.SQL_NULL){
-                $this->data[$fieldname] = true;
                 continue;
             }
 
@@ -345,7 +343,7 @@ class DbEntitySearch
 
         foreach($or_values as $value){
 
-            if($value == SQL_NULL){
+            if($value == 'NULL'){
                 array_push($or_predicates, $fieldname.' IS NULL');
                 continue;
             }elseif($value == '-NULL'){

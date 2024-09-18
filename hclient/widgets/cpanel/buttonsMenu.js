@@ -24,12 +24,15 @@ $.widget( "heurist.buttonsMenu", {
         is_h6style: true,
         menu_class:null,
         
+        //if content is not defined here it takes this.element.html()
         menuContent:null, //html snippet with ul/li menu items
         menuContentFile:null, //html snippet file with menu
-        // callbacks
         
+        // callbacks
+        manuActionHandler:null
     },
     
+    divMainMenuItems:null, //parent UL
     menuBtns:[],
     menuSubs:[],
 
@@ -43,17 +46,17 @@ $.widget( "heurist.buttonsMenu", {
         // prevent double click to select text
         .disableSelection();
         
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
-            //.css({'dispaly':'table-row'})
-            .appendTo(this.element);
-
         this._initMenu(()=>{
             
-            //complete intialization 
+            if(that.divMainMenuItems==null){
+                return;
+            }
             
+            //complete intialization 
             that.divMainMenuItems.menu();
 
-            that.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'100px', 'text-align':'center'}); // center, place gap and setting width
+            // 'width':'100px', 
+            that.divMainMenuItems.find('li').css({'padding':'0 3px 3px','text-align':'center'}); // center, place gap and setting width
             
             that.divMainMenuItems.find('li.autowidth').css('width','auto');
 
@@ -63,11 +66,8 @@ $.widget( "heurist.buttonsMenu", {
             }else{
                 that.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
             }
-
            
-            that.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
-           
-            
+            that.divMainMenuItems.children('li').children('a').children('.ui-icon-right').css({right: '2px', left:'unset'});
 
             that._refresh();
         });
@@ -124,25 +124,42 @@ $.widget( "heurist.buttonsMenu", {
             return false;
         };
 
-        //load menu content
+        if(this.options.menuContentFile){
+
+            $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
+                function(response){
+                    that.options.menuContent = response;
+                    that._initMenu(callback);
+            });
+            return;
+        }
+
+        let top_levels;
+        
         if(this.options.menuContent){
-
+            top_levels = $(this.options.menuContent).find('ul'); //find top level 
+        }else{
+            top_levels = this.element.find('ul'); //find top levels 
+        }
+        
             let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-
-            //appendTo(this.divMainMenuItems).
-            let top_levels = $(this.options.menuContent).find('ul'); //find top level 
 
             if(top_levels.length==0){
                 //@todo error
-
+                console.log('menu content is not defined');
+                return;
             }
+            
+            this.element.empty();
+            this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
 
             for(let i=0; i<top_levels.length; i++){
 
                 //init top level buttons
                 const top_level = $(top_levels[i]);
-                const menuID = top_level.attr('id');
-                const menuName =  window.hWin.HR(top_level.attr('name'));
+                let menuID = top_level.attr('id');
+                menuID = menuID?`data-action="${menuID}"`:'';
+                const menuName =  window.hWin.HR(top_level.attr('title'));
                 let menuCss =  top_level.attr('style');
                 menuCss = menuCss?` style="${menuCss}"`:'';
                 let linkCss =  top_level.attr('link-style');
@@ -152,16 +169,25 @@ $.widget( "heurist.buttonsMenu", {
                 const menuTitle =  window.hWin.HR(top_level.attr('title'));
                 const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
 
-                let link = $(`<a id="${menuID}" href="#" style="padding-right:22px !important;${linkCss}" title="${menuTitle}">${menuLabel}</a>`);
 
-                let sicon = top_level.attr('data-icon');
-                if(!sicon){
-                    sicon = 'ui-icon-carat-d';    
+                let right_padding = '2px';
+                let icon_left = top_level.attr('data-icon-left');
+                if(icon_left){
+                    icon_left = `<span class="ui-icon ${icon_left}"></span>`;
+                    right_padding = '22px';
+                }else{
+                    icon_left = '';
                 }
-                if(sicon!='none'){
-                    $(`<span class="ui-icon ${sicon}">`).appendTo(link);  //caret-1-s
+                
+                let icon_righ = top_level.attr('data-icon');
+                if(!icon_righ){
+                    icon_righ = 'ui-icon-carat-d';    
                 }
+                icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
 
+                let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
+                
+                
                 this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
 
                 /*
@@ -172,18 +198,17 @@ $.widget( "heurist.buttonsMenu", {
                     }
                 }*/
                 
-                if(top_level.find('li').length==0){ //without children
+                let submenu = top_level.find('li');
+                
+                if(submenu.length==0){ //without children
                     
                     this._on( this.menuBtns[menuName], {
-                        click : function(event){
-                            event.preventDefault(); 
-                            this.menuActionHandler($(event.target).attr('id')); 
-                            return false; 
-                        }
-                    });
+                        click : this.menuActionHandler });
                     this.menuBtns[menuName].addClass('autowidth');
                     
                 }else{
+                    
+                    $.each(submenu, this._initActionItem);
 
                     this.menuSubs[menuName] = top_level.hide();
 
@@ -193,12 +218,9 @@ $.widget( "heurist.buttonsMenu", {
                     //.addClass('ui-menu-divider-heurist')
                     .menu({
                         icons: { submenu: "ui-icon-circle-triangle-e" },
-                        select: function(event, ui){ 
-                            event.preventDefault(); 
-                            that.menuActionHandler(ui.item.attr('id')); 
-                            return false; 
-                    }});
+                        select: function(event, ui){ that.menuActionHandler(event, ui) } });
 
+                    /* not tested
                     if(window.hWin.HAPI4.has_access()){
                         this.menuSubs[menuName].find('.logged-in-only').show();
                     }else{
@@ -224,6 +246,7 @@ $.widget( "heurist.buttonsMenu", {
                             item.attr('title',hint);    
                         }
                     });
+                    */
 
                     this.menuSubs[menuName].find('li').css('padding-left',0);
 
@@ -238,27 +261,69 @@ $.widget( "heurist.buttonsMenu", {
                 }
             }//for
             
-            callback.call();
-
-        }else if(this.options.menuContentFile){
-
-            $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
-                function(response){
-                    that.options.menuContent = response;
-                    that._initMenu(callback);
-            });
-
-        }
+            callback.call(); //init completed
 
     },
 
     //
+    // callback function
     //
-    //
-    menuActionHandler: function(action){
-        let that = this;
-        if(this.options.actionHandler){
-            this.options.actionHandler.call(this, action);
+    menuActionHandler: function(event, ui) {
+
+        event.preventDefault(); 
+        let ele;
+        
+        if(ui?.item){
+            ele = ui.item;
+        }else{
+            ele = $(event.target);
+            if(ele.is('span')){
+                ele = ele.parent();
+            }
         }
+        
+        let action_id = ele.attr('data-action');
+        if(!action_id){
+            action_id = ele.attr('id');
+        }
+        if(this.options.manuActionHandler){
+            this.options.manuActionHandler.call(this, action_id);
+        }
+        
+        return false; 
     },
+    
+    //
+    //
+    //
+    _initActionItem: function(idx, item){
+                        
+        item = $(item);
+        let action_id = item.attr('data-action');
+        
+        if( !action_id ){
+            return
+        }
+            
+        let action = window.hWin.HAPI4.actionHandler.findActionById(action_id);
+            
+        if(!action){
+            return;   
+        }
+                
+        let action_icon = action.data?.icon?action.data.icon:'';
+
+        let action_label = window.hWin.HR( action_id ); 
+        if(!action_label){ //localized version not found
+            action_label = action.text;
+        }
+        let action_hint = window.hWin.HR( action_id+'-hint' ); 
+        if(!action_hint){ //localized version not foind
+            action_hint = action.title;
+        }
+
+        $(`<a data-action="${action_id}" href="#" title="${action_hint}">${action_label}</a>`)
+                .appendTo(item);
+    }
+    
 });

@@ -404,7 +404,7 @@ function postmode_file_selection() {
                 $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
             }else{
                 if ($_FILES[$param_name]['tmp_name'] && is_uploaded_file($_FILES[$param_name]['tmp_name'])) {
-                    $file_size = get_file_size($_FILES[$param_name]['tmp_name']);
+                    $file_size = getFileSize($_FILES[$param_name]['tmp_name']);
                 } else {
                     $file_size = $content_length;
                 }

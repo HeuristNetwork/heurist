@@ -1,7 +1,7 @@
 /**
 * bookmarkletSource.js: The source for the bookmarklet: this file is here to provide a reference
 *                       for the source, but is not referenced by any other file. The code is
-*                       duplicatd in: hclient/widgets/profile/profile_preferences.html
+*                       duplicatd in: hclient/widgets/profile/profilePreferences.html
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
