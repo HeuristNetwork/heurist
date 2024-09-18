@@ -157,7 +157,6 @@ $.widget("heurist.lookupESTC_editions", $.heurist.lookupESTC, {
         }
         if(this.element.find('#select_bf').val()>0){
             query['f:256'] = this.element.find('#select_bf').val();
-            //query['all'] = this.element.find('#select_bf option:selected').text();  //enum
         }
         if(this.element.find('#estc_no').val() != ''){
             query['f:254'] = `@${this.element.find('#estc_no').val()}`;

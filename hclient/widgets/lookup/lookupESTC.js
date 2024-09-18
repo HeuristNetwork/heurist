@@ -346,12 +346,22 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      */
     _reportResults: function(rec_IDs, data){
 
-        let cnt = data.count_imported;
-        let cnt_ex = data.cnt_exist;
-        let cnt_i = data.count_ignored;
-        let ids = data.ids; //all
+        const cnt = data.count_imported;
+        const cnt_ex = data.cnt_exist;
+        const cnt_i = data.count_ignored;
+        const ids = data.ids; //all
+
         let ids_ex = data.exists; //skipped
         if(!ids_ex) ids_ex = [];
+
+        const imported_extra = cnt > 1 ? 's are' : ' is';
+        const existed_extra = cnt_ex > 1 ? 's are' : ' is';
+        const skipped_extra = cnt_i > 1 ? 's are' : ' is';
+
+        const sIgnored = cnt_i > 0 
+            ? `${cnt_i} record${skipped_extra} skipped. Either record type is not set in mapping or is missing from this database` : '';
+
+        rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
 
         let query_request = { 
             serviceType: 'ESTC',
@@ -363,7 +373,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         };
 
         //find record titles
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, (response) => {
 
             window.hWin.HEURIST4.msg.sendCoverallToBack();
             response = window.hWin.HEURIST4.util.isJSON(response);
@@ -376,37 +386,19 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
             let recordset = new HRecordSet(response.data);
 
-            if(cnt > 0){
-                for(const rec_ID of ids){
-                    if(ids_ex.indexOf(rec_ID) < 0){
-                        let rec = recordset.getById(rec_ID);
-                        sImported += (`<li>${rec_ID}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                    }
-                }
-                sImported = `<ul>${sImported}</ul>`;
+            for(const rec_ID of ids){
+                let rec = recordset.getById(rec_ID);
+                sImported += ids_ex.indexOf(rec_ID) < 0 ? `<li>${rec_ID}: ${recordset.fld(rec, 'rec_Title')}</li>` : '';
             }
-            if(cnt_ex > 0){
-                for(let i = 0; i < ids_ex.length; i++){
-                    let rec = recordset.getById(ids_ex[i]);
-                    sExisted += (`<li>${ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                }
-                sExisted = `<ul>${sExisted}</ul>`;
+            sImported = `${cnt} record${imported_extra} imported:<br>${cnt > 0 ? `<ul>${sImported}</ul>` : ''}`;
+
+            for(const rec_ID of ids_ex){
+                let rec = recordset.getById(rec_ID);
+                sExisted += `<li>${rec_ID}: ${recordset.fld(rec, 'rec_Title')}</li>`;
             }
+            sExisted = cnt_ex > 0 ? `${cnt_ex} record${existed_extra} already in database<br><ul>${sExisted}</ul>` : '';
 
-            let imported_extra = cnt > 1 ? 's are' : ' is';
-            let existed_extra = cnt_ex > 1 ? 's are' : ' is';
-            let skipped_extra = cnt_i > 1 ? 's are' : ' is';
-
-            window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
-                +`${cnt} record${imported_extra} imported.<br>`
-                    +sImported
-                +(cnt_ex>0
-                ?(`${cnt_ex} record${existed_extra} already in database`) : '')
-                    +sExisted
-                +(cnt_i>0
-                ?(`${cnt_i} record${skipped_extra}`
-                +' skipped. Either record type is not set in mapping or is missing from this database') : '')
-            );
+            window.hWin.HEURIST4.msg.showMsgDlg(`<p>Lookup has been completed.</p>${sImported}${sExisted}${sIgnored}`);
         });
     },
 
