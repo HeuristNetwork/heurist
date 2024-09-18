@@ -172,9 +172,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     
                     //loads list of actions                 window.hWin.document
                     if(typeof ActionHandler !== 'undefined'){
-                    //window.hWin.HEURIST4.util.isFunction($('body')['ActionHandler'])){
-                        that.actionHandler = new ActionHandler(that.baseURL);    
+                        (async () => {
+                            that.actionHandler = new ActionHandler();
+                            await that.actionHandler.loadActionsFromFile(that.baseURL)
+                        })();                        
                     }
+                    
                     
                     let lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {

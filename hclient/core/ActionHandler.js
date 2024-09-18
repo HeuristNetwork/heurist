@@ -30,7 +30,6 @@ class ActionHandler {
      * Constructor: Initializes the ActionHandler instance.
      * 
      * If `arg` is an array, it sets the `actions` property directly. 
-     * If `arg` is a string or undefined, it constructs a URL to load actions from a JSON file.
      * 
      * @param {Array|String|undefined} arg - Can be an array of actions, a string URL, or undefined (default URL used).
      */
@@ -38,9 +37,7 @@ class ActionHandler {
         if(Array.isArray(arg)){
             this.actions = actions;
         } else {
-            const baseURL = arg ? arg : window.hWin.HAPI4.baseURL;    
-            const url = baseURL + 'hclient/core/actions.json';
-            this.actions = this.loadActionsFromFile(url);
+            this.actions = null;
         }
     }
     
@@ -55,7 +52,9 @@ class ActionHandler {
      */
     async loadActionsFromFile(url) {
         try {
-            const response = await fetch(url);
+            const path = (url ? url : window.hWin.HAPI4.baseURL) + 'hclient/core/actions.json';
+            
+            const response = await fetch(path);
             if (!response.ok) {
                 throw new Error(`Failed to load actions from ${url}: ${response.statusText}`);
             }
