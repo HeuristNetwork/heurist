@@ -24,40 +24,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
-
-    options: {
-
-        height: 540,
-        width: 820,
-
-        title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
-
-        htmlContent: 'lookupESTC_works.html'
-    },
+$.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
 
     //    
     //
     //
     _initControls: function () {
-
-        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'});
-
-        this.options.resultList = $.extend(this.options.resultList, {
-            empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>'
-        });
-
-        // Set search button status based on the existence of input
-        this._on(this.element.find('input'), {
-            keyup: function(event){
-
-                let $inputs_with_value = this.element.find('input').filter(function(){ return $(this).val(); });
-
-                let is_empty = window.hWin.HEURIST4.util.isempty($(event.target).val());
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), is_empty && $inputs_with_value.length == 0);
-            }
-        });
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), true);
 
         this.element.find('#btnStartSearch').parent().parent().position({
             my: 'left center',
@@ -65,30 +37,14 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
             of: '#ent_header > fieldset'
         });
 
-        //by default action button is disabled
-        window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), false);
-
         return this._super();
     },
 
     // getActionButtons
 
-    // Render Lookup query results
-    _rendererResultList: function (recordset, record) {
-
-        recordset.setFld(record, 'rec_RecTypeID', this.options.mapping.rty_ID);
-
-        const rec_Title = recordset.fld(record, 'rec_Title');
-        recordset.setFld(record, 'rec_Title', `<div class="recordTitle" style="left:30px;right:2px">${rec_Title}</div>`);
-
-        return this._super(recordset, record);
-    },
-
     // Show a confirmation window after user selects a record from the lookup query results
     // If the user clicks "Check Author", then call method _checkAuthor
     doAction: function(){
-
-        let that = this;
 
         let [recset, record] = this._getSelection(true);
         if(recset?.length() < 0 || !record){
@@ -101,45 +57,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
         let details = record.d;
 
         if(!details){
-
-            let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
-            let query_request = { 
-                serviceType: 'ESTC',
-                org_db: window.hWin.HAPI4.database,
-                db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                q: `ids:${sel_Rec_ID}`, 
-                detail: 'detail' 
-            };
-            
-            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-            window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
-                
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                
-                response = window.hWin.HEURIST4.util.isJSON(response);
-
-                if(response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    return;
-                }
-
-                let recordset = new HRecordSet(response.data);
-                let record = recordset.getFirstRecord();
-                if(!record?.d){
-                    window.hWin.HEURIST4.msg.showMsgErr({
-                        message: 'We are having trouble performing your request on the ESTC server. '
-                                +`Impossible obtain details for selected record ${sel_Rec_ID}`,
-                        error_title: 'Issues with ESTC server',
-                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                    });
-                    return;
-                }
-
-                let recset = that.recordList.resultList('getRecordSet');
-                recset.addRecord2(sel_Rec_ID, record);
-                that.doAction();
-            });
+            this._getRecordDetails(recset, record);
             return;
         }
 
@@ -189,59 +107,14 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
             return;
         }
         
-        let request = {
-            serviceType: 'ESTC',
-            db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            a: 'search',
-            entity: 'defTerms',
-            details: 'list', //name
-            request_id: window.hWin.HEURIST4.util.random(),
-            trm_ID: term_id
-        };
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-        
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); 
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-            
-            let recordset = new HRecordSet(response.data);
-            recordset.each2(function(id, record){
-                for(const i in dlg_response){
-
-                    let assigned_label = false;
-
-                    for(const j in dlg_response[i]){
-
-                        if(dlg_response[i][j] == id){
-
-                            dlg_response[i][j] = record['trm_Label'];
-                            assigned_label = true;
-                            break;
-                        }
-                    }
-
-                    if(assigned_label){
-                        break;
-                    }
-                }
-            });
-        });
+        this._importTerms(dlg_response, term_id);
     },
 
     // Get the user input from lookupESTC_works.html and build the query string
     // Then lookup ESTC database if the query produces any search results
     _doSearch: function () {
 
-        let that = this;
-
-        let query = {"t":"49"}; //search for Works
+        let query = {t: "49"}; //search for Works
 
         if(this.element.find('#work_name').val() != ''){ // work_name
             query['f:1'] = this.element.find('#work_name').val() ;
@@ -268,44 +141,6 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupBase, {
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-        let query_request = { 
-            serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
-            db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            q: query, 
-            limit: 1000,
-            detail: 'header' 
-        };
-
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-            
-            if(response.data.count>response.data.reccount){
-                window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
-                    + `Only first ${response.data.reccount} have been retrieved. `
-                    + 'You may specify more restrictive criteria to narrow the result.');
-                response.data.count = response.data.reccount;
-            }
-            that._onSearchResult(response);
-        });
-    },    
-
-    //
-    // Build each Works as a record to display list of records that can be selected by the user
-    //
-    _onSearchResult: function (response){
-        if(!response.data){
-            response.data = response;
-        }
-        this._super(response.data, true);
-    },
+        this._super(query);
+    }
 });

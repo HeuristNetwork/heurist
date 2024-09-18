@@ -5498,20 +5498,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             };
 
                             if(service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC'){
-
-                                let req = {
-                                    a: 'check_allow_estc',
-                                    db: window.hWin.HAPI4.database,
-                                    ver: service_name
-                                };
-                                window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                                        return false;
-                                    }
-                                });
+                                this._handleESTCLookup(dialog_name, dlg_opts);
                             }else{
                                 window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
                             }
@@ -7048,5 +7035,31 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
         );
+    },
+
+    _handleESTCLookup: function(dialog_name, dlg_opts){
+
+        let req = {
+            a: 'check_allow_estc',
+            db: window.hWin.HAPI4.database,
+            ver: dlg_opts.mapping.service
+        };
+
+        window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return false;
+            }
+
+            if(window.hWin.HEURIST4.util.isFunction($('body')['lookupESTC'])){
+                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                return;
+            }
+
+            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupESTC.js`, () => {
+                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+            });
+        });
     }
 });

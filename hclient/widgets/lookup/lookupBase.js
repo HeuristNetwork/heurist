@@ -99,7 +99,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
                 resultlistonselect: function(event, selected_recs){
                     window.hWin.HEURIST4.util.setDisabled(
                         this.element.parents('.ui-dialog').find('#btnDoAction'),
-                        selected_recs && selected_recs.length() != 1
+                        selected_recs && selected_recs.length() < 1
                     );
                 },
                 resultlistondblclick: function(event, selected_recs){
@@ -126,6 +126,23 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             this._on(this.search_buttons, {
                 click: this._doSearch
             });
+
+            // Set search button status based on the existence of input
+            this._on(this.element.find('input, select'), {
+                keyup: () => {
+                    let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
+                        return !window.hWin.HEURIST4.util.isempty($(ele).val());
+                    });
+                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, is_empty && $inputs_with_value.length == 0);
+                },
+                change: () => {
+                    let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
+                        return !window.hWin.HEURIST4.util.isempty($(ele).val());
+                    });
+                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, is_empty && $inputs_with_value.length == 0);
+                }
+            });
+            window.hWin.HEURIST4.util.setDisabled(this.search_buttons, true);
         }
 
         // Init save settings button
@@ -159,6 +176,9 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         // Setup settings tab
         this._setupSettings();
+
+        // By default action button is disabled
+        window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), true);
 
         return this._super();
     },

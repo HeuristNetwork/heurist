@@ -222,9 +222,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             }
         });
 
-        // Set what the 'Update Record' button, bottom right of form, does
-        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), false );
-
         // Disable the 'X' button, located top-right corner
         this.element.dialog('widget').find('.ui-dialog-titlebar-close').button().hide();
 

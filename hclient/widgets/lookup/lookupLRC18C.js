@@ -26,12 +26,14 @@
 */
 
 let mapDict = {}
-$.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
+$.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
 
     //defintions mapping
     // source rectype: target rectype
     mapping_defs:{
-        10:{rty_ID:10, key:253,  //Author->Agent
+        10:{
+            rty_ID:10,
+            key:253, //Author->Agent
             details: { //source:target
                 //Standarised Name
                 250: 1,
@@ -48,18 +50,21 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
                 //Also Known As
                 287: 132,
                 //Birth Date
-                10:  10,
+                10: 10,
                 //Death Date
-                11:  11,
+                11: 11,
                 // Prefix
-                249: 1049,   //ENUM!
+                249: 1049, //ENUM!
                 // Suffix to Name
                 279: 1050,
                 // Agent Type
                 278: 1000   //ENUM!
-        }},
+            }
+        },
 
-        49:{rty_ID:56, key:271,  //Work->Work
+        49:{
+            rty_ID:56,
+            key:271, //Work->Work
             details: { 
                 //Title
                 1: 1,
@@ -72,27 +77,33 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
                 //272 => Helsinki Work ID
                 //298 => Helsinki Work ID assignation
                 //236 => Helsinki raw data
-        }},    
+            }
+        },    
 
         
-        12:{rty_ID:12, key:268,  //Place->Place
+        12:{
+            rty_ID:12,
+            key:268, //Place->Place
             details: { 
                 //Title
                 1: 1,
                 //Region
-                260: 939,  //ENUM
+                260: 939, //ENUM
                 //Country
-                264: 940,  //ENUM
+                264: 940, //ENUM
                 //ESTC location ID                
                 265: 1089, 
                 //Place type
                 133: 133, //ENUM  Cleaned Upper Territory vocab
                 //ESTC Place ID
                 268: 1090  //KEY
-        }},    
+            }
+        },    
         
         
-        30:{rty_ID:55, key:254,  //Book(edition)->Edition
+        30:{
+            rty_ID:55,
+            key:254, //Book(edition)->Edition
             details: {
                 //Title
                 1: 1,
@@ -101,13 +112,13 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
                 // Year of Final Volume
                 275: 955,
                 //Book Format
-                256: 991,  //ENUM
+                256: 991, //ENUM
                 //Plase - POINTER
                 259: 238,
                 //Summary Publisher Statement
                 285: 1096,
                 //ESTC ID
-                254: 1094,  //KEY
+                254: 1094, //KEY
                 //Author - POINTER
                 15: 1106,
                 //Work - POINTER
@@ -120,102 +131,21 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
                 290: 1107,
                 // Imprint details
                 270: 652
-        }},
+            }
+        },
         
         vocabularies:[
             5430, //1321-5430 book formats for 256 => 991  6891 ( 1323-6891 ) - SYNCED!
-            5432,  //  ( 1321-5432 )region 18C for 260 => 939    6353
-            5436,  //  ( 1321-5436 ) country 18C for 264 => 940   6499  BT Sovereign territory 18 century
-            5039, //  ( 3-5039 ) place type for 133 =>    5039  ( 3-5039 )
-            507,  //    ( 2-507 ) prefix/honorofic for 249:1049       7124 (1323-7124)  - SYNCED
-            5848  // ( 1321-5848 now  1323-6901)  agent type for 278: 1000   6901 (1323-6901)   - SYNCED
-         ]
+            5432, // ( 1321-5432 )region 18C for 260 => 939    6353
+            5436, // ( 1321-5436 ) country 18C for 264 => 940   6499  BT Sovereign territory 18 century
+            5039, // ( 3-5039 ) place type for 133 =>    5039  ( 3-5039 )
+            507, // ( 2-507 ) prefix/honorofic for 249:1049       7124 (1323-7124)  - SYNCED
+            5848 // ( 1321-5848 now  1323-6901)  agent type for 278: 1000   6901 (1323-6901)   - SYNCED
+        ]
 
-    },
-
-    options: {
-        height: 540,
-        width: 820,
-
-        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and paginathorizontalion
-        show_menu: true,       //@todo ? - replace to action_select and action_buttons
-        support_collection: true,
-        show_savefilter: false,
-        show_counter: true,
-        show_viewmode: true,
-
-        title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
-
-        htmlContent: 'lookupLRC18C.html'
-    },
-
-    //    
-    //
-    //
-    _initControls: function () {
-
-        this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
-
-        this.options.resultList = $.extend(this.options.resultList,{
-            empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>'
-        });
-
-        // Set search button status based on the existence of input
-        this._on(this.element.find('input'), {
-            keyup: function(event){
-
-                let $inputs_with_value = this.element.find('input').filter(function(){ return $(this).val(); });
-
-                let is_empty = window.hWin.HEURIST4.util.isempty($(event.target).val());
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), is_empty && $inputs_with_value.length == 0);
-            }
-        });
-        window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnStartSearch'), true);
-
-        //Populate Bookformat dropdown on lookup page
-        let request = {
-            serviceType: 'ESTC',
-            db:'ESTC_Helsinki_Bibliographic_Metadata',
-            a: 'search', 
-            entity: 'defTerms', 
-            details: 'list', 
-            request_id: window.hWin.HEURIST4.util.random(),
-            trm_ParentTermID: 5430
-        };
-
-        let selBf = this.element.find('#select_bf').empty();
-        window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
-
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
-
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(response.status == window.hWin.ResponseStatus.OK){
-                let recordset = new HRecordSet(response.data);
-                recordset.each2(function(trm_ID, term){
-                    window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
-                });
-            }
-        });
-
-        //by default action button is disabled
-        window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), false);
-
-        return this._super();
     },
 
     // getActionButtons
-
-    /* Render Lookup query results */
-    _rendererResultList: function (recordset, record) {
-
-        recordset.setFld(record, 'rec_RecTypeID', 1);
-
-        const rec_Title = recordset.fld(record, 'rec_Title');
-        recordset.setFld(record, 'rec_Title', `<div class="recordTitle" style="left:30px;right:2px">${rec_Title}</div>`);
-
-        return this._super(recordset, record);
-    },
 
     /* Show a confirmation window after user selects a record from the lookup query results */
     /* If the user clicks "Check Author", then call method _checkAuthor*/
@@ -230,113 +160,14 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront( that._as_dialog.parent() );
 
-        //avoid sync on every request
-        this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
-
-        let request = { 
-            serviceType: 'ESTC',
-            action: 'import_records',
-            source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            org_db: window.hWin.HAPI4.database,
-            db: window.hWin.HAPI4.database,
-            q: `ids:${sels.join(',')}`,
-            rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
-            mapping: this.mapping_defs,
-            //session: session_id,
-            id: window.hWin.HEURIST4.util.random()
-        };
-
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function( response ){
-
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-
-            let target_dty_ID = that.options.mapping.fields['properties.edition']
-
-            let cnt = response.data.count_imported;
-            let cnt_ex = response.data.cnt_exist;
-            let cnt_i = response.data.count_ignored;
-            let ids = response.data.ids; //all
-            let ids_ex  = response.data.exists; //skipped
-            if(!ids_ex) ids_ex = [];
-
-            let rec_ids = ids.concat(ids_ex);
-
-            let query_request = { 
-                serviceType: 'ESTC',
-                org_db: window.hWin.HAPI4.database,
-                db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                q: `ids:"${rec_ids.join(',')}"`, 
-                w: 'a',
-                detail: 'header' 
-            };
-
-            //find record titles
-            window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request,
-                function(response){
-
-                    response = window.hWin.HEURIST4.util.isJSON(response);
-
-                    if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                        return;
-                    }
-                    
-                    let sImported = '', sExisted = '';
-
-                    let recordset = new HRecordSet(response.data);
-
-                    if(cnt > 0){
-                        for(let i = 0; i < ids.length; i++){
-                            if(ids_ex.indexOf(ids[i]) < 0){
-                                let rec = recordset.getById(ids[i]);
-                                sImported += (`<li>${ids[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                            }
-                        }
-                        sImported = `<ul>${sImported}</ul>`;
-                    }
-                    if(cnt_ex > 0){
-                        for(let i = 0; i < ids_ex.length; i++){
-                            let rec = recordset.getById(ids_ex[i]);
-                            sExisted += (`<li>{ids_ex[i]}: ${recordset.fld(rec,'rec_Title')}</li>`);
-                        }
-                        sExisted = `<ul>${sExisted}</ul>`;
-                    }
-
-                    let imported_extra = cnt > 1 ? 's are' : ' is';
-                    let existed_extra = cnt_ex > 1 ? 's are' : ' is';
-                    let skipped_extra = cnt_i > 1 ? 's are' : ' is';
-
-                    window.hWin.HEURIST4.msg.showMsgDlg('<p>Lookup has been completed.</p>'
-                        +`${cnt} record${imported_extra} imported.<br>`
-                            +sImported
-                        +(cnt_ex>0
-                        ?(`${cnt_ex} record${existed_extra} already in database`) : '')
-                            +sExisted
-                        +(cnt_i>0
-                        ?(`${cnt_i} record${skipped_extra}`
-                        +' skipped. Either record type is not set in mapping or is missing from this database') : '')
-                    );
-                }
-            );
-
-            window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
-
-            this.closingAction({[target_dty_ID]: ids[0]});
-        });
+        this._importRecords(sels.join(','));
     },
 
     /* Get the user input from lookupLRC18C.html and build the query string */
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
 
-        let that = this;
-
-        let query = {"t":"30"}; //search for Books
+        let query = {t: "30"}; //search for Books
 
         if (this.element.find('#edition_name').val() != '') {
             query['f:1'] = `@${this.element.find('#edition_name').val()}`;
@@ -381,45 +212,6 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupBase, {
             return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-        let query_request = { 
-            serviceType: 'ESTC',
-            org_db: window.hWin.HAPI4.database,
-            db: 'ESTC_Helsinki_Bibliographic_Metadata',
-            q: query, 
-            limit: 1000,
-            detail: 'header' 
-        };
-
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(query_request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-
-            if(response.data.count>response.data.reccount){
-                window.hWin.HEURIST4.msg.showMsgDlg(`Your request generated ${response.data.count} results. `
-                + `Only first ${response.data.reccount} have been retrieved. `
-                + 'You may specify more restrictive criteria to narrow the result.');
-                response.data.count = response.data.reccount;
-            }
-
-            that._onSearchResult(response);
-        });
-    },    
-
-    //
-    // Build each Book(Edition) as a record to display list of records that can be selected by the user
-    //
-    _onSearchResult: function (response) {
-        if(!response.data){
-            response.data = response;
-        }
-        this._super(response.data, true);
-    },
+        this._super(query);
+    }
 });
