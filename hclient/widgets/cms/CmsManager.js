@@ -160,7 +160,7 @@ class CmsManager {
         let query_search_pages = {t:this.RT_CMS_MENU, sort:'-id'};
         query_search_pages['f:'+this.DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
         
-        #.openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode);
+        this.#openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode);
     }    
 
     //
@@ -217,7 +217,7 @@ class CmsManager {
 
         let query_search_sites = {t:this.RT_CMS_HOME, sort:'-id'};
         
-        #.openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode);
+        this.#openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode);
         
         if(this.cms_home_counts.sMsgCmsPrivate!=''){
                 //show warning
@@ -232,6 +232,8 @@ class CmsManager {
     //
     //
     #openCMSlist(sTitle, query_search, is_view_mode){
+        
+        let that = this;
         
         let popup_options = {
                         select_mode: 'select_single', //select_multi
