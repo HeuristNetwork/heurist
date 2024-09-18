@@ -24,12 +24,15 @@ $.widget( "heurist.buttonsMenu", {
         is_h6style: true,
         menu_class:null,
         
+        //if content is not defined here it takes this.element.html()
         menuContent:null, //html snippet with ul/li menu items
         menuContentFile:null, //html snippet file with menu
+        
         // callbacks
         manuActionHandler:null
     },
     
+    divMainMenuItems:null, //parent UL
     menuBtns:[],
     menuSubs:[],
 
@@ -43,14 +46,13 @@ $.widget( "heurist.buttonsMenu", {
         // prevent double click to select text
         .disableSelection();
         
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
-            //.css({'dispaly':'table-row'})
-            .appendTo(this.element);
-
         this._initMenu(()=>{
             
-            //complete intialization 
+            if(that.divMainMenuItems==null){
+                return;
+            }
             
+            //complete intialization 
             that.divMainMenuItems.menu();
 
             // 'width':'100px', 
@@ -122,17 +124,34 @@ $.widget( "heurist.buttonsMenu", {
             return false;
         };
 
+        if(this.options.menuContentFile){
+
+            $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
+                function(response){
+                    that.options.menuContent = response;
+                    that._initMenu(callback);
+            });
+            return;
+        }
+
+        let top_levels;
+        
         if(this.options.menuContent){
-
+            top_levels = $(this.options.menuContent).find('ul'); //find top level 
+        }else{
+            top_levels = this.element.find('ul'); //find top levels 
+        }
+        
             let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-
-            //appendTo(this.divMainMenuItems).
-            let top_levels = $(this.options.menuContent).find('ul'); //find top level 
 
             if(top_levels.length==0){
                 //@todo error
-
+                console.log('menu content is not defined');
+                return;
             }
+            
+            this.element.empty();
+            this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
 
             for(let i=0; i<top_levels.length; i++){
 
@@ -243,16 +262,6 @@ $.widget( "heurist.buttonsMenu", {
             }//for
             
             callback.call(); //init completed
-
-        }else if(this.options.menuContentFile){
-
-            $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
-                function(response){
-                    that.options.menuContent = response;
-                    that._initMenu(callback);
-            });
-
-        }
 
     },
 

@@ -367,8 +367,9 @@ $entity = null;
 $recid = null;
 $database_id = 0;
 
-if(@$_REQUEST['recID'] || @$_REQUEST['recid']){
-    $recid = @$_REQUEST['recid']?$_REQUEST['recid']:$_REQUEST['recID'];
+if(@$_REQUEST['recID'] || @$_REQUEST['recid'] || @$_REQUEST['id']){
+
+    $recid = $_REQUEST['recID']??($_REQUEST['recid']??$_REQUEST['id']);
 
 }elseif (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
 

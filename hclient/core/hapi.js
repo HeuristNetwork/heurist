@@ -116,14 +116,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
+            //replace devlopment folder to production one (ie h6-ij to heurist)
             installDir = installDir.split('/');
-            for (let i = installDir.length - 1; i >= 0; i--) {
-                if (installDir[i] != '') {
-                    installDir[i] = 'heurist';
-                    break;
-                }
-            }
+            let i = installDir.length-1;
+            while(i>0 && installDir[i]=='') i--;
+            installDir[i] = 'heurist';
             installDir = installDir.join('/');
+            
             that.baseURL_pro = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         } else {
             that.baseURL_pro = _baseURL;
@@ -171,8 +170,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                     
-                    //loads list of actions
-                    that.actionHandler = new ActionHandler(that.baseURL);
+                    //loads list of actions                 window.hWin.document
+                    if(typeof ActionHandler !== 'undefined'){
+                    //window.hWin.HEURIST4.util.isFunction($('body')['ActionHandler'])){
+                        that.actionHandler = new ActionHandler(that.baseURL);    
+                    }
                     
                     let lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
@@ -186,9 +188,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
 
-        window.hWin.HAPI4.sysinfo.host_logo = 'https://t3.ftcdn.net/jpg/03/74/19/26/360_F_374192621_mCSB5FIskwdMEJZou3DuMN8N2Z6IzXqb.jpg';
-        window.hWin.HAPI4.sysinfo.host_url = 'https://t3.ftcdn.net';
-                    
                 }
                 _oninit(success);
             });

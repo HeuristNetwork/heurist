@@ -203,7 +203,7 @@
     }elseif( !$system->init( $dbname ) ){
 
     }elseif($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
-
+        //TO REMOVE
         if(isset($allowCMSCreation) && $allowCMSCreation == -1){
 
             $msg = 'Due to security restrictions, website creation is blocked on this server.<br>Please ' . CONTACT_SYSADMIN . ' if you wish to create a website.';

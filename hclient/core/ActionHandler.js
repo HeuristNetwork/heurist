@@ -190,15 +190,6 @@ class ActionHandler {
         popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
 
 
-//Create New Database
-//Restore Database            
-//Delete Database    
-//Clear Database
-//Rename Database    
-//Clone Database 
-//Register database 
-//Verify Database Integrity  
-
         let is_supported = true;
         let contentURL;
         
@@ -325,13 +316,6 @@ class ActionHandler {
             case "menu-manage-rectitles":                                       
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordsTitles', popup_dialog_options);
                 break;
-
-            case "menu-cms-embed":
-
-            window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog', 
-                                {cms_popup_dialog_options:popup_dialog_options, path: 'widgets/cms/',title:'Web Page' });
-                                break;
-
 */
 
             case "menu-help-quick-tips":

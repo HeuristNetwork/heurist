@@ -101,7 +101,7 @@
             "logaction": "db_Register",
             "pwd-nonowner": "ServerFunctions",
             "icon": "ui-icon-star",
-            "header": "Register database",
+            "header": "Register Database",
             "container": "design"
         },
         "text": "Register"
@@ -114,6 +114,7 @@
             "user-experience-level": "1",
             "pwd-nonowner": "DatabaseDeletion",
             "icon": "ui-icon-trash",
+            "header": "Delete Database",
             "container": "admin"
         },
         "text": "Delete"
@@ -127,6 +128,7 @@
             "pwd-nonowner": "DatabaseDeletion",
             "logaction": "db_Clear",
             "icon": "ui-icon-erase",
+            "header": "Clear Database",
             "container": "admin"
         },
         "text": "Clear"
@@ -150,7 +152,7 @@
             "user-admin-status": "1",
             "user-experience-level": "1",
             "icon": "ui-icon-check",
-            "header": "Verify > Errors in database structure"
+            "header": "Verify Database Integrity"
         },
         "text": "Verify integrity"
     },

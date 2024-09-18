@@ -72,7 +72,7 @@ if(!isset($message)){
     }
 }
 
-    $dbname = $_REQUEST['db'];
+    $dbname = @$_REQUEST['db'];
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
 <!DOCTYPE html>

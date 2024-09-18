@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global showLoginDialog,editSymbology,imgFilter,editTheme,editCMS_Manager,HPublishDialog */
+/* global showLoginDialog,editSymbology,imgFilter,editTheme,HPublishDialog */
 
 /*
 Selectors:
@@ -2635,25 +2635,6 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.showEditThemeDialog(current_value, needName, callback);
             }); 
         }
-    },
-
-    // @todo move it to new editCMS_Records
-    // show record action dialog
-    // options 
-    //      record_id
-    //          -1 create set of records for website
-    //          -2 create webpage record for embed
-    //      field_id - to open editor of specific field for edit_input
-    // callback
-    // webpage_title  -title for new embed page
-    //
-    showEditCMSDialog: function( options ){
-        //todo optionally load dynamically editCMS.js
-        if( window.hWin.HEURIST4.util.isNumber( options ) ){
-            options = {record_id:options};
-        }
-        
-        editCMS_Manager( options );
     },
 
     //

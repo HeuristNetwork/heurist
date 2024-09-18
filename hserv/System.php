@@ -1070,7 +1070,8 @@ class System {
                $needEncodeRecordDetails,
                $common_languages_for_translation, $glb_lang_codes, $glb_lang_codes_index,
                $saml_service_provides, $hideStandardLogin,
-               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink;
+               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
+               $allowCMSCreation;
 
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1154,6 +1155,8 @@ class System {
                     "service_config"=>$this->get_system('sys_ExternalReferenceLookups'), //get 3d part web service mappings
                     "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
+                    "cms_allowed"=> $allowCMSCreation??1,
+                    
                     'max_post_size'=>USystem::getConfigBytes('post_max_size'),
                     'max_file_size'=>USystem::getConfigBytes('upload_max_filesize'),
                     'is_file_multipart_upload'=>($this->getDiskQuota()>0)?1:0,

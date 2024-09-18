@@ -170,14 +170,6 @@ $.widget( "heurist.controlPanel", {
             .text(window.hWin.HAPI4.database).appendTo( this.div_dbname );
             
         }
-
-        /*$("<span>")
-            .addClass('ui-icon ui-icon-database') //    .css({'margin-left':'50px'})
-            .appendTo( this.div_dbname );
-
-        $("<span>").text(window.hWin.HAPI4.database)
-            .css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px'})
-            .appendTo( this.div_dbname );*/
             
         // MAIN MENU-----------------------------------------------------
         this.divProfileMenu = this.element.find('div.menu-container');
@@ -185,6 +177,7 @@ $.widget( "heurist.controlPanel", {
         this.divProfileMenu.addClass('horizontalmenu');
             
         this.divProfileMenu.buttonsMenu({
+            /*
            menuContent:
                     '<div>'                                                                          //margin-left:150px
                     +'<ul title="Help" link-style="width:auto;background:none;border:none;" style="" data-icon-left="ui-icon-circle-b-help">'
@@ -211,19 +204,8 @@ $.widget( "heurist.controlPanel", {
                     +'<li data-action="menu-profile-import"/>'
                     +'<li data-action="menu-profile-logout"/>'
                     +'</ul>'
-           /*
-            [{text:'Help', icon:'ui-icon-circle-b-help', items:
-                    ['menu-help-online','menu-help-quick-tips','menu-help-website','menu-help-roadmap','menu-help-devhist',
-                     '-',   
-                     'menu-help-bugreport','menu-help-emailteam','menu-help-emailadmin','menu-help-acknowledgements','menu-help-about']
-                },
-                {text:'Profile', icon:'ui-icon-user', items:[
-                     'menu-profile-preferences','menu-profile-tags','menu-profile-reminders',
-                     '-',
-                     'menu-profile-info','menu-profile-groups',
-                     'menu-profile-users','menu-profile-import','menu-profile-logout'
-                ]}]*/
-           , 
+           
+           ,*/ 
            manuActionHandler:function(action){
                 that.actionHandler.executeActionById(action)
            }
