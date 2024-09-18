@@ -160,45 +160,7 @@ class CmsManager {
         let query_search_pages = {t:this.RT_CMS_MENU, sort:'-id'};
         query_search_pages['f:'+this.DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
         
-        let popup_options = {
-                        select_mode: 'select_single', //select_multi
-                        select_return_mode: 'recordset',
-                        edit_mode: 'popup',
-                        selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                        title: window.hWin.HR('Select Web page'),
-                        fixed_search: query_search_pages, // RT_CMS_MENU,
-                        parententity: 0,
-                        
-                        layout_mode: 'listonly',
-                        width:500, height:400,
-                        default_palette_class: 'ui-heurist-publish',
-                        
-                        resultList:{
-                            show_toolbar: false,
-                            view_mode:'icons',
-                            searchfull:null,
-                            //search_realm: 'x',
-                            //search_initial: , 
-                            renderer:function(recordset, record){
-                                let recID = recordset.fld(record, 'rec_ID')
-                                let recTitle = recordset.fld(record, 'rec_Title'); 
-                                let recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);
-                                let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'+recTitle_strip_all+'</div>';
-                                return html;
-                            }
-                        },
-                        
-                        onselect:function(event, data){
-                                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                    let recordset = data.selection;
-                                    let rec_ID = recordset.getOrder()[0];
-                                    //offer options: open in production or development environment
-                                    that.#openCMS(rec_ID, is_view_mode?'':'edit');  
-                                 }
-                        }
-        };//popup_options
-        
-        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        #.openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode);
     }    
 
     //
@@ -255,13 +217,29 @@ class CmsManager {
 
         let query_search_sites = {t:this.RT_CMS_HOME, sort:'-id'};
         
+        #.openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode);
+        
+        if(this.cms_home_counts.sMsgCmsPrivate!=''){
+                //show warning
+                window.hWin.HEURIST4.msg.showMsgDlg(this.cms_home_counts.sMsgCmsPrivate, null,
+                                   'Non-public website records',
+                                   {default_palette_class: 'ui-heurist-publish'});
+            
+        }
+    }
+    
+    //
+    //
+    //
+    #openCMSlist(sTitle, query_search, is_view_mode){
+        
         let popup_options = {
                         select_mode: 'select_single', //select_multi
                         select_return_mode: 'recordset',
                         edit_mode: 'popup',
                         selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                        title: window.hWin.HR('Select Website'),
-                        fixed_search: query_search_sites,
+                        title: sTitle,
+                        fixed_search: query_search,
                         //rectype_set: RT_CMS_HOME,
                         parententity: 0,
                         
@@ -293,14 +271,6 @@ class CmsManager {
         };//popup_options
         
         window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
-        
-        if(this.cms_home_counts.sMsgCmsPrivate!=''){
-                //show warning
-                window.hWin.HEURIST4.msg.showMsgDlg(this.cms_home_counts.sMsgCmsPrivate, null,
-                                   'Non-public website records',
-                                   {default_palette_class: 'ui-heurist-publish'});
-            
-        }
     }
     
     
