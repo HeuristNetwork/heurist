@@ -262,7 +262,7 @@ class ActionHandler {
             case "menu-profile-info":
                 entity_dialog_options['edit_mode'] = 'editonly';
                 entity_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
-                
+                 // fall through
             case "menu-database-properties":
             case "menu-structure-rectypes":
             case "menu-structure-fieldtypes":
@@ -363,7 +363,7 @@ class ActionHandler {
             case "menu-help-online":
             
                 action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website';
-            
+                 // fall through
             default:
                 const href = action.href;
                 const target = action?.target;

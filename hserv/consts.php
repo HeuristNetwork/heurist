@@ -559,6 +559,6 @@ function isPositiveInt($val){
 }
 
 function isLocalHost(){
-    return ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
+    return $_SERVER["SERVER_NAME"]=='localhost' || $_SERVER["SERVER_NAME"]=='127.0.0.1';
 }
 ?>

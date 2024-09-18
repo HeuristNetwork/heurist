@@ -67,7 +67,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _is_callserver_in_progress = false,
         _last_check_dbcache_relevance = 0,
 
-        _use_debug = true;
+        _use_debug = true,
         
         actionHandler = null;
                 
@@ -2723,11 +2723,11 @@ Automatic translation
             }
 
             /*default extension is html
-            var ext = window.hWin.HEURIST4.util.getFileExtension(name);
+            let ext = window.hWin.HEURIST4.util.getFileExtension(name);
             if(window.hWin.HEURIST4.util.isempty(ext)){
                 name = name + '.html';
             }
-            var sURL = '';
+            let sURL = '';
             if(_region && _region!='en'){
                 sURL = sURL + _region + '/';
                 

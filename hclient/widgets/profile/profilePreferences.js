@@ -159,17 +159,16 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
     
     initProfilePreferences: function(){
 
-        var sel = this._$("#layout_language");
+        let sel = this._$("#layout_language");
 
         sel.val(window.hWin.HAPI4.getLocale());
 
         sel = this._$("#layout_id");
         if(sel.length==1){ //global variable defined in layout_default.js
 
-            var key;
             sel.empty();
             sel = sel.get(0);
-            for(key in cfg_layouts){
+            for(let key in cfg_layouts){
                 if(key){
                     window.hWin.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
                 }

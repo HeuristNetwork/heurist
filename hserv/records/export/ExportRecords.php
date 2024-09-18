@@ -201,6 +201,9 @@ abstract class ExportRecords {
                     $direction = 1;
                     $no_relationships = true;
                     break;
+                default:
+                    $direction = 0;
+                    break;
             }
         }
 
