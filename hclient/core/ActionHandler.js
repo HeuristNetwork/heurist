@@ -506,6 +506,11 @@ class ActionHandler {
                 contentURL = window.hWin.HAPI4.baseURL+'context_help/quickTips.html';
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
                 break;
+                
+            case "menu-subset-set":
+            
+                window.hWin.HAPI4.LayoutMgr.executeCommand('resultList','callResultListMenu', 'menu-subset-set');
+                break;
            
             case "menu-help-acknowledgements":
             

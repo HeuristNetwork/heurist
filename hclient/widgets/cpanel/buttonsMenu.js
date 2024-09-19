@@ -186,10 +186,10 @@ $.widget( "heurist.buttonsMenu", {
         this.element.empty(); // Clear existing content
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
 
-        for (let top_level of top_levels) {
+        for (let tul of top_levels) {
             // Initialize each top-level button and submenu
             
-            top_level = $(top_level);
+            let top_level = $(tul);
             let menuName = this._createMenuButton(top_level);
             
             // Initialize submenu if present

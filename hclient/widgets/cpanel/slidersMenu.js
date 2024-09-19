@@ -792,15 +792,16 @@ console.log('ON_CREDENTIALS', e);
         let explore_height = 'auto';
         let explore_width = '300px';
 
+        const qlinks_cnt = menu_item?menu_item.parents('.ui-heurist-quicklinks').length:-1; 
         
         if(position){
             explore_top = position.top;
             explore_left = position.left;
-        }else if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 0 && 
+        }else if (qlinks_cnt === 0 && 
                 (this._active_section === 'explore' || this._active_section === 'populate')) 
         {
             explore_left = this._left_position + 211;
-        } else if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 1) {
+        } else if (qlinks_cnt === 1) {
             explore_left = this._widthMenu + 4;
         }
 
@@ -811,12 +812,12 @@ console.log('ON_CREDENTIALS', e);
             explore_width = '850px';
 
             if(!position){
+                
+                explore_top = menu_item.offset().top; //if called from menu
 
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
                     explore_top = widget.position().top + 100;
-                }else{
-                    explore_top = menu_item.offset().top; //if called from menu
                 }
             }
             if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
@@ -825,7 +826,7 @@ console.log('ON_CREDENTIALS', e);
         }
 
         
-        if(explore_top<0) explore_top = 0;             
+        explore_top = Math.max(0, explore_top);
         
         return { explore_top, explore_left, explore_height, explore_width };        
     },
@@ -922,7 +923,7 @@ console.log('ON_CREDENTIALS', e);
 
         const that = this;
 
-        if(!(this.menues && this.menues.explore && this.menues.explore.find('ul.favourite-filters').length != 0)){
+        if(!(this.menues?.explore && this.menues.explore.find('ul.favourite-filters').length != 0)){
             setTimeout(function(){ that.populateFavouriteFilters(favourite_filters); }, 1000);
             return;
         }
@@ -1207,7 +1208,7 @@ console.log('ON_CREDENTIALS', e);
     //
     //
     _onCloseSearchFaceted: function(){
-        if(this.search_faceted && this.search_faceted.is(':visible')){
+        if(this.search_faceted !=null && this.search_faceted.is(':visible')){
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
                 {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
             this.search_faceted.hide();
@@ -1258,7 +1259,7 @@ console.log('ON_CREDENTIALS', e);
     //
     //
     _getSectionName: function(e){
-        let that = this;
+        
         let section_name = null;
         if(e){
             let ele;
@@ -1585,6 +1586,42 @@ console.log('ON_CREDENTIALS', e);
             this.menues[section].find('li.accordionHeader').css('padding', '0px 0px 8px');
         }
     },
+
+    //
+    //
+    //    
+    _closeActiveSection:function(section, force_show){
+
+            this._closeExploreMenuPopup();
+            this._onCloseSearchFaceted();
+            
+            if(this._active_section && this.menues[this._active_section])
+            {
+                this.containers[this._active_section].hide();
+                this.menues[this._active_section].hide();
+                this.element.removeClass('ui-heurist-'+this._active_section+'-fade');
+                this.menues_explore_gap.removeClass('ui-heurist-'+this._active_section+'-fade');
+            }
+            this._current_explore_action = null;
+            this._active_section = section;
+
+            //show menu and section 
+            if(this.menues[section]){
+                this.menues[section].css('z-index',101).show();    
+            }
+
+            if(force_show || (this.containers[section] && !this.containers[section].is(':empty'))){
+                this.containers[section].show();    
+            }else if(this.introductions && this.introductions[section]){
+                this.introductions[section].css('left', (this._left_position+211)+'px').show();    
+            }
+            
+            //change main background
+            this.element.addClass('ui-heurist-'+section+'-fade');    
+            if(this.menues_explore_gap){
+                this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');    
+            }
+    },
     
     //
     // switch section on section menu click
@@ -1596,37 +1633,7 @@ console.log('ON_CREDENTIALS', e);
         
         let that = this;
         if(that._active_section!=section ){
-
-            that._closeExploreMenuPopup();
-            that._onCloseSearchFaceted();
-            
-            if(that._active_section && that.menues[that._active_section])
-            {
-                that.containers[that._active_section].hide();
-                that.menues[that._active_section].hide();
-                that.element.removeClass('ui-heurist-'+that._active_section+'-fade');
-                that.menues_explore_gap.removeClass('ui-heurist-'+that._active_section+'-fade');
-            }
-            that._current_explore_action = null;
-            that._active_section = section;
-
-            //show menu and section 
-            if(that.menues[section]){
-                that.menues[section].css('z-index',101).show();    
-            }
-
-            if(force_show || (that.containers[section] && !that.containers[section].is(':empty'))){
-                that.containers[section].show();    
-            }else if(that.introductions && that.introductions[section]){
-                that.introductions[section].css('left', (that._left_position+211)+'px').show();    
-            }
-            
-            //change main background
-            this.element.addClass('ui-heurist-'+section+'-fade');    
-            if(this.menues_explore_gap){
-                this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');    
-            }
-            
+            that._closeActiveSection( section, force_show );
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
         }else{
