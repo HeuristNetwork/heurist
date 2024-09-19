@@ -52,8 +52,7 @@ class ActionHandler {
      */
     async loadActionsFromFile(url) {
         try {
-            const path = (url ? url : window.hWin.HAPI4.baseURL) + 'hclient/core/actions.json';
-            
+            const path = url || (window.hWin.HAPI4.baseURL + 'hclient/core/actions.json');
             const response = await fetch(path);
             if (!response.ok) {
                 throw new Error(`Failed to load actions from ${url}: ${response.statusText}`);
@@ -88,6 +87,234 @@ class ActionHandler {
     }
 
     /**
+     * Helper Method: #handleVerification
+     * 
+     * Handles the verification process.
+     */
+    #handleVerification(action, dialog_options) {
+        
+        let adata = action.data;            
+        
+        if(!adata){
+            return false;
+        }
+        
+        // Handle password and permission verification
+        let action_passworded = adata.pwd;
+        if (!action_passworded && !window.hWin.HAPI4.has_access(2)) {
+            action_passworded = adata['pwd-nonowner'];
+        }
+        
+        let action_admin_level = adata['user-admin-status'];
+        let action_member_level = adata['user-memebr-status'];
+        let action_user_permissions = adata['user-permissions']; 
+        let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
+        
+        if(!(action_passworded || requiredLevel > 0)){ 
+            return false;                
+        }
+        
+        if (action_member_level > 0) {
+            requiredLevel += ';' + action_member_level;
+        }
+        
+        window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password) => {
+            dialog_options.entered_password = entered_password;
+            dialog_options.verification_passed = true;
+            this.executeActionById(action.id, dialog_options);              
+        },
+        requiredLevel, action_passworded, null, action_user_permissions);
+            
+        return true;
+    }    
+    
+    /**
+     * Helper Method: #handleHrefAction
+     * 
+     * Handles actions that involve opening a URL or external link.
+     * 
+     * @param {Object} action - The action object.
+     * @param {string} href - The URL to open.
+     * @param {string} target - The target window for the URL.
+     * @param {Object} popup_dialog_options - Additional dialog options.
+     */
+    #handleHrefAction(action, popup_dialog_options) {
+
+         const href = action.href;
+         const target = action?.target;
+         
+         if (window.hWin.HEURIST4.util.isempty(href) || href == '#') {
+             return false;
+         }
+
+         if (href.startsWith('mailto:')) {
+             window.open(href, 'emailWindow');
+             return;
+         }
+
+         if (!(href.startsWith('http://') || href.startsWith('https://'))) {
+             href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?') >= 0 ? '&' : '?') + 'db=' + window.hWin.HAPI4.database;
+         }
+
+         if (target) {
+             window.open(href, target);
+         } else {
+             if (!popup_dialog_options.title) {
+                 popup_dialog_options.title = action.text;
+             }
+             let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
+
+             /*                if (item.hasClass('upload_files')) {
+             //beforeClose
+             options['afterclose'] = function( event, ui ) {
+
+             if(window.hWin.HEURIST4.filesWereUploaded){
+
+             let buttons = {};
+             buttons[window.hWin.HR('OK')]  = function() {
+             let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+             $dlg.dialog( "close" );
+
+             that.actionHandler.executeActionById('menu-index-files');
+             };                                 
+
+             window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
+             +' until you run Import > index multimedia This function will open when you click OK.',buttons);
+             }
+             }
+             }
+             */            
+             window.hWin.HEURIST4.msg.showDialog(href, options);
+         }
+         return true;
+    }
+
+    /**
+     * Helper Method: #prepareDialogOptions
+     * 
+     * Prepares the dialog options for the action.
+     */
+    #prepareDialogOptions(action, dialog_options){        
+         let actionid = action.id;
+         let adata = action.data;
+         let action_container = adata?.container;
+
+         let container, menu_container;
+
+         if (dialog_options.container) {
+             container = dialog_options['container'];
+         } else if (action_container) {
+             let section = action_container;
+             $('.ui-menu6').slidersMenu('switchContainer', section, true);
+             container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
+             container.removeClass('ui-suppress-border-and-shadow');
+
+             menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-' + section);
+             menu_container.find('li').removeClass('ui-state-active');
+             menu_container.find('li[data-action="' + actionid + '"]').addClass('ui-state-active');
+         }
+
+         let popup_dialog_options = {
+             isdialog: !container,
+             innerTitle: true,
+             menu_container: menu_container,
+             container: container,
+
+             isFrontUI: true,
+             is_h6style: true,
+             resizable: false,
+             draggable: false,
+             position: dialog_options.position || null,
+             maximize: true,
+             ...dialog_options
+         };
+
+         if (window.hWin.HR(actionid+'-header') != actionid+'-header') {
+             popup_dialog_options.title = window.hWin.HR(adata?.header || action.text);
+         }
+         
+         return popup_dialog_options;
+    }
+    
+    /**
+     * Helper Method: _importUsers
+     * 
+     * Handles the import of users into the system through a series of dialog steps.
+     * 
+     * @param {Object} entity_dialog_options - Configuration options for the dialogs during the import process.
+     */
+    importUsers(entity_dialog_options) {
+        if (!entity_dialog_options) entity_dialog_options = {};
+        
+        let options = $.extend(entity_dialog_options, {
+            subtitle: 'Step 1. Select database with users to be imported',
+            title: 'Import users', 
+            select_mode: 'select_single',
+            pagesize: 300,
+            edit_mode: 'none',
+            use_cache: true,
+            except_current: true,
+            keep_visible_on_selection: true,
+            onselect: function(event, data){
+                if (!data?.selection || data.selection.length == 0) {
+                    return;
+                }
+                    let selected_database = data.selection[0].substr(4);
+                    let options2 = $.extend(entity_dialog_options, {
+                        subtitle: 'Step 2. Select users in ' + selected_database + ' to be imported',
+                        title: 'Import users', 
+                        database: selected_database,
+                        select_mode: 'select_multi',
+                        edit_mode: 'none',
+                        keep_visible_on_selection: true,
+                        onselect: function(event, data){
+                                if (!data?.selection || data.selection.length == 0) {
+                                    return;
+                                }
+                                let selected_users = data.selection;
+                                let options3 = $.extend(entity_dialog_options, {
+                                    subtitle: 'Step 3. Allocate imported users to work groups',
+                                    title: 'Import users', 
+                                    select_mode: 'select_roles',
+                                    selectbutton_label: 'Allocate roles',
+                                    sort_type_int: 'recent',
+                                    edit_mode: 'none',
+                                    keep_visible_on_selection: false,
+                                    onselect: function(event, data){
+                                        if (!data || $.isEmptyObject(data.selection)){
+                                            return;
+                                        }
+                                            //add new user to specified group
+                                            let request = {
+                                                a: 'action',
+                                                entity: 'sysUsers',
+                                                roles: data.selection,
+                                                userIDs: selected_users,
+                                                sourceDB: selected_database,
+                                                request_id: window.hWin.HEURIST4.util.random()
+                                            };
+                                            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+                                                if (response.status == window.hWin.ResponseStatus.OK) {
+                                                    window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+                                                } else {
+                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                                }
+                                            });
+                                        
+                                    }
+                                });              
+                                window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
+                            
+                        }
+                    });
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+            }
+            
+        });
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+    }    
+    
+    /**
      * Method: executeActionById
      * 
      * Executes the action with the specified ID. Verifies credentials if required and handles dialogs or popups.
@@ -104,9 +331,9 @@ class ActionHandler {
             return false;
         }
         
-        let adata = action?.data;
+        let adata = action.data;
     
-        // Check if the action is disabled
+        // If action is disabled, return early
         if (adata?.ext == 1) {
             return;
         }
@@ -115,37 +342,14 @@ class ActionHandler {
             dialog_options = {};
         }
 
-        if(!dialog_options?.verification_passed && adata){
-            // Handle password and permission verification
-            let action_passworded = adata?.pwd;
-            if (!action_passworded && !window.hWin.HAPI4.has_access(2)) {
-                action_passworded = adata['pwd-nonowner'];
-            }
-            
-            let action_admin_level = adata['user-admin-status'];
-            let action_member_level = adata['user-memebr-status'];
-            let action_user_permissions = adata['user-permissions']; 
-            let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
-            
-            if(action_passworded || requiredLevel > 0){ 
-                if (action_member_level > 0) {
-                    requiredLevel += ';' + action_member_level;
-                }
-                
-                window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password) => {
-                    dialog_options.entered_password = entered_password;
-                    dialog_options.verification_passed = true;
-                    this.executeActionById(id, dialog_options);              
-                },
-                requiredLevel, action_passworded, null, action_user_permissions);
-                    
-                return;
-            }
+        if(!dialog_options?.verification_passed && 
+            this.#handleVerification(action, dialog_options))
+        {
+            return;
         }
 
-        let actionid = action?.id;
+        let actionid = action.id;
         let action_log = adata?.logaction; 
-        let action_container = adata?.container;
         
         if (action_log) {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
@@ -160,53 +364,14 @@ class ActionHandler {
         }
 
         // Prepare dialog options
-        let container, menu_container;
-        if (dialog_options?.container) {
-            container = dialog_options['container'];
-        } else if (action_container) {
-            let section = action_container;
-            $('.ui-menu6').slidersMenu('switchContainer', section, true);
-            container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
-            container.removeClass('ui-suppress-border-and-shadow');
-            menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-' + section);
-            menu_container.find('li').removeClass('ui-state-active');
-            menu_container.find('li[data-action="' + actionid + '"]').addClass('ui-state-active');
-        }
-
-        let pos = dialog_options?.position || null;
-
-        let entity_dialog_options = {
-            isdialog: !container,
-            innerTitle: true,
-            isFrontUI: true,
-            menu_container: menu_container,
-            container: container
-        };
-
-        let popup_dialog_options = {
-            innerTitle: true,
-            is_h6style: true,
-            isdialog: !container,
-            resizable: false,
-            draggable: false,
-            menu_container: menu_container,
-            container: container,
-            position: pos,
-            maximize: true,
-        };
-
-        if (dialog_options?.record_id > 0) {
-            popup_dialog_options.record_id = dialog_options['record_id'];
-        }
-
-        if (window.hWin.HR(actionid+'-header') != actionid+'-header') {
-            popup_dialog_options.title = window.hWin.HR(adata.header ? adata.header : action.text);
-        }
-
-        popup_dialog_options = $.extend(dialog_options, popup_dialog_options);
+        let popup_dialog_options = this.#prepareDialogOptions(action, dialog_options);
 
         let is_supported = true;
         let contentURL;
+
+        //database action name
+        const s = actionid.substr(actionid.lastIndexOf('-') + 1);
+        const actionName = 'db' + s.capitalize();
         
         switch (actionid) {
             case "menu-database-create":
@@ -217,8 +382,6 @@ class ActionHandler {
             case "menu-database-clone":
             case "menu-database-register":
             case "menu-database-verify":
-                const s = actionid.substr(actionid.lastIndexOf('-') + 1);
-                const actionName = 'db' + s.capitalize();
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
             case "menu-lookup-config":
@@ -259,8 +422,8 @@ class ActionHandler {
                 break;
 
             case "menu-profile-info":
-                entity_dialog_options['edit_mode'] = 'editonly';
-                entity_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
+                popup_dialog_options['edit_mode'] = 'editonly';
+                popup_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
                  // fall through
             case "menu-database-properties":
             case "menu-structure-rectypes":
@@ -275,30 +438,30 @@ class ActionHandler {
 
             case "menu-profile-groups":
             case "menu-profile-users":
-                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, entity_dialog_options);
+                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);
                 break;
             case "menu-manage-dashboards":
-                entity_dialog_options['isViewMode'] = false;
-                entity_dialog_options['is_iconlist_mode'] = false;
-                entity_dialog_options['onClose'] = function(){
+                popup_dialog_options['isViewMode'] = false;
+                popup_dialog_options['is_iconlist_mode'] = false;
+                popup_dialog_options['onClose'] = function(){
                     setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
                 }; 
-                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, entity_dialog_options);
+                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);
 
                 break;
 
             case "menu-database-browse":
-                let options = $.extend(entity_dialog_options, {
-                    select_mode: 'select_single',
-                    onselect: function(event, data) {
-                        if (data && data.selection && data.selection.length === 1) {
+                
+                popup_dialog_options['select_mode'] = 'select_single';
+                popup_dialog_options['onselect'] = function(event, data) {
+                        if (data?.selection && data.selection.length === 1) {
                             let db = data.selection[0];
                             if (db.indexOf('hdb_') === 0) db = db.substr(4);
                             window.open(window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
                         }
-                    }
-                });
-                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+                    };
+                
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', popup_dialog_options);
                 break;
 
 
@@ -312,7 +475,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('profilePreferences', popup_dialog_options);
                 break;
             case "menu-profile-import":
-                this._importUsers( entity_dialog_options ); //for admin only
+                this.importUsers( popup_dialog_options ); //for admin only
                 break;
             case "menu-profile-logout":
                 window.hWin.HAPI4.SystemMgr.logout();
@@ -364,138 +527,10 @@ class ActionHandler {
                 action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website';
                  // fall through
             default:
-                const href = action.href;
-                const target = action?.target;
-                if (!window.hWin.HEURIST4.util.isempty(href) && href !== '#') {
-                    this._handleHrefAction(action, href, target, popup_dialog_options);
-                } else {
-                    is_supported = false;
-                }
+                is_supported = this.#handleHrefAction(action, popup_dialog_options);
                 break;
         }
 
         return is_supported;
     }
-    
-    /**
-     * Helper Method: _handleHrefAction
-     * 
-     * Handles actions that involve opening a URL or external link.
-     * 
-     * @param {Object} action - The action object.
-     * @param {string} href - The URL to open.
-     * @param {string} target - The target window for the URL.
-     * @param {Object} popup_dialog_options - Additional dialog options.
-     */
-    _handleHrefAction(action, href, target, popup_dialog_options) {
-        if (href.indexOf('mailto:') === 0) {
-            window.open(href, 'emailWindow');
-            return;
-        }
-
-        if (!(href.indexOf('http://') === 0 || href.indexOf('https://') === 0)) {
-            href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?') >= 0 ? '&' : '?') + 'db=' + window.hWin.HAPI4.database;
-        }
-
-        if (target) {
-            window.open(href, target);
-        } else {
-            if (!popup_dialog_options.title) {
-                popup_dialog_options.title = action.text;
-            }
-            let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
-            
-/*                if (item.hasClass('upload_files')) {
-                    //beforeClose
-                    options['afterclose'] = function( event, ui ) {
-
-                            if(window.hWin.HEURIST4.filesWereUploaded){
-                                
-                                let buttons = {};
-                                buttons[window.hWin.HR('OK')]  = function() {
-                                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                                    $dlg.dialog( "close" );
-                                        
-                                    that.actionHandler.executeActionById('menu-index-files');
-                                };                                 
-                                
-                                window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
-                                +' until you run Import > index multimedia This function will open when you click OK.',buttons);
-                            }
-                    }
-                }
-*/            
-            window.hWin.HEURIST4.msg.showDialog(href, options);
-        }
-    }
-    
-    /**
-     * Helper Method: _importUsers
-     * 
-     * Handles the import of users into the system through a series of dialog steps.
-     * 
-     * @param {Object} entity_dialog_options - Configuration options for the dialogs during the import process.
-     */
-    _importUsers(entity_dialog_options) {
-        if (!entity_dialog_options) entity_dialog_options = {};
-        let options = $.extend(entity_dialog_options, {
-            subtitle: 'Step 1. Select database with users to be imported',
-            title: 'Import users', 
-            select_mode: 'select_single',
-            pagesize: 300,
-            edit_mode: 'none',
-            use_cache: true,
-            except_current: true,
-            keep_visible_on_selection: true,
-            onselect: function(event, data){
-                if (data && data.selection && data.selection.length > 0) {
-                    let selected_database = data.selection[0].substr(4);
-                    let options2 = $.extend(entity_dialog_options, {
-                        subtitle: 'Step 2. Select users in ' + selected_database + ' to be imported',
-                        title: 'Import users', 
-                        database: selected_database,
-                        select_mode: 'select_multi',
-                        edit_mode: 'none',
-                        keep_visible_on_selection: true,
-                        onselect: function(event, data){
-                            if (data && data.selection &&  data.selection.length > 0) {
-                                let selected_users = data.selection;
-                                let options3 = $.extend(entity_dialog_options, {
-                                    subtitle: 'Step 3. Allocate imported users to work groups',
-                                    title: 'Import users', 
-                                    select_mode: 'select_roles',
-                                    selectbutton_label: 'Allocate roles',
-                                    sort_type_int: 'recent',
-                                    edit_mode: 'none',
-                                    keep_visible_on_selection: false,
-                                    onselect: function(event, data){
-                                        if (data && !$.isEmptyObject(data.selection)){
-                                            let request = {
-                                                a: 'action',
-                                                entity: 'sysUsers',
-                                                roles: data.selection,
-                                                userIDs: selected_users,
-                                                sourceDB: selected_database,
-                                                request_id: window.hWin.HEURIST4.util.random()
-                                            };
-                                            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-                                                if (response.status == window.hWin.ResponseStatus.OK) {
-                                                    window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
-                                                } else {
-                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                }
-                                            });
-                                        }
-                                    }
-                                });              
-                                window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
-                            }
-                        }
-                    });
-                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
-                }
-            }
-        });
-        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
-    }    
 }

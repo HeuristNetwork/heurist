@@ -174,7 +174,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if(typeof ActionHandler !== 'undefined'){
                         (async () => {
                             that.actionHandler = new ActionHandler();
-                            await that.actionHandler.loadActionsFromFile(that.baseURL)
+                            await that.actionHandler.loadActionsFromFile();
                         })();                        
                     }
                     
