@@ -635,7 +635,7 @@ console.log('ON_CREDENTIALS', e);
     //
     _mousein_ExploreMenu: function(e) {
 
-if( this._isExplorerMenu_locked() ) return;
+        if( this._isExplorerMenu_locked() ) return;
         this._explorer_menu_locked = false;
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
@@ -643,31 +643,22 @@ if( this._isExplorerMenu_locked() ) return;
         this._resetCloseTimers();
         
         this.divMainMenu.find('li.menu-explore, div.menu-explore').css('background','none');
-        
-        let ele, hasAction = false;
-        
-        if($(e.target).attr('id')=='filter_by_groups'){
-            hasAction = false;
-        }else{
 
-            ele = $(e.target).is('li, div.menu-explore')?$(e.target):$(e.target).parents('li');
-            if(ele){
-                if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
-                hasAction = ele.attr('data-action-popup');
-                
-                if(hasAction=='search_recent' || hasAction=='databaseOverview') {
-                    hasAction = false;   
-                    return;
-                }
-                
-            }
+        const target = $(e.target);
+        const ele = target.is('li, div.menu-explore') ? target : target.parents('li');
+        let hasAction = ele?.attr('data-action-popup');    
+
+        if (target.attr('id') === 'filter_by_groups' || hasAction === 'search_recent' || hasAction === 'databaseOverview') {
+            return;
         }
 
-        if(e && $(e.target).parents('.ui-heurist-quicklinks').length==0)
-        {
-            this._collapseMainMenuPanel(true); //close instantly 
+        if (ele?.parents('.ui-heurist-quicklinks').length > 0) {
+            ele.css('background', 'aliceblue');
         }
         
+        if (target.parents('.ui-heurist-quicklinks').length==0) {
+            this._collapseMainMenuPanel(true); // close instantly
+        }
         
         if(hasAction){
             this.show_ExploreMenu(e);    
@@ -677,35 +668,6 @@ if( this._isExplorerMenu_locked() ) return;
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
         }
-                           
-/*
-        
-        const target = $(e.target);
-        const ele = target.is('li, div.menu-explore') ? target : target.parents('li');
-        let hasAction = ele?.attr('data-action-popup');    
-        
-        if (target.attr('id') === 'filter_by_groups' || hasAction === 'search_recent' || hasAction === 'databaseOverview') {
-            return;
-        }
-
-        if (ele && ele.parents('.ui-heurist-quicklinks').length > 0) {
-            ele.css('background', 'aliceblue');
-        }
-        
-        if (target.parents('.ui-heurist-quicklinks').length==0) {
-            this._collapseMainMenuPanel(true); // close instantly
-        }
-        
-        if(hasAction){
-            this.show_ExploreMenu(e, hasAction);    
-        } else {
-            let that = this;
-            this._myTimeoutId2 = setTimeout(function(){
-                                        that._closeExploreMenuPopup();
-                                    },  this._delayOnCollapse_ExploreMenu); //600
-        }
-                   
-*/        
     },
     
     // helper
@@ -778,7 +740,7 @@ if( this._isExplorerMenu_locked() ) return;
                 that.closeFacetedWizard();
             }
             
-            const { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
+            let { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
             
             if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
@@ -825,31 +787,31 @@ if( this._isExplorerMenu_locked() ) return;
     
     _getMenuPosition: function(menu_item, action_name, position){
       
-        let explore_left = this.divMainMenu.width() + 4;
+        let explore_left = ((this.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position)+4; 
         let explore_top = '2px';
         let explore_height = 'auto';
         let explore_width = '300px';
 
-        if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 0 && 
+        
+        if(position){
+            explore_top = position.top;
+            explore_left = position.left;
+        }else if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 0 && 
                 (this._active_section === 'explore' || this._active_section === 'populate')) 
         {
             explore_left = this._left_position + 211;
         } else if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 1) {
             explore_left = this._widthMenu + 4;
-        }else{
-            explore_left = ((this.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position)+4; 
         }
+
 
         if (action_name === 'searchBuilder') {
             
-            explore_top = 0;
             explore_height = 450;
-            explore_width === '850px';
+            explore_width = '850px';
 
-            if(position){
-                explore_top = position.top;
-                explore_left = position.left;
-            }else{
+            if(!position){
+
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
                     explore_top = widget.position().top + 100;
@@ -860,9 +822,6 @@ if( this._isExplorerMenu_locked() ) return;
             if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
                 explore_top = this.element.innerHeight() - explore_height;
             }
-        }else if(position){
-            explore_top = position.top;
-            explore_left = position.left;
         }
 
         
@@ -1000,7 +959,9 @@ if( this._isExplorerMenu_locked() ) return;
             $favourite_container.css('height', cont_height + 'px');
         }
 
-        if(favourite_filters[0] != ''){
+        if(favourite_filters[0] == ''){
+            return;   
+        }
 
             if(!this.svs_list){
                 this.getSvsList();
@@ -1122,7 +1083,7 @@ if( this._isExplorerMenu_locked() ) return;
                 cont_height = this.menues.explore.height() - $favourite_container.position().top - 110; 
                 $favourite_container.css('height', cont_height + 'px');
             }
-        }
+        
     },
 
     //
@@ -1484,15 +1445,19 @@ if( this._isExplorerMenu_locked() ) return;
             function(i, item){
                 item = $(item);
                 let action_id = item.attr('data-action');
-                if( action_id ){
+                if( !action_id ){
+                    return;
+                }
                     
                     let action = window.hWin.HAPI4.actionHandler.findActionById(action_id);
                     
                     item.addClass('fancytree-node');
                     
-                    if(action!=null){
+                    if(action==null){
+                        return;
+                    }
                         
-                        let action_icon = action.data?.icon?action.data.icon:'';
+                        let action_icon = action.data?.icon || '';
 
                         let action_label = window.hWin.HR( action_id ); 
                         if(!action_label){ //localized version not found
@@ -1517,8 +1482,8 @@ if( this._isExplorerMenu_locked() ) return;
                         if(!action_hint){
                             item.attr('title',action_hint);
                         }
-                    }
-                }
+                    
+                
             });
 
         let $recAddSettings = this.menues[section].find('li[data-action-popup="recordAddSettings"]');
@@ -1664,27 +1629,29 @@ if( this._isExplorerMenu_locked() ) return;
             
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
-        // remarked since editCMS is in separate window
-        //}else if(typeof editCMS_instance !=='undefined' && section=='publish'){ 
-       
         }else{
             return;
         }
         
-        if(section == 'explore' && that.containers[section]) {
-            if(that.containers[section].hasClass('ui-layout-container'))
-                 that.containers[section].layout().resizeAll();
-            that._switch_SvsList( 0 );
-
-            this.hideDatabaseOverview();
-
-            if(this._show_quick_tips){
-                this._show_quick_tips = false; //show once
-                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-quick-tips');
-            }
-
-            this.populateFavouriteFilters(null, true); // resize favourite filters section
+        if(section != 'explore' || !that.containers[section]) {
+            return;
         }
+        
+        if(that.containers[section].hasClass('ui-layout-container')){
+             that.containers[section].layout().resizeAll();
+        }
+             
+        that._switch_SvsList( 0 );
+
+        this.hideDatabaseOverview();
+
+        if(this._show_quick_tips){
+            this._show_quick_tips = false; //show once
+            window.hWin.HAPI4.actionHandler.executeActionById('menu-help-quick-tips');
+        }
+
+        this.populateFavouriteFilters(null, true); // resize favourite filters section
+        
 
     },
 

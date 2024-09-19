@@ -152,7 +152,7 @@ $.widget( "heurist.buttonsMenu", {
             clearTimeout(myTimeoutId);
 
             $('.menu-or-popup').hide(); //hide other
-            let menu = $( ele )
+            $( ele )
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
             return false;
@@ -177,7 +177,6 @@ $.widget( "heurist.buttonsMenu", {
             top_levels = this.element.find('ul'); // From existing element HTML
         }
         
-        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
 
         if(top_levels.length==0){
             console.error('menu content is not defined');
@@ -187,52 +186,11 @@ $.widget( "heurist.buttonsMenu", {
         this.element.empty(); // Clear existing content
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
 
-        for(let i=0; i<top_levels.length; i++){
-
+        for (let top_level of top_levels) {
             // Initialize each top-level button and submenu
-            const top_level = $(top_levels[i]);
-                
-            let menuID = top_level.attr('id') ? `data-action="${top_level.attr('id')}"` : '';
-
-            const menuName = window.hWin.HR(top_level.attr('title'));
-            let menuLabel = window.hWin.HR(top_level.attr('data-label')) || menuName;
-                
-            let menuCss =  top_level.attr('style');
-            menuCss = menuCss?` style="${menuCss}"`:'';
-                
-            let linkCss =  top_level.attr('link-style');
-            if(!linkCss) {linkCss = '';}
             
-            const menuTitle =  window.hWin.HR(top_level.attr('title'));
-            const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
-            
-            let right_padding = '2px';
-            let icon_left = top_level.attr('data-icon-left');
-            if(icon_left){
-                icon_left = `<span class="ui-icon ${icon_left}"></span>`;
-                right_padding = '22px';
-            }else{
-                icon_left = '';
-            }
-            
-            let icon_righ = top_level.attr('data-icon');
-            if(!icon_righ){
-                icon_righ = 'ui-icon-carat-d';    
-            }
-            icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
-
-            let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
-            
-            
-            this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
-
-            /*
-            if(false && competency_level>=0){
-                this.menuBtns[menuName].addClass('heurist-competency'+competency_level);    
-                if(usr_exp_level>competency_level){
-                    this.menuBtns[menuName].hide();    
-                }
-            }*/
+            top_level = $(top_level);
+            let menuName = this._createMenuButton(top_level);
             
             // Initialize submenu if present
             let submenu = top_level.find('li');
@@ -300,6 +258,47 @@ $.widget( "heurist.buttonsMenu", {
             
         callback.call(); //init completed
     },
+    
+    /**
+    * Helper _createMenuButton
+    */
+    _createMenuButton: function(top_level){
+        let menuID = top_level.attr('id') ? `data-action="${top_level.attr('id')}"` : '';
+
+        const menuName = window.hWin.HR(top_level.attr('title'));
+        let menuLabel = window.hWin.HR(top_level.attr('data-label')) || menuName;
+            
+        let menuCss =  top_level.attr('style');
+        menuCss = menuCss?` style="${menuCss}"`:'';
+            
+        let linkCss =  top_level.attr('link-style');
+        if(!linkCss) {linkCss = '';}
+        
+        const menuTitle =  window.hWin.HR(top_level.attr('title'));
+        
+        let right_padding = '2px';
+        let icon_left = top_level.attr('data-icon-left');
+        if(icon_left){
+            icon_left = `<span class="ui-icon ${icon_left}"></span>`;
+            right_padding = '22px';
+        }else{
+            icon_left = '';
+        }
+        
+        let icon_righ = top_level.attr('data-icon');
+        if(!icon_righ){
+            icon_righ = 'ui-icon-carat-d';    
+        }
+        icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
+
+        let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
+        
+        
+        this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
+        
+        return menuName;
+    },
+    
 
     /**
      * menuActionHandler
@@ -360,8 +359,6 @@ $.widget( "heurist.buttonsMenu", {
             return;   
         }
                 
-        let action_icon = action.data?.icon?action.data.icon:'';
-
         let action_label = window.hWin.HR( action_id ); 
         if(!action_label){ //localized version not found
             action_label = action.text;

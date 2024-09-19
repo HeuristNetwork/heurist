@@ -125,11 +125,10 @@ default content consists of
     #main-content-container > #main-content - target the content of particular page will be loaded
 */
 if(!$edit_OldEditor && $system->is_member(1)){
-        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:70px; top:5px; z-index: 9999;" class="cms-button">DB</a>'
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
+        .'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
-        .'style="position:absolute;right:10px; top:5px; z-index: 9999;" class="cms-button">Editor</a>';
-
+        .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
     }
 
 if($isWebPage){ //set in websiteRecord.php

@@ -278,7 +278,7 @@ $.widget( "heurist.controlPanel", {
                 let elink = $(item).find('a');
                 
                 if(lvl_user>=0){  //2 database owner, 1 - memeber of Database admin
-                    //todo lvl_user=1 is_admin
+                    // lvl_user=1 is_admin
                     is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
 
                     if(is_visible){
@@ -426,17 +426,11 @@ $.widget( "heurist.controlPanel", {
         
         this._initial_search_already_executed = true;
         
-        let cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         let cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
 
-        //ignore initial search of some menu command is called from url or need to open cms editor
-        //initial parameters 
-        //1. open CMS edit
-        if(cms_record_id>0){
-            this.actionHandler.executeActionById('menu-cms-edit',{record_id:cms_record_id});
-            return;
-        }else if(cmd){
-        //2. executes arbitrary command
+        //ignore initial search of some menu command is called from url 
+        if(cmd){
+            //executes arbitrary command
             this.actionHandler.executeActionById(cmd);
             return;        
         }else if(window.hWin.HAPI4.is_publish_mode || window.hWin.HAPI4.sysinfo['db_total_records']==0){
