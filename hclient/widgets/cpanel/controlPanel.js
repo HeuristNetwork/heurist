@@ -42,24 +42,57 @@
     menu-database-clone-header#
 */
 
+/**
+ * jQuery UI Widget: heurist.controlPanel
+ * 
+ * This widget creates a control panel for the Heurist application. It handles menu creation, login actions, 
+ * version checks, and user notifications.
+ * 
+ * @options
+ *   @param {String} host_logo - Path to the host logo (default: null).
+ *   @param {Boolean} login_inforced - If true, forces the user to log in (default: true).
+ * 
+ * @properties
+ *   @property {Object} menues - Stores references to various menus in the control panel.
+ *   @property {Object} actionHandler - Handles actions related to menu items and user actions.
+ *   @property {Boolean} _initial_search_already_executed - Tracks whether the initial search has already been performed.
+ *   @property {Boolean} _retrieved_notifications - Tracks whether user notifications have been retrieved.
+ *   @property {Object} version_message - Contains the message about available alpha or stable versions.
+ * 
+ * @methods
+ *   _init() - Initializes the control panel, loads HTML content, and sets up event listeners.
+ *   _initControls() - Initializes the visual and interactive elements within the control panel.
+ *   _refresh() - Refreshes the control panel, adjusting visibility based on login status and showing notifications.
+ *   _destroy() - Cleans up event listeners and removes elements when the widget is destroyed.
+ *   doLogin() - Initiates the login process, showing the login dialog if the user is not logged in.
+ *   _performInitialSearch() - Performs the initial search or action based on URL parameters, or triggers a dashboard search.
+ *   _dashboardVisibility(is_startup) - Controls the visibility of the dashboard panel.
+ *   _adjustHeight() - Adjusts the height of the header and main panel after dashboard visibility changes.
+ *   _showVersionMessage() - Displays a message next to the database name about available software versions.
+ *   _getUserNotifications() - Retrieves and displays user notifications, including prompting for bug reports.
+ */
 $.widget( "heurist.controlPanel", {
 
     // default options
     options: {
         host_logo:null,
         login_inforced: true,
-        is_h6style: true
     },
     
     menues:{},
     actionHandler: null,
     
-    //glags    
+    //flags    
     _initial_search_already_executed: false,
     _retrieved_notifications: false,
 
     version_message: null, // container for message about available alpha/stable version
     
+    /**
+     * _init
+     * 
+     * Initializes the control panel widget. Loads the content from a predefined URL and calls `_initControls` once the content is loaded.
+     */
     _init: function() {
 
         let that = this;
@@ -70,7 +103,7 @@ $.widget( "heurist.controlPanel", {
                         +'hclient/widgets/cpanel/controlPanel.html?t=' 
                         +window.hWin.HEURIST4.util.random()
         
-        //load content
+        // Load HTML content into the widget
         this.element.load(url, 
             function(response, status, xhr){
                 that._need_load_content = false;
@@ -87,10 +120,18 @@ $.widget( "heurist.controlPanel", {
         
     },
     
+    /**
+     * _initControls
+     * 
+     * Sets up the visual and interactive controls for the control panel, 
+     * such as the logo, version information, database dropdown, and profile menu.
+     * 
+     */    
     _initControls:function(){
         
         let that = this;
         
+        // Set the basic CSS for the control panel
         this.element.css({'height':'100%'}).addClass('ui-heurist-header2')
             .disableSelection();// prevent double click to select text
 
@@ -109,7 +150,7 @@ $.widget( "heurist.controlPanel", {
             .css('margin-right','-'+mr+'px')
             .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>');
             
-        // bind click events
+        // Bind click events for version alert and reload actions
         this._on( this.div_logo, {
             click: function(event){
                 if($(event.target).is('span.ui-icon-alert')){
@@ -222,15 +263,7 @@ $.widget( "heurist.controlPanel", {
 
     }, //end _create
      
-
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-
-        let that = this;
-
+/*
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
                 let lvl_user = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
@@ -245,7 +278,7 @@ $.widget( "heurist.controlPanel", {
                 let elink = $(item).find('a');
                 
                 if(lvl_user>=0){  //2 database owner, 1 - memeber of Database admin
-                    //@todo lvl_user=1 is_admin
+                    //todo lvl_user=1 is_admin
                     is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
 
                     if(is_visible){
@@ -303,14 +336,12 @@ $.widget( "heurist.controlPanel", {
                             item.hide();  
                         }
                 }         
-                
         }
         
         //  0 - logged in                 
         //  1 - db admin (admin of group #1)
         //  2 - db owner
         //loop top level menu
-        /* disabled
         for (let key in this.menues){
             let menu = this.menues[key];
             if(menu.is('li')){
@@ -319,22 +350,33 @@ $.widget( "heurist.controlPanel", {
                 $(menu).find('li,a').each(___set_menu_item_visibility); //enable/disbale dropdown items
             }
         }
-        */
-        
+*/    
+   
+    /**
+     * _refresh
+     * 
+     * Refreshes the control panel by checking the login status, displaying the version message, 
+     * performing initial search if required, and retrieving user notifications.
+     */   
+    _refresh: function(){
+    
         // Replace "Profile" label for menu to current user name
         this.divProfileMenu.find('span.ui-icon-user').next().text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
         if(this.options.login_inforced && !window.hWin.HAPI4.has_access()){
             this.doLogin();
         }else {
-            this._show_version_message();
+            this._showVersionMessage();
             this._performInitialSearch();
             this._getUserNotifications();
         }
     },
 
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * _destroy
+     * 
+     * Cleans up the control panel widget by removing event listeners and clearing DOM elements related to the control panel.
+     */
     _destroy: function() {
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
@@ -344,12 +386,12 @@ $.widget( "heurist.controlPanel", {
         this.divProfileMenu.remove();
     },
     
-    //------------------------ LOGIN / LOGOUT --------------------
-
-    //
-    // show login popup dialog if not logged in
-    // if login fails show list of databases
-    //
+    /**
+     * doLogin
+     * 
+     * Displays the login dialog and handles the login process. If the user is not logged in and login is enforced, 
+     * it redirects the user to the login page.
+     */
     doLogin: function(){
         
         let isforced = this.options.login_inforced;
@@ -359,7 +401,7 @@ $.widget( "heurist.controlPanel", {
                 if(is_logged) {
                     $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
-                    that._show_version_message();
+                    that._showVersionMessage();
                     that._performInitialSearch();
                     that._getUserNotifications();
 
@@ -369,9 +411,12 @@ $.widget( "heurist.controlPanel", {
             }); 
     },
     
-    //
-    //
-    //
+
+    /**
+     * _performInitialSearch
+     * 
+     * Executes an initial search or handles specific actions like opening the CMS editor or running commands based on URL parameters.
+     */
     _performInitialSearch: function(){
     
         if(this._initial_search_already_executed){
@@ -381,9 +426,6 @@ $.widget( "heurist.controlPanel", {
         
         this._initial_search_already_executed = true;
         
-        let lt = window.hWin.HAPI4.sysinfo['layout']; 
-            
-        
         let cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         let cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
 
@@ -391,64 +433,73 @@ $.widget( "heurist.controlPanel", {
         //initial parameters 
         //1. open CMS edit
         if(cms_record_id>0){
-                    this.actionHandler.executeActionById('menu-cms-edit',{record_id:cms_record_id});
+            this.actionHandler.executeActionById('menu-cms-edit',{record_id:cms_record_id});
+            return;
         }else if(cmd){
-                //2. executes arbitrary command
-                        this.actionHandler.executeActionById(cmd);
-                    
-        }else if(!window.hWin.HAPI4.is_publish_mode && window.hWin.HAPI4.sysinfo['db_total_records']>0){
+        //2. executes arbitrary command
+            this.actionHandler.executeActionById(cmd);
+            return;        
+        }else if(window.hWin.HAPI4.is_publish_mode || window.hWin.HAPI4.sysinfo['db_total_records']==0){
+            return;
+        }    
+        
+        let request = {};
 
-                let request = {};
-
-                if(window.hWin.HAPI4.postparams && window.hWin.HAPI4.postparams['q']){
-                    request = window.hWin.HAPI4.postparams;
-                }else{
-                    let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
-                    let qdomain;
-                    let rules = null;
-                    if(init_search){
-                        qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
-                        rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
-                    }else{
-                        init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
-                    }
-                    if(!qdomain) qdomain = 'a';
-                    request = {q: init_search, w: qdomain}
-                    if(rules) request['rules'] = rules;
-                }
-                
-                if(!window.hWin.HEURIST4.util.isempty(request['q'])){
-                    request['f'] = 'map';
-                    request['source'] = 'init';
-
-                    setTimeout(function(){
-                        window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
-                        }, 1000);
-                }else{
-                    //trigger search finish to init some widgets
-                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
-                }
-                
-                window.hWin.HAPI4.postparams = null;
-
-                this._dashboardVisibility( true ); //after login
+        if(window.hWin.HAPI4.postparams.?q){
+            request = window.hWin.HAPI4.postparams;
+        }else{
+            let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
+            let qdomain;
+            let rules = null;
+            if(init_search){
+                qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
+                rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
+            }else{
+                init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
+            }
+            if(!qdomain) qdomain = 'a';
+            request = {q: init_search, w: qdomain}
+            if(rules) request['rules'] = rules;
         }
+        
+        if(!window.hWin.HEURIST4.util.isempty(request['q'])){
+            request['f'] = 'map';
+            request['source'] = 'init';
+
+            setTimeout(function(){
+                window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
+                }, 1000);
+        }else{
+            //trigger search finish to init some widgets
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
+        }
+        
+        window.hWin.HAPI4.postparams = null;
+
+        this._dashboardVisibility( true ); //after login
+        
     },
 
-    //
-    //  show/hide dashboard panel
-    //    
+    /**
+     * _dashboardVisibility
+     * 
+     * Manages the visibility of the dashboard panel based on the startup conditions. Shows or hides the dashboard or shortcuts ribbon.
+     * 
+     * @param {Boolean} is_startup - Flag indicating if the control panel is being initialized at startup.
+     */
     _dashboardVisibility: function(is_startup){
 
-        if (!window.hWin.HAPI4.is_publish_mode
-            && (window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0))
-        {
+        if (window.hWin.HAPI4.is_publish_mode || window.hWin.HAPI4.sysinfo.db_has_active_dashboard==0){
+            return;
+        }
             
-                let remove_ribbon = true;
+            
+               let remove_ribbon = true;
                //show dashboard
                let prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:0, show_as_ribbon:0});
+               
                if(prefs.show_on_startup==1){
-                    if(prefs.show_as_ribbon==1){ //    && lt!='H5Default'
+                    if(prefs.show_as_ribbon==1){
                         remove_ribbon = false;
                         if(!this.divShortcuts){
                             this.divShortcuts = $( "<div>")            
@@ -459,8 +510,7 @@ $.widget( "heurist.controlPanel", {
                             //refresh
                             this.divShortcuts.manageSysDashboard('startSearch');
                         }
-                    }else{
-                        if(is_startup)
+                    }else if(is_startup) {
                             window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard'); //show as poup
                     }
                }
@@ -473,15 +523,14 @@ $.widget( "heurist.controlPanel", {
                let that = this;
               
                setTimeout( function(){ that._adjustHeight(); },is_startup?1000:10)
-               
-        }
-        
     },
     
-    //
-    //  adjust header and main panel after dashboard visibility on/off
-    //
-    _adjustHeight: function(){
+    /**
+     * _adjustHeight
+     * 
+     * Adjusts the height of the layout and main panel after changing the visibility of the dashboard.
+     */
+     _adjustHeight: function(){
 
         let ele = this.element.parents('#layout_panes');
         if(ele){
@@ -500,10 +549,12 @@ $.widget( "heurist.controlPanel", {
         
     },
     
-    //
-    // Display message next to DB name, about available stable/alpha version
-    //
-    _show_version_message: function(){
+    /**
+     * _showVersionMessage
+     * 
+     * Display message next to DB name, about available stable/alpha version
+     */
+    _showVersionMessage: function(){
 
         const that = this;
 
@@ -588,6 +639,8 @@ $.widget( "heurist.controlPanel", {
     },
 
     /**
+     * _getUserNotifications
+     * 
      * Disply notifications about certain features / functions to the user
      * Or, open the bug reporter monthly
      * 
@@ -596,8 +649,6 @@ $.widget( "heurist.controlPanel", {
     _getUserNotifications: function(){
 
         if(this._retrieved_notifications){ return; }
-
-        const that = this;
 
         this._retrieved_notifications = true;
 
@@ -615,7 +666,6 @@ $.widget( "heurist.controlPanel", {
 
             if(Object.keys(notifications).length == 1 && notifications['bug_report']){
                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
-                return;
             }
         });
     },
