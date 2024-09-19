@@ -288,10 +288,8 @@ $.widget( "heurist.slidersMenu", {
         }
         if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
 console.log('ON_CREDENTIALS', e);
-            /* todo
+            /* later: update visibility of menu items
             this.populateFavouriteFilters();
-            // if there is no search parameter
-            this.showDatabaseOverview();
             */
         }        
     },               
@@ -576,8 +574,7 @@ console.log('ON_CREDENTIALS', e);
                 that.divMainMenu.find('#filter_by_groups').hide();
                 that._switch_SvsList( 1 );
                 
-                if (!that.containers[that._active_section] ||
-                    !that.containers[that._active_section].is(':visible')) 
+                if (! window.hWin.HEURIST4.ui.isVisible(that.containers[that._active_section]) )
                 {
                     that.menues[that._active_section].css({left:that._widthMenu+5});
                 }   
@@ -792,12 +789,21 @@ console.log('ON_CREDENTIALS', e);
         let explore_height = 'auto';
         let explore_width = '300px';
 
-        const qlinks_cnt = menu_item?menu_item.parents('.ui-heurist-quicklinks').length:-1; 
+        if (action_name === 'searchBuilder') {
+            explore_height = 450;
+            explore_width = '850px';
+        }
         
         if(position){
-            explore_top = position.top;
-            explore_left = position.left;
-        }else if (qlinks_cnt === 0 && 
+            return { position.top, 
+                     position.left, 
+                     explore_height, 
+                     explore_width 
+            };
+        }
+        
+        const qlinks_cnt = menu_item?menu_item.parents('.ui-heurist-quicklinks').length:-1; 
+        if (qlinks_cnt === 0 && 
                 (this._active_section === 'explore' || this._active_section === 'populate')) 
         {
             explore_left = this._left_position + 211;
@@ -805,26 +811,19 @@ console.log('ON_CREDENTIALS', e);
             explore_left = this._widthMenu + 4;
         }
 
-
         if (action_name === 'searchBuilder') {
             
-            explore_height = 450;
-            explore_width = '850px';
-
-            if(!position){
-                
-                explore_top = menu_item.offset().top; //if called from menu
-
-                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
-                if(widget){
-                    explore_top = widget.position().top + 100;
-                }
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+            if(widget){
+                explore_top = widget.position().top + 100;
+            }else if(menu_item){
+                explore_top = menu_item.offset().top; //if called from menu   
             }
+            
             if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
                 explore_top = this.element.innerHeight() - explore_height;
             }
         }
-
         
         explore_top = Math.max(0, explore_top);
         
@@ -1612,7 +1611,7 @@ console.log('ON_CREDENTIALS', e);
 
             if(force_show || (this.containers[section] && !this.containers[section].is(':empty'))){
                 this.containers[section].show();    
-            }else if(this.introductions && this.introductions[section]){
+            }else if(this.introductions?.section){
                 this.introductions[section].css('left', (this._left_position+211)+'px').show();    
             }
             
@@ -1690,13 +1689,13 @@ console.log('ON_CREDENTIALS', e);
             this.edit_svs_dialog = new HSvsEdit();    
         }
         
-        if(!(left_position>0)){
+        if( !window.hWin.HEURIST4.util.isPositiveInt(left_position) ){
             left_position = ((that.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position) + 4; 
             if(this._active_section=='explore'){
                 left_position = this._left_position + 211;
             }
         }
-        if(!(top_position>0)){
+        if( !window.hWin.HEURIST4.util.isPositiveInt(top_position) ){
             top_position = 40;
         }
 
@@ -1716,7 +1715,7 @@ console.log('ON_CREDENTIALS', e);
         //for faceted wizard and save filter delay is increased to 2sec
         this._delayOnCollapse_ExploreMenu = 2000;
 
-        let $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
+        this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
             { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
             function(){  //after save - trigger refresh of saved filter tree
                 
@@ -1731,13 +1730,10 @@ console.log('ON_CREDENTIALS', e);
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){
                     that._resetCloseTimers();
-                    return; //prevent close on mouse out
 
                 }else if(is_locked=='close'){
                     that.coverAll.hide();                 
-                   
-                   
-                   
+                    
                 }else{
                     that._resetCloseTimers();    
                     
@@ -1866,9 +1862,7 @@ console.log('ON_CREDENTIALS', e);
         }
 
         function openDBProperties(event){
-            if($(event.target).is('a')){
-                return;
-            }else if(editingProperties){
+            if($(event.target).is('a') || editingProperties){
                 return;
             }
             editingProperties = true;

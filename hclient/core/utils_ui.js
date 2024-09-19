@@ -88,6 +88,10 @@ if (!window.hWin.HEURIST4.ui)
 
 window.hWin.HEURIST4.ui = {
     
+    isVisible: function(ele){
+        return ele && $(ele).is(':visible');
+    },
+    
     setValueAndWidth: function(ele, value, padding){
         
         if(window.hWin.HEURIST4.util.isempty(value)) value='';

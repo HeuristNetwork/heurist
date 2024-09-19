@@ -111,6 +111,10 @@ window.hWin.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
     
+    isPositiveInt: function (n) {
+        n = parseInt(n);
+        return !isNaN(n) && n>0;
+    },
 
     //
     //
