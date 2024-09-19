@@ -795,11 +795,9 @@ console.log('ON_CREDENTIALS', e);
         }
         
         if(position){
-            return { position.top, 
-                     position.left, 
-                     explore_height, 
-                     explore_width 
-            };
+            explore_top = position.top;
+            explore_height = position.left;
+            return { explore_top, explore_left, explore_height, explore_width };
         }
         
         const qlinks_cnt = menu_item?menu_item.parents('.ui-heurist-quicklinks').length:-1; 
