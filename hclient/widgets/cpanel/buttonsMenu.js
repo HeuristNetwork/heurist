@@ -17,34 +17,59 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * jQuery UI Widget: heurist.buttonsMenu
+ * 
+ * This widget creates a horizontal menu with buttons and optional submenus. It includes customizable styles, content loading from external sources, and menu item action handling.
+ * 
+ * @options
+ *   @param {String} menu_class - Additional CSS class for the menu container (default: null).
+ *   @param {String} menuContent - HTML snippet to populate the menu content. If undefined, the element's HTML is used (default: null).
+ *   @param {String} menuContentFile - URL to an HTML snippet file with the menu structure (default: null).
+ *   @param {Function} manuActionHandler - Callback function for menu item actions (default: null).
+ * 
+ * @properties
+ *   @property {Object} divMainMenuItems - Stores the main `<ul>` container for menu items.
+ *   @property {Array} menuBtns - Stores references to the top-level menu buttons.
+ *   @property {Array} menuSubs - Stores submenus linked to the top-level buttons.
+ * 
+ * @methods
+ *   _create() - Initializes the widget and sets up the menu.
+ *   _refresh() - Placeholder for refreshing the widget (currently unused).
+ *   _destroy() - Cleans up the widget and removes all menu buttons and submenus.
+ *   _initMenu(callback) - Builds the menu and submenus based on options. Calls the provided callback when complete.
+ *   menuActionHandler(event, ui) - Handles menu item clicks and triggers the appropriate action.
+ *   _initActionItem(idx, item) - Initializes each submenu action item.
+ */
 $.widget( "heurist.buttonsMenu", {
 
     // default options
     options: {
-        is_h6style: true,
         menu_class:null,
         
-        //if content is not defined here it takes this.element.html()
-        menuContent:null, //html snippet with ul/li menu items
-        menuContentFile:null, //html snippet file with menu
-        
-        // callbacks
-        manuActionHandler:null
+        //if content is not defined here, it takes this.element.html()
+        menuContent: null, // HTML snippet with ul/li menu items
+        menuContentFile: null, // HTML snippet file with menu
+        manuActionHandler: null // Callback for handling menu actions
     },
     
-    divMainMenuItems:null, //parent UL
-    menuBtns:[],
-    menuSubs:[],
+    divMainMenuItems: null, // Parent UL
+    menuBtns: [], // Array of menu buttons
+    menuSubs: [], // Array of submenu elements  
 
-    // the widget's constructor
+    /**
+     * _create
+     * 
+     * Initializes the widget, setting up the menu's DOM structure and handling.
+     * It fetches menu content if needed and prepares the buttons and submenus.
+     */
     _create: function() {
 
         let that = this;
 
         this.element
         .css('font-size', '1.2em')
-        // prevent double click to select text
-        .disableSelection();
+        .disableSelection();// prevent double click to select text
         
         this._initMenu(()=>{
             
@@ -52,21 +77,21 @@ $.widget( "heurist.buttonsMenu", {
                 return;
             }
             
-            //complete intialization 
+            // Initialize the jQuery UI menu
             that.divMainMenuItems.menu();
 
-            // 'width':'100px', 
+            // Style the menu items
             that.divMainMenuItems.find('li').css({'padding':'0 3px 3px','text-align':'center'}); // center, place gap and setting width
-            
             that.divMainMenuItems.find('li.autowidth').css('width','auto');
 
-            
+            // Apply menu_class if provided
             if(that.options.menu_class!=null){
-                 that.element.addClass( that.options.menu_class );   
+                that.element.addClass( that.options.menu_class );   
             }else{
                 that.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
             }
            
+           // Style the right-hand icons in menu items
             that.divMainMenuItems.children('li').children('a').children('.ui-icon-right').css({right: '2px', left:'unset'});
 
             that._refresh();
@@ -74,13 +99,22 @@ $.widget( "heurist.buttonsMenu", {
 
     }, //end _create
 
+    /**
+     * _refresh
+     * 
+     * Placeholder method for refreshing the widget.
+     * Can be implemented later to reflect current level of credentials 
+     */    
     _refresh: function() {
-        
+        // No content to refresh for now
     },
     
-    //
-    // custom, widget-specific, cleanup.
-    //
+    /**
+     * _destroy
+     * 
+     * Cleans up the widget by removing all menu buttons and submenus.
+     * Empties the `menuBtns` and `menuSubs` arrays.
+     */
     _destroy: function() {
         
         this.menuBtns.forEach((item)=>{
@@ -94,180 +128,188 @@ $.widget( "heurist.buttonsMenu", {
 
     },
 
-    //
-    //
-    //
+    /**
+     * _initMenu
+     * 
+     * Initializes the menu structure and loads content if provided.
+     * Builds the main menu and submenus from either static HTML or a content file.
+     * @param {Function} callback - Called when the menu initialization is complete.
+     */
     _initMenu: function(callback){
 
         let that = this;
         let myTimeoutId = -1;
 
-        //show hide function
-        //show hide functions
+        // Function to hide submenus after a timeout
         let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 1);
-           
         };
 
+        // Function to show submenus and position them correctly
         let _show = function(ele, parent) {
             clearTimeout(myTimeoutId);
 
             $('.menu-or-popup').hide(); //hide other
             let menu = $( ele )
-            //.css('width', this.btn_user.width())
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
-           
-
             return false;
         };
 
+        // If menuContentFile is specified, load the menu from an external file
         if(this.options.menuContentFile){
-
             $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
                 function(response){
                     that.options.menuContent = response;
-                    that._initMenu(callback);
+                    that._initMenu(callback); // Reinitialize after loading content
             });
             return;
         }
 
         let top_levels;
         
-        if(this.options.menuContent){
-            top_levels = $(this.options.menuContent).find('ul'); //find top level 
-        }else{
-            top_levels = this.element.find('ul'); //find top levels 
+        // Determine the top-level UL elements to build the menu from
+        if (this.options.menuContent) {
+            top_levels = $(this.options.menuContent).find('ul'); // From menuContent
+        } else {
+            top_levels = this.element.find('ul'); // From existing element HTML
         }
         
-            let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
 
-            if(top_levels.length==0){
-                //@todo error
-                console.log('menu content is not defined');
-                return;
+        if(top_levels.length==0){
+            console.error('menu content is not defined');
+            return;
+        }
+            
+        this.element.empty(); // Clear existing content
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
+
+        for(let i=0; i<top_levels.length; i++){
+
+            // Initialize each top-level button and submenu
+            const top_level = $(top_levels[i]);
+                
+            let menuID = top_level.attr('id') ? `data-action="${top_level.attr('id')}"` : '';
+
+            const menuName = window.hWin.HR(top_level.attr('title'));
+            let menuLabel = window.hWin.HR(top_level.attr('data-label')) || menuName;
+                
+            let menuCss =  top_level.attr('style');
+            menuCss = menuCss?` style="${menuCss}"`:'';
+                
+            let linkCss =  top_level.attr('link-style');
+            if(!linkCss) {linkCss = '';}
+            
+            const menuTitle =  window.hWin.HR(top_level.attr('title'));
+            const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
+            
+            let right_padding = '2px';
+            let icon_left = top_level.attr('data-icon-left');
+            if(icon_left){
+                icon_left = `<span class="ui-icon ${icon_left}"></span>`;
+                right_padding = '22px';
+            }else{
+                icon_left = '';
             }
             
-            this.element.empty();
-            this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
+            let icon_righ = top_level.attr('data-icon');
+            if(!icon_righ){
+                icon_righ = 'ui-icon-carat-d';    
+            }
+            icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
 
-            for(let i=0; i<top_levels.length; i++){
-
-                //init top level buttons
-                const top_level = $(top_levels[i]);
-                let menuID = top_level.attr('id');
-                menuID = menuID?`data-action="${menuID}"`:'';
-                const menuName =  window.hWin.HR(top_level.attr('title'));
-                let menuCss =  top_level.attr('style');
-                menuCss = menuCss?` style="${menuCss}"`:'';
-                let linkCss =  top_level.attr('link-style');
-                if(!linkCss) {linkCss = '';}
-                let menuLabel =  window.hWin.HR(top_level.attr('data-label'));
-                if(!menuLabel) {menuLabel = menuName;}
-                const menuTitle =  window.hWin.HR(top_level.attr('title'));
-                const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
-
-
-                let right_padding = '2px';
-                let icon_left = top_level.attr('data-icon-left');
-                if(icon_left){
-                    icon_left = `<span class="ui-icon ${icon_left}"></span>`;
-                    right_padding = '22px';
-                }else{
-                    icon_left = '';
-                }
-                
-                let icon_righ = top_level.attr('data-icon');
-                if(!icon_righ){
-                    icon_righ = 'ui-icon-carat-d';    
-                }
-                icon_righ = (icon_righ!='none')?`<span class="ui-icon-right ui-icon ${icon_righ}"></span>`:'';
-
-                let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
-                
-                
-                this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
-
-                /*
-                if(false && competency_level>=0){
-                    this.menuBtns[menuName].addClass('heurist-competency'+competency_level);    
-                    if(usr_exp_level>competency_level){
-                        this.menuBtns[menuName].hide();    
-                    }
-                }*/
-                
-                let submenu = top_level.find('li');
-                
-                if(submenu.length==0){ //without children
-                    
-                    this._on( this.menuBtns[menuName], {
-                        click : this.menuActionHandler });
-                    this.menuBtns[menuName].addClass('autowidth');
-                    
-                }else{
-                    
-                    $.each(submenu, this._initActionItem);
-
-                    this.menuSubs[menuName] = top_level.hide();
-
-                    this.menuSubs[menuName].addClass('menu-or-popup')
-                    .css('position','absolute')
-                    .appendTo( that.document.find('body') )
-                    //.addClass('ui-menu-divider-heurist')
-                    .menu({
-                        icons: { submenu: "ui-icon-circle-triangle-e" },
-                        select: function(event, ui){ that.menuActionHandler(event, ui) } });
-
-                    /* not tested
-                    if(window.hWin.HAPI4.has_access()){
-                        this.menuSubs[menuName].find('.logged-in-only').show();
-                    }else{
-                        this.menuSubs[menuName].find('.logged-in-only').hide();
-                    }
-
-                    this.menuSubs[menuName].find('li[data-user-experience-level]').each(function(){
-                        if(usr_exp_level > $(this).data('exp-level')){  //data-competency
-                            $(this).hide();    
-                        }else{
-                            $(this).show();    
-                        }
-                    });
-
-                    //localization                
-                    this.menuSubs[menuName].find('li[id^="menu-"]').each(function(){
-                        let menu_id = $(this).attr('id');
-                        let item = $(this).find('a');
-                        const label = window.hWin.HR( menu_id );
-                        if(label!=menu_id) item.text(label);
-                        const hint = window.hWin.HR( menu_id+'-hint');
-                        if(hint!=(menu_id+'-hint')){
-                            item.attr('title',hint);    
-                        }
-                    });
-                    */
-
-                    this.menuSubs[menuName].find('li').css('padding-left',0);
-
-                    this._on( this.menuBtns[menuName], {
-                        mouseenter : function(){_show(this.menuSubs[menuName], this.menuBtns[menuName])},
-                        mouseleave : function(){_hide(this.menuSubs[menuName])}
-                    });
-                    this._on( this.menuSubs[menuName], {
-                        mouseenter : function(){_show(this.menuSubs[menuName], this.menuBtns[menuName])},
-                        mouseleave : function(){_hide(this.menuSubs[menuName])}
-                    });
-                }
-            }//for
+            let link = $(`<a ${menuID} href="#" style="padding:2px 22px 2px ${right_padding} !important;${linkCss}" title="${menuTitle}">${icon_left}<span>${menuLabel}</span>${icon_righ}</a>`);
             
-            callback.call(); //init completed
+            
+            this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
 
+            /*
+            if(false && competency_level>=0){
+                this.menuBtns[menuName].addClass('heurist-competency'+competency_level);    
+                if(usr_exp_level>competency_level){
+                    this.menuBtns[menuName].hide();    
+                }
+            }*/
+            
+            // Initialize submenu if present
+            let submenu = top_level.find('li');
+            
+            if(submenu.length==0){ //without children
+                
+                this._on( this.menuBtns[menuName], {
+                    click : this.menuActionHandler });
+                this.menuBtns[menuName].addClass('autowidth');
+                
+            }else{
+                
+                $.each(submenu, this._initActionItem);
+
+                this.menuSubs[menuName] = top_level.hide();
+
+                this.menuSubs[menuName].addClass('menu-or-popup')
+                .css('position','absolute')
+                .appendTo( that.document.find('body') )
+                //.addClass('ui-menu-divider-heurist')
+                .menu({
+                    icons: { submenu: "ui-icon-circle-triangle-e" },
+                    select: function(event, ui){ that.menuActionHandler(event, ui) } });
+
+                /* not tested
+                if(window.hWin.HAPI4.has_access()){
+                    this.menuSubs[menuName].find('.logged-in-only').show();
+                }else{
+                    this.menuSubs[menuName].find('.logged-in-only').hide();
+                }
+
+                this.menuSubs[menuName].find('li[data-user-experience-level]').each(function(){
+                    if(usr_exp_level > $(this).data('exp-level')){  //data-competency
+                        $(this).hide();    
+                    }else{
+                        $(this).show();    
+                    }
+                });
+
+                //localization                
+                this.menuSubs[menuName].find('li[id^="menu-"]').each(function(){
+                    let menu_id = $(this).attr('id');
+                    let item = $(this).find('a');
+                    const label = window.hWin.HR( menu_id );
+                    if(label!=menu_id) item.text(label);
+                    const hint = window.hWin.HR( menu_id+'-hint');
+                    if(hint!=(menu_id+'-hint')){
+                        item.attr('title',hint);    
+                    }
+                });
+                */
+
+                this.menuSubs[menuName].find('li').css('padding-left',0);
+
+                this._on( this.menuBtns[menuName], {
+                    mouseenter : function(){_show(this.menuSubs[menuName], this.menuBtns[menuName])},
+                    mouseleave : function(){_hide(this.menuSubs[menuName])}
+                });
+                this._on( this.menuSubs[menuName], {
+                    mouseenter : function(){_show(this.menuSubs[menuName], this.menuBtns[menuName])},
+                    mouseleave : function(){_hide(this.menuSubs[menuName])}
+                });
+            }
+        }//for
+            
+        callback.call(); //init completed
     },
 
-    //
-    // callback function
-    //
+    /**
+     * menuActionHandler
+     * 
+     * Callback function triggered when a menu item is clicked or selected.
+     * It retrieves the `data-action` attribute or the element's ID and passes it to the provided action handler.
+     * 
+     * @param {Event} event - The click event object.
+     * @param {Object} ui - The UI object containing the selected item.
+     */
     menuActionHandler: function(event, ui) {
 
         event.preventDefault(); 
@@ -278,7 +320,7 @@ $.widget( "heurist.buttonsMenu", {
         }else{
             ele = $(event.target);
             if(ele.is('span')){
-                ele = ele.parent();
+                ele = ele.parent();// If a span inside a button is clicked
             }
         }
         
@@ -286,6 +328,7 @@ $.widget( "heurist.buttonsMenu", {
         if(!action_id){
             action_id = ele.attr('id');
         }
+        // Call user-defined action handler
         if(this.options.manuActionHandler){
             this.options.manuActionHandler.call(this, action_id);
         }
@@ -293,9 +336,15 @@ $.widget( "heurist.buttonsMenu", {
         return false; 
     },
     
-    //
-    //
-    //
+    /**
+     * _initActionItem
+     * 
+     * Initializes individual submenu items by setting their attributes and event handlers.
+     * It appends an anchor (`<a>`) to each item with the appropriate label, icon, and hint.
+     * 
+     * @param {Number} idx - Index of the submenu item.
+     * @param {HTMLElement} item - The submenu item element.
+     */
     _initActionItem: function(idx, item){
                         
         item = $(item);

@@ -140,7 +140,7 @@ class ActionHandler {
      */
     #handleHrefAction(action, popup_dialog_options) {
 
-         const href = action.href;
+         let href = action.href;
          const target = action?.target;
          
          if (window.hWin.HEURIST4.util.isempty(href) || href == '#') {
@@ -246,6 +246,8 @@ class ActionHandler {
     importUsers(entity_dialog_options) {
         if (!entity_dialog_options) entity_dialog_options = {};
         
+        let that = this;
+        
         let options = $.extend(entity_dialog_options, {
             subtitle: 'Step 1. Select database with users to be imported',
             title: 'Import users', 
@@ -281,26 +283,7 @@ class ActionHandler {
                                     edit_mode: 'none',
                                     keep_visible_on_selection: false,
                                     onselect: function(event, data){
-                                        if (!data || $.isEmptyObject(data.selection)){
-                                            return;
-                                        }
-                                            //add new user to specified group
-                                            let request = {
-                                                a: 'action',
-                                                entity: 'sysUsers',
-                                                roles: data.selection,
-                                                userIDs: selected_users,
-                                                sourceDB: selected_database,
-                                                request_id: window.hWin.HEURIST4.util.random()
-                                            };
-                                            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
-                                                if (response.status == window.hWin.ResponseStatus.OK) {
-                                                    window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
-                                                } else {
-                                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                                }
-                                            });
-                                        
+                                       that.importUsersComplete(data, selected_users, selected_database);
                                     }
                                 });              
                                 window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
@@ -313,6 +296,35 @@ class ActionHandler {
         });
         window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     }    
+    
+    /**
+     * Helpr Method: importUsersComplete
+     * 
+     * 
+     */ 
+    importUsersComplete(data, selected_users, selected_database){
+
+        if (!data || $.isEmptyObject(data.selection)){
+            return;
+        }
+        //add new user to specified group
+        let request = {
+            a: 'action',
+            entity: 'sysUsers',
+            roles: data.selection,
+            userIDs: selected_users,
+            sourceDB: selected_database,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+            if (response.status == window.hWin.ResponseStatus.OK) {
+                window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+            } else {
+                window.hWin.HEURIST4.msg.showMsgErr(response);      
+            }
+        });
+        
+    }
     
     /**
      * Method: executeActionById
