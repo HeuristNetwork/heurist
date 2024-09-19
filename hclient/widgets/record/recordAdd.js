@@ -84,6 +84,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
         if(this.options.is_h6style){
             //add title 
+            
             $dlg.css({top:'36px',bottom:'2px','overflow-y':'auto',position:'absolute',width:'auto', margin: '0px','font-size':'0.9em'}).hide();
 
             //titlebar            
@@ -128,9 +129,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             .insertBefore($dlg);
 
             this._on(this.expandBtn, {click: function(e){ 
-
                 this.doExpand( this.rectype_list.is(':visible') );
-
             }});
 
             //list of rectypes
@@ -212,15 +211,15 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
         }
 
-        let res = this._super();
-        
-        this._onRecordScopeChange();
+        //let res = this._super();
+        this.fillAccessControls()
+        this._$('#sel_record_scope').parent().hide();
         
         if(this.options.is_h6style){
             this.doExpand( this.options.isExpanded );
         }
         
-        return res;
+        return true;
     },
 
     

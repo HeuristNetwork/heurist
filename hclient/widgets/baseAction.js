@@ -143,7 +143,7 @@ $.widget( "heurist.baseAction", {
                                         .insertBefore(fele);
                     $(fele).css('margin-top', '38px');
                 }
-                
+            
                 this._innerTitle.text(this.options.title);
 
                 this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:window.hWin.HR('Close')}) 

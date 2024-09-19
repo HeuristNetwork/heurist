@@ -445,7 +445,7 @@ $.widget( "heurist.controlPanel", {
         
         let request = {};
 
-        if(window.hWin.HAPI4.postparams.?q){
+        if(window.hWin.HAPI4.postparams?.q){
             request = window.hWin.HAPI4.postparams;
         }else{
             let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);

@@ -22,6 +22,7 @@
 */
 
 /* global HSvsEdit */
+
 $.widget( "heurist.slidersMenu", {
 
     // default options
@@ -250,67 +251,25 @@ $.widget( "heurist.slidersMenu", {
             function(e, data) {
                 
                 if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT){
-                    if(data && data.userWorkSetUpdated){
+                    if(data?.userWorkSetUpdated){
                             that._refreshSubsetSign();
                     }
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     
-                    //not need to check realm since this widget the only per instance
-                    if(data && (data.ispreview || data.increment || data.search_realm)) return;
+                    that._onSearchStart(data);
+                    
+                }
+                else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                    // Check whether to block auto switch to explore menu
-                    let move_to_explore = !data.no_menu_switch;
-                    if(Object.hasOwn(data, 'no_menu_switch')){
-                        delete data.no_menu_switch;
-                        delete window.hWin.HEURIST4.current_query_request.no_menu_switch;
-                    }
+                    that._onSearchFinish(data);
                     
-                    that.reset_svs_edit = true;
-                    if(data && !data.reset){
-                        //keep current search for "Save Filter"
-                        that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
-                        that._updateSaveFilterButton(1);
+                }
+                else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE || e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
+                    
+                    that._onPreferencesChange(e, data);
 
-                        if(move_to_explore){
-                            that.switchContainer('explore');
-                            that._mouseout_SectionMenu();
-                            that._collapseMainMenuPanel(true, 1000);
-                        }
-                        
-                    }else if(data.reset){
-                        that.currentSearch = null;
-                        that._updateSaveFilterButton(0);
-                    }
-                    
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
-                    if(data && data.request && (data.request.ispreview || data.request.increment || data.search_realm)) return;
-                    
-                    that.coverAll.hide();
-                    // window.hWin.HAPI4.currentRecordset is the same as data.recordset
-                    if(data.recordset && data.recordset.length()>0){
-                        that._updateSaveFilterButton(2);
-                    }else{
-                        that._updateSaveFilterButton(0);
-                    } 
-                    
-                    that._refreshSubsetSign();                    
-                    
-                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE || e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
-                    if(data && data.origin=='recordAdd'){
-                        that._updateDefaultAddRectype( data.preferences );
-                    }else{
-                        that._updateDefaultAddRectype();
-                    }
-                    if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
-console.log('ON_CREDENTIALS', e);
-                        /* todo
-                        that.populateFavouriteFilters();
-                        // if there is no search parameter
-                        that.showDatabaseOverview();
-                        */
-                    }
-                }else{  //ON_STRUCTURE_CHANGE
+                }
+                else{  //ON_STRUCTURE_CHANGE
                     //refresh list of rectypes after structure edit
                     that._updateDefaultAddRectype();
                     window.hWin.HEURIST4.browseRecordCache = {};
@@ -319,6 +278,67 @@ console.log('ON_CREDENTIALS', e);
         });
         
     }, //end _create
+
+    _onPreferencesChange: function (e, data){                    
+
+        if(data?.origin=='recordAdd'){
+            this._updateDefaultAddRectype( data.preferences );
+        }else{
+            this._updateDefaultAddRectype();
+        }
+        if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
+console.log('ON_CREDENTIALS', e);
+            /* todo
+            this.populateFavouriteFilters();
+            // if there is no search parameter
+            this.showDatabaseOverview();
+            */
+        }        
+    },               
+
+    _onSearchFinish: function (data){                    
+
+        if(data?.request && (data.request.ispreview || data.request.increment || data.search_realm)) return;
+        
+        this.coverAll.hide();
+        // window.hWin.HAPI4.currentRecordset is the same as data.recordset
+        if(data.recordset && data.recordset.length()>0){
+            this._updateSaveFilterButton(2);
+        }else{
+            this._updateSaveFilterButton(0);
+        } 
+        
+        this._refreshSubsetSign();                    
+    },          
+    
+    _onSearchStart: function (data){                    
+        //not need to check realm since this widget the only per instance
+        if(data?.ispreview || data?.increment || data?.search_realm) return;
+
+        // Check whether to block auto switch to explore menu
+        let move_to_explore = !data.no_menu_switch;
+        if(Object.hasOwn(data, 'no_menu_switch')){
+            delete data.no_menu_switch;
+            delete window.hWin.HEURIST4.current_query_request.no_menu_switch;
+        }
+        
+        this.reset_svs_edit = true;
+        if(!data?.reset){
+            //keep current search for "Save Filter"
+            this.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
+            this._updateSaveFilterButton(1);
+
+            if(move_to_explore){
+                this.switchContainer('explore');
+                this._mouseout_SectionMenu();
+                this._collapseMainMenuPanel(true, 1000);
+            }
+            
+        }else if(data?.reset){
+            this.currentSearch = null;
+            this._updateSaveFilterButton(0);
+        }
+    },
     
     //
     //
@@ -375,12 +395,21 @@ console.log('ON_CREDENTIALS', e);
     },
     
     //
-    //  
+    // Change label for add record link 
     //
     _updateDefaultAddRectype: function( preferences ){
 
-        let prefs = (preferences)?preferences:window.hWin.HAPI4.get_prefs('record-add-defaults');
-        if(Array.isArray(prefs) && prefs.length>0){
+        //show/hide bookmarks section in saved filters list
+        let bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
+        let ele_bookmark = this.divMainMenu.find('.menu-explore[data-action-popup="svs_list"][data-id="bookmark"]')
+        if(bm_on) ele_bookmark.show();
+        else ele_bookmark.hide();      
+        
+        let prefs = preferences || window.hWin.HAPI4.get_prefs('record-add-defaults');
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(prefs)){
+            return;   
+        }    
+        
             let rty_ID = prefs[0];
 
             let ele = this.element.find('li[data-action-popup="recordAdd"]');
@@ -424,13 +453,8 @@ console.log('ON_CREDENTIALS', e);
                 }
 
             }
-        }
+        
 
-        //show/hide bookmarks section in saved filters list
-        let bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
-        let ele = this.divMainMenu.find('.menu-explore[data-action-popup="svs_list"][data-id="bookmark"]')
-        if(bm_on) ele.show();
-        else ele.hide();      
     },
     
     _refresh: function(){
@@ -552,8 +576,8 @@ console.log('ON_CREDENTIALS', e);
                 that.divMainMenu.find('#filter_by_groups').hide();
                 that._switch_SvsList( 1 );
                 
-                if (!(that.containers[that._active_section] &&
-                    that.containers[that._active_section].is(':visible'))) 
+                if (!that.containers[that._active_section] ||
+                    !that.containers[that._active_section].is(':visible')) 
                 {
                     that.menues[that._active_section].css({left:that._widthMenu+5});
                 }   
@@ -611,10 +635,8 @@ console.log('ON_CREDENTIALS', e);
     //
     _mousein_ExploreMenu: function(e) {
 
-        if( this._isExplorerMenu_locked() ) return;
+if( this._isExplorerMenu_locked() ) return;
         this._explorer_menu_locked = false;
-        
-       
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
         
@@ -655,8 +677,51 @@ console.log('ON_CREDENTIALS', e);
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
         }
-                   
+                           
+/*
         
+        const target = $(e.target);
+        const ele = target.is('li, div.menu-explore') ? target : target.parents('li');
+        let hasAction = ele?.attr('data-action-popup');    
+        
+        if (target.attr('id') === 'filter_by_groups' || hasAction === 'search_recent' || hasAction === 'databaseOverview') {
+            return;
+        }
+
+        if (ele && ele.parents('.ui-heurist-quicklinks').length > 0) {
+            ele.css('background', 'aliceblue');
+        }
+        
+        if (target.parents('.ui-heurist-quicklinks').length==0) {
+            this._collapseMainMenuPanel(true); // close instantly
+        }
+        
+        if(hasAction){
+            this.show_ExploreMenu(e, hasAction);    
+        } else {
+            let that = this;
+            this._myTimeoutId2 = setTimeout(function(){
+                                        that._closeExploreMenuPopup();
+                                    },  this._delayOnCollapse_ExploreMenu); //600
+        }
+                   
+*/        
+    },
+    
+    // helper
+    _getDelay: function getDelay(action_name, menu_item) {
+        return action_name === 'recordAdd' && menu_item?.attr('data-id') > 0
+            ? this._delayOnShow_AddRecordMenu
+            : this._delayOnShow_ExploreMenu;
+    },
+    
+    // Helper functions
+    _getMenuItem: function (e, action_name) {
+        if (!action_name) {
+            const target = $(e.target);
+            return target.is('li, div.menu-explore') ? target : target.parents('li');
+        }
+        return null;
     },
         
     //
@@ -664,78 +729,152 @@ console.log('ON_CREDENTIALS', e);
     //        
     show_ExploreMenu: function(e, action_name, position) {
         
-        let menu_item;
-        
-        if(!action_name){
-            menu_item = $(e.target).is('li, div.menu-explore')?$(e.target):$(e.target).parents('li');
-            action_name = menu_item.attr('data-action-popup');
-        }
-        
+        let menu_item = this._getMenuItem(e, action_name);
+
+        action_name = menu_item?.attr('data-action-popup') || action_name;
+
         if(this._current_explore_action==action_name) return;
 
-        let that = this,
-            expandRecordAddSetting = false,
-            delay = this._delayOnShow_ExploreMenu; //500
-
-        if(action_name=='recordAddSettings'){
+        const that = this;
+        let expandRecordAddSetting = false;
+        if (action_name === 'recordAddSettings') {
             action_name = 'recordAdd';
-            if(e.type == 'click'){
-                expandRecordAddSetting = true;
-            }
+            expandRecordAddSetting = e.type === 'click';
         }
+        
+        
+        const delay = this._getDelay(action_name, menu_item);
             
-        //menu section has several containers with particular widgets
-        let cont = this.menues_explore_popup.find('#'+action_name);
- 
-        if(action_name == 'recordAdd'){
-            if(!expandRecordAddSetting && menu_item && menu_item.attr('data-id')>0){
-                delay = this._delayOnShow_AddRecordMenu;
-            }
-        }else{
+        if(action_name != 'recordAdd'){
             this.menues_explore_popup
-                    .removeClass('ui-heurist-populate record-addition').addClass('ui-heurist-explore');
+                    .removeClass('ui-heurist-populate record-addition')
+                    .addClass('ui-heurist-explore');
         }      
-      
-        let explore_top = '2px',
-        explore_height = 'auto',
-        explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
-        
-        if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
-                (this._active_section=='explore' || this._active_section=='populate')){
-            explore_left = that._left_position + 211;
-        }else if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==1){
-            explore_left = this._widthMenu+4;
-        }else{
-            explore_left = ((that.divMainMenu.width()>that._left_position)?this._widthMenu:that._left_position)+4; 
-        }
-        
+
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear previous delay before open
         
+        //that.open_ExploreMenu(action_name, position);
         //delay before open explore section menu
-        this._myTimeoutId3 = setTimeout(function(){
+        this._myTimeoutId3 = setTimeout(
+        function(){
 
             that._current_explore_action = action_name;
-
             that.hideDatabaseOverview();
-
+  
+            //menu section has several containers with particular widgets
+            let cont = that.menues_explore_popup.find('#'+action_name);
             if(cont.length==0){
                 //create new one
                 cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(that.menues_explore_popup);
-            }else if( cont.is(':visible')){ // && action_name!='svs_list'
-               
             }
 
             //stop show animation and hide others
             that.menues_explore_popup.find('.explore-widgets').finish().hide();
-            
+          
             if(action_name!='svsAdd'){
-                //attempt for non modal 
                 that.closeSavedSearch();
             }
             if(action_name!='svsAddFaceted'){
                 that.closeFacetedWizard();
             }
+            
+            const { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
+            
+            if(action_name=='svsAdd'){
+                that._closeExploreMenuPopup();
+                that.addSavedSearch( 'saved', false, explore_left, explore_top );
+                return;
+            }
+            else if(action_name=='svsAddFaceted'){
+                that._closeExploreMenuPopup();
+                that.addSavedSearch( 'faceted', false, explore_left );
+                return;
+            }
 
+            that._handleActionInit(action_name, cont, expandRecordAddSetting);
+                
+            that.menues_explore_popup.css({
+                left: explore_left,
+                top: explore_top,
+                height: explore_height,
+                width: expandRecordAddSetting?'500px':explore_width,
+                'z-index': 103,
+                overflow: action_name === 'searchBuilder' ? 'hidden' : 'hidden auto',
+            }).show();
+            
+            if(explore_left+that.menues_explore_popup.outerWidth() > that.element.innerWidth()){
+                    explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
+                    that.menues_explore_popup.css({
+                        left: explore_left
+                    });
+            }
+                        
+            cont.fadeIn(delay+200, function(){
+                let action_name = $(this).attr('id');
+                that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
+                
+                if(action_name=='searchByEntity'){
+                    //trigger refresh  myOnShowEvent
+                    $(this).searchByEntity('refreshOnShow');
+                }
+            });
+
+        }, delay);
+        
+    },    
+    
+    _getMenuPosition: function(menu_item, action_name, position){
+      
+        let explore_left = this.divMainMenu.width() + 4;
+        let explore_top = '2px';
+        let explore_height = 'auto';
+        let explore_width = '300px';
+
+        if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 0 && 
+                (this._active_section === 'explore' || this._active_section === 'populate')) 
+        {
+            explore_left = this._left_position + 211;
+        } else if (menu_item && menu_item.parents('.ui-heurist-quicklinks').length === 1) {
+            explore_left = this._widthMenu + 4;
+        }else{
+            explore_left = ((this.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position)+4; 
+        }
+
+        if (action_name === 'searchBuilder') {
+            
+            explore_top = 0;
+            explore_height = 450;
+            explore_width === '850px';
+
+            if(position){
+                explore_top = position.top;
+                explore_left = position.left;
+            }else{
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                if(widget){
+                    explore_top = widget.position().top + 100;
+                }else{
+                    explore_top = menu_item.offset().top; //if called from menu
+                }
+            }
+            if(this.element.innerHeight()>0 && explore_top+explore_height>this.element.innerHeight()){
+                explore_top = this.element.innerHeight() - explore_height;
+            }
+        }else if(position){
+            explore_top = position.top;
+            explore_left = position.left;
+        }
+
+        
+        if(explore_top<0) explore_top = 0;             
+        
+        return { explore_top, explore_left, explore_height, explore_width };        
+    },
+    
+    _handleActionInit: function(action_name, cont, expandRecordAddSetting){
+        
+            let that = this;
+        
             if(action_name=='searchByEntity'){
 
                 if(!cont.searchByEntity('instance'))
@@ -752,9 +891,6 @@ console.log('ON_CREDENTIALS', e);
                             }
                         }
                     });    
-
-                that.menues_explore_popup.css({bottom:'4px',width:'220px','overflow-y':'auto','overflow-x':'hidden'});
-
             }
             else if(action_name=='searchBuilder'){
                 
@@ -781,81 +917,25 @@ console.log('ON_CREDENTIALS', e);
                     cont.searchBuilder('refreshRectypeMenu');
                 }
                 
-                explore_top = 0;
-                explore_height = 450;
-
-                if(position){
-                    explore_top = position.top;
-                    explore_left = position.left;
-                }else{
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
-                    if(widget){
-                        explore_top = widget.position().top + 100;
-                    }else{
-                        explore_top = menu_item.offset().top; //if called from menu
-                    }
-                }
-                if(that.element.innerHeight()>0 && explore_top+explore_height>that.element.innerHeight()){
-                    explore_top = that.element.innerHeight() - explore_height;
-                }
-                
-                that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
-                
             }
             else if(action_name=='search_filters' || action_name=='search_rules'){ //list of saved filters
 
                 that._init_SvsList(cont, (action_name=='search_rules')?2:1);                
                 
-                if(position){
-                    explore_top = position.top;
-                    explore_left = position.left;
-                }
-                
-                that.menues_explore_popup.css({bottom:'4px',width:'300px','overflow-y':'auto','overflow-x':'hidden'});
-            }
-            else if(action_name=='svsAdd'){
-                that._closeExploreMenuPopup();
-                /*
-                const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
-                if(widget){
-                        explore_top = widget.position().top + 100;
-                        if(explore_top+600>that.element.innerHeight()){
-                            explore_top = '2px';
-                        }
-                }else{
-                        explore_top = 2;
-                }*/
-                
-                if(position){
-                    explore_top = position.top;
-                    explore_left = position.left;
-                }else{
-                    explore_top = 0;
-                }
-                
-                that.addSavedSearch( 'saved', false, explore_left, explore_top );
-                return;
-            }
-            else if(action_name=='svsAddFaceted'){
-                that._closeExploreMenuPopup();
-                that.addSavedSearch( 'faceted', false, explore_left );
-                return;
+                that.menues_explore_popup.css({bottom:'4px'}); //,'overflow-y':'auto','overflow-x':'hidden'});
             }
             else if(action_name=='recordAdd'){
-
+                
                 that.menues_explore_popup
-                    .css({bottom:'4px',width:'300px',overflow:'hidden'})
+                    .css({bottom:'4px'})  //,overflow:'hidden'
                     .removeClass('ui-heurist-explore').addClass('ui-heurist-populate record-addition');
 
-                if(position){
-                    expandRecordAddSetting = true;
-                    explore_top = position.top;
-                    explore_left = position.left;
-                }
+                //let expandRecordAddSetting = false;
                  
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                         is_h6style: true,
+                        innerTitle: true,
                         onClose: function() { 
                             that._closeExploreMenuPopup();
                         },
@@ -872,35 +952,9 @@ console.log('ON_CREDENTIALS', e);
                 }
                
 
-            }//endif
-         
-            if(explore_left+that.menues_explore_popup.outerWidth() > that.element.innerWidth()){
-                explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
-            }
-
-            if(explore_top<0) explore_top = 0;            
-            
-            that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
-            
-            //show menu section
-            that.menues_explore_popup.css({'z-index':103}).show(); 
-            
-            //explore-widgets - show current widget in menu section
-            //cont.show('fade',{},delay+200); 
-            
-            cont.fadeIn(delay+200, function(){
-                let action_name = $(this).attr('id');
-                that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
-                
-                if(action_name=='searchByEntity'){
-                    //trigger refresh  myOnShowEvent
-                    $(this).searchByEntity('refreshOnShow');
-                }
-            });
-
-        }, delay);
+            }//endif        
         
-    },    
+    },
 
     //
     // List user's favourite filters

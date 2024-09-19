@@ -48,13 +48,13 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             this._$('#hr_sel_record_scope').hide();
         }
         
-        that._fillAccessControls();
+        that.fillAccessControls();
         
         
         //window.hWin.HAPI4.addEventListener(this, 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
             function(e, data) { 
-                that._fillAccessControls();
+                that.fillAccessControls();
         });
         
         return this._super();
@@ -72,7 +72,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     //
     //    
-    _fillAccessControls: function(){
+    fillAccessControls: function(){
 
         let that = this;
         let groups = window.hWin.HAPI4.is_admin() ? 'all_users_and_groups' : null;
