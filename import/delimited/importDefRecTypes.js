@@ -1,8 +1,6 @@
 /**
 * Class to import record types from CSV
 *
-* @returns {Object}
-* 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -20,83 +18,87 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class HImportRecordTypes
+ * @augments HImportBase
+ * @classdesc For handling the bulk importing of new record types by CSV
+ *
+ * @function matchColumns - Perform column matching base on imported column headers
+ * @function doPrepare - Prepare data for creating new record types
+ */
+
 class HImportRecordTypes extends HImportBase{
 
+    /**
+     * @param {integer} rtg_ID - default record type group ID, can be changed by the user
+     */
     constructor(rtg_ID = 0){
         let field_selectors = ['#field_name', '#field_desc', '#field_uri'];
         super(rtg_ID, 'rty', field_selectors, !window.hWin.HEURIST4.util.isempty(rtg_ID) && rtg_ID > 0);
     }
 
-    redrawPreviewTable(){
+    /**
+     * Attempt to automatically match column headers to mappable fields
+     *
+     * @param {array} headers - array of column headers, to use for matching
+     */
+    matchColumns(headers = []){
 
-        let rtn = super.redrawPreviewTable();
-
-        const [maxcol, headers] = !rtn ? [0, null] : [rtn[0], rtn[1]];
-
-        if(maxcol <= 0){
+        if(headers.length == 0){
             return;
         }
 
-        //AUTODETECT COLUMN ROLES by name
-        for(let i = 0; i < maxcol; i++){
+        for(const idx in headers){
 
-            const s = headers[i].toLowerCase();
+            const column = headers[idx].toLowerCase();
 
-            if(s.indexOf('name') >= 0 || s.indexOf('rectype') >= 0){
+            if(column.indexOf('name') >= 0 || column.indexOf('rectype') >= 0){
 
-                $('#field_name').val(i);
+                $('#field_name').val(idx);
 
-            }else if(s.indexOf('desc') >= 0){
+            }else if(column.indexOf('desc') >= 0){
 
-                $('#field_desc').val(i);
+                $('#field_desc').val(idx);
 
-            }else if(s.indexOf('uri') >= 0 || s.indexOf('url') >= 0
-                || s.indexOf('reference') >= 0 || s.indexOf('semantic') >= 0){
+            }else if(column.indexOf('uri') >= 0 || column.indexOf('url') >= 0
+                || column.indexOf('reference') >= 0 || column.indexOf('semantic') >= 0){
 
-                $('#field_uri').val(i);
+                $('#field_uri').val(idx);
 
             }
         }
-
-        this.doPrepare();
     }
 
+    /**
+     * Prepare CSV data for creating new record types
+     */
     doPrepare(){
 
-        this._prepareddata = [];
+        this.prepared_data = [];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._parseddata)){
-            $('#preparedInfo').html('<i>No data. Upload and parse</i>');
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.parsed_data)){
+            this.updatePreparedInfo('<i>No data. Upload and parse</i>', 0);
+            return;
+        }
+
+        const field_name = $('#field_name').val();
+        const field_desc = $('#field_desc').val();
+        const field_uri = $('#field_uri').val();
+        if(field_name < 0 || field_desc < 0){
+
+            let missing = field_name < 0 ? ['Name'] : [];
+            field_desc >= 0 || missing.push('Description');
+
+            this.updatePreparedInfo(`<span style="color:red">${missing.join(' and ')} must be defined</span>`, 0);
             return;
         }
 
         let msg = '';
-
-        let field_name = $('#field_name').val();
-        let field_desc = $('#field_desc').val();
-        let field_uri = $('#field_uri').val();
-
-        if(field_name < 0 || field_desc < 0){
-
-            if(field_name < 0){ 
-                msg = 'Name'; 
-            }
-            if(field_desc < 0){ 
-                msg = msg == '' ? 'Description' : `${msg} and Description`; 
-            }
-            msg = `<span style="color:red">${msg} must be defined</span>`;
-
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
-            return;
-        }
-
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -109,41 +111,28 @@ class HImportRecordTypes extends HImportBase{
                 continue;
             }
 
-            let record = {};
+            const name_empty = window.hWin.HEURIST4.util.isempty(row[field_name]);
+            const desc_empty = window.hWin.HEURIST4.util.isempty(row[field_desc]);
+            if(name_empty || desc_empty){
 
-            if(window.hWin.HEURIST4.util.isempty(row[field_name])
-            || window.hWin.HEURIST4.util.isempty(row[field_desc])){
+                let missing = name_empty ? ['name'] : [];
+                !desc_empty || missing.push('description');
 
-                let missing = window.hWin.HEURIST4.util.isempty(row[field_name]) ? 'name' : '';
-                if(window.hWin.HEURIST4.util.isempty(row[field_desc])){
-                    missing = missing == '' ? 'description' : `${missing} and description`;
-                }
-
-                msg += `Row #${count} is missing: ${missing}<br>`;
+                msg += `Row #${count} is missing: ${missing.join(' and ')}<br>`;
 
                 continue;
             }
 
-            record['rty_Name'] = row[field_name].trim();
-            record['rty_Description'] = row[field_desc].trim();
-
-            if(field_uri > -1 && field_uri < row.length){
-                record['rty_SemanticReferenceURL'] = row[field_uri];
-            }
-
-            this._prepareddata.push(record);
+            this.createRecord(row, {
+                rty_Name: field_name,
+                rty_Description: field_desc,
+                rty_SemanticReferenceURL: field_uri
+            });
         }//for
 
-        $('#preparedInfo2').html('');
+        msg = this.prepared_data.length == 0 ? '<span style="color:red">No valid record types to import</span>' : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
 
-        if(this._prepareddata.length==0){
-            msg = '<span style="color:red">No valid record types to import</span>';   
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0  || $('#field_rtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this.prepared_data.length == 0  || $('#field_rtg').val() == 0));
     }
 }

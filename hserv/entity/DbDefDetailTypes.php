@@ -309,6 +309,7 @@ class DbDefDetailTypes extends DbEntityBase
                                 break;
 
                             case 'date':
+                            case 'datetime':
                                 $this->data['fields'][$idx]['dty_Type'] = 'date';
                                 $record['dty_Type'] = 'date';
                                 break;
@@ -340,6 +341,26 @@ class DbDefDetailTypes extends DbEntityBase
                             case 'relmarker':
                                 $this->data['fields'][$idx]['dty_Type'] = 'relmarker';
                                 $record['dty_Type'] = 'relmarker';
+                                break;
+
+                            case 'file':
+                            case 'uploads':
+                                $this->data['fields'][$idx]['dty_Type'] = 'file';
+                                $record['dty_Type'] = 'file';
+                                break;
+
+                            case 'geo':
+                            case 'geospatial':
+                            case 'location':
+                                $this->data['fields'][$idx]['dty_Type'] = 'geo';
+                                $record['dty_Type'] = 'geo';
+                                break;
+
+                            case 'group':
+                            case 'separator':
+                            case 'divider':
+                                $this->data['fields'][$idx]['dty_Type'] = 'separator';
+                                $record['dty_Type'] = 'separator';
                                 break;
 
                             default:

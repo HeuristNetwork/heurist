@@ -1,7 +1,6 @@
 /**
 * Class to import file data from CSV
 *
-* 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -19,6 +18,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class HImportFileData
+ * @augments HImportBase
+ * @classdesc 
+ *  For handling the bulk addition or replacement of already registered file details by CSV.
+ *  For bulk registeration see HImportMedia
+ *
+ * @function matchColumns - Perform column matching base on imported column headers
+ * @function doPrepare - Prepare data for adding/updating file details
+ * @function doPost - Send the prepared data server side to add/update file details
+ */
+
 class HImportFileData extends HImportBase{
 
     constructor(){
@@ -26,86 +37,82 @@ class HImportFileData extends HImportBase{
         super(0, 'ulf', field_selectors, false);
     }
 
-    redrawPreviewTable(){
+    /**
+     * Attempt to automatically match column headers to mappable fields
+     *
+     * @param {array} headers - array of column headers, to use for matching
+     */
+    matchColumns(headers = []){
 
-        let rtn = super.redrawPreviewTable();
-
-        const [maxcol, headers] = !rtn ? [0, null] : [rtn[0], rtn[1]];
-
-        if(maxcol <= 0){
+        if(headers.length == 0){
             return;
         }
 
-        //AUTODETECT COLUMN ROLES by name
-        for(let i = 0; i < maxcol; i++){
+        for(const idx in headers){
 
-            const s = headers[i].toLowerCase();
+            const column = headers[idx].toLowerCase();
 
-            if(s.indexOf('id') >= 0 || s.indexOf('file') >= 0){
+            if(column.indexOf('id') >= 0 || column.indexOf('file') >= 0){
 
-                $('#file_id').val(i);
+                $('#file_id').val(idx);
 
-            }else if(s.indexOf('desc') >= 0){
+            }else if(column.indexOf('desc') >= 0){
 
-                $('#file_desc').val(i);
+                $('#file_desc').val(idx);
 
-            }else if(s.indexOf('cap') >= 0 || s.indexOf('caption') >= 0){
+            }else if(column.indexOf('cap') >= 0 || column.indexOf('caption') >= 0){
 
-                $('#file_cap').val(i);
+                $('#file_cap').val(idx);
 
-            }else if(s.indexOf('rights') >= 0 || s.indexOf('copyright') >= 0){
+            }else if(column.indexOf('rights') >= 0 || column.indexOf('copyright') >= 0){
 
-                $('#file_rights').val(i);
+                $('#file_rights').val(idx);
 
-            }else if(s.indexOf('owner') >= 0 || s.indexOf('copyowner') >= 0){
+            }else if(column.indexOf('owner') >= 0 || column.indexOf('copyowner') >= 0){
 
-                $('#file_owner').val(i);
+                $('#file_owner').val(idx);
 
-            }else if(s.indexOf('vis') >= 0 || s.indexOf('whocanview') >= 0){
+            }else if(column.indexOf('vis') >= 0 || column.indexOf('whocanview') >= 0){
 
-                $('#file_vis').val(i);
+                $('#file_vis').val(idx);
 
             }
         }
-
-        this.doPrepare();
     }
 
+    /**
+     * Prepare CSV data for adding/replacing already registered file details
+     */
     doPrepare(){
 
-        this._prepareddata = [];
+        this.prepared_data = [];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._parseddata)){
-            $('#preparedInfo').html('<i>No data. Upload and parse</i>');
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.parsed_data)){
+            this.updatePreparedInfo('<i>No data. Upload and parse</i>', 0);
             return;
         }
 
-        let file_id = $('#file_id').val();
-        //let file_id_type = $('#file_id_type').val(); always has a value
-        let file_desc = $('#file_desc').val();
-        let file_cap = $('#file_cap').val();
-        let file_rights = $('#file_rights').val();
-        let file_owner = $('#file_owner').val();
-        let file_vis = $('#file_vis').val();
-
-        let msg = '';
+        const file_id = $('#file_id').val();
+        const file_desc = $('#file_desc').val();
+        const file_cap = $('#file_cap').val();
+        const file_rights = $('#file_rights').val();
+        const file_owner = $('#file_owner').val();
+        const file_vis = $('#file_vis').val();
 
         if(file_id < 0 || (file_desc < 0 && file_cap < 0 && file_rights < 0 && file_owner < 0 && file_vis < 0)){
 
-            msg = file_id < 0 ? 'File ID' : 'A file data field';
-            msg = `<span style="color:red">${msg} must be defined</span>`;
+            let missing = file_id < 0 ? 'File ID' : 'A file data field';
 
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+            this.updatePreparedInfo(`<span style="color:red">${missing} must be defined</span>`, 0);
             return;
         }
-
+        
+        let msg = '';
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -117,58 +124,35 @@ class HImportFileData extends HImportBase{
                 continue;
             }
 
-            let record = {};
-
+            const id_empty = window.hWin.HEURIST4.util.isempty(row[file_id]);
             const missing_details = row[file_desc] || row[file_cap] || row[file_rights] || row[file_owner] || row[file_vis];
-            if(window.hWin.HEURIST4.util.isempty(row[file_id])
-            || window.hWin.HEURIST4.util.isempty(missing_details)){
+            if(id_empty || window.hWin.HEURIST4.util.isempty(missing_details)){
 
-                let missing = window.hWin.HEURIST4.util.isempty(row[file_id]) ? ['file ID'] : [];
+                let missing = id_empty ? ['file ID'] : [];
                 !missing_details || missing.push('file data');
 
-                let last = missing.pop();
-                missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
-
-                msg += `Row #${count} is missing: ${missing}<br>`;
+                msg += `Row #${count} is missing: ${missing.join(' and ')}<br>`;
 
                 continue;
             }
 
-            // Records validate in php
-            record['ID'] = row[file_id];
-
-            if(file_desc > -1 && file_desc < row.length){
-                record['ulf_Description'] = row[file_desc];
-            }
-            if(file_cap > -1 && file_cap < row.length){
-                record['ulf_Caption'] = row[file_cap];
-            }
-            if(file_rights > -1 && file_rights < row.length){
-                record['ulf_Copyright'] = row[file_rights];
-            }
-            if(file_owner > -1 && file_owner < row.length){
-                record['ulf_Copyowner'] = row[file_owner];
-            }
-            if(file_vis > -1 && file_vis < row.length){
-                record['ulf_WhoCanView'] = row[file_vis];
-            }
-
-            this._prepareddata.push(record);
+            this.createRecord(row, {
+                ID: file_id,
+                ulf_Description: file_desc,
+                ulf_Caption: file_cap,
+                ulf_Copyright: file_rights,
+                ulf_Copyowner: file_owner,
+                ulf_WhoCanView: file_vis
+            });
         }//for
 
-        $('#preparedInfo2').html('');
-
-        if(this._prepareddata.length==0){
-            msg = '<span style="color:red">No valid file details to import</span>';
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0 || $('#field_dtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        msg = this.prepared_data.length == 0 ? '<span style="color:red">No valid file details to import</span>' : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
     }
 
+    /**
+     * Sends prepared data server side to add/replace registered file details
+     */
     doPost(){
 
         let request = {

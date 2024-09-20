@@ -1,7 +1,6 @@
 /**
 * Class to import record fields from CSV, also assign directly to record types
 *
-* 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -19,105 +18,109 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class HImportDetailTypes
+ * @augments HImportBase
+ * @classdesc For handling the bulk importing of new base fields by CSV
+ *
+ * @function matchColumns - Perform column matching base on imported column headers
+ * @function doPrepare - Prepare data for creating new external media
+ */
+
 class HImportDetailTypes extends HImportBase{
 
+    /**
+     * @param {integer} dtg_ID - default detail type group ID, can be changed by the user
+     */
     constructor(dtg_ID = 0){
         let field_selectors = ['#field_name', '#field_desc', '#field_type', '#field_vocab', '#field_target', '#field_uri'];
         super(dtg_ID, 'dty', field_selectors, !window.hWin.HEURIST4.util.isempty(dtg_ID) && dtg_ID > 0);
     }
 
-    redrawPreviewTable(){
+    /**
+     * Attempt to automatically match column headers to mappable fields
+     *
+     * @param {array} headers - array of column headers, to use for matching
+     */
+    matchColumns(headers = []){
 
-        let rtn = super.redrawPreviewTable();
-
-        const [maxcol, headers] = !rtn ? [0, null] : [rtn[0], rtn[1]];
-
-        if(maxcol <= 0){
+        if(headers.length == 0){
             return;
         }
 
-        //AUTODETECT COLUMN ROLES by name
-        for(let i = 0; i < maxcol; i++){
+        for(const idx in headers){
 
-            const s = headers[i].toLowerCase();
+            const column = headers[idx].toLowerCase();
 
-            if(s.indexOf('name') >= 0 || s.indexOf('label') >= 0
-                || s.indexOf('detailtype')>=0){
+            if(column.indexOf('name') >= 0 || column.indexOf('label') >= 0
+                || column.indexOf('detailtype')>=0){
 
-                $('#field_name').val(i);
+                $('#field_name').val(idx);
 
-            }else if(s.indexOf('desc') >= 0){
+            }else if(column.indexOf('desc') >= 0){
 
-                $('#field_desc').val(i);
+                $('#field_desc').val(idx);
 
-            }else if(s.indexOf('uri')>=0 || s.indexOf('url')>=0
-                || s.indexOf('reference')>=0 || s.indexOf('semantic')>=0 ){
+            }else if(column.indexOf('uri')>=0 || column.indexOf('url')>=0
+                || column.indexOf('reference')>=0 || column.indexOf('semantic')>=0 ){
 
-                $('#field_uri').val(i);
+                $('#field_uri').val(idx);
 
-            }else if(s.indexOf('type')>=0){
+            }else if(column.indexOf('type')>=0){
 
-                $('#field_type').val(i);
+                $('#field_type').val(idx);
 
-            }else if(s.indexOf('vocab')>=0){
+            }else if(column.indexOf('vocab')>=0){
 
-                $('#field_vocab').val(i);
+                $('#field_vocab').val(idx);
 
-            }else if(s.indexOf('target')>=0){
+            }else if(column.indexOf('target')>=0){
 
-                $('#field_target').val(i);
+                $('#field_target').val(idx);
 
             }
         }
-
-        this.doPrepare();
     }
 
+    /**
+     * Prepare CSV data for creating new base fields
+     */
     doPrepare(){
 
-        this._prepareddata = [];
+        this.prepared_data = [];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._parseddata)){
-            $('#preparedInfo').html('<i>No data. Upload and parse</i>');
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.parsed_data)){
+            this.updatePreparedInfo('<i>No data. Upload and parse</i>', 0);
             return;
         }
 
-        let field_name = $('#field_name').val();
-        let field_desc = $('#field_desc').val();
-        let field_type = $('#field_type').val();
-
-        let msg = '';
-
+        const field_name = $('#field_name').val();
+        const field_desc = $('#field_desc').val();
+        const field_type = $('#field_type').val();
         if(field_name < 0 || field_desc < 0 || field_type < 0){
 
             let missing = [];
-
-            field_name < 0 || missing.push('Name'); 
-
-            field_desc < 0 || missing.push('Description'); 
-
+            field_name >= 0 || missing.push('Name');
+            field_desc >= 0 || missing.push('Description');
             field_type < 0 || missing.push('Type');
 
             let last = missing.pop();
             missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
 
-            msg = `<span style="color:red">${missing} must be defined</span>`;
-
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+            this.updatePreparedInfo(`<span style="color:red">${missing} must be defined</span>`, 0);
             return;
         }
+        
+        const field_vocab = $('#field_vocab').val();
+        const field_target = $('#field_target').val();
+        const field_uri = $('#field_uri').val();
 
-        let field_vocab = $('#field_vocab').val();
-        let field_target = $('#field_target').val();
-        let field_uri = $('#field_uri').val();
-
+        let msg = '';
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -130,15 +133,14 @@ class HImportDetailTypes extends HImportBase{
                 continue;
             }
 
-            let record = {};
-            
-            if(window.hWin.HEURIST4.util.isempty(row[field_name])
-            || window.hWin.HEURIST4.util.isempty(row[field_desc])
-            || window.hWin.HEURIST4.util.isempty(row[field_type])){
+            const name_empty = window.hWin.HEURIST4.util.isempty(row[field_name]);
+            const desc_empty = window.hWin.HEURIST4.util.isempty(row[field_desc]);
+            const type_empty = window.hWin.HEURIST4.util.isempty(row[field_type]);
+            if(name_empty || desc_empty || type_empty){
 
-                let missing = window.hWin.HEURIST4.util.isempty(row[field_name]) ? ['name'] : [];
-                !window.hWin.HEURIST4.util.isempty(row[field_desc]) || missing.push('description');
-                !window.hWin.HEURIST4.util.isempty(row[field_type]) || missing.push('type');
+                let missing = name_empty ? ['name'] : [];
+                !desc_empty || missing.push('description');
+                !type_empty || missing.push('type');
 
                 let last = missing.pop();
                 missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
@@ -148,34 +150,19 @@ class HImportDetailTypes extends HImportBase{
                 continue;
             }
 
-            // Records validate in php
-            record['dty_Name'] = row[field_name].trim();
-            record['dty_HelpText'] = row[field_desc].trim();
-            record['dty_Type'] = row[field_type].trim();
-
-            if(field_uri > -1 && field_uri < row.length){
-                record['dty_SemanticReferenceURL'] = row[field_uri];
-            }
-            if(field_vocab > -1 && field_vocab < row.length){
-                record['dty_JsonTermIDTree'] = row[field_vocab];
-            }
-            if(field_target > -1 && field_target < row.length){
-                record['dty_PtrTargetRectypeIDs'] = row[field_target];
-            }
-
-            this._prepareddata.push(record);
+            this.createRecord(row, {
+                dty_Name: field_name,
+                dty_HelpText: field_desc,
+                dty_Type: field_type,
+                dty_SemanticReferenceURL: field_uri,
+                dty_JsonTermIDTree: field_vocab,
+                dty_PtrTargetRectypeIDs: field_target
+            });
         }//for
 
-        $('#preparedInfo2').html('');
+        msg = this.prepared_data.length == 0 ? '<span style="color:red">No valid detail types to import</span>' : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
 
-        if(this._prepareddata.length==0){
-            msg = '<span style="color:red">No valid detail types to import</span>';
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0 || $('#field_dtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this.prepared_data.length == 0 || $('#field_dtg').val() == 0));
     }
 }
