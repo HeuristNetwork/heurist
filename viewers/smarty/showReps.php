@@ -337,7 +337,11 @@ function executeSmartyTemplate($system, $params){
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
 
-    $smarty->assignByRef('heurist', $heuristRec);
+    if(method_exists($smarty, 'assignByRef')){ //version 3
+        $smarty->assignByRef('heurist', $heuristRec); 
+    }else {
+        $smarty->assign('heurist', $heuristRec); //version 5
+    }
 
     $smarty->assign('results', $results);//assign record ids
 
