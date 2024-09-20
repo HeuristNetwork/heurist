@@ -1,14 +1,12 @@
 /**
 * Class to import recUploadedFiles from CSV
-* 
-* @returns {Object}
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     6.0
 */
 
 /*
@@ -19,6 +17,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class HImportMedia
+ * @augments HImportBase
+ * @classdesc For handling the bulk registeration of new external files by CSV
+ *
+ * @function matchColumns - Perform column matching base on imported column headers
+ * @function doPrepare - Prepare data for registering new external media
+ * @function doPost - Sends the prepared data server side to register new external media
+ */
+
 class HImportMedia extends HImportBase{
 
     constructor(){
@@ -26,70 +34,65 @@ class HImportMedia extends HImportBase{
         super(0, 'ulf', field_selectors, false);
     }
 
-    redrawPreviewTable(){
+    /**
+     * Attempt to automatically match column headers to mappable fields
+     *
+     * @param {array} headers - array of column headers, to use for matching
+     */
+    matchColumns(headers = []){
 
-        let rtn = super.redrawPreviewTable();
-
-        const [maxcol, headers] = !rtn ? [0, null] : [rtn[0], rtn[1]];
-
-        if(maxcol <= 0){
+        if(headers.length == 0){
             return;
         }
 
-        //AUTODETECT COLUMN ROLES by name
-        for(let i = 0; i < maxcol; i++){
+        for(const idx in headers){
 
-            const s = headers[i].toLowerCase();
+            const column = headers[idx].toLowerCase();
 
-            if(s.indexOf('url') >= 0 || s.indexOf('path') >= 0 || s.indexOf('uri') >= 0){
+            if(column.indexOf('url') >= 0 || column.indexOf('path') >= 0 || column.indexOf('uri') >= 0){
 
-                $('#field_url').val(i);
+                $('#field_url').val(idx);
 
-            }else if(s.indexOf('desc') >= 0){
+            }else if(column.indexOf('desc') >= 0){
 
-                $('#field_desc').val(i);
+                $('#field_desc').val(idx);
 
             }
         }
-
-        this.doPrepare();
     }
 
+    /**
+     * Prepare CSV data for registering new external files
+     */
     doPrepare(){
 
-        this._prepareddata = [];
+        this.prepared_data = [];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._parseddata)){
-            $('#preparedInfo').html('<i>No data. Upload and parse</i>');
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.parsed_data)){
+            this.updatePreparedInfo('<i>No data. Upload and parse</i>', 0);
             return;
         }
 
         let urls = [];
-        let field_url = $('#field_url').val();
 
-        let field_desc = $('#field_desc').val();
-        let field_desc_sep = ', Download ';
-        let field_desc_concat = $('#field_desc_concat').is(':checked');
+        const field_desc = $('#field_desc').val();
+        const field_desc_sep = ', Download ';
+        const field_desc_concat = $('#field_desc_concat').is(':checked');
 
-        let multival_separator = $('#multival_separator').val();
+        const multival_separator = $('#multival_separator').val();
 
-        let msg = '';
-
+        const field_url = $('#field_url').val();
         if(field_url < 0){
-
-            msg = `<span style="color:red">URL/Path must be defined</span>`;
-
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+            this.updatePreparedInfo(`<span style="color:red">URL/Path must be defined</span>`, );
             return;
         }
-
+        
+        let msg = '';
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -153,23 +156,17 @@ class HImportMedia extends HImportBase{
                 record['ulf_ExternalFileReference'] = _url;
                 record['ulf_Description'] = _desc;
 
-                this._prepareddata.push(record);
+                this.prepared_data.push(record);
             }// _urls
         }//for
 
-        $('#preparedInfo2').html('');
-
-        if(this._prepareddata.length==0){
-            msg = '<span style="color:red">No valid files to import</span>';
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0 || $('#field_dtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        msg = this.prepared_data.length == 0 ? '<span style="color:red">No valid files to import</span>' : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
     }
 
+    /**
+     * Sends prepared data server side to register new external files
+     */
     doPost(){
 
         let request = {
@@ -179,7 +176,7 @@ class HImportMedia extends HImportBase{
         super.doPost(request, (response) => {
 
             if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                this.showError(response);
                 return;
             }
 

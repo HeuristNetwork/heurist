@@ -1,15 +1,12 @@
 /**
 * Class to import terms from CSV
-* 
-* @param _trm_ParentTermID - id of parent term
-* @returns {Object}
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     6.0
 */
 
 /*
@@ -20,6 +17,22 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class HImportTerms
+ * @augments HImportBase
+ * @classdesc For handling the bulk importing of new vocabularies and terms, or new label and description translations, by CSV
+ *
+ * @property {integer} vcg_ID - the default vocabulary group ID to add the new vocabularies to
+ * @property {integer} trm_ParentTermID - the default vpcabulary/parent term to add the new terms to
+ * @property {string} trm_Domain - what types of new vocabularies/terms are being created, [enum|relation]
+ * @property {boolean} is_Translations - whether the import is for only translating existing term's label and description
+ *
+ * @function matchColumns - Perform column matching base on imported column headers
+ * @function doPrepare - Prepare data for creating new vocabularies/terms
+ * @function doPrepareTranslation - Prepare data for creating new label and description translations
+ * @function doPost - Sends the prepared data server side and either; creates the new vocabularies/terms or adds the new translation values
+ */
+
 class HImportTerms extends HImportBase{
 
     _vcg_ID = 0;
@@ -28,6 +41,11 @@ class HImportTerms extends HImportBase{
 
     _is_Translations = false;
 
+    /**
+     * @param {integer} trm_ParentTermID - For importing new terms, the parent term for the to-be created terms
+     * @param {integer} vcg_ID - For importing vocabularies, the vocabulary group for the to-be created vocabularies
+     * @param {boolean} is_Translations - Whether this is to import term label and description translations
+     */
     constructor(trm_ParentTermID, vcg_ID, is_Translations){
 
         let field_selectors = ['#field_term', '#field_code', '#field_desc', '#field_uri', '#field_ref_term', '#field_ref_id', '#field_trn_term', '#field_trn_desc'];
@@ -87,51 +105,51 @@ class HImportTerms extends HImportBase{
         }
     }
 
-    redrawPreviewTable(){
+    /**
+     * Attempt to automatically match column headers to mappable fields
+     *
+     * @param {array} headers - array of column headers, to use for matching
+     */
+    matchColumns(headers = []){
 
-        let rtn = super.redrawPreviewTable();
-
-        const [maxcol, headers] = !rtn ? [0, null] : [rtn[0], rtn[1]];
-
-        if(maxcol <= 0){
+        if(headers.length == 0){
             return;
         }
 
-        //AUTODETECT COLUMN ROLES by name
-        for(let i = 0; i < maxcol; i++){
+        for(const idx in headers){
 
-            const s = headers[i].toLowerCase();
+            const column = headers[idx].toLowerCase();
 
-            if(s.indexOf('term') >= 0 || s.indexOf('label') >= 0){
+            if(column.indexOf('term') >= 0 || column.indexOf('label') >= 0){
 
-                $('#field_term').val(i);
+                $('#field_term').val(idx);
 
-            }else if(s.indexOf('code') >= 0){
+            }else if(column.indexOf('code') >= 0){
 
-                $('#field_code').val(i);
+                $('#field_code').val(idx);
 
-            }else if(s.indexOf('desc') >= 0){
+            }else if(column.indexOf('desc') >= 0){
 
-                $('#field_desc').val(i);
+                $('#field_desc').val(idx);
 
-            }else if(s.indexOf('uri')>=0 || s.indexOf('url')>=0
-                || s.indexOf('reference')>=0 || s.indexOf('semantic')>=0){
+            }else if(column.indexOf('uri')>=0 || column.indexOf('url')>=0
+                || column.indexOf('reference')>=0 || column.indexOf('semantic')>=0){
 
-                $('#field_uri').val(i);
+                $('#field_uri').val(idx);
 
             }
         }
-
-        this.doPrepare();
     }
 
+    /**
+     * Prepare CSV data for creating new terms/vocabularies
+     */
     doPrepare(){
 
-        this._prepareddata = [];
+        this.prepared_data = [];
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._parseddata)){
-            $('#preparedInfo').html('<i>No data. Upload and parse</i>');
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.parsed_data)){
+            this.updatePreparedInfo('<i>No data. Upload and parse</i>', 0);
             return;
         }
 
@@ -140,28 +158,22 @@ class HImportTerms extends HImportBase{
             return;
         }
 
-        let msg = '';
-
-        let field_term = $('#field_term').val();
-
+        const field_term = $('#field_term').val();
         if(field_term < 0){
-
-            msg = `<span style="color:red">Term (Label) must be defined</span>`;
-
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+            this.updatePreparedInfo(`<span style="color:red">Term (Label) must be defined</span>`, 0);
             return;
         }
 
-        let field_code = $('#field_code').val();
-        let field_desc = $('#field_desc').val();
-        let field_uri = $('#field_uri').val();
+        const field_code = $('#field_code').val();
+        const field_desc = $('#field_desc').val();
+        const field_uri = $('#field_uri').val();
 
+        let msg = '';
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -174,69 +186,52 @@ class HImportTerms extends HImportBase{
                 continue;
             }
 
-            let record = {};
-
             if(window.hWin.HEURIST4.util.isempty(row[field_term])){
 
                 msg += `Row #${count} is missing: Term label<br>`;
                 continue;
             }
 
-            record['trm_Label'] = row[field_term].trim();
+            let record = {};
             record['trm_Domain'] = this._trm_Domain;
 
             if(this._trm_ParentTermID > 0){ record['trm_ParentTermID'] = this._trm_ParentTermID; }
             if(this._vcg_ID > 0){ record['trm_VocabularyGroupID'] = this._vcg_ID; }
 
-            if(field_desc > -1 && field_desc < row.length){
-                record['trm_Description'] = row[field_desc];
-            }
-            if(field_code > -1 && field_code < row.length){
-                record['trm_Code'] = row[field_code];
-            }
-            if(field_uri > -1 && field_uri < row.length){
-                record['trm_SemanticReferenceURL'] = row[field_uri];
-            }
+            this.createRecord(row, {
+                trm_Label: field_term,
+                trm_Description: field_desc,
+                trm_Code: field_code,
+                trm_SemanticReferenceURL: field_uri
+            }, record);
 
-            this._prepareddata.push(record);
         }//for
 
-        $('#preparedInfo2').html('');
-
-        if(this._prepareddata.length==0){
-            msg = `<span style="color:red">No valid ${this._vcg_ID > 0 ? 'vocabulary' : 'terms'} to import</span>`;   
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0  || $('#field_rtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        msg = this.prepared_data.length == 0 
+                ? `<span style="color:red">No valid ${this._vcg_ID > 0 ? 'vocabulary' : 'terms'} to import</span>` : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
     }
 
+    /**
+     * Prepare CSV data for creating new label and description translations
+     */
     doPrepareTranslation(){
 
-        let msg = '';
-
-        let field_ref_term = $('#field_ref_term').val();
-
+        const field_ref_term = $('#field_ref_term').val();
         if(field_ref_term < 0){
-
-            msg = `<span style="color:red">Reference Term (Label) must be defined</span>`;
-
-            $('#preparedInfo').html(msg);
-            window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), true);
+            this.updatePreparedInfo(`<span style="color:red">Reference Term (Label) must be defined</span>`, 0);
             return;
         }
 
-        let field_trn_term = $('#field_trn_term').val();
-        let field_trn_desc = $('#field_trn_desc').val();
+        const field_trn_term = $('#field_trn_term').val();
+        const field_trn_desc = $('#field_trn_desc').val();
 
+        let msg = '';
         const has_header = $('#csv_header').is(':checked');
         let found_header = false;
         let count = 0;
 
-        for(const row of this._parseddata){
+        for(const row of this.parsed_data){
 
             count ++;
 
@@ -249,45 +244,29 @@ class HImportTerms extends HImportBase{
                 continue;
             }
 
-            let record = {};
-
             if(window.hWin.HEURIST4.util.isempty(row[field_ref_term])){
 
                 msg += `Row #${count} is missing: Term label<br>`;
                 continue;
             }
 
-            record['ref_id'] = row[field_ref_term].trim();
-
-            if(field_trn_term > -1 && field_trn_term < row.length){
-                record['trm_Label'] = row[field_trn_term];
-            }
-            if(field_trn_desc > -1 && field_trn_desc < row.length){
-                record['trm_Description'] = row[field_trn_desc];
-            }
-
-            this._prepareddata.push(record);
+            this.createRecord(row, {
+                ref_id: field_ref_term,
+                trm_Label: field_trn_term,
+                trm_Description: field_trn_desc
+            });
         }//for
 
-        $('#preparedInfo2').html('');
-
-        if(this._prepareddata.length==0){
-            msg = `<span style="color:red">No valid translations to import</span>`;   
-        }else{
-            $('#preparedInfo2').html(`n = ${this._prepareddata.length}`);
-        }
-
-        window.hWin.HEURIST4.util.setDisabled($('#btnImportData'), (this._prepareddata.length == 0  || $('#field_rtg').val() == 0));
-
-        $('#preparedInfo').html(msg);
+        msg = this.prepared_data.length == 0 ? `<span style="color:red">No valid translations to import</span>` : msg;
+        this.updatePreparedInfo(msg, this.prepared_data.length);
     }
 
     /**
-     * Imports new terms/translations
+     * Sends prepared data server side to create the new terms/vocabularies/translations
      */
     doPost(){
 
-        if(this._prepareddata.length < 1){
+        if(this.prepared_data.length < 1){
             return;
         }
 
@@ -300,10 +279,10 @@ class HImportTerms extends HImportBase{
         };
 
         if(this._is_Translations){
-            request['set_translations'] = JSON.stringify(this._prepareddata);
+            request['set_translations'] = JSON.stringify(this.prepared_data);
             request['vcb_ID'] = this._trm_ParentTermID;
         }else{
-            request['fields'] = JSON.stringify(this._prepareddata);
+            request['fields'] = JSON.stringify(this.prepared_data);
             request['term_separator'] = $('#term_separator').val();
         }
 
@@ -311,7 +290,7 @@ class HImportTerms extends HImportBase{
 
             if(response.status != window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                this.showError(response);
                 return;
             }
 
