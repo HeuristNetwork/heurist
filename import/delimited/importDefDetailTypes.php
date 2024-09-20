@@ -95,7 +95,7 @@
     				<p><b>Step 1</b></p>
     				<p>
     					Paste content in area below (one name, description and type per line, may optionally be followed by semantic URI), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br><br>
-    					The type must be one of the following: Text, Memo, Date, Numeric, Terms, Record pointer and Relationship marker<br>
+    					The type must be one of the following: Text, Memo, Date, Numeric, Terms, File, Geospatial, Separator, Record pointer and Relationship marker<br>
     					The Target column may contain a comma-separated list of record type IDs for record pointer and relationship marker fields or may be left blank<br>
     					The Vocabulary column may contain a vocabulary ID or may be le blank for both term and relaonship marker fields, in which case a new vocabulary is created with the name of the field
     				</p>
