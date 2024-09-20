@@ -154,7 +154,7 @@ $tot_size = 0;
 
 foreach ($databases as $idx=>$db_name){
 
-    $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
+    $dir_root = HEURIST_FILESTORE_ROOT.basename($db_name).'/';
 
     $db_name = htmlspecialchars($db_name);
 

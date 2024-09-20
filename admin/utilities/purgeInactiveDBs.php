@@ -452,7 +452,7 @@ if($need_email){
 
             //dump and archive
             // Do an SQL dump for import tables
-            $backup_imports2 = $backup_imports.$db_name;
+            $backup_imports2 = $backup_imports.basename($db_name);
             if (!folderCreate($backup_imports2, true)) {
                 exit("$db_name Failed to create backup folder $backup_imports2 \n");
             }

@@ -155,6 +155,8 @@ function doReport($system, $update_mode, $format, $row){
 
 		if ($ext == null) {
             //add extension
+            $format = basename($format);
+            
 			$filename2 = $outputfile.'.'.$format;
 			if(file_exists($filename2)){
 				$outputfile = $filename2;

@@ -149,7 +149,7 @@ foreach ($arg_database as $idx=>$db_name){
 
     echo "processing ".$db_name." ";//.'  in '.$folder
 
-
+    $db_name = basename($db_name);
     $folder = $backup_root.$db_name.'/';
     $backup_zip = $backup_root.$db_name.'.zip';
 

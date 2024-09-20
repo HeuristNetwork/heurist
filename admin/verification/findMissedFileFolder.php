@@ -67,7 +67,7 @@ if(!@$_REQUEST['mail']){
 
     foreach ($databases as $idx=>$db_name){
 
-        $db_name = htmlspecialchars($db_name);
+        $db_name = basename($db_name);
 
         $dir = $root.$db_name.'/';
 
