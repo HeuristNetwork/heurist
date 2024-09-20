@@ -530,7 +530,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         if ($mimeType) {
             header('Content-type: ' .$mimeType);
         }else{
-            header('Content-type: binary/download');
+            header('Content-type: application/octet-stream'); //was binary/download
         }
         if($mimeType!="video/mp4"){
             header(HEADER_CORS_POLICY);
@@ -552,7 +552,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header(CONTENT_LENGTH . ($range_max>0?($range_max-$range_min+1):filesize($filename)));
+        header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename))); //CONTENT_LENGTH
         @ob_clean();
         ob_end_flush();//flush();
 

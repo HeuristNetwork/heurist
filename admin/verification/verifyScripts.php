@@ -1031,6 +1031,8 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
     foreach ($databases as $idx=>$db_name){
 
         $cnt = 0;
+        
+        $db_name = basename($db_name);
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
         if(file_exists($old_path)){

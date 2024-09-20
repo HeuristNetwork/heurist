@@ -406,8 +406,12 @@ function downloadFileReferences($system, $ids){
     fclose($fd);
 
     if($len>0){
-        header(CONTENT_LENGTH . $len);
+        header('Content-Length: ' . $len); //CONTENT_LENGTH
     }
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'');
     exit($output);
 }
 ?>

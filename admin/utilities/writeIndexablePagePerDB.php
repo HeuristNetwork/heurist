@@ -371,6 +371,7 @@ foreach ($databases as $idx=>$db_name){
     $values[3] = 'None';
 
     $cms_home_id = mysql__select_value($mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 99 AND rty_IDInOriginatingDB = 51');
+    $db_name = basename($db_name);
     $prime_url_base = $base_url.$db_name.'/web/';
     $alt_url_base = $base_url.'?db='.$db_name.'&website&id=';
 

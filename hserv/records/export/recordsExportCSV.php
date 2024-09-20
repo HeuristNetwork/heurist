@@ -1230,10 +1230,13 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                     $csv_filename = $csv_filename.'_t'.$rty_ID.'_'.$rty_Name;
                 }
             }
-            $csv_filename = basename(strpos($csv_filename, '.') !== false
+            $csv_filename = strpos($csv_filename, '.') !== false
                                     ? $csv_filename
-                                    : $csv_filename.'.csv');//'_'.date("YmdHis").
+                                    : $csv_filename.'.csv';//'_'.date("YmdHis").
 
+                                    
+            $csv_filename = basename($csv_filename);
+                                    
             $fd = $streams[$rty_ID];
 
             if($fd==null){

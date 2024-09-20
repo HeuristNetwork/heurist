@@ -393,7 +393,7 @@ class DbUtils {
                 $directory = HEURIST_FILESTORE_ROOT.$database_name;
 
                 // Define dump file name
-                $database_dumpfile = $directory.'/'.$database_name_full.'_'.time().'.sql';
+                $database_dumpfile = $directory.'/'.basename($database_name_full).'_'.time().'.sql';
             }
 
             if($dump_options==null){

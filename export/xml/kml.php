@@ -67,14 +67,16 @@ if(!$islist){
     if(array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")
     {
         //kml is stored in uploaded file
-        $kml_file = mysql__select_value($mysqli,
-            'select concat(ulf_FilePath,ulf_FileName) as fullPath from recDetails '
+        $kml_file = mysql__select_row($mysqli,
+            'select ulf_FilePath,ulf_FileName from recDetails '
             .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = '
             . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = "
             .$dtFile." OR dtl_DetailTypeID = ".$dtKMLfile.")");
 
-        if ($kml_file!=null) {
-            $kml_file = resolveFilePath($kml_file);
+        if ($kml_file[0] && $kml_file[1]) {
+            $path =  resolveFilePath($kml_file[0]);
+            $kml_file = basename($kml_file[1]);
+            $kml_file = $path.$kml_file;
         }else{
 
             $kml_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "kml");

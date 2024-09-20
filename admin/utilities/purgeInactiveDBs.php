@@ -516,7 +516,7 @@ if($need_email){
             if($cnt_dumped>0)
             {   //archive import tables
                 $archOK = true;
-                $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
+                $destination = $backup_imports.basename($db_name).' '.$datetime1->format('Y-m-d').'.tar';
                 $archOK = UArchive::createBz2($backup_imports2, null, $destination, false);
 
                 if($archOK){
@@ -548,7 +548,7 @@ if($need_email){
                     $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
 
-                $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';//.$db_name.' '
+                $dumpfile = $backup_sysarch.basename($db_name).'_'.$datetime1->format('Y-m-d').'.sql';//.$db_name.' '
                     $opts = array('include-tables' => array('sysArchive'),
                                   'default-character-set'=>'utf8',
                                   'single-transaction'=>true,
