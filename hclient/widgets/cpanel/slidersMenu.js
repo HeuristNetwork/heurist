@@ -1205,7 +1205,7 @@ console.log('ON_CREDENTIALS', e);
     //
     //
     _onCloseSearchFaceted: function(){
-        if(this.search_faceted !=null && this.search_faceted.is(':visible')){
+        if(window.hWin.HEURIST4.ui.isVisible( this.search_faceted )){
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
                 {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
             this.search_faceted.hide();
@@ -1930,7 +1930,6 @@ console.log('ON_CREDENTIALS', e);
 
         function changeStyles(){
 
-            let title = $('h3#title');
             let owner = $('span#owner');
             let rights = $('span#rights');
             let desc = $('div#description');
@@ -2085,7 +2084,7 @@ console.log('ON_CREDENTIALS', e);
             .appendTo(this.containers['explore']);
         
         // Load Content
-        // @todo - implement as widgets/admin/databaseOverview (on baseAction)
+        // @later implement as widgets/admin/databaseOverview (on baseAction)
         $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/database_overview.html',
             function(){
 
@@ -2297,7 +2296,7 @@ console.log('ON_CREDENTIALS', e);
 							.css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
 
                     // Load Welcome Content
-                    let $container = $('<div class="gs-box">')
+                    $('<div class="gs-box">')
 						.css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
 						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/welcome.html', function(){
 							
