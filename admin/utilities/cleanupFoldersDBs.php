@@ -217,7 +217,7 @@ foreach ($databases as $idx=>$db_name){
                         continue;
                     }catch(Exception $e){
                         $err = $e->getMessage();
-                        $report .= "{$tabs}{$err}{$eol}";
+                        $report .= "{$tabs}{htmlentities($err)}{$eol}";
 
                         continue;
                     }
@@ -230,7 +230,7 @@ foreach ($databases as $idx=>$db_name){
                         $report .= "{$tabs}Failed to create temporary log file{$eol}";
                         continue;
                     }catch(Exception $e){
-                        $err = $e->getMessage();
+                        $err = htmlentities($e->getMessage());
                         $report .= "{$tabs}{$err}{$eol}";
 
                         continue;
@@ -274,7 +274,7 @@ foreach ($databases as $idx=>$db_name){
 
                     if($remove_lines > 0 && filesize($log_tmp) > 0){ // replace existing file with temp
                         fileCopy($log_tmp, $log_file);
-                        $report .= "{$tabs}Removed {$remove_lines} interactions from the log file{$eol}";
+                        $report .= "{$tabs}Removed {intval($remove_lines)} interactions from the log file{$eol}";
                     }
 
                     fileDelete($log_tmp);// delete temp file

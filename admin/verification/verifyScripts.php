@@ -1413,6 +1413,7 @@ function __findRDF(){
             $dtl_cnt = intval(mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
                 .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""'));
 
+            $db_name = htmlentities($db_name);    
             echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";//$s1/$s2
         }
     }

@@ -1080,15 +1080,7 @@
     }
 
 	// Return response
-    //header(CTYPE_JSON);
-    header('Content-type: application/json;charset=UTF-8');
-    header('Content-Length: '. strlen($remote_data));
-    header('X-Content-Type-Options: nosniff');
-    //header('X-Frame-Options: SAMEORIGIN'); replaced wiht frame-ancestors 'self'
-    header('X-XSS-Protection: 1; mode=block');
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
-
-    echo $remote_data;
+    dataOutput($remote_data);
 
 //------------------------------------------------------------------------------
 

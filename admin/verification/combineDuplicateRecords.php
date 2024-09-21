@@ -716,7 +716,7 @@ function detail_str($rd_type, $rd_val)
     elseif (in_array($rd_type, array_keys($enum_bdts)) && is_integer($rd_val) ) {
             $res = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID ='.$rd_val);
             if($res){
-                return $res;
+                return htmlspecialchars($res);
             }
     }
 

@@ -38,6 +38,8 @@ $databases = mysql__getdatabases4($mysqli);
 // Generic record fields
 $rec_meta = array('title','typeid','typename','added','modified','addedby','url','notes','owner','access','tag');
 
+$databases = array_map('htmlentities', $databases);
+
 $results = array_fill_keys(array_values($databases), array());
 
 $field_in_rst = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID = dtyID AND rst_RecTypeID = rtyID';

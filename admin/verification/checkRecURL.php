@@ -384,21 +384,21 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
         while ($row = $res->fetch_row()) {
 
             $rec_id = $row[0];
-            $url = $row[1];
+            $rec_url = $row[1];
             $dty_id = $row[2];
             $data = null;
 
             if($list_only){
                 $rec_url = htmlentities($rec_url);
                 print intval($rec_id).' : '.intval($dty_id)
-                ." <a href=\"$url\" target=\"_blank\" rel=\"noopener\">$url</a><br>";
+                ." <a href=\"$rec_url\" target=\"_blank\" rel=\"noopener\">$rec_url</a><br>";
                 continue;
             }
-            if(strpos(strtolower($url),$heurist_server_url)===0){
+            if(strpos(strtolower($rec_url),$heurist_server_url)===0){
                 continue; //skip same server
             }
 
-            $data = loadRemoteURLContentWithRange($url, CURL_RANGE, true, 5);
+            $data = loadRemoteURLContentWithRange($rec_url, CURL_RANGE, true, 5);
 
             if($data){
                 $passed_cnt++;
@@ -421,7 +421,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                 }
 
                 $broken_cnt ++;
-                $broken_field_urls[$rec_id][$dty_id] .= DIV_S.$url.' '.$glb_curl_error.DIV_E;
+                $broken_field_urls[$rec_id][$dty_id] .= DIV_S.$rec_url.' '.$glb_curl_error.DIV_E;
 
                 if($return_output){
                     if(!array_key_exists($rec_id, $results[2])){
@@ -430,7 +430,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
                     if(!array_key_exists($dty_id, $results[2][$rec_id])){
                         $results[2][$rec_id][$dty_id] = array();
                     }
-                    $results[2][$rec_id][$dty_id][] = $url;
+                    $results[2][$rec_id][$dty_id][] = $rec_url;
                 }
             }
         }

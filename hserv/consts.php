@@ -561,4 +561,34 @@ function isPositiveInt($val){
 function isLocalHost(){
     return $_SERVER["SERVER_NAME"]=='localhost' || $_SERVER["SERVER_NAME"]=='127.0.0.1';
 }
+
+
+function dataOutput($data, $filename=null, $mimeType=null)
+{
+    $len = strlen(data);
+    
+    if($mimeType==null){
+        $mimeType = 'application/json';
+    }
+
+    if($mimeType=='gzip'){
+        header('Content-type: gzip');
+    }else{
+        header('Content-type: '.$mimeType.';charset=UTF-8');    
+    }
+    
+    
+    if($filename){
+        header('Content-Disposition: attachment; filename="' . $filename . '";');
+        header("Pragma: no-cache;");
+        header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+    }
+    
+    if($len>0){header('Content-Length: '. $len);}
+    header('X-Content-Type-Options: nosniff');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
+    echo $data;
+}
+
 ?>

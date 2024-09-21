@@ -143,8 +143,7 @@ function doReport($system, $update_mode, $format, $row){
         $format = 'html';//default
     }
 
-    $filename = $row['rps_FileName'] ?? $row['rps_Template'];
-    $filename = basename($filename);
+    $filename = basename($row['rps_FileName'] ?? $row['rps_Template']);
     $filename = USanitize::sanitizeFileName($filename);
 
 	$outputfile = $dir.$filename;

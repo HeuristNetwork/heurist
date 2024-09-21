@@ -743,18 +743,12 @@ public static function exportList($params){
         return false;
     }
 
-    $filename = HEURIST_DBNAME . '_Duplicate_Records.tsv';
     $fd = fopen('php://output', 'w');
     if(!$fd){
         header(CTYPE_HTML);
         echo 'Unable to open temporary output for writing TSV.<br>Please contact the Heurist team.';
         return false;
     }
-
-    header('Content-Type: text/tab-separated-values');
-    header('Content-Disposition: attachment; filename="' . $filename . '";');
-    header("Pragma: no-cache;");
-    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add headers
     fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group', 'Instant merge (replace record_to_keep with record ID to keep)'], "\t");
@@ -787,13 +781,11 @@ public static function exportList($params){
     // Get content, length and close resource
     rewind($fd);
     $output = stream_get_contents($fd);
-    $length = strlen($output);
     fclose($fd);
 
-    if($length > 0){
-        header(CONTENT_LENGTH . $length);
-    }
-    exit($output);
+    $filename = HEURIST_DBNAME . '_Duplicate_Records.tsv';
+    
+    dataOutput($output, $filename, 'text/tab-separated-values');
 }
 
 } //end class

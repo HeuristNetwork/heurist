@@ -397,22 +397,9 @@ function downloadFileReferences($system, $ids){
 
     rewind($fd);
     $output = stream_get_contents($fd);
-    $len = strlen($output);
     fclose($fd);
 
-
     $filename = HEURIST_DBNAME . '_File_References.csv';
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="' . $filename . '";');
-    header("Pragma: no-cache;");
-    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
-    if($len>0){
-        header('Content-Length: ' . $len); //CONTENT_LENGTH
-    }
-    header('X-Content-Type-Options: nosniff');
-    //header('X-Frame-Options: SAMEORIGIN');  replaced wiht frame-ancestors 'self'
-    header('X-XSS-Protection: 1; mode=block');
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
-    echo $output;
+    dataOutput($output, $filename, 'text/csv');
 }
 ?>

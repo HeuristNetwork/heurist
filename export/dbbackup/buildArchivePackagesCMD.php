@@ -249,6 +249,7 @@ foreach ($arg_database as $idx=>$db_name){
 
     if(!$res){
         if(file_exists($progress_flag)) {unlink($progress_flag);}
+        $destination = htmlentities($destination);
         exit("Database: $db_name_esc Failed to create zip file at $destination \n");
     }
 

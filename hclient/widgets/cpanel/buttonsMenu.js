@@ -49,7 +49,7 @@ $.widget( "heurist.buttonsMenu", {
         
         //if content is not defined here, it takes this.element.html()
         menuContent: null, // HTML snippet with ul/li menu items
-        menuContentFile: null, // HTML snippet file with menu
+        //DISABLED menuContentFile: null, // HTML snippet file with menu
         manuActionHandler: null // Callback for handling menu actions
     },
     
@@ -159,6 +159,7 @@ $.widget( "heurist.buttonsMenu", {
         };
 
         // If menuContentFile is specified, load the menu from an external file
+        /* DISABLED
         if(this.options.menuContentFile){
             $.get(window.hWin.HAPI4.baseURL+this.options.menuContentFile,
                 function(response){
@@ -166,7 +167,7 @@ $.widget( "heurist.buttonsMenu", {
                     that._initMenu(callback); // Reinitialize after loading content
             });
             return;
-        }
+        }*/
 
         let top_levels;
         

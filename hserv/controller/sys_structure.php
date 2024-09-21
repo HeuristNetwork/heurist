@@ -45,6 +45,8 @@
             unset($req_params['remote']);
             $req_params['db'] = $match[1];
        }else{
+                $mimeType = null;
+           
                 if(@$match[1]==null || $match[1]==''){
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
                      $data = json_encode($data);
@@ -73,16 +75,12 @@
                         $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
                         $data = json_encode($data);
                     }else{
-                        header('Content-Encoding: gzip');
+                        $mimeType = 'gzip';
                     }
                 }
 
-                header(CTYPE_JSON);
-                echo $data;
+                dataOutput(data, null, $mimeType);
                 exit;
-                //$response = json_decode($data, true);
-                //$is_remote = true;
-
        }
     }
 

@@ -262,9 +262,9 @@ $requestUri:
                     $ids = prepareIds(@$requestUri[3]);
 
                     if(!empty($ids)){
-                        $redirect .= ('ids:'.implode(',',$ids); //$requestUri[3]);
+                        $redirect .= ('ids:'.implode(',',$ids)); //$requestUri[3]);
                     }else{
-                        $redirect .= $requestUri[3];
+                        $redirect .= rawurlencode($requestUri[3]);
                     }
 
                     if(@$requestUri[4]!=null && ctype_digit($requestUri[4]) && $requestUri[4]>=0){
