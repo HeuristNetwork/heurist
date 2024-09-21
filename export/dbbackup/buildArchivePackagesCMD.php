@@ -147,7 +147,7 @@ set_time_limit(0);//no limit
 
 foreach ($arg_database as $idx=>$db_name){
 
-    echo "processing ".$db_name." ";//.'  in '.$folder
+    echo "processing ".htmlentities($db_name)." ";//.'  in '.$folder
 
     $db_name = basename($db_name);
     $folder = $backup_root.$db_name.'/';
@@ -155,11 +155,15 @@ foreach ($arg_database as $idx=>$db_name){
 
     $database_folder = $upload_root.$db_name.'/';
 
+    $folder_esc =  htmlentities($folder);
+    $db_name_esc = htmlentities($db_name);
+    
     if(file_exists($folder)){
         $res = folderDelete2($folder, true);//remove previous backup
         if(!$res){
+            
             if(file_exists($progress_flag)) {unlink($progress_flag);}
-            exit("Cannot clear existing backup folder $folder \n");
+            exit("Cannot clear existing backup folder $folder_esc \n");
         }
     }
 
@@ -171,7 +175,7 @@ foreach ($arg_database as $idx=>$db_name){
 
     if (!folderCreate($folder, true)) {
         if(file_exists($progress_flag)) {unlink($progress_flag);}
-        exit("Failed to create folder $folder in which to create the backup \n");
+        exit("Failed to create folder $folder_esc in which to create the backup \n");
     }
 
     echo "files.. ";
@@ -222,7 +226,7 @@ foreach ($arg_database as $idx=>$db_name){
         $err = $system->getError();
         error_log('buildArchivePackagesCMD Error: '.@$err['message']);
 
-        exit("Sorry, unable to generate MySQL database dump for $db_name.".$err['message']."\n");
+        exit("Sorry, unable to generate MySQL database dump for $db_name_esc. ".$err['message']."\n");
     }
 /*
     try{
@@ -245,10 +249,10 @@ foreach ($arg_database as $idx=>$db_name){
 
     if(!$res){
         if(file_exists($progress_flag)) {unlink($progress_flag);}
-        exit("Database: $db_name Failed to create zip file at $destination \n");
+        exit("Database: $db_name_esc Failed to create zip file at $destination \n");
     }
 
-    echo "   ".$db_name." OK \n";//.'  in '.$folder
+    echo "   $db_name_esc OK \n";//.'  in '.$folder
 }//for
 
 if(file_exists($progress_flag)) {unlink($progress_flag);}

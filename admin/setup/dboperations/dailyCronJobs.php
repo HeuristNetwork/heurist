@@ -336,7 +336,7 @@ echo $eol.$tabs0.'finished'.$eol;
 
 if($mysql_gone_away_error){
     $text = ' dailyCronJobs failed. MySQL server has gone away';
-echo $text.' Db '.$last_processed_database.$eol;
+echo $text.' Db '.htmlentities($last_processed_database).$eol;
     sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.$text,
                 $text.' It stopped on '.$last_processed_database);
 }

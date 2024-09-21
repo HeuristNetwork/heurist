@@ -580,7 +580,7 @@ if($need_email){
                                     .$err['message']."\n");
                         if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
-                        $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
+                        $destination = $backup_sysarch.basename($db_name).'_'.$datetime1->format('Y-m-d');
 
                         if( extension_loaded('bz2') ){
 

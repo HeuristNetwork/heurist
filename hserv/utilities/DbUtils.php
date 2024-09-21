@@ -390,7 +390,7 @@ class DbUtils {
 
             // dump will be created in database upload folder
             if($database_dumpfile==null){
-                $directory = HEURIST_FILESTORE_ROOT.$database_name;
+                $directory = HEURIST_FILESTORE_ROOT.basename($database_name);
 
                 // Define dump file name
                 $database_dumpfile = $directory.'/'.basename($database_name_full).'_'.time().'.sql';
@@ -536,7 +536,7 @@ class DbUtils {
                 $size = filesize($database_dumpfile) / pow(1024,2);
                 echo "<br>Successfully dumped "
                     .htmlspecialchars($database_name)." to ".htmlspecialchars($database_dumpfile);
-                echo "<br>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
+                echo "<br>Size of SQL dump: ".htmlspecialchars(sprintf("%.2f", $size))." MB";
             }
 
             return $database_dumpfile;

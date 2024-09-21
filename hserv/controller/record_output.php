@@ -354,11 +354,6 @@ function downloadFileReferences($system, $ids){
     }
 
     // return setup
-    $filename = HEURIST_DBNAME . '_File_References.csv';
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="' . $filename . '";');
-    header("Pragma: no-cache;");
-    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
     fputcsv($fd, array("Uploaded_File_ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
@@ -405,6 +400,12 @@ function downloadFileReferences($system, $ids){
     $len = strlen($output);
     fclose($fd);
 
+
+    $filename = HEURIST_DBNAME . '_File_References.csv';
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    header("Pragma: no-cache;");
+    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
     if($len>0){
         header('Content-Length: ' . $len); //CONTENT_LENGTH
     }
@@ -412,6 +413,6 @@ function downloadFileReferences($system, $ids){
     header('X-Frame-Options: SAMEORIGIN');
     header('X-XSS-Protection: 1; mode=block');
     header('Content-Security-Policy: default-src \'self\'; script-src \'self\'');
-    exit($output);
+    echo $output;
 }
 ?>

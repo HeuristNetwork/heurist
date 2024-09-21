@@ -1871,7 +1871,7 @@ function flush_buffers($start=true){
  * 
  * @return int|false Returns the size of the file in bytes if successful, or false on failure.
  */
-function fileReadByChunks($file_path)
+function fileReadByChunks($file_path, $range_min=0, $range_max=0)
 {
     // Get the size of the file
     $file_size = getFileSize($file_path);
@@ -1880,26 +1880,35 @@ function fileReadByChunks($file_path)
     $chunk_size = 10 * 1024 * 1024;
 
     // Check if the file is larger than the chunk size
-    if ($chunk_size && $file_size > $chunk_size) {
-        // Open the file in binary read mode
-        $handle = fopen($file_path, 'rb');
+    if ($range_max==0 && $file_size < $chunk_size) {
+        // If the file is smaller than the chunk size, output the entire file
+        return readfile($file_path);
+    }
+    
+    // Open the file in binary read mode
+    $handle = fopen($file_path, 'rb');
+    if(!$handle){
+        //error_log('file not found: '.htmlspecialchars($filename));
+        return 0;
+    }
 
+    if($range_max>0){ //output defined range only
+        if($range_min>0) {fseek($handle,$range_min);}
+        $chunk = fread($handle, $range_max-$range_min+1);
+        echo $chunk;
+    }else{
         // Loop through the file and read it in chunks
         while (!feof($handle)) {
-            echo fread($handle, $chunk_size); // Output the current chunk
+            echo fread($handle, 1000); // Output the current chunk (was $chunk_size)
             @ob_flush(); // Flush the output buffer
             @flush();    // Flush the system buffers
         }
-
-        // Close the file handle
-        fclose($handle);
-
-        // Return the file size after reading
-        return $file_size;
     }
+    // Close the file handle
+    fclose($handle);
 
-    // If the file is smaller than the chunk size, output the entire file
-    return readfile($file_path);
+    // Return the file size after reading
+    return $file_size;
 }
 
 /**

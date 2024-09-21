@@ -342,6 +342,7 @@ EXP;
                                             $rd_temp = mysql__select_value($mysqli,
                                                     'select ulf_OrigFileName from recUploadedFiles where ulf_ID ='
                                                     .$rg['dtl_UploadedFileID']);
+                                            $rd_temp = htmlspecialchars($rd_temp);
                                         }else {
 
                                             if ($rg['dtl_Geo']) {
@@ -639,6 +640,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
         }elseif ($rg['dtl_UploadedFileID']) {
             $detail_val = mysql__select_value($mysqli,
                     'select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']);
+            $detail_val = htmlspecialchars($detail_val);
         }
 
         if($detail_val==null) {$detail_val = '';}

@@ -144,9 +144,10 @@ function doReport($system, $update_mode, $format, $row){
     }
 
     $filename = $row['rps_FileName'] ?? $row['rps_Template'];
+    $filename = basename($filename);
     $filename = USanitize::sanitizeFileName($filename);
 
-	$outputfile = $dir.basename($filename);
+	$outputfile = $dir.$filename;
 
 	if($update_mode==3 || $update_mode==4){  //if published file already exists take it
 

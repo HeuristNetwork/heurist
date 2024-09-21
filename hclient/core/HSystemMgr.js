@@ -626,60 +626,7 @@ class HSystemMgr {
       let request = { a: 'foldercontent', source: source, exts: exts };
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }  
-  
-  /**
-  * Get the desired database structure definition
-  * @param {Request} request
-  * @param {string} [request.terms] comma-separated list of term ids, or 'all'
-  * @param {string} [request.rectypes] comma-separated list of rectype ids, or 'all'
-  * @param {string} [request.detailtypes] comma-separated list of detailtype ids, or 'all'
-  * @param {number} [mode] applied for rectypes: 0 only names (default), 1 only structure, 2 - both, 3 - all
-  */
-  get_defs(request, callback) {
-      window.hWin.HAPI4.callserver('sys_structure', request, callback);
-  }
 
-  /**
-  * Wrapper for EntityMgr.refreshEntityData
-  * @param {boolean} is_message - whether to show message to user after refresh
-  * @param {any} document - unused
-  * @param {Function} callback
-  */
-  get_defs_all(is_message, document, callback) {
-      window.hWin.HEURIST4.msg.bringCoverallToFront();
-
-      window.hWin.HAPI4.EntityMgr.refreshEntityData('force_all', success => {
-          window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-          if (success && is_message === true) {
-              let $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions refreshed.');
-              $dlg.parent('.ui-dialog').css({ top: 150, left: 150 });
-          }
-
-          if (window.hWin.HEURIST4.util.isFunction(callback)) callback(success);
-      });
-  }
-
-  /**
-  * Resolve mimetype for a given URL
-  * @param {string} url
-  * @param {callserverCallback} callback
-  */
-  get_url_content_type(url, callback) {
-      let request = { a: 'get_url_content_type', url: url };
-      window.hWin.HAPI4.callserver('usr_info', request, callback);
-  }
-
-  /**
-  * Returns list of files for given folders
-  * @param {string|Array.<string>} folders single folder or array of folders to search
-  * @param {callserverCallback} callback
-  */
-  get_foldercontent(source, exts, callback) {
-      let request = { a: 'foldercontent', source: source, exts: exts };
-      window.hWin.HAPI4.callserver('usr_info', request, callback);
-  }  
-  
   /**
   * Check if current server + db has access to ESTC lookups
   * @param {Request} [request] - if not provided, current db & server are checked
