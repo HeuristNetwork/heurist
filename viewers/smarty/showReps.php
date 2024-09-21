@@ -1020,7 +1020,10 @@ function save_report_into_file($tpl_source){
                 }
                 $ext =  '.'.$outputmode;
 
-                $file_name = basename($path_parts['filename'].$ext);
+                
+                $path_parts = pathinfo($outputfile);
+                $file_name = $path_parts['filename'] . '.' . $ext;
+                //$file_name = preg_replace('@\..*$@', $ext, $outputfile);
                 
                 $res_file = $dirname."/".$file_name; // acutal file
                 $temp_file = $dirname."/_".$file_name; // temporary file, if needed

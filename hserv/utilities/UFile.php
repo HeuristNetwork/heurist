@@ -1899,7 +1899,7 @@ function fileReadByChunks($file_path, $range_min=0, $range_max=0)
     }else{
         // Loop through the file and read it in chunks
         while (!feof($handle)) {
-            echo fread($handle, 1000); // Output the current chunk (was $chunk_size)
+            echo fread($handle, $chunk_size); // Output the current chunk (was 1000)
             @ob_flush(); // Flush the output buffer
             @flush();    // Flush the system buffers
         }

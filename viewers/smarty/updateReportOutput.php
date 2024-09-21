@@ -145,14 +145,17 @@ function doReport($system, $update_mode, $format, $row){
 
     $filename = basename($row['rps_FileName'] ?? $row['rps_Template']);
     $filename = USanitize::sanitizeFileName($filename);
-
+    
+    $path_parts = pathinfo($filename);
+    $file_name = $path_parts['filename'] . '.' . $format;
+    
 	$outputfile = $dir.$filename;
+    
 
 	if($update_mode==3 || $update_mode==4){  //if published file already exists take it
 
-		$path_parts = pathinfo($outputfile);
+		/*$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
-
 		if ($ext == null) {
             //add extension
             $format = basename($format);
@@ -166,7 +169,7 @@ function doReport($system, $update_mode, $format, $row){
 			}
             $ext = $format;
             $filename = $filename.'.'.$ext;
-		}
+		}*/
 
 		if(file_exists($outputfile)){
 
