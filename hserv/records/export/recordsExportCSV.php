@@ -1224,10 +1224,10 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
             if(!$save_to_file || empty($temp_name)){
 
-                $csv_filename = $temp_name;
+                $csv_filename = basename($temp_name);
                 if($rty_ID>0){
                     $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
-                    $csv_filename = $csv_filename.'_t'.$rty_ID.'_'.$rty_Name;
+                    $csv_filename = basename($csv_filename.'_t'.$rty_ID.'_'.$rty_Name);
                 }
             }
             $csv_filename = strpos($csv_filename, '.') !== false

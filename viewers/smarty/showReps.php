@@ -994,18 +994,21 @@ function save_report_into_file($tpl_source){
     if($publishmode!=2){ //saves into $outputfile
 
         try{
+            
+            $outputfile = basename($outputfile);
 
+            /* 2024-09-21 outpust to generated-reports only 
             $path_parts = pathinfo($outputfile);
             $dirname = USanitize::sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
-
             $dirname = isPathInHeuristUploadFolder($dirname);
-
             //if folder is not defined - output into generated-reports
-            if(!$dirname){
-                $dirname = $system->getSysDir('generated-reports');
-                if(!folderCreate($dirname, true)){
-                    $errors = 'Failed to create folder for generated reports';
-                }
+            if(!$dirname){ }
+            */
+
+            //outpust to generated-reports only 
+            $dirname = $system->getSysDir('generated-reports');
+            if(!folderCreate($dirname, true)){
+                $errors = 'Failed to create folder for generated reports';
             }
 
 

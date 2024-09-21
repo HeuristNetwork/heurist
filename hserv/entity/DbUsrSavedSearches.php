@@ -28,17 +28,6 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 class DbUsrSavedSearches extends DbEntityBase
 {
 
-    /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
-    */
     public function search(){
 
         if(parent::search()===false){

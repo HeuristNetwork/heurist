@@ -262,7 +262,7 @@ $requestUri:
                     $ids = prepareIds(@$requestUri[3]);
 
                     if(!empty($ids)){
-                        $redirect .= ('ids:'.$requestUri[3]);
+                        $redirect .= ('ids:'.implode(',',$ids); //$requestUri[3]);
                     }else{
                         $redirect .= $requestUri[3];
                     }

@@ -26,6 +26,7 @@
 * @subpackage  Export/xml
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
+use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
@@ -74,7 +75,7 @@ if(!$islist){
             .$dtFile." OR dtl_DetailTypeID = ".$dtKMLfile.")");
 
         if ($kml_file[0] && $kml_file[1]) {
-            $path =  resolveFilePath($kml_file[0]);
+            $path =  USanitize::sanitizePath(resolveFilePath($kml_file[0]));
             $kml_file = basename($kml_file[1]);
             $kml_file = $path.$kml_file;
         }else{

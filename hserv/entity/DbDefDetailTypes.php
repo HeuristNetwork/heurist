@@ -144,43 +144,25 @@ class DbDefDetailTypes extends DbEntityBase
                         $new_children = getTermChildrenAll($mysqli, $this->records[$idx]['dty_JsonTermIDTree'], true);
 
                         $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children);});
+                        
+                        $s = predicateId('dtl_Value', $children, SQL_AND);
 
-                        if(!empty($children)){
-                            if(count($children)>1){
-                                $s = 'in ('.implode(',',$children).')';
-                            }else{
-                                $s = '= '.$children[0];
-                            }
-                            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
+                        if($s!=''){
+
+                            $query = 'SELECT COUNT(DISTINCT dtl_RecID) FROM recDetails '
                                 .'WHERE (dtl_DetailTypeID='.$this->records[$idx]['dty_ID'].') AND '
                                 .'(dtl_Value '.$s.')';
-
-                            $total_count_rows = 0;
-                            $records = array();
-                            $res = $mysqli->query($query);
-                            if ($res){
-                                $total_count_rows = mysql__found_rows($mysqli);
-
-                                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
-
-                                    $records = array();
-                                    while ($row = $res->fetch_row())  {
-                                        array_push($records, (int)$row[0]);
-                                    }
-                                }
-                                $res->close();
-                            }
+                                
+                            $total_count_rows = mysql__select_value($mysqli, $query);
                             if($mysqli->error){
                                 $this->system->addError(HEURIST_DB_ERROR,
                                     'Search query error (retrieving number of records that uses terms)', $mysqli->error);
                                 return false;
                             }elseif($total_count_rows>0){
-                                $ret = array('reccount'=>$total_count_rows,'records'=>$records);
                                 $this->system->addError(HEURIST_ACTION_BLOCKED,
                                     'Sorry, we cannot change the vocabulary because terms in the '
-                                    .'current vocabulary are already in use for this field.', $ret);
+                                    .'current vocabulary are already in use for this field.');
                                 return false;
-                                //show records which use these terms.
                             }
                         }
                     }

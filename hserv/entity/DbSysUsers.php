@@ -37,15 +37,6 @@ class DbSysUsers extends DbEntityBase
        $this->requireAdminRights = false;
     }
 
-    /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    */
     public function search(){
 
         $not_in_group = @$this->data['not:ugl_GroupID'];
