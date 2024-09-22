@@ -289,6 +289,7 @@ class HImportBase{
             missing_fields.length < fields[field_name].length || missing.push(field_name);
         }
 
+        let last = '';
         switch(missing.length){
             case 0:
                 return true;
@@ -298,7 +299,7 @@ class HImportBase{
                 return missing.join(' and ');
 
             default:
-                let last = missing.pop();
+                last = missing.pop();
                 return `${missing.join(', ')} and ${last}`;
         }
     }
@@ -323,6 +324,7 @@ class HImportBase{
             invalid_indexes.length < fields[field_name].length || missing.push(field_name);
         }
 
+        let last = '';
         switch(missing.length){
             case 0:
                 return true;
@@ -332,7 +334,7 @@ class HImportBase{
                 return missing.join(' and ');
 
             default:
-                let last = missing.pop();
+                last = missing.pop();
                 return `${missing.join(', ')} and ${last}`;
         }
     }

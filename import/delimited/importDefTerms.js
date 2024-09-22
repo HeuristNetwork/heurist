@@ -124,6 +124,11 @@ class HImportTerms extends HImportBase{
 
                 $('#field_term').val(idx);
 
+            }else if(column.indexOf('uri')>=0 || column.indexOf('url')>=0
+                || column.indexOf('reference')>=0 || column.indexOf('semantic')>=0){
+
+                $('#field_uri').val(idx);
+
             }else if(column.indexOf('code') >= 0){
 
                 $('#field_code').val(idx);
@@ -131,11 +136,6 @@ class HImportTerms extends HImportBase{
             }else if(column.indexOf('desc') >= 0){
 
                 $('#field_desc').val(idx);
-
-            }else if(column.indexOf('uri')>=0 || column.indexOf('url')>=0
-                || column.indexOf('reference')>=0 || column.indexOf('semantic')>=0){
-
-                $('#field_uri').val(idx);
 
             }
         }

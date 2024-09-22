@@ -146,7 +146,6 @@ class HImportMedia extends HImportBase{
         const field_url = $('#field_url').val();
         const field_desc = $('#field_desc').val();
 
-        const field_desc_concat = $('#field_desc_concat').is(':checked');
         const multival_separator = $('#multival_separator').val();
 
         let _urls = row[field_url];
@@ -166,12 +165,6 @@ class HImportMedia extends HImportBase{
             }
 
             let _desc = url_count < descriptions.length ? descriptions[url_count] : '';
-            if(field_desc_concat){ //add other fields to description
-
-                for(const idx in row){
-                    _desc = idx != field_url && idx != field_desc ? `${row[idx]}, ${_desc}` : _desc;
-                }
-            }
 
             urls.push(_url.toLowerCase());
 
@@ -191,16 +184,28 @@ class HImportMedia extends HImportBase{
      */
     prepareDescription(row){
 
+        const field_url = $('#field_url').val();
+
         const field_desc = $('#field_desc').val();
         const field_desc_sep = ', Download ';
+        const field_desc_concat = $('#field_desc_concat').is(':checked');
 
-        if(field_desc < 0 || field_desc >= row.length || window.hWin.HEURIST4.util.isempty(row[field_desc])){
+        if(field_desc < 0 || field_desc >= row.length){
             return [];
         }
 
-        let desc = row[field_desc].indexOf(' Download') == 0 ? row[field_desc].substring(9) : row[field_desc];
-        desc = desc.trim();
+        let description = row[field_desc].indexOf(' Download') == 0 ? row[field_desc].substring(9) : row[field_desc];
+        description = description.trim().split(field_desc_sep);
 
-        return desc.split(field_desc_sep);
+        if(field_desc_concat){ //add other fields to description
+
+            let _desc = '';
+            for(const idx in row){
+                _desc = idx != field_url && idx != field_desc ? `${row[idx]}, ${_desc}` : _desc;
+            }
+            description = description.map(desc => _desc + desc); // map extra description to start of every element
+        }
+
+        return description;
     }
 }

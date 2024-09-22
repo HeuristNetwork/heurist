@@ -172,7 +172,6 @@
                             <option value="ulf_ID">Heurist File ID</option>
                             <option value="ulf_ObfuscatedFileID">Obfuscated ID</option>
                             <option value="ulf_FullPath">File path + name</option>
-                            <!--<option value="ulf_Checksum">Checksum</option>-->
 						</select>
 					</div>
 					<div>
