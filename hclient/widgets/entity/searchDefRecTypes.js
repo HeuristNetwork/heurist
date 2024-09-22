@@ -225,7 +225,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     if(!(vB>=0)) vB = cnt;
                     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
             });
-        let cop = flist.children();
+        
         flist.append(items);    
         
         flist.controlgroup('refresh');

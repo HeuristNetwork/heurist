@@ -213,8 +213,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
                     }
-                }else if (is_browse) {
-                   
                 }
             }else if(is_addonly){
                 that.btn_select_rt.click(); //show dropdown

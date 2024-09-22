@@ -92,7 +92,6 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     _getEditDialogButtons: function(){
         let btns = this._super();
         
-        let that = this;
         for(let idx in btns){
             if(btns[idx].id=='btnRecRemove'){
                 btns[idx].text = window.hWin.HR('Delete bookmark');

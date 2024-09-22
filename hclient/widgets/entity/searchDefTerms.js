@@ -23,8 +23,6 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        let that = this;
-
         this.selectViewmode = this.element.find('#sel_viewmode');
         this.selectViewmode.tabs()
             .css({position:'absolute','height':'1.8em','bottom':0,'background':'none','border':'none'});

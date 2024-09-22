@@ -151,17 +151,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         //-----------------
-        let sh = 0;
         if(hasSearchForm && this.searchForm.is(':visible')){
             
             let rt_list = this.options.rectype_set;
-            let is_expand_rt_list = false;
-            let is_only_rt = false;
             if(!window.hWin.HEURIST4.util.isempty(rt_list)){
                 if(!Array.isArray(rt_list)){
                     rt_list = rt_list.split(',');
                 }
-                is_only_rt = (rt_list.length==1);
             }            
             
             this._adjustResultListTop();
@@ -239,7 +235,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             false, {'max-width':'100px','font-size':'0.9em', padding:0});
             window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_repeat'),
                                             false, {'max-width':'100px','font-size':'0.9em', padding:0});
-            let ele = window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_width'),
+            window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_width'),
                                             false, {'max-width':'60px','font-size':'0.9em', padding:0});
             
             //save/cancel rts buttons
@@ -495,7 +491,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             let sep_id = $(div_ele).attr('separator-dtid');
 
-            let is_folder = false;      
             let ele = $('<div'+(sep_id>0?(' data-dtid="'+sep_id+'"'):'')
                     +'><span class="ui-icon ui-icon-gear"></span></div>')
             .css({'display':(sep_id>0?'inline-block':'table-cell'),'vertical-align':'top',
@@ -567,7 +562,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }});
         }else{
             //placeholder
-            let ele = $('<div>').css({'display':'table-cell','min-width':'32px'})
+            $('<div>').css({'display':'table-cell','min-width':'32px'})
             .prependTo($(div_ele));    
         }
     },
@@ -1403,7 +1398,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     closeEditDialog:function(){
         
         //save preferences
-        let that = this;
         
         if(this.options.edit_mode=='editonly'){
             
@@ -2182,11 +2176,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         request['recIDs']  = that._currentEditID;
                                         request['request_id'] = window.hWin.HEURIST4.util.random();
                                         
-                                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                            function(response){
-                                                if(response.status == window.hWin.ResponseStatus.OK){
-                                                }
-                                            });
+                                        window.hWin.HAPI4.EntityMgr.doRequest(request, null);
                                         //update panel
                                        
                                     }
@@ -2374,8 +2364,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
            
         }
 
-        let record_stub = {};
-        
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
@@ -2468,7 +2456,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             ],{  title:'Creation of relationship record' }        
                         );
 
-                        let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
+                        $dlg.find('input[type="checkbox"]').on('change', function(){
                             let params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
                             params['show_warn_about_relationship'] = false;
                             window.hWin.HAPI4.save_pref('prefs_'+that._entityName, params);     
@@ -3003,7 +2991,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             for(let k=0; k<s_fields.length; k++){
 
                 let dtFields = that._prepareFieldForEditor( s_fields[k] );
-                let simpleDetails = {};
 
                 if(dtFields['dty_Type']=='separator'){
 
@@ -3528,7 +3515,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             let len = window.hWin.HEURIST4.util.byteLength(values[k]);
                             let len2 = values[k].length;
                             let lim = (len-len2<200)?64000:32768;
-                            let lim2 = (len-len2<200)?64:32;
                             
                             if(len>lim){ //65535){  32768
                                 let sMsg = `The data in field ${$Db.rst(that._currentEditRecTypeID, dtyID, 'rst_DisplayName')}`
@@ -4049,12 +4035,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     return;
                                 }								
 								
-                                let mapdoc_extent = null;
-                                
                                 const vals = ele.editing_input('getValues');
+                                /*let mapdoc_extent;
                                 if(vals[0]) {
                                     mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(vals);
-                                }
+                                }*/
                             
                                 //search for values    
                                 window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recIds.join(','), w: "e", f:dtId_Geo}, 
@@ -4611,7 +4596,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 blur: (event) => { // Remove node focus
 
                     let $target_ele = $(event.target);
-                    let unselect_only = false;
+
                     if($target_ele.is('select')){ // Check if selectmenu is still visible
                         let $sel = $target_ele.parent().find('select.enum-selector-main');
                         if($sel.length == 1){
@@ -4885,9 +4870,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     params['left'] = parseInt(dlged.css('left'), 10);
                 }
                 
-            }else{
-               
-               
             }      
                   
         }else                
@@ -6821,7 +6803,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             that._source_def = response.data.rectypes;
 
-            let rty_cc_idx = that._source_def.typedefs.commonNamesToIndex.rty_ConceptID;
             let dty_cc_idx = that._source_def.typedefs.dtFieldNamesToIndex.dty_ConceptID;
 
             const rty_IDs = Object.keys(that._source_def.typedefs);

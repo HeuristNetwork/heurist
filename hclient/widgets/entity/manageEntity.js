@@ -1753,7 +1753,6 @@ $.widget( "heurist.manageEntity", {
         
         if(!isOpenAready){            
     
-            let that = this; 
             this._currentEditID = recID;
 
             this.editFormPopup = this.editForm;

@@ -23,8 +23,6 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        let that = this;
-        
         this.btn_search_start.css('float','right');   
         
         this.input_sort_rectitle = this.element.find('#input_sort_rectitle');

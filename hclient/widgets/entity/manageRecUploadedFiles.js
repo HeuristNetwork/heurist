@@ -140,17 +140,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         //init viewer 
-        let that = this;
-        
-        if(this.options.select_mode=='manager'){
-            //init image viewer for result list
-            this.recordList.resultList('option','onPageRender',function(){
-                //$(that.recordList.find('.ent_content_full'))
-                let ele = $(that.recordList.find('.ent_content_full')); //.find('a')
-                
-            });
-        }
-
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
@@ -344,12 +333,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
             //list of records that refer to this file    
             let relations = this._currentEditRecordset.getRelations();    
-            if(relations && relations.direct && relations.direct.length>0){
+            if(relations && relations.direct && relations.dir149ect.length>0){
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
                 
                 let direct = relations.direct;
                 let headers = relations.headers;
-                let ele1=null;
+
                 for(let k in direct){
                     let targetID = direct[k].targetID;
                     

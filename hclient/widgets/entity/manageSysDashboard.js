@@ -80,8 +80,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         //init viewer 
         let that = this;
         
-        let prefs = this.getUiPreferences();
-
         this._on( this.searchForm, {
                 "searchsysdashboardonresult": this.updateRecordList,
                 "searchsysdashboardviewmode": function() { this._setMode( true );  }, //back to view mode
@@ -265,7 +263,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
                     this._on(this.div_openconfig, {
                         click:function(){
-                            let that = this;
                             window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',   //edit mode
                                 {isViewMode:false, is_iconlist_mode:false,
                                 onClose:function(){
@@ -451,13 +448,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         let recID   = fld('dsh_ID');
         
-        let rectype = fld('ulf_ExternalFileReference')?'external':'local';
-        
         let recTitle = fld2('dsh_Label','auto');//,'20em'
         let recTitleHint = fld('dsh_Description');
         let recOpacity = (fld('dsh_Enabled')=='y')?1:0.3;
         
-        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
         
         let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
@@ -523,7 +517,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             let record = this._selection.getFirstRecord();
             if(this.options.isViewMode){
                 let command = this._selection.fld(record, 'dsh_CommandToRun');
-                let params = this._selection.fld(record, 'dsh_Parameters');
                 const dsh_ID = this._selection.fld(record, 'dsh_ID');
                 
                 if(command.indexOf('menu-')==0){ //main menu action
@@ -626,8 +619,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     'fields'     : fields                     
                 };
 
-                let that = this;                                                
-               
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

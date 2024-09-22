@@ -378,7 +378,6 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         + '</div>'
         + recTitle;
 
-        let add_role = this.options.select_mode!='select_roles' && !this.options.ugl_UserID;
         if(!is_user_roles){
 
             let show_role = this.searchForm.find('#input_search_type').val()!='any';

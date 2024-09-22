@@ -202,9 +202,6 @@ function HMultiSelect(){
 		if(window.hWin.HEURIST4.util.isempty(recset)){ return; } // skip if there are no base fields
 
 		recset.each2(function(fID, fields){ // proceed through all fields and record each id
-
-			let type = getTypeById(fields['rst_DetailTypeID']);
-
 			assigned_fields.push(fID);
 		});
 	}

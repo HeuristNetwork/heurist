@@ -459,12 +459,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             containment: 'window',
                             scope: 'vocab_change',
 
-                            start: function(event,ui){
+                            /*start: function(event,ui){
                                 if(that.space_for_drop){
-                                   
-                                   
                                 }
-                            },
+                            },*/
                             drag: function(event,ui){
                                 //let trg = $(event.target);trg.hasClass('ui-droppable')
                                 if($('.ui-droppable.ui-drag-drop').is(':visible')){
@@ -895,7 +893,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }else{
                     let rdiv = this.recordList.find('.recordDiv:first');
                     if(rdiv.length){
-                        let rec_ID = rdiv.attr('recid');
                         rdiv.click();
                     }else if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                         this.options.onSelect.call( this, null );
@@ -1670,8 +1667,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return;
         }else if(this.it_was_insert && this.options.auxilary=='vocabulary' && this.options.edit_mode=='popup'){
             
-
-            
         }else if(this.it_was_insert && this.options.auxilary=='term' && this.options.edit_mode=='popup'){
 
             this.options.trm_ParentTermID = $Db.trm(recID,'trm_ParentTermID'); //it was reset to -1 in afterInitEditForm
@@ -1728,8 +1723,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         if(!t_idx[parent_id]) t_idx[parent_id] = []; 
                         t_idx[parent_id].push(recID);        
                     }
-                }else{
-                   
                 }
             }
            
@@ -1796,8 +1789,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             // set parent field to acutal parent field, to avoid moving it
             fields['trm_ParentTermID'] = parents[parents.length - 1]; 
-        }else if(!window.hWin.HEURIST4.util.isempty(fields['trm_ParentTermID'])){
-           
         }
         
         let lbl = Array.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
@@ -2663,8 +2654,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }});
         }
 
-        let setdis = input_name.val().length<3;
-
         //find terms
         if(input_name.val().length>1){
 
@@ -3251,7 +3240,6 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                         'fields'     : {trm_ID:trm_ID, trm_ParentTermID:correct_vocab_id},
                         'isfull'     : 0
                         };
-                        let that = this;                                                
                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){

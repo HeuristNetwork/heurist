@@ -366,7 +366,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         treeData = [];
         
-        let groupIdx = -1;
         let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
         let outer_group = {};
         let inner_group = {}; // simple dividers or accordions placed within tabs
@@ -449,7 +448,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let that = this;
         
         let fancytree_options = {};
-        let need_redraw = false;
         this._treeview = this.element.find('.treeView');
         
         if(this._treeview.fancytree('instance')){
@@ -877,7 +875,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             clearTimeout(this._menuTimeoutId);
             
             $('.menu-or-popup').hide(); //hide other
-            let menu = $( ele )
+            $( ele )
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left-2 top", at: "left top", of: parent });
@@ -1200,17 +1198,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 //need refresh structure - obtain from rst_Index again
                 that._cachedRecordset = $Db.rst(that.options.rty_ID);  //from  rst_Index
                 
-                if(res && res.selection){
-                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
+                if(res?.selection && 
+                    window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
                         let dty_ID = res.selection[0];
                         that.addNewFieldToStructure(dty_ID, after_dty_ID, res.rst_fields);
-                    }else
-                    if(window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                        let recordset = res.selection;
-                        let record = recordset.getFirstRecord();
-                    }
                 }
-                if(res.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
+                if(res?.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
                     that._treeview.find('span[data-dtid="'+ res.updatedRstField +'"]').text($Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName'));
 
                     /*
@@ -2436,8 +2429,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }else if(dt_type=='separator'){
             fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
             fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
-        }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
-           
+        //}else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                           
         }
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';
@@ -2503,14 +2495,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         //rare case when edited edit form reload with another record
-        let is_usual_way = (!(this._stillNeedUpdateForRecID>0)); 
         this._stillNeedUpdateForRecID = 0;
         //record is already updated in _saveEditAndClose
        
-        if(is_usual_way){
-            
-        }
-
         // Check if user is going to update the base field's name or help text
         if(this.editForm.find('input#alter_basefield').is(':checked')){
 
@@ -2718,7 +2705,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         
-        let that = this;
         if(recID.indexOf(this.options.rty_ID+'.')===0){
             recID = recID.substring(recID.indexOf('.')+1);
         }
@@ -2962,7 +2948,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _deleteBaseField: function(dtyid){
 
-        let that = this;
         if(window.hWin.HEURIST4.util.isempty(dtyid) || !$Db.dty(dtyid)){
             return;
         }

@@ -23,8 +23,6 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     //
     _initControls: function() {
 
-        let that = this;
-        
         this.input_search_type = this.element.find('#input_search_type');   //field type
         let vals = []; 
         let filter_types = [];

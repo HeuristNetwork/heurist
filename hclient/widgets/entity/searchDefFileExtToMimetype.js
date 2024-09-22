@@ -23,8 +23,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
 
-        let that = this;
-        
         /*
         this.btn_add_record = this.element.find('#btn_add_record');
         if(this.options.edit_mode=='none'){

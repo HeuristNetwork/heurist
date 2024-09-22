@@ -140,7 +140,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Save Mask');
         res[0].text = window.hWin.HR('Cancel');
         return res;
@@ -397,8 +396,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //
     _loadRecordTypeTreeView: function(rtyID){
         
-        let that = this;
-
         //generate treedata from rectype structure
         let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all','parent_link'] );
 

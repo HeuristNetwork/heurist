@@ -600,8 +600,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
             if(recID>0){
                 
-                let that = this;
- 
                 if(action=='show_in_list' || action=='hide_in_list'){
                     
                     
@@ -968,8 +966,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     let dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
                                     
                                     if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
-
-                                        let changeToNewType = true;
                                         if(((dt_type==="resource") || (dt_type==="relmarker") || 
                                             (dt_type==="enum"))  && dt_type!==dt_type_new)
                                         {
@@ -1147,17 +1143,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }});
         }
         
-        let setdis = input_name.val().length<3;
-        //this._editing.setDisabled( setdis )
-       
-       
-        
       
         //find base field to suggest
         if(input_name.val().length>2){
            
             let rty_ID = this.options.newFieldForRtyID; 
-            let dty_ID, field_name, field_type;
+            let field_name, field_type;
                 
             this.fields_list_div.empty();  
             let is_added = false;
@@ -1360,7 +1351,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
 
         let vocab_id =  this.enum_container.find("#selVocab").val();
-        let is_frist_time = true;
         let that = this;
         
         
@@ -1509,7 +1499,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             opts.domain = term_type;
         }
         
-        let selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
+        window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
 
         this._off(orig_selector, 'change');
         this._on(orig_selector, {change: function(event){
@@ -1552,7 +1542,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //append to first preview
             let new_selector = this.enum_container.find('#selPreview');
             
-            new_selector = window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
+            window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
                     {vocab_id:allTerms, topOptions:false, supressTermCode:true});
 
             preview_sel.css({'display':'inline-block'});
@@ -2078,8 +2068,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     addEditRecord: function(recID, is_proceed){
 
         if(recID<0 && is_proceed !== true){
-            let that = this;
-
             this.coverMessage(recID);
         }else{
             this._super(recID, is_proceed); 

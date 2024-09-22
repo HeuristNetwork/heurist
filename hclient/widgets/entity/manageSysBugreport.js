@@ -60,7 +60,6 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     _getEditDialogButtons: function(){
         let btns = this._super();
         
-        let that = this;
         for(let idx in btns){
             if(btns[idx].id=='btnRecSave'){
                 btns[idx].text = window.hWin.HR('Send to heurist development team');
@@ -80,8 +79,6 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
 
         this._super();
-
-        let that = this;
 
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
         let ele = this._as_dialog.find('input[type=file]');

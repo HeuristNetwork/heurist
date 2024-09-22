@@ -738,16 +738,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
         
         let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
-        let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        //let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
         if(this.is_new_icons){
             rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
-            recThumb = window.hWin.HAPI4.iconBaseURL+recID+'&version=thumb'; 
+            //recThumb = window.hWin.HAPI4.iconBaseURL+recID+'&version=thumb'; 
         }
 		
         let random_id = window.hWin.HEURIST4.util.random(); // force php request to redo		
         
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&'+random_id+'&quot;);">'
-        +'</div>';
+        //let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&'+random_id+'&quot;);">'
+        //+'</div>';
         
         //recordIcons 
         let html_icon = '<div class="item" style="vertical-align: middle;max-width:40px;min-width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -1001,8 +1001,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
             if(recID>0){
                 
-                let that = this;
- 
                 if(action=='addrec'){
                     
                     let new_record_params = {RecTypeID: recID};
@@ -1558,13 +1556,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         msg = 'Unless the record type is very simple with few fields, we suggest using tabs to<br>organsie the fields describing this record type.<br>'
                 + 'Please choose from this list of frequently used headings (tabs can be added or<br>removed later, and the labels can be easily edited).<br><br>';
 
-        let k = 1;
         for(let i = 0; i < def_tabs.length; i++){
 
             let checked = '';
             if(i == 0){
                 checked = ' checked="true"';
-                k++;
             }
 
             msg += '<label><input type="checkbox" value="'+ def_tabs[i] +'"'+ checked +'>'+ def_tabs[i] +'</label><br>';

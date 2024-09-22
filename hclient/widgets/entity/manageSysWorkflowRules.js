@@ -153,7 +153,6 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 onSortStop: function(){
                     
                     let recordset = this.getRecordSet();
-                    let that = this;
                     window.hWin.HEURIST4.dbs.applyOrder(recordset, 'swf', function(res){
                        
                     });

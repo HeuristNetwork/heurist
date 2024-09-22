@@ -219,7 +219,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     
     _updateAccordions: function( recordset ){
         
-        let that = this, idx;
+        let that = this;
        
         this.recordList.empty();
         
@@ -589,7 +589,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
        let that = this;
         
-       let idx, panel = this.recordList, pnl_picked;
+       let panel = this.recordList, pnl_picked;
        
        panel.empty();
        
@@ -663,11 +663,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             }
         }
         //add content - selected tags
-        let recordset = this._cachedRecordset;
-        let records = recordset.getRecords();
-        let recID, label, groupid, record, grp, isnone = true;
-        
-        for (idx=0;idx<this.options.selection_ids.length;idx++){
+        for (let idx=0;idx<this.options.selection_ids.length;idx++){
             this._addTagToPicked(this.options.selection_ids[idx], true);
         }  
         
@@ -767,14 +763,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                     let records = recordset.getRecords();
                     let order = recordset.getOrder();
-                    let recID, label, record;
+                    let recID, label;
                     
                     if(order.length>0){
                         that.list_div.empty();  
                         
                         let is_added = false;
                         
-                        for (idx=0;idx<order.length;idx++){
+                        for (let idx=0;idx<order.length;idx++){
 
                             recID = order[idx];
                             let kk = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);

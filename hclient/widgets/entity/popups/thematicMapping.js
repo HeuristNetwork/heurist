@@ -102,7 +102,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Save thematic map');
         res[0].text = window.hWin.HR('Cancel');
         return res;
@@ -186,7 +185,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         //
         //
         //
-        let opt, selScope = this.selectRecordScope.get(0);
+        let selScope = this.selectRecordScope.get(0);
         this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
         {
             topOptions: [{key:'-1',title:'select record type...'}],
@@ -308,9 +307,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             if(rtyID>0){
                 //reload treeview
                 this._loadRecordTypesTreeView( rtyID );
-               
-            }else{
-               
             }
         }
         
@@ -883,7 +879,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         let f_ranges = this.element.find('#f_ranges');
         fele.attr('readonly','readonly');
         
-        let $btn_edit_clear = $('<span>')
+        $('<span>')
         .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
         .attr('tabindex', '-1')
         .attr('title', 'Reset default symbology')
