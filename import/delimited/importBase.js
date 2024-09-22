@@ -25,13 +25,17 @@
  * @property {array} allowed_entities - Currently handled entities
  * @property {json} entity_details - Configuration details for each handled entity
  * @property {string} entity_type - The import's current entity
+ * @property {integer} column_count - Table headers count
  * @property {array} parsed_data - Imported file data/User entered data formatted into an array
  * @property {json} prepared_data - Processed parsed data into 'records' for creating the new definitions server side
  * @property {boolean} return_results - On success, close the window and return the result as context
  *
  * @function doParse - Convert the data from #sourceContent into a 2D array for processing
+ * @function cleanupParsedData - Removes any empty rows or rows that contain only empty values
  * @function doPrepare - Processes the parsed data into records for creation, must be expanded by child classes
  * @function createRecord - Creates the record in json format, then adds it to the prepared records
+ * @function checkRequiredMapping - Checks whether the required fields have been mapped before preparing
+ * @function checkRequiredValues - Checks whether the provided indexes are valid
  * @function doPost - Sends the prepared records server side to create the new definitions
  * @function redrawPreviewTable - Draws the parsed data into a human readable table, including the results when return_results is false
  * @function renderTableHeader - Draws the column headers to the human readable table
@@ -59,6 +63,7 @@ class HImportBase{
 
     entity_type = null;
 
+    column_count = 0;
     parsed_data = null;
     prepared_data = null;
 
@@ -119,7 +124,7 @@ class HImportBase{
 
         window.hWin.HEURIST4.util.setDisabled($btnStartImport, true);
         
-        $('#csv_header').on('change', () => { this.redrawPreviewTable() });
+        $('#csv_header').on('change', () => { this.doParse() });
 
         // Setup group selector fo entity
         if(!window.hWin.HEURIST4.util.isempty(this.#entity_details[this.entity_type]['group'])){
@@ -217,8 +222,20 @@ class HImportBase{
 
             this.parsed_data = response.data;
 
+            this.cleanupParsedData();
+
             this.redrawPreviewTable();
         });
+    }
+
+    /**
+     * Removes empty rows and rows that contain no data from the parsed data
+     */
+    cleanupParsedData(){
+
+        this.parsed_data = this.parsed_data.filter(
+            (row) => window.hWin.HEURIST4.util.isArrayNotEmpty(row)
+                        && !row.every((value) => window.hWin.HEURIST4.util.isempty(value)));
     }
 
     /**
@@ -238,14 +255,10 @@ class HImportBase{
      */
     createRecord(row, fields, record = {}){
 
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(row)){
-            return;
-        }
-
         for(const field in fields){
 
             const idx = fields[field];
-            if(idx < 0 || row.length <= idx || window.hWin.HEURIST4.util.isempty(row[idx])){
+            if(!idx || idx < 0 || row.length <= idx){
                 continue;
             }
 
@@ -254,6 +267,75 @@ class HImportBase{
 
         if(Object.keys(record).length > 0){
             this.prepared_data.push(record);
+        }
+    }
+
+    /**
+     * Check whether the provided required fields have been mapped with valid indexes, 
+     *  then constructs the message for any invalid field
+     *
+     * @param {json} fields - fields that must have a valid index assigned {field name => field indexes}
+     *
+     * @returns {boolean|string} returns true on no errors, otherwise returns a string with the missing fields
+     */
+    checkRequiredMapping(fields){
+
+        let missing = [];
+
+        for(const field_name in fields){
+            let missing_fields = fields[field_name].filter(
+                (index) => index < 0 || index >= this.column_count
+            );
+            missing_fields.length < fields[field_name].length || missing.push(field_name);
+        }
+
+        let last = '';
+        switch(missing.length){
+            case 0:
+                return true;
+
+            case 1:
+            case 2:
+                return missing.join(' and ');
+
+            default:
+                last = missing.pop();
+                return `${missing.join(', ')} and ${last}`;
+        }
+    }
+
+    /**
+     * Check whether the provided fields have values, 
+     *  then constructs the error message for any missing fields
+     *
+     * @param {array} data - row from parsed data, used to check for a value
+     * @param {json} fields - fields to validate {field name => field value}
+     *
+     * @returns {boolean|string} returns true on no errors, otherwise returns a string with the invalid/missing fields
+     */
+    checkRequiredValues(data, fields){
+
+        let missing = [];
+
+        for(const field_name in fields){
+            let invalid_indexes = fields[field_name].filter(
+                (index) => index < 0 || index >= data.length || window.hWin.HEURIST4.util.isempty(data[index])
+            );
+            invalid_indexes.length < fields[field_name].length || missing.push(field_name);
+        }
+
+        let last = '';
+        switch(missing.length){
+            case 0:
+                return true;
+
+            case 1:
+            case 2:
+                return missing.join(' and ');
+
+            default:
+                last = missing.pop();
+                return `${missing.join(', ')} and ${last}`;
         }
     }
 
@@ -342,20 +424,20 @@ class HImportBase{
         }
 
         // Get maximum column count
-        const max_columns = this.getHeaderCount();
+        this.column_count = this.getHeaderCount();
 
         let $container = $('#divParsePreview').empty();    
         let $table  = $('<table>', {class: 'tbmain'}).appendTo($container);
         const data_has_headers = $('#csv_header').is(':checked');
 
         // PREPARE HEADER FIELDS
-        const headers = this.prepareHeaders(max_columns);
+        const headers = this.prepareHeaders();
 
         // RENDER TABLE HEADER
         this.renderTableHeader($table, headers);
 
         // RENDER TABLE BODY (parsed data)
-        this.renderTableBody($table, max_columns);
+        this.renderTableBody($table);
 
         // POPULATE COLUMN ROLES DROPDOWNS
         this.setupColumnRoles(headers);
@@ -390,22 +472,20 @@ class HImportBase{
      * Render the table's data
      *
      * @param {jQuery} $table - jQuery object selecting the table
-     * @param {integer} max_columns - Maximum allowed columns for each row
      */
-    renderTableBody($table, max_columns){
+    renderTableBody($table){
 
         let check_header = $('#csv_header').is(':checked');
-        let found_header = false;
 
         for(const row of this.parsed_data){
 
-            if(!window.hWin.HEURIST4.util.isArrayNotEmpty(row) || (!found_header && check_header)){
-                found_header = check_header && window.hWin.HEURIST4.util.isArrayNotEmpty(row);
+            if(check_header){
+                check_header = false;
                 continue;
             }
 
             let $body_row = $('<tr>').appendTo($table);
-            for(let i = 0; i < max_columns; i ++){
+            for(let i = 0; i < this.column_count; i ++){
                 $('<td>', {
                     class: 'truncate',
                     text: i < row.length ? row[i] : ''
@@ -423,31 +503,20 @@ class HImportBase{
      */
     getHeaderCount(){
         return this.parsed_data.reduce((max_columns, row) => {
-            return window.hWin.HEURIST4.util.isArrayNotEmpty(row) ? Math.max(max_columns, row.length) : max_columns;
+            return Math.max(max_columns, row.length);
         }, 0);
     }
 
     /**
      * Setup the column headers 
      *
-     * @param {integer} column_count - Number of columns
-     *
      * @returns {array} The column headers
      */
-    prepareHeaders(column_count){
+    prepareHeaders(){
 
-        let headers = [];
-        const data_has_headers = $('#csv_header').is(':checked');
+        let headers = $('#csv_header').is(':checked') ? this.parsed_data[0] : [];
 
-        if(data_has_headers){
-            for(const row of this.parsed_data){
-                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(row)){ continue; }
-                headers = row;
-                break;
-            }
-        }
-
-        return Array.from({length: column_count}, (val, idx) => {
+        return Array.from({length: this.column_count}, (val, idx) => {
             return headers.length > idx ? headers[idx] : `column ${idx}`;
         });
     }
@@ -456,10 +525,9 @@ class HImportBase{
      * Match the column headers from the CSV data to the mappable columns
      *  Function should be extended by child classes
      *
-     * @param {integer} column_count - Number of columns
      * @param {array} header - Column headers from data
      */
-    matchColumns(column_count = 0, header = []){
+    matchColumns(header = []){
         return;
     }
 
@@ -473,15 +541,16 @@ class HImportBase{
     handleResults(response){
 
         let results = response.data;
-        let $rows = $('.tbmain').find('tr');
+        let $header_row = $('.tbmain').find('tr:first');
+        let $rows = $('.tbmain').find('tr:not(.data_error)');
         let col_num = 0;
         let update_cache = false;
 
         // Add result header
-        if($($rows[0]).find('.post_results').length == 0){
-            $('<th>', {class: 'post_results truncate', text: 'Results'}).appendTo($($rows[0]));
+        if($header_row.find('.post_results').length == 0){
+            $('<th>', {class: 'post_results truncate', text: 'Results'}).appendTo($header_row);
         }else{
-            col_num = $($rows[0]).find('th').length - 1;
+            col_num = $header_row.find('th').length - 1;
         }
 
         // Add result data

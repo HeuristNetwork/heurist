@@ -25,6 +25,8 @@
  * @function matchColumns - Perform column matching base on imported column headers
  * @function doPrepare - Prepare data for registering new external media
  * @function doPost - Sends the prepared data server side to register new external media
+ * @function prepareURLs - Process the URL field, which can contain several URLs to handle individually
+ * @function prepareDescription - Process the description field, splitting it by the ', Download' separator
  */
 
 class HImportMedia extends HImportBase{
@@ -73,91 +75,40 @@ class HImportMedia extends HImportBase{
             return;
         }
 
-        let urls = [];
-
-        const field_desc = $('#field_desc').val();
-        const field_desc_sep = ', Download ';
-        const field_desc_concat = $('#field_desc_concat').is(':checked');
-
-        const multival_separator = $('#multival_separator').val();
-
         const field_url = $('#field_url').val();
-        if(field_url < 0){
-            this.updatePreparedInfo(`<span style="color:red">URL/Path must be defined</span>`, );
+
+        const allow_prepare = this.checkRequiredMapping({
+            'URL/Path': [field_url]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
-        
+
+        let urls = [];
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = !$('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
-            if(field_url >= row.length){
+
+            count ++;
+
+            const is_valid = this.checkRequiredValues(row, {
+                'File URL or path': [field_url]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 
-            if(window.hWin.HEURIST4.util.isempty(row[field_url])){
-
-                msg += `Row #${count} is missing: File URL or path<br>`;
-                continue;                
-            }
-            
-            let _urls = row[field_url].trim();
-            let _descriptions = [];
-
-            _urls = multival_separator ? _urls.split(multival_separator) : [_urls];
-
-            if(field_desc > -1 && field_desc < row.length){
-
-                let desc = row[field_desc];
-
-                //remove leading Donwload
-                if(!window.hWin.HEURIST4.util.isempty(desc)){
-
-                    if(desc.indexOf(' Download')==0){
-                        desc = desc.substring(9);
-                    }
-
-                    desc = desc.trim();
-                    _descriptions = desc.split(field_desc_sep);
-                }
-            }
-
-            let url_count = -1;
-            for(let url of _urls){
-
-                const _url = url.trim();
-                url_count ++;
-
-                // also verify duplication in parent term and in already added
-                if(window.hWin.HEURIST4.util.isempty(_url) || urls.indexOf(_url.toLowerCase()) >= 0){
-                    continue;
-                }
-
-                let _desc = url_count < _descriptions.length ? _descriptions[url_count] : '';
-                if(field_desc_concat){ //add other fields to description
-
-                    for(const idx in row){
-                        _desc = idx != field_url && idx != field_desc ? `${row[idx]}, ${_desc}` : _desc;
-                    }
-                }
-
-                urls.push(_url.toLowerCase());
-
-                let record = {};
-                record['ulf_ExternalFileReference'] = _url;
-                record['ulf_Description'] = _desc;
-
-                this.prepared_data.push(record);
-            }// _urls
+            this.prepareURLs(row, urls);
         }//for
 
         msg = this.prepared_data.length == 0 ? '<span style="color:red">No valid files to import</span>' : msg;
@@ -182,5 +133,79 @@ class HImportMedia extends HImportBase{
 
             window.hWin.HEURIST4.msg.showMsgDlg(response.data);
         });
+    }
+
+    /**
+     * Process the current record account for potentially several URLs, leading to several records
+     *
+     * @param {array} row - current record row to process, with potentially multiple URLs to import 
+     * @param {array} urls - already handled URLs, to avoid duplication here
+     */
+    prepareURLs(row, urls){
+
+        const field_url = $('#field_url').val();
+        const field_desc = $('#field_desc').val();
+
+        const multival_separator = $('#multival_separator').val();
+
+        let _urls = row[field_url];
+        let descriptions = this.prepareDescription(row);
+
+        _urls = multival_separator ? _urls.split(multival_separator) : [_urls];
+
+        let url_count = -1;
+        for(let url of _urls){
+
+            const _url = url.trim();
+            url_count ++;
+
+            // also verify possible duplication
+            if(window.hWin.HEURIST4.util.isempty(_url) || urls.indexOf(_url.toLowerCase()) >= 0){
+                continue;
+            }
+
+            let _desc = url_count < descriptions.length ? descriptions[url_count] : '';
+
+            urls.push(_url.toLowerCase());
+
+            this.prepared_data.push({
+                ulf_ExternalFileReference: _url,
+                ulf_Description: _desc
+            });
+        }//_urls
+    }
+
+    /**
+     * Prepare the file's description
+     *
+     * @param {array} row - current record row to retrieve the description from
+     *
+     * @returns {array} returns the prepared description value
+     */
+    prepareDescription(row){
+
+        const field_url = $('#field_url').val();
+
+        const field_desc = $('#field_desc').val();
+        const field_desc_sep = ', Download ';
+        const field_desc_concat = $('#field_desc_concat').is(':checked');
+
+        if(field_desc < 0 || field_desc >= row.length){
+            return [];
+        }
+
+        let description = row[field_desc].indexOf(' Download') == 0 ? row[field_desc].substring(9) : row[field_desc];
+        description = description.trim().split(field_desc_sep);
+
+        if(field_desc_concat){ //add other fields to description
+
+            let _desc = '';
+            for(const idx in row){
+                _desc = idx != field_url && idx != field_desc ? `${row[idx]}, ${_desc}` : _desc;
+            }
+            description = description.map(desc => _desc + desc); // map extra description to start of every element
+        }
+
+        return description;
     }
 }

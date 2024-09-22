@@ -84,42 +84,36 @@ class HImportRecordTypes extends HImportBase{
         const field_name = $('#field_name').val();
         const field_desc = $('#field_desc').val();
         const field_uri = $('#field_uri').val();
-        if(field_name < 0 || field_desc < 0){
 
-            let missing = field_name < 0 ? ['Name'] : [];
-            field_desc >= 0 || missing.push('Description');
-
-            this.updatePreparedInfo(`<span style="color:red">${missing.join(' and ')} must be defined</span>`, 0);
+        const allow_prepare = this.checkRequiredMapping({
+            'Name': [field_name],
+            'Description': [field_desc]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
 
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = !$('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
 
-            if(field_name >= row.length || field_desc >= row.length){
-                continue;
-            }
+            count ++;
 
-            const name_empty = window.hWin.HEURIST4.util.isempty(row[field_name]);
-            const desc_empty = window.hWin.HEURIST4.util.isempty(row[field_desc]);
-            if(name_empty || desc_empty){
-
-                let missing = name_empty ? ['name'] : [];
-                !desc_empty || missing.push('description');
-
-                msg += `Row #${count} is missing: ${missing.join(' and ')}<br>`;
-
+            const is_valid = this.checkRequiredValues(row, {
+                'name': [field_name],
+                'description': [field_desc]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 

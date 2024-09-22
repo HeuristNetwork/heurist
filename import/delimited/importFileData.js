@@ -99,40 +99,35 @@ class HImportFileData extends HImportBase{
         const file_owner = $('#file_owner').val();
         const file_vis = $('#file_vis').val();
 
-        if(file_id < 0 || (file_desc < 0 && file_cap < 0 && file_rights < 0 && file_owner < 0 && file_vis < 0)){
-
-            let missing = file_id < 0 ? 'File ID' : 'A file data field';
-
-            this.updatePreparedInfo(`<span style="color:red">${missing} must be defined</span>`, 0);
+        const allow_prepare = this.checkRequiredMapping({
+            'File ID': [file_id],
+            'A file data field': [file_desc, file_cap, file_rights, file_owner, file_vis]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
         
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = !$('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
-            if(file_id >= row.length){
-                continue;
-            }
 
-            const id_empty = window.hWin.HEURIST4.util.isempty(row[file_id]);
-            const missing_details = row[file_desc] || row[file_cap] || row[file_rights] || row[file_owner] || row[file_vis];
-            if(id_empty || window.hWin.HEURIST4.util.isempty(missing_details)){
+            count ++;
 
-                let missing = id_empty ? ['file ID'] : [];
-                !missing_details || missing.push('file data');
-
-                msg += `Row #${count} is missing: ${missing.join(' and ')}<br>`;
-
+            const is_valid = this.checkRequiredValues(row, {
+                'file ID': [file_id],
+                'file data': [file_desc, file_cap, file_rights, file_owner, file_vis]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 
