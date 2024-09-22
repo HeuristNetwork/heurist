@@ -124,7 +124,7 @@ class HImportBase{
 
         window.hWin.HEURIST4.util.setDisabled($btnStartImport, true);
         
-        $('#csv_header').on('change', () => { this.redrawPreviewTable() });
+        $('#csv_header').on('change', () => { this.doParse() });
 
         // Setup group selector fo entity
         if(!window.hWin.HEURIST4.util.isempty(this.#entity_details[this.entity_type]['group'])){
