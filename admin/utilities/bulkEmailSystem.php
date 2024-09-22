@@ -87,62 +87,16 @@ class SystemEmailExt {
 
 		$rtn = 0;
 
-		if (!isset($data["db"])) { // A current database is needed
-			// Can only be reached by another php script accessing the class or the outside functions at the end
-			$this->set_error('No current database has been provided<br>Please contact the Heurist team if this problem persists.');
-			return -1;
-		}
-
         $this->databases = null;
 
-		if (isset($data["databases"])){
-            if(!is_array($data["databases"])){
-                $data["databases"] = explode(',',$data["databases"]);
-            }
-            if(is_array($data["databases"]) && count($data["databases"]) >= 1) { // Get list of Databases
-			    $this->databases = $this->validateDatabases($data["databases"]);
-            }
-		}
-
-        if(isEmptyArray($this->databases)){
-			// Here databases is not an array
-			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . htmlspecialchars($data["databases"]);
-			$this->set_error('No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values.'
-                    . $provided_dbs);
-			return -1;
-		}
-
-		if(isEmptyArray($this->databases)){
-			// No valid databases found
-			$this->set_error('All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.');
-			return -1;
-		}
-
-		if (isset($data["users"]) && in_array($data["users"], $this->user_options)) { // Get list of Users
-			$this->users = $data["users"];
-		} else {
-
-			$main_msg = 'No valid users have been provided, this is needed to retrieve a list of users to email from the selected databases.<br>users => '
-                        . (isset($data["users"])?htmlspecialchars(print_r($data["users"],true)):' not defined') ;
-			$this->set_error($main_msg);// . "<br>Please contact the Heurist team if this problem persists."
-			return -1;
-		}
-
-		if (isset($data["emailTitle"]) && is_string($data["emailTitle"])) { // Get Email subject
-			$this->email_subject = $data["emailTitle"];
-		} else {
-			$this->email_subject = null;
-		}
-
-		if (isset($data["emailBody"]) && is_string($data["emailBody"])) { // Get Email body
-			$this->email_body = $data["emailBody"];
-		} else {
-
-			$this->set_error('No email body has been provided');//, the Heurist team has been notified
-
-			return -1;
-		}
-
+        if (!$this->validateDatabaseInput($data)) {
+            return -1;
+        }     
+        
+        if (!$this->validateUserInput($data)) {
+            return -1;
+        }           
+        
 		// Get record filtering options, use defaults if none supplied
 		$this->rec_count = (isset($data["recTotal"]) && is_numeric($data["recTotal"]) && $data["recTotal"] >= 0) ? $data["recTotal"] : "none";
 
@@ -184,6 +138,53 @@ class SystemEmailExt {
 
 		return 0;
 	}
+    
+    private function validateDatabaseInput($data) {
+        if (!isset($data["db"])) {
+            $this->set_error('No current database has been provided<br>Please contact the Heurist team if this problem persists.');
+            return false;
+        }
+
+        if (isset($data["databases"])) {
+            if (!is_array($data["databases"])) {
+                $data["databases"] = explode(',', $data["databases"]);
+            }
+
+            if (is_array($data["databases"]) && count($data["databases"]) >= 1) {
+                $this->databases = $this->validateDatabases($data["databases"]);
+            }
+        }
+
+        if (isEmptyArray($this->databases)) {
+            $provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . htmlspecialchars($data["databases"]);
+            $this->set_error('No valid databases have been provided.' . $provided_dbs);
+            return false;
+        }
+        
+        return true;        
+        
+    }
+    
+    private function validateUserInput($data) {
+        if (isset($data["users"]) && in_array($data["users"], $this->user_options)) {
+            $this->users = $data["users"];
+        } else {
+            $main_msg = 'No valid users have been provided.<br>users => ' 
+                . (isset($data["users"]) ? htmlspecialchars(print_r($data["users"], true)) : ' not defined');
+            $this->set_error($main_msg);
+            return false;
+        }
+
+        $this->email_subject = isset($data["emailTitle"]) && is_string($data["emailTitle"]) ? $data["emailTitle"] : null;
+
+        if (!isset($data["emailBody"]) || !is_string($data["emailBody"])) {
+            $this->set_error('No email body has been provided');
+            return false;
+        }
+        
+        $this->email_body = $data["emailBody"];
+        return true;
+    }    
 
 	/*
 	 * Get current user's email
@@ -267,33 +268,15 @@ class SystemEmailExt {
 		$wg_count = 0;
 
 		foreach ($dbs as $db){
+            
+             $where_clause = $this->generateWhereClause($this->users, $db);
 
-			$where_clause = "";
-
-			// Create WHERE clause
-			if ($users == "owner") { // Owners
-				$where_clause = "WHERE ugr.ugr_ID = 2";
-			} elseif($users == "manager") { // Admins for workgroup Database Managers
-				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
- 			} elseif($users == "admin") { // Admins for ALL workgroups
-
- 				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN
-						  		 (SELECT ugr_ID
- 						   		  FROM " . $db . ".sysUGrps
- 						   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
-
-			} elseif($users == "user") { // ALL users
-				$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
-			}
-
-			// Execute WHERE Clause
-			if (empty($where_clause)) {
-
-				$this->set_error('Unable to construct WHERE clause for User List query due to an invalid users option<br>users => '
-                         . htmlspecialchars($users));
-				return -1;
-			} else {
-
+            if (empty($where_clause)) {
+                $this->set_error('Unable to construct WHERE clause for User List query due to an invalid users option<br>users => '
+                                 . htmlspecialchars($this->users));
+                return -1;
+            }
+            
 				$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail, ugr.ugr_ID
 						  FROM " . $db . ".sysUsrGrpLinks AS ugl
 						  INNER JOIN " . $db . ".sysUGrps AS ugr ON ugl.ugl_UserID = ugr.ugr_ID "
@@ -304,53 +287,65 @@ class SystemEmailExt {
 
 					continue;
 				}
-
-				while ($row = $res->fetch_row()) {
-
-					$db_name = substr($db,strlen(HEURIST_DB_PREFIX));
-
-                    $email = $row[2];
-
-					if($email){
-						$email = filter_var($email, FILTER_VALIDATE_EMAIL);//FILTER_SANITIZE_EMAIL
-					}
-
-                    if(!$email){
-                        //email invalid
-                        $this->user_invalid_email[] = array($db, $row[0], $row[1], $row[3], $row[2]);
-
-                    }else
-					if (array_key_exists($email, $this->user_details)) { // check if user already has data in user_details array, note: only the first set of first/last name are used
-
-						if (!in_array($db_name, $this->user_details[$email]["db_list"])) { // add db to list
-
-							$this->user_details[$email]["db_list"][] = $db_name;
-						}
-					} else {
-
-						$details = array();
-						$details["first_name"] = $row[0];
-						$details["last_name"] = $row[1];
-						$details["db_list"][] = $db_name;
-
-						$this->user_details[$email] = $details;
-					}
-				}
+                
+                $this->processUserResults($res, $db);
 
 				$res->close();
-			}
+			
 		}
 
 		return 0;
 	}
+    
+    private function generateWhereClause($users, $db) {
+        switch ($users) {
+            case "owner":
+                return "WHERE ugr.ugr_ID = 2";
+            case "manager":
+                return "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
+            case "admin":
+                return "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN
+                        (SELECT ugr_ID FROM $db.sysUGrps WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
+            case "user":
+                return "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
+            default:
+                return "";
+        }
+    }    
+    
+    private function processUserResults($res, $db) {
+        while ($row = $res->fetch_row()) {
+            $db_name = substr($db, strlen(HEURIST_DB_PREFIX));    
+    
+            $email = filter_var($row[2], FILTER_VALIDATE_EMAIL);
+    
 
-	/*
-	 * Retrieve the record count and newest last modified date
-	 *
-	 * Param: None
-	 *
-	 * Return: VOID || Error Code
-	 */
+            if (!$email) {
+                $this->user_invalid_email[] = array($db, $row[0], $row[1], $row[3], $row[2]);
+            } else {
+                if (array_key_exists($email, $this->user_details)) {
+                    if (!in_array($db_name, $this->user_details[$email]["db_list"])) {
+                        $this->user_details[$email]["db_list"][] = $db_name;
+                    }
+                } else {
+                    $this->user_details[$email] = [
+                        "first_name" => $row[0],
+                        "last_name" => $row[1],
+                        "db_list" => [$db_name]
+                    ];
+                }                
+            }    
+        }
+    }
+    
+    /*
+     * Retrieve the record count and newest last modified date
+     *
+     * Param: None
+     *
+     * Return: VOID || Error Code
+     */
+	
 
 	private function createRecordsList() {
 
@@ -491,136 +486,14 @@ class SystemEmailExt {
         $mailer->SetFrom($email_from, $email_from_name);
 
 		foreach ($this->user_details as $email => $details) {
-
-			$db_url_arr = array();
-
-			$records_arr = array();
-			$lastmod_arr = array();
-
-			$dbs = $details["db_list"];
-
-			// Convert information into arrays and get DB urls
-			foreach ($dbs as $db) {
-				$url = HEURIST_BASE_URL . "?db=$db";
-				$db_url_arr[] = "<a href='$url' target='_blank'>$url</a>";
-
-				$row = $this->records[HEURIST_DB_PREFIX.$db];
-
-				$records_arr[] = $row[0];
-				$lastmod_arr[] = $row[1];
-			}
-			// Then transform from array into readable list
-			$db_listed = $this->createListFromArray($dbs);
-			$db_url_listed = $this->createListFromArray($db_url_arr);
-			$records_listed = $this->createListFromArray($records_arr);
-			$lastmod_listed = $this->createListFromArray($lastmod_arr);
-
-			// Replace placeholders with information
-			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
-
-			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
-
-			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist email about databases: " . $db_url_listed);
-            $status_msg = '';
-
-            if($this->debug_run){
-
-                $status_msg = 'OK';
-
-            }elseif($this->use_native_mail_function){ //use php native mail
-
-                $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
-                //."\r\nReply-To: ".
-                ."\r\n".CTYPE_HTML."\r\n";
-
-                $title = '=?utf-8?B?'.base64_encode($title).'?=';
-
-                USanitize::purifyHTML($body);
-                $rv = mail($email, $title, $body, $email_header);
-                if(!$rv){
-                    $this->set_error('Unknown error');
-                    $email_rtn = -3;
-                }
-
-            }elseif(isset($mailRelayPwd) && $mailRelayPwd!=''
-                        && endsWith($email, '@gmail.com')){
-
-                $data = array('pwd' => $mailRelayPwd ,
-                              'from_name' => $this->cur_user["ugr_FullName"],
-                              'from' => $this->cur_user['ugr_eMail'],
-                              'to' => $email,
-                              'title' => $title,
-                              'text' => $body,
-                              'html' => 1);
-
-                $data_str = http_build_query($data);
-
-                $ch =  curl_init("https://heuristref.net/HEURIST/mailRelay.php");
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $responce = curl_exec($ch);
-                curl_close($ch);
-
-                if($responce!=1){
-                    $this->set_error('Unknown error. Sending via heuristref relay');
-                    $email_rtn = -3;
-                }
-
-            }else{
-
-                try {
-                    $mailer->AddAddress( $email );
-                } catch (Exception $e) {
-                    $email_rtn = -2;
-                    $status_msg = 'Failed, Error Message: Invalid email '.htmlspecialchars($email);
-                    $this->set_error( $status_msg );
-                }
-                if($email_rtn == 0){
-
-                    $mailer->Subject = $title;
-                    USanitize::purifyHTML($body);
-                    $mailer->Body = $body;
-                    try {
-                        $mailer->send();
-                    } catch (Exception $e) { // PHPMailer exception
-                        $this->set_error($e->errorMessage());
-                        $email_rtn = -3;
-                    } catch (\Exception $e) { // Global PHP exception
-                        $this->set_error($e->getMessage());
-                        $email_rtn = -3;
-                    }
-
-                }
-            }
-
-            if ($email_rtn == 0) {
-                $status_msg = "Sent, Sent Message: " . $body;
-            } else {
-                $status_msg = "Failed, Error Message: " . $this->get_error();
-            }
-
-			$this->log .= htmlspecialchars("Values: {databases: {".$db_listed."}, email: $email, name: "
-                        .$details['first_name']. " " .$details["last_name"]
-					    .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
-					    ."Timestamp: " . date(DATE_8601) . ", Status: " . $status_msg.'  , '.$email_from )
-					    . '<br><br>';
-
-			$mailer->clearAddresses();// ensure that the current email is gone
-
-			if ($email_rtn != 0) {
-
-				if ($email_rtn == -3){
-					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => "
-                            . htmlspecialchars($this->error_msg));
-				}elseif($email_rtn == -2){
-                    continue;
-                }
+            
+            $email_rtn = $this->processEmailForUser($email, $details, $mailer, $mailRelayPwd);
+            
+            if ($email_rtn != 0) {
                 //ERROR
-				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
-
-				return $email_rtn;
-			}
+                $this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
+                return $email_rtn;
+            }
 
 			$user_cnt++;
 		} //for users
@@ -630,6 +503,121 @@ class SystemEmailExt {
 
 		return $email_rtn;
 	}
+    
+    private function processEmailForUser($email, $details, $mailer, $mailRelayPwd) {
+        $email_rtn = 0;
+        
+        list($db_listed, $db_url_listed, $records_listed, $lastmod_listed) = $this->prepareEmailContent($details);
+
+        $replace_with = [$details['first_name'], $details['last_name'], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed];
+        $body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
+        $title = isset($this->email_subject) ? $this->email_subject : "Heurist email about databases: " . $db_url_listed;
+
+        if ($this->debug_run) {
+            $status_msg = 'OK';
+        } elseif ($this->use_native_mail_function) {
+            $email_rtn = $this->sendNativeMail($email, $title, $body);
+        } elseif (isset($mailRelayPwd) && $mailRelayPwd != '' && endsWith($email, '@gmail.com')) {
+            $email_rtn = $this->sendViaRelay($email, $title, $body, $mailRelayPwd);
+        } else {
+            $email_rtn = $this->sendUsingPHPMailer($email, $title, $body, $mailer);
+        }
+
+        $this->logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body);
+        $mailer->clearAddresses();
+
+        return $email_rtn;
+    }
+
+    private function prepareEmailContent($details) {
+        $db_url_arr = [];
+        $records_arr = [];
+        $lastmod_arr = [];
+
+        foreach ($details['db_list'] as $db) {
+            $url = HEURIST_BASE_URL . "?db=$db";
+            $db_url_arr[] = "<a href='$url' target='_blank'>$url</a>";
+
+            $row = $this->records[HEURIST_DB_PREFIX . $db];
+            $records_arr[] = $row[0];
+            $lastmod_arr[] = $row[1];
+        }
+
+        $db_listed = $this->createListFromArray($details['db_list']);
+        $db_url_listed = $this->createListFromArray($db_url_arr);
+        $records_listed = $this->createListFromArray($records_arr);
+        $lastmod_listed = $this->createListFromArray($lastmod_arr);
+
+        return [$db_listed, $db_url_listed, $records_listed, $lastmod_listed];
+    }
+
+    private function sendNativeMail($email, $title, $body) {
+        $email_header = 'From: Heurist system <no-reply@' . HEURIST_DOMAIN . '>' . "\r\n" . CTYPE_HTML . "\r\n";
+        $title = '=?utf-8?B?' . base64_encode($title) . '?=';
+        USanitize::purifyHTML($body);
+
+        if (!mail($email, $title, $body, $email_header)) {
+            $this->set_error('Unknown error');
+            return -3;
+        }
+
+        return 0;
+    }
+
+    private function sendViaRelay($email, $title, $body, $mailRelayPwd) {
+        $data = [
+            'pwd' => $mailRelayPwd,
+            'from_name' => $this->cur_user['ugr_FullName'],
+            'from' => $this->cur_user['ugr_eMail'],
+            'to' => $email,
+            'title' => $title,
+            'text' => $body,
+            'html' => 1
+        ];
+
+        $data_str = http_build_query($data);
+        $ch = curl_init("https://heuristref.net/HEURIST/mailRelay.php");
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if ($response != 1) {
+            $this->set_error('Unknown error. Sending via heuristref relay');
+            return -3;
+        }
+
+        return 0;
+    }
+
+    private function sendUsingPHPMailer($email, $title, $body, $mailer) {
+        try {
+            $mailer->AddAddress($email);
+            $mailer->Subject = $title;
+            USanitize::purifyHTML($body);
+            $mailer->Body = $body;
+            $mailer->send();
+        } catch (Exception $e) {
+            $this->set_error($e->errorMessage());
+            return -3;
+        } catch (\Exception $e) {
+            $this->set_error($e->getMessage());
+            return -3;
+        }
+
+        return 0;
+    }
+
+    private function logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body) {
+        $status_msg = $email_rtn == 0 ? "Sent, Sent Message: " . $body : "Failed, Error Message: " . $this->get_error();
+        $this->log .= htmlspecialchars("Values: {databases: {" . $db_listed . "}, email: $email, name: "
+                     . $details['first_name'] . " " . $details["last_name"]
+                     . ", record_count: {" . $records_listed . "}, last_modified: {" . $lastmod_listed . "} },"
+                     . "Timestamp: " . date(DATE_8601) . ", Status: " . $status_msg)
+                     . '<br><br>';
+    }    
+    
 
 	/*
 	 * Export Email Detail's as a CSV File
@@ -788,46 +776,47 @@ class SystemEmailExt {
 
 		$user_list_size = strlen($user_list);// User List part in bytes
 
-		// Check if Main and User List parts can be placed together or in different blocktext fields
-		if ($main_size+$user_list_size > $max_size) { // Save the text in chucks
-
-			$this->receipt = array();
-
-			if ($main_size < $max_size) {
-				$this->receipt[] = $main;
-			} else { // Save this part in chunks
-
-				$main_t = mb_convert_encoding($main, "UTF-8", "auto");
-
-				if ($main_t) {
-					$start = 0;
-					while ($start < mb_strlen($main_t)) {
-						$this->receipt[] = mb_substr($main_t, $start, $max_chars);
-						$start += $max_chars;
-					}
-				}
-
-			}
-			if ($user_list_size < $max_size) {
-				$this->receipt[] = $user_list;
-			} else { // Save this part in chunks
-
-				$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
-
-				if ($user_list_t) {
-					$start = 0;
-					while ($start < mb_strlen($user_list_t)) {
-						$this->receipt[] = mb_substr($user_list_t, $start, $max_chars);
-						$start += $max_chars;
-					}
-				}
-
-			}
-
-		} else { // Save together
-			$this->receipt = $main . "<br>" . $user_list;
-		}
         $this->emails_sent_count = $user_count;
+
+		// Check if Main and User List parts can be placed together or in different blocktext fields
+		if ($main_size+$user_list_size <= $max_size) { // Save the text in chucks
+            $this->receipt = $main . "<br>" . $user_list;
+            return;
+        }
+
+		$this->receipt = array();
+
+		if ($main_size < $max_size) {
+			$this->receipt[] = $main;
+		} else { // Save this part in chunks
+
+			$main_t = mb_convert_encoding($main, "UTF-8", "auto");
+
+			if ($main_t) {
+				$start = 0;
+				while ($start < mb_strlen($main_t)) {
+					$this->receipt[] = mb_substr($main_t, $start, $max_chars);
+					$start += $max_chars;
+				}
+			}
+
+		}
+		if ($user_list_size < $max_size) {
+			$this->receipt[] = $user_list;
+		} else { // Save this part in chunks
+
+			$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
+
+			if ($user_list_t) {
+				$start = 0;
+				while ($start < mb_strlen($user_list_t)) {
+					$this->receipt[] = mb_substr($user_list_t, $start, $max_chars);
+					$start += $max_chars;
+				}
+			}
+
+		}
+
 	}
 	private function get_receipt() {
 		return $this->receipt;
