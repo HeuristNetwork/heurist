@@ -97,17 +97,14 @@ class HImportDetailTypes extends HImportBase{
         const field_name = $('#field_name').val();
         const field_desc = $('#field_desc').val();
         const field_type = $('#field_type').val();
-        if(field_name < 0 || field_desc < 0 || field_type < 0){
 
-            let missing = [];
-            field_name >= 0 || missing.push('Name');
-            field_desc >= 0 || missing.push('Description');
-            field_type < 0 || missing.push('Type');
-
-            let last = missing.pop();
-            missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
-
-            this.updatePreparedInfo(`<span style="color:red">${missing} must be defined</span>`, 0);
+        const allow_prepare = this.checkRequiredMapping({
+            'Name': [field_name],
+            'Description': [field_desc],
+            'Type': [field_type]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
         
@@ -116,37 +113,26 @@ class HImportDetailTypes extends HImportBase{
         const field_uri = $('#field_uri').val();
 
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = $('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
 
-            if(field_name >= row.length || field_desc >= row.length || field_type >= row.length){
-                continue;
-            }
+            count ++;
 
-            const name_empty = window.hWin.HEURIST4.util.isempty(row[field_name]);
-            const desc_empty = window.hWin.HEURIST4.util.isempty(row[field_desc]);
-            const type_empty = window.hWin.HEURIST4.util.isempty(row[field_type]);
-            if(name_empty || desc_empty || type_empty){
-
-                let missing = name_empty ? ['name'] : [];
-                !desc_empty || missing.push('description');
-                !type_empty || missing.push('type');
-
-                let last = missing.pop();
-                missing = missing.length == 0 ? last : `${missing.join(', ')} and ${last}`;
-
-                msg += `Row #${count} is missing: ${missing}<br>`;
-
+            const is_valid = this.checkRequiredValues(row, {
+                'name': [field_name],
+                'description': [field_desc],
+                'type': [field_type]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 

@@ -159,8 +159,12 @@ class HImportTerms extends HImportBase{
         }
 
         const field_term = $('#field_term').val();
-        if(field_term < 0){
-            this.updatePreparedInfo(`<span style="color:red">Term (Label) must be defined</span>`, 0);
+
+        const allow_prepare = this.checkRequiredMapping({
+            'Term (label)': [field_term]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
 
@@ -169,34 +173,32 @@ class HImportTerms extends HImportBase{
         const field_uri = $('#field_uri').val();
 
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = !$('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
 
-            if(field_term >= row.length){
-                continue;
-            }
+            count ++;
 
-            if(window.hWin.HEURIST4.util.isempty(row[field_term])){
-
-                msg += `Row #${count} is missing: Term label<br>`;
+            const is_valid = this.checkRequiredValues(row, {
+                'term label': [field_term]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 
             let record = {};
             record['trm_Domain'] = this._trm_Domain;
 
-            if(this._trm_ParentTermID > 0){ record['trm_ParentTermID'] = this._trm_ParentTermID; }
-            if(this._vcg_ID > 0){ record['trm_VocabularyGroupID'] = this._vcg_ID; }
+            record['trm_ParentTermID'] = this._trm_ParentTermID;
+            record['trm_VocabularyGroupID'] = this._vcg_ID;
 
             this.createRecord(row, {
                 trm_Label: field_term,
@@ -207,8 +209,9 @@ class HImportTerms extends HImportBase{
 
         }//for
 
+        const entity = this._vcg_ID > 0 ? 'vocabulary' : 'terms';
         msg = this.prepared_data.length == 0 
-                ? `<span style="color:red">No valid ${this._vcg_ID > 0 ? 'vocabulary' : 'terms'} to import</span>` : msg;
+                ? `<span style="color:red">No valid ${entity} to import</span>` : msg;
         this.updatePreparedInfo(msg, this.prepared_data.length);
     }
 
@@ -218,8 +221,12 @@ class HImportTerms extends HImportBase{
     doPrepareTranslation(){
 
         const field_ref_term = $('#field_ref_term').val();
-        if(field_ref_term < 0){
-            this.updatePreparedInfo(`<span style="color:red">Reference Term (Label) must be defined</span>`, 0);
+
+        const allow_prepare = this.checkRequiredMapping({
+            'Reference Term (label)': [field_ref_term]
+        });
+        if(allow_prepare !== true){
+            this.updatePreparedInfo(`<span style="color:red">${allow_prepare} must be defined</span>`, 0);
             return;
         }
 
@@ -227,26 +234,25 @@ class HImportTerms extends HImportBase{
         const field_trn_desc = $('#field_trn_desc').val();
 
         let msg = '';
-        const has_header = $('#csv_header').is(':checked');
-        let found_header = false;
+        let found_header = !$('#csv_header').is(':checked');
         let count = 0;
 
         for(const row of this.parsed_data){
 
-            count ++;
-
-            if(has_header && !found_header){
+            if(!found_header){
                 found_header = true;
                 continue;
             }
 
-            if(field_ref_term >= row.length){
-                continue;
-            }
+            count ++;
 
-            if(window.hWin.HEURIST4.util.isempty(row[field_ref_term])){
-
-                msg += `Row #${count} is missing: Term label<br>`;
+            const is_valid = this.checkRequiredValues(row, {
+                'term label': [field_ref_term],
+                'a translation': [field_trn_term, field_trn_desc]
+            });
+            if(is_valid !== true){
+                msg += `Row #${count} is missing: ${is_valid}<br>`;
+                $('.tbmain').find(`tr:nth-child(${count})`).addClass('data_error');
                 continue;
             }
 
