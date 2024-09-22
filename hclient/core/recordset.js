@@ -175,9 +175,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
         let aitems = [], titems = [];
-        let item, titem, shape, idx;
-        const min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
+        let item, titem, idx;
         let mapenabled = 0,
             timeenabled = 0;
             
@@ -243,8 +241,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //item - item object to be added to timemap 
         let linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
         
-        let tot = 0;
-        
         for(idx in records){
             if(idx)
             {
@@ -291,8 +287,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 for(let k=0; k<timefields.length; k++){
                     const datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
-                        let m, res = [];
-                        for(m=0; m<datetime.length; m++){
+                        for(let m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
@@ -519,8 +514,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     mapenabled++;
                     aitems.push(item);
                 }
-
-                tot++;
         }}//for records
       
         //add linked places as separate items 
@@ -575,29 +568,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 
     */
     function _toGeoJSON(filter_rt, geoType, max_limit){
-
-        let aitems = [], titems = [];
-        let item, titem, shape, idx, 
-            min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
-        let mapenabled = 0,
-            timeenabled = 0;
             
-        let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
-        
         let localIds = window.hWin.HAPI4.sysinfo['dbconst'];
-        let DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        let DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR'];
-        let DT_BG_COLOR = localIds['DT_BG_COLOR'];
-        let DT_OPACITY = localIds['DT_OPACITY'];
         let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY'];
         
         //make bounding box for map datasource transparent and unselectable
-        let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
-                                    localIds['RT_GEOTIFF_SOURCE'],
-                                    localIds['RT_KML_SOURCE'],
-                                    localIds['RT_MAPABLE_QUERY'],
-                                    localIds['RT_SHP_SOURCE']];
                                     
         let geofields = [], timefields = [];
         
@@ -616,14 +591,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         }
         
-        let linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
         //linkedRecs - records linked to this place
         //shape - coordinates
         //item - item object to be added to timemap 
-        let linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
-        
-        let tot = 0;
-        
         //{"geojson":[]}
         function __getGeoJsonFeature(record, extended, simplify){
                  
@@ -683,8 +653,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(date_start==null) date_start = '';
                             if(date_end==null) date_end = '';
                             timevalues.push([date_start, '', '', date_end, '']);
-                                
-                        timeenabled++;
                 }                      
                 if(timevalues.length>0){
                     res['when'] = {timespans:timevalues};    
@@ -699,8 +667,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(recShape && geoType!=1){  //geoType==1 from geo fields only, ignore recShape
                     geovalues = [recShape];
                 }
-                
-                let has_linked_places = [];
                 
                 if(geoType!=2){ //get coordinates from geo fields geoType==2 form recShape only - ignore native geo coords   
                     
@@ -798,7 +764,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     // some important id for record and detail types in local values
     const RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
         DT_TARGET_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
-        DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
         DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
         DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
         //DT_YEAR = window.hWin.HAPI4.sysinfo['dbconst']['DT_YEAR'],     //73
@@ -1423,7 +1388,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         sort: function(sortFields){
             
-            let recID, fieldName, dataTypes={};
+            let fieldName, dataTypes={};
             
             if(sortFields==null || $.isEmptyObject(sortFields)) return
             
@@ -1512,7 +1477,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
             }
             
-            let recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
+            let fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
             let isexact = {};
             let isnegate= {};
             let isless= {};

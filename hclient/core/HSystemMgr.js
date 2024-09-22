@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global prepared_params */
 
     /**
     * @class 
@@ -817,7 +817,7 @@ class HSystemMgr {
           return 0;
       }
 
-      let $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
+      window.hWin.HEURIST4.msg.showMsgDlg(message
           + '<br>'
           + window.hWin.HR('Click "Import" to get these definitions'),
           {

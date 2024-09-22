@@ -466,12 +466,10 @@ window.hWin.HEURIST4.query = {
             target.setSelectionRange(0, target.value.length);
             let succeed;
             try {
-                succeed = document.execCommand("copy");
-                
+                document.execCommand("copy");
                 $dlg.dialog( "close" );
             } catch(e) {
-                succeed = false;
-                alert('Not supported by browser');
+               alert('Not supported by browser');
             }                            
             
         }; 

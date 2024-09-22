@@ -9,7 +9,7 @@ function _detectHeurist( win ){
     }
 
     try{
-        let doc = win.parent.document;
+        win.parent.document;
     }catch(e){
         // not accessible - this is cross domain
         return win;

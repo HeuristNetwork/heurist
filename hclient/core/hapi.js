@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global regional, prepared_params */
+/* global ActionHandler, HSystemMgr */
 
 /*
 
@@ -209,7 +209,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         
     }
     
-    let _key_count;
     function _getKeyCount(data, level) {
         level = level || 0;
         let _key_count = 0;
@@ -869,9 +868,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             createRstIndex: function () {
                 let rst_index = {};
-                let rst_references = {}; //list of record pointer and relmarker fields that refers this rectype
-                let rst_reverse = {};    //linked FROM rectypes
-                let rst_direct = {};     //linked TO rectypes
 
                 let recset = entity_data['defRecStructure'];
                 recset.each2(function (rst_ID, record) {

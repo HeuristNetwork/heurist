@@ -28,8 +28,7 @@ function HLayout(args) {
      const _className = "HLayout",
          _version   = "0.4";      
 
-    let widgetinstances = [], //@todo array of all inited widgets 
-         widgets = [],
+    let  widgets = [],
          layouts = [],  //json description of layout
          _containerid,
          _is_container_layout = false;
@@ -252,7 +251,6 @@ function HLayout(args) {
 
     //--------------------------------------------
     let grid_min_size = 200;
-    let grid_step_size = 100;
     let app_counter = 0; //to maintain unique id for panels and tabs
 
     //
@@ -535,10 +533,7 @@ function HLayout(args) {
             }
         }
 
-        
-        let bg_color = $('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', '');
-        
         
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
@@ -804,7 +799,6 @@ console.error('Cardinal layout widget does not have proper options');
 
                 let $src_tab = $app_content.parent();
 
-                let app = _appGetWidgetById($app_content.attr('widgetid')); //ART04-26
                 let offset = $pane_content.offset();
                 let $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.substr(1) }, //to remove #
                     {dockable: true, dragable:true, resizable:true,
@@ -1205,7 +1199,6 @@ console.error('Cardinal layout widget does not have proper options');
     //
     function isMouseoverTabControl(e){
 
-        let s = e.pageX+"  "+e.pageY;
         let res = false;
 
         $(".tab_ctrl").each(

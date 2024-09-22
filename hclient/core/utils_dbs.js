@@ -298,8 +298,7 @@ window.hWin.HEURIST4.dbs = {
 
     createRectypeStructureTree_new: function( options )
     {
-        let db_structure = options.db_structure,
-            $mode = options.mode,
+        let $mode = options.mode,
             rectypeids = options.rectypeids,
             fieldtypes = options.fieldtypes,
             parentcode = options.parentcode,
@@ -340,7 +339,6 @@ window.hWin.HEURIST4.dbs = {
             let $res = {};
             let $children = [];
             let $dtl_fields = [];
-            let headerFields = [];
             
             //add default fields - RECORD TYPE HEADER
             if($mode==3){
@@ -779,7 +777,6 @@ window.hWin.HEURIST4.dbs = {
         
         let $dt_label   = $dtValue['rst_DisplayName'];
         let $dt_title   = $dtValue['rst_DisplayName'];
-        let $dt_tooltip = $dtValue['rst_DisplayHelpText']; //help text
         let $dt_conceptcode   = $Db.getConceptID('dty', $dtID);
         let $dt_display_order = $dtValue['rst_DisplayOrder'];
         
@@ -1486,12 +1483,6 @@ window.hWin.HEURIST4.dbs = {
      */
     rst: function(rec_ID, dty_ID, fieldName, newValue){
         
-        //fieldnames for backward capability
-        let dfname = null;
-        if(fieldName) dfname = $Db.rst_to_dtyField( fieldName );
-        if(dfname){
-            return $Db.dty(dty_ID, dfname);
-        }else{
             //direct access (without check and reload)
             let rectype_structure = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
             
@@ -1502,7 +1493,6 @@ window.hWin.HEURIST4.dbs = {
                     return rectype_structure[rec_ID];            
                 }
             }
-        }
         return null
         
     },
@@ -1580,24 +1570,6 @@ window.hWin.HEURIST4.dbs = {
             }
             
         }
-    },
-    
-    //
-    // Some fields in rectype structure are taken from basefield (dty) directly
-    //
-    rst_to_dtyField: function(fieldName)
-    {
-        let dfname = null;
-        if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
-        else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
-        //else if(fieldName=='rst_TermIDTreeNonSelectableIDs') dfname='dty_TermIDTreeNonSelectableIDs' //not used anymore
-        else if( //fieldName=='dty_TermIDTreeNonSelectableIDs' || fieldName=='dty_FieldSetRectypeID' || 
-                fieldName=='dty_Type')
-        {
-            dfname = fieldName; 
-        } 
-        
-        return null;
     },
     
 /*    
@@ -2443,21 +2415,18 @@ window.hWin.HEURIST4.dbs = {
                 rtid = rtid.split(',')[0];
             }
             
-            if(rtid==''){
-
-                if(dtid=='typeid' || dtid=='typename'){
+            if(rtid!=''){
+                if(rtid=='any'){
+                    harchy.push('');    
+                    if(top_rty_ID>0) rtid = top_rty_ID;
+                    
+                }else if($Db.rty(rtid)==null){
+                    //record type was removed - remove facet
+                    removeFacet = true;
+                    break;
+                }else{
+                    harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');    
                 }
-            
-            }else if(rtid=='any'){
-                harchy.push('');    
-                if(top_rty_ID>0) rtid = top_rty_ID;
-                
-            }else if($Db.rty(rtid)==null){
-                //record type was removed - remove facet
-                removeFacet = true;
-                break;
-            }else{
-                harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');    
             }
 
             let rec_header = null;
@@ -2617,7 +2586,6 @@ window.hWin.HEURIST4.dbs = {
 
                         let cfn_record = recset.getFirstRecord();
                         let cfn_Content = recset.fld(cfn_record, 'cfn_FunctionSpecification');
-                        let cfn_Name = recset.fld(cfn_record, 'cfn_Name');
 
                         //find affected record types
                         //finds all fields with rst_CalcFunctionID = cfn_ID

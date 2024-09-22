@@ -577,9 +577,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
                 //close dialog from inside of frame - need redifine each time
                 content.close = function() {
-                    
-                    let did = $dlg.attr('id');
-
                     let rval = true;
                     let closeCallback = options['callback'];
                     if(window.hWin.HEURIST4.util.isFunction(closeCallback)){
@@ -708,8 +705,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
                     //close dialog from inside of frame
                     content.close = function() {
-                        let did = $dlg.attr('id');
-
                         let rval = true;
                         let closeCallback = options['callback'];
                         if(window.hWin.HEURIST4.util.isFunction(closeCallback)){
@@ -816,7 +811,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         function __maximizeOneResize(){
                             let dialog_height = window.innerHeight;
                             $dlg.dialog( 'option', 'height', dialog_height);
-                            let dialog_width = window.innerWidth;
                             $dlg.dialog( 'option', 'width', '100%'); //dialog_width
                         }
                         //$(window).resize(__maximizeOneResize)
@@ -1114,8 +1108,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             $(element).show().appendTo($dlg);
 
-            let body = $(this.document).find('body');
-            
             let dimW = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
             let dimH = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
             
@@ -1484,7 +1476,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         
-        let progressCounter = 0;        
         let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
         
         let session_id = options.session;
@@ -1612,8 +1603,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             pbar.progressbar( "value", 0 );
                         }
                     }
-                    
-                    progressCounter++;
                     
                 }
             },'text');

@@ -398,7 +398,6 @@ function Temporal (strInitTemporal) {
         },
 
         getTDate: function (code) {
-            let a = _dates;
             if ( _dates[code] ) {
                 return _dates[code];
             } else {
@@ -2161,10 +2160,12 @@ function temporalToHumanReadableString(inputStr) {
             tpq = tpq ? tpq[1]: null;
             let taq = str.match(/TAQ=([^\|]+)/);
             taq = taq ? taq[1]: null;
+            /*
             let pdb = str.match(/PDB=([^\|]+)/);
             pdb = pdb ? pdb[1]: (tpq ? tpq:"");
             let pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
+            */
             str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             let dat = str.match(/DAT=([^\|]+)/);

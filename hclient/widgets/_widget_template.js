@@ -28,8 +28,6 @@ $.widget( "heurist.widgetname", {
     // the widget's constructor
     _create: function() {
 
-        let that = this;
-
         this.element
         // prevent double click to select text
         .disableSelection();

@@ -141,8 +141,6 @@ function HintDiv(_id, _width, _height, _initcontent) {
 
 		let div_height =  popup_div.height();
 		let div_width =  popup_div.width();
-		let pageHeight = popup_div.parents().height();
-		let scrollValue = popup_div.parents().scrollTop();
 		if(!offset) {
 			offset = 5;
 		}

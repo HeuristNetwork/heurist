@@ -185,8 +185,6 @@ window.hWin.HEURIST4.geo = {
                                                 
                             if(shapes.length>0){
 
-                                let type = null;
-
                                 if( geometry.type=="Point" || 
                                     geometry.type=="MultiPoint")
                                 {   

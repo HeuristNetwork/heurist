@@ -18,6 +18,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global CmsManager */
+
 /**
  * Class: ActionHandler
  * 
@@ -35,7 +37,7 @@ class ActionHandler {
      */
     constructor(arg) {
         if(Array.isArray(arg)){
-            this.actions = actions;
+            this.actions = arg;
         } else {
             this.actions = null;
         }
@@ -447,7 +449,6 @@ class ActionHandler {
             case "menu-profile-tags":
             case "menu-profile-reminders":
             case "menu-profile-files":
-
             case "menu-profile-groups":
             case "menu-profile-users":
                 window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);

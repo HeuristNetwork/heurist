@@ -105,8 +105,6 @@ $.widget( "heurist.emailForm", {
             
             this._element_form.hide()
             this._initDialog();
-        }else{
-           
         }
         
         //init layout
@@ -160,8 +158,6 @@ $.widget( "heurist.emailForm", {
     // invoked from _init after loading of html content
     //
     _initControls:function(){
-        
-        let that = this;
         
         //verify that form has all required elements
         let missed = [];

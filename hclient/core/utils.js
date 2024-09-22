@@ -235,13 +235,12 @@ window.hWin.HEURIST4.util = {
             }
                 
             try {
-                let flash = new ActiveXObject("Plugin.mailto");
+                new ActiveXObject("Plugin.mailto");
             } catch (e) {
                 //not installed
             }
         } else { //firefox,chrome,opera
            
-            let mimeTypes = navigator.mimeTypes;
             let mime = navigator.mimeTypes['application/x-mailto'];
             if(mime) {
                 //installed
@@ -786,8 +785,7 @@ window.hWin.HEURIST4.util = {
 
             let styles = css.split(';'),
             i= styles.length,
-            style, k, v;
-
+            k, v;
 
             while (i--)
             {

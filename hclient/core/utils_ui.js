@@ -176,7 +176,7 @@ window.hWin.HEURIST4.ui = {
             
             for (let idx in options.values)
             if(idx>=0){
-                let key, title, disabled = false;
+                let key, title;
                 if(window.hWin.HEURIST4.util.isnull(options.values[idx].key) && 
                    window.hWin.HEURIST4.util.isnull(options.values[idx].title))
                 {
@@ -536,7 +536,6 @@ window.hWin.HEURIST4.ui = {
         //recordset 
         let rtg_Trash = $Db.getTrashGroupId('rtg');
         let rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1, 'rty_RecTypeGroupID': `!=${rtg_Trash}` });
-        let index;
 
         if(rectypes){ 
 
@@ -726,7 +725,7 @@ window.hWin.HEURIST4.ui = {
             extraOptions      = options['extraOptions'] ? options['extraOptions'] : {};
         }
         
-        let dtyID, details;
+        let details;
      
         //show fields for specified set of record types
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
@@ -736,7 +735,7 @@ window.hWin.HEURIST4.ui = {
             //       names of field as specified in record structure (disabled items)
             let dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
             
-            let rty,rtyName,dty,dtyName,fieldName,opt;
+            let rty,rtyName,dtyName,fieldName,opt;
             
             //for all rectypes find all fields as Detail names sorted
             for (let i in rtyIDs) {
@@ -820,7 +819,6 @@ window.hWin.HEURIST4.ui = {
             let arrterm = [];
             rectype = ''+rectype;
             
-            let child_rectypes = [];
             if(show_parent_rt){
                 let DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
                 //get all child rectypes
@@ -1308,33 +1306,9 @@ window.hWin.HEURIST4.ui = {
                 exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2); //beginner default
             }
             
-            let is_exit = false;
             if(!$context){
-                is_exit = true;
                 $context = $(window.hWin.document);
             }
-        
-            /* since 2018-12=24 help is not related to competency level
-        
-            if(exp_level>1){
-                //show beginner level
-                $context.find('.heurist-helper2').css('display','block');
-                $context.find('.heurist-table-helper2').css('display','table-cell');
-            }else{
-                $context.find('.heurist-table-helper2').css('display','none');
-                $context.find('.heurist-helper2').css('display','none');
-            }
-      
-            if(exp_level>0){
-                //show beginner and intermediate levels
-                $context.find('.heurist-helper1').css('display','block');
-                $context.find('.heurist-table-helper1').css('display','table-cell');
-            }else{
-                $context.find('.heurist-table-helper1').css('display','none');
-                $context.find('.heurist-helper1').css('display','none');
-            }
-            */
-            
             
             $context.find('li[data-user-experience-level]').each(function(){
                 if(exp_level > $(this).data('exp-level')){
@@ -1516,7 +1490,6 @@ window.hWin.HEURIST4.ui = {
             is_popup = true;
             options.container = $(document.body);
         }
-        let _innerTitle;
         let oEffect = {effect:'slide',direction:'right',duration:500};
         
         function __closeHelpDiv($helper_div){
@@ -1587,7 +1560,6 @@ window.hWin.HEURIST4.ui = {
                                         
                                     }else{
 
-                                        let div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
                                         let div_width  = Math.min(700, $(document.body).width() *0.8);
                                        
                                         let head = $helper_div.find('#content>h2');
@@ -2090,11 +2062,12 @@ window.hWin.HEURIST4.ui = {
                                     let recordset = new HRecordSet(response.data);
                                     if(recordset.length()>0){
                                         let record = recordset.getFirstRecord();
+                                        /*
                                         let term_ID = recordset.fld(record,DT_RELATION_TYPE);
                                         //update relation type !!!!
                                         if(info['is_inward']){
                                             term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);
-                                        }
+                                        }*/
                                         ele.find('.detailType').text($Db.trm(info['trm_ID'], 'trm_Label')); 
                                         let related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
 
@@ -2112,8 +2085,6 @@ window.hWin.HEURIST4.ui = {
                                                             .text( window.hWin.HEURIST4.util.stripTags(rec_Title) )
                                                             .attr('data-recid', related_ID);
                                                             
-                                                    let rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
-                                                    //@todo - update record type icon
                                                 }
                                             }
                                         });
@@ -2549,7 +2520,6 @@ window.hWin.HEURIST4.ui = {
         
         //OK! script as been loaded
         if( typeof HPublishDialog==='undefined' || !window.hWin.HEURIST4.util.isFunction(HPublishDialog)){        
-            let that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
                 function(){ 
@@ -2579,7 +2549,7 @@ window.hWin.HEURIST4.ui = {
                 
                 let parent_div = element.parent(); //$dlg.find(sname+'_div')
         
-                let $btn_edit_clear = $('<span>')
+                $('<span>')
                 .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
                 .attr('tabindex', '-1')
                 .attr('title', 'Reset default symbology')
@@ -2781,7 +2751,7 @@ window.hWin.HEURIST4.ui = {
     validateName: function(name, lbl, maxlen){
       
             let swarn = "";
-            let regex = /[\[\].\$]+/;
+
             name = name.toLowerCase();
             if( name=="id" || name=="modified" || name=="rectitle"){
                    swarn = lbl+", you defined, is a reserved word. Please try an alternative";
