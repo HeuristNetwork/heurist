@@ -1,6 +1,6 @@
 <?php
     /**
-    * smartyInit.php: additional Smarty functions
+    * smartyInit5.php: init Smarty and additional functions
     * this file should be included after system init
     *
     * @package     Heurist academic knowledge management system

@@ -103,7 +103,12 @@ if(!$is_included){
     }
 }
 
-require_once dirname(__FILE__).'/smartyInit.php';
+if(file_exists(dirname(__FILE__).'../../vendor/smarty/smarty5/')){
+    require_once dirname(__FILE__).'/smartyInit5.php';
+}else{
+    require_once dirname(__FILE__).'/smartyInit.php';
+}
+
 require_once dirname(__FILE__).'/reportRecord.php';
 
 define('HEAD_E','</head>');
