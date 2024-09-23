@@ -803,6 +803,7 @@ class SystemEmailExt {
         $main_t = mb_convert_encoding($list, "UTF-8", "auto");
 
         if ($main_t) {
+            $max_size = 1024 * 64; // 64 KBytes
             $max_chars = $max_size / 4 - 1;    // Max Characters, allow roughly 4 bytes per character (for encoded/special chars)
             $start = 0;
             while ($start < mb_strlen($main_t)) {

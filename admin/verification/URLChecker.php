@@ -104,6 +104,12 @@ class URLChecker {
 
         return $results;
     }
+    
+    private function printHeader($sHeader){
+        if($this->isVerbose || $this->listOnly){
+            print $sHeader;
+        }
+    }
 
     /**
      * Check URLs from records and validate.
@@ -114,10 +120,8 @@ class URLChecker {
     private function checkRecordURLs(&$results) {
         $query = 'SELECT rec_ID, rec_URL, rec_RecTypeID FROM Records WHERE (rec_URL != "") AND (rec_URL IS NOT NULL)';
         $res = $this->mysqli->query($query);
-
-        if($this->isVerbose || $this->listOnly){
-            print "<h4>Records URLs</h4>";
-        }
+        
+        $this->printHeader('<h4>Records URLs</h4>');
         
         if (!$res) {
             if($this->isVerbose || $this->listOnly){
@@ -126,7 +130,7 @@ class URLChecker {
             return;
         }
         
-        $passed_cnt++;
+        $passed_cnt=0;
     
         while ($row = $res->fetch_row()) {
             $recId = $row[0];
@@ -134,9 +138,9 @@ class URLChecker {
             $recTypeId = $row[2];
 
             // Modify URL for Heurist Reference Index if necessary
-            $checkReferenceIndex = false;
+            $isReferenceDatabase = false;
             if ($this->isHeuristReferenceIndex && ($recTypeId == 101 || $recTypeId == 103)) {
-                $checkReferenceIndex = true;
+                $isReferenceDatabase = true;
                 $recUrl .= '&isalive=1';
             }
 
@@ -156,23 +160,8 @@ class URLChecker {
 
             if ($data) {
 
-                //special case for reference index database
-                if($checkReferenceIndex && strpos($data, 'error: ')===0 && $this->isVerbose){
-
-                    $recUrl = htmlspecialchars($recUrl);
-                    print intval($recId)
-                    ." : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a>";
-
-                    $data = strpos($data, 'timeout') !== false ? 'Timeout occurred' : $data;
-                    $data = strpos($data, 'does not exist') !== false ? 'Database does not exist' : $data;
-
-                    print error_Div(htmlspecialchars($data));
-                }else{
-                    $this->passedRecIds[] = $recId;
-                    if (count($this->passedRecIds) > 1000) {
-                        $this->updateRecordsLastVerified();
-                    }
-                }
+                $this->handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase);
+                
             } elseif($this->handleBrokenRecordUrl($recId, $recUrl, $results)){
                 break;
             }     
@@ -200,6 +189,34 @@ class URLChecker {
             }
         }
     }
+    
+    /**
+    * Helper function
+    * 
+    * @param mixed $recId
+    * @param mixed $recUrl
+    * @param mixed $data
+    */
+    private function handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase){
+        
+        //special case for reference index database
+        if($isReferenceDatabase && strpos($data, 'error: ')===0 && $this->isVerbose){
+
+            $recUrl = htmlspecialchars($recUrl);
+            print intval($recId)
+            ." : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a>";
+
+            $data = strpos($data, 'timeout') !== false ? 'Timeout occurred' : $data;
+            $data = strpos($data, 'does not exist') !== false ? 'Database does not exist' : $data;
+
+            print error_Div(htmlspecialchars($data));
+        }else{
+            $this->passedRecIds[] = $recId;
+            if (count($this->passedRecIds) > 1000) {
+                $this->updateRecordsLastVerified();
+            }
+        }
+    }
 
     /**
      * Check free text and block text fields for URLs.
@@ -215,9 +232,7 @@ class URLChecker {
         
         $res = $this->mysqli->query($query);
 
-        if($this->isVerbose || $this->listOnly){
-            print "<h4>URLs in text fields</h4>";
-        }
+        $this->printHeader('<h4>URLs in text fields</h4>');
         
         if (!$res) {
             if($this->isVerbose || $this->listOnly){
@@ -274,9 +289,7 @@ class URLChecker {
 
         $res = $this->mysqli->query($query);
         
-        if($this->isVerbose || $this->listOnly){
-            print "<h4>External URLs (File fields)</h4>";
-        }
+        $this->printHeader('<h4>External URLs (File fields)</h4>');
 
         if (!$res) {
             if($this->isVerbose){
