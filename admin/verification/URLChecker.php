@@ -68,7 +68,7 @@ class URLChecker {
      */
     private function updateRecordsLastVerified() {
         $date = date(DATE_8601);
-        $query = 'UPDATE Records SET rec_URLLastVerified="' . $date . '", rec_URLErrorMessage=null WHERE rec_ID IN (' 
+        $query = 'UPDATE Records SET rec_URLLastVerified="' . $date . '", rec_URLErrorMessage=null WHERE rec_ID IN ('
                             . implode(',', $this->passedRecIds) . ')';
         $this->mysqli->query($query);
         $this->passedRecIds = []; // reset the array
@@ -147,7 +147,7 @@ class URLChecker {
             // Handle listing URLs without validation
             if ($this->listOnly) {
                 $recUrl = htmlentities($recUrl);
-                echo intval($recId) . ' : <a href="' . $recUrl . '" target="_blank" rel="noopener">' . $recUrl . '</a><br>';
+                echo intval($recId) . " : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a><br>";
                 continue;
             }
             // Skip URLs that match the Heurist server URL
@@ -362,7 +362,7 @@ class URLChecker {
 
         if ($this->isVerbose) {
             $recUrl = htmlspecialchars($recUrl);
-            echo '<div>' . intval($recId) . ' : <a href="' . $recUrl . '" target="_blank" rel="noopener">' . $recUrl . '</a>&nbsp;' . $brokenUrlMessage . '</div>';
+            echo '<div>' . intval($recId) . " : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a>&nbsp;$brokenUrlMessage</div>";
         }
 
         $results[0][$recId] = $recUrl;

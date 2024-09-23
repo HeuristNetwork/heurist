@@ -61,7 +61,7 @@ $isHeuristReferenceIndex = (strcasecmp(HEURIST_DBNAME,'Heurist_Reference_Index')
 $checker = new URLChecker($system->get_mysqli(), HEURIST_SERVER_URL, $isHeuristReferenceIndex);
 $results = $checker->checkURLs(true, $list_only);
 
-/* heurist instances */
+/* heurist instances 
 $heurist_instances = array(
  'https://int-heuristweb-prod.intersect.org.au',
  'https://heuristref.net',
@@ -77,5 +77,6 @@ $heurist_instances = array(
  'https://heurist.unige.ch',
  'https://dcsrs-test-ssp.ad.unil.ch',
  );
+*/ 
 ?>
 </div></body></html>
