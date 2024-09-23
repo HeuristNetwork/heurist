@@ -303,14 +303,14 @@ class DbSysUsers extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             foreach($this->records as $idx=>$record){
                 $ugr_ID = @$record['ugr_ID'];
-                if($ugr_ID>0 && in_array($ugr_ID, $ret)){
+                if($ugr_ID>0 && in_array($ugr_ID, $savedRecIds)){
 
                     //treat user image
                     $thumb_file_name = @$record['ugr_Thumb'];
@@ -351,7 +351,7 @@ class DbSysUsers extends DbEntityBase
                 }
             }
         }
-        return $ret;
+        return $savedRecIds;
     }
 
     //

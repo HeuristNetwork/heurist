@@ -190,9 +190,9 @@ class DbDefDetailTypes extends DbEntityBase
 
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             $dbID = $this->system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) {$dbID = 0;}
@@ -201,7 +201,7 @@ class DbDefDetailTypes extends DbEntityBase
 
             foreach($this->records as $idx=>$record){
                 $dty_ID = @$record['dty_ID'];
-                if($dty_ID>0 && in_array($dty_ID, $ret)){
+                if($dty_ID>0 && in_array($dty_ID, $savedRecIds)){
 
                     $query = null;
                     //set dbid or update modified locally
@@ -220,7 +220,7 @@ class DbDefDetailTypes extends DbEntityBase
                 }
             }
         }
-        return $ret;
+        return $savedRecIds;
     }
 
     //

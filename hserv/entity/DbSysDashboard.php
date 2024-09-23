@@ -103,14 +103,14 @@ class DbSysDashboard extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             //treat group image
             foreach($this->records as $record){
                 $dsh_ID = @$record['dsh_ID'];
-                if($dsh_ID && in_array($dsh_ID, $ret)){
+                if($dsh_ID && in_array($dsh_ID, $savedRecIds)){
                     $thumb_file_name = @$record['dsh_Image'];
 
                     //rename it to recID.png
@@ -121,7 +121,7 @@ class DbSysDashboard extends DbEntityBase
             }
         }
 
-        return $ret;
+        return $savedRecIds;
 
     }
 

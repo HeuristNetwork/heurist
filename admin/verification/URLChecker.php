@@ -111,6 +111,21 @@ class URLChecker {
         }
     }
 
+    private function printFooter($idx, $passed_cnt, $sMsg, $sMsg2=''){
+        if($this->isVerbose){
+            
+            echo "<p>$sMsg. Processed: $passed_cnt</p>";
+            
+            $broken_cnt = count($results[$idx]);
+
+            if($broken_cnt>0){
+                print "<div style=\"padding-top:20px;color:red\">There are <b>$broken_cnt</b> broken urls. $sMsg2</div>";
+            }else{
+                print '<div><h3 class="res-valid">OK: All URLs are valid</h3></div>';
+            }
+        }
+    }
+    
     /**
      * Check URLs from records and validate.
      *
@@ -159,9 +174,7 @@ class URLChecker {
             $data = $this->loadRemoteURLContent($recUrl);
 
             if ($data) {
-
                 $this->handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase);
-                
             } elseif($this->handleBrokenRecordUrl($recId, $recUrl, $results)){
                 break;
             }     
@@ -174,20 +187,7 @@ class URLChecker {
             $this->updateRecordsLastVerified();
         }
         
-        
-        if($this->isVerbose){
-            echo '<p>Record URLs. Processed: '.$passed_cnt.' records</p>';
-            
-            $broken_cnt = count($results[0]);
-
-            if($broken_cnt>0){
-
-                print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
-                .'</b> records with broken url. Search "_BROKEN_" for details</div>';
-            }else{
-                print '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
-            }
-        }
+        $this->printFooter(0, $passed_cnt, 'Record URLs', 'Search "_BROKEN_" for details');
     }
     
     /**
@@ -259,20 +259,8 @@ class URLChecker {
             $passed_cnt++;
         }
         $res->close();
-        
-        if($this->isVerbose){
-            echo '<p>URL is text fields. Processed: '.$passed_cnt.' records</p>';
-            
-            $broken_cnt = count($results[1]);
 
-            if($broken_cnt>0){
-
-                print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
-                .'</b> text fields with broken url.</div>';
-            }else{
-                print '<div><h3 class="res-valid">OK: All text fields have valid URL</h3></div>';
-            }
-        }
+        $this->printFooter(1, $passed_cnt, 'Text fields with URLs', '');
     }
 
     /**
@@ -311,20 +299,7 @@ class URLChecker {
         }
         $res->close();
         
-        
-        if($this->isVerbose){
-            echo '<p>URL is file fields. Processed: '.$passed_cnt.' records</p>';
-            
-            $broken_cnt = count($results[2]);
-
-            if($broken_cnt>0){
-
-                print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
-                .'</b> records with broken url in file fields</div>';
-            }else{
-                print '<div><h3 class="res-valid">OK: All records have valid file fields URL</h3></div>';
-            }
-        }
+        $this->printFooter(2, $passed_cnt, 'External URLs (File fields)', '');
     }
 
     /**

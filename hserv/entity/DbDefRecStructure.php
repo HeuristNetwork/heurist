@@ -182,14 +182,14 @@ class DbDefRecStructure extends DbEntityBase
 
     public function save(){
 
-        $results = parent::save();
-        if($results!==false){
-            $results = array();
+        $savedRecIds = parent::save();
+        if($savedRecIds!==false){
+            $savedRecIds = array();
             foreach($this->records as $rec_idx => $record){
-                $results[] = $this->records[$rec_idx]['rst_DetailTypeID'];
+                $savedRecIds[] = $this->records[$rec_idx]['rst_DetailTypeID'];
             }
         }
-        return $results;
+        return $savedRecIds;
     }
 
     public function delete($disable_foreign_checks = false){

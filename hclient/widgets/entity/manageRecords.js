@@ -4717,10 +4717,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     //
     _reloadRtsEditor: function(force_reload = false){            
 
-            if(!force_reload && this.options.rts_editor){
-                if(this.options.rts_editor.manageDefRecStructure('option','rty_ID')==this._currentEditRecTypeID){
+            if(!force_reload && this.options.rts_editor 
+                    && this.options.rts_editor.manageDefRecStructure('instance') 
+                    && this.options.rts_editor.manageDefRecStructure('option','rty_ID')==this._currentEditRecTypeID)
+            {
                     return;
-                }
             } 
 
             let $structure_editor = this.element.find('.editStructure');

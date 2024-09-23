@@ -215,14 +215,14 @@ class DbSysGroups extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             //treat group image
             foreach($this->records as $record){
                 $group_ID = @$record['ugr_ID'];
-                if($group_ID && in_array($group_ID, $ret)){
+                if($group_ID && in_array($group_ID, $savedRecIds)){
                     $thumb_file_name = @$record['ugr_Thumb'];
 
                     //rename it to recID.png
@@ -245,7 +245,7 @@ class DbSysGroups extends DbEntityBase
             }
         }
 
-        return $ret;
+        return $savedRecIds;
 
     }
 

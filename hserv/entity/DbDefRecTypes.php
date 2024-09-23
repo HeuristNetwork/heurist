@@ -368,8 +368,8 @@ class DbDefRecTypes extends DbEntityBase
      */
     public function save() {
         // Call the parent save method
-        $ret = parent::save();
-        if ($ret === false) {
+        $savedRecIds = parent::save();
+        if ($savedRecIds === false) {
             return false;
         }
 
@@ -383,7 +383,7 @@ class DbDefRecTypes extends DbEntityBase
         // Loop through each record and process accordingly
         foreach ($this->records as $idx => $record) {
             $rty_ID = isset($record['rty_ID']) ? $record['rty_ID'] : null;
-            if (!isPositiveInt($rty_ID) || !in_array($rty_ID, $ret)) {
+            if (!isPositiveInt($rty_ID) || !in_array($rty_ID, $savedRecIds)) {
                 continue; // Skip invalid or non-existent record types
             }
 
@@ -399,7 +399,7 @@ class DbDefRecTypes extends DbEntityBase
             $this->handleMediaFiles($record, $rty_ID);
         }
 
-        return true;
+        return $savedRecIds;
     }
 
     /**

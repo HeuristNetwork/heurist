@@ -1680,7 +1680,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         window.hWin.HEURIST4.msg.coverallKeep = true;
         window.hWin.HEURIST4.msg.showMsgFlash('loading structure', false);
-                    
+                   
 		let request = {};
 		request['a']        = 'action'; //batch action
 		request['entity']   = 'defRecStructure';
