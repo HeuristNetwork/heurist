@@ -79,7 +79,7 @@
                     }
                 }
 
-                dataOutput(data, null, $mimeType);
+                dataOutput($data, null, $mimeType);
                 exit;
        }
     }

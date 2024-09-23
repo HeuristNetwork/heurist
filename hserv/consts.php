@@ -565,7 +565,7 @@ function isLocalHost(){
 
 function dataOutput($data, $filename=null, $mimeType=null)
 {
-    $len = strlen(data);
+    $len = strlen($data);
     
     if($mimeType==null){
         $mimeType = 'application/json';
@@ -585,9 +585,11 @@ function dataOutput($data, $filename=null, $mimeType=null)
     }
     
     if($len>0){header('Content-Length: '. $len);}
-    header('X-Content-Type-Options: nosniff');
-    header('X-XSS-Protection: 1; mode=block');
-    header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
+    if($mimeType!='gzip'){
+        header('X-Content-Type-Options: nosniff');
+        header('X-XSS-Protection: 1; mode=block');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
+    }
     echo $data;
 }
 
