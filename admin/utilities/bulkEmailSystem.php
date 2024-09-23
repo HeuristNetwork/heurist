@@ -734,7 +734,6 @@ class SystemEmailExt {
 	private function save_receipt($status, $email_subject, $email_body, $user_count = 0) {
 
 		$max_size = 1024 * 64; // 64 KBytes
-		$max_chars = $max_size / 4 - 1;	// Max Characters, allow roughly 4 bytes per character (for encoded/special chars)
 
 		$db = implode(", ", $this->databases);
 		$db_list = str_replace(HEURIST_DB_PREFIX, "", $db);
@@ -789,35 +788,30 @@ class SystemEmailExt {
 		if ($main_size < $max_size) {
 			$this->receipt[] = $main;
 		} else { // Save this part in chunks
-
-			$main_t = mb_convert_encoding($main, "UTF-8", "auto");
-
-			if ($main_t) {
-				$start = 0;
-				while ($start < mb_strlen($main_t)) {
-					$this->receipt[] = mb_substr($main_t, $start, $max_chars);
-					$start += $max_chars;
-				}
-			}
-
+            $this->composeList($main);
 		}
 		if ($user_list_size < $max_size) {
 			$this->receipt[] = $user_list;
 		} else { // Save this part in chunks
-
-			$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
-
-			if ($user_list_t) {
-				$start = 0;
-				while ($start < mb_strlen($user_list_t)) {
-					$this->receipt[] = mb_substr($user_list_t, $start, $max_chars);
-					$start += $max_chars;
-				}
-			}
-
+            $this->composeList($user_list);
 		}
 
 	}
+    
+    private function composeList($list){
+
+        $main_t = mb_convert_encoding($list, "UTF-8", "auto");
+
+        if ($main_t) {
+            $max_chars = $max_size / 4 - 1;    // Max Characters, allow roughly 4 bytes per character (for encoded/special chars)
+            $start = 0;
+            while ($start < mb_strlen($main_t)) {
+                $this->receipt[] = mb_substr($main_t, $start, $max_chars);
+                $start += $max_chars;
+            }
+        }
+    }
+    
 	private function get_receipt() {
 		return $this->receipt;
 	}

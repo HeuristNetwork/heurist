@@ -257,77 +257,62 @@ foreach ($databases as $idx=>$db_name){
             continue;
         }
 
-        $url_results = checkURLs($system, true);// [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
-
-        if(is_array($url_results)){
+        echo $eol.$db_name;        
+        
+        $checkerURL = new URLChecker($mysqli, HEURIST_SERVER_URL, false);
+        $url_results = $checkerURL->checkURLs();
 
         $invalid_rec_urls = $url_results[0];
         $invalid_fb_urls = $url_results[1];
         $invalid_file_urls = $url_results[2];
-
-        if(!empty($invalid_rec_urls[0])){
-            if(!is_array($invalid_rec_urls[0])){ // error
-                echo $invalid_rec_urls[0];
-            }else{
-
-                echo 'invalid rec_URL: ' . implode(',', $invalid_rec_urls[0]);
-
-                $url_list[$db_name] = array();
-                $url_list[$db_name][0] = implode(',', $invalid_rec_urls[0]);
-            }
-        }
-
-        if(!empty($invalid_fb_urls)){
-            if(!is_array($invalid_fb_urls)){ // error
-                echo $invalid_fb_urls;
-            }else{
-
-                echo $eol.'fields containing invalid urls: ';
-                foreach ($invalid_fb_urls as $rec_id => $flds) {
-                    echo $eol.$rec_id.': ';
-                    foreach($flds as $dty_id => $urls){
-                        echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
-                    }
-
-                    if(!array_key_exists($db_name, $url_list)){
-                        $url_list[$db_name] = array();
-                    }
-                    if(!array_key_exists(1, $url_list[$db_name])){
-                        $url_list[$db_name][1] = array();
-                    }
-                    $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
+        $fatal_curl_error = $url_results[3];
+        
+        if(!$fatal_curl_error){
+        
+            $url_list[$db_name] = array([], []);
+        
+            if(!empty($invalid_rec_urls)){
+                echo $eol.'Records with invalid urls: ';
+                foreach ($invalid_rec_urls as $rec_id => $url) {
+                    echo $eol.$rec_id.' : '.$url;
+                    $url_list[$db_name][0][] = $rec_id.' : '.$url;
                 }
             }
-        }elseif(!empty($invalid_file_urls)){
-            echo $eol.'Record fields contain invalid urls: ';
-        }
 
-        if(!empty($invalid_file_urls)){
-            if(!is_array($invalid_file_urls)){ // error
-                echo $invalid_file_urls;
-            }else{
-                foreach ($invalid_file_urls as $rec_id => $flds) {
-                    echo $eol.$rec_id.': ';
-                    foreach($flds as $dty_id => $urls){
-                        echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
+            if(!empty($invalid_fb_urls)){
+
+                    echo $eol.'text fields containing invalid urls: ';
+                    
+                    foreach ($invalid_fb_urls as $rec_id => $flds) {
+                        echo $eol.$rec_id.': ';
+                        foreach($flds as $dty_id => $urls){
+                            echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
+                        }
+
+                        $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
                     }
 
-                    if(!array_key_exists($db_name, $url_list)){
-                        $url_list[$db_name] = array();
-                    }
-                    if(!array_key_exists(1, $url_list[$db_name])){
-                        $url_list[$db_name][1] = array();
-                    }
-                    $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
-                }
             }
-        }
+            if(!empty($invalid_file_urls)){
+                
+                    echo $eol.'file fields contain invalid urls: ';
+                    foreach ($invalid_file_urls as $rec_id => $flds) {
+                        echo $eol.$rec_id.': ';
+                        foreach($flds as $dty_id => $urls){
+                            echo $eol.$tabs.$dty_id.': '.implode(',', $urls);
+                        }
+
+                        $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
+                    }
+            }
 
         }else{
+            echo $eol.'CURL error: '.$fatal_curl_error;
             sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.' Check url fails.',
-                $url_results.' It stopped on '.$db_name);
+                $fatal_curl_error.' It stopped on '.$db_name);
 
         }
+        
     }
 }//foreach database
 
@@ -371,10 +356,10 @@ if(!empty($email_list) || !empty($report_list) || !empty($url_list)){
     foreach($url_list as $dbname=>$reps){
         $rec_URL = 'None';
         $fld_URL = 'None';
-        if(array_key_exists(0, $reps)){
-            $rec_URL = htmlspecialchars($reps[0]);
+        if(!empty($reps[0])){
+            $rec_URL = "\n  ".implode("\n  ", $reps[0]);
         }
-        if(array_key_exists(1, $reps)){
+        if(!empty($reps[1])){
             $fld_URL = "\n  ".implode("\n  ", $reps[1]);
         }
         $text = $text . "\n" . $dbname . "\n rec_URL => " . $rec_URL . "\n Fields => " . $fld_URL;
