@@ -2209,7 +2209,8 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
                    */  
                 if(this.isReadonly()){
-                   return 0; 
+                   $('<span>readonly</span>').appendTo( $inputdiv );
+                   return 0;
                 }else{
                    $inputdiv
                         .uniqueId();
