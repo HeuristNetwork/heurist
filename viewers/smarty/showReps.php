@@ -106,8 +106,6 @@ if(!$is_included){
     }
 }
 
-error_log('>>>>'.HEURIST_SMARTY_TEMPLATES_DIR);
-
 require_once 'smartyInit.php';
 
 initSmarty(HEURIST_SMARTY_TEMPLATES_DIR);

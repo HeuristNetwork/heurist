@@ -679,6 +679,8 @@ class DbUtils {
 
         }
         if(self::setSessionVal(4)) {return false;} //import core defs
+        
+        return true;
     }
 
 

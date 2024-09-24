@@ -214,6 +214,7 @@ if(isLocalHost()){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
 
