@@ -126,9 +126,9 @@ default content consists of
 */
 if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
+        .'style="position:absolute;right:110px; top:5px;color:blue !important;z-index:9999;" class="cms-button">DB</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
-        .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
+        .'style="position:absolute;right:10px;top:5px;color:blue !important;z-index:9999;" class="cms-button">Editor</a>';
     }
 
 if($isWebPage){ //set in websiteRecord.php
