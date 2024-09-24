@@ -571,12 +571,7 @@ function dataOutput($data, $filename=null, $mimeType=null)
         $mimeType = 'application/json';
     }
 
-    if($mimeType=='gzip'){
-        header('Content-type: gzip');
-    }else{
-        header('Content-type: '.$mimeType.';charset=UTF-8');    
-    }
-    
+    header('Content-type: '.$mimeType.';charset=UTF-8');
     
     if($filename){
         header('Content-Disposition: attachment; filename="' . $filename . '";');
