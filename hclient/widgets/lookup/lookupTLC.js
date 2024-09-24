@@ -183,9 +183,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         fields = fields.concat(map_flds);
         fields = fields.concat('tlc_link');
 
-        for(const idx in map_flds){
-            map_flds[idx] = map_flds[idx].split('.'); 
-        }
+        map_flds = map_flds.map((prop) => prop.split('.'));
 
         if(!geojson_data.features) geojson_data.features = geojson_data;
 
@@ -201,36 +199,14 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
                 let val = feature[ fld_Name[0] ];
 
-                for(const fld_Part of fld_Name){
-                    if(val && !window.hWin.HEURIST4.util.isnull( val[ fld_Part ])){
-                        val = val[fld_Part];
-                    }
-                }      
+                val = this.getValueByParts(fld_Name, val);
 
                 // Special handling for Geo Objects
-                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Name]){
-                    if(!window.hWin.HEURIST4.util.isempty(val)){
-                        val = {"type": "Feature", "geometry": val};
-                        let wkt = stringifyMultiWKT(val);    
-                        if(window.hWin.HEURIST4.util.isempty(wkt)){
-                            val = '';
-                        }else{
-                            //@todo the same code mapDraw.php:134
-                            let typeCode = 'm';
-                            if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                if(wkt.indexOf('LINESTRING')>=0){
-                                    typeCode = 'l';
-                                }else if(wkt.indexOf('POLYGON')>=0){
-                                    typeCode = 'pl';
-                                }else {
-                                    typeCode = 'p';
-                                }
-                            }
-                            val = `${typeCode} ${wkt}`;
-                            hasGeo = true;
-                        }
-                    }
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
+                    val = this.createGeoFeature(val);
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
                 }
+
                 values.push(val); // push value into record
             }
 

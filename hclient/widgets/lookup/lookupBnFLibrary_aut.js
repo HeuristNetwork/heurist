@@ -158,6 +158,38 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        function getFieldWidth(def_width, type, fld_name){
+
+            let width = def_width;
+
+            switch(type){
+
+                case '215':
+                case '216':
+                case '240':
+                case '250':
+                    width = fld_name == 'name' ? 75 : 0;
+                    break;
+
+                case '200':
+                    width = fld_name == 'location' ? 0 : width;
+                    width = fld_name == 'name' ? 50 : width;
+                    break;
+
+                case '210':
+                    width = fld_name == 'years_active' ? 0 : width;
+                    width = fld_name == 'name' ? 40 : width;
+                    width = fld_name == 'location' ? 20 : width;
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            return width;
+        }
+
         /**
          * Get field details for displaying
          * 
@@ -181,30 +213,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
                 title = 'View authoritative record';
             }
 
-            switch(authority_type){
-                case '215':
-                case '216':
-                case '240':
-                case '250':
-                    width = fldname == 'name' ? 75 : 0;
-                    break;
-
-                case '200':
-                    width = fldname == 'location' ? 0 : width;
-                    width = fldname == 'name' ? 50 : width;
-                    break;
-
-                case '210':
-                    width = fldname == 'years_active' ? 0 : width;
-                    width = fldname == 'name' ? 40 : width;
-                    width = fldname == 'location' ? 20 : width;
-
-                    break;
-            
-                default:
-                    break;
-            }
-
+            width = getFieldWidth(width, authority_type);
             if(s != ''){
                 s = fldname == 'years_active' || fldname == 'location' ? `( ${s} )` : s;
                 s = fldname == 'role' ? `[ ${s} ]` : s;
@@ -281,6 +290,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         
         // Construct query portion of url
         let query = '(';
+        let last_logic = '';
 
         /** 
          * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the authoritative fields can be added here (fields starting with 'aut.')
@@ -293,78 +303,57 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         // any field
         if(this.element.find('#inpt_any').val()!=''){
-
-            query += `aut.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"`;
-
-            if(accesspointHasValue || typeHasValue || isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_any_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_any_logic').val()} `;
+            query += `aut.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"${last_logic}`;
         }
 
         // access point field
         if(accesspointHasValue){
-
-            query += `aut.accesspoint ${this.element.find('#inpt_accesspoint_link').val()} "${this.element.find('#inpt_accesspoint').val()}"`;
-
-            if(typeHasValue || isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_accesspoint_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_accesspoint_logic').val()} `;
+            query += `aut.accesspoint ${this.element.find('#inpt_accesspoint_link').val()} "${this.element.find('#inpt_accesspoint').val()}"${last_logic}`;
         }
 
         // type field
         if(typeHasValue){
-
-            query += `aut.type ${this.element.find('#inpt_type_link').val()} "${this.element.find('#inpt_type').val()}"`;
-
-            if(isniHasValue || isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_type_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_type_logic').val()} `;
+            query += `aut.type ${this.element.find('#inpt_type_link').val()} "${this.element.find('#inpt_type').val()}"${last_logic}`;
         }
 
         // isni field
         if(isniHasValue){
-
-            query += `aut.isni ${this.element.find('#inpt_isni_link').val()} "${this.element.find('#inpt_isni').val()}"`;
-
-            if(isnidateHasValue || domainHasValue || recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_isni_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_isni_logic').val()} `;
+            query += `aut.isni ${this.element.find('#inpt_isni_link').val()} "${this.element.find('#inpt_isni').val()}"${last_logic}`;
         }
 
         // isni date field
         if(isnidateHasValue){
-
-            query += `aut.isnidate ${this.element.find('#inpt_isnidate_link').val()} "${this.element.find('#inpt_isnidate').val()}"`;
-
-            if(domainHasValue || recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_isnidate_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_isnidate_logic').val()} `;
+            query += `aut.isnidate ${this.element.find('#inpt_isnidate_link').val()} "${this.element.find('#inpt_isnidate').val()}"${last_logic}`;
         }
 
         // domain field
         if(domainHasValue){
-
-            query += `aut.domain ${this.element.find('#inpt_domain_link').val()} "${this.element.find('#inpt_domain').val()}"`;
-
-            if(recidHasValue){ // add combination logic
-                query += ` ${this.element.find('#inpt_domain_logic').val()} `;
-            }
+            last_logic = ` ${this.element.find('#inpt_domain_logic').val()} `;
+            query += `aut.domain ${this.element.find('#inpt_domain_link').val()} "${this.element.find('#inpt_domain').val()}"${last_logic}`;
         }
 
         // record id field
         if(recidHasValue){
+            last_logic = '';
             query += `aut.recordid ${this.element.find('#inpt_recordid_link').val()} "${this.element.find('#inpt_recordid').val()}"`;
-            // no combination logic as record id is the last field
+        }
+
+        // Remove last logic connection
+        if(!window.hWin.HEURIST4.util.isempty(last_logic)){
+            let regex = new RegExp(`${last_logic}$`);
+            query = query.replace(regex, '');
         }
 
         // Close off and encode query portion, then add to request url
-        if(query.length != 1){
+        query += ')';
+        query = encodeURIComponent(query);
 
-            query += ')';
-            query = encodeURIComponent(query);
-
-            sURL += `&query=${query}`;
-        }
+        sURL += `&query=${query}`;
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
 
@@ -402,11 +391,9 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if(!json_data){
+        if(!json_data || !json_data.result){
             this._super(false);
         }
-
-        if(!json_data.result) return false;
 
         let res_records = {}, res_orders = [];
 
@@ -435,11 +422,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
             res_records[recID] = values;
         }
 
-        if(json_data.numberOfRecords > maxRecords){
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                `There are ${json_data.numberOfRecords} records satisfying these criteria, only the first ${maxRecords} are shown.<br>Please narrow your search.`
-            );
-        }
+        this.checkResultSize(json_data.numberOfRecords, maxRecords);
 
         let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
         this._super(res);

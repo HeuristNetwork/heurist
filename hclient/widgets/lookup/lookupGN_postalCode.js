@@ -22,44 +22,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
+$.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
 
-    // default options
-    options: {
-
-        height: 520,
-        width:  800,
-
-        title:  'Lookup values Postal codes for Heurist record',
-
-        htmlContent: 'lookupGN_postalCode.html',
-    },
-
-    _country_vocab_id: 0,
-
-    //  
+    //
     // invoked from _init after loading of html content
     //
     _initControls: function(){
 
-        // Fill countries dropdown
-        let ele = this.element.find('#inpt_country');
-        this._country_vocab_id = $Db.getLocalID('trm','2-509');
-        if(this._country_vocab_id > 0){
-            window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
-        }
-
-        if(ele.hSelect('instance') != 'undefined'){
-            ele.hSelect('widget').css({'max-width':'30em'});
-        }
-        
         this.element.find('#search_container > div > div > .header').css({width:'80px','min-width':'80px', display: 'inline-block'});
 
         this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
-
-        this.options.resultList = $.extend(this.options.resultList, {
-            empty_remark: '<div style="padding:1em 0 1em 0">No Locations Found</div>'
-        });
 
         return this._super();
     },
@@ -97,33 +69,6 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
     },
 
     /**
-     * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
-     * For multi-values, [dty_ID: [value1, value2, ...], ...]
-     * 
-     * To trigger record pointer selection/creation popup, value must equal [dty_ID, default_searching_value]
-     * 
-     * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
-     *  the value must be the complete html (i.e. anchor tag with href and target attributes set)
-     *  e.g. res['ext_url'] = '<a href="www.google.com" target="_blank">Link to Google</a>'
-     * 
-     * Param: None
-     */
-    doAction: function(){
-
-        let [recset, record] = this._getSelection(true);
-        if(recset?.length() < 0 || !record){
-            return;
-        }
-
-        let res = {};
-        res['googlemap_link'] = recset.fld(record, '');
-        res = this.prepareValues(recset, record, res, {check_term_codes: this._country_vocab_id});
-
-        // Pass mapped values and close dialog
-        this.closingAction(res);
-    },
-    
-    /**
      * Create search URL using user input within form
      * Perform server call and handle response
      * 
@@ -132,7 +77,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
     _doSearch: function(){
         
         if(this.element.find('#inpt_postalcode').val()=='' && this.element.find('#inpt_placename').val()==''){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a geoname or postal code to perform search', 1000);
+            window.hWin.HEURIST4.msg.showMsgFlash('Please enter a place name or postal code to perform search', 1000);
             return;
         }
 
@@ -148,24 +93,8 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
             let _countryCode = this._getCountryCode(this.element.find('#inpt_country').val());
             _countryCode += _countryCode ? `&country=${_countryCode}` : '';
         }
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        let that = this;
-        let request = {service:sURL, serviceType:'geonames'};             
-        //loading as geojson  - see controller record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
-            function(response){
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    return;
-                }
-
-                that._onSearchResult(response);
-            }
-        );
+        this._super(sURL, false);
     },
 
     /**
@@ -214,9 +143,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupBase, {
                 val = feature[fld_Name];
 
                 if(fld_Name == 'location'){
-                    val = feature['lng'] && feature['lat'] 
-                        ? `p POINT(${feature['lng']} ${feature['lat']})`
-                        : '';
+                    val = this.constructLocation(feature['lng'], feature['lat']);
                 }
 
                 values.push(val);    

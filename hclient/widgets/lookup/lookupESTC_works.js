@@ -26,6 +26,25 @@
 
 $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
 
+    return_mapping: [
+        {field_name: 'title', index: 1},
+        {field_name: 'extendedTitle', index: 276},
+        {field_name: 'projectId', index: 271},
+        {field_name: 'helsinkiTitle', index: 273},
+        {field_name: 'helsinkiId', index: 272},
+        {field_name: 'helsinkiIdAssignation', index: 298},
+        {field_name: 'helsinkiRawData', index: 236}
+    ],
+
+    search_mapping: {
+        t: '49',
+        'f:1': '__work_name__',
+        'f:271': '__project_id__',
+        'f:273': '__helsinki_name__',
+        'f:272': '__helsinki_id__',
+        'sortby': 'f:__sort_by_field__'
+    },
+
     //    
     //
     //
@@ -39,8 +58,6 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
 
         return this._super();
     },
-
-    // getActionButtons
 
     // Show a confirmation window after user selects a record from the lookup query results
     // If the user clicks "Check Author", then call method _checkAuthor
@@ -64,36 +81,11 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
         for(const fld_Name of fields){
 
             let dty_ID = this.options.mapping.fields[fld_Name];
-            if(dty_ID < 1){
+            if(dty_ID < 1 || !$Db.dty(dty_ID)){
                 continue;
             }
 
-            // defintions mapping can be found in the original version => lookupLRC18C.js
-            switch(fld_Name){
-                case 'title':
-                    dlg_response[dty_ID] = details[1] ? details[1] : '';
-                    break;
-                case 'extendedTitle':
-                    dlg_response[dty_ID] = details[276] ? details[276] : '';
-                    break;
-                case 'projectId':
-                    dlg_response[dty_ID] = details[271] ? details[271] : '';
-                    break;
-                case 'helsinkiTitle':
-                    dlg_response[dty_ID] = details[273] ? details[273] : '';
-                    break;
-                case 'helsinkiId':
-                    dlg_response[dty_ID] = details[272] ? details[272] : '';
-                    break;
-                case 'helsinkiIdAssignation':
-                    dlg_response[dty_ID] = details[298] ? details[298] : '';
-                    break;
-                case 'helsinkiRawData':
-                    dlg_response[dty_ID] = details[236] ? details[236] : '';
-                    break;
-                default:
-                    break;
-            }
+            dlg_response[dty_ID] = this._mapValues(fld_Name, recset, record);
         }
 
         let term_id = '';
@@ -107,40 +99,6 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
             return;
         }
         
-        this._importTerms(dlg_response, term_id);
-    },
-
-    // Get the user input from lookupESTC_works.html and build the query string
-    // Then lookup ESTC database if the query produces any search results
-    _doSearch: function () {
-
-        let query = {t: "49"}; //search for Works
-
-        if(this.element.find('#work_name').val() != ''){ // work_name
-            query['f:1'] = this.element.find('#work_name').val() ;
-        }
-        if(this.element.find('#project_id').val() != ''){ // project_id
-            query['f:271'] = this.element.find('#project_id').val();
-        }
-        if(this.element.find('#helsinki_name').val() != ''){ // helsinki_name
-            query['f:273'] = this.element.find('#helsinki_name').val();
-        }
-        if(this.element.find('#helsinki_id').val() != ''){ // helsinki_id
-            query['f:272'] = this.element.find('#helsinki_id').val();
-        }
-
-        if(this.element.find('#sort_by_field').val() > 0){ // Sort by field
-            let sort_by_key = "'sortby'"
-            query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
-        }
-
-        let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
-
-        if(missingSearch){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
-            return;
-        }
-
-        this._super(query);
+        this._getTerms(dlg_response, term_id);
     }
 });

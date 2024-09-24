@@ -87,11 +87,17 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
                 let url = new URL(that._servers[server]);
                 that._servers[server] = { title: url.hostname, uri: url.href };
                 options.push({key: server, title: that._servers[server]['title']});
+
+                that._collections[server] = {};
             }
             window.hWin.HEURIST4.ui.fillSelector(that._sel_elements['server'][0], options);
             window.hWin.HEURIST4.ui.initHSelect(that._sel_elements['server'], false, null, {
                 onSelectMenu: () => { that._displayThesauruses(); }
             });
+
+            if(that._sel_elements['server'].hSelect('instance') !== undefined){
+                that._sel_elements['server'].hSelect('widget').css('width', '170px');
+            }
 
             that._updateThesauruses();
         });
@@ -176,38 +182,38 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
                 return;
             }
 
-            for(const server in that._servers){
-
-                const theso = Object.hasOwn(response, server) ? response[server] : [];
-                let options = [];
-
-                if(!Object.hasOwn(that._collections, server)){
-                    that._collections[server] = {};
-                }
-
-                for(const key in theso){
-                    options.push({key: key, title: theso[key]['name']});
-
-                    if(!Object.hasOwn(that._collections[server], key)){
-                        that._collections[server][key] = [];
-                    }
-
-                    if(theso[key]['groups'].length > 0){
-                        for(const g_key in theso[key]['groups']){
-                            that._collections[server][key].push({key: g_key, title: theso[key]['groups'][g_key]});
-                        }
-                    }else if(!is_refresh){
-                        that._refreshCollections = true;
-                    }
-                }
-
-                that._thesauruses[server] = options;
-            }
+            that._updateThesaurusList(response, is_refresh);
 
             that._displayThesauruses();
         });
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
+    },
+
+    _updateThesaurusList: function(response, is_refresh){
+
+        for(const server in this._servers){
+
+            const theso = Object.hasOwn(response, server) ? response[server] : [];
+            let options = [];
+
+            for(const key in theso){
+                options.push({key: key, title: theso[key]['name']});
+
+                this._collections[server][key] = [];
+
+                if(theso[key]['groups'].length <= 0){
+                    this._refreshCollections = !is_refresh;
+                    continue;
+                }
+
+                for(const g_key in theso[key]['groups']){
+                    this._collections[server][key].push({key: g_key, title: theso[key]['groups'][g_key]});
+                }
+            }
+
+            this._thesauruses[server] = options;
+        }
     },
     
     /**
@@ -217,7 +223,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     _displayThesauruses: function(){
 
-        if(!this._sel_elements || !this._sel_elements['theso']){
+        if(!this._sel_elements?.['theso']){
             return;
         }
 
@@ -299,7 +305,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     _displayCollections: function(){
 
-        if(!this._sel_elements || !this._sel_elements['group']){
+        if(!this._sel_elements?.['group']){
             return;
         }
 
@@ -392,6 +398,17 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
         res = this.prepareValues(recset, record, res);
 
+        // Account for label translations
+        let label_dty_ID = this.options.mapping.fields['term_label'];
+        if(label_dty_ID > 0
+            && window.hWin.HEURIST4.util.isArrayNotEmpty(res[label_dty_ID])
+            && res[label_dty_ID].length == 2 && window.hWin.HEURIST4.util.isObject(res[label_dty_ID][1])){
+
+                res[label_dty_ID].push(...Object.values(res[label_dty_ID][1]));
+                res[label_dty_ID].splice(1, 1);
+        }
+
+        // Setup value for insertion into enum field
         let term_field_dty_ID = this.options.mapping.fields['term_field'];
         if(term_field_dty_ID > 0){
 

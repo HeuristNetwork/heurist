@@ -69,7 +69,11 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     tabs_container: null, // jQuery tabs container, separates query and results
     results_tab: 1, // Tab that displays the result list
 
-    action_timeout: null, // Timeout for certain actions
+    timeout: {
+        action_timeout: null, // Timeout for certain actions
+        field_name: '',
+        value: ''
+    },
 
     //element => dialog inner content
     //_as_dialog => dialog container
@@ -133,13 +137,13 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
                     let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
                         return !window.hWin.HEURIST4.util.isempty($(ele).val());
                     });
-                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, is_empty && $inputs_with_value.length == 0);
+                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 },
                 change: () => {
                     let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
                         return !window.hWin.HEURIST4.util.isempty($(ele).val());
                     });
-                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, is_empty && $inputs_with_value.length == 0);
+                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 }
             });
             window.hWin.HEURIST4.util.setDisabled(this.search_buttons, true);
@@ -266,9 +270,6 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         if(!window.hWin.HEURIST4.util.isObject(dlg_response)){
             dlg_response = {};
         }
-        if(!window.hWin.HEURIST4.util.isObject(extra_settings)){
-            extra_settings = {};
-        }
 
         let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
@@ -281,38 +282,8 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             }
 
             let values = recordset.fld(record, fld_Name);
-            let field_type = $Db.dty(dty_ID, 'dty_Type');
-            
-            if(window.hWin.HEURIST4.util.isObject(values)){
-                values = Object.values(values);
-            }
-            if(!Array.isArray(values)){
-                values = window.hWin.HEURIST4.util.isempty(values) ? '' : values;
-                values = [values];
-            }
-            values = values.filter((value) => !window.hWin.HEURIST4.util.isempty(value)); // remove empty values
 
-            if(window.hWin.HEURIST4.util.isempty(values)){
-                continue;
-            }
-
-            switch(field_type){
-                case 'enum':
-                    // Match term labels with val, need to return the term's id to properly save its value
-                    if(Object.hasOwn(extra_settings, 'check_term_codes')){
-                        values = this._getTermByCode(trm_ID, dty_ID, values);
-                    }
-                    break;
-
-                case 'resource':
-                case 'relmarker':
-                    values = this._processRecordFields(values);
-                    break;
-
-                default:
-                    break;
-            }
-
+            this.prepareValue(values, dty_ID, extra_settings);
 
             // Check that values is valid, add to response object
             if(window.hWin.HEURIST4.util.isempty(values)){
@@ -328,6 +299,49 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
+     * Process the value(s) for the provided field, based on the field's type
+     *
+     * @param {any} values - value/values to be processed, will be converted into an array
+     * @param {integer} dty_ID - field's ID, to retrieve field type
+     * @param {json} extra_settings - additional settings
+     */
+    prepareValue: function(values, dty_ID, extra_settings){
+
+        if(window.hWin.HEURIST4.util.isObject(values)){
+            values = Object.values(values);
+        }
+        if(!Array.isArray(values)){
+            values = window.hWin.HEURIST4.util.isempty(values) ? '' : values;
+            values = [values];
+        }
+        values = values.filter((value) => !window.hWin.HEURIST4.util.isempty(value)); // remove empty values
+
+        if(window.hWin.HEURIST4.util.isempty(values)){
+            return;
+        }
+
+        const field_type = $Db.dty(dty_ID, 'dty_Type');
+
+        switch(field_type){
+            case 'enum':
+                // Match term labels with val, need to return the term's id to properly save its value
+                if(Object.hasOwn(extra_settings, 'check_term_codes')){
+                    this._getTermByCode(extra_settings.check_term_codes, dty_ID, values);
+                }
+                break;
+
+            case 'resource':
+            case 'relmarker':
+                this._processRecordFields(values);
+                break;
+
+            default:
+                this._processValues(values);
+                break;
+        }
+    },
+
+    /**
      * Perform final actions before exiting popup
      * Clear timeout before returning result
      *
@@ -336,8 +350,8 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     closingAction: function(dlg_response){
 
-        if(this.action_timeout){
-            clearTimeout(this.action_timeout); // clear timeout
+        if(this.timeout.action_timeout){
+            clearTimeout(this.timeout.action_timeout); // clear timeout
         }
 
         if(dlg_response !== false && window.hWin.HEURIST4.util.isempty(dlg_response)){
@@ -593,6 +607,61 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
+     * Trims leading and trailing spaces from values and removes empty values from array of values
+     *
+     * @param {array} values - array of values
+     */
+    _processValues: function(values){
+
+        for(const idx in values){
+
+            let value = values[idx];
+            value = typeof value === 'string' ? value.trim() : value;
+
+            !window.hWin.HEURIST4.util.isempty(value) || values.splice(idx, 1);
+        }
+    },
+
+    setupTimeout: function(){
+
+        let that = this;
+
+        this.timeout.action_timeout = setTimeout(function(){
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+            let field = that.timeout.field_name;
+            let value = that.timeout.value;
+            let dty_ID = that.options.mapping.fields[field];
+
+            if(Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
+                value = JSON.stringify(value);
+            }
+
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'An error has occurred with mapping values to their respective fields,<br>'
+                        + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
+                        + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
+                        + 'Invalid field details:<br>'
+                        + `Response field - "${field}"<br>`
+                        + `Record field - "${$Db.rst(that.options.mapping.rty_ID, dty_ID, 'rst_DisplayName')}" (<em>${$Db.dty(dty_ID, 'dty_Type')}</em>)<br>`
+                        + `Value to insert - "${value}"<br>`,
+                error_title: 'Saving selection canceled',
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
+        }, 20000); // set timeout to 20 seconds
+    },
+
+    checkResultSize: function(result_size, max_size){
+
+        if(result_size > max_size){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                `There are ${result_size} records satisfying these criteria, only the first ${max_size} are shown.<br>Please narrow your search.`
+            );
+        }
+    },
+
+    /**
      * Converts the provided country name into it's country code, 
      *  this is just for the few missed/incorrect with default Heurist
      *
@@ -638,5 +707,68 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         return _countryCode;
+    },
+
+    constructLocation: function(long, lat){
+
+        return !window.hWin.HEURIST4.util.isempty(long) && !window.hWin.HEURIST4.util.isempty(lat)
+                ? `p POINT(${long} ${lat})`
+                : '';
+    },
+
+    getTimespan: function(fld_Names, value){
+
+        if(!fld_Names[0].startsWith('when') || window.hWin.HEURIST4.util.isempty(value)){
+            return value;
+        }
+
+        if(fld_Names[2].startsWith('start') && value['timespans']){
+            value = value['timespans'][0]['start'];
+        }else if(fld_Names[2].startsWith('end') && value['timespans']){
+            value = value['timespans'][0]['end'];
+        }
+
+        return value;
+    },
+
+    getValueByParts: function(fld_Names, value){
+
+        if(window.hWin.HEURIST4.util.isempty(value)){
+            return value;
+        }
+
+        for(const part of fld_Names){
+            if(value && !window.hWin.HEURIST4.util.isempty(value[part])){
+                value = value[part];
+            }else if(part == 'count'){
+                value = 0;
+            }
+        }
+
+        return value;
+    },
+
+    createGeoFeature: function(value){
+
+        value = {type: 'Feature', geometry: value};
+
+        let wkt = stringifyMultiWKT(value);    
+
+        if(window.hWin.HEURIST4.util.isempty(wkt)){
+            return '';
+        }
+
+        let typeCode = 'm';
+        if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
+            if(wkt.indexOf('LINESTRING')>=0){
+                typeCode = 'l';
+            }else if(wkt.indexOf('POLYGON')>=0){
+                typeCode = 'pl';
+            }else {
+                typeCode = 'p';
+            }
+        }
+
+        return `${typeCode} ${wkt}`;
     }
 });

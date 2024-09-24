@@ -198,18 +198,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         }
         if(this.element.find('#inpt_year').val() != 'all'){
 
-            let years = this.element.find('#inpt_year').val();
-            if(years.length > 4){
-                if(years.indexOf(',') === -1 && years.indexOf(' ') === -1){
-                    years = years.replace(/.{4}/g, '$&,');
-                }
-                if(years.indexOf(',') === -1){
-                    years = years.replaceAll(' ', ',');
-                }
-                if(years.indexOf(', ') !== -1){
-                    years = years.replaceAll(', ', ',');
-                }
-            }
+            let years = this.getYear();
             filter_query += `;year=${years}`;
         }
         if(this.element.find('#inpt_type').val() != 'all'){
@@ -306,5 +295,23 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
         this._super(res);
+    },
+
+    getYear: function(){
+
+        let years = this.element.find('#inpt_year').val();
+        if(years.length > 4){
+            if(years.indexOf(',') === -1 && years.indexOf(' ') === -1){
+                years = years.replace(/.{4}/g, '$&,');
+            }
+            if(years.indexOf(',') === -1){
+                years = years.replaceAll(' ', ',');
+            }
+            if(years.indexOf(', ') !== -1){
+                years = years.replaceAll(', ', ',');
+            }
+        }
+
+        return years;
     }
 });

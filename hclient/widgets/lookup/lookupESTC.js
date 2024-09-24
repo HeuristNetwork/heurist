@@ -31,6 +31,9 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
     _is_works: false,
 
+    search_mapping: {},
+    return_mapping: [],
+
     _init: function(){
 
         this._is_works = this.options.mapping.service == 'ESTC_works';
@@ -129,7 +132,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: `ids:${sel_Rec_ID}`, 
-            detail: 'detail' 
+            detail: 'detail'
         };
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
@@ -177,7 +180,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         //avoid sync on every request
         this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched ? 0 : 1;
 
-        rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
+        rec_IDs = Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
 
         let request = { 
             serviceType: 'ESTC',
@@ -213,25 +216,30 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Import additional record from the ESTC database,
+     * Get additional record(s) from the ESTC database,
      *  these records belong to record pointer fields
      *
      * @param {json} dlg_response - alreay mapped field results, new record ids to be added
      * @param {array|string} rec_IDs - record ID(s) to import from ESTC database
      * @param {integer|array} term_ID - term ID(s) to import from ESTC database, after the records
      */
-    _importRecPointers: function(dlg_response, rec_IDs, term_ID){
+    _getRecPointers: function(dlg_response, rec_IDs, term_ID){
 
         let that = this;
 
-        rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
+        if(window.hWin.HEURIST4.util.isempty(rec_IDs)){
+            this._getTerms(dlg_response, term_ID);
+            return;
+        }
+
+        rec_IDs = Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
 
         let query_request = { 
             serviceType: 'ESTC',
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
             q: `ids:"${rec_IDs}"`, 
-            detail: 'detail' 
+            detail: 'header' 
         };
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
@@ -249,44 +257,38 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             let recordset = new HRecordSet(response.data);
             recordset.each2(function(id, record){
                 for(const i in dlg_response){
-                    
-                    let assigned_title = false;
 
-                    for(const j in dlg_response[i]){
+                    dlg_response[i] = Array.isArray(dlg_response[i]) ? dlg_response[i] : [dlg_response[i]];
 
-                        if(dlg_response[i][j] == id){
-
-                            dlg_response[i][j] = record['rec_Title'];
-                            assigned_title = true;
-                            break;
-                        }
-                    }
-
-                    if(assigned_title){
+                    if(that.assignValue(dlg_response[i], id, record['rec_Title'])){
                         break;
                     }
                 }
             });
+
+            dlg_response['heurist_url'] = `https://heuristref.net/h6-alpha/?db=ESTC_Helsinki_Bibliographic_Metadata&w=a&q=ids:${rec_IDs}`;
 
             if(window.hWin.HEURIST4.util.isempty(term_ID)){
                 that.closingAction(dlg_response);
                 return;
             }
 
-            that._importTerms(dlg_response, term_ID);
+            that._getTerms(dlg_response, term_ID);
         });
     },
 
     /**
-     * Import missing terms from the ESTC database
+     * Gets the missing terms from the ESTC database, for user to define matching value / create new term
      *
      * @param {json} dlg_response - alreay mapped field results, new term IDs to be added
      * @param {integer|array} term_ID - term ID(s) to import from ESTC database
      */
-    _importTerms: function(dlg_response, term_ID){
+    _getTerms: function(dlg_response, term_ID){
+
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(term_ID)){
-            that.closingAction(dlg_response);
+            this.closingAction(dlg_response);
             return;
         }
 
@@ -311,22 +313,19 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
                 window.hWin.HEURIST4.msg.showMsgErr(response);
                 return;
             }
-            
+
             let recordset = new HRecordSet(response.data);
             recordset.each2(function(id, record){
                 for(const i in dlg_response){
 
-                    let assigned_label = false;
+                    dlg_response[i] = Array.isArray(dlg_response[i]) ? dlg_response[i] : [dlg_response[i]];
 
-                    for(const j in dlg_response[i]){
-
-                        if(dlg_response[i][j] == id){
-
-                            dlg_response[i][j] = record['trm_Label'];
-                            assigned_label = true;
-                            break;
-                        }
-                    }
+                    let assigned_label = that.assignValue(dlg_response[i], id, {
+                        label: record['trm_Label'],
+                        desc: record['trm_Description'],
+                        code: record['trm_Code'],
+                        uri: record['trm_SemanticReferenceURL']
+                    });
 
                     if(assigned_label){
                         break;
@@ -336,6 +335,34 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
             that.closingAction(dlg_response);
         });
+    },
+
+    /**
+     * Replaces placeholder term and record IDs with values that will allow the user to either:
+     *  select an existing term/record, or 
+     *  create a new term/record
+     *
+     * @param {array} values - array of values to check
+     * @param {integer} to_replace - the id value to replace
+     * @param {mixed} replace_value - what to replace the id value with
+     *
+     * @returns {boolean} whether the value was replaced
+     */
+    assignValue: function(values, to_replace, replace_value){
+
+        let replaced_value = false;
+
+        for(const idx in values){
+
+            if(values[idx] == to_replace){
+
+                values[idx] = replace_value;
+                replaced_value = true;
+                break;
+            }
+        }
+
+        return replaced_value;
     },
 
     /**
@@ -361,7 +388,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         const sIgnored = cnt_i > 0 
             ? `${cnt_i} record${skipped_extra} skipped. Either record type is not set in mapping or is missing from this database` : '';
 
-        rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
+        rec_IDs = Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
 
         let query_request = { 
             serviceType: 'ESTC',
@@ -390,7 +417,8 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
                 let rec = recordset.getById(rec_ID);
                 sImported += ids_ex.indexOf(rec_ID) < 0 ? `<li>${rec_ID}: ${recordset.fld(rec, 'rec_Title')}</li>` : '';
             }
-            sImported = `${cnt} record${imported_extra} imported:<br>${cnt > 0 ? `<ul>${sImported}</ul>` : ''}`;
+            sImported = cnt > 0 ? `<ul>${sImported}</ul>` : '';
+            sImported = `${cnt} record${imported_extra} imported:<br>${sImported}`;
 
             for(const rec_ID of ids_ex){
                 let rec = recordset.getById(rec_ID);
@@ -403,13 +431,42 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Send query search to Heurist ESTC database
-     *
-     * @param {json} query - Heurst JSON query for ESTC database
+     * Construct and send query search to Heurist ESTC database
      */
-    _doSearch: function(query){
+    _doSearch: function(){
 
         let that = this;
+
+        let query = {};
+        for(const field in this.search_mapping){
+
+            let value_field = this.search_mapping[field];
+            let actual_field = typeof value_field === 'string' ? value_field : Object.values(value_field)[1];
+
+            let placeholder = actual_field.match(/__([a-zA-Z_]{7,14})__/);
+            if(!placeholder){
+                query[field] = value_field;
+                continue;
+            }
+
+            let value = this.element.find(`#${placeholder[1]}`).val();
+            if(window.hWin.HEURIST4.util.isempty(value) || value == 0){
+                continue;
+            }
+
+            if(actual_field === value_field){
+                query[field] = value_field.replace(placeholder[0], value);
+            }else{
+                let replacing = Object.keys(value_field)[1];
+                value_field[replacing] = actual_field.replace(placeholder[0], value);
+                query[field] = value_field;
+            }
+        }
+
+        if(Object.keys(query).length <= 2){
+            window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
+            return;
+        }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
@@ -454,5 +511,29 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             response.data = response;
         }
         this._super(response.data, true);
+    },
+
+    /**
+     * Retrieves the value from the record via the mapping provided
+     *  defintions mapping can be found in the original version => lookupLRC18C.js
+     *
+     * @param {string} field_name - field to be mapped
+     * @param {HRecordSet} recordset - current record set
+     * @param {array} record - current record from record set
+     * @returns 
+     */
+    _mapValues: function(field_name, recordset, record){
+
+        const field = this.return_mapping.find((field) => field.field_name === field_name);
+
+        if(!field){
+            return '';
+        }
+
+        let value = '';
+
+        value = recordset.fld(record, field.index);
+
+        return !window.hWin.HEURIST4.util.isempty(value) ? value : '';
     }
 });

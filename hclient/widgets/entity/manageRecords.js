@@ -5483,7 +5483,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             if(service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC'){
                                 this._handleESTCLookup(dialog_name, dlg_opts);
                             }else{
-                                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+                                this._loadParentLookup(dialog_name, dlg_opts)
                             }
                         }
                     });
@@ -7021,6 +7021,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
     _handleESTCLookup: function(dialog_name, dlg_opts){
 
+        let that = this;
+
         let req = {
             a: 'check_allow_estc',
             db: window.hWin.HAPI4.database,
@@ -7034,13 +7036,57 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return false;
             }
 
-            if(window.hWin.HEURIST4.util.isFunction($('body')['lookupESTC'])){
-                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
-                return;
-            }
+            that._loadParentLookup(dialog_name, dlg_opts);
+        });
+    },
 
-            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupESTC.js`, () => {
-                window.hWin.HEURIST4.ui.showRecordActionDialog(dialog_name, dlg_opts);
+    /**
+     * Load base widget and any other possible parent widget
+     *  ESTC <= ESTC_editions, ESTC_works and LRC18C
+     *  Geonames <= GN and GN_postalCode
+     *
+     * @param {string} lookup_name - lookup/service name
+     * @param {json} dialog_options - dialog options; title, modal, width, height, etc...
+     */
+    _loadParentLookup: function(lookup_name, dialog_options){
+
+        let that = this;
+
+        if(!window.hWin.HEURIST4.util.isFunction($('body')['lookupBase'])){
+            $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupBase.js`, () => {
+                that._loadParentLookup(lookup_name, dialog_options);
+            }).fail(() => {
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                    error_title: 'Failed to load lookup base',
+                    message: `Heurist failed to load the base lookup script needed for all external lookups.`
+                });
+            });
+            return;
+        }
+
+        let is_estc = lookup_name.indexOf('ESTC') > -1 || lookup_name.indexOf('LRC18C') > -1;
+
+        if(lookup_name.indexOf('GN') === -1 && !is_estc){// or BnF
+            window.hWin.HEURIST4.ui.showRecordActionDialog(lookup_name, dialog_options);
+            return;
+        }
+
+        let parent = lookup_name.indexOf('GN') > -1 ? 'lookupGeonames' : '';
+        parent = is_estc ? 'lookupESTC' : parent;
+
+        if(window.hWin.HEURIST4.util.isFunction($('body')[parent])){
+            window.hWin.HEURIST4.ui.showRecordActionDialog(lookup_name, dialog_options);
+            return;
+        }
+
+        $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/${parent}.js`, () => {
+            window.hWin.HEURIST4.ui.showRecordActionDialog(lookup_name, dialog_options);
+        }).fail((jqxhr, settings, exception) => {
+            window.hWin.HEURIST4.msg.showMsgErr({
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                error_title: 'Failed to load parent widget',
+                message: `Heurist failed to load the necessary scripts for the external lookup ${lookup_name}.`
             });
         });
     }
