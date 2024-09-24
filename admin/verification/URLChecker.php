@@ -36,8 +36,8 @@ class URLChecker {
     /** @var mysqli $mysqli Database connection */
     private $mysqli;
 
-    /** @var string $heuristServerUrl The base URL of the Heurist server */
-    private $heuristServerUrl;
+    /** @var string $heuristDomain  domain for this Heurist server  */
+    private $heuristDomain;
 
     /** @var bool $isHeuristReferenceIndex Whether the database is Heurist_Reference_Index */
     private $isHeuristReferenceIndex;
@@ -58,12 +58,15 @@ class URLChecker {
      * Constructor for URLChecker.
      *
      * @param mysqli $mysqli
-     * @param string $heuristServerUrl
+     * @param string $heuristDomain
      * @param bool $isHeuristReferenceIndex
      */
-    public function __construct($mysqli, $heuristServerUrl, $isHeuristReferenceIndex) {
+    public function __construct($mysqli, $heuristDomain, $isHeuristReferenceIndex) {
         $this->mysqli = $mysqli;
-        $this->heuristServerUrl = strtolower($heuristServerUrl);
+        
+        $info = parse_url(strtolower($heuristDomain));
+        $this->heuristDomain = $info['scheme'].'://'.$info['host'];
+        
         $this->isHeuristReferenceIndex = $isHeuristReferenceIndex;
     }
 
@@ -125,7 +128,7 @@ class URLChecker {
         }
     }
 
-    private function printFooter($broken_cnt, $passed_cnt, $sMsg, $sMsg2='', $time_start=0){
+    private function printFooter($broken_cnt, $passed_cnt, $sMsg, $sMsg2='', $timestart=0){
         if($this->isVerbose){
 
             echo "<p>$sMsg. Processed: $passed_cnt</p>";
@@ -137,7 +140,7 @@ class URLChecker {
             }
             
             if($timestart>0){
-                print '<p>total time:    '.(microtime(true) - $time_start).'</p>';
+                print '<p>total time:    '.(microtime(true) - $timestart).'</p>';
             }
             
         }
@@ -166,7 +169,7 @@ class URLChecker {
             return;
         }
 
-        $time_start = microtime(true);     
+        $timestart = microtime(true);     
         $passed_cnt = 0;
 
         while ($row = $res->fetch_row()) {
@@ -180,17 +183,18 @@ class URLChecker {
                 $recUrl .= '&isalive=1';
             }
 
+            // Skip URLs that match current Heurist server URL
+            if (strpos(strtolower($recUrl), $this->heuristDomain) === 0) {
+                continue;
+            }
+
             // Handle listing URLs without validation
             if ($this->listOnly) {
                 $recUrl = htmlentities($recUrl);
                 echo intval($recId) . " : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a><br>";
                 continue;
             }
-            // Skip URLs that match the Heurist server URL
-            if (strpos(strtolower($recUrl), $this->heuristServerUrl) === 0) {
-                continue;
-            }
-
+            
             // Validate the URL
             $error_msg = $this->loadRemoteURLContent($recUrl, $isReferenceDatabase);
             if($error_msg==null){
@@ -262,7 +266,7 @@ class URLChecker {
             return;
         }
         
-        $time_start = microtime(true);     
+        $timestart = microtime(true);     
 
 
         $passed_cnt = 0;
@@ -285,7 +289,7 @@ class URLChecker {
         $res->close();
 
         $broken_cnt = count($results[1]);
-        $this->printFooter($broken_cnt, $passed_cnt, 'Text fields with URLs', '', $time_start);
+        $this->printFooter($broken_cnt, $passed_cnt, 'Text fields with URLs', '', $timestart);
     }
 
     /**
@@ -311,7 +315,7 @@ class URLChecker {
             return;
         }
 
-        $time_start = microtime(true);
+        $timestart = microtime(true);
         $passed_cnt = 0;
         while ($row = $res->fetch_row()) {
             $recId = $row[0];
@@ -326,7 +330,7 @@ class URLChecker {
         $res->close();
 
         $broken_cnt = count($results[2]);
-        $this->printFooter($broken_cnt, $passed_cnt, 'External URLs (File fields)', '', $time_start);
+        $this->printFooter($broken_cnt, $passed_cnt, 'External URLs (File fields)', '', $timestart);
     }
 
     /**
@@ -372,7 +376,7 @@ class URLChecker {
 
         //use get_headers ------------------
         
-        $time_start = microtime(true);     
+        $timestart = microtime(true);     
         
         //check takes around one second
         // in case of DNS issue it may take 20 seconds - we reduce timeout to 5 seconds
@@ -395,10 +399,7 @@ class URLChecker {
             //HTTP/1.1 200 OK
         }
         
-        //DEBUG 
-        print $url.'     '.(microtime(true) - $time_start).'   '.$error_msg.'<br>';
-        
-        
+        //DEBUG  print $url.'     '.(microtime(true) - $timestart).'   '.$error_msg.'<br>';
         //cooldown 2 seconds
         sleep(2);
     
@@ -446,17 +447,16 @@ class URLChecker {
      */
     private function validateAndHandleFieldUrl($recId, $url, $detailTypeId, &$results, $idx_in_results) {
 
+        // Skip URLs from the same server
+        if (strpos(strtolower($url), $this->heuristDomain) === 0) {
+            return false;
+        }
+        
         if ($this->listOnly) {
             $url = htmlentities($url);
             echo intval($recId) . ' : ' . intval($detailTypeId) . ' : <a href="' . $url . '" target="_blank" rel="noopener">' . $url . '</a><br>';
             return false;
         }
-
-        if (strpos(strtolower($url), $this->heuristServerUrl) === 0) {
-            //return false; // Skip URLs from the same server
-            return false;
-        }
-            
 
         $error_msg = $this->loadRemoteURLContent($url);
 
