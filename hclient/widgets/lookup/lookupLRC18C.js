@@ -1,5 +1,5 @@
 /**
- * LRC18C.js
+ * lookupLRC18C.js
  *
  *  1) Loads html content from LRC18C.html
  *  2) User defines search parameters and searches Book(edition) (rt:30) in ESTC database
@@ -80,7 +80,6 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
             }
         },    
 
-        
         12:{
             rty_ID:12,
             key:268, //Place->Place
@@ -99,8 +98,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
                 268: 1090  //KEY
             }
         },    
-        
-        
+
         30:{
             rty_ID:55,
             key:254, //Book(edition)->Edition
@@ -133,7 +131,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
                 270: 652
             }
         },
-        
+
         vocabularies:[
             5430, //1321-5430 book formats for 256 => 991  6891 ( 1323-6891 ) - SYNCED!
             5432, // ( 1321-5432 )region 18C for 260 => 939    6353
@@ -145,10 +143,22 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
 
     },
 
-    // getActionButtons
+    search_mapping: {
+        t: '30',
+        'f:1': '@__edition_name__',
+        'f:9': '__edition_date__',
+        'linkedto:15': {t: '10', 'f:250': '__edition_author__'},
+        'linkedto:284': {t: '49', 'f:272': '__edition_work__'},
+        'linkedto:259': {t: '12', title: '__edition_place__'},
+        'f:137': '=__vol_count__',
+        'f:290': '=__vol_parts__',
+        'f:256': '__select_bf__',
+        'f:254': '@__estc_no__',
+        'sortby': 'f:__sort_by_field__'
+    },
 
-    /* Show a confirmation window after user selects a record from the lookup query results */
-    /* If the user clicks "Check Author", then call method _checkAuthor*/
+    // Show a confirmation window after user selects a record from the lookup query results
+    // If the user clicks "Check Author", then call method _checkAuthor
     doAction: function(){
 
         let that = this;
@@ -161,57 +171,5 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
         window.hWin.HEURIST4.msg.bringCoverallToFront( that._as_dialog.parent() );
 
         this._importRecords(sels.join(','));
-    },
-
-    /* Get the user input from lookupLRC18C.html and build the query string */
-    /* Then lookup ESTC database if the query produces any search results */
-    _doSearch: function () {
-
-        let query = {t: "30"}; //search for Books
-
-        if (this.element.find('#edition_name').val() != '') {
-            query['f:1'] = `@${this.element.find('#edition_name').val()}`;
-        }
-        if (this.element.find('#edition_date').val() != '') {
-            query['f:9'] = this.element.find('#edition_date').val();
-        }
-        if (this.element.find('#edition_author').val() != '') {
-            //Standardised agent name  - 250
-            query['linkedto:15'] = {"t":"10", "f:250":this.element.find('#edition_author').val()};
-        }
-        if (this.element.find('#edition_work').val() != '') {
-            query['linkedto:284'] = {"t":"49","f:272":this.element.find('#edition_work').val()};
-            //Helsinki work ID - 272
-            //Project Record ID - 271
-        }
-        if (this.element.find('#edition_place').val() != '') {
-            query['linkedto:259'] = {"t":"12", "title":this.element.find('#edition_place').val()};
-        }
-        if (this.element.find('#vol_count').val() != '') {
-            query['f:137'] = `=${this.element.find('#vol_count').val()}`;
-        }
-        if (this.element.find('#vol_parts').val() != '') {
-            query['f:290'] = `=${this.element.find('#vol_parts').val()}`;
-        }
-        if (this.element.find('#select_bf').val()>0) {
-            query['f:256'] = this.element.find('#select_bf').val();
-        }
-        if (this.element.find('#estc_no').val() != '') {
-            query['f:254'] = `@${this.element.find('#estc_no').val()}`;
-        }
-
-        if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
-            let sort_by_key = "'sortby'"
-            query[sort_by_key.slice(1, -1)] = `f:${this.element.find('#sort_by_field').val()}`;
-        }
-
-        let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
-
-        if(missingSearch){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
-            return;
-        }
-
-        this._super(query);
     }
 });

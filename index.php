@@ -221,7 +221,6 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
-<script type="text/javascript" src="hclient/widgets/lookup/lookupBase.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>

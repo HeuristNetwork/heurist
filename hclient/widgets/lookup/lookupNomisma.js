@@ -85,7 +85,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
                 s = recordset.fld(record, fldname);
             }
 
-            s = s?s:'';
+            s = s || '';
             let title = s;
 
             if(fldname == 'properties.gazetteer_uri'){
@@ -193,9 +193,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         let map_flds = Object.keys(this.options.mapping.fields);
         fields = fields.concat(map_flds);
 
-        for(const idx in map_flds){
-            map_flds[idx] = map_flds[idx].split('.'); 
-        }
+        map_flds = map_flds.map((prop) => prop.split('.'));
 
         if(!geojson_data.features) geojson_data.features = geojson_data;
 
@@ -205,54 +203,21 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
             let recID = i++;
             
-            let hasGeo = false;
+            let hasGeo = true;
             let values = [recID, this.options.mapping.rty_ID];
             for(const fld_Names of map_flds){
 
                 let val = feature[fld_Names[0]];
 
-                if(fld_Names[0].startsWith('when') && val){
+                val = this.getTimespan(fld_Names, val);
 
-                    if(fld_Names[2].startsWith('start') && val['timespans']){
-                        val = val['timespans'][0]['start'];
-                    }else if(fld_Names[2].startsWith('end') && val['timespans']){
-                        val = val['timespans'][0]['end'];
-                    }
-                }
+                val = this.getValueByParts(fld_Names, val);
 
-                for(const part of fld_Names){
-                    if(val && !window.hWin.HEURIST4.util.isnull(val[part])){
-                        val = val[part];
-                    }else if(part == 'count'){
-                        val = 0;
-                    }
-                }      
-                
-                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names]){ // looking for geospatial values
-                    if(!window.hWin.HEURIST4.util.isempty(val)){
-                        val = {"type": "Feature", "geometry": val};
-                        let wkt = stringifyMultiWKT(val);    
-                        if(window.hWin.HEURIST4.util.isempty(wkt)){
-                            val = '';
-                        }else{
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
+                    val = this.createGeoFeature(val);
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
+                } // else not looking for geospatial values
 
-                            let typeCode = 'm';
-                            if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                if(wkt.indexOf('LINESTRING')>=0){
-                                    typeCode = 'l';
-                                }else if(wkt.indexOf('POLYGON')>=0){
-                                    typeCode = 'pl';
-                                }else {
-                                    typeCode = 'p';
-                                }
-                            }
-                            val = `${typeCode} ${wkt}`;
-                            hasGeo = true;
-                        }
-                    }
-                }else{ // not looking for geospatial values
-                    hasGeo = true;
-                }
                 values.push(val);    
             }
 
@@ -266,4 +231,3 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         this._super(res);
     }
 });
-

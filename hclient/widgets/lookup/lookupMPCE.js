@@ -72,7 +72,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
     assoc_work_count: null, // the number of works that contain the selected keyword
     assoc_startindex: null, // the index of the current start of list 
     assoc_endindex: null,   // the index of the current end of list
-    assoc_selected: null,   // array of selected keyword ids from the associated keyword list
+    assoc_selected: [],   // array of selected keyword ids from the associated keyword list
 
     // Previously Assigned Keywords Variables
     prev_works: null,       // ids of the last 5 previous works
@@ -499,7 +499,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
         Return: json -> all keywords, containing {id: 'keyword name', ...}
      */
-    getKeywords: function(next_step='none', extra_ids){
+    getKeywords: function(next_step='none', extra_ids = null){
 
         let that = this;
 
@@ -534,44 +534,49 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                     return;
                 }
 
-                let title = null;
-                switch(next_step){
-                    case 'assigned': // add assigned keywords to html list
-
-                        if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
-
-                            for(const id of that.project_keywords){
-
-                                let title = `Record ID - ${id}`;
-                                if(that.full_keywords_list[id] !== undefined){
-                                    title = that.full_keywords_list[id];
-                                }
-
-                                that.showKeyword(title, id); // Add to Keyword Table
-                            }
-                        }
-
-                        that.setupRecentWorks(); // initialise recent keywords
-
-                        break;
-                    case 'associated': // retrieve associated keywords
-                        that.setupAssocKeywords(extra_ids);
-                        break;
-                    case 'recent': // retrieve recent keywords
-                        that.getRecentKeywords(extra_ids);
-                        break;
-                    case 'add': // add new assigned keyword
-
-                        title = that.full_keywords_list[extra_ids] !== undefined ? `Record ID - ${extra_ids}` : that.full_keywords_list[extra_ids];
-                        that.addKeyword(extra_ids, title);
-
-                        break;
-                    default:
-                        // Unknown/None, do nothing
-                        break;
-                }
+                this.getKeywordsNextStep(next_step, extra_ids);
             }
         );
+    },
+
+    getKeywordsNextStep: function(step, ids){
+
+        let title = null;
+        switch(step){
+            case 'assigned': // add assigned keywords to html list
+
+                if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
+
+                    for(const id of that.project_keywords){
+
+                        let title = `Record ID - ${id}`;
+                        if(that.full_keywords_list[id] !== undefined){
+                            title = that.full_keywords_list[id];
+                        }
+
+                        that.showKeyword(title, id); // Add to Keyword Table
+                    }
+                }
+
+                that.setupRecentWorks(); // initialise recent keywords
+
+                break;
+            case 'associated': // retrieve associated keywords
+                that.setupAssocKeywords(ids);
+                break;
+            case 'recent': // retrieve recent keywords
+                that.getRecentKeywords(ids);
+                break;
+            case 'add': // add new assigned keyword
+
+                title = that.full_keywords_list[ids] !== undefined ? `Record ID - ${ids}` : that.full_keywords_list[ids];
+                that.addKeyword(ids, title);
+
+                break;
+            default:
+                // Unknown/None, do nothing
+                break;
+        }
     },
 
     /*
@@ -712,8 +717,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 }
             }
         );
-
-        return;
     },
     
     /*
@@ -762,8 +765,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      */
     updateAssocDisplay: function(move_to_start=true){
 
-        let that = this;
-
         let list = $('#associated_field');
 
         if(window.hWin.HEURIST4.util.isempty(this.assoc_keywords)){
@@ -776,13 +777,9 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             return;
         }
 
-        let assigned = this.project_keywords;
-
         keywords.sort(compareIndexes);
 
         this.assoc_startindex = list.find('li').length != 0 && !move_to_start ? this.assoc_endindex : 0;
-
-        let max = this.assoc_startindex + 13;
 
         // Empty List, before use
         list.empty();
@@ -792,65 +789,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         $('#assoc_total').text(`(n=${this.assoc_work_count})`);
 
         // Now add items into the HTML list
-        let i = this.assoc_startindex;
-        for(; i < max && keywords.length > i; i++){
-
-            let item = $('<li>');
-
-            if(keywords[i] == null){
-                break; 
-            }
-
-            if(assigned.find(e => e == keywords[i][0])){
-                max++;
-                continue;
-            }else{
-
-                item.html(`<input type='checkbox' value='${keywords[i][0]}' style='vertical-align:middle;' id='${keywords[i][0]}_a'>`
-                        + `<label for='${keywords[i][0]}_a' class='non-selectable key-label truncate' style='max-width:180px;vertical-align:middle;'`
-                        + ` title="${keywords[i][2]}">${keywords[i][2]}</label>&nbsp;&nbsp;`
-                        + `<button data-value='${keywords[i][0]}' class='btn btn-info ui-icon ui-icon-circle-b-info'`
-                            + " style='float:right;font-size:1em;display:inline-block;width:20px;height:20px;color:white;' title='View keyword record'>&nbsp;"
-                        +"</button>"
-                        + `<label class='non-selectable' style='vertical-align:middle;float:right;margin-right:5px;'> [ ${keywords[i][1]} ] </label>`);
-
-                item.find('.btn-info.ui-icon-circle-b-info').on('click', function(e){
-                    let rec_id = $(e.target).parent().find('input').attr('value');
-
-                    that.openRecordInTab(rec_id);
-                });
-
-                if(this.assoc_selected && this.assoc_selected.length != 0){
-
-                    if(this.assoc_selected.indexOf(keywords[i][0]) > -1){
-                        $(item).find('input').prop('checked', true);
-                    }
-                }
-
-                item.find(`#${keywords[i][0]}_a`).on('click', function(e){ 
-
-                    let id = $(e.target).val();
-                    if($(e.target).is(':checked')){
-
-                        if(!that.assoc_selected) { that.assoc_selected = []; }
-                        
-                        that.assoc_selected.push(id);
-                    }else{
-
-                        if(!that.assoc_selected) { return; }
-
-                        let index = that.assoc_selected.indexOf(id);
-                        if(index > -1){
-                            that.assoc_selected.splice(index, 1);
-                        }
-                    }
-
-                    that.disableUpdateBtn(); 
-                });
-
-                list.append(item);
-            }
-        }
+        this.assoc_endindex = this.renderAssocKeywods(keywords);
 
         this.assoc_endindex = i;
 
@@ -875,6 +814,61 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         }
 
         this.disableUpdateBtn();
+    },
+
+    renderAssocKeywods: function(keywords){
+
+        let that = this;
+
+        let max = this.assoc_startindex + 13;
+        let assigned = this.project_keywords;
+
+        let i = this.assoc_startindex;
+        for(; i < max && keywords.length > i; i++){
+
+            let item = $('<li>');
+
+            if(keywords[i] == null){
+                break; 
+            }
+
+            if(assigned.find(e => e == keywords[i][0])){
+                max++;
+                continue;
+            }
+
+            item.html(`<input type='checkbox' value='${keywords[i][0]}' style='vertical-align:middle;' id='${keywords[i][0]}_a'>`
+                    + `<label for='${keywords[i][0]}_a' class='non-selectable key-label truncate' style='max-width:180px;vertical-align:middle;'`
+                    + ` title="${keywords[i][2]}">${keywords[i][2]}</label>&nbsp;&nbsp;`
+                    + `<button data-value='${keywords[i][0]}' class='btn btn-info ui-icon ui-icon-circle-b-info'`
+                        + " style='float:right;font-size:1em;display:inline-block;width:20px;height:20px;color:white;' title='View keyword record'>&nbsp;"
+                    +"</button>"
+                    + `<label class='non-selectable' style='vertical-align:middle;float:right;margin-right:5px;'> [ ${keywords[i][1]} ] </label>`);
+
+            if(this.assoc_selected && this.assoc_selected.length != 0 && this.assoc_selected.indexOf(keywords[i][0]) > -1){
+                $(item).find('input').prop('checked', true);
+            }
+
+            list.append(item);
+        }
+
+        this._on(list.find('.btn-info.ui-icon-circle-b-info'), {
+            click: (e) => {
+                let rec_id = $(e.target).parent().find('input').attr('value');
+                that.openRecordInTab(rec_id);
+            }
+        });
+        this._on(list.find(`input[type="checkbox"]`), {
+            click: (e) => {
+
+                let id = $(e.target).val();
+                this.handleAssocOption($(e.target).is(':checked'), id);
+
+                that.disableUpdateBtn(); 
+            }
+        });
+
+        return i;
     },
     
     /*
@@ -1091,7 +1085,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         $(item).find('.btn-info').on('click', function(e){ that.openRecordInTab(id); });
 
         list.append(item);
-        return;
     },
 
     /*
@@ -1261,7 +1254,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
     */
     disableUpdateBtn: function(){
 
-        if($('.mpce').find('input:checked').not('.check-all').length > 0 || (this.assoc_selected && this.assoc_selected.length > 0)){
+        if($('.mpce').find('input:checked').not('.check-all').length > 0 || this.assoc_selected.length > 0){
             $($('.mpce')[0].parentNode.parentNode).find('#btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
             $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
         }
@@ -1293,25 +1286,30 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 continue;
             }
 
-            if(chkbox.is(':checked') != isChecked){
-                chkbox.prop('checked', isChecked);
+            chkbox.prop('checked', isChecked);
+
+            if(!isAssoc){
+                continue;
             }
 
-            if(isChecked && isAssoc){
-                if(!this.assoc_selected){ this.assoc_selected = []; }
-
-                this.assoc_selected.push(chkbox.val());
-            }else if(!isChecked && isAssoc){
-                if(!this.assoc_selected){ return; }
-
-                let index = this.assoc_selected.indexOf(chkbox.val());
-                if(index > -1){
-                    this.assoc_selected.splice(index, 1);
-                }
-            }
+            this.handleAssocOption(isChecked, chkbox.val());
         }
 
         this.disableUpdateBtn();
+    },
+
+    handleAssocOption: function(is_checked, id){
+
+        if(is_checked){
+            this.assoc_selected.push(id);
+        }else if(!is_checked){
+            if(this.assoc_selected.length == 0){ return; }
+
+            let index = this.assoc_selected.indexOf(id);
+            if(index > -1){
+                this.assoc_selected.splice(index, 1);
+            }
+        }
     },
 
     /*
@@ -1406,9 +1404,9 @@ function mergeArraysUnique(a, b){
         return b;
     }
 
-    for(let i = 0; i < b.length; i++){
-        if(a.indexOf(b[i]) == -1){
-            a.push(b[i]);
+    for(const value of b){
+        if(a.indexOf(value) == -1){
+            a.push(value);
         }
     }
 
