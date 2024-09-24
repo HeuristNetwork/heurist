@@ -48,9 +48,9 @@ class URLChecker {
 
     /** @var bool $isVerbose Whether echo results at once */
     private $isVerbose = false;
-    
+
     private $context = null;
-    
+
     private $timeoutDomains = [];
     private $alreadyChecked = [];
 
@@ -63,10 +63,10 @@ class URLChecker {
      */
     public function __construct($mysqli, $heuristDomain, $isHeuristReferenceIndex) {
         $this->mysqli = $mysqli;
-        
+
         $info = parse_url(strtolower($heuristDomain));
         $this->heuristDomain = $info['scheme'].'://'.$info['host'];
-        
+
         $this->isHeuristReferenceIndex = $isHeuristReferenceIndex;
     }
 
@@ -95,11 +95,11 @@ class URLChecker {
         $this->passedRecIds = [];
         $this->timeoutDomains = [];
         $this->alreadyChecked = [];
-        
+
         //define timeout for get_headers
         $opts['http']['timeout'] = 5;
         $this->context = stream_context_create( $opts );
-        
+
         $results =  [
             0 => [],  // Broken record URLs   'count' => 0, 'broken_urls' => []
             1 => [],  // Broken free text/block text URLs
@@ -138,15 +138,15 @@ class URLChecker {
             }else{
                 print '<div><h3 class="res-valid">OK: All URLs are valid</h3></div>';
             }
-            
+
             if($timestart>0){
                 print '<p>total time:    '.(microtime(true) - $timestart).'</p>';
             }
-            
+
         }
     }
 
-    private function isReferenceDatabase(){
+    private function isReferenceDatabase(recTypeId){
         return $this->isHeuristReferenceIndex && ($recTypeId == 101 || $recTypeId == 103);
     }
 
@@ -169,7 +169,7 @@ class URLChecker {
             return;
         }
 
-        $timestart = microtime(true);     
+        $timestart = microtime(true);
         $passed_cnt = 0;
 
         while ($row = $res->fetch_row()) {
@@ -194,9 +194,9 @@ class URLChecker {
                 echo intval($recId) . " : <a href=\"$recUrl\" target=\"_blank\" rel=\"noopener\">$recUrl</a><br>";
                 continue;
             }
-            
+
             // Validate the URL
-            $error_msg = $this->loadRemoteURLContent($recUrl, $isReferenceDatabase);
+            $error_msg = $this->checkRemoteURL($recUrl, $isReferenceDatabase);
             if($error_msg==null){
                 $this->handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase);
             }elseif($this->handleBrokenRecordUrl($recId, $recUrl, $results, $error_msg)){
@@ -265,8 +265,8 @@ class URLChecker {
             }
             return;
         }
-        
-        $timestart = microtime(true);     
+
+        $timestart = microtime(true);
 
 
         $passed_cnt = 0;
@@ -333,76 +333,78 @@ class URLChecker {
         $this->printFooter($broken_cnt, $passed_cnt, 'External URLs (File fields)', '', $timestart);
     }
 
+
+    private function loadRemoteURLContent($url) {
+        global $glb_curl_error, $glb_curl_code;
+
+        $exists = loadRemoteURLContentWithRange($url, CURL_RANGE, true, CURL_TIMEOUT);
+
+        if(!$exists){
+            if ($glb_curl_code == HEURIST_SYSTEM_FATAL) {
+                if ($this->isVerbose) {
+                    echo error_Div( $glb_curl_error );
+                }
+                $results[3] = $glb_curl_error;
+                $glb_curl_error = 'Fatal curl error '.$glb_curl_error;
+            }
+            return $glb_curl_error ?? 'Unknown error';
+        }
+
+        return null;
+
+    }
+
     /**
      * Loads the content from a remote URL.
      *
      * @param string $url
      * @return mixed null if success or error message
      */
-    private function loadRemoteURLContent($url, $use_curl=false) {
-        global $glb_curl_error, $glb_curl_code;
-        
+    private function checkRemoteURL($url, $use_curl=false) {
+
         $lurl = strtolower($url);
-        
-        if(in_array($lurl, $this->alreadyChecked)){
-            return null;    
+
+        $info = parse_url($lurl);
+        if(strpos($info['scheme'],'http')!==0
+          ||
+          in_array($lurl, $this->alreadyChecked))
+        {
+            return null;
         }
 
         foreach($this->timeoutDomains as $bad_domain){
             if(strpos($lurl, $bad_domain) === 0){
-                //print $url.'   excluded<br>';
                 return 'Check skipped (it was timeout previously)';
             }
         }
-        
+
         $this->alreadyChecked[] = $lurl;
-        
+
         if($use_curl){
-            $exists = loadRemoteURLContentWithRange($url, CURL_RANGE, true, CURL_TIMEOUT);
-            
-            if(!$exists){
-                if ($glb_curl_code == HEURIST_SYSTEM_FATAL) {
-                    if ($this->isVerbose) {
-                        echo error_Div( $glb_curl_error );
-                    }
-                    $results[3] = $glb_curl_error;
-                    $glb_curl_error = 'Fatal curl error '.$glb_curl_error;
-                }
-                return $glb_curl_error ?? 'Unknown error';
-            }
-            
-            return null;            
+            return $this->checkRemoteURL($url);
         }
 
         //use get_headers ------------------
-        
-        $timestart = microtime(true);     
-        
         //check takes around one second
         // in case of DNS issue it may take 20 seconds - we reduce timeout to 5 seconds
         $error_msg = null;
-        $info = parse_url($lurl);
-        if(strpos($info['scheme'],'http')!==0){
-            return null; //skip
-        }
-        
+
         $file_headers = @get_headers($url, 0, $this->context);
         if(!$file_headers){
             $exists = false;
-            
+
             $this->timeoutDomains[] = $info['scheme'].'://'.$info['host'];
-            
+
             $error_msg = 'Timeout out';
-            
+
         }elseif($file_headers[0] == 'HTTP/1.1 404 Not Found') {
             $error_msg = 'Not found (Error 404)';
             //HTTP/1.1 200 OK
         }
-        
-        //DEBUG  print $url.'     '.(microtime(true) - $timestart).'   '.$error_msg.'<br>';
+
         //cooldown 2 seconds
         sleep(2);
-    
+
         return $error_msg;
     }
 
@@ -416,12 +418,12 @@ class URLChecker {
      */
     private function handleBrokenRecordUrl($recId, $recUrl, &$results, $error_msg) {
 
-        
+
         if(strpos($error_msg,'Fatal curl error')===0){
             $results[3] = $error_msg;
             return true;
         }
-        
+
         $query = 'UPDATE Records SET rec_URLLastVerified=?, rec_URLErrorMessage=? WHERE rec_ID='.intval($recId);
         mysql__exec_param_query($this->mysqli, $query, ['ss', date(DATE_8601), substr($error_msg, 0, 255)], true);
 
@@ -451,14 +453,14 @@ class URLChecker {
         if (strpos(strtolower($url), $this->heuristDomain) === 0) {
             return false;
         }
-        
+
         if ($this->listOnly) {
             $url = htmlentities($url);
             echo intval($recId) . ' : ' . intval($detailTypeId) . ' : <a href="' . $url . '" target="_blank" rel="noopener">' . $url . '</a><br>';
             return false;
         }
 
-        $error_msg = $this->loadRemoteURLContent($url);
+        $error_msg = $this->checkRemoteURL($url);
 
         if ($error_msg!=null) {
 
@@ -472,12 +474,12 @@ class URLChecker {
             }
 
         }
-        
+
         $is_fatal = strpos($error_msg,'Fatal curl error')===0;
         if($is_fatal){
             $results[3] = $error_msg;
         }
-        
+
         return $is_fatal;
 
     }
