@@ -31,7 +31,8 @@
 * other parameters are hquery's
 *
 *
-* smarty_function_wrap  - function for var wrap
+* smarty_tag_wrap  - function for var wrap  
+* for example: {wrap var=$r.f38_originalvalue dt="file" mode="thumbnail" fancybox="1" width="300" height="auto"}
 *
 *
 * @author      Tom Murtagh
@@ -54,6 +55,8 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 
 require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
+
+$smarty_session_id = null;
 
 $outputfile = null;
 
@@ -103,11 +106,13 @@ if(!$is_included){
     }
 }
 
-if(file_exists(dirname(__FILE__).'../../vendor/smarty/smarty5/')){
-    require_once dirname(__FILE__).'/smartyInit5.php';
-}else{
-    require_once dirname(__FILE__).'/smartyInit.php';
-}
+error_log('>>>>'.HEURIST_SMARTY_TEMPLATES_DIR);
+
+require_once 'smartyInit.php';
+
+initSmarty(HEURIST_SMARTY_TEMPLATES_DIR);
+
+$smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'wrap', 'smarty_tag_wrap');
 
 require_once dirname(__FILE__).'/reportRecord.php';
 
@@ -139,7 +144,7 @@ function executeSmartyTemplate($system, $params){
     //$smarty is inited in smartyInit.php
     global $smarty, $outputfile, $outputmode, $gparams, $max_allowed_depth, $publishmode,
            $execution_counter, $execution_total_counter, $is_included, $is_jsallowed,
-           $record_with_custom_styles, $is_headless;
+           $record_with_custom_styles, $is_headless, $smarty_session_id;
 
 
     $outputfile  = (array_key_exists("output", $params)) ? htmlspecialchars($params["output"]) :null;
@@ -174,7 +179,7 @@ function executeSmartyTemplate($system, $params){
 
     set_time_limit(0);//no script execution time limit
 
-    $session_id = @$params['session'];//session progress id
+    $smarty_session_id = @$params['session'];//session progress id
 
     $params["f"] = 1; //always search (do not use cache)
 
@@ -329,10 +334,10 @@ function executeSmartyTemplate($system, $params){
     }
 
 
-    if($publishmode==0 && $session_id!=null){
-        mysql__update_progress($mysqli, $session_id, true, '0,0');
+    if($publishmode==0 && $smarty_session_id!=null){
+        mysql__update_progress($mysqli, $smarty_session_id, true, '0,0');
     }else{
-        $session_id = null;
+        $smarty_session_id = null;
     }
 
     //convert to array that will assigned to smarty variable
@@ -455,10 +460,10 @@ function executeSmartyTemplate($system, $params){
     }
 
     $smarty->registerFilter('pre', 'smarty_pre_filter');//before compilation: handle short form term translations
-    if($publishmode==0 && $session_id>0)
+    if($publishmode==0 && $smarty_session_id>0)
     {
         $smarty->registerFilter('post','smarty_post_filter');//after compilation: to add progress support
-        mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
+        mysql__update_progress($mysqli, $smarty_session_id, true, '0,'.count($results));
     }
 
     $execution_counter = -1;
@@ -518,8 +523,8 @@ function executeSmartyTemplate($system, $params){
         $result = false;
     }
 
-    if($session_id>0){
-        mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
+    if($smarty_session_id>0){
+        mysql__update_progress($mysqli, $smarty_session_id, false, 'REMOVE');
     }
     if(!$params["void"]){
         $mysqli->close();
@@ -537,7 +542,7 @@ function executeSmartyTemplate($system, $params){
 //Performs the following, before Smarty processes the report:
 // Convert short form term translations
 //
-function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
+function smarty_pre_filter($tpl_source, \Smarty\Template $template){
     /* Original pre filter - remove all <script> tags from template
     $s = preg_replace("/<!--#.*-->/U",'',$tpl_source);
     return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
@@ -592,10 +597,11 @@ function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
 //
 // adds a small piece of code in main loop with function smarty_function_progress - need to maintain progress
 //
-function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
+function smarty_post_filter($tpl_source, \Smarty\Template $template)
 {
     //find fist foreach and insert as first operation
-    $offset = strpos($tpl_source,'foreach ($_from as $_smarty_tpl');
+    $offset = strpos($tpl_source,'foreach ($_from ?? [] as $_smarty_tpl->getVariable(');//'foreach ($_from as $_smarty_tpl');
+    
     if($offset>0){
         $pos = strpos($tpl_source,'{',$offset);
 
@@ -613,7 +619,7 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 // Strip js and clean html
 // it calls before other output filters
 //
-function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
+function smarty_output_filter_strip_js($tpl_source, \Smarty\Template $template){
 
     global $system, $is_jsallowed, $record_with_custom_styles, $is_headless, $outputmode, $publishmode;
 
@@ -974,7 +980,7 @@ function removeHeadAndBodyTags($content){
 // executed after smarty execution - save output to file
 // before this it calls smarty_output_filter_strip_js to strip js
 //
-function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
+function smarty_output_filter($tpl_source, \Smarty\Template $template)
 {
     save_report_into_file( smarty_output_filter_strip_js($tpl_source, $template) );
 }
@@ -1192,7 +1198,7 @@ function save_report_into_file($tpl_source){
 // wrap smarty output into javascript function document.write
 // before this it calls smarty_output_filter_strip_js to strip js
 //
-function smarty_output_filter_wrap_js($tpl_source, Smarty_Internal_Template $template)
+function smarty_output_filter_wrap_js($tpl_source, \Smarty\Template  $template)  //was Smarty_Internal_Template
 {
     return add_javascript_wrap4( smarty_output_filter_strip_js($tpl_source, $template) );
 }
@@ -1205,14 +1211,14 @@ function add_javascript_wrap4($tpl_source)
 }
 
 
-//
+// Runtime tags
 // quick solution for progress tracking
 // it is added into smarty report code into main loop in postfilter event listener
 //
 function smarty_function_progress($params, &$smarty){
-    global $publishmode, $execution_counter, $execution_total_counter,$session_id,$mysqli;
+    global $publishmode, $execution_counter, $execution_total_counter,$smarty_session_id,$mysqli;
 
-    if($publishmode!=0 || $session_id==null){ //check that this call from ui
+    if($publishmode!=0 || $smarty_session_id==null){ //check that this call from ui
         return false;
     }
 
@@ -1237,7 +1243,7 @@ function smarty_function_progress($params, &$smarty){
 
 
             $session_val = $execution_counter.','.$tot_count;
-            $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
+            $current_val = mysql__update_progress($mysqli, $smarty_session_id, false, $session_val);
             if($current_val && $current_val=='terminate'){
                 $session_val = '';//remove from db
                 $res = true;
@@ -1250,7 +1256,7 @@ function smarty_function_progress($params, &$smarty){
 }
 
 
-//
+// Runtime tags
 // smarty plugin function
 //
 function smarty_function_out($params, &$smarty)
@@ -1264,6 +1270,7 @@ function smarty_function_out($params, &$smarty)
     }
 }
 
+// Runtime tags
 //
 // smarty plugin function
 // {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto" mode=""}
@@ -1277,7 +1284,7 @@ function smarty_function_out($params, &$smarty)
 // style or width,height
 // limit - limits output for multivalue fields
 //
-function smarty_function_wrap($params, &$smarty)
+function smarty_tag_wrap($params, &$smarty)
 {
     global $system, $is_jsallowed;
 
