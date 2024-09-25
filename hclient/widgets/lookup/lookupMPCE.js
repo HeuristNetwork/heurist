@@ -277,7 +277,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
         }
 
-        this.closingAction(res);
+        this.closingAction(res, false);
     },
 
     /** Keyword Assignment **/

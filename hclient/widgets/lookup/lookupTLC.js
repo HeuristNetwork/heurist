@@ -45,6 +45,17 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
+        window.hWin.HEURIST4.msg.showMsgErr({
+            error_title: 'Warning: broken lookup',
+            message: 'Please beware that due to changes with the TLC map project this lookup is not currently 100% functional.<br><br>'
+                    +'The issue appears when attempting to search, if the results are too large the server will response with a "un-supported format" error.<br>'
+                    +'We recommend either:<br>'
+                    +'a) Searching directly on the projects website at <a href="https://ghap.tlcmap.org/" target="_blank" rel="noopener">https://ghap.tlcmap.org/</a><br>'
+                    +'b) Using one of the GeoNames lookup instead, or<br>'
+                    +'c) You can attempt to refine your search here <strong>NOT RECOMMENDED</strong><br><br>'
+                    +'We apologise for any inconvenience.'
+        });
+
         return this._super();
     },
 

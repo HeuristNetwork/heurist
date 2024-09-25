@@ -105,11 +105,6 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
 
         let res_records = {}, res_orders = [];
 
-        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-        if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
-            this.options.mapping.fields['location'] = DT_GEO_OBJECT;
-        }
-
         let fields = ['rec_ID', 'rec_RecTypeID'];
         let map_flds = Object.keys(this.options.mapping.fields);
 

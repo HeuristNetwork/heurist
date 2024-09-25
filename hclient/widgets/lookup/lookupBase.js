@@ -346,9 +346,9 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * Clear timeout before returning result
      *
      * @param {json|boolean} dlg_response - mapped values to fields, or false to return nothing
-     * @returns void
+     * @param {boolean} check_for_empty - check the response values for empty values, multi-value only
      */
-    closingAction: function(dlg_response){
+    closingAction: function(dlg_response, check_for_empty = true){
 
         if(this.timeout.action_timeout){
             clearTimeout(this.timeout.action_timeout); // clear timeout
@@ -356,6 +356,19 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         if(dlg_response !== false && window.hWin.HEURIST4.util.isempty(dlg_response)){
             dlg_response = {};
+        }
+
+        if(check_for_empty){
+
+            for(const ID in dlg_response){
+
+                if(!Array.isArray(dlg_response[ID])){
+                    dlg_response[ID] = [dlg_response[ID]];
+                    continue;
+                }
+
+                dlg_response[ID] = dlg_response[ID].filter((value) => !window.hWin.HEURIST4.util.isempty(value));
+            }
         }
 
         window.hWin.HEURIST4.msg.sendCoverallToBack(true);

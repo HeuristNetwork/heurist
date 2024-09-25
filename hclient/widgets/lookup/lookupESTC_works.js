@@ -93,11 +93,6 @@ $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
         if(Object.hasOwn(details, 298)){
             term_id = details[298][0];
         }
-
-        if(window.hWin.HEURIST4.util.isempty(term_id)){
-            that.closingAction(dlg_response);
-            return;
-        }
         
         this._getTerms(dlg_response, term_id);
     }
