@@ -112,7 +112,7 @@ function heurist_modifier_array_key_exists($key, $arr){
 }
 
 function heurist_modifier_array_column($arr, $column){
-    if(is_array($arr) && array_key_exists($column, $arr)){
+    if(is_array($arr)){ // && array_key_exists($column, $arr[0])
         return array_column($arr, $column);
     }else{
         return '';

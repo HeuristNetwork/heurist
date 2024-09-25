@@ -48,7 +48,7 @@ require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.php';
 
-//require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
+require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
 require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
 
 global $useNewTemporalFormatInRecDetails;
