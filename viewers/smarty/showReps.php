@@ -25,7 +25,7 @@
 * 'mode' - if publish>0: js or html (default)
 * 'publish' - 0 vsn 3 UI (smarty tab),
 *             1,2,3 - different behaviour when output is defined
-*             if output si null if html and js - output to browser, otherwise download
+*             if output is null if html and js - output to browser, otherwise download
 *             4 - for calculation fields
 *
 * other parameters are hquery's
@@ -925,7 +925,11 @@ EXP;
 
     }else{
         //other than html or js output - it removes html and body tags
-        $tpl_source = removeHeadAndBodyTags($tpl_source);
+        $new_source = removeHeadAndBodyTags($tpl_source);
+        
+        if($new_source!=null && $new_source!=''){
+            $tpl_source = $new_source;    
+        }
     }
 
     $onclick = '';
@@ -945,12 +949,15 @@ EXP;
             .'}" ';
     }
 
-    $tpl_source = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
-        function($matches) use ($onclick){
-            global $system;
-            return $onclick.'href="'.$system->recordLink($matches[1]).'"';
-        },
-        $tpl_source);
+    if(($outputmode=='js' || $outputmode=='html')){
+    
+        $tpl_source = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
+            function($matches) use ($onclick){
+                global $system;
+                return $onclick.'href="'.$system->recordLink($matches[1]).'"';
+            },
+            $tpl_source);
+    }
 
     return $tpl_source;
 
@@ -1031,7 +1038,7 @@ function save_report_into_file($tpl_source){
 
                 
                 $path_parts = pathinfo($outputfile);
-                $file_name = $path_parts['filename'] . '.' . $ext;
+                $file_name = $path_parts['filename'] . $ext;
                 //$file_name = preg_replace('@\..*$@', $ext, $outputfile);
                 
                 $res_file = $dirname."/".$file_name; // acutal file

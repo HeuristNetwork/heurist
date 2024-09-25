@@ -287,7 +287,7 @@ $.widget( "heurist.slidersMenu", {
             this._updateDefaultAddRectype();
         }
         if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
-console.log('ON_CREDENTIALS', e);
+//console.log('ON_CREDENTIALS', e);
             /* later: update visibility of menu items
             this.populateFavouriteFilters();
             */

@@ -359,12 +359,16 @@ class ReportRecord {
     // convert record array to array to be assigned to smarty variable
     //
     private function getRecordForSmarty($rec){
+        
 
         if(!$rec){
             return null;
         }
-        else
-        {
+            
+            if($rec['rec_ID']==206997){
+//error_log('11');                
+            }
+            
             $recordID = $rec['rec_ID'];
 
             if(@$this->loaded_recs[$recordID]){
@@ -412,7 +416,7 @@ class ReportRecord {
                     $details = array();
                     foreach ($value as $dtKey => $dtValue){
                         $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);//$record['recID']);
-                        if($dt){
+                        if($dt!=null){
                             $record = array_merge($record, $dt);
                         }
                     }
@@ -428,7 +432,7 @@ class ReportRecord {
             $this->loaded_recs[$recordID] = $record;
 
             return $record;
-        }
+        
     }
 
 

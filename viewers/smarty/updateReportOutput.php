@@ -136,7 +136,7 @@ function doReport($system, $update_mode, $format, $row){
             parse_str($row['rps_URL'], $params);
             $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']);//for snyk
         }else{
-            $format = null;
+            $format = @$row['rps_URL'];
         }
     }
     if($format==null || !preg_match('/html|js|txt|csv|xml|json|css/',$format)){
@@ -149,7 +149,7 @@ function doReport($system, $update_mode, $format, $row){
     $path_parts = pathinfo($filename);
     $file_name = $path_parts['filename'] . '.' . $format;
     
-	$outputfile = $dir.$filename;
+	$outputfile = $dir.$file_name;
     
 
 	if($update_mode==3 || $update_mode==4){  //if published file already exists take it
@@ -188,30 +188,30 @@ function doReport($system, $update_mode, $format, $row){
             if($res == 1){ //request for current files (without smarty execution)
                 if($update_mode==3){
 
-                    if($ext=='js'){
+                    if($format=='js'){
                         header(CTYPE_JS);
                     }else{
 
-                        if($ext=='txt'){
+                        if($format=='txt'){
                             $mimetype = 'plain/text';
-                        }elseif($ext=='json'){
+                        }elseif($format=='json'){
                             $mimetype = 'application/json';
                         }else{
-                            $mimetype = "text/$ext";
+                            $mimetype = "text/$format";
                         }
 
-                        if($ext!='html'){
+                        if($format!='html'){
                             header("Content-type: $mimetype;charset=UTF-8");
                         }
 
-                        if($ext!='html'){
+                        if($format!='html'){
                             header('Pragma: public');
-                            header('Content-Disposition: attachment; filename="'.$filename.'"');
+                            header('Content-Disposition: attachment; filename="'.$file_name.'"');
                         }
                     }
 
 			        $content = file_get_contents($outputfile);
-			        if($ext=="js"){
+			        if($format=="js"){
 				        $content = str_replace("\n","",$content);
 				        $content = str_replace("\r","",$content);
 				        $content = str_replace("'","&#039;",$content);
