@@ -144,7 +144,6 @@ class HImportMedia extends HImportBase{
     prepareURLs(row, urls){
 
         const field_url = $('#field_url').val();
-        const field_desc = $('#field_desc').val();
 
         const multival_separator = $('#multival_separator').val();
 
