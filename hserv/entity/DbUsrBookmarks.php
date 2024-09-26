@@ -145,7 +145,7 @@ class DbUsrBookmarks extends DbEntityBase
         $rec_IDs = prepareIds(@$this->data['bkm_RecID']);//these are rec_IDs from Record table
         $bkm_IDs = prepareIds(@$this->data['bkm_ID']);
 
-        if(empty($rec_IDs)==0 && count($bkm_IDs)){
+        if(empty($rec_IDs) && empty($bkm_IDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
         }

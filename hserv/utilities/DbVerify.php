@@ -377,7 +377,7 @@ class DbVerify {
                 mysql__safe_updatess($mysqli, true);
         }
 
-        if(empty($trmWithWrongParents)==0 && count($trmWithWrongInverse)){
+        if(empty($trmWithWrongParents) && empty($trmWithWrongInverse)){
                 $resMsg .= '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
 
                 if($wasassigned1>0){

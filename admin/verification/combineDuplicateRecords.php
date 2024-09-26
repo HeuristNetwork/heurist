@@ -574,7 +574,7 @@ EXP;
                                         .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate']);
                                 }
                                 $res2->close();
-                                if (count($rems)){
+                                if (!empty($rems)){
                                     print '<tr><td>Reminders</td><td>' . join(', ', $rems) . TR_E;
                                 }
 
@@ -819,7 +819,7 @@ function do_fix_dupe()
     }
 
     //get flat array of keep detail ids
-    if (is_array($keep_dt_ids) && count($keep_dt_ids)){
+    if (is_array($keep_dt_ids) && !empty($keep_dt_ids)){
         $master_keep_ids = array();
         foreach($keep_dt_ids as $dt_id => $details){
             foreach($details as $detail){
@@ -946,7 +946,7 @@ function do_fix_dupe()
     //get tag links for the soon to be deleted dup records
     $delete_dup_rtl_ids = mysql__select_assoc2($mysqli, 'select rtl_ID, rtl_TagID FROM usrRecTagLinks WHERE rtl_RecID in'. $dup_rec_list);
     foreach ($delete_dup_rtl_ids as $rtl_ID => $tag_id) {
-        if (is_array($master_tag_ids) && count($master_tag_ids) && array_search($tag_id,$master_tag_ids)){ //if it's already linked to the master delete it
+        if (is_array($master_tag_ids) && !empty($master_tag_ids) && array_search($tag_id,$master_tag_ids)){ //if it's already linked to the master delete it
             $mysqli->query('delete from usrRecTagLinks where rtl_ID = '.$rtl_ID);//FIXME add error code
         }else{ // otherwise point it to the master record
             $mysqli->query('update usrRecTagLinks set rtl_RecID='.$master_rec_id.', where rtl_ID = '.$rtl_ID);
@@ -957,7 +957,7 @@ function do_fix_dupe()
     // move reminders to master
     $mysqli->query('update usrReminders set rem_RecID='.$master_rec_id.' where rem_RecID in '.$dup_rec_list);//?FIXME  do we need to check reminders like we checked usrBookmarks
     //delete master details
-    if(is_array($master_delete_dt_ids) && count($master_delete_dt_ids)){
+    if(is_array($master_delete_dt_ids) && !empty($master_delete_dt_ids)){
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';
         $mysqli->query('delete from recDetails where dtl_ID in '.$master_detail_delete_list);//FIXME add error code
     }

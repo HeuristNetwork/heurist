@@ -393,7 +393,7 @@ class DbsImport {
                     $this->_findDependentRecordTypes($def_id, 0);
                 }
 
-                if(empty($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0 && count($this->imp_terms)){
+                if(empty($this->imp_recordtypes) && empty($this->imp_fieldtypes) && empty($this->imp_terms)){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one entity to be imported found');
                     return false;
                 }
@@ -405,7 +405,7 @@ class DbsImport {
                     $this->_findDependentRecordTypesByFieldId($def_id);
                 }
 
-                if(empty($this->imp_fieldtypes)==0 && count($this->imp_terms)){
+                if(empty($this->imp_fieldtypes) && empty($this->imp_terms)){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one field or vocabulary to be imported found');
                     return false;
                 }
@@ -536,7 +536,8 @@ class DbsImport {
             return false;
         }
 
-        if(empty($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)){
+        if(empty($this->imp_recordtypes) && empty($this->imp_fieldtypes)){  
+            //only terms we can exit
             $mysqli->commit();
             $this->system->cleanDefCache();
             return true;
@@ -2385,7 +2386,7 @@ $mysqli->commit();
                 .'hserv/controller/sys_structure.php?db='.$remote_dbname.'&'
                 . http_build_query(array('translations' => $this->def_translations[$def]));
 
-            $translations = _getRemoteTranslations($remoteURL);
+            $translations = $this->_getRemoteTranslations($remoteURL);
 
             if(!$translations){
                 return;

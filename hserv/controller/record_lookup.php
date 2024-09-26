@@ -853,7 +853,7 @@
                 }
             }
 
-            if(count($formatted_array) > 0 && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
+            if(!empty($formatted_array) && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
                 $results['result'][] = $formatted_array;
             }
         }
