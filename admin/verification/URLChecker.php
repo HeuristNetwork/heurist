@@ -146,7 +146,7 @@ class URLChecker {
         }
     }
 
-    private function isReferenceDatabase(recTypeId){
+    private function isReferenceDatabase($recTypeId){
         return $this->isHeuristReferenceIndex && ($recTypeId == 101 || $recTypeId == 103);
     }
 
