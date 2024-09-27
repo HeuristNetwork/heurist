@@ -381,8 +381,13 @@ $.widget( "heurist.navigation", {
                             menuName = !is_link ? menuName : $a.text();
                         }
                     }
+
                     menuName = window.hWin.HEURIST4.util.htmlEscape(menuName);
+                    menuName = !window.hWin.HEURIST4.util.isempty(menuName) ? menuName.replace('&amp;', '&') : menuName;
                     menuName = iconOnly ? `<span style="display:none;">${menuName}</span>` : menuName;
+
+                    menuTitle = window.hWin.HEURIST4.util.htmlEscape(menuTitle);
+                    menuTitle = !window.hWin.HEURIST4.util.isempty(menuTitle) ? menuTitle.replace('&amp;', '&') : menuTitle;
 
                     iconStyle += !iconOnly ? 'padding-right:4px;' : '';
 
@@ -391,7 +396,7 @@ $.widget( "heurist.navigation", {
                             +(iconOnly?'width:20px;':'')
                             +'" data-pageid="'+ page_id + '" data-parentid="'+ parent_id +'"'
                             + (pageTarget?' data-target="' + pageTarget +'"':'')
-                            + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
+                            + ' title="'+menuTitle+'">'
 
                             + (!nameOnly && menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&thumb='+menuIcon+'" '
