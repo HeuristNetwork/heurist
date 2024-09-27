@@ -20,7 +20,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
+require_once dirname(__FILE__).'/../../vendor/autoload.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/ULocale.php';
 
 
@@ -36,11 +36,13 @@ class Heurist_Security_Policy extends Security {
 
   public $allowed_modifiers = array('isset', 'empty', 'capitalize', 'count', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
-                    'array_key_exists', 'array_column', 
+                    'array_key_exists', 'array_column', 'array_multisort', 
                     'array_diff', 'array_count_values', 'array_unique',
-                    'asort', 'array_merge', 'array_slice', 'array_values', 'date_format',
-                    'json_encode', 'time', 'nl2br', 'print_r',
-                    'printf', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode');
+                    'asort', 'array_merge', 'array_slice', 'array_values', 'cat',
+                    'date_format',
+                    'json_encode', 'time', 'nl2br', 'print_r', 'printf', 
+                    'replace', 'setlocale',
+                    'sort', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode');
 
   public $allow_super_globals = false; //default true  
 
@@ -89,10 +91,10 @@ function initSmarty($smarty_templates_dir=null){
         //allowed php functions
         $php_functions = array( 'constant', 'count', 
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
-                    //'array_key_exists', 'array_column',
-                    'array_count_values', 
+                    //'array_key_exists', 'array_column', 
+                    'array_count_values', 'array_multisort', 
                     'array_diff', 'array_merge', 'array_slice', 'array_unique',
-                    'array_multisort', 'array_values', 'asort', 'ksort', 'json_encode',
+                    'array_values', 'asort', 'ksort', 'json_encode',
                     'time', 'nl2br', 'print_r',
                     'printf', 'range', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos',
                     'utf8_encode');
@@ -103,12 +105,11 @@ function initSmarty($smarty_templates_dir=null){
         
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heurist_modifier_array_key_exists');
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heurist_modifier_array_column');
-        
     }
 }
 
 function heurist_modifier_array_key_exists($key, $arr){
-    return (is_array($arr) && array_key_exists($key, $arr));
+    return is_array($arr) && array_key_exists($key, $arr);
 }
 
 function heurist_modifier_array_column($arr, $column){
