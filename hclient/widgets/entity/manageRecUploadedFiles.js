@@ -236,27 +236,27 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             'URL of an external file. This must DIRECTLY point to a renderable file or stream eg. image, video.<br>'
             +'Note: the URL MUST load the image alone without any page furniture or labelling<br>'
             +'NOT the page containing the image (the extension at the end of the URL can be misleading)';
-        
+
         if(this._additionMode=='any' ||  this._additionMode=='tiled'){ //uncertain addition show both upload and url
-          //only addition
+            //only addition
             this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden'; //show DnD zone
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url //
-            
+
             if(this._additionMode=='tiled'){
                 this.options.entity.fields[i_url_ext].dtFields['rst_DisplayHelpText'] =
                 '<br>URL to TileMapService (for example openstreetmap.org or maptiler.com) or image service (iiif manifest).'
                 +'<br>For uploaded tile stack this field will be filled automatically with name of selected stack (folder).';
             }
-        
+
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
-            
+
             this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden'; //temp till ext will be defined
             this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden'; //readonly fxm_MimeType
-        
-            this._edit_dialog.dialog('option','height',500);
+
+            this._edit_dialog.dialog('option', 'height', 600);
 
         }else
         if(isLocal){ //local
@@ -333,7 +333,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
             //list of records that refer to this file    
             let relations = this._currentEditRecordset.getRelations();    
-            if(relations && relations.direct && relations.dir149ect.length>0){
+            if(relations?.direct?.length>0){
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
                 
                 let direct = relations.direct;
@@ -946,18 +946,24 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         +     recTitle
         + '</div>';
         
+        let action_style = 'style="height:20px;margin-left:0px;"';
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
 
-            let style = 'style="height:20px;margin-left:0px;"';
             html = html 
-                + '<div title="Click to edit file" '+style+' role="button" aria-disabled="false" data-key="edit" '
+                + `<div title="Click to edit file" ${action_style} role="button" aria-disabled="false" data-key="edit" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
-                + '<div title="Click to delete file" '+style+' role="button" aria-disabled="false" data-key="delete" '
+                + `<div title="Click to delete file" ${action_style} role="button" aria-disabled="false" data-key="delete" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+        }else{
+
+            html += `<div title="Click to view file" ${action_style} role="button" aria-disabled="false" data-key="view" `
+                +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-search"></span><span class="ui-button-text"></span>'
                 + '</div>';
         }
         
@@ -970,6 +976,37 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         return html;
         
+    },
+
+    _onActionListener: function(event, action){
+
+        let is_resolved = this._super(event, action);
+
+        if(is_resolved){
+            return true;
+        }else if(!window.hWin.HEURIST4.util.isObject(action)){
+            return false;
+        }
+
+        let ulf_ID = action.recID;
+        action = action.action;
+
+        if(action == 'view'){
+            let popup_opts = {
+                isdialog: true, 
+                select_mode: 'manager',
+                edit_mode: 'editonly',
+                rec_ID: ulf_ID,
+                default_palette_class: 'ui-heurist-populate',
+                width: 950
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+
+            is_resolved = true;
+        }
+
+        return is_resolved;
     },
 
     addEditRecord: function(recID, is_proceed){

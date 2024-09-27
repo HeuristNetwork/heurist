@@ -31,7 +31,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.btn_edit_mimetypes = this.element.find('#btn_edit_mimetypes');
 
 
-        if(this.options.edit_mode=='none'){
+        if(this.options.edit_mode=='none' || this.options.select_mode != 'manager'){
             this.element.find('#div_add_record').hide();
         }else{
             this.btn_edit_mimetypes
