@@ -740,6 +740,26 @@ if(isLocalHost()){
                 };
 
                 $('.miradorViewer_link').on('click', __openMiradorViewer);
+
+                $('.popupMedia_link').on('click', (e) => {
+
+                    let $ele = $(e.target);
+
+                    let file_nonce = $ele.attr('data-id');
+                    let file = rec_Files.find((file) => file.id === file_nonce);
+                    let file_url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${file_nonce}`;
+
+                    let file_desc = $ele.closest('.download_link').find('span.media-desc').attr('title');
+                    file_desc = window.hWin.HEURIST4.util.isempty(file_desc) ? '' : file_desc;
+                    file_desc = file_desc.replace('"', '&quote;').replace("'", '&apos;');
+
+                    let msg = `<img src='${file_url}' alt='${file_desc}' style='height:99%;width:99%;object-fit:contain' />`;
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        msg, null, {title: file.filename},
+                        {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
+                    );
+                    $dlg.css('max-width', 'none');
+                });
             }
 
             /**
@@ -768,42 +788,43 @@ if(isLocalHost()){
 
             function mediaTooltips(){
 
-                $('span.media-desc, span.media-right').tooltip({
-                    //item: '[data-value]',
-                    content: function(){
-                        return $(this).attr('data-value');
-                    },
-                    open: function(event, ui){
+                $('span.media-desc, span.media-right').on('mouseenter focusin', (event) => {
 
-                        ui.tooltip.css({
-                            background: '#D4DBEA',
-                            "font-size": '1em',
-                            padding: '5px',
-                            width: '85%',
-                            cursor: 'default'
-                        });
+                    let $ele = $(event.target);
+                    $ele.tooltip({
+                        open: function(event, ui){
 
-                        let $ele = $(this);
-                        let $tooltip = ui.tooltip;
+                            ui.tooltip.css({
+                                background: '#D4DBEA',
+                                "font-size": '1em',
+                                padding: '5px',
+                                width: '85%',
+                                cursor: 'default'
+                            });
 
-                        $tooltip.off('mouseenter mouseleave');
+                            let $ele = $(this);
+                            let $tooltip = ui.tooltip;
 
-                        $tooltip.on('mouseleave', function(){
-                            $ele.attr('data-tooltip', 0);
-                            setTimeout(function(){
-                                if($ele.attr('data-tooltip') != 1){
-                                    $ele.tooltip('close');
-                                }
-                            }, 1000);
-                        }).on('mouseenter', function(){
-                            $ele.attr('data-tooltip', 1);
-                        });
-                    },
-                    position: {
-                        my: "left top+5",
-                        at: "left bottom",
-                        collision: "flipfit"
-                    }
+                            $tooltip.off('mouseenter mouseleave');
+
+                            $tooltip.on('mouseleave', function(){
+                                $ele.attr('data-tooltip', 0);
+                                setTimeout(function(){
+                                    if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
+                                        $ele.tooltip('close');
+                                    }
+                                }, 1000);
+                            }).on('mouseenter', function(){
+                                $ele.attr('data-tooltip', 1);
+                            });
+                        },
+                        position: {
+                            my: "left top+5",
+                            at: "left bottom",
+                            collision: "flipfit"
+                        }
+                    });
+                    $ele.tooltip('open');
                 }).on('mouseleave focusout', function(event){
 
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -812,14 +833,13 @@ if(isLocalHost()){
                     let $ele = $(event.target);
 
                     let int_id = setInterval(function(){
-                        if($ele.attr('data-tooltip') != 1){
-                            $ele.tooltip('close');
+                        if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
+                            $ele.tooltip('destroy');
                         }
                         clearInterval(int_id);
                     }, 1000);
                 });
 
-                //$('a.img-desc, a.img-right').off('mouseleave focusout');
             }
 
             // Toggle the visibility of hidden fields
@@ -1003,7 +1023,7 @@ if(!empty($import_webfonts)){
             vertical-align: middle;
         }
         .thumb_image {
-            margin: 5px;
+            margin: 5px 5px 10px;
             cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-in.png),pointer;
         }
         div.thumbnail .fullSize img {
@@ -1018,6 +1038,7 @@ if(!empty($import_webfonts)){
             padding: 15px 10px;
             font-size: 9px;
             min-width: 80px;
+            cursor: default;
         }
         .prompt {
             color: #999999;
@@ -2022,16 +2043,15 @@ function print_public_details($bib) {
             if(!$is_map_popup){
                 print '<div class="download_link">';
 
-                if(!$is_map_popup){
-
-                    if($k==0 && $several_media>1){
-                        print '<a href="#" onclick="displayImages(true);">'
-                        .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>'.BR2;
-                    }
-                    if(!empty($thumbs) && !$isAudioVideo){
-                        print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
-                        .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>'.BR2;
-                    }
+                if($k==0 && $several_media>1){
+                    print '<a href="#" onclick="displayImages(true);">'
+                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>'.BR2;
+                }
+                if(!empty($thumbs) && !$isAudioVideo){
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
+                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>'.BR2;
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="popupMedia_link">'
+                    .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;view in popup</a>'.BR2;
                 }
 
                 if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
@@ -2069,7 +2089,7 @@ function print_public_details($bib) {
                     $val = empty($val) ? $description : $val;
 
                     print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
                             . 'description</span>'.BR2;
                 }
 
@@ -2080,11 +2100,11 @@ function print_public_details($bib) {
                     $val = empty($val) ? $owner : $val;
 
                     print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                            . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
+                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
                             . 'rights</span>'.BR2;
                 }
 
-                if(!$is_map_popup && $thumb['player'] && !$without_header){
+                if($thumb['player'] && !$without_header){
                     print '<a id="lnk'.htmlspecialchars($thumb['id'])
                             .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
                             .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
