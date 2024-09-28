@@ -311,6 +311,10 @@ class HSystemMgr {
       window.hWin.HAPI4.callserver(controller, request, callback, 600000); //5 minutes
   }
 
+  reportAction(request, callback) {
+      let controller = 'ReportController';
+      window.hWin.HAPI4.callserver(controller, request, callback);
+  }
   
 
   /**

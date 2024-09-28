@@ -20,9 +20,8 @@
 
 /* global CodeMirror */
 
-//aliases
 /**
-* UserEditor - class for pop-up edit group
+* SmartyEditor - 
 *
 * public methods
 *

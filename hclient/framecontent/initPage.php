@@ -307,7 +307,9 @@ if(isLocalHost()){
     }
 
 
-    var onAboutInit, onPageInit, isHapiInited = false;
+    window.onAboutInit = null;
+    window.onPageInit = null;
+    window.isHapiInited = false;
 
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
@@ -315,7 +317,7 @@ if(isLocalHost()){
         // Standalone check
         if(!window.hWin.HAPI4){
             window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
-        }else{
+        }else if(!window.isHapiInited){
             // Not standalone, use HAPI from parent window
             onHapiInit( true );
         }
@@ -327,18 +329,18 @@ if(isLocalHost()){
     //
     function onHapiInit(success)
     {
-        isHapiInited = true;
+        window.isHapiInited = true;
 
         if(success) // Successfully initialized system
         {
             applyTheme();
 
-            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
+            if(!window.hWin.HEURIST4.util.isnull(window.onAboutInit) && window.hWin.HEURIST4.util.isFunction(window.onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                    onAboutInit();//init about dialog
+                    window.onAboutInit();//init about dialog
             }
 
-            if(initialLoadDatabaseDefintions(null, onPageInit)){
+            if(initialLoadDatabaseDefintions(null, window.onPageInit)){
                 return;
             }
 
@@ -350,8 +352,8 @@ if(isLocalHost()){
             success = false;
         }
 
-        if(window.hWin.HEURIST4.util.isFunction(onPageInit)){
-            onPageInit(success);
+        if(window.hWin.HEURIST4.util.isFunction(window.onPageInit)){
+            window.onPageInit(success);
         }
     }
 

@@ -1263,6 +1263,7 @@ function smarty_function_progress($params, &$smarty){
 
 // Runtime tags
 // smarty plugin function
+//  print <div>label: value</div>
 //
 function smarty_function_out($params, &$smarty)
 {
@@ -1554,7 +1555,7 @@ function smarty_error_output($system, $error_msg){
 }
 
 //-----------------------------------------------------------------------
-
+//NOT Used
 function getSmartyVars($string){
     // regexp
     $fullPattern = '`{[^\\$]*\\$([a-zA-Z0-9]+)[^\\}]*}`';

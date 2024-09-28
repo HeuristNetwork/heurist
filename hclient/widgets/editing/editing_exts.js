@@ -580,25 +580,10 @@ function editSymbology(current_value, mode_edit, callback){
         beforeClose: function(){
             //show warning in case of modification
             if(_editing_symbology.isModified()){
-                let $dlg, buttons = {};
-                buttons['Save'] = function(){ 
-                    //that._saveEditAndClose(null, 'close'); 
-                    edit_symb_dialog.parent().find('#btnRecSave').trigger('click');
-                    $dlg.dialog('close'); 
-                }; 
-                buttons['Ignore and close'] = function(){ 
-                    _editing_symbology.setModified(false);
-                    edit_symb_dialog.dialog('close'); 
-                    $dlg.dialog('close'); 
-                };
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    window.hWin.HR('Warn_Lost_Data'),
-                    buttons,
-                    {title: window.hWin.HR('Confirm'),
-                       yes: window.hWin.HR('Save'),
-                        no: window.hWin.HR('Ignore and close')},
-                    {default_palette_class:'ui-heurist-design'});
+                
+                window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
+                    ()=>{edit_symb_dialog.parent().find('#btnRecSave').trigger('click');}, //save
+                    ()=>{_editing_symbology.setModified(false); edit_symb_dialog.dialog('close'); }); //ignore and close
                 return false;   
             }
             return true;

@@ -200,9 +200,6 @@ if($isLocalHost){
 
 <script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
 
-<!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
-number of widgets. Currently it is commented out of the code in layout_default.js -->
-
 <script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>
 
 <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
@@ -221,6 +218,9 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
+
+<script type="text/javascript" src="hclient/widgets/report/reportViewer.js"></script>
+<script type="text/javascript" src="hclient/widgets/report/reportEditor.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>

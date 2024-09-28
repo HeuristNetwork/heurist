@@ -60,6 +60,7 @@ class ReportRecord {
 
        $this->system = $system;
        $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
+       //load array dty_ID => dty_Type
        $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
        /* loads on first request
        $this->dtTerms = dbs_GetTerms($system);

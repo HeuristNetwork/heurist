@@ -1430,10 +1430,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     showProgress: function( options ){
         
         let $progress_div;
-        let content = options.content;
+        let content = options?.content;
         let is_popup = true;
+        
+        if(!options){
+            options = {};
+        }        
 
-        if(options.container){ //container element
+        if(options?.container){ //container element
             is_popup = false;
             $progress_div = options.container;
         }        
@@ -1442,7 +1446,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             //default content
             content = '';
             
-            if(Array.isArray(options.steps)){
+            if(Array.isArray(options?.steps)){
                 
                 content = '<ol type="1" style="font-size:12px;height:80%;padding-top:20px;" class="progress-steps">';
                 
@@ -1634,6 +1638,31 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
     },
     
+    
+    //
+    // Warning on exit
+    //             
+    showMsgOnExit: function(sMessage, onSave, onIgnore){
+        let $dlg, buttons = {};
+        buttons['Save'] = function(){ 
+            //that._saveEditAndClose(null, 'close'); 
+            onSave();
+            $dlg.dialog('close'); 
+        }; 
+        buttons['Ignore and close'] = function(){ 
+            onIgnore();
+            $dlg.dialog('close'); 
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            window.hWin.HR('Warn_Lost_Data'),
+            buttons,
+            {title: window.hWin.HR('Confirm'),
+               yes: window.hWin.HR('Save'),
+                no: window.hWin.HR('Ignore and close')},
+            {default_palette_class:'ui-heurist-design'});
+        
+    },
     
   
 };

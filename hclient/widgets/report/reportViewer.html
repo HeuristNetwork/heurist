@@ -1,0 +1,53 @@
+<!--
+/**
+* reportViewer.html: 
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<div id="viewercontainer" style="padding:0" class="ui-layout-center">
+    <iframe title="for print" id="ifrmPrint" style="width:0; height:0;"></iframe>
+    <div id="progressbar_div" style="width:99%;height:36px;display:none;padding:5px">
+        <div id="progressbar">
+            <div class="progress-label">Loading data...</div>
+        </div>
+        <div id="progress_stop" style="float:right;">Stop</div>
+    </div>
+    <div id="toolbardiv" style="padding:6px" class="ent_header">
+        <div style="display:inline-block;vertical-align: bottom;" class="selectmenu-parent">
+            <span style="width:100px;padding-left:0.5em;white-space:nowrap;" class="slocale">Select template:</span>
+            <select id="selTemplates" style="display:inline-block;width:200px;"></select>
+
+            <span id="recordCount"></span>
+        </div>
+
+        <div style="display:inline-block;" class="toolbar">
+            <button data-action="edit" data-icon="pencil" title="Edit the selected template">Edit</button>
+            <button data-action="new"  data-icon="plusthick" title="Create a new template">New</button>
+            <button data-action="delete" data-icon="closethick" title="Delete the selected template">Delete</button>
+            <button data-action="import" data-icon="sign-out" title="Import a template exported from another database">Import</button>
+            <button data-action="export" data-icon="sign-out" title="Export a template in a format which can imported to another database">Export</button>
+            <button data-action="get" data-icon="disk" title="Download current report">Download</button>
+            <button data-action="publish" data-icon="globe-b" title="Obtain javascript to insert report in a web page, set publishing schedule">Publish</button>
+            <button data-action="print"  data-icon="print" title="">Print</button>
+            <button data-action="refresh" data-icon="refresh" title="Refresh memory - updates lists, dropdowns and report output">Refresh</button>
+        </div>
+    </div>
+    <div id="rep_container" class="ent_content_full">
+        <iframe title="report" id="rep_container_frame" style="border:none"></iframe>
+    </div>
+</div>

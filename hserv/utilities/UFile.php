@@ -27,6 +27,7 @@ use hserv\utilities\USystem;
     * fileCopy
     * fileSave
     * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
+    * fileDelete
     *
     * getRelativePath
     * folderRecurseCopy
@@ -716,6 +717,40 @@ use hserv\utilities\USystem;
             return 0;
         }
     }
+    
+    //
+    // Adds counter to the end of file name
+    //
+    function getUniqueFileName($folder, $filename, $ext){
+
+        $path_parts = pathinfo($filename);
+        $filename = $path_parts['filename'];
+        $cnt = 0;
+        if(strpos($ext,'.')==false){
+            $ext = '.'.$ext;
+        }
+
+        $file_fullpath = $folder.$filename.$ext;
+
+        do{
+            if(file_exists($file_fullpath)){
+                if($cnt>0){
+                    $cnt = $cnt+1;
+                }else{
+                    $k = strpos($file_fullpath,'(');
+                    $k2 = strpos($file_fullpath,')'.$ext);
+                    $cnt = intval(substr($file_fullpath,$k,$k2-$k));
+                    $cnt = ($cnt>1)?$cnt+1:1;
+                }
+                $file_fullpath = $folder.$template_file."($cnt)$ext";
+            }
+        }while (file_exists($file_fullpath));
+
+        return $file_fullpath;
+    }
+    
+    
+    
 
     /**
      * Returns the target path as relative reference from the base path.
@@ -1876,6 +1911,10 @@ function fileReadByChunks($file_path, $range_min=0, $range_max=0)
     // Get the size of the file
     $file_size = getFileSize($file_path);
 
+    if($file_size==0){
+        return; //file does not exist
+    }
+    
     // Set the chunk size to 10 MB (10 * 1024 * 1024 bytes)
     $chunk_size = 10 * 1024 * 1024;
 

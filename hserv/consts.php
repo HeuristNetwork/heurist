@@ -565,26 +565,30 @@ function isLocalHost(){
 
 function dataOutput($data, $filename=null, $mimeType=null)
 {
-    $len = strlen($data);
-    
     if($mimeType==null){
         $mimeType = 'application/json';
+    }
+    if($mimeType=='application/json' && is_array($data)){
+        $data = json_encode($data);
     }
 
     header('Content-type: '.$mimeType.';charset=UTF-8');
     
-    if($filename){
+    if($filename){ //browser downloads it as file
         header('Content-Disposition: attachment; filename="' . $filename . '";');
         header("Pragma: no-cache;");
         header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
     }
     
+    $len = strlen($data);
     if($len>0){header('Content-Length: '. $len);}
-    if($mimeType!='gzip'){
+    
+    if($mimeType=='application/json'){
         header('X-Content-Type-Options: nosniff');
         header('X-XSS-Protection: 1; mode=block');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
     }
+    
     echo $data;
 }
 
