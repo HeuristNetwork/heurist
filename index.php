@@ -174,7 +174,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }elseif (@$_REQUEST['logo']){
 
-    list($host_logo, $host_url, $mime_type) = USystem::getHostLogoAndUrl();
+    list($host_logo, $host_url, $mime_type) = USystem::getHostLogoAndUrl(false);
 
     if($host_logo!=null && file_exists($host_logo)){
         header('Content-type: image/'.$mime_type);

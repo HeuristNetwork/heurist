@@ -341,7 +341,7 @@ class USystem {
     //
     //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
     //
-    public static function getHostLogoAndUrl(){
+    public static function getHostLogoAndUrl($return_url = true){
 
         //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
         $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.jpg");
@@ -351,8 +351,9 @@ class USystem {
             $mime_type = 'png';
         }
         $host_url = null;
-        if($host_logo!==false &&  file_exists($host_logo)){
-            $host_logo = defined('HEURIST_BASE_URL')?HEURIST_BASE_URL.'?logo=host':null;
+        if($host_logo!==false && file_exists($host_logo)){
+
+            !$return_url || $host_logo = defined('HEURIST_BASE_URL') ? HEURIST_BASE_URL.'?logo=host' : null;
 
             $host_url = realpath(dirname(__FILE__)."/../../../organisation_url.txt");
             if($host_url!==false && file_exists($host_url)){
