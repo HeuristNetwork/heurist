@@ -71,7 +71,9 @@ class ReportController
                     break;
 
                 case 'export':
-                    $this->repAction->exportTemplate($template_file, null);
+                    $is_check_only = array_key_exists('check', $this->req_params);
+                
+                    $result = $this->repAction->exportTemplate($template_file, $is_check_only, null);
                     break;
 
                 case 'check':
@@ -85,15 +87,15 @@ class ReportController
             
         } catch (\Exception $e) {
             $result = false;
-            $system->addError(HEURIST_INVALID_REQUEST, $e->getMessage());
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $e->getMessage());
         }
         
-        if($result!=null){
+        if(isset($result)){
             
             if($mimeType==null){ //default json output
             
                 if(is_bool($result) && $result==false){
-                    $result = $system->getError();
+                    $result = $this->system->getError();
                 }else{
                     $result = array('status'=>HEURIST_OK, 'data'=> $result);
                 }

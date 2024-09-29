@@ -17,6 +17,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global CodeMirror */
+
 $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
     // default options
@@ -44,7 +46,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     
     _keepTemplateValue:'',
     codeEditor: null,
-    _currentTemplate: null,
+    _currentTemplate: '',
+    
+    _addVariableDlg: null,
     
     _create: function() {
         this._super();
@@ -264,6 +268,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     _loadTemplate: function(){    
 
+        // null means new template
         if(this._currentTemplate!=this.options.template){
             this._currentTemplate = this.options.template;
 
@@ -273,14 +278,22 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     that._initEditor(response.message);
             });
 
+           
+            this.changeTitle();
         }
     },
-
     
+    changeTitle: function(){
+        let new_title = window.hWin.HR('Edit Report Template')+': '+
+                    (this._currentTemplate?this._currentTemplate:'new template');
+        this._super(new_title);
+    },
+    
+    //
+    //
+    // 
     _initEditor: function(content){
     
-//console.log(content);
-
         let that = this;
         
         if(this.codeEditor==null){
@@ -358,6 +371,191 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     },
     
     
+    //
+    // "IF" for root rectypes
+    //
+    _insertPatternRectypeIf: function(_nodep, parent, rectypeId){
+        
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        
+        return '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}'+_remark+ ' \n  \n{/if}'+ _remark +' \n';  
+
+    },
+    
+    //
+    // NEW
+    //    
+    _insertPatternIfOperator: function(_nodep, varname, language_handle = '', file_handle = ''){
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+        inner_val = file_handle !== '' ? file_handle : inner_val;
+        return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
+    },
+    
+    //
+    // insert foreach operator
+    //
+    _insertPatternMagicLoop: function(_nodep, varname, language_handle = '', file_handle = ''){
+        
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        
+        let codes = varname.split('.');
+        let field = codes[codes.length-1];
+        
+        
+        let loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
+        let getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+
+        if(!window.hWin.HEURIST4.util.isempty(language_handle)){
+            language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
+        }
+        if(!window.hWin.HEURIST4.util.isempty(file_handle)){
+            file_handle = '\n\t' + file_handle.replace('replace_id', field) + '\n';
+        }
+        
+        if(codes[1]=='Relationship'){
+            this._insertGetRelatedRecords();
+            
+            return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
+            
+        }else{
+            return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
+                    +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                    + language_handle
+                    + file_handle
+                    +'\n{/foreach} '+_remark;
+        }
+
+    },
+    
+    //
+    //
+    //
+    _getRemark: function(_nodep){
+
+        let s = _nodep.title;
+        let key = _nodep.key;
+
+        if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){
+            s = _nodep.parent.title + '.' + s;
+        }
+
+        s =  window.hWin.HEURIST4.util.stripTags(s);
+        if(_nodep.parent && _nodep.parent.data.codes ){ //!_nodep.parent.isRootNode()
+            s = window.hWin.HEURIST4.util.stripTags(_nodep.parent.title) + ' >> ' + s;
+        }
+        return s;
+    },
+    
+    //
+    // _addVariable2
+    //
+    _insertPatternVariable: function(_nodep, varname, insertMode, language_handle = '', file_handle = ''){
+        
+        let res= '';
+        
+        let remark = this._getRemark(_nodep);
+
+        if(insertMode==0){ //variable only
+
+            let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+            inner_val = file_handle !== '' ? file_handle : inner_val;
+            res = inner_val + " {*" +  remark + "*}";
+
+        }else if (insertMode==1){ //label+field
+
+            res = _nodep.title+": {$"+varname+"}";  //not used
+
+        }else if(_nodep){ // insert with 'wrap' fumction which provides URL and image handling
+            let dtype = _nodep.data.type;
+            res = '{wrap var=$'+varname;
+            if(!(_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
+            {
+                if(window.hWin.HEURIST4.util.isempty(dtype) || _nodep.key === 'recURL'){
+                    res = res + ' dt="url"';
+                }else if(dtype === 'geo'){
+                    res = res + '_originalvalue dt="'+dtype+'"';
+                }else if(dtype === 'date'){
+                    res = res + '_originalvalue dt="date" mode="0" calendar="native"';
+                    
+                    remark = remark+' mode: 0-simple,1-full,2-all fields; calendar: native,gregorian,both';
+                    
+                }else if(dtype === 'file'){
+                    res = res + '_originalvalue dt="'+dtype+'"';
+                    res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
+                }
+            }
+            res = res +'}{*' +  remark + '*}';
+        }
+
+        return (res+((insertMode==0)?' ':'\n'));
+    },
+
+    //
+    // returns false if token not found in current and lines until first "if" or "for" above
+    //
+    _findAboveCursor: function(token) {
+        
+        //for codemirror
+        let crs = this.codeEditor.getCursor();
+        //calculate required indent
+        let l_no = crs.line;
+        let line = "";
+        
+        token = token.trim();
+        
+        while (l_no>0){
+            line = this.codeEditor.getLine(l_no);
+            l_no--;
+            if(line.trim()=='') continue;
+
+            if(line.indexOf(token)>=0){
+                return true;   
+            }
+        
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                return false;   
+            }
+        }
+        
+        return false;   
+    },
+    
+    //
+    //
+    //
+    _insertGetRelatedRecords: function(){
+        
+        //find main loop and {$r = $heurist->getRecord($r)}
+        let l_count = this.codeEditor.lineCount();
+        let l_no = 0, k = -1;
+            
+        while (l_no<l_count){
+            let line = this.codeEditor.getLine(l_no);
+            if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){
+                return;//already inserted
+            }
+            l_no++;
+        }
+        
+        l_no = 0;    
+        while (l_no<l_count){
+            let line = this.codeEditor.getLine(l_no);
+            k = line.indexOf('$heurist->getRecord($r)}');
+            if(k>=0){
+                
+                let s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
+                '{$Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
+                
+                this.codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
+                
+                break;
+            }
+            l_no++;
+        }
+    },
+   
+    
     _insertPattern: function(){
         
         let pattern_id = Number(this._$('#selInsertPattern').val());
@@ -365,6 +563,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         this._closeInsertPopup();
         
         let _text = '';
+        let that = this;        
 
         // Update these patterns in synch with pulldown in showReps.html
         switch(pattern_id) {
@@ -452,7 +651,6 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 break;
 
             case 98: // add record link
-                let that = this;        
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
                     title: 'Select type and other parameters for new record',
                     height: 520, width: 540,
@@ -477,6 +675,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
     },
 
+    //
+    //
+    //
     _loadRecordTypeTreeView: function(){
         
         let rty_ID = this._$('#rectype_selector').val();
@@ -610,6 +811,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
     },
     
+    //
+    //
+    //
     _insertAtCursor: function(myValue){
 
         
@@ -654,18 +858,348 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
     },
     
+    //
+    //
+    //
+    _insertSelectedVars2: function( _nodep, inloop, isif, _insertMode, language_code, file_field ){
+
+        let _text = "",
+        _varname = '',
+        rectypeId = 0,
+        key = '',
+        _getrec = '',
+        language_handle = '',
+        file_handle = '';
+        
+        if(_nodep){
+            
+            key = _nodep.key;
+/*            
+code:  rt:dtid   like   10:lt134:12:ids3
+key 
+
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"          
+
+  
+*/
+
+                
+                _varname = '';
+                
+                    let codes = _nodep.data.code;
+                    if(!codes) codes = key;
+                    
+                    let prefix = 'r';
+                    
+                        codes = codes.split(':');
+                        
+                        if(key.indexOf('rec_')===0){
+                            _varname = key.replace('_','');
+                        }
+                        
+                        if(codes[0]=='Relationship'){ //_nodep.data.type == 'relationship'){
+                            this._insertGetRelatedRecords();
+                            if(_varname!='') {
+                                if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
+                            }else if(codes[1]){
+                                _varname = codes[1];
+                            }
+                            
+                            _varname = codes[0]+(_varname!=''?('.'+_varname):'');
+                        }else{
+
+                            let offset = 3;
+                            let lastcode = codes[codes.length-1];
+                                                
+                            if(_nodep.data.type == 'rectype'){
+                                rectypeId = _nodep.data.rtyID_local;
+                                _varname = '';
+                            }else if(key.indexOf('rec_')!==0)
+                            {
+                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
+                                    if( inloop!=1 ){
+                                        _varname = ('.'+key);
+                                    }
+                                    offset = 4;
+                                    lastcode = codes[codes.length-2];
+                                }else if (lastcode.indexOf('lt')==0) {
+                                    lastcode = lastcode.substring(2);
+                                }
+                                _varname = 'f'+lastcode+_varname;    
+                            }
+/*
+0: "5"   rt
+1: "lt15"   -5
+2: "10"  rt
+3: "lt240"  -3
+4: "48"  rt
+5: "title"
+
+0: "5"
+1: "lt15"  -4
+2: "10"
+3: "263"
+4: "Term"
+*/                            
+                            if(codes.length>3){ //second level (isif && codes.length==2) || 
+                                
+                                let parent_key = '';
+                                let pkeys = [];
+                                while(codes.length-offset>0){
+                                    let pkey = codes[codes.length-offset];
+                                    if(pkey.indexOf('lt')==0){ //resource
+                                        pkey = 'f'+pkey.substring(2);
+                                    }else{
+                                        pkey = 'f'+pkey;
+                                    }
+                                    offset = offset + 2;
+                                    //prefix = prefix + '.' + pkey;
+                                    
+                                    pkeys.unshift(pkey);
+                                    
+                                    if(!parent_key) parent_key = pkey;
+                                    if(pkeys.length==2) break;
+                                }
+                                if(pkeys.length<2) pkeys.unshift(prefix);
+                                prefix = pkeys.join('.');
+                                //prefix = prefix + '.' + pkey;
+                                //prefix = parent_key; 
+                                
+                                if( inloop<2 ){
+                                    
+                                    //r.
+                                    _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+                                    let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
+                                    //find if above cursor code already has such line             
+                                    if(this._findAboveCursor(_getrec) || this._findAboveCursor(_getrec2)) {
+                                            _getrec = '';
+                                    }
+                                    
+                                    //_getrec = _getrec+''+_getrec2;
+                                    
+                                    
+                                    _varname = parent_key +  (_varname?('.' + _varname):'');
+                                }
+                                prefix = '';
+                            }
+                        }
+                    
+                    // 0 - outside loop
+                    // 1 - insert loop operator
+                    // 2 - in loop
+                    if( inloop<2 ){
+                        _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
+
+                        if(language_code && language_code != '' && (key == 'term' || key == 'desc')){
+
+                            let id_fld = _varname.replace(`.${key}`, '.id');
+                            let fld = (inloop==1) ? 'replace_id.id' : id_fld;
+                            let trm_fld = key == 'term' ? 'label' : 'desc';
+
+                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
+                        }else if(file_field && _nodep.data.type == 'file'){
+
+                            let fld = (inloop==1) ? 'replace_id' : _varname;
+                            file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
+                        }
+                    }
+                    
+                    _nodep.data.varname = _varname;
+                    //_nodep.data.key = _varname;
+                
+            if( inloop==1 ){
+                
+                //** _getrec = '';
+                _text = this._insertPatternMagicLoop(_nodep, _varname, language_handle, file_handle);
+                
+            }else if(isif){
+                
+                if(rectypeId>0){
+                    _text = this._insertPatternRectypeIf(_nodep, _varname, rectypeId);
+                }else{
+                    _text = this._insertPatternIfOperator(_nodep, _varname, language_handle, file_handle);    
+                }
+                
+                
+            }else{
+                _text = this._insertPatternVariable(_nodep, _varname, _insertMode, language_handle, file_handle);
+            }
+        
+        
+            if(_text!=='')    {
+                _text = _getrec + _text;
+                this._insertAtCursor(_text);
+            }
+        }
+    },
+
+
     _closeInsertPopup: function(){
+        if(this._addVariableDlg && this._addVariableDlg.dialog('instance')){
+            this._addVariableDlg.dialog('close');
+        }
+    },
+    
+    
+    _showInsertPopup2: function( _nodep, elt ){
+        
+        var that = this;
+
+        // show hide         
+        let no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
+                    (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
+        let show_languages = _nodep.key=='term' || _nodep.key=='desc';
+        let show_file_data = _nodep.data.type=='file';
+        let h;
+        if(no_loop){
+            h = 260;
+        }else{
+            h = 360;
+        }
+
+        let field_name = _nodep.data.name;
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            let codes = _nodep.data.code.split(':');
+
+            if(codes.length >= 3){
+                let rtyid = codes[codes.length-3];
+                let dtyid = codes[codes.length-2];
+
+                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
+            }
+        }
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            field_name = 'field';
+        }
+        
+        if(this._addVariableDlg && this._addVariableDlg.dialog('instance')){
+            this._addVariableDlg.dialog('close');
+        }
+        
+        function __on_add(event){
+
+            let $ele = $(event.target);
+            if($ele.is('strong')){
+                $ele = $ele.parent();
+            }
+
+            let $dlg2 = $ele.parents('.ui-dialog-content');
+            let insertMode = $dlg2.find("#selInsertMode").val();
+            let language = $dlg2.find('#selLanguage').val();
+            let file_data = $dlg2.find('#selFileData').val();
+            
+            let bid = $ele.attr('id');
+            
+            let inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
+            
+            that._insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
+            //this._addVariableDlg.dialog('close');
+        }
+        
+        // init buttons
+        let $ele_popup = $('#insert-popup');
+        $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+            
+        $ele_popup.find('#btn_insert_loop').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_loop_var').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+        $ele_popup.find('#btn_insert_loop_if').attr('onclick',null).button()
+            .off('click')
+            .click(__on_add);
+            
+        $ele_popup.find('#selInsertModifiers').attr('onchange',null)
+            .off('change')
+            .on('change', function __on_add(){
+        
+                let $dlg2 = $(event.target).parents('.ui-dialog-content');
+                let sel = $dlg2.find("#selInsertModifiers")
+                let modname = sel.val();
+
+                if(modname !== ''){
+                    that._insertAtCursor("|"+modname);
+                }
+
+                sel.val('');
+            });
+
+        let $langSel = $ele_popup.find('#selLanguage');
+        if($langSel.find('option').length == 1){ // fill select with available languages
+
+            let lang_opts = window.hWin.HEURIST4.ui.createLanguageSelect();
+            $langSel.html($langSel.html() + lang_opts);
+        }
+        $langSel.val(''); // reset
+        h = !show_languages && !show_file_data ? h - 10 : h;
+        
+        this._addVariableDlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
+            {element: $ele_popup[0],
+            modal: false,
+            width:450,
+            height:h,
+            resizable: false,
+            title:`Insert ${field_name}`,
+            buttons:null,
+            open: null,
+            beforeClose:null,
+            close:function(){
+                return true; //remove
+            },
+            position:{my:'top left',at:'bottom left', of: elt},
+            borderless: false,
+            default_palette_class:null});
+
+        let grid_temp_cols = (!show_languages && !show_file_data ? '' : '75px ') + '130px 180px'
+
+        this._addVariableDlg.find('.insert-field-grid').css({'display': 'grid', 'grid-template-columns': '100%'});
+        this._addVariableDlg.find('.insert-field-grid > div:not(.header)').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '5px 0'});
+        this._addVariableDlg.find('.insert-field-grid > div.header').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '15px 0 5px'});
+
+        this._addVariableDlg.find('button').css({
+            'padding': '0px', 
+            'width': '100px', 
+            'height': '25px'
+        });
+        this._addVariableDlg.find('button').not('#btn_insert_var, #btn_insert_loop_var').css('margin-left', '10px');
+        this._addVariableDlg.find('#btn_insert_var, #btn_insert_loop_var').css('width', '110px');
+
+        if(no_loop){
+            this._addVariableDlg.find('.ins_isloop').hide();
+        }else{
+            this._addVariableDlg.find('.ins_isloop').show();
+        }
+
+        if(show_languages){
+
+            this._addVariableDlg.find('.language_row, .empty_ele').show();
+            this._addVariableDlg.find('.file_row').hide();
+        }else if(show_file_data){
+
+            this._addVariableDlg.find('.language_row').hide();
+            this._addVariableDlg.find('.file_row, .empty_ele').show();
+        }else{
+
+            this._addVariableDlg.find('.language_row, .file_row, .empty_ele').hide();
+        }
         
     },
     
-    _insertSelectedVars2: function(){
-        
-    },
-    
-    _showInsertPopup2: function(){
-        
-    },
-    
+    //
+    //
+    //
     isModified: function(){
         return (this._keepTemplateValue && this._keepTemplateValue!=this.codeEditor.getValue());  
     },
@@ -675,10 +1209,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         if(this.isModified()){
         
             window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
-                ()=>{this.closeDialog();}, //save
+                ()=>{this.doAction(false, true);}, //save
                 ()=>{this._keepTemplateValue=false; this.closeDialog();}); //ignore and close
            
-            //"Template was changed. Are you sure you wish to exit and lose all modifications?!!!";
             return false;
         }else{
             return true;
@@ -691,6 +1224,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
+
+        let that = this;
         
         res[0].text = window.hWin.HR('Close');
         
@@ -702,7 +1237,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     class:'ui-button-action',
                     css:{'float':'right'},  
                     click: function() { 
-                            that.doAction(); 
+                            that.doAction(true); 
                     }}
                     );
         
@@ -712,24 +1247,41 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     //
     //
-    doAction: function(){
-            
-        let request = {};
+    doAction: function(is_save_as, need_close){
 
         let that = this;
 
-        //save preferences in session
-        /*
-        window.hWin.HAPI4.SystemMgr.save_prefs(request,
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
+        if(!this._currentTemplate || is_save_as){
 
-
-                }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);      
+            setTimeout(()=>{    
+            window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
+                if(!window.hWin.HEURIST4.util.isempty(tmp_name)){
+                    that._currentTemplate = tmp_name;
+                    that._context_on_close = true;
+                    that.doAction(false);
                 }
-            });
-        */    
+                }, {title:'Save template as',yes:'Save as',no:"Cancel"});
+            }, is_save_as?10:500);
+            return;
+        }
+
+        window.hWin.HAPI4.SystemMgr.reportAction({mode:'save', 
+            template: this._currentTemplate, 
+            template_body: this.codeEditor.getValue()
+            }, 
+            function(response){
+                if (response.status == window.hWin.ResponseStatus.OK) {
+                    that._keepTemplateValue = that.codeEditor.getValue()
+                    that.changeTitle();
+                    window.hWin.HEURIST4.msg.showMsgFlash('Report template has been saved');
+                    if(need_close){
+                        that.closeDialog();
+                    }
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
+
     }
         
 });

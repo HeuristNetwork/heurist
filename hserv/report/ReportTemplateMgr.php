@@ -1,6 +1,8 @@
 <?php
 namespace hserv\report;
 
+use hserv\structure\ConceptCode;
+
 /*
 * ReportTemplateMgr.php
 *
@@ -115,7 +117,7 @@ class ReportTemplateMgr
         try{
             
             if($template_file==null || $template_file==''){
-                $template_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'template2.tpl';            
+                $template_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'template.tpl';            
                 if(!file_exists($template_file)){
                     throw new \Exception("Template example file not found");
                 }
@@ -203,6 +205,13 @@ class ReportTemplateMgr
             return $template;    // nothing to do -- no substitutions
         }
 
+        // in php v8 use str_ends_with
+        function __endsWith($haystack, $needle) {
+            // search forward starting from end minus needle length characters
+            return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+        }
+
+        
         $not_found_details = array();
         $replacements_exp = array();
 
@@ -241,7 +250,7 @@ class ReportTemplateMgr
                             if(substr($part, -1)=='s'){
                                     $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
-                            }elseif($this->endsWith($part,'_originalvalue')){
+                            }elseif(__endsWith($part,'_originalvalue')){
                                     $suffix = '_originalvalue';
                                     $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
@@ -303,30 +312,36 @@ class ReportTemplateMgr
      * @param string|null $template The template content. If null, the template is loaded from the file.
      * @return void Outputs the converted template or an error in JSON format.
      */
-    public function exportTemplate($filename, $template = null)
+    public function exportTemplate($filename, $is_check_only, $template_body = null)
     {
-        $dbID = $this->system->get_system('sys_dbRegisteredID');
-        if (!$dbID) {
-            throw new \Exception('Database must be registered to allow translation of local template to global template');
-        }
+            $dbID = $this->system->get_system('sys_dbRegisteredID');
+            if (!$dbID) {
+                throw new \Exception('Database must be registered to allow translation of local template to global template');
+            }
 
-        if ($filename) {
-            $template_file = $this->checkTemplate($filename);
-            $template = file_get_contents($template_file);
-        }else{
-            $filename = 'Export.gpl';
-        }
+            if ($filename) {
+                $template_file = $this->checkTemplate($filename);
+                $template_body = file_get_contents($template_file);  //content
+            }else{
+                $filename = 'Export.gpl';
+            }
 
-        if ($template && strlen($template) > 0) {
-            $filename = str_replace(".tpl",".gpl",basename($filename));
-            
-            $content = $this->convertTemplate($template, 0);
-            header('Content-type: html/text');
-            header('Content-Disposition: attachment; filename=' . $filename);
-            print $content;
-        } else {
-            throw new \Exception('Template is not defined or empty');
-        }
+            if ($template_body && strlen($template_body) > 0) {
+                $filename = str_replace(".tpl",".gpl",basename($filename));
+                
+                if($is_check_only){
+                    return 'ok';                    
+                }else{
+                    $content = $this->convertTemplate($template_body, 0);
+                    header('Content-type: html/text');
+                    header('Content-Disposition: attachment; filename=' . $filename);
+                    print $content;
+                }
+                
+            } else {
+                throw new \Exception('Template is not defined or empty');
+            }
+            return null;
     }
 
     /**

@@ -92,10 +92,141 @@
                 <div style="text-align:center"><button class="btnStartTest ui-button-action" title="Test your template">TEST</button></div>
             </div>
         
-            <div class="ent_content_full" style="top:90px;">
+            <div class="ent_content_full" style="background-color: #FFFFFF;top:90px;overflow:hidden">
                 <iframe title="report" style="border:none"></iframe>
             </div>
         
         </div>
     </div>
-</div>'
+</div>
+
+<div id="insert-popup" style="display:none;overflow:hidden;">
+    <div style="position:absolute;left:0;right:0;top:0px;bottom:0;padding:15px;overflow:hidden;">
+
+        <div class="insert-field-grid">
+            <div class="language_row">
+                <span>Language</span>
+
+                <select id="selLanguage" style="width:110px;height:18px;"
+                    title="Retrieve the translated version of the provided term\'s label">
+                    <option value="">Default language</option>
+                </select>
+
+                <span class='heurist-helper2'>
+                    If language is not chosen,<br> the current system language is used<br>
+                    As another option use "translate" modifier
+                </span>
+            </div>
+
+            <div class="file_row">
+                <span>File metadata</span>
+
+                <select id="selFileData" style="width:110px;height:18px;"
+                    title="Retrieve metadata related to the provided file">
+                    <option value="">None</option>
+                    <option value="name">Name</option>
+                    <option value="desc">Description</option>
+                    <option value="cap">Caption</option>
+                    <option value="rights">Copyright</option>
+                    <option value="copyowner">Copy Owner</option>
+                    <option value="type">Type</option>
+                </select>
+
+                <span class='heurist-helper2'>
+                    Retrieve metadata regarding the file(s)
+                </span>
+            </div>
+
+            <div>
+                <span class="empty_ele"></span>
+
+                <select id="selInsertMode" style="width:110px"
+                    title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
+                    <option value="0">Field only</option>
+                    <option value="2">Field + function wrapper</option>
+                </select>
+
+                <select id="selInsertModifiers" style="width:110px"
+                    title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)">
+                    <option>Value as-is</option>
+                    <option>capitalize</option>
+                    <option>cat</option>
+                    <option>count_characters</option>
+                    <option>count_paragraphs</option>
+                    <option>count_sentences</option>
+                    <option>count_words</option>
+                    <option>date_format</option>
+                    <option>default</option>
+                    <option>escape</option>
+                    <option>indent</option>
+                    <option>lower</option>
+                    <option>nl2br</option>
+                    <option>regex_replace</option>
+                    <option>replace</option>
+                    <option>spacify</option>
+                    <option>string_format</option>
+                    <option>strip</option>
+                    <option>strip_tags</option>
+                    <option>truncate</option>
+                    <option>translate:ENG:term</option>
+                    <option>upper</option>
+                    <option>wordwrap</option>
+                </select>
+            </div>
+
+            <div class="header">
+                <span class="empty_ele"></span>
+                <strong>Normal</strong>
+            </div>
+
+            <div>
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_if"
+                    title="Inserts a test of whether the field is blank (or a specific value).">
+                    Test value (If ...)</button>
+
+                <button id="btn_insert_var"
+                    title="Inserts the value of the field in the output. Customise using the dropdowns.">
+                    <strong>Insert field value</strong>
+                </button>
+            </div>
+
+            <div class="header ins_isloop">
+                <span class="empty_ele"></span>
+
+                <strong>Within repeat loop</strong>
+                <span class="heurist-helper2">
+                    Use these buttons to insert field or test within a repeat loop
+                </span>
+            </div>
+
+            <div class="ins_isloop">
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_loop">
+                    Insert repeat</button>
+            </div>
+
+            <div class="ins_isloop">
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_loop_if">
+                    Test value (If ...)</button>
+
+                <button id="btn_insert_loop_var">
+                    <strong>Insert field value</strong>
+                </button>
+            </div>
+        </div>
+
+        <br>
+        <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
+        by clicking "repeat" next to the name of the field, then place further field specifications
+        inside the {foreach}...{/foreach} loop that is inserted.
+        <span class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</span>
+        
+    </div>
+</div>
+
+

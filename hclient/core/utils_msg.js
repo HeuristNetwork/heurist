@@ -1428,6 +1428,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // t_interval - checkout interval
     //
     showProgress: function( options ){
+        if(window.hWin.HEURIST4.msg._progressInterval>0){
+            console.log('previous progress is not completed');            
+            return;
+        }
         
         let $progress_div;
         let content = options?.content;
@@ -1523,7 +1527,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                if(response=='' || response?.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     window.hWin.HEURIST4.msg.hideProgress();
                 }else if(response){
                     //it may return terminate,done,
@@ -1620,7 +1624,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     hideProgress: function(){
         
         $('body').css('cursor','auto');
-        
+
         if(window.hWin.HEURIST4.msg._progressInterval!=null){
             
             clearInterval(window.hWin.HEURIST4.msg._progressInterval);

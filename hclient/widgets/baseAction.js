@@ -146,7 +146,7 @@ $.widget( "heurist.baseAction", {
 
                 let fele = this.element.children().get(0);
                 
-                if(this._innerTitle.length==0){
+                if(this._innerTitle.length==0){ //not created yet
                     //titlebar            
                     this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;"></div>')
                                         .insertBefore(fele);
@@ -210,6 +210,18 @@ $.widget( "heurist.baseAction", {
                             that.doAction(); 
                     }}
                  ];
+    },
+    
+    changeTitle: function(new_title){
+        
+       //this.options.title = new_title; 
+        
+       if(this.options.isdialog){
+           this._as_dialog.parent().find('.ui-dialog-title').text(new_title);        
+       }else{
+           this._$('.ui-heurist-header').text(new_title);
+       } 
+        
     },
 
     //

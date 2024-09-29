@@ -34,12 +34,17 @@ class Heurist_Security_Policy extends Security {
   // disable acess to static classes
   public $static_classes = null;
 
-  public $allowed_modifiers = array('isset', 'empty', 'capitalize', 'count', 'escape',
+  public $allowed_modifiers = array('isset', 'empty', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     'array_key_exists', 'array_column', 'array_multisort', 
                     'array_diff', 'array_count_values', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'array_values', 'cat',
-                    'date_format',
+                    'capitalize', 
+                    'count',
+                    'count_characters','count_words',
+                    
+                    'translate',                    
+                    'date_format','indent',
                     'json_encode', 'time', 'nl2br', 'print_r', 'printf', 
                     'replace', 'setlocale',
                     'sort', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode');
@@ -94,7 +99,11 @@ function initSmarty($smarty_templates_dir=null){
                     //'array_key_exists', 'array_column', 
                     'array_count_values', 'array_multisort', 
                     'array_diff', 'array_merge', 'array_slice', 'array_unique',
-                    'array_values', 'asort', 'ksort', 'json_encode',
+                    'array_values', 'asort', 
+                    
+                    
+                    
+                    'ksort', 'json_encode',
                     'time', 'nl2br', 'print_r',
                     'printf', 'range', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos',
                     'utf8_encode');

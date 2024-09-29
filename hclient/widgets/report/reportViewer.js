@@ -122,7 +122,7 @@ $.widget( "heurist.reportViewer", {
 
                 if(!that._isSameRealm(data)) return;
 
-            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
+            //}else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                 
             }
         });
@@ -134,7 +134,7 @@ $.widget( "heurist.reportViewer", {
             that._on($(item).button({text:false, icons: { primary: "ui-icon-"+$(item).attr('data-icon')}}),
                 {click: that._handleToolbarAction});
         });
-        this._$('button[data-action="export"]').find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});        
+        this._$('button[data-action="import"]').find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});        
     },
     
     _handleToolbarAction: function(event){
@@ -179,15 +179,48 @@ $.widget( "heurist.reportViewer", {
     // Show popup with template editor
     //
     onTemplateEdit: function(isNew) {
-        let popup_dialog_options = {path: 'widgets/report/', keep_instance:true, template: isNew?null:this._currentTemplate};
+        let that = this;
+        
+        let popup_dialog_options = {path: 'widgets/report/', 
+                    keep_instance:true, 
+                    template: isNew?null:this._currentTemplate,
+                    onClose: function(is_update_list){
+                        if(is_update_list){
+                            that._updateTemplatesList();
+                        }
+                    }
+        };
         window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popup_dialog_options);
     },
 
     //
     //
     //
-    onTemplateDelete: function() {
-        
+    onTemplateDelete: function(unconditionally) {
+
+        let that = this;
+
+        if(unconditionally===true){
+
+            window.hWin.HAPI4.SystemMgr.reportAction({mode:'delete', template:this._currentTemplate}, 
+                function(response){
+                    if (response.status == window.hWin.ResponseStatus.OK) {
+                        window.hWin.HAPI4.SystemMgr.save_prefs({'viewerCurrentTemplate': null});
+                        that._currentTemplate = null;
+                        that._updateTemplatesList();
+                    } else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete template "'+this._currentTemplate+'"?', 
+                function(){ that.onTemplateDelete(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+            return;
+        }
+
     },
 
     //
@@ -198,9 +231,33 @@ $.widget( "heurist.reportViewer", {
     },
 
     //
-    //
+    // Converts template to global (all local field ids will be replaced with concept codes)
     //
     onTemplateExport: function() {
+        
+        let dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
+        if(!(dbId > 0)){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Database must be registered to allow translation of local template to global template.',
+                error_title: 'Cannot convert to global template'
+            });
+            return;
+        }
+
+        let template_file = this._$('#selTemplates').val();
+        if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
+        
+        window.hWin.HAPI4.SystemMgr.reportAction({mode:'export', check:1 ,template:template_file}, 
+            function(response){
+                if (response.status == window.hWin.ResponseStatus.OK) {
+                    let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/ReportController.php";
+                    let squery = 'db='+window.hWin.HAPI4.database+'&mode=export&template='+template_file;
+                    window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });        
+
         
     },
 
@@ -208,6 +265,12 @@ $.widget( "heurist.reportViewer", {
     //
     //
     onTemplateDownload: function() {
+
+        let template_file = this._$('#selTemplates').val();
+        if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
+        
+        
+
         
     },
 
@@ -216,6 +279,27 @@ $.widget( "heurist.reportViewer", {
     //
     onTemplatePublish: function() {
         
+        //this._currentTemplate
+        /*
+        let template_file = $('#selTemplates').val();
+        if(window.hWin.HEURIST4.util.isempty(template_file)) return;
+        
+        let mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
+
+        let q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
+        
+        
+        let params = {mode:'smarty'};
+        params.url_schedule = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
+                                    + q + "&db="+window.hWin.HAPI4.database;
+
+        params.url = window.hWin.HAPI4.baseURL + "viewers/smarty/?"+ //showReps.php
+            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
+        
+        
+        window.hWin.HEURIST4.ui.showPublishDialog( params );
+        */
     },
 
     //
@@ -245,7 +329,11 @@ $.widget( "heurist.reportViewer", {
     _updateTemplatesList: function() {
         
         this._currentTemplate = window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
+        
         let sel = this._$('#selTemplates');
+        sel.empty();
+        this._off(sel,'change');
+        
         window.hWin.HEURIST4.ui.createTemplateSelector(sel, null, this._currentTemplate, null);
         
         this._on(sel,{change:(event)=>{
@@ -275,6 +363,12 @@ $.widget( "heurist.reportViewer", {
     //
     //
     executeTemplate: function(template_file){
+        
+        if(window.hWin.HEURIST4.msg._progressInterval>0){
+            window.hWin.HEURIST4.msg.showMsgFlash('Previous report is not completed yet');
+            return;   
+        }
+        
         
         let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
         
@@ -355,11 +449,6 @@ $.widget( "heurist.reportViewer", {
             iframe.contentWindow.document.open();
             iframe.contentWindow.document.write( txt );
             iframe.contentWindow.document.close();
-            
-            //document.getElementById('rep_container').innerHTML = context;
-
-            //_needSelection = (txt && txt.indexOf("Select records to see template output")>0);
-            
         
     },
 

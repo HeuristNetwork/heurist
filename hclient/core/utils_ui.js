@@ -2283,6 +2283,7 @@ window.hWin.HEURIST4.ui = {
                     if(defValue){
                         $select.val( defValue );
                     }
+                    
                     window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
 
                 } else {
