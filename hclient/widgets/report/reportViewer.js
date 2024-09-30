@@ -47,17 +47,19 @@ $.widget( "heurist.reportViewer", {
         this._loadContent();    
 
         //this._refresh();
-
+        
     }, //end _create
 
     _init: function(){
     },
 
+    
     //
     //
     //    
     _loadContent:function(){
         if(this._need_load_content){  //load general layout      
+            this._need_load_content = false;
 
             let url = window.hWin.HAPI4.baseURL+'hclient/widgets/report/reportViewer.html';
             
@@ -65,8 +67,13 @@ $.widget( "heurist.reportViewer", {
             let that = this;
             this.element.load(url, 
             function(){
-                that._need_load_content = false;
                 that._initControls();
+            });
+            
+            this.element.on("myOnShowEvent", function(event){
+                if( event.target.id == that.element.attr('id')){
+                    that.executeTemplate();
+                }
             });
         }            
     },
@@ -81,10 +88,20 @@ $.widget( "heurist.reportViewer", {
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
+        
+        this.element.off("myOnShowEvent");
+        
         // remove generated elements
         if(this._events){
             $(this.document).off(this._events);    
         }
+        
+        let file_upload = this._$('#fileupload')
+        
+        if(file_upload.fileupload('instance')){
+           file_upload.fileupload('destroy');
+        }
+        
     },
     
     _initControls: function(){
@@ -160,9 +177,6 @@ $.widget( "heurist.reportViewer", {
             case 'export':
                 this.onTemplateExport();
                 break;
-            case 'get':
-                this.onTemplateDownload();
-                break;
             case 'publish':
                 this.onTemplatePublish();
                 break;
@@ -170,7 +184,8 @@ $.widget( "heurist.reportViewer", {
                 this.onTemplatePrint();
                 break;
             case 'refresh':
-            
+                this.onRefresh();
+                break;
         }
         
     },
@@ -228,6 +243,52 @@ $.widget( "heurist.reportViewer", {
     //
     onTemplateImport: function() {
         
+        let file_upload = this._$('#fileupload')
+        
+        if(!file_upload.fileupload('instance')){
+            
+            let that = this;
+            
+            let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/ReportController.php";
+        
+            file_upload.fileupload({
+                    url: baseurl,
+                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {name:'mode', value:'import'}],
+                    dataType: 'json',
+                    done: function (e, response) {
+
+                        if(response.result){//file upload place our respose to 'result'
+                            response = response.result;
+                        }
+                        
+                        if(response.status==window.hWin.ResponseStatus.OK){
+
+                            let data = response.data;
+                                                        
+                            that._updateTemplatesList();
+                            //open editor
+                            that._currentTemplate = data?.filename;
+                            that.onTemplateEdit(false);
+                            
+                            if(data?.details_not_found){
+
+                                var list_of_notfound = data.details_not_found.join(', ');
+                                
+                                window.hWin.HEURIST4.msg.showMsgDlg(
+'Unable to convert IDs for following concept codes: '+list_of_notfound
++'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
++'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'
++'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
+                                ,null,'Conversion of template file to internal codes');
+                            }
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                });        
+        }
+        file_upload.click();
     },
 
     //
@@ -264,13 +325,25 @@ $.widget( "heurist.reportViewer", {
     //
     //
     //
-    onTemplateDownload: function() {
+    onRefresh: function() {
 
+        //keep current template    
         let template_file = this._$('#selTemplates').val();
-        if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
         
+        //remove editor
+        let ele = $('#heurist-dialog-reportEditor');
+        if(ele.length>0){
+            if(ele.reportEditor('instance')){
+                ele.reportEditor('destroy');
+            }
+            ele.remove();
+        }
         
-
+        //update list
+        this._updateTemplatesList( template_file );
+        
+        //restart template
+        this.executeTemplate( template_file );
         
     },
 
@@ -279,13 +352,15 @@ $.widget( "heurist.reportViewer", {
     //
     onTemplatePublish: function() {
         
-        //this._currentTemplate
-        /*
         let template_file = $('#selTemplates').val();
         if(window.hWin.HEURIST4.util.isempty(template_file)) return;
         
-        let mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
-        let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
+         
+        let request = window.hWin.HEURIST4.util.cloneJSON(this._currentQuery
+                    ?this._currentQuery :window.hWin.HEURIST4.current_query_request);
+        
+        //let mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( request, true );
 
         let q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
         
@@ -299,7 +374,6 @@ $.widget( "heurist.reportViewer", {
         
         
         window.hWin.HEURIST4.ui.showPublishDialog( params );
-        */
     },
 
     //
@@ -326,9 +400,9 @@ $.widget( "heurist.reportViewer", {
     },
 
     
-    _updateTemplatesList: function() {
+    _updateTemplatesList: function(template_to_select) {
         
-        this._currentTemplate = window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
+        this._currentTemplate = template_to_select ?template_to_select :window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
         
         let sel = this._$('#selTemplates');
         sel.empty();
@@ -357,18 +431,22 @@ $.widget( "heurist.reportViewer", {
         this._currentRecordset = recordset;
         this._currentQuery = query_request;
         this._facet_value = facet_value;
+        
     },
     
     //
     //
     //
     executeTemplate: function(template_file){
-        
+    
+        if(!this.element.is(':visible')){
+              return;
+        }
+
         if(window.hWin.HEURIST4.msg._progressInterval>0){
             window.hWin.HEURIST4.msg.showMsgFlash('Previous report is not completed yet');
             return;   
         }
-        
         
         let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
         
@@ -376,7 +454,9 @@ $.widget( "heurist.reportViewer", {
             template_file = this._$('#selTemplates').val();    
         }
         this._currentTemplate = template_file;
-        let _currentRecordset = this.options.recordset;
+
+        let _currentRecordset = this._currentRecordset?this._currentRecordset :window.hWin.HAPI4.currentRecordset;
+        //this.options.recordset;
 
         if(_currentRecordset==null){
             return;   

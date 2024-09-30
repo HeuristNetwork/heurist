@@ -242,7 +242,7 @@ function ShowReps( is_snippet_editor ) {
     * Executes the template with the given query
     */
     function _reload(template_file) {
-
+        
         let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
         let request = null;
         let session_id = Math.round((new Date()).getTime()/1000);

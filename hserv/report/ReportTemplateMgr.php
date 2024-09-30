@@ -2,6 +2,7 @@
 namespace hserv\report;
 
 use hserv\structure\ConceptCode;
+use hserv\utilities\USanitize;
 
 /*
 * ReportTemplateMgr.php
@@ -377,7 +378,7 @@ class ReportTemplateMgr
         $template = file_get_contents($filename);
         $res = $this->convertTemplate($template, 1);
 
-        if (!isset($res['error'])) {
+        if (isset($res['error'])) {
             throw new \Exception($res['error']);
         }
          

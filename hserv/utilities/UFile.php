@@ -725,30 +725,30 @@ use hserv\utilities\USystem;
 
         $path_parts = pathinfo($filename);
         $filename = $path_parts['filename'];
-        $cnt = 0;
         if(strpos($ext,'.')==false){
             $ext = '.'.$ext;
         }
 
         $file_fullpath = $folder.$filename.$ext;
 
+        $k = strpos($filename,'(');
+        $k2 = strpos($filename,')');
+        if($k>0 && $k2>0){
+            $cnt = intval(substr($filename,$k+1,$k2-$k));
+            $filename = substr($filename,0,$k);
+        }else{
+            $cnt = 0;
+        }
+       
         do{
             if(file_exists($file_fullpath)){
-                if($cnt>0){
-                    $cnt = $cnt+1;
-                }else{
-                    $k = strpos($file_fullpath,'(');
-                    $k2 = strpos($file_fullpath,')'.$ext);
-                    $cnt = intval(substr($file_fullpath,$k,$k2-$k));
-                    $cnt = ($cnt>1)?$cnt+1:1;
-                }
-                $file_fullpath = $folder.$template_file."($cnt)$ext";
+                $cnt++;
+                $file_fullpath = $folder.$filename."($cnt)$ext";
             }
         }while (file_exists($file_fullpath));
 
         return $file_fullpath;
-    }
-    
+    }  
     
     
 

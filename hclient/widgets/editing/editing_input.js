@@ -3352,7 +3352,7 @@ $.widget( "heurist.editing_input", {
             //hide progress bar
             $progress_dlg.dialog( "close" );
         
-            if(response.result){//????
+            if(response.result){//file upload places our data to 'result'
                 response = response.result;
             }
             if(response.status==window.hWin.ResponseStatus.OK){
