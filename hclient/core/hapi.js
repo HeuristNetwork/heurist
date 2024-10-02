@@ -75,7 +75,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     /**
     * initialization of hAPI object
     *  1) define paths from top.location
-    *  2) takes regional from  localization.js
+    *  2) takes regional from  localization_xxx.txt
     *
     * @param _db - database name, if omit it takes from url parameter
     * @param _oninit - callback function, obtain parameter true if initialization is successeful
