@@ -369,7 +369,7 @@ $.widget( "heurist.resultList", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                     //accept events from the same realm only
-                    if(!that._isSameRealm(data)) return;
+                    if(!that._isSameRealm(data) || data?.showing_subset) return;
 
                     that._currentSubset = null; // override current subset
                     that._isCollectionUsed = false;
@@ -450,6 +450,15 @@ $.widget( "heurist.resultList", {
                         }else if(data.subset_only){
                             that._currentSubset = that._currentRecordset.getSubSetByIds(data.selection);
                             that._renderPage(0);
+
+                            const query = that._currentSubset.length() > 0 ? `ids:${that._currentSubset.getIds().join(',')}` : '';
+
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {
+                                recordset: that._currentSubset,
+                                showing_subset: true,
+                                search_realm: that.options.search_realm,
+                                query: query
+                            });
                         }else{
                             that.setSelected(data.selection);        
                         }
@@ -4530,6 +4539,15 @@ $.widget( "heurist.resultList", {
             this._isCollectionUsed = false;
             this._currentRecordset = this._fullRecordset;
         }
+
+        const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';
+
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {
+            recordset: this._currentRecordset,
+            showing_subset: true,
+            search_realm: this.options.search_realm,
+            query: query
+        });
 
         this._renderPage(0);
     },
