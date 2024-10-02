@@ -1846,7 +1846,7 @@ class System {
 
         $use_rewrite = isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink;
 
-        $base_url = HEURIST_BASE_URL;
+        $base_url = HEURIST_BASE_URL_PRO;
 
         if(!$use_rewrite){
             $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
