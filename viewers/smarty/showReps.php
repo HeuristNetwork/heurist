@@ -21,8 +21,8 @@
 * 'template' or 'template_body' - template file name or template value as a text
 * 'replevel'  - 1 notices, 2 all, 3 debug mode
 *
-* 'output' - full file path to be saved
-* 'mode' - if publish>0: js or html (default)
+* 'output' -  full file path to be saved
+* 'mode' -    if publish>0: js or html (default)
 * 'publish' - 0 vsn 3 UI (smarty tab),
 *             1,2,3 - different behaviour when output is defined
 *             if output is null if html and js - output to browser, otherwise download
@@ -71,13 +71,8 @@ $outputmode = 'html';
 $is_headless = false; //param:  snippet=1 or Content-type other than text/html and text/javascript
 
 
-$rtStructs = null;
-$dtStructs = null;
-$dtTerms = null;
-
 $gparams = null;
-$loaded_recs = array();
-$max_allowed_depth = 2;
+$max_allowed_depth = 2;    //not used
 
 //"publish"
 // 0  - Heurist User Interface (smarty tab) it truncates number of records to be out (see smarty-output-limit)
@@ -408,7 +403,7 @@ function executeSmartyTemplate($system, $params){
         //this is user name $template_file = "_temp.tpl";
         $user = $system->getCurrentUser();
 
-        $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl';//snyk SSRF
+        $template_file = '_'.basename(USanitize::sanitizeFileName($user['ugr_Name'])).'.tpl';
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) {$template_folder = $template_folder[0];}
         $file = fopen ($template_folder.$template_file, "w");

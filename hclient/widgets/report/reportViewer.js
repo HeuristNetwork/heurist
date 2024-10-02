@@ -199,6 +199,7 @@ $.widget( "heurist.reportViewer", {
         let popup_dialog_options = {path: 'widgets/report/', 
                     keep_instance:true, 
                     template: isNew?null:this._currentTemplate,
+                    
                     onClose: function(is_update_list){
                         if(is_update_list){
                             that._updateTemplatesList();
@@ -477,6 +478,7 @@ $.widget( "heurist.reportViewer", {
             }else{
                 recset = {recIDs:_currentRecordset.getIds()};
             }
+            rec_count = recset['recIDs'].length;
 
         let request = {db:window.hWin.HAPI4.database, 
                        template:template_file, 
@@ -487,7 +489,10 @@ $.widget( "heurist.reportViewer", {
             request['facet_val'] = this._facet_value;
         }
 
-            request['session'] = window.hWin.HEURIST4.msg.showProgress();
+            if(rec_count>200){
+                request['session'] = window.hWin.HEURIST4.msg.showProgress();
+            }
+                
 
             window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
 

@@ -2608,49 +2608,52 @@ window.hWin.HEURIST4.dbs = {
                                         });
                                     }
                                     
-                                    let surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
+                                    let popup_dialog_options = {path: 'widgets/report/', 
+                                                default_palette_class: 'ui-heurist-design',
+                                                title: 'Edit calculation field',
+                                                keep_instance:false, 
+                                                
+                                                is_snippet_editor: true, 
+                                                rty_ID:rectypes, 
+                                                rec_ID:0,
+                                                template_body:cfn_Content,
+                                                
+                                                onClose: function(context){
+                                                    if(!context) return;
 
-                                    window.hWin.HEURIST4.msg.showDialog( 
-                                        surl,
-                                        {width:900, height:700, 
-                                            title: 'Edit calculation field', 
-                                            default_palette_class: 'ui-heurist-design', 
-                                            params:{content: cfn_Content, rty_IDs:rectypes, rec_ID:0}, 
-                                            callback: function(context){
-                                                if(!context) return;
+                                                    //save new formula
+                                                    let request = {
+                                                        'a'          : 'save',
+                                                        'entity'     : 'defCalcFunctions',
+                                                        'request_id' : window.hWin.HEURIST4.util.random(),
+                                                        'fields'     : {cfn_ID:cfn_ID, cfn_FunctionSpecification:context}
+                                                    };
+                                                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                                        function(response){
+                                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                                //update caclulated fields
+                                                                if(rectypes && rectypes.length>0){
 
-                                                //save new formula
-                                                let request = {
-                                                    'a'          : 'save',
-                                                    'entity'     : 'defCalcFunctions',
-                                                    'request_id' : window.hWin.HEURIST4.util.random(),
-                                                    'fields'     : {cfn_ID:cfn_ID, cfn_FunctionSpecification:context}
-                                                };
-                                                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                                    function(response){
-                                                        if(response.status == window.hWin.ResponseStatus.OK){
-                                                            //update caclulated fields
-                                                            if(rectypes && rectypes.length>0){
+                                                                    let sURL = window.hWin.HAPI4.baseURL + 'admin/verification/longOperationInit.php?type=calcfields&db='
+                                                                    +window.hWin.HAPI4.database+"&recTypeIDs="+rectypes.join(',');
 
-                                                                let sURL = window.hWin.HAPI4.baseURL + 'admin/verification/longOperationInit.php?type=calcfields&db='
-                                                                +window.hWin.HAPI4.database+"&recTypeIDs="+rectypes.join(',');
+                                                                    window.hWin.HEURIST4.msg.showDialog(sURL, {
 
-                                                                window.hWin.HEURIST4.msg.showDialog(sURL, {
+                                                                        "close-on-blur": false,
+                                                                        "no-resize": true,
+                                                                        height: 400,
+                                                                        width: 550,
+                                                                        afterclose: main_callback
+                                                                    });                                                            
 
-                                                                    "close-on-blur": false,
-                                                                    "no-resize": true,
-                                                                    height: 400,
-                                                                    width: 550,
-                                                                    afterclose: main_callback
-                                                                });                                                            
-
+                                                                }
+                                                            }else{
+                                                                window.hWin.HEURIST4.msg.showMsgErr(response);
                                                             }
-                                                        }else{
-                                                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                                                        }
-                                                });
-
-                                    }})
+                                                    });
+                                                }
+                                    };
+                                    window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popup_dialog_options);
 
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);

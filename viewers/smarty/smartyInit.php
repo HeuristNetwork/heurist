@@ -42,12 +42,11 @@ class Heurist_Security_Policy extends Security {
                     'capitalize', 
                     'count',
                     'count_characters','count_words',
-                    
                     'translate',                    
                     'date_format','indent',
                     'json_encode', 'time', 'nl2br', 'print_r', 'printf', 
                     'replace', 'setlocale',
-                    'sort', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode');
+                    'sort', 'strstr', 'substr', 'strpos', 'strlen', 'utf8_encode');
 
   public $allow_super_globals = false; //default true  
 
@@ -91,29 +90,27 @@ function initSmarty($smarty_templates_dir=null){
         // enable security
         $smarty->enableSecurity('Heurist_Security_Policy');
         
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'smarty_modifier_translate');
-
-        //allowed php functions
+        //need to register all $allowed_modifiers as plugins
         $php_functions = array( 'constant', 'count', 
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     //'array_key_exists', 'array_column', 
                     'array_count_values', 'array_multisort', 
                     'array_diff', 'array_merge', 'array_slice', 'array_unique',
                     'array_values', 'asort', 
-                    
-                    
-                    
                     'ksort', 'json_encode',
                     'time', 'nl2br', 'print_r',
-                    'printf', 'range', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos',
+                    'printf', 'range', 'setlocale', 'sort', 'strstr', 'substr', 'strpos', 'strlen', 
                     'utf8_encode');
                     
+        //register php functions
         foreach($php_functions as $fname){
             $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $fname, $fname);    
         }
         
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heurist_modifier_array_key_exists');
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heurist_modifier_array_column');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'smarty_modifier_translate');
+
     }
 }
 
@@ -128,10 +125,8 @@ function heurist_modifier_array_column($arr, $column){
         return '';
     }
 }
-
-
 function smarty_modifier_translate($input, $lang, $field=null)
 {
-    return getTranslation($input, $lang, $field);//see uLocale
+    return getTranslation($input, $lang, $field);//see ULocale
 }
 ?>

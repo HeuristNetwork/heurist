@@ -217,6 +217,7 @@ if(isLocalHost()){
                 var currentImg = obj;
 
                 if (currentImg.parentNode.className != "fullSize"){
+console.log('hide curr image');                    
                     $(currentImg).hide();
                     currentImg.src = url;
                     currentImg.onload=function(){
@@ -774,7 +775,7 @@ if(isLocalHost()){
 
                 $('.media-content').show();
                 if(hide_images == 1){ // hide linked media
-                    $('.linked-media').hide();
+                    $('.linked-media:not(:first)').hide();
                 }else{
                     $('.linked-media').show();
                 }
@@ -2027,7 +2028,7 @@ function print_public_details($bib) {
             $media_control_chkbx = '';
             if($k == 0 && !$is_production && !$is_map_popup && $several_media>1){
                 $checked_status = $hide_images == 0 ? ' checked="checked"' : '';
-                $media_control_chkbx = " <label class='media-control'><input type='checkbox' id='show-linked-media' onchange='displayImages(false);' $checked_status> show linked media</label>";
+                $media_control_chkbx = " <label class='media-control'><input type='checkbox' id='show-linked-media' onchange='displayImages(false);' $checked_status> show all linked media</label>";
 
                 if($thumb['linked'] == true){
                     print "<h5 style='margin-block:1.5em'>Linked Media Only: $media_control_chkbx</h5>";
@@ -2118,7 +2119,8 @@ function print_public_details($bib) {
                     .($is_production?'margin-left:100px':'')
                     .($k>0?CSS_HIDDEN:'').'">';
             }else{
-                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
+                //'. ($thumb['linked'] == true ? ' linked-media' : '') .'
+                print '<div class="thumb_image media-content"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
                     .($k>0?CSS_HIDDEN:'').'">';
             }
 

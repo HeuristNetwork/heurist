@@ -1,4 +1,7 @@
 <?php
+use hserv\utilities\USanitize;
+
+
 /*
 An array of the form array($object, $method) with $object being a reference to an object and $method being a string containing the method-name
 
@@ -6,23 +9,42 @@ An array of the form array($object, $method) with $object being a reference to a
 
 class ReportExecute
 {
-    protected $smarty;
-    protected $outputfile;
-    protected $outputmode;
-    protected $gparams;
-    protected $max_allowed_depth = 2;
-    protected $publishmode;
-    protected $execution_counter;
-    protected $execution_total_counter;
-    protected $is_included;
-    protected $is_jsallowed;
-    protected $record_with_custom_styles;
-    protected $is_headless;
-    protected $smarty_session_id;
+    private $smarty;
+    private $outputfile;
+    private $outputmode; //output format
+    private $is_fetch = false;  
+    private $max_allowed_depth = 2; //not used
+    private $publishmode;
+    private $execution_counter;
+    private $execution_total_counter;
+    private $is_included;
+    private $is_jsallowed;
+    private $record_with_custom_styles;
+    private $is_headless; //output without html header and styles - for snippet and xml output
+    private $smarty_session_id;
+    
+    private $limit;
+    private $replevel;
 
-    protected $system;
-    protected $params;
+    private $system;
+    private $params;
 
+/*
+* parameters
+* 'template' or 'template_body' - template file name or template value as a text
+* 'replevel'  - 1 notices, 2 all, 3 debug mode
+*
+* 'output' -  full file path to be saved
+* 'mode' -    output format if publish>0: js or html (default)
+* 'publish' - 0 vsn 3 UI (smarty tab),
+*             1,2,3 - different behaviour when output is defined
+*             if output is null if html and js - output to browser, otherwise download
+*             4 - for calculation fields
+*
+* other parameters are hquery's
+*/    
+    
+    
     /**
      * Constructor
      *
@@ -33,14 +55,6 @@ class ReportExecute
     {
         $this->system = $system;
         $this->params = $params;
-
-        // Initialize properties from parameters or set defaults
-        $this->outputfile = isset($params["output"]) ? htmlspecialchars($params["output"]) : null;
-        $this->publishmode = isset($params['publish']) ? intval($params['publish']) : 0;
-        $this->record_with_custom_styles = isset($params['cssid']) ? intval($params['cssid']) : null;
-        $this->is_headless = isset($params['snippet']) && $params['snippet'] == 1;
-        $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
-        $this->smarty_session_id = isset($params['session']) ? $params['session'] : null;
     }
 
     /**
@@ -55,37 +69,24 @@ class ReportExecute
             return false;
         }
 
-        $this->is_jsallowed = $this->system->isJavaScriptAllowed();
-        $mysqli = $this->system->get_mysqli();
-
         set_time_limit(0); // No script execution time limit
 
-        // Handle publishing modes and output types
-        $this->handleOutputMode();
-
-        $params = $this->params;
-        $params["f"] = 1; // Always search (do not use cache)
-        $params["void"] = isset($params["void"]) && $params["void"] == true;
-
-        $this->gparams = $params; // Store parameters globally
-
-        // Define search limits
-        $this->setSearchLimit();
+        // Initialize properties from parameters or set defaults
+        $this->setParameters();
 
         // Fetch record IDs
-        $recIDs = [];
-        $qresult = $this->fetchRecordIDs($recIDs);
+        $qresult = $this->fetchRecordIDs();
 
         // Handle empty result set
         if (!$this->handleEmptyResultSet($qresult)) {
             return true;
         }
 
-        // Process template file or template body
-        $content = $this->processTemplate();
+        // Loads template file or template body
+        $content = $this->loadTemplateContent();
 
         // Pre-parse template to set allowed depth
-        $this->preparseTemplate($content);
+        //$this->preparseTemplate($content);
 
         // Initialize Smarty if necessary
         $this->initSmarty();
@@ -95,23 +96,33 @@ class ReportExecute
     }
 
     /**
+    *  Initialize properties from parameters or set defaults
      * Handle the output mode and set appropriate flags.
+     * Set the search limit based on publishing mode or user preferences.
      */
-    protected function handleOutputMode()
+    private function setParameters()
     {
+        
+        $this->outputfile = isset($params["output"]) ? htmlspecialchars($params["output"]) : null;
+        $this->publishmode = isset($params['publish']) ? intval($params['publish']) : 0;
+        $this->record_with_custom_styles = isset($params['cssid']) ? intval($params['cssid']) : null;
+        
+        $this->is_headless = isset($params['snippet']) && $params['snippet'] == 1;
+        $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
+        $this->smarty_session_id = isset($params['session']) ? $params['session'] : null;
+        
         if ($this->outputmode !== 'js' && $this->outputmode !== 'html') {
             $this->is_headless = true;
         }
         if ($this->outputmode === 'text') {
             $this->outputmode = 'txt';
         }
-    }
+        
+        $this->is_fetch = isset($this->params["void"]) && $this->params["void"] == true;  //fetch into file
+        
+        $this->is_jsallowed = $this->system->isJavaScriptAllowed();
 
-    /**
-     * Set the search limit based on publishing mode or user preferences.
-     */
-    protected function setSearchLimit()
-    {
+        //Set the search limit based on publishing mode or user preferences.
         if (!isset($this->params["limit"])) {
             if ($this->publishmode == 0) {
                 $limit_for_interface = intval($this->system->user_GetPreference('smarty-output-limit'));
@@ -123,17 +134,24 @@ class ReportExecute
                 $this->params["limit"] = PHP_INT_MAX;
             }
         }
+        $this->limit = $this->params["limit"];
+        
+        $this->replevel = 0;
+        if (@$this->params['template_body']){
+            $this->replevel = isset($this->params['replevel']) ? intval($this->params['replevel']) : 0;
+        }
     }
 
     /**
      * Fetch record IDs based on the provided query parameters.
      *
-     * @param array $recIDs Reference to the array where record IDs will be stored.
      * @return array The query result containing records and record count.
      */
-    protected function fetchRecordIDs(&$recIDs)
+    private function fetchRecordIDs()
     {
         if (isset($this->params['recordset'])) {
+            //A. recordset (list of record ids) is already defined
+            
             if (is_array($this->params['recordset'])) {
                 $qresult = $this->params['recordset'];
             } else {
@@ -142,9 +160,9 @@ class ReportExecute
 
             if ($this->publishmode == 0 && $qresult && isset($qresult['recIDs'])) {
                 $recIDs = $this->prepareIds($qresult['recIDs']);
-                if ($this->params["limit"] < count($recIDs)) {
+                if ($this->limit < count($recIDs)) {
                     $qresult = [
-                        'records' => array_slice($recIDs, 0, $this->params["limit"]),
+                        'records' => array_slice($recIDs, 0, $this->limit),
                         'reccount' => count($recIDs)
                     ];
                 } else {
@@ -155,6 +173,7 @@ class ReportExecute
                 }
             }
         } else {
+            //B. get recordset from query/search results
             $this->params['detail'] = 'ids';
             $qresult = $this->recordSearch($this->system, $this->params);
 
@@ -174,12 +193,13 @@ class ReportExecute
      * @param array $qresult The query result containing records and record count.
      * @return bool Returns false if result is empty, true otherwise.
      */
-    protected function handleEmptyResultSet($qresult)
+    private function handleEmptyResultSet($qresult)
     {
         $emptysetmessage = isset($this->params['emptysetmessage']) ? $this->params['emptysetmessage'] : null;
 
         if (!$qresult || !isset($qresult['records']) || !(intval($qresult['reccount']) > 0)) {
             if ($this->publishmode == 4) {
+                //for calculation field
                 echo USanitize::sanitizeString($emptysetmessage && $emptysetmessage != 'def' ? $emptysetmessage : '');
             } else {
                 $error = $emptysetmessage && $emptysetmessage != 'def'
@@ -199,7 +219,7 @@ class ReportExecute
      *
      * @return string The content of the template to be processed.
      */
-    protected function processTemplate()
+    private function loadTemplateContent()
     {
         $template_file = isset($this->params['template']) ? basename($this->params['template']) : null;
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
@@ -220,7 +240,7 @@ class ReportExecute
         } else {
             $content = $template_body;
             if ($this->publishmode != 4) {
-                $this->publishmode = 0;
+                $this->publishmode = 0; //always html in test/snippet mode
             }
             $this->outputmode = 'html';
             return $content;
@@ -232,8 +252,32 @@ class ReportExecute
      *
      * @param string $content The content of the template.
      */
-    protected function preparseTemplate($content)
+    private function preparseTemplate($content)
     {
+        // NOT USED
+        //verify that template has new features
+        /*
+        //need to detect $heurist->getRecord - if it is not found this is old version - show error message
+        if($this->publishmode!=4 && strpos($content, '{foreach $results as ')>0 && strpos($content, '$heurist->getRecord(')===false){
+
+               $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'.
+                        '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br>'
+                        .'immediately after the start of the main record loop indicated by {foreach $results as $r}, like this:<p/>'
+                        .'<p><br>{*------------------------------------------------------------*}'
+                        .'<br>{foreach $results as $r}'
+                        .'<br><b>{$r = $heurist->getRecord($r)}</b>'
+                        .'<br>{*------------------------------------------------------------*}</p>'
+                        .'<p><br>If your report format contains repeating value loops, you will also need to add similar<br>'
+                        .'expressions to these loops, for example: {$r.f103 = $heurist->getRecord($r.f103)}.<br>'
+                        .'Generate a new report to obtain examples, then cut and paste into your existing report.</p>'
+                        .'<p>If you are stuck, please send your report template to <br>'
+                        .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
+
+               smarty_error_output($this->system, $error);
+               return false; //exit;
+        }
+        */    
+       
         $k = strpos($content, "{*depth");
         $kp = 8;
         if (is_bool($k) && !$k) {
@@ -252,9 +296,10 @@ class ReportExecute
     /**
      * Initialize the Smarty engine if it is not already initialized.
      */
-    protected function initSmarty()
+    private function initSmarty()
     {
         if (!isset($this->smarty) || $this->smarty === null) {
+            
             initSmarty($this->system->getSysDir('smarty-templates'));
 
             if (!isset($this->smarty) || $this->smarty === null) {
@@ -271,14 +316,14 @@ class ReportExecute
      * @param string $content The content of the template.
      * @return bool Returns true on successful execution, false otherwise.
      */
-    protected function executeTemplate($qresult, $content)
+    public function executeTemplate($qresult, $content)
     {
-        $results = $qresult["records"];
+        $results = $qresult["records"];  //reocrd ids
         $this->execution_total_counter = count($results);
         $heuristRec = new ReportRecord();
 
         if (method_exists($this->smarty, 'assignByRef')) {
-            $this->smarty->assignByRef('heurist', $heuristRec);
+            $this->smarty->assignByRef('heurist', $heuristRec); //deprecated 
         } else {
             $this->smarty->assign('heurist', $heuristRec);
         }
@@ -292,13 +337,7 @@ class ReportExecute
 
         // Register Smarty plugins and modifiers
         try {
-            if (method_exists($this->smarty, 'registerPlugin')) {
-                $this->smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']);
-                $this->smarty->registerPlugin('modifier', 'translate', 'getTranslation');
-            } else {
-                $this->smarty->register_modifier('file_data', [$heuristRec, 'getFileField']);
-                $this->smarty->register_modifier('translate', 'getTranslation');
-            }
+            $this->smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']);
         } catch (Exception $e) {
             if (strpos($e, 'already registered') === false) {
                 $this->smarty_error_output($this->system, $e);
@@ -307,15 +346,14 @@ class ReportExecute
         }
 
         ini_set('display_errors', 'false');
-        $this->smarty->error_reporting = 0;
-
+        
         // Execute the template and handle output filtering
         $result = $this->handleTemplateOutput($content, $results);
 
         // Handle activity logging if required
-        if (!$this->is_headless && !isset($this->params['template_body']) && !$this->params["void"]) {
-            log_smarty_activity($this->system, $results);
-        }
+        //if (!$this->is_headless && !isset($this->params['template_body']) && !$this->is_fetch) {
+        //    log_smarty_activity($this->system, $results);
+        //}
 
         return $result;
     }
@@ -331,10 +369,10 @@ class ReportExecute
     {
         $result = true;
         $need_output_filter = true;
+        
+        $this->setupErrorReporting($this->replevel);
 
-        if ($this->params['template_body']) {
-            $replevel = isset($this->params['replevel']) ? $this->params['replevel'] : 0;
-            $this->setupErrorReporting($replevel);
+        if (@$this->params['template_body']) {
 
             $template_file = $this->saveTemporaryTemplate($content);
             if ($this->publishmode == 4) {
@@ -347,10 +385,6 @@ class ReportExecute
             if (!$template_file) {
                 $template_file = 'test01.tpl';
             }
-
-            $this->smarty->debugging = false;
-            $this->smarty->error_reporting = 0;
-
             if ($this->outputfile) {
                 $this->smarty->registerFilter('output', 'smarty_output_filter');
                 $need_output_filter = false;
@@ -375,10 +409,10 @@ class ReportExecute
                 $this->setOutputHeaders();
             }
 
-            if ($this->gparams['void']) {
+            if ($this->is_fetch) {
                 $this->smarty->fetch($template_file);
             } else {
-                $this->smarty->display($template_file);
+                $this->smarty->display($template_file); //browser output
             }
         } catch (Exception $e) {
             $this->smarty_error_output($this->system, 'Exception on execution: ' . $e->getMessage());
@@ -386,11 +420,33 @@ class ReportExecute
         }
 
         if ($this->smarty_session_id > 0) {
-            mysql__update_progress($this->system->get_mysqli(), $this->smarty_session_id, false, 'REMOVE');
+            mysql__update_progress(null, $this->smarty_session_id, false, 'REMOVE');
         }
 
         return $result;
     }
+    
+    private function setupErrorReporting($replevel){
+        
+        $this->smarty->debugging = false;
+        $this->smarty->error_reporting = 0;
+        
+        if($replevel==1 || $replevel==2){
+            ini_set( 'display_errors' , 'true');// 'stdout' );
+            if($replevel==2){
+                $smarty->error_reporting = E_ALL & ~E_STRICT & ~E_NOTICE;
+            }else{
+                $smarty->error_reporting = E_NOTICE;
+            }
+        }else{
+            ini_set( 'display_errors' , 'false');
+            $smarty->debugging = ($replevel==3);
+        }
+        if($replevel>0){
+            $smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
+        }
+        
+    }
 
-    // Add other helper functions like setupErrorReporting(), saveTemporaryTemplate(), setOutputHeaders(), etc.
+    // Add other helper functions like saveTemporaryTemplate(), setOutputHeaders(), etc.
 }

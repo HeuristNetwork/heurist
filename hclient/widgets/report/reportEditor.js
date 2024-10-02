@@ -29,7 +29,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         default_palette_class: 'ui-heurist-populate',
         actionName: 'reportEditor',
         path: 'widgets/report/',
+
         is_snippet_editor: false,
+        rty_ID:null, 
         
         keep_instance: true,
         template: null
@@ -52,8 +54,14 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     
     _create: function() {
         this._super();
-        this.options.height = this.usrPreferences.height;
-        this.options.width = this.usrPreferences.width;
+        if(this.options.is_snippet_editor){
+            this.options.width  = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.7
+            this.options.height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.7
+           
+        }else{
+            this.options.height = this.usrPreferences.height;
+            this.options.width = this.usrPreferences.width;
+        }
         
         let that = this;
         this.options.beforeClose = function(){
@@ -171,19 +179,33 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
         //init Insert Pattern controls
         let rtSelect = this._$('#rectype_selector');
-        let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
+        let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), 
+                                        this.options.rty_ID,
+                                        this.options.rty_ID>0?null:window.hWin.HR('select record type'), true );
         this._on($rec_select,{change: this._loadRecordTypeTreeView});
         
         this._on(this._$('#btnInsertPattern').button(), {click:this._insertPattern});
 
-        //init editor (load codeMirror)
-        this._loadTemplate();
-        
-        
         //init test panel
         this._on(this._$('.btnStartTest').button({icons: { primary: 'ui-icon-circle-arrow-s'}}), 
             {click:()=>{this._doTest();}});
         
+
+        if(this.options.is_snippet_editor){
+            this._$('.editForm').css({top:'90px'});
+            this._$('.insertForm > .ent_content_full').css({top:'50px'});
+            this._$('.hide-for-snippet').hide();
+            this._$('.show-for-snippet').show();
+            
+            this._loadRecordTypeTreeView();
+            this._loadTestRecords();
+            
+            this._initEditor(this.options.template_body);
+        }else{
+            //init editor (load codeMirror)
+            this._loadTemplate();
+        }        
+
         
         
         return true;
@@ -193,38 +215,51 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     //
     _doTest:function(){
-        
-        if(!(window.hWin.HAPI4.currentRecordset?.length()>0)){
-            window.hWin.HEURIST4.msg.showMsgFlash('Perform search to get record set to test against');
-            return;
-        }
-        
+
         let template_body = this.codeEditor.getValue();
 
         if(!(template_body?.length>10)){
-            window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define report code');
+            window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define code');
             return;            
         }
+
+        let request = {db:window.hWin.HAPI4.database, 
+                       template_body:template_body};
         
+        if(this.options.is_snippet_editor){
+                let rec_ID = this._$('#listRecords').val();
+                if(!window.hWin.HEURIST4.util.isPositiveInt(rec_ID)){
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Select record to test on',
+                        error_title: 'Missing record'
+                    });
+                    return;
+                }
+                request['publish'] = 4;
+                request['recordset'] = JSON.stringify({records:[rec_ID], reccount:1});
+                
+        }else if(!(window.hWin.HAPI4.currentRecordset?.length()>0)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Perform search to get record set to test against');
+            return;
+        }else{
         
+            let debug_limit = document.getElementById('cbDebugReportLimit').value;
+            if(debug_limit<0){
+                debug_limit = 2000;
+            }
+            
+            request['recordset'] = JSON.stringify({recIDs:window.hWin.HAPI4.currentRecordset.getIds().slice(0, debug_limit-1)});
+        }
+
         let replevel = document.getElementById('cbErrorReportLevel').value;
         if(replevel<0) {
             document.getElementById('cbErrorReportLevel').value = 0;
             replevel = 0;
         }
-        let debug_limit = document.getElementById('cbDebugReportLimit').value;
+        request['replevel'] = replevel;
         
-        if(debug_limit<0){
-            debug_limit = 2000;
-        }
-        let recset = {recIDs:window.hWin.HAPI4.currentRecordset.getIds().slice(0, debug_limit-1)};
-
+        
         let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
-        let request = {db:window.hWin.HAPI4.database, 
-                       replevel: replevel,
-                       template_body:template_body,
-//                       limit: debug_limit,  
-                       recordset:JSON.stringify(recset)}
         
         let that = this;
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('.testForm'));
@@ -255,19 +290,29 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             if(context == 'NAN' || context == 'INF' || context == 'NULL'){
                 context = 'No value';
             }
-            let txt = (context && context.message)?context.message:context
+
+            if(this.option.is_snippet_editor){
+                this._$('.testForm').innerHTML = context;
+            }else{
+                let txt = (context && context.message)?context.message:context
+
+                let iframe = this._$('.testForm').find('iframe')[0];
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write( txt );
+                iframe.contentWindow.document.close();
+
+            }
             
-            let iframe = this._$('.testForm').find('iframe')[0];
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write( txt );
-            iframe.contentWindow.document.close();
     },
 
     //
     //
     //
     _loadTemplate: function(){    
-
+        
+        if(this.options.is_snippet_editor){
+            that._initEditor(this.options.template_body);
+        }else
         // null means new template
         if(this._currentTemplate!=this.options.template){
             this._currentTemplate = this.options.template;
@@ -277,15 +322,19 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 function(response){
                     that._initEditor(response.message);
             });
-
            
             this.changeTitle();
         }
     },
     
-    changeTitle: function(){
-        let new_title = window.hWin.HR('Edit Report Template')+': '+
+    //
+    //
+    //
+    changeTitle: function( new_title ){
+        if(!new_title){
+           new_title = window.hWin.HR('Edit Report Template')+': '+
                     (this._currentTemplate?this._currentTemplate:'new template');
+        }
         this._super(new_title);
     },
     
@@ -323,7 +372,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 return;
             }
 
-                this._$('.editForm').empty().css({overflow:'none',padding:0});
+                this._$('.editForm').empty().css({padding:0});
             
                 this.codeEditor = CodeMirror( this._$('.editForm')[0], {
                     mode           : "smartymixed",
@@ -1232,6 +1281,7 @@ this_id       : "term"
         res[1].text = window.hWin.HR('Save');
         res[1].disabled = null;
         
+        if(!this.options.is_snippet_editor){
         res.splice(1,0,{text:window.hWin.HR('Save As'),
                     id:'btnDoAction2',
                     class:'ui-button-action',
@@ -1240,16 +1290,27 @@ this_id       : "term"
                             that.doAction(true); 
                     }}
                     );
+        }
         
         return res;
     },
 
     //
-    //
+    // Save template
     //
     doAction: function(is_save_as, need_close){
 
         let that = this;
+        
+        if(this.options.is_snippet_editor)
+        {
+            if(this.isModified()){
+                this._context_on_close = this.codeEditor.getValue();    
+            }
+            this._keepTemplateValue=false;
+            this.closeDialog();
+            return;    
+        }
 
         if(!this._currentTemplate || is_save_as){
 
@@ -1282,7 +1343,44 @@ this_id       : "term"
                 }
         });
 
-    }
+    },
+    
+    //
+    // Load limited list of records of given record types (to test template)
+    //
+    _loadTestRecords: function()
+    {
+        let selector = this._$('#listRecords')[0];
+        selector.innerHTML = '';
+        //load list of records for testing 
+        if(this.options.rty_ID>0){
+            
+                var server_request = {
+                    q: 't:'+this.options.rty_ID,
+                    restapi: 1,
+                    columns: ['rec_ID', 'rec_Title'],
+                    limit:10,
+                    zip: 1,
+                    format:'json'};
+                    
+                
+                //search for record type
+                window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                        function(response){
+
+                           if(window.hWin.HEURIST4.util.isJSON(response)) {
+                               let options = [];
+                               response.records.forEach((item) => {
+                                    options.push({key:item.rec_ID, 
+                                    title:window.hWin.HEURIST4.util.stripTags(item.rec_Title)});
+                               });
+                               window.hWin.HEURIST4.ui.createSelector(selector, options);
+                           }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                           }
+                });            
+        }
+    }    
         
 });
 
