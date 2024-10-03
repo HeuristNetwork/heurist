@@ -600,21 +600,22 @@ this._dout('reload datatable '+this.options.serverSide);
     _highlightSelected: function(){
 
         const that = this;
+        let $rows = this.div_content.find('table.dataTable tbody tr');
 
         // No rows
-        if(this.div_content.find('tr[role="row"]').length == 0){
+        if($rows.length == 0){
             return;
         }
 
         // Remove previous highlighting
-        this.div_content.find('tr[role="row"].ui-highlight').removeClass('ui-highlight');
+        $rows.removeClass('ui-highlight');
 
         if(!this.options.selection || this.options.selection.length == 0){
             return;
         }
 
         // Highlight selected
-        $.each(this.div_content.find('tr[role="row"]'), (idx, row) => {
+        $.each($rows, (idx, row) => {
 
             let row_data = that._dataTable.row(row).data();
 
