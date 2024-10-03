@@ -350,7 +350,7 @@ $.widget( "heurist.searchBuilderItem", {
         };
 
         let dty_ID = this.options.dty_ID;
-        
+
         if(dty_ID.indexOf('r.')==0){
             dty_ID = dty_ID.substr(2);    
         }else if(dty_ID.indexOf('lt')==0 || dty_ID.indexOf('lf')==0){
@@ -423,6 +423,10 @@ $.widget( "heurist.searchBuilderItem", {
 
             if(field_type=="rectype"){
                 dtFields['cst_EmptyValue'] = window.hWin.HR('Any record type');
+            }else if(field_type == 'user'){
+                dtFields['rst_FieldConfig'] = {
+                    mode: 'all_users_and_groups'
+                };
             }
 
             ed_options['dtFields'] = dtFields;
@@ -445,7 +449,6 @@ $.widget( "heurist.searchBuilderItem", {
                 eqopts[0].key = '=';
                 eqopts.unshift({key:'',title:'like'}); //string match
             }
-                      
 
         } else if(field_type=='float' || field_type=='integer'){
 
@@ -683,7 +686,7 @@ Whole value = EQUAL
         }else if(field_type=='freetext' || field_type=='blocktext' || field_type==prev_type){
             ed_options.values = prev_value;
         }
-        
+
         //init input elements
         this._predicate_input_ele = $("<div>")
             .editing_input(ed_options).appendTo(this.values_container);
