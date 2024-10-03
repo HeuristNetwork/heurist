@@ -2291,6 +2291,11 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         }
     }
 
+    $increment_update = true;
+    if($updating_record){
+        $increment_update = self::_isRecordUpdating($recordId, $record);
+    }
+
     $out = recordSave(self::$system, $record, false, false, 0, $record_count);//see recordModify.php
 
     $new_recordID = null;
@@ -2345,7 +2350,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             //do not count updates if this record was already inserted before
             if($updating_record && !in_array($new_recordID, self::$rep_unique_ids)){
                 self::$rep_unique_ids[] = $new_recordID;
-                self::$rep_updated++;
+                !$increment_update || self::$rep_updated++;
             }elseif(is_numeric($new_recordID) && $new_recordID > 0){
                 self::$rep_added++;
                 self::$rep_unique_ids[] = $new_recordID;
@@ -3512,6 +3517,73 @@ public static function insertNewColumns($params){
     }
 
     return true;
+}
+
+/**
+ * Checks if the record is actually being updated with new values
+ *
+ * @param integer $rec_ID - record ID
+ * @param array $record - record to be saved, needs to contain the 'details' key
+ * @return bool whether the record can be considered to be updating
+ */
+private static function _isRecordUpdating($rec_ID, $record){
+
+    $existing_record = recordSearchByID(self::$system, $rec_ID, false);
+    $existing_details = recordSearchDetailsRaw(self::$system, $rec_ID);
+
+    // Check if header fields are being updated, or if the record didn't have any values
+    $has_scratchpad = !empty($record['details']['recordNotes']);
+    $has_url = !empty($record['details']['recordURL']);
+    if(empty($existing_details)
+    || ($has_scratchpad && $record['details']['recordNotes'] != $existing_record['rec_ScratchPad'])
+    || ($has_url && $record['details']['recordURL'] != $existing_record['rec_URL'])){
+        return true;
+    }
+
+    $existing_values = [];
+    $rtn = false;
+    foreach($record['details'] as $dty_ID => $values){
+
+        if(strpos($dty_ID, 't:') === false){
+            // skip imp_ID, recordNotes and recordURL
+            continue;
+        }
+        $dty_ID = str_replace('t:', '', $dty_ID);
+
+        // Retrieve necessary values
+        $check_values = null;
+        if(array_key_exists($dty_ID, $existing_values)){
+            $check_values = $existing_values[$dty_ID];
+        }else{
+            $check_values = array_filter($existing_details, function($detail) use ($dty_ID){
+                return $detail['dtl_DetailTypeID'] == $dty_ID;
+            });
+            $existing_values[$dty_ID] = $check_values;
+        }
+
+        // Check whether values have been removed/added
+        if(count($check_values) != count($values)){
+            $rtn = true;
+            break;
+        }
+
+        // Now check whether values have been updated
+        $exists = array_filter($check_values, function($detail) use ($values){
+
+            $value = !empty($detail['dtl_Value']) ? $detail['dtl_Value'] : '';
+            $value = !empty($detail['dtl_Geo']) ? $detail['dtl_Geo'] : $value;
+            $value = !empty($detail['dtl_UploadedFileID']) ? $detail['dtl_UploadedFileID'] : $value;
+
+            return !empty($value) && in_array($value, $values);
+        });
+
+        if(count($exists) < count($values)){
+            $rtn = true;
+            break;
+        }
+    }
+
+    return $rtn;
 }
 } //end class
 ?>
