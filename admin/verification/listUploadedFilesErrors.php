@@ -62,7 +62,7 @@ $mysqli = $system->get_mysqli();
         </style>
         <script>
             $(document).ready(function() {
-               $('button').button();
+                $('button').button();
             });
         </script>
 
@@ -690,6 +690,52 @@ $mysqli = $system->get_mysqli();
                         document.getElementById('page-inner').style.display = 'none';//hide all
 
                     }//doRepairAction
+
+                    function doIndexing(selected_only){
+
+                        let $selected_files = $('.files_notreg:is(:checked)');
+
+                        if((!selected_only && $('.files_notreg').length == 0)
+                        || (selected_only && $selected_files.length == 0)){
+
+                            return;
+                        }
+
+                        let request = {
+                            'a': 'batch',
+                            'entity': that.options.entity.entityName,
+                            'request_id': window.hWin.HEURIST4.util.random(),
+                            'bulk_reg_filestore': 1
+                        };
+
+                        if(selected_only){
+                            // Add checked files
+                            let files = [];
+                            $selected_files.each((idx, input) => {
+                                files.push(input.parentNode.textContent);
+                            });
+                            request['files'] = JSON.stringify(files);
+                        }
+
+                        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                            if(response.status != window.hWin.ResponseStatus.OK){
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                return;
+                            }
+
+                            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(response.data, {'OK': function(){
+                                $dlg.dialog('close');
+
+                                selected_only ? $selected_files.closest('.msgline').remove() : $('#files_notreg, a[href="#file_notreg"]').remove();
+
+                            }}, {title: 'Refresh indexes results', 'OK': window.HR('OK')}, {default_palette_class: 'ui-heurist-admin', dialogId: 'refresh-file-indexes'});
+                        });
+                    }
                 <?php
                     $smsg='';
 
@@ -837,6 +883,8 @@ $mysqli = $system->get_mysqli();
                     <br>
                     <label><input type=checkbox
                         onchange="{$('.files_notreg').prop('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all</label>
+                    <button onclick="doIndexing(false)" style="margin: 0px 10px;">Register all files</button>
+                    <button onclick="doIndexing(true)">Register selected files</button>
                     <br>
                     <br>
                 <?php
