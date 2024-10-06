@@ -306,7 +306,7 @@ $requestUri:
 
                     if(@$requestUri[4]){
 
-                        $redirect .= ('viewers/smarty/showReps.php?db='.$database.'&template='.basename($requestUri[3]).'&publish=1&w=a&q=');
+                        $redirect .= ('?db='.$database.'&template='.basename($requestUri[3]).'&w=a&q=');
 
                         $ids = prepareIds(@$requestUri[4]);
                         if(!empty($ids)){
@@ -319,7 +319,7 @@ $requestUri:
                         $params['w'] = 'a';
                         $params['q'] = urldecode($query);
                         $params['template'] = urldecode($requestUri[3]);
-                        $rewrite_path = dirname(__FILE__).'/../viewers/smarty/showReps.php';
+                        $rewrite_path = dirname(__FILE__).'/../index.php';
 
                     }else{
                         $error_msg = 'Query or Record ID is not defined';

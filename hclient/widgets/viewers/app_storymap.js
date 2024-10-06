@@ -1020,7 +1020,7 @@ $.widget( "heurist.app_storymap", {
             if( typeof this.options.reportOverview === 'string' 
                             && this.options.reportOverview.substr(-4)=='.tpl' ){
             
-                infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
+                infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.reportOverview);
@@ -1113,7 +1113,7 @@ $.widget( "heurist.app_storymap", {
         if( typeof this.options.reportEndPage === 'string' 
                         && this.options.reportEndPage.substr(-4)=='.tpl' ){
         
-            infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
+            infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                     + recID 
                     + '&db='+window.hWin.HAPI4.database+'&template='
                     + encodeURIComponent(this.options.reportEndPage);
@@ -1560,7 +1560,7 @@ $.widget( "heurist.app_storymap", {
                 if( typeof this.options.reportElement === 'string' 
                                 && this.options.reportElement.substr(-4)=='.tpl' ){
                 
-                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
+                    infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                             + recID 
                             + '&db='+window.hWin.HAPI4.database+'&template='
                             + encodeURIComponent(this.options.reportElement);

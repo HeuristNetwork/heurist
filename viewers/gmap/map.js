@@ -1860,7 +1860,7 @@ if(_mapdata.limit_warning){
                     
                 if(mapdocument && mapdocument.popup_template){ //1. as smarty output 
                                                
-                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&h4=1&w=a&db='+window.hWin.HAPI4.database
+                    popupURL = window.hWin.HAPI4.baseURL + '?snippet=1&h4=1&w=a&db='+window.hWin.HAPI4.database
                             +'&q=ids:'+item.opts.recid+'&template='+encodeURIComponent(mapdocument.popup_template);
 
             

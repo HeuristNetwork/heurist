@@ -1358,9 +1358,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts[selection_mode] = true;
 
             if(opts['template'] != ''){
-                opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                opts['url'] = '?template='+encodeURIComponent(opts['template'])
                 +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
-                +'&template='+encodeURIComponent(opts['template'])
                 +'&[query]';
             }else{
                 opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';

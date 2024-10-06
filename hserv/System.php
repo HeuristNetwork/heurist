@@ -1850,7 +1850,7 @@ class System {
 
         if(!$use_rewrite){
             $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
-                        : $base_url . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
+                        : $base_url . '?db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
             return $url;
         }
 
