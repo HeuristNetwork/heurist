@@ -183,9 +183,8 @@ window.cfg_layouts = [
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
                     
-                    {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
-                    },
+                    {appid:'heurist_reportViewer', name: 'Custom Reports'},
+
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}
@@ -224,11 +223,7 @@ window.cfg_layouts = [
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
                     
-                    {appid:'heurist_resultListExt', name: 'Report', options:{title:'Report', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports',
-                                    css:{overflow:'hidden'}}
-                    },
-                    {appid:'heurist_reportViewer', name: 'Smarty'},
+                    {appid:'heurist_reportViewer', name: 'Report'},
                         
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',

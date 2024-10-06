@@ -51,7 +51,7 @@ class ReportTemplateMgr
      * @param mixed $_system The system object.
      * @param string $_dir The directory where templates are stored.
      */
-    public function __construct($_system, $_dir)
+    public function __construct($_system, $_dir=null)
     {
         global $system;
 

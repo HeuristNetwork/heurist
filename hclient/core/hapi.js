@@ -275,6 +275,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if (request.notes) {
             request.notes = null; //unset to reduce traffic
         }
+        if(!action){
+            action = 'index';
+        }
 
         //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';

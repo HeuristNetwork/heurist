@@ -40,8 +40,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 use hserv\utilities\USanitize;
-
-require_once dirname(__FILE__).'/../../viewers/smarty/showReps.php';
+use hserv\report\ReportExecute;
 
 if(isset($_REQUEST) && !empty($_REQUEST)){ //if set it is included in dailyCronJobs
 
@@ -181,12 +180,13 @@ function doReport($system, $update_mode, $format, $row){
 
                 $tot_minutes = ($interval->days*1440 + $interval->h*60 + $interval->i);
                 if($tot_minutes > $row['rps_IntervalMinutes']){
-                    $publish = 3; //saves into file and produces smarty output
+                    $publish = 3; //saves into file and produces info page (was 3 - and browser output)
                     $res = 2; //to update
                 }
             }
             if($res == 1){ //request for current files (without smarty execution)
                 if($update_mode==3){
+                    //file exists and up to date
 
                     if($format=='js'){
                         header(CTYPE_JS);
@@ -223,10 +223,10 @@ function doReport($system, $update_mode, $format, $row){
 			    return 3; //intakted - existing taken
             }
 		}
-		$publish = 1; //file does not exist - regenerates and output into browser
+		$publish = 3; //file does not exist - regenerates and output into browser
 	}//publish==3
     else{
-        $publish = $update_mode; //1 - regenerates and output user info OR 2 - download
+        $publish = $update_mode; //1 - regenerates and output info page OR 2 - download
     }
 
 	$hquery = $row['rps_HQuery'];
@@ -247,10 +247,11 @@ function doReport($system, $update_mode, $format, $row){
 	$params["output"]	= $outputfile;
 	$params["mode"] 	= $format;
 	$params["publish"] 	= $publish;
-	$params["rps_id"] 	= $row['rps_ID'];
-    $params["void"]     = ($update_mode==4);//no browser output
+	$params["rps_id"] 	= $row['rps_ID'];    //report schedule iD
+    $params["void"]     = ($update_mode==4); //no browser output
 
-	$success = executeSmartyTemplate($system, $params);//in showReps
+	$report = ReportExecute($system, $params);
+    $success = $report->execute();
 
     if(!$success) {$res = 0;}
 

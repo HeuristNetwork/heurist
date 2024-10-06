@@ -33,6 +33,7 @@ $.widget( "heurist.reportViewer", {
     _$: $, //shorthand for this.element.find
     _need_load_content: true,
     _currentTemplate: null,
+    _tempForm: null,
     
     // the widget's constructor
     _create: function() {
@@ -102,6 +103,9 @@ $.widget( "heurist.reportViewer", {
            file_upload.fileupload('destroy');
         }
         
+        if(this._tempForm){
+            this._tempForm.remove();
+        }
     },
     
     _initControls: function(){
@@ -218,7 +222,7 @@ $.widget( "heurist.reportViewer", {
 
         if(unconditionally===true){
 
-            window.hWin.HAPI4.SystemMgr.reportAction({mode:'delete', template:this._currentTemplate}, 
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'delete', template:this._currentTemplate}, 
                 function(response){
                     if (response.status == window.hWin.ResponseStatus.OK) {
                         window.hWin.HAPI4.SystemMgr.save_prefs({'viewerCurrentTemplate': null});
@@ -250,11 +254,11 @@ $.widget( "heurist.reportViewer", {
             
             let that = this;
             
-            let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/ReportController.php";
+            let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/index.php";
         
             file_upload.fileupload({
                     url: baseurl,
-                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {name:'mode', value:'import'}],
+                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {template:'---'}, {name:'action', value:'import'}],
                     dataType: 'json',
                     done: function (e, response) {
 
@@ -309,11 +313,11 @@ $.widget( "heurist.reportViewer", {
         let template_file = this._$('#selTemplates').val();
         if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
         
-        window.hWin.HAPI4.SystemMgr.reportAction({mode:'export', check:1 ,template:template_file}, 
+        window.hWin.HAPI4.SystemMgr.reportAction({action:'export', check:1 ,template:template_file}, 
             function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/ReportController.php";
-                    let squery = 'db='+window.hWin.HAPI4.database+'&mode=export&template='+template_file;
+                    let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/index.php";
+                    let squery = 'db='+window.hWin.HAPI4.database+'&action=export&template='+template_file;
                     window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -370,8 +374,8 @@ $.widget( "heurist.reportViewer", {
         params.url_schedule = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
                                     + q + "&db="+window.hWin.HAPI4.database;
 
-        params.url = window.hWin.HAPI4.baseURL + "viewers/smarty/?"+ //showReps.php
-            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
+        params.url = window.hWin.HAPI4.baseURL + "?"+ 
+            squery.replace('"','%22') + '&template='+encodeURIComponent(template_file);
         
         
         window.hWin.HEURIST4.ui.showPublishDialog( params );
@@ -434,12 +438,12 @@ $.widget( "heurist.reportViewer", {
         this._facet_value = facet_value;
         
     },
-    
+
     //
     //
     //
     executeTemplate: function(template_file){
-    
+        
         if(!this.element.is(':visible')){
               return;
         }
@@ -448,8 +452,6 @@ $.widget( "heurist.reportViewer", {
             window.hWin.HEURIST4.msg.showMsgFlash('Previous report is not completed yet');
             return;   
         }
-        
-        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
         
         if(window.hWin.HEURIST4.util.isnull(template_file)){
             template_file = this._$('#selTemplates').val();    
@@ -466,76 +468,64 @@ $.widget( "heurist.reportViewer", {
         if(!template_file){
             return;    
         }
+
+        //limit to  records  smarty-output-limit
+        let recset = _currentRecordset.getIds();
+        let rec_count = _currentRecordset.count_total();
+        //rec_count = recset['recIDs'].length;
         
-            //limit to  records  smarty-output-limit
-            let recset;
-            let rec_count = _currentRecordset.count_total()
-            if(rec_count>0){
-                let limit = window.hWin.HAPI4.get_prefs_def('smarty-output-limit',50);
-                if(limit>2000) limit = 2000;
-                //rec_count = Math.min(limit, rec_count)
-                recset = {recIDs:_currentRecordset.getIds().slice(0, limit-1), recordCount:limit , resultCount:limit};
-            }else{
-                recset = {recIDs:_currentRecordset.getIds()};
-            }
-            rec_count = recset['recIDs'].length;
+        let limit = window.hWin.HAPI4.get_prefs_def('smarty-output-limit',50);
+        if(limit>2000) limit = 2000;
+        
+        if(limit<recset.length){
+            recset = {recIDs:_currentRecordset.getIds().slice(0, limit-1), recordCount:rec_count};
+        }else{
+            recset = {recIDs:_currentRecordset.getIds()};    
+        }
+        rec_count = recset.recIDs.length;
 
         let request = {db:window.hWin.HAPI4.database, 
+                       publish: 0, 
+                       action: 'execute', 
                        template:template_file, 
-                       recordset:JSON.stringify(recset)}
-
-
+                       recordset:'1'}; //JSON.stringify(recset)};
+                       
         if(this._facet_value){
             request['facet_val'] = this._facet_value;
         }
+        if(rec_count>200){
+            request['session'] = window.hWin.HEURIST4.msg.showProgress();
+        }
 
-            if(rec_count>200){
-                request['session'] = window.hWin.HEURIST4.msg.showProgress();
-            }
+        let that = this;
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
+        
+        let inputs = '';
+        for (let [key, value] of Object.entries(request)) {
+          inputs += `<input type="hidden" name="${key}" value="${value}"/>`;
+        }       
+        
+        if(this._tempForm){
+            this._tempForm.empty();
+        }else{
+            const url = window.hWin.HAPI4.baseURL+'hserv/controller/index.php';
+            this._tempForm = $(`<form target="rep_container_frame" action="${url}" method="post"></form>`)
+                .appendTo(this.element);
                 
-
-            window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
-
-            let that = this;
-            
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
-                
+            this._on(this._$('#rep_container_frame'),{load:()=>{
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 window.hWin.HEURIST4.msg.hideProgress();
-                
-                if(response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    if(response.message){ //error in php code
-                        that._updateReps( response.message );    
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);                       
-                    }
-                    
-                }else{
-                    that._updateReps( response );
-                }
-            }, 'auto');
-                
-    },
-    
-    _updateReps: function(context) {
-
-        if(context == 'NAN' || context == 'INF' || context == 'NULL'){
-            context = 'No value';
+            }});
         }
         
-        /*
-        if(_is_snippet_editor){
-            document.getElementById('snippet_output').innerHTML = context;
-        }*/
-            
-            let txt = (context && context.message)?context.message:context
-            
-            let iframe = document.getElementById("rep_container_frame");
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write( txt );
-            iframe.contentWindow.document.close();
+        this._tempForm.html(inputs);
         
-    },
-
+        this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
+        
+        this._tempForm.submit();
+        
+        
+       
+    }
 
 });

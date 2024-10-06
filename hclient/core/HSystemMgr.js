@@ -312,8 +312,11 @@ class HSystemMgr {
   }
 
   reportAction(request, callback) {
-      let controller = 'ReportController';
-      window.hWin.HAPI4.callserver(controller, request, callback);
+      //let controller = 'ReportController';
+      if(!request.template){
+          request.template = '---';
+      }
+      window.hWin.HAPI4.callserver('index', request, callback, 'auto');
   }
   
 

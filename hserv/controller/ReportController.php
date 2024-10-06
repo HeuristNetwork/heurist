@@ -1,22 +1,10 @@
 <?php
-namespace hserv\controllers;
+namespace hserv\controller;
 
 use hserv\System;
 use hserv\report\ReportTemplateMgr;
+use hserv\report\ReportExecute;
 use hserv\utilities\USanitize;
-
-require_once dirname(__FILE__).'/../../autoload.php';
-
-if(!isset($system)){
-    $system = new System();
-    if(!$system->init(@$_REQUEST['db'])){
-        exit;
-    }
-    $mode = $_REQUEST['mode'];
-    $controller = new ReportController($system);
-    $controller->handleRequest($mode);
-}
-
 
 class ReportController
 {
@@ -27,18 +15,23 @@ class ReportController
 
     public function __construct($system, $params=null)
     {
+        $this->req_params = is_array($params) ?$params :USanitize::sanitizeInputArray();    
+
+        if(!isset($system)){
+            $system = new System();
+            if(!$system->init(@$this->req_params['db'])){
+                dataOutput($system->getError());
+                return null;
+            }
+        }        
+
         $this->system = $system;
         $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;
-        
-        if(!$params){
-            //take from get or post
-            $this->req_params = USanitize::sanitizeInputArray();    
-        }
         
         $this->repAction = new ReportTemplateMgr($this->system, $this->dir);
     }
 
-    public function handleRequest($mode)
+    public function handleRequest($action)
     {
         $result = null;
         $mimeType = null;
@@ -49,7 +42,17 @@ class ReportController
             $template_file = $this->getTemplateFileName();
             $template_body = $this->getTemplateBody();
             
-            switch ($mode) {
+            if($template_file && $action==null){
+                $action = 'execute';
+            }
+            
+            switch ($action) {
+                case 'execute':
+                               
+                    $repExec = new ReportExecute($this->system, $this->req_params);
+                    $repExec->execute();
+                    break;
+                    
                 case 'list':
                     $result = $this->repAction->getList();;
                     break;
@@ -82,7 +85,7 @@ class ReportController
                     break;
 
                 default:
-                    throw new \Exception('Invalid "mode" parameter');
+                    throw new \Exception('Invalid "action" parameter');
             }
             
         } catch (\Exception $e) {
@@ -129,9 +132,11 @@ class ReportController
 
     private function getTemplateFileName()
     {
-        return (array_key_exists('template', $this->req_params) ?
-            USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false) :
-            null);
+        if(array_key_exists('template', $this->req_params) && $this->req_params['template']!='---'){
+            return USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false);
+        }
+        
+        return null;
     }
 
     private function getTemplateBody()

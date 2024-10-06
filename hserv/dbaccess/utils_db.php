@@ -1749,7 +1749,9 @@ $mysqli->kill($thread_id);
             $res = 'terminate';
         }else{
             //get
-            if($is_exist) {$res = file_get_contents($session_file);}
+            if($is_exist) {
+                $res = file_get_contents($session_file);
+            }
 
             if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);

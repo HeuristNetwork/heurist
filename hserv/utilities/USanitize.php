@@ -154,7 +154,7 @@ class USanitize {
     }
 
     //
-    // We can also use HTMLPurifier (see example in showReps.php)
+    // We can also use HTMLPurifier (see example in ReportExecute.php)
     //
     public static function sanitizeString($message, $allowed_tags=null, $allowed_entities=true){
         if($message==null){

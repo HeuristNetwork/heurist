@@ -2270,7 +2270,7 @@ window.hWin.HEURIST4.ui = {
     //
     createTemplateSelector: function($select, topOptions, defValue, options){
         
-        window.hWin.HAPI4.SystemMgr.reportAction({mode:'list'}, 
+        window.hWin.HAPI4.SystemMgr.reportAction({action:'list'}, 
             function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
 

@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 use hserv\utilities\USystem;
+use hserv\controller\FrontController;
 
 require_once dirname(__FILE__).'/autoload.php';
 
@@ -126,7 +127,10 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }elseif(array_key_exists('template',$_REQUEST))
     {
         //execute smarty template
-        $script_name = 'viewers/smarty/showReps.php';
+        $controller = new FrontController();
+        $controller->run();
+        exit;
+        
     }else {
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';
@@ -135,7 +139,6 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
 
@@ -182,6 +185,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         return;
     }
 }
+
 
 define('IS_INDEX_PAGE',true);
 if(!defined('PDIR')) {define('PDIR','');}
