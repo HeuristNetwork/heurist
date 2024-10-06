@@ -1102,7 +1102,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     let that = {
 
         getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
+        isA: function (strClass) {return (strClass === _className || strClass === 'hRecordSet');},
         getVersion: function () {return _version;},
         entityName:'',
         calcfields:{}, //set of callback functions for calculation fields
