@@ -1484,7 +1484,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         
-        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
         
         let session_id = options.session;
         if(!(session_id>0)) session_id = window.hWin.HEURIST4.util.random();
@@ -1527,7 +1527,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
-                if(response=='' || response?.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+//response=='' || 
+                if(response?.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     window.hWin.HEURIST4.msg.hideProgress();
                 }else if(response){
                     //it may return terminate,done,
@@ -1622,7 +1623,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     hideProgress: function(){
-        
         $('body').css('cursor','auto');
 
         if(window.hWin.HEURIST4.msg._progressInterval!=null){

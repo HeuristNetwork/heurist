@@ -164,6 +164,7 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
     },
     
     
+    //   @todo use msg.showProgress
     //
     // Requests reportProgress every t_interval ms 
     // is_autohide 
@@ -180,7 +181,7 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         let that = this;
        
         let progressCounter = 0;        
-        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
 
         this._$('#div_fieldset').hide();
         this._$('.ent_wrapper').hide();
