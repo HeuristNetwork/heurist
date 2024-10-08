@@ -106,7 +106,7 @@ function initSmarty($smarty_templates_dir=null){
                     'ksort', 'nl2br', 
                     'preg_match_all','print_r','printf', 'range',
                     'setlocale', 'sort', 'strstr', 'substr', 'strpos', 'strlen', 
-                    'time','truncate',
+                    'time',
                     'utf8_encode');
                     
         foreach($php_functions as $fname){
