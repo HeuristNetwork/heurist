@@ -16,7 +16,7 @@
 *
 * parameters
 * 'id' - key field value in usrReportSchedule
-* 'mode' - if publish>0: js or html (default)
+* 'mode' - if publish>0: js or html (default) - output format
 * 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
 *                 3 - redirect the existing report (use already publshed output), if it does not exist publish=1
 *
@@ -39,8 +39,17 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-use hserv\utilities\USanitize;
-use hserv\report\ReportExecute;
+use hserv\controller\FrontController;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
+$_REQUEST['controller'] = 'ReportController';
+$_REQUEST['action'] = 'update';
+$frontController = new FrontController();
+$frontController->run();
+
+exit;
+
 
 if(isset($_REQUEST) && !empty($_REQUEST)){ //if set it is included in dailyCronJobs
 

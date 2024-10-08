@@ -122,10 +122,10 @@ function ReportScheduleEditor() {
     */
     function _updateTemplatesList() {
 
-            let sel = document.getElementById('rps_Template');
-            const keepSelValue = sel.value;
+            let sel = $('#rps_Template');
+            const keepSelValue = sel.val();
 
-            $(sel).empty();
+            sel.empty();
             
             window.hWin.HEURIST4.ui.createTemplateSelector(sel, null, keepSelValue, null);
             

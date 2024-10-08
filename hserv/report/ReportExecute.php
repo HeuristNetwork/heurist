@@ -144,7 +144,11 @@ class ReportExecute
         $this->smarty_session_id = isset($params['session']) ? $params['session'] : null;
 
         
-        $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
+        //$this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
+        $allowed_exts = array('html','js','txt','text','csv','xml','json','css');
+        $idx = array_search($this->outputmode, $allowed_exts);
+        $this->outputmode = ($idx>=0)?$allowed_exts[intval($idx)]:'html';
+        
         if ($this->outputmode === 'text') {
             $this->outputmode = 'txt';
         }
@@ -292,6 +296,9 @@ class ReportExecute
         
         if(!isset($params["output"]) && $this->publishmode != 2){
             $this->outputfile = null;
+            if($this->publishmode==1 ){
+                $this->publishmode = 3;   
+            }
         }else{
             $this->outputfile = isset($params["output"]) ? $params["output"] : ($template_file?$template_file:'heurist_output');    
             $path_parts = pathinfo($this->outputfile);
@@ -1562,7 +1569,11 @@ Javascript wrap:<br>
                 //if this is CMS content
                 // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
                 // 2. Convert relative paths to absolute
-                $content = json_decode($params['var'], true);
+                if(is_string(@$params['var'])){
+                    $content = json_decode($params['var'], true);
+                }else{
+                    $content = @$params['var'];
+                }
                 if(is_array($content)){
                     $content = $this->prepareCMScontent($content);
                 }else{
@@ -1587,7 +1598,7 @@ Javascript wrap:<br>
             if(!@$content['type']=='text'){
                 $convert_links = false;
                 foreach($content as $grp){
-                    $res = cms_content_prepare($grp);
+                    $res = $this->prepareCMScontent($grp);
                     if($res){
                         $cnt = $cnt.'<br>'.$res;
                     }
@@ -1597,7 +1608,7 @@ Javascript wrap:<br>
             }elseif(@$content['type']=='group' && is_array(@$content['children'])){
                 $convert_links = false;
                 foreach($content['children'] as $grp){
-                    $res = cms_content_prepare($grp);
+                    $res = $this->prepareCMScontent($grp);
                     if($res){
                         $cnt = $cnt.'<br>'.$res;
                     }

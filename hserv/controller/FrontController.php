@@ -4,6 +4,7 @@ namespace hserv\controller;
 use hserv\controller\ReportController;
 use hserv\System;
 use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
 class FrontController
 {
@@ -22,6 +23,8 @@ class FrontController
         }
 
         $this->system = $system;
+        
+        ConceptCode::setSystem($system);
     }
 
 
@@ -31,7 +34,9 @@ class FrontController
             return;
         }
         
-        if($this->req_params['template'] || $this->req_params['template_body']){
+        if(@$this->req_params['controller']=='ReportController' 
+            || @$this->req_params['template'] 
+            || @$this->req_params['template_body']){
         
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);

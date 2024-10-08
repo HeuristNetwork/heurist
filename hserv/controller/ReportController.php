@@ -52,6 +52,11 @@ class ReportController
                     $repExec = new ReportExecute($this->system, $this->req_params);
                     $repExec->execute();
                     break;
+
+                case 'update':
+                
+                    $result = $this->updateTemplate();
+                    break;
                     
                 case 'list':
                     $result = $this->repAction->getList();;
@@ -132,7 +137,7 @@ class ReportController
 
     private function getTemplateFileName()
     {
-        if(array_key_exists('template', $this->req_params) && $this->req_params['template']!='---'){
+        if(array_key_exists('template', $this->req_params)){
             return USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false);
         }
         
@@ -145,4 +150,34 @@ class ReportController
             $this->req_params['template_body'] :
             null);
     }
+    
+    
+    private function updateTemplate(){
+ 
+        $rps_ID = intval($this->req_params['id']); //rps_ID in usrReportSchedule
+        
+        //$row = mysql__select_row_assoc($this->system->get_mysqli(), 'SELECT * FROM usrReportSchedule WHERE rps_ID='.$rps_ID);
+        
+        $query = 'SELECT * FROM usrReportSchedule';
+        
+        if($rps_ID>0){
+            $query .= ' WHERE rps_ID='.$rps_ID;
+        }else{
+            $this->req_params['publish'] = 4; //void - no browser output
+        }
+        
+        $res = $this->system->get_mysqli()->query('select * from usrReportSchedule');
+        if($res){
+            while ($row = $res->fetch_assoc()) {
+                $result = $this->repAction->updateTemplate($this->req_params, $row);
+            }
+            $res->close();
+        }
+        
+        
+        
+        
+    }
+    
+    
 }

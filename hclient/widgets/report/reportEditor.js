@@ -270,7 +270,6 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
         request['replevel'] = replevel;
         
-        let that = this;
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('.testForm'));
         
         let inputs = '';
@@ -303,7 +302,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     _loadTemplate: function(){    
         
         if(this.options.is_snippet_editor){
-            that._initEditor(this.options.template_body);
+            this._initEditor(this.options.template_body);
         }else
         // null means new template
         if(this._currentTemplate!=this.options.template){
@@ -1090,7 +1089,7 @@ this_id       : "term"
     
     _showInsertPopup2: function( _nodep, elt ){
         
-        var that = this;
+        let that = this;
 
         // show hide         
         let no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
@@ -1347,7 +1346,7 @@ this_id       : "term"
         //load list of records for testing 
         if(this.options.rty_ID>0){
             
-                var server_request = {
+                const server_request = {
                     q: 't:'+this.options.rty_ID,
                     restapi: 1,
                     columns: ['rec_ID', 'rec_Title'],

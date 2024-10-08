@@ -41,6 +41,7 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     header( 'Location: '.$script_name.'?'.$query_string );
     
 }else{
+    $_REQUEST['controller'] = 'ReportController';
     $frontController = new FrontController();
     $frontController->run();
 }

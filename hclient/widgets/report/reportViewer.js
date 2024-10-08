@@ -258,7 +258,7 @@ $.widget( "heurist.reportViewer", {
         
             file_upload.fileupload({
                     url: baseurl,
-                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {template:'---'}, {name:'action', value:'import'}],
+                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {name:'controller', value:'ReportController'}, {name:'action', value:'import'}],
                     dataType: 'json',
                     done: function (e, response) {
 
@@ -277,7 +277,7 @@ $.widget( "heurist.reportViewer", {
                             
                             if(data?.details_not_found){
 
-                                var list_of_notfound = data.details_not_found.join(', ');
+                                const list_of_notfound = data.details_not_found.join(', ');
                                 
                                 window.hWin.HEURIST4.msg.showMsgDlg(
 'Unable to convert IDs for following concept codes: '+list_of_notfound
@@ -493,11 +493,10 @@ $.widget( "heurist.reportViewer", {
         if(this._facet_value){
             request['facet_val'] = this._facet_value;
         }
-        if(rec_count>200){
+        if(rec_count>500){
             request['session'] = window.hWin.HEURIST4.msg.showProgress();
         }
 
-        let that = this;
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
         
         let inputs = '';
