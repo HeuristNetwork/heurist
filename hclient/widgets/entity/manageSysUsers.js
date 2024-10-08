@@ -148,7 +148,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
                         if (window.hWin.HAPI4.is_admin()){
                             s += `<div style="flex:0 0 4.5em;${center_cols}">Edit</div>`;
-                            s += `<div style="flex:0 0 6em;${center_cols}">Delete</div>`;
+                            s += `<div style="flex:0 0 6em;${center_cols}">${!that.options.ugl_GroupID ? 'Delete' : 'Remove'}</div>`;
                         }
 
                         s += `<div style="flex:0 1 8em;${center_cols}">Membership</div>`;
@@ -401,18 +401,21 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         }else
         if( window.hWin.HAPI4.is_admin() ) {//current user is admin of database managers
-            
+
+            let icon = !this.options.ugl_GroupID ? 'circle-close' : 'arrowrefresh-1-n';
+            let action = !this.options.ugl_GroupID ? 'delete' : 'remove';
+
             html += '<div title="Click to edit user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
                   + 'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
                     + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" '
+                + `<div title="Click to ${action} user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="${action}" `
                   + 'style="height:16px;margin: 0px 25px;flex:0 0 25px;">'
-                    + '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                    + `<span class="ui-button-icon-primary ui-icon ui-icon-${icon}"></span><span class="ui-button-text"></span>`
                 + '</div>';
-           
+
         }
-        
+
         // add edit group memberships
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
         
@@ -458,7 +461,31 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         return html;
         
     },
-    
+
+    _onActionListener: function(event, action){
+
+        let is_resolved = this._super(event, action);
+
+        if(is_resolved){
+            return true;
+        }else if(!window.hWin.HEURIST4.util.isObject(action)){
+            return false;
+        }
+
+        let usr_ID = action.recID;
+        action = action.action;
+
+        if(action == 'remove' && this.options.ugl_GroupID > 0){
+
+            let $select = this.recordList.find(`.recordDiv[recID="${usr_ID}"] select.user-role`);
+            $select.val('remove').trigger('change');
+
+            is_resolved = true;
+        }
+
+        return is_resolved;
+    },
+
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
@@ -733,6 +760,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 }
             }
         );
-    }  
+    }
     
 });
