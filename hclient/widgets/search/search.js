@@ -57,6 +57,8 @@ $.widget( "heurist.search", {
 
     _is_publication:false, //this is CMS publication - take css from parent
 
+    _use_global_query: false, // when on clicking 'filter', apply the global query instead
+
     // the constructor
     _create: function() {
 
@@ -270,30 +272,32 @@ $.widget( "heurist.search", {
         this.input_search.data('x', this.input_search.outerWidth());
         this.input_search.data('y', this.input_search.outerHeight());
 
-        /*AAAA*/
-        this.input_search.mouseup(function () {
-            let $this = $(this);
-            if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
-               
-                if($this.outerHeight()<25){
-                   
-                    $this.height(23);
-                }else{
-                    let pt;
-                    if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
-                        $this.height(that.element.height()-menu_h-10);
-                        pt = '2px';
+        this._on(this.input_search, {
+            mouseup: function(){
+
+                if (this.input_search.outerWidth() != this.input_search.data('x') || this.input_search.outerHeight() != this.input_search.data('y')) {
+
+                    if(this.input_search.outerHeight()<25){                   
+                        this.input_search.height(23);
                     }else{
-                        //parseFloat(that.div_search.css('padding-top'))
-                        pt =  (that.element.height() - $this.height())/2 - menu_h;
+
+                        let pt;
+                        if(this.input_search.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
+                            this.input_search.height(that.element.height()-menu_h-10);
+                            pt = '2px';
+                        }else{
+                            //parseFloat(that.div_search.css('padding-top'))
+                            pt =  (that.element.height() - $this.height())/2 - menu_h;
+                        }
                     }
-                   
+
+                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE);
                 }
+                // set new height/width
+                this.input_search.data('x', this.input_search.outerWidth());
+                this.input_search.data('y', this.input_search.outerHeight());
             }
-            // set new height/width
-            $this.data('x', $this.outerWidth());
-            $this.data('y', $this.outerHeight());
-        }) // this.input_search.mouseup
+        }); // this.input_search.mouseup
 
         //
         // quick filter builder buttons
@@ -412,9 +416,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' heurist-bookmark-search')
         .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
-       
 
-       
 
         let dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');
         let smenu = "";
@@ -571,9 +573,12 @@ $.widget( "heurist.search", {
 
         // bind click events
         this._on( this.btn_search_as_user, {
-            click:  function(){
-               
-                that._doSearch(true);}
+            click: function(){
+                if(that._use_global_query){
+                    that.input_search.val(window.hWin.HEURIST4.current_query_request.q);
+                }
+                that._doSearch(true);
+            }
         });
         /* AAAA */        
         this._on( this.input_search, {
@@ -669,12 +674,21 @@ $.widget( "heurist.search", {
     //
     // help text inside input field
     //
-    _showhide_input_prompt:function() {
+    _showhide_input_prompt:function(event) {
+
         if(this.input_search.val()==''){
             this.input_search_prompt.show();    
             this.input_search_prompt2.css({'visibility':'hidden'});//hide();    
         }else{
             this.input_search_prompt.hide();     
+        }
+
+        if(this._use_global_query && event){
+            // revert only if the query has been changed
+            this._use_global_query = false;
+
+            this.btn_search_as_user.attr('title', window.hWin.HR('filter_start_hint'));
+            this.btn_search_as_user.button('option', 'label', window.hWin.HR(this.options.search_button_label));
         }
     },
 
@@ -914,6 +928,19 @@ $.widget( "heurist.search", {
                 if(!that._isSameRealm(data)) return;
 
                 window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
+
+                if(!this._is_publication && data.showing_subset && !window.hWin.HEURIST4.util.isempty(data.query)){
+                    this.input_search.val(data.query).change();
+
+                    if(window.hWin.HEURIST4?.current_query_request?.q){
+                        that._use_global_query = true;
+
+                        // Change filter button labelling to reflect temporary functionality
+                        let query = window.hWin.HEURIST4.current_query_request.q.replace('"', '&quot;');
+                        this.btn_search_as_user.attr('title', `Re-apply to the previous query:\n${query}`);
+                        this.btn_search_as_user.button('option', 'label', 'Reset<br>filter').button('option', 'icon', '');
+                    }
+                }
 
                 this._setFocus();
                 //show if there is resulst

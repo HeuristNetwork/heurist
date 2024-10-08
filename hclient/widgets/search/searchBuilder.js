@@ -651,8 +651,8 @@ $.widget( "heurist.searchBuilder", {
 
                 this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
 
-                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search. &#010; '
-                    + 'ANY will search across the default language and all translated terms or texts. &#010; '
+                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search.\n'
+                    + 'ANY will search across the default language and all translated terms or texts.\n'
                     + 'Default is the default language used in construction of the database.');
             }
             
