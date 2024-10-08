@@ -680,22 +680,8 @@ foreach ($this->imp_recordtypes as $rtyID){
         //converts 0000 origin db to 9999            TT1
         $def_rectype[$idx_ccode] = DbsImport::convertUnregisteredCode($def_rectype[$idx_ccode],$rtyID);
 
-        //fill original ids if missed
-        if(!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id]){
-            if($def_rectype[$idx_ccode]){
-                $codes = explode("-",$def_rectype[$idx_ccode]);
-                if(is_array($codes) && count($codes)==2){
-                    $def_rectype[$idx_origin_dbid] = $codes[0];
-                    $def_rectype[$idx_origin_id] = $codes[1];
-                }
-            }else{
-                $def_rectype[$idx_origin_dbid] = $this->source_db_reg_id;
-                $def_rectype[$idx_origin_id] = $rtyID;
-            }
-        }
-        if(!$def_rectype[$idx_origin_name]){
-            $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
-        }
+        // Fill in missing original values
+        DbsImport::_setConceptValues($def_rectype, [$this->source_db_reg_id, $rtyID, $def_rectype[$idx_name]], [$idx_ccode, $idx_origin_dbid, $idx_origin_id, $idx_origin_name]);
 
         //from saveStructureLib.php
         $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
@@ -835,24 +821,8 @@ foreach ($this->imp_fieldtypes as $ftId){
 
     $def_field[$idx_ccode] = DbsImport::convertUnregisteredCode($def_field[$idx_ccode],$ftId);
 
-    //fill original ids if missed
-    if(!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id]){
-        if($def_field[$idx_ccode]){
-            $codes = explode("-",$def_field[$idx_ccode]);
-            if(is_array($codes) && count($codes)==2){
-                $def_field[$idx_origin_dbid] = $codes[0];
-                $def_field[$idx_origin_id] = $codes[1];
-            }
-        }else{
-                $def_field[$idx_origin_dbid] = $this->source_db_reg_id;
-                $def_field[$idx_origin_id] = $ftId;
-        }
-    }
-
-
-    if(!$def_field[$idx_origin_name]){
-        $def_field[$idx_origin_name] = $def_field[$idx_name];
-    }
+    // Fill in missing original values
+    DbsImport::_setConceptValues($def_field, [$this->source_db_reg_id, $ftId, $def_field[$idx_name]], [$idx_ccode, $idx_origin_dbid, $idx_origin_id, $idx_origin_name]);
 
     array_shift($def_field);//remove dty_ID
     $res = createDetailTypes($columnNames, array("common"=>$def_field));
@@ -1707,15 +1677,8 @@ $mysqli->commit();
             $term_import = $this->sourceTerms->getTerm($term_id, $domain);
             //$term_import = $terms['termsByDomainLookup'][$domain][$term_id];//6256 returns wrong!!
 
-            if(!$term_import[$idx_ccode]){
-                if($term_import[$idx_origin_dbid]>0 && $term_import[$idx_origin_id]>0){
-
-                }elseif($term_id<999999){
-                    $term_import[$idx_origin_dbid] = $this->source_db_reg_id;
-                    $term_import[$idx_origin_id] = $term_id;
-                }
-                $term_import[$idx_ccode] = $term_import[$idx_origin_dbid].'-'.$term_import[$idx_origin_id];
-            }
+            // Fill in missing original values
+            DbsImport::_setConceptValues($term_import, [$this->source_db_reg_id, $term_id, $term_import[$idx_label]], [$idx_ccode, $idx_origin_dbid, $idx_origin_id, $idx_origin_name]);
 
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
@@ -1786,23 +1749,6 @@ $mysqli->commit();
                                                 $same_level_labels['label']);
 
                     $term_import[$idx_vocab_group_id] = 0;
-                }
-
-                // fill original ids (concept codes) if missed
-                if(!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id]){
-                    if($term_import[$idx_ccode]){
-                        $codes = explode("-",$term_import[$idx_ccode]);
-                        if(is_array($codes) && count($codes)==2){
-                            $term_import[$idx_origin_dbid] = $codes[0];
-                            $term_import[$idx_origin_id] = $codes[1];
-                        }
-                    }else{
-                        $term_import[$idx_origin_dbid] = $this->source_db_reg_id;
-                        $term_import[$idx_origin_id] = $term_id;
-                    }
-                }
-                if(!@$term_import[$idx_origin_name]){
-                    $term_import[$idx_origin_name] = $term_import[$idx_label];
                 }
 
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli());//see saveStructureLib
@@ -2504,6 +2450,55 @@ $mysqli->commit();
         }
 
         return true;
+    }
+
+    /**
+     * Assigns concept values [concept ID, original DB ID, original ID, and original Name] to current definition
+     *  Set these here to avoid situations were the definitions are missing these values, causing potential issues later on
+     *
+     * @param array $definition - row representing the concept being imported
+     * @param array $concept_values - [original database ID, original ID, original name]
+     * @param array $indexes - array of indexes to access values from $definition [conceptCode, originDBID, originID, originName]
+     * @return void
+     */
+    private function _setConceptValues($definition, $concept_values, $indexes){
+
+        $source_DBID = @$concept_values[0];
+        $source_ID = @$concept_values[1];
+        $source_Name = @$concept_values[2];
+
+        if(!ctype_digit($source_DBID) || intval($source_DBID) < 0
+        || !ctype_digit($source_ID) || intval($source_ID) <= 0){
+            return;
+        }
+
+        $missing_conceptID = empty($definition[$indexes[0]]);
+        // Use the existing concept codes for source IDs
+        if(!$missing_conceptID){
+            $parts = explode('-', $definition[$indexes[0]]);
+            if(count($parts) == 2 && ctype_digit($parts[0]) && ctype_digit($parts[1])){
+                $source_DBID = intval($parts[0]);
+                $source_ID = intval($parts[1]);
+            }
+        }
+
+        // Check if either original ID is missing
+        $update_conceptID = false;
+        if(empty($definition[$indexes[1]]) || empty($definition[$indexes[2]])){
+            $definition[$indexes[1]] = $source_DBID;
+            $definition[$indexes[2]] = $source_ID;
+            $update_conceptID = true;
+        }
+
+        // Update concept code, if missing or other original IDs were updated
+        if($missing_conceptID || $update_conceptID){
+            $definition[$indexes[0]] = "{$source_DBID}-{$source_ID}";
+        }
+
+        // Update original name
+        if(empty($definition[$indexes[3]]) && !empty($source_Name)){
+            $definition[$indexes[3]] = $source_Name;
+        }
     }
 }
 ?>

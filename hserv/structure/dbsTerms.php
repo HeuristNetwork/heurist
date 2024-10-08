@@ -462,8 +462,7 @@ class DbsTerms
 
         if(is_array($lvl_src)){
             foreach($lvl_src as $trmId=>$children){
-                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
-                $lvl_values[] = $name1;
+                $lvl_values[] = trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
             }
         }
 
@@ -472,11 +471,9 @@ class DbsTerms
 
         if(is_array($lvl_src)){
             foreach($lvl_src as $trmId=>$children){
-                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
-                $lvl_values[] = $name1;
+                $lvl_values[] = trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
             }
         }
-
 
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
     }
