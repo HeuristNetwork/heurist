@@ -922,7 +922,40 @@ EXP;
 
             //$styles = $purifier->context->get('StyleBlocks');
         }
+  
+/*        
+        $script2 = <<<EXP
+        <script>
+console.log('script');        
+            (function() {
+            console.log('call');
+            let imgs = document.getElementsByTagName("img");
+            for (let i = 0; i < imgs.length; i++) {
+console.log(imgs[i].src);            
+                if(imgs[i].src.indexOf('./?db=')==0){
+                    let newSrc = imgs[i].src.replace('./?db=', '<?php echo HEURIST_BASE_URL."?db="; ?>');
+                    imgs[i].src = newSrc;
+                    console.log(imgs[i].src);
+                }
+            }
+            })();
+        </script>
+EXP;
 
+        $pos = strpos($tpl_source, '</body>');
+        if(!$pos){
+            $pos = strpos($tpl_source, '</html>');
+        }
+        if($pos>0){
+            $tpl_source = substr($tpl_source,0,$pos-1).$script2.substr($tpl_source,$pos);
+        }else{
+            $tpl_source = $tpl_source.$script2;
+        }
+*/       
+
+        $tpl_source = str_replace(' src="./?db='.$system->dbname().'&',
+            ' src="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&',$tpl_source);
+ 
     }else{
         //other than html or js output - it removes html and body tags
         $new_source = removeHeadAndBodyTags($tpl_source);
