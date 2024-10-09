@@ -51,7 +51,7 @@ class Heurist_Security_Policy extends Security {
                     'utf8_encode');
 
 
-  public $allow_super_globals = false; //default true  
+  public $allow_super_globals = true; //default true  
 
   public $allowed_tags = false;
   
