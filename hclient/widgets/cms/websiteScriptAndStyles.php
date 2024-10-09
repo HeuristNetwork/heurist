@@ -759,8 +759,15 @@ function assignPageTitle(pageid){
 
     // if page title is visible - increase height of header
     if($('#main-header').length>0 && $('#main-content-container').length>0){
-        $('#main-header').height(is_show_pagetitle?180:144);
-        $('#main-content-container').css({top:is_show_pagetitle?190:152});
+        
+        const h  = $('#main-header').height();
+        if(h==144 || h==180){ //default values
+          $('#main-header').height(is_show_pagetitle?180:144);
+          $('#main-content-container').css({top:is_show_pagetitle?190:152});
+        }
+       
+        $('#main-menu').css('bottom',is_show_pagetitle?40:0);
+
     }
 }
 
