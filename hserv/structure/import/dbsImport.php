@@ -643,10 +643,9 @@ $idx_origin_id   = $def_rts['commonNamesToIndex']['rty_IDInOriginatingDB'];
 $idx_origin_name  = $def_rts['commonNamesToIndex']['rty_NameInOriginatingDB'];
 $idx_ccode       = $def_rts['commonNamesToIndex']['rty_ConceptID'];
 $idx_titlemask   = $def_rts['commonNamesToIndex']['rty_TitleMask'];
-$idx_titlemask_canonical = $def_rts['commonNamesToIndex']['rty_CanonicalTitleMask'];
+$idx_titlemask_canonical = $def_rts['commonNamesToIndex']['rty_CanonicalTitleMask']; //not used
 
 $cfn_tobeimported = array();
-
 
 foreach ($this->imp_recordtypes as $rtyID){
 
@@ -674,7 +673,7 @@ foreach ($this->imp_recordtypes as $rtyID){
         //disambiguate rectype name
         $def_rectype[$idx_name] = $this->doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
 
-        //assign canonical to title mask (since in DB we store only rty_TitleMask)
+        //assign title mask (in DB we store only rty_TitleMask)
         $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
         //converts 0000 origin db to 9999            TT1
@@ -955,27 +954,31 @@ foreach ($this->imp_recordtypes as $rtyID){
 
 // ------------------------------------------------------------------------------------------------
 
-// VII. Update titlemasks with new ids
+// VII. Update titlemasks with new ids - ONLY FOR NEW RECORD TYPES
+//          title mask for existing record types remains unchanged
 
 //$mysqli->commit();
 
 TitleMask::set_fields_correspondence($this->fields_correspondence);
 
 foreach ($this->imp_recordtypes as $rtyID){
-    if(@$this->rectypes_correspondence[$rtyID]){
-
-        $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
-//echo $mask;
-        // note we use special global array $this->fields_correspondence - for proper conversion of remote id to concept code
-        $res = updateTitleMask( $this->rectypes_correspondence[$rtyID], $mask);//see saveStructureLib
-        if(!is_numeric($res)){
-            //$this->error_exit2($res);
-            $mysqli = $this->system->get_mysqli();
-            $mysqli->rollback();
-            $mysqli->close();
-            return true;
-        }
+    $target_ID = @$this->rectypes_correspondence[$rtyID];
+    if($target_ID==null || !in_array($target_ID, $this->rectypes_added) ){
+        continue;
     }
+
+    $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
+//echo $mask;
+    // note we use special global array $this->fields_correspondence - for proper conversion of remote id to concept code
+    $res = updateTitleMask( $target_ID, $mask);//see saveStructureLib
+    if(!is_numeric($res)){
+        //$this->error_exit2($res);
+        $mysqli = $this->system->get_mysqli();
+        $mysqli->rollback();
+        $mysqli->close();
+        return true;
+    }
+    
 }
 
 TitleMask::set_fields_correspondence(null);
