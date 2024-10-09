@@ -477,7 +477,13 @@ class DbUtils {
                     $cmd = '"'.$cmd.'"';
                 }
 
+                $port = '';
+                if(HEURIST_DB_PORT){
+                    $port = " -P ".HEURIST_DB_PORT;
+                }
+                
                 $cmd = $cmd
+                ." -h ".HEURIST_DBSERVER_NAME." ".$port
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local
                 ." {$options} ".escapeshellarg($database_name_full)
@@ -516,7 +522,11 @@ class DbUtils {
                 if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']);}
 
                 try{
-                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
+                    $port = '';
+                    if(HEURIST_DB_PORT){
+                        $port = ';port='.HEURIST_DB_PORT;
+                    }
+                    $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.$port.';dbname='.$database_name_full.';charset=utf8mb4';
                     $dump = new \Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
 
                     $dump->start($database_dumpfile);

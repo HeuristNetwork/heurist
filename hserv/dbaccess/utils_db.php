@@ -948,9 +948,15 @@ $mysqli->kill($thread_id);
                 if(strpos(HEURIST_DB_MYSQLPATH,' ')>0){
                     $cmd = '"'.$cmd.'"';
                 }
-
+                
+                $port = '';
+                if(HEURIST_DB_PORT){
+                    $port = " -P ".HEURIST_DB_PORT;
+                }
+                
                 /* remarked temporary to avoid security warnings */
                 $cmd = $cmd         //." --login-path=local "
+                ." -h ".HEURIST_DBSERVER_NAME." ".$port
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
 

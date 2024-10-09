@@ -99,6 +99,7 @@ global $error, $errorScriptExecution;
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
+$db_port = HEURIST_DB_PORT;
 
 $err_msg1 = '<p>Query: ';
 $err_msg2 = '<p>MySQL: ';
@@ -201,7 +202,7 @@ do_action ('script_runs');
 
 if (!$error && !TESTMODE)
 {
-    $mysqli = new mysqli($db_server,$db_username,$db_password);
+    $mysqli = new mysqli($db_server,$db_username,$db_password,null,$db_port);
     if (!$mysqli){
 
         error_echo (
