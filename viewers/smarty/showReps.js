@@ -160,9 +160,9 @@ function ShowReps( is_snippet_editor ) {
                     _last_disabled_message = txt;
 
                     let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
-    '<p>Sorry, most of native php functions are disabled in custom reports. <br>'
-    +'That it is an over-enthusiastic security measure. <br>'
-    +'Please send us a bug report asking for it to be fixed</p>',
+    '<p>Sorry, native php functions in custom reports are disabled by default<br>'
+    +'as a security precaution. </p>'
+    +'<p>Please use the bug report function to ask that this function be enabled. </p>',
                         {'Send Bug Report': function() {
                                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
                                 $dlgm.dialog( 'close' );
