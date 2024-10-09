@@ -94,7 +94,7 @@ function initSmarty($smarty_templates_dir=null){
         $smarty->enableSecurity('Heurist_Security_Policy');
         
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'smarty_modifier_translate');
-
+           
         //allowed php functions
         $php_functions = array( 'constant', 'count', 
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
@@ -105,7 +105,7 @@ function initSmarty($smarty_templates_dir=null){
                     'floatval','json_encode',
                     'ksort', 'nl2br', 
                     'preg_match_all','print_r','printf', 'range',
-                    'setlocale', 'sort', 'strstr', 'substr', 'strpos', 'strlen', 
+                    'setlocale', 'sort', 'strpos', //'strstr', 'substr', 'strlen', 
                     'time',
                     'utf8_encode');
                     

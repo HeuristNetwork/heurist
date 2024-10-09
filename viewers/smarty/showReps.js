@@ -58,6 +58,8 @@ function ShowReps( is_snippet_editor ) {
     
     let top_repcontainer = '36px';
     
+    let _last_disabled_message = null;
+    
     /**
     *  show the list of available reports
     *  #todo - filter based on record types in result set
@@ -150,7 +152,31 @@ function ShowReps( is_snippet_editor ) {
 
             _needSelection = (txt && txt.indexOf("Select records to see template output")>0);
             
+            if(txt.indexOf('Exception on execution: Syntax error in template')==0 
+            && txt.indexOf('not allowed by security setting')>0
+            && window.hWin.HAPI4.actionHandler
+            && _last_disabled_message != txt){
+                
+                    _last_disabled_message = txt;
+
+                    let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+    '<p>Sorry, most of native php functions are disabled in custom reports. <br>'
+    +'That it is an over-enthusiastic security measure. <br>'
+    +'Please send us a bug report asking for it to be fixed</p>',
+                        {'Send Bug Report': function() {
+                                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
+                                $dlgm.dialog( 'close' );
+                            },
+                            'Cancel':function() {
+                                $dlgm.dialog( 'close' );
+                            }
+                        },
+                        'Warning');
+                
+            }
+        
         }
+        
     }
 
 

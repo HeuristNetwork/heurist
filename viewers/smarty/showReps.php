@@ -1475,7 +1475,11 @@ function smarty_tag_wrap($params, &$smarty)
             //if this is CMS content
             // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
             // 2. Convert relative paths to absolute
-            $content = json_decode($params['var'], true);
+            if(is_string(@$params['var'])){
+                $content = json_decode($params['var'], true);
+            }else{
+                $content = @$params['var'];
+            }            
             if(is_array($content)){
                 $content = cms_content_prepare($content);
             }else{
