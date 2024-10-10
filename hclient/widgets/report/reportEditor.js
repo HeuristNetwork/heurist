@@ -54,6 +54,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     
     _tempForm: null,
     
+    _last_disabled_message: null,
+    
     _create: function() {
         this._super();
         if(this.options.is_snippet_editor){
@@ -286,6 +288,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 
             this._on(this._$('#test_container_frame'),{load:()=>{
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                this._showWarningAboutDisabledFunction();
             }});
         }
         
@@ -293,6 +296,18 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
         this._tempForm.find('input[name="template_body"]').val(template_body);
         this._tempForm.submit();
+        
+    },
+    
+    
+    _showWarningAboutDisabledFunction: function(){    
+        
+        let txt = this._$('#test_container_frame')[0].contentDocument.body.innerHTML;
+        
+        if(this._last_disabled_message != txt && 
+            window.hWin.HEURIST4.msg.showWarningAboutDisabledFunction(txt)){
+            this._last_disabled_message = txt;
+        }
         
     },
     

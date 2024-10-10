@@ -47,8 +47,8 @@ class Heurist_Security_Policy extends Security {
                     'time','translate','truncate',
                     'out','wrap','progressCallback',                    
                     'utf8_encode');
-
-  public $allow_super_globals = false; //default true  
+                    
+  public $allow_super_globals = true; //default true  
 
   public $allowed_tags = false;
   
@@ -99,8 +99,8 @@ function smartyInit($smarty_templates_dir=null){
                     'floatval','json_encode',
                     'ksort', 'nl2br', 
                     'preg_match_all','print_r','printf', 'range',
-                    'setlocale', 'sort', 'strstr', 'substr', 'strpos', 'strlen', 
-                    'time','truncate',
+                    'setlocale', 'sort', 'strpos', //'strstr', 'substr',  'strlen', 
+                    'time',
                     'utf8_encode');
                     
         //register php functions

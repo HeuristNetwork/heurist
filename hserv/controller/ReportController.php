@@ -42,6 +42,10 @@ class ReportController
             $template_file = $this->getTemplateFileName();
             $template_body = $this->getTemplateBody();
             
+            if($this->req_params['template_id']>0){
+                $action = 'update'; 
+            }
+            
             if($template_file && $action==null){
                 $action = 'execute';
             }
@@ -49,8 +53,8 @@ class ReportController
             switch ($action) {
                 case 'execute':
                                
-                    $repExec = new ReportExecute($this->system, $this->req_params);
-                    $repExec->execute();
+                    $repExec = new ReportExecute($this->system);
+                    $repExec->execute( $this->req_params );
                     break;
 
                 case 'update':
@@ -152,9 +156,9 @@ class ReportController
     }
     
     
-    private function updateTemplate(){
+    public function updateTemplate(){
  
-        $rps_ID = intval($this->req_params['id']); //rps_ID in usrReportSchedule
+        $rps_ID = intval($this->req_params['template_id']); //rps_ID in usrReportSchedule
         
         //$row = mysql__select_row_assoc($this->system->get_mysqli(), 'SELECT * FROM usrReportSchedule WHERE rps_ID='.$rps_ID);
         
@@ -163,13 +167,35 @@ class ReportController
         if($rps_ID>0){
             $query .= ' WHERE rps_ID='.$rps_ID;
         }else{
+            //update all reports 
             $this->req_params['publish'] = 4; //void - no browser output
         }
+
+        $format = @$this->req_params['mode'];
+        
+        
+        $repExec = new ReportExecute($this->system);
         
         $res = $this->system->get_mysqli()->query('select * from usrReportSchedule');
         if($res){
             while ($row = $res->fetch_assoc()) {
-                $result = $this->repAction->updateTemplate($this->req_params, $row);
+                
+                //find name of generated file
+                
+                
+                
+                //$result = $this->repAction->updateTemplate($this->req_params, $row);
+                $params = array(
+                    'publish'=>$this->req_params['publish'],
+                    'mode'=>$this->req_params['mode']??@$row['rps_URL'],
+                
+                
+                
+                );
+                $repExec->execute($params);
+               
+                
+                
             }
             $res->close();
         }

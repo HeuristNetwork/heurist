@@ -4,7 +4,7 @@ use hserv\entity\DbDefRecTypes;
 use hserv\utilities\USanitize;
 use hserv\utilities\UImage;
 use hserv\structure\ConceptCode;
-use hserv\entity\ReportRecord;
+use hserv\report\ReportRecord;
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

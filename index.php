@@ -117,20 +117,21 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
                 redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
+    
+}elseif ($_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)){
+
+    //execute smarty template
+    $controller = new FrontController();
+    $controller->run();
+    exit;
+    
 }elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
-          array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
+          array_key_exists('icon',$_REQUEST)){
 
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
         $script_name = 'hserv/controller/fileGet.php';
-    }elseif(array_key_exists('template',$_REQUEST))
-    {
-        //execute smarty template
-        $controller = new FrontController();
-        $controller->run();
-        exit;
-        
     }else {
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';

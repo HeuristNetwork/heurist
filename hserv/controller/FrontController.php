@@ -36,7 +36,8 @@ class FrontController
         
         if(@$this->req_params['controller']=='ReportController' 
             || @$this->req_params['template'] 
-            || @$this->req_params['template_body']){
+            || @$this->req_params['template_body']
+            || @$this->req_params['template_id']){
         
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);

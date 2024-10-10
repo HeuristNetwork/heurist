@@ -43,8 +43,8 @@ use hserv\controller\FrontController;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
-$_REQUEST['controller'] = 'ReportController';
-$_REQUEST['action'] = 'update';
+//$_REQUEST['controller'] = 'ReportController';
+$_GET['template_id'] = $_REQUEST['id'];
 $frontController = new FrontController();
 $frontController->run();
 

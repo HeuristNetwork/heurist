@@ -34,6 +34,7 @@ $.widget( "heurist.reportViewer", {
     _need_load_content: true,
     _currentTemplate: null,
     _tempForm: null,
+    _last_disabled_message: null,
     
     // the widget's constructor
     _create: function() {
@@ -514,6 +515,8 @@ $.widget( "heurist.reportViewer", {
             this._on(this._$('#rep_container_frame'),{load:()=>{
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 window.hWin.HEURIST4.msg.hideProgress();
+                
+                this._showWarningAboutDisabledFunction();
             }});
         }
         
@@ -522,9 +525,19 @@ $.widget( "heurist.reportViewer", {
         this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
         
         this._tempForm.submit();
+    },
+    
+    
+    _showWarningAboutDisabledFunction: function(){    
         
+        let txt = this._$('#rep_container_frame')[0].contentDocument.body.innerHTML;
         
-       
-    }
+        if(this._last_disabled_message != txt && 
+            window.hWin.HEURIST4.msg.showWarningAboutDisabledFunction(txt)){
+            this._last_disabled_message = txt;
+        }
+        
+    },
+    
 
 });

@@ -1668,5 +1668,42 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
     },
     
+    //
+    // for smarty reports
+    //
+    showWarningAboutDisabledFunction: function(txt){
+      
+            if(txt.indexOf('Exception on execution: Syntax error in template')==0 
+            && txt.indexOf('not allowed by security setting')>0){
+                
+                    let buttons = null
+                    if(window.hWin.HAPI4.actionHandler){
+                        buttons = 
+                        {   'Send Bug Report': function() {
+                                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
+                                $dlgm.dialog( 'close' );
+                                },
+                            'Cancel':function() {
+                                $dlgm.dialog( 'close' );
+                            }
+                        };
+                    }
+
+                    let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+    '<p>Sorry, native php functions in custom reports are disabled by default<br>'
+    +'as a security precaution. </p>'
+    +'<p>Please use the bug report function to ask that this function be enabled. </p>',
+                        buttons,
+                        'Warning');
+                        
+                        return true;
+                
+            }
+            
+            return false;
+        
+    },
+    
+    
   
 };

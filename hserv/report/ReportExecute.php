@@ -75,7 +75,7 @@ class ReportExecute
      * @param mixed $system The system object used for database and other interactions.
      * @param array $params The parameters array typically passed from $_REQUEST.
      */
-    public function __construct($system, $params)
+    public function __construct($system, $params=null)
     {
         $this->system = $system;
         $this->params = $params;
@@ -86,12 +86,16 @@ class ReportExecute
      *
      * @return bool Returns true on successful execution, false on failure.
      */
-    public function execute()
+    public function execute($params=null)
     {
         
         if (!isset($this->system) || !$this->system->is_inited()) {
             $this->smarty_error_output();
             return false;
+        }
+        
+        if($params!=null){
+            $this->params = $params;
         }
 
         set_time_limit(0); // No script execution time limit
@@ -1054,7 +1058,12 @@ class ReportExecute
                 $tpl_source = $this->handleJsAllowed($tpl_source, $font_styles);
             } else {
                 $tpl_source = $this->sanitizeHtml($tpl_source, $font_styles);
-            }            
+            }    
+            
+        //replace relative path for images that are in blocktext fields                
+        $tpl_source = str_replace(' src="./?db='.$this->system->dbname().'&',
+            ' src="'.HEURIST_BASE_URL.'?db='.$this->system->dbname().'&',$tpl_source);
+                    
 
 
         $onclick = '';
