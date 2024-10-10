@@ -29,7 +29,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         title:  'Add new link or create a relationship between records',
         
         htmlContent: 'recordAddLink.html',
-        helpContent: 'recordAddLink.html', //in context_help folder
         
         source_ID:null,
         target_ID:null,

@@ -29,8 +29,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         init_scope: 'selected',
         hide_scope: true,
         title:  'Delete Records',
-        htmlContent: 'recordDelete.html',
-        helpContent: 'recordDelete.html' //in context_help folder
+        htmlContent: 'recordDelete.html'
     },
     
     header_div:null,

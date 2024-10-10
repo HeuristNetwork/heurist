@@ -1743,7 +1743,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
                 .appendTo(edit_ele.find('.input-div'));
         window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
-                    url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                    url: window.hWin.HRes('parent_child_instructions #content'),
                     no_init:true} );                
         
             

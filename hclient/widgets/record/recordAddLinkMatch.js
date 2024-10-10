@@ -29,7 +29,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         title:  'Foreign Key matching. Add links between records by matching field values',
         
         htmlContent: 'recordAddLinkMatch.html',
-        helpContent: 'recordAddLinkMatch.html', //in context_help folder
         
         relationtype: null
         

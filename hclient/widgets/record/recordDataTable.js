@@ -28,7 +28,6 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         title:  'Configure DataTable columns',
         
         htmlContent: 'recordDataTable.html',
-        helpContent: 'recordDataTable.html', //in context_help folder
         
         initial_cfg: null
     },

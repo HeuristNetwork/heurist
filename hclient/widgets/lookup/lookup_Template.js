@@ -38,7 +38,6 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         title:  "Template lookup",
         
         htmlContent: 'lookup_Template.html',
-        helpContent: null, //in context_help folder
 
         mapping: null, //configuration from record_lookup_config.json
                

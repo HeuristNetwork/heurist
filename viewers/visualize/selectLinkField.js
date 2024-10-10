@@ -29,14 +29,8 @@ function SelectLinkField()
 
         window.hWin.HEURIST4.ui.initHelper( { button:$('#hint_more_info1'), 
                             title:'Link types', 
-                            url:window.hWin.HAPI4.baseURL+'context_help/link_types.html #content_body',
+                            url: window.hWin.HRes('link_types #content_body'),
                             position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
-/*                            
-        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
-                            'Field data type: Relationship marker', 
-                            window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
-                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
-*/                            
 	    
         $('#btnSelect').button().addClass('ui-button-action').click( _editDetailType );
 

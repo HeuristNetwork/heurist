@@ -28,7 +28,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         title:  "External lookup",
         
         htmlContent: 'lookupBase.html', // in hclient/widgets/lookup folder
-        helpContent: null, // in context_help folder
+        helpContent: false,
 
         mapping: null, // configuration from record_lookup_config.json
         edit_fields: null, // realtime values from edit form fields

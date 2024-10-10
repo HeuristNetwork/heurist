@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/autoload.php';
 
@@ -141,32 +142,40 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }elseif (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
-    $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
+    $params = USanitize::sanitizeInputArray();
+
+    $name = $params['asset'];
+    $part = strstr($name,'#');
+    if($part){
+         $name = strstr($name,'#');
+    }
+    
     //default ext is html
     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     if(!$extension){
-        $name = $name . '.html';
+        $name = $name . '.htm';
     }
 
-    $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING);//locale
+    $help_folder = 'context_help/';
+    
+    $locale = $params['lang'];//locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
-        $locale = urlencode(strtolower($locale));
+        $locale = strtolower($locale);
         $locale = ($locale=='eng')?'' :($locale.'/');
     }else{
         $locale = '';
     }
 
-    $help_folder = 'context_help/';
-
-    $asset = $help_folder.$locale.'/'.urlencode($name);
-    if(!file_exists($help_folder.$locale.'/'.$name)){
+    $asset = $help_folder.$locale.basename($name);
+    if(!file_exists($asset)){
         //without locale - default is English
-        $asset = $help_folder.urlencode($name);
+        $locale = '';
+        $asset = $help_folder.basename($name);
     }
 
     if(file_exists($help_folder.$name)){
         //download
-        header( 'Location: '.$asset );
+        header( 'Location: '.$asset.' '.$part );
         return;
     }else{
         exit('Asset not found: '.htmlspecialchars($name));

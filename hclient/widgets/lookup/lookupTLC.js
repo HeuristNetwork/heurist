@@ -34,8 +34,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         title:  'Lookup values for Heurist record', // dialog title
 
-        htmlContent: 'lookupTLC.html', // in hclient/widgets/lookup folder
-        helpContent: 'lookupTLC.html' // in context_help folder
+        htmlContent: 'lookupTLC.html' // in hclient/widgets/lookup folder
     },
 
     //  

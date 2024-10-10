@@ -27,7 +27,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Notification',
-        helpContent: ''  //'usrTags.html'
+        helpContent: false  //'usrTags'
     },
 
     _reminderWidgetContainer:null,

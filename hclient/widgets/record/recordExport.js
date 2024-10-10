@@ -29,8 +29,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
         
         format: 'xml',
         
-        htmlContent: 'recordExport.html',
-        helpContent: 'recordExport.html' //in context_help folder
+        htmlContent: 'recordExport.html'
     },
 
     _initControls: function() {

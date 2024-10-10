@@ -26,8 +26,7 @@ $.widget( "heurist.recordTitles", $.heurist.recordAction, {
         width:  540,
         modal:  true,
         init_scope: 'selected',
-        title:  'Rebuild Record Titles',
-        helpContent: 'recordTitles.html'
+        title:  'Rebuild Record Titles'
     },
 
     _initControls:function(){

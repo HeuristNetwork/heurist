@@ -28,8 +28,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         title:  'Export records to comma or tab separated text files',
         default_palette_class: 'ui-heurist-publish', 
         
-        htmlContent: 'recordExportCSV.html',
-        helpContent: 'recordExportCSV.html' //in context_help folder
+        htmlContent: 'recordExportCSV.html'
     },
 
     selectedFields:null,

@@ -37,7 +37,8 @@ $.widget( "heurist.baseAction", {
         
         path: '',  // non default path to html content 
         htmlContent: '', //general layout
-        helpContent: null,
+        helpContent: null, //if false help button is hidden, if null it sets name of help file to widgetName,
+                           // help file must be in context_help folder
         
         //listeners
         onInitFinished:null,  // event listener when dialog is fully inited
@@ -295,7 +296,10 @@ $.widget( "heurist.baseAction", {
             }
 
             if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
-            
+
+            if(this.options.helpContent==null){
+                this.options.helpContent = this.widgetName;
+            }
             
             if(this.options.helpContent){
                 let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';

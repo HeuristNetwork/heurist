@@ -98,7 +98,7 @@ L.Control.Help = L.Control.extend({
         commonOnAdd.call(this, 'Help', 'ui-icon-help');
         
         window.hWin.HEURIST4.ui.initHelper({ button:this._container,
-                url:window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
+                url: window.hWin.HRes('mapping_overview #content'),
                 position:{ my: "center center", at: "center center", 
                 of: $(window.parent.document) }, no_init:true} ); 
         

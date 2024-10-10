@@ -974,7 +974,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     
                     window.hWin.HEURIST4.ui.initHelper({
                             button:$info_button, 
-                            url:options['context_help'],
+                            url: window.hWin.HRes(options['context_help']),
                             position:{my:'right top', at:'right top', of:$container},
                             container: $container,
                             is_open_at_once: options['show_help_on_init']===false ? false : true

@@ -50,7 +50,7 @@ if(!window.hWin.entityRecordCfg){
         "tableName": "Records",
         "tablePrefix": "rec",
         
-        "helpContent": "records.html",
+        "helpContent": "records.htm",
         
         "searchFormContent": "searchRecords.html",
         

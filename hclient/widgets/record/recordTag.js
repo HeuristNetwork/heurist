@@ -27,7 +27,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
-        helpContent: 'recordTags.html',
+        helpContent: 'recordTags',
         scope_types: 'selected',
         groups: 'all',
         modes: ['assign','remove']       //bookmark=assign bookmark_url - just selection of tags - no real action
@@ -38,7 +38,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
     _initControls:function(){
         
-        this.options.helpContent = 'recordTags.html';
+        this.options.helpContent = 'recordTags';
         
         let sMsg;
         if(this.options.modes=='bookmark_url'){
@@ -46,7 +46,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             sMsg = window.hWin.HR('recordTag_hint0');
         }else if (this.options.modes=='bookmark') { 
             sMsg = window.hWin.HR('recordTag_hint1');
-            this.options.helpContent = 'recordBookmark.html';
+            this.options.helpContent = 'recordBookmark';
         }else{
             sMsg = window.hWin.HR('recordTag_hint2');;
         }   

@@ -48,7 +48,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 // init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'),
                             title:'Mapping Drawing Overview',
-                            url:'../../context_help/mapping_drawing.html #content'});
+                            url: window.hWin.HRes('mapping_drawing #content')});
 
 
                 if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {

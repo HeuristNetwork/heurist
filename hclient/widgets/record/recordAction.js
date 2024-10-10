@@ -23,8 +23,6 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
     options: {
         default_palette_class: 'ui-heurist-explore', 
         path: 'widgets/record/',
-
-        htmlContent: 'recordAction.html',
         
         //parameters
         scope_types: null, // [all, selected, current, rectype ids, none]

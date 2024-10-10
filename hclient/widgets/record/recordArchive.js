@@ -29,7 +29,6 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         title:  'Lookup and restore archive records',
         
         htmlContent: 'recordArchive.html',
-        helpContent: 'recordArchive.html', //in context_help folder
         
         mapping:null, //maps external fields to heurist field details
         add_new_record: false  //if true it creates new record on selection

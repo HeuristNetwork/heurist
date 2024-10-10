@@ -27,7 +27,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Set Record Rating',
-        helpContent: 'recordBookmark.html'
+        helpContent: 'recordBookmark'
     },
 
     _initControls:function(){

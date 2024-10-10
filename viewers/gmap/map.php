@@ -313,7 +313,7 @@ $system->defineConstants();
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load(window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content');
+        $( "#helper" ).load(window.hWin.HRes('mapping_overview. #content'));
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
             autoOpen: false, //(window.hWin.HAPI4.get_prefs('help_on')=='1'),

@@ -74,8 +74,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         path: 'widgets/entity/popups/', //location of this widget
         
-        htmlContent: 'thematicMapping.html',
-        helpContent: 'thematicMapping.html' //in context_help folder
+        htmlContent: 'thematicMapping.html'
     },
     
     baseLayerSymbol: null, //from layer 

@@ -32,8 +32,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         rty_ID: 0, 
         rty_TitleMask: '',
         
-        htmlContent: 'rectypeTitleMask.html',
-        helpContent: 'rectypeTitleMask.html' //in context_help folder
+        htmlContent: 'rectypeTitleMask.html'
     },
 
     action_in_progress: false,

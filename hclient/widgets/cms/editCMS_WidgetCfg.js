@@ -37,7 +37,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             empty_remark_def: 'resultList_empty_remark'
         },
         heurist_resultListExt: {
-            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.html
+            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.htm
             empty_remark_def: 'No default'
         },
         heurist_resultListDataTable: {

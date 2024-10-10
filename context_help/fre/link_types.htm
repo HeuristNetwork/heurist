@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+        <title>HEURIST Aide contextuelle - Structure de la base de données : Types de liens</title>
+    </head>
+
+    <body width=600 height=500>
+
+        <div id="content" style="width: 100%; height: 100%; overflow: auto;">
+
+            <h2>Structure de la base de données : types de liens</h2>
+
+            <div id="content_body">
+
+                <div id="resource">
+
+                    <h4>Pointeur d'enregistrement</h4>
+
+                    <p>
+                        Une simple connexion à un autre enregistrement, normalement limitée à des types d'enregistrement cible spécifiques. À utiliser lorsque le champ représente une connexion directe et est permanent, par exemple : parent, auteur, composant, lieu, période.
+                    </p>
+
+                    <p style="font-size: 11px;padding-bottom:1em">
+                        Les champs <b>Pointeur d'enregistrement</b> permettent à un enregistrement de référencer d'autres enregistrements de type spécifié
+                        qui contiennent des ensembles d'informations connexes, souvent des composants de l'enregistrement parent,
+                        par exemple : le capitaine d'un navire, le père d'une personne, une période de service militaire, un épisode éducatif, un lieu de naissance.
+                        L'enregistrement référencé peut être une entité indépendante (par exemple, un lieu, un éditeur, une personne, une œuvre) ou un groupe
+                        d'informations connexes telles que les attributs d'une personne ou d'un objet, un ensemble d'attributs
+                        qui s'appliquent à une période de temps spécifiée, ou les attributs d'une partie d'un objet ou d'un
+                        type d'objet particulier. Le type de relation est cependant implicite dans le nom du champ -
+                        père, mère, service, éducation, lieu ou composant impliquent tous une relation fixe avec l'entité parente -
+                        mais ne sont pas enregistrés par ailleurs.</p>
+
+                </div>
+                <div id="relmarker">
+
+                    <h4>Marqueur de relation</h4>
+
+                    <p>
+                        Une connexion plus complexe qui permet de spécifier le type de relation et la période de validité. À utiliser lorsqu'il existe de nombreux types de connexion possibles et/ou que les connexions ont une durée de temps, par exemple les rôles dans un événement, les relations sociales, la propriété, le mariage, l'adresse.
+                    </p>
+
+                    <p style="font-size: 11px;padding-bottom:1em">
+                        Les champs <b>Marqueur de relation</b> créent une connexion entre deux entités avec un type de relation explicite
+                        (sélectionné dans une liste déroulante), ainsi qu'une plage de dates et d'autres informations contextuelles.
+
+                        Ils sont particulièrement utiles lorsqu'il existe une longue liste de relations potentielles,
+                        comme les rôles des acteurs dans un événement, les relations interpersonnelles, les relations stratigraphiques, etc.
+
+                        Les champs de marqueur de relation ressemblent à un champ composite dans le formulaire de saisie de données mais,
+                        au lieu de créer un attribut attaché à l'enregistrement, ils créent un enregistrement de relation
+                        distinct qui peut contenir des informations supplémentaires importantes sur la relation.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </body>
+
+</html>

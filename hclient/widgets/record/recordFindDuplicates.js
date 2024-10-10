@@ -28,8 +28,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         modal:  true,
         title:  'Find duplicate records',
         
-        htmlContent: 'recordFindDuplicates.html',
-        helpContent: 'recordFindDuplicates.html' //in context_help folder
+        htmlContent: 'recordFindDuplicates.html'
     },
     
     //results

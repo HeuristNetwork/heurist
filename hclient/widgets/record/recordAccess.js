@@ -33,7 +33,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         show_modes: false,
         
         htmlContent: 'recordAccess.html',
-        helpContent: '' //'recordAccess.html' //in context_help folder
+        helpContent: false
     },
 
     _initControls:function(){

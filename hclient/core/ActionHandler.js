@@ -504,7 +504,7 @@ class ActionHandler {
 */
 
             case "menu-help-quick-tips":
-                contentURL = window.hWin.HAPI4.baseURL+'context_help/quickTips.html';
+                contentURL = window.hWin.HRes('quickTips');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
                 break;
                 
@@ -515,13 +515,13 @@ class ActionHandler {
            
             case "menu-help-acknowledgements":
             
-                contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
+                contentURL = window.hWin.HRes('acknowledgementsHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
                 break;
 
             case "menu-help-about":
 
-                contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
+                contentURL = window.hWin.HRes('aboutHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
                         let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();

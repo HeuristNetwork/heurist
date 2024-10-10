@@ -87,7 +87,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 /* init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'),
                             'Mapping Drawing Overview',
-                            '../../context_help/mapping_drawing.html #content');
+                            window.hWin.HRes('mapping_drawing #content'));
                 */
 
                 handleApiReady();

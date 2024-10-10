@@ -1005,11 +1005,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     
                                     window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
                                                     title:'Field data type: Record pointer', 
-                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                                                    url: window.hWin.HRes('field_data_types #resource'),
                                                     position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
                                     window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
                                                     title:'Field data type: Relationship marker', 
-                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                                                    url: window.hWin.HRes('field_data_types #relmarker'),
                                                     position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
                                     
                                 }  //end open event
@@ -1710,7 +1710,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
                             .appendTo(child_rec.find('.input-div'));
                     window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
-                                url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                                url: window.hWin.HRes('parent_child_instructions #content'),
                                 no_init:true} );
 
                     browser_filter.find('.heurist-helper1').before(
@@ -2305,7 +2305,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             title: 'Import Base fields by CSV',
             height: 800,
             width: 1000,
-            context_help: `${window.hWin.HAPI4.baseURL}context_help/defDetailTypes.html #import`,
+            context_help: 'defDetailTypes #import',
             callback: function(context){ 
 
                 if(context && context.result){

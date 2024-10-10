@@ -4,7 +4,7 @@
         "tableName": "usrTags",
         "tablePrefix": "tag",
         
-        "helpContent": "usrTags.html",
+        "helpContent": "usrTags.htm",
         
         "searchFormContent": "searchUsrTags.html",
         

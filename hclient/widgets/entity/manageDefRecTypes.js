@@ -1835,7 +1835,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             title: 'Import Record types by CSV',
             height: 800,
             width: 1000,
-            context_help: `${window.hWin.HAPI4.baseURL}context_help/defRecTypes.html #import`,
+            context_help: 'defRecTypes #import',
             callback: function(context){ 
 
                 if(context && context.result){
