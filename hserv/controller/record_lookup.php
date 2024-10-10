@@ -1268,7 +1268,7 @@
             return $data[$server][$theso]['groups'];
         }
 
-        $url = $service_types['opentheso'][$server] . 'group/' . $theso;
+        $url = $service_types['opentheso'][$server] . 'group/' . urlencode($theso);
 
         $groups = loadRemoteURLContentWithRange($url, null, true, 60);
 
