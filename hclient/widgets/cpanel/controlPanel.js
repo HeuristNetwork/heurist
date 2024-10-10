@@ -551,6 +551,8 @@ $.widget( "heurist.controlPanel", {
     _showVersionMessage: function(){
 
         const that = this;
+        const SPIN_INTERVAL = 30000; // how often to spin - 5 minutes
+        const SPIN_DURATION = 1000; // how long the spin takes - 1 second
 
         if(this.version_message){
             return;
@@ -569,7 +571,7 @@ $.widget( "heurist.controlPanel", {
                     return;
                 }
 
-                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data + location.search}" id="lnk_change">`
+                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data + location.search}" id="lnk_change" title="Move to alpha version">`
                                + `Use the latest (alpha) version</a> (recommended)`;
 
                 styling['margin-top'] = '1.2em';
@@ -581,15 +583,45 @@ $.widget( "heurist.controlPanel", {
             });
         }else{ // currently on alpha
 
-            suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
-                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change">standard version</a>'
-                + ' PLEASE REPORT BUGS.';
-
             styling['margin-top'] = '0.9em';
+
+            // Add message about reporting bugs
+            styling['width'] = '220px';
+            let $bug_msg = $('<div>', {title: 'Click to make a bug report'})
+                .css($.extend({}, styling, {color: '#FFFF66', cursor: 'pointer'}))
+                .insertAfter(this.div_dbname)
+                .html('<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>Please report bugs here, or suggest improvements. We are responsive');
+
+            this._on($bug_msg, {
+                click: () => {
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');
+                }
+            });
+
+            let $bug_icon = $bug_msg.find('span.ui-icon');
+            const INTERVAL = setInterval(() => {
+                $({deg: 0}).animate({deg: 360}, {
+                    duration: SPIN_DURATION,
+                    step: (rotation) => {
+
+                        if($bug_icon.length == 0){
+                            clearInterval(INTERVAL);
+                            return;
+                        }
+
+                        $bug_icon.css('transform', `rotate(${rotation}deg)`);
+                    }
+                });
+            }, SPIN_INTERVAL);
+
+            suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
+                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change" title="Go to standard version">standard version</a>';
+
+            styling['width'] = '280px';
 
             this.version_message = $("<div>")
                 .css(styling)
-                .insertAfter(this.div_dbname)
+                .insertAfter($bug_msg)
                 .html(suggestion_txt);
 
             this._on(this.version_message.find('#lnk_change'), {
