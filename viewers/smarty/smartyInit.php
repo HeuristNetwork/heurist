@@ -40,15 +40,17 @@ class Heurist_Security_Policy extends Security {
                     'array_diff', 'array_count_values', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'array_values', 'cat',
                     'capitalize', 
-                    'count','count_characters','count_words',
+                    'count',
+                    'count_characters','count_words','count_paragraphs',
                     'date_format',
                     'floatval','indent','json_encode',
-                    'nl2br', 
+                    'lower','nl2br', 
                     'preg_match_all','print_r', 'printf','replace',
-                    'setlocale','sort', 'strstr', 'substr', 'strpos', 'strlen', 
+                    'range', 'regex_replace',
+                    'setlocale','sort', 'spacify', 'strip', 'strstr', 'substr', 'strpos', 'string_format', 'strlen', 'strip_tags', 
                     'time','translate','truncate',
                     'out','wrap',                    
-                    'utf8_encode');
+                    'upper','utf8_encode','wordwrap');
 
 
   public $allow_super_globals = true; //default true  
