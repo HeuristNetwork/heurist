@@ -30,7 +30,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         currentAccess: null,
         currentAccessGroups: null,
         
-        htmlContent: 'recordTemplate.html'
+        htmlContent: 'recordTemplate.html',
         
         recordType: 0
     },

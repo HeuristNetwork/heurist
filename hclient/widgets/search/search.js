@@ -287,7 +287,7 @@ $.widget( "heurist.search", {
                             pt = '2px';
                         }else{
                             //parseFloat(that.div_search.css('padding-top'))
-                            pt =  (that.element.height() - $this.height())/2 - menu_h;
+                            pt =  (that.element.height() - this.input_search.height())/2 - menu_h;
                         }
                     }
 

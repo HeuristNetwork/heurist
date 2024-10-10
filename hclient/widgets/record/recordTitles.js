@@ -53,7 +53,7 @@ $.widget( "heurist.recordTitles", $.heurist.recordAction, {
         let base_url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=titles&db=${window.hWin.HAPI4.database}`;
         //const rectypes = !all_rectypes ? `&recTypeIDs=${selected_rectypes.join(',')}` : '';
 
-        window.hWin.HEURIST4.msg.showDialog( `${base_url}${rectypes}`, {} );    
+        window.hWin.HEURIST4.msg.showDialog( base_url, {} );    
         
     },
   

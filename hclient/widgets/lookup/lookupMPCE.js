@@ -540,7 +540,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
     },
 
     getKeywordsNextStep: function(step, ids){
-
+        let that = this;
         let title = null;
         switch(step){
             case 'assigned': // add assigned keywords to html list
@@ -791,7 +791,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         // Now add items into the HTML list
         this.assoc_endindex = this.renderAssocKeywods(keywords);
 
-        this.assoc_endindex = i;
+        //this.assoc_endindex = i;
 
         let jump = this.assoc_endindex - this.assoc_startindex;
 
@@ -817,6 +817,8 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
     },
 
     renderAssocKeywods: function(keywords){
+
+        let list = $('#associated_field');
 
         let that = this;
 
@@ -897,7 +899,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         }
 
         if(found == 0){
-            assoc_keyword.push([id, 1, title]);
+            this.assoc_keywords.push([id, 1, title]);
         }
     },
 
