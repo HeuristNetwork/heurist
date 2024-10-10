@@ -70,9 +70,9 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         return btns;
     },
     
-//----------------------------------------------------------------------------------    
-    _afterSaveEventHandler: function( recID, fields ){
-        window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
+//---------------------------------------------------------------------------------- 
+    _afterSaveEventHandler: function(message){
+        window.hWin.HEURIST4.msg.showMsgDlg(message, null, {title: 'Bug report sent'}, {default_palette_class: 'ui-heurist-admin'});
         this.closeDialog(true); //force to avoid warning
     },
     

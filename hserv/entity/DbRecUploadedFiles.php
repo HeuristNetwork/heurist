@@ -585,21 +585,34 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     public function save(){
 
         $ret = parent::save();
-/*
-        if($ret!==false){
-            //treat thumbnail image
-            foreach($this->records as $record){
-                if(in_array(@$record['trm_ID'], $ret)){
-                    $thumb_file_name = @$record['trm_Thumb'];
 
-                    //rename it to recID.png
-                    if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
-                    }
-                }
+        $thumb_dir = HEURIST_THUMB_DIR;
+        $scratch_dir = HEURIST_SCRATCH_DIR;
+        $tilestacks_dir = HEURIST_TILESTACKS_DIR;
+        $files_dir = HEURIST_FILES_DIR;
+        $current_db = $this->system->dbname();
+
+        if(strpos(HEURIST_FILESTORE_DIR, $current_db) === false){
+
+            $parts = explode("/", $thumb_dir);
+            $idx = array_search("HEURIST_FILESTORE", $parts);
+
+            if($idx <= 0){
+                $this->system->addError(HEURIST_UNKNOWN_ERROR, "Heurist was unable to copy the newly registered image into the correct filestore");
+                $this->setData(['ulf_ID' => $this->records[0]['ulf_ID']]);
+                $this->delete();
+                return false;
             }
+
+            $idx ++;
+            $original_db = $parts[$idx];
+
+            $thumb_dir = str_replace($original_db, $current_db, $thumb_dir);
+            $scratch_dir = str_replace($original_db, $current_db, $scratch_dir);
+            $tilestacks_dir = str_replace($original_db, $current_db, $tilestacks_dir);
+            $files_dir = str_replace($original_db, $current_db, $files_dir);
         }
-*/
+
         if($ret!==false){
         foreach($this->records as $rec_idx => $record){
 
@@ -643,8 +656,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             if( (strpos($record['ulf_OrigFileName'],ULF_IIIF)===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
                 && @$record['ulf_TempThumbUrl']){
 
-                    $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
-                    $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+                    $thumb_name = $thumb_dir.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
+                    $temp_path = tempnam($scratch_dir, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
                         UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
                         unlink($temp_path);
@@ -665,13 +678,13 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                         $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles';
 
-                        if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) )
+                        if( copy($tmp_name, $tilestacks_dir.$new_name) )
                         {
                             //remove temp file
                             unlink($tmp_name);
 
                             //create thumbnail
-                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            $thumb_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                             //UImage::createScaledImageFile($filename, $thumb_name);
                             $img = UImage::createFromString('tileserver tiled images');
                             imagepng($img, $thumb_name);//save into file
@@ -681,14 +694,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         }else{
                             $this->system->addError(HEURIST_INVALID_REQUEST,
                                     "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                                . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
+                                . $this->system->dbname().' ('.$tilestacks_dir
                                 .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                         }
 
                     }else{
 
                         //create destination folder
-                        $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
+                        $dest = $tilestacks_dir.$ulf_ID.'/';
                         $warn = folderCreate2($dest, '');
 
                         //unzip archive to HEURIST_TILESTACKS_DIR
@@ -711,7 +724,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             //get first file from first folder - use it as thumbnail
                             $filename = folderFirstFile($dest);
 
-                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            $thumb_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
 
                             $mimeExt = UImage::getImageType($filename);
 
@@ -742,16 +755,16 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $new_name = $this->records[$rec_idx]['ulf_FileName'];
 
-                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) )
+                    if( copy($tmp_name, $files_dir.$new_name) )
                     {
                         //remove temp file
                         unlink($tmp_name);
 
                         //copy thumbnail
                         if(@$record['ulf_TempFileThumb']){
-                            $thumb_name = HEURIST_SCRATCH_DIR.DIR_THUMBS.$record['ulf_TempFileThumb'];
+                            $thumb_name = $scratch_dir.DIR_THUMBS.$record['ulf_TempFileThumb'];
                             if(file_exists($thumb_name)){
-                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                $new_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                                 copy($thumb_name, $new_name);
                                 //remove temp file
                                 unlink($thumb_name);
@@ -761,7 +774,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else{
                         $this->system->addError(HEURIST_INVALID_REQUEST,
                                 "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                            . $this->system->dbname().' ('.$files_dir
                             .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                     }
                 }
@@ -1493,6 +1506,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
        $this->records = null; //reset
 
+       $newname = empty($newname) && !empty(@$_fields['ulf_NewName']) ? $_fields['ulf_NewName'] : $newname;
        $fields = $this->getFileInfoForReg($file, $newname);
 
        if($fields!==false){

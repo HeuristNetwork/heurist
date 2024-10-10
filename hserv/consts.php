@@ -43,6 +43,7 @@ define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.HEURIST_DEF_DIR);//cent
 define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
 define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
+define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
 define('HEURIST_HELP', $heuristReferenceServer.HEURIST_DEF_DIR.'help');
 
 if (@$httpProxy != '') {
