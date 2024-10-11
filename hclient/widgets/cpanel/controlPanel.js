@@ -530,6 +530,10 @@ $.widget( "heurist.controlPanel", {
         if(ele){
             let h = 50;
             
+            if(this.divShortcuts){
+                h = 100;
+            }
+            
             ele.children('#north_pane').height(h);
             ele.children('#center_pane').css({top: h});
             

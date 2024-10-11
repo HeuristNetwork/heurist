@@ -34,7 +34,7 @@ class Heurist_Security_Policy extends Security {
   // disable acess to static classes
   public $static_classes = null;
 
-  public $allowed_modifiers = array('isset', 'empty', 'escape',
+  public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     'array_key_exists', 'array_column', 'array_multisort', 
                     'array_diff', 'array_count_values', 'array_unique',
