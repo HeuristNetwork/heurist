@@ -30,7 +30,7 @@ define('DT_FILE','type:2-38');
 class DbSysBugreport extends DbEntityBase
 {
 
-    private $perform_logout = false; // perform logout after completing the required action
+    private $performLogout = false; // perform logout after completing the required action
 
     public function __construct( $system, $data=null ) {
        parent::__construct( $system, $data );
@@ -46,9 +46,9 @@ class DbSysBugreport extends DbEntityBase
             $attempt_public_login = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false
                                     && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE;
 
-            $this->perform_logout = $attempt_public_login ? $this->system->doLogin('extern', null, 'public', true) : false; // attempt login to publicly available guest account
+            $this->performLogout = $attempt_public_login ? $this->system->doLogin('extern', null, 'public', true) : false; // attempt login to publicly available guest account
 
-            if($this->perform_logout){
+            if($this->performLogout){
                 $this->system->getCurrentUserAndSysInfo(false); // refresh system vars before continuing
                 $res = true;
             }
@@ -98,9 +98,9 @@ class DbSysBugreport extends DbEntityBase
         if(array_key_exists('new_record', $this->data)){
             // Called from external server
 
-            $res = $this->_createBugReportRecord($this->data['new_record']);
+            $res = $this->createBugReportRecord($this->data['new_record']);
 
-            if($this->perform_logout){
+            if($this->performLogout){
                 $this->system->doLogout();
             }
 
@@ -214,9 +214,10 @@ class DbSysBugreport extends DbEntityBase
         $new_record['details']['960'] = empty($type_term) ? 6986 : $type_term;
         array_push($ext_info, "   Report type: $types");
 
-        if(empty($record['3-1058'])){
-            array_push($ext_info, "   Provided url: " . $record['3-1058']);
-            $new_record['details']['993'] = $record['3-1058'];
+        $url = @$record['3-1058'];
+        if(!empty($url)){
+            array_push($ext_info, "   Provided url: $url");
+            $new_record['details']['993'] = $url;
         }else{
             $new_record['details']['993'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
         }
@@ -261,7 +262,7 @@ class DbSysBugreport extends DbEntityBase
 
         $res = false;
         if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // on server with Heurist_Job_Tracker DB
-            $res = $this->_createBugReportRecord($new_record);
+            $res = $this->createBugReportRecord($new_record);
         }else{
 
             $params = [
@@ -274,7 +275,7 @@ class DbSysBugreport extends DbEntityBase
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
         }
 
-        if($this->perform_logout){
+        if($this->performLogout){
             $this->system->doLogout();
         }
 
@@ -291,7 +292,7 @@ class DbSysBugreport extends DbEntityBase
 
                 $res = "Your bug report has been successfully added to the Heurist Job tracker database.<br>"
                       ."You can view your report at: " . HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$rec_ID";
-            }else if(is_array($res)){
+            }elseif(is_array($res)){
                 $this->system->addErrorArr($res);
                 $res = false;
             }
@@ -301,8 +302,7 @@ class DbSysBugreport extends DbEntityBase
 
         if($res && $email_already_sent){
             return [$res];
-        }else
-        if(!$email_already_sent && sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
+        }elseif(!$email_already_sent && sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
                 $bug_title,
                 $sMessage, //since 02 Dec 2021 we sent human readable message
                 $filename, true)){
@@ -310,14 +310,16 @@ class DbSysBugreport extends DbEntityBase
             $message = $res ? $res : "Your bug report has been sent to the Heurist team.";
             return $res === false ? false : [$message];
         }else{
-            $email_already_sent || $this->system->addError(HEURIST_ACTION_BLOCKED, 'EMAIL NOT SENT');
+
+            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>Please re-try in a few minutes, however if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
             return false;
         }
     }
 
-    private function _createBugReportRecord($record){
+    private function createBugReportRecord($record){
 
-        if(empty($record) || empty($record['details'])){
+        if(empty(@$record['details'])){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Bug report details are missing');
             return false;
         }
@@ -333,14 +335,10 @@ class DbSysBugreport extends DbEntityBase
                 $using_db = $report_system->doLogin('extern', null, 'public', true);
                 !$using_db || $report_system->getCurrentUserAndSysInfo();
             }
-
-            if($using_db !== true){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Heurist failed to connect to the Job tracker database');
-                return false;
-            }
         }
 
-        if($using_db !== true || !$report_system || !$report_system->is_inited() || !$report_system->has_access()){
+        $report_system_ready = $report_system && $report_system->is_inited() && $report_system->has_access();
+        if($using_db !== true || !$report_system_ready){
             $action = $report_system && !$report_system->has_access() ? 'access' : 'connect to';
             $this->system->addError(HEURIST_ACTION_BLOCKED, "Heurist was unable to $action the Job tracker database");
             return false;
@@ -360,12 +358,12 @@ class DbSysBugreport extends DbEntityBase
 
         $mysqli = $report_system->get_mysqli();
         $guest_user = user_getByField($mysqli, 'ugr_Name', 'extern');// to update AddedBy value in new record
-        $uid = is_array($guest_user) && array_key_exists('ugr_ID', $guest_user) ? $guest_user['ugr_ID'] : 0;
+        $uid = is_array($guest_user) ? $guest_user['ugr_ID'] : 0;
 
         $res = recordSave($report_system, $record, true, false, 0, 2);// set total recs to 2 to avoid sending the swf email, we will send a more specific email instead
         $sent_email = false;
 
-        if(!$res || $res['status'] != HEURIST_OK){
+        if(@$res['status'] != HEURIST_OK){
             // Transfer error across
             $this->system->addErrorArr($report_system->getError());
             return false;
