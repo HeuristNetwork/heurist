@@ -50,7 +50,6 @@ function hLayoutMgr(){
     function _layoutInitKey(layout, i){
         
         if(!layout[i].key){
-
             layout[i].key = pnl_counter;
             //data-lid is required to find title in treeveiew
             layout[i].title = '<span data-lid="'+pnl_counter+'">' + layout[i].name 
@@ -114,8 +113,6 @@ function hLayoutMgr(){
         }
 
         if(isFirstLevel===true){
-            
-            pnl_counter = 1;
             
             if(_supp_options.page_name){
                 layout[0].name  = 'Page';
@@ -866,6 +863,9 @@ function hLayoutMgr(){
         
         for(let i=0; i<content.length; i++){
             if(content[i].key == ele_key){
+                if(new_cfg.type && new_cfg.type.indexOf('text')==0){
+                   new_cfg.content =  content[i].content;
+                }
                 content[i] = new_cfg;
                 return true 
             }else if(content[i].children && content[i].children.length>0){
@@ -1000,7 +1000,7 @@ function hLayoutMgr(){
     // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
     // <div id="cms-widget-51" data-cms-name="Menu"  data-cms-type="app" css=""> options:{} </div>
     //
-    // 2. Convert html t json (to edit)
+    // 2. Convert html to json (to edit)
     //     id=>dom_id, data-cms-name=>name, data-cms-type=>type, css=>css, folder: true if it has children, 
     //        children|options|content , appid  
     // 

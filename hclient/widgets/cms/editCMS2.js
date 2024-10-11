@@ -1766,7 +1766,7 @@ function(value){
         _showOverlayForElement( ele_id );
         
         _initTinyMCE( ele_id );
-        
+
         //
         // mode - 0       take values from _edit_Element without saving in db
         //        'save'  save entire page in db
@@ -1775,8 +1775,6 @@ function(value){
 
                     //save
                     if(new_cfg){
-                        
-                       
                         
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
