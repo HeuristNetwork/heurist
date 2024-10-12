@@ -239,7 +239,7 @@ class ReportController
                     }
                     
                     $proc_length = time() - $proc_start;
-                    if(true || $proc_length > 10){ // report if this report takes more than 10 seconds to generate
+                    if($proc_length > 10){ // report if this report takes more than 10 seconds to generate
                         $result_report[4][$row['rps_ID'].' '.basename($row['rps_Template'])] = $proc_length;
                     }
                 }

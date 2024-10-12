@@ -309,9 +309,10 @@ echo $text.' Db '.htmlentities($last_processed_database).$eol;
                 $text.' It stopped on '.$last_processed_database);
 }
 
+$errors = 0;
+
 if(!empty($email_list) || !empty($report_list) || !empty($url_list)){
 
-    $errors = 0;
     $created = 0;
     $updated = 0;
     $intacted = 0;
@@ -377,6 +378,23 @@ if($long_reports_count > 0){
 
     sendEmail(HEURIST_MAIL_TO_ADMIN, "Slow report generation on " . HEURIST_SERVER_NAME, $email_body);
 }
+
+if($errors>0){
+    $email_body = "The following report" . ($errors > 1 ? "s have" : " has") . " errors and can not be executed/regenerated:\n";
+    
+    foreach($report_list as $dbname=>$report){
+            if(!empty($report[5])){
+                echo 'Reports with errors:'.$eol;
+                foreach($report[5] as $id=>$err){
+                    $email_body .= "DB: $dbname, Report name: " . $id . '   '.$err."\n";
+                }
+            }
+    }
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Reports with errors " . HEURIST_SERVER_NAME, $email_body);
+}
+
+
+
 
 function exclusion_list(){
 
