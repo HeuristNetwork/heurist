@@ -42,7 +42,7 @@ class ReportController
             $template_file = $this->getTemplateFileName();
             $template_body = $this->getTemplateBody();
             
-            if($this->req_params['template_id']>0){
+            if($this->req_params['template_id']>0 || $this->req_params['id']>0){
                 $action = 'update'; 
             }
             
@@ -53,13 +53,13 @@ class ReportController
             switch ($action) {
                 case 'execute':
                                
-                    $repExec = new ReportExecute($this->system);
-                    $repExec->execute( $this->req_params );
+                    $repExec = new ReportExecute($this->system, $this->req_params);
+                    $repExec->execute();
                     break;
 
                 case 'update':
                 
-                    $result = $this->updateTemplate();
+                    $this->updateTemplate();
                     break;
                     
                 case 'list':
@@ -156,52 +156,97 @@ class ReportController
     }
     
     
+    //
+    // returns array [error, created, updated, unchanged, long reports, error reports]
+    //
     public function updateTemplate(){
- 
-        $rps_ID = intval($this->req_params['template_id']); //rps_ID in usrReportSchedule
         
-        //$row = mysql__select_row_assoc($this->system->get_mysqli(), 'SELECT * FROM usrReportSchedule WHERE rps_ID='.$rps_ID);
+        //error, created, updated, unchanged, long reports, error reports
+        $result_report = [0,0,0,0,[],[]];
+        
+        $is_void = false;
+        
+        $rps_ID = intval($this->req_params['template_id']??@$this->req_params['id']); //rps_ID in usrReportSchedule
+        
+        $publishmode = $this->req_params['publish']??4; //default generate silently
         
         $query = 'SELECT * FROM usrReportSchedule';
         
         if($rps_ID>0){
             $query .= ' WHERE rps_ID='.$rps_ID;
         }else{
-            //update all reports 
-            $this->req_params['publish'] = 4; //void - no browser output
+            //update all reports
+            $publishmode = 4; 
+        }
+        if($publishmode==4){
+            $publishmode = 3;
+            $is_void = true;    
         }
 
-        $format = @$this->req_params['mode'];
-        
-        
         $repExec = new ReportExecute($this->system);
+        $repExec->setParameters(array('publish'=>3, 'void'=>$is_void));
         
-        $res = $this->system->get_mysqli()->query('select * from usrReportSchedule');
+        if(!$repExec->initSmarty(true)){
+            $result_report[5]['fatal'] = $repExec->getError();    
+            return $result_report;
+        }
+        
+        $res = $this->system->get_mysqli()->query($query);
         if($res){
             while ($row = $res->fetch_assoc()) {
                 
-                //find name of generated file
+                $format = $this->req_params['mode']??@$row['rps_URL']; //extension
                 
-                
-                
-                //$result = $this->repAction->updateTemplate($this->req_params, $row);
                 $params = array(
-                    'publish'=>$this->req_params['publish'],
-                    'mode'=>$this->req_params['mode']??@$row['rps_URL'],
-                
-                
-                
+                    'publish'=>$publishmode,
+                    'mode'=>$format,
+                    'output'=>$row['rps_FileName'] ?? $row['rps_Template'],
+                    'template'=>$row['rps_Template'],
+                    'rps_id'=>$row['rps_ID'],    //report schedule iD
+                    'void'=>$is_void   //without browser output
                 );
-                $repExec->execute($params);
+                
+                $hquery = $row['rps_HQuery'];
+                if(strpos($hquery, "&q=")>0){
+                    parse_str($hquery, $params2);//parse query and put to parameters
+                    $params = array_merge($params, $params2);
+                }else{
+                    $params = array("q"=>$hquery);
+                }
+                
+                $repExec->setParameters($params);
+                            
+                //result: 0 - error, 1 - created, 2 - updated, 3 - intakted
+                //check that report is already exists
+                $result = 1;
+                if($publishmode==3){
+                    //output already generated report (if it is up to date)
+                    $result = $repExec->outputGeneratedReport($row['rps_IntervalMinutes']);
+                }
                
+                if($result!=3){
+                    $proc_start = time();// time execution
+                    
+                    if(!$repExec->execute()){
+                        $result = 0; //error    
+                        array_push($result_report[4], array($row['rps_ID'].' '.basename($row['rps_Template'])=>$repExec->getError()));
+                    }
+                    
+                    $proc_length = time() - $proc_start;
+                    if($proc_length > 10){ // report if this report takes more than 10 seconds to generate
+                        array_push($result_report[5], array($row['rps_ID'].' '.basename($row['rps_Template'])=>$proc_length));
+                    }
+                }
+                
+                $result_report[$result]++;
                 
                 
-            }
+            }//while
             $res->close();
         }
         
         
-        
+        return $result_report;
         
     }
     

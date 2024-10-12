@@ -199,7 +199,7 @@ return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&p
             }}},
             
             { data: 'rps_URL', title: "<div style='font-size:10;'>Raw</div>", sortable:false, width:16,  //resizeable:false,width:7,
-                render: function(rps_ID, type, row) {
+                render: function(data, type, row) {
                     if (type === 'display') {
                         let status = 0;
                         if(status==1){
@@ -207,8 +207,8 @@ return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&p
                         }else{
                             //show output as javascript wrap row.rps_ID
                             let outputformat = data?data:'txt';
-return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=3&template_id=${rps_ID}&mode=${outputformat}" target="_blank">`
-                            +outputmode.toUpperCase()
+return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=3&template_id=${row.rps_ID}&mode=${outputformat}" target="_blank">`
+                            +outputformat.toUpperCase()
                             +'&nbsp;<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
                         }
                     }else{

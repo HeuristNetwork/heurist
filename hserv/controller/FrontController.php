@@ -34,7 +34,7 @@ class FrontController
             return;
         }
         
-        if(@$this->req_params['controller']=='ReportController' 
+        if(@$_REQUEST['controller']=='ReportController'  //$this->req_params['controller']
             || @$this->req_params['template'] 
             || @$this->req_params['template_body']
             || @$this->req_params['template_id']){

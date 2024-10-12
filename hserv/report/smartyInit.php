@@ -32,21 +32,23 @@ class Heurist_Security_Policy extends Security {
   // disable acess to static classes
   public $static_classes = null;
 
-  public $allowed_modifiers = array('isset', 'empty', 'escape',
+  public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     'array_key_exists', 'array_column', 'array_multisort', 
                     'array_diff', 'array_count_values', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'array_values', 'cat',
                     'capitalize', 
-                    'count','count_characters','count_words',
+                    'count',
+                    'count_characters','count_words','count_paragraphs',
                     'date_format',
                     'floatval','indent','json_encode',
-                    'nl2br', 
+                    'lower','nl2br', 
                     'preg_match_all','print_r', 'printf','replace',
-                    'setlocale','sort', 'strstr', 'substr', 'strpos', 'strlen', 
+                    'range', 'regex_replace',
+                    'setlocale','sort', 'spacify', 'strip', 'strstr', 'substr', 'strpos', 'string_format', 'strlen', 'strip_tags', 
                     'time','translate','truncate',
-                    'out','wrap','progressCallback',                    
-                    'utf8_encode');
+                    'out','wrap',                    
+                    'upper','utf8_encode','wordwrap');
                     
   public $allow_super_globals = true; //default true  
 
@@ -89,7 +91,7 @@ function smartyInit($smarty_templates_dir=null){
         // enable security
         $smarty->enableSecurity('Heurist_Security_Policy');
         
-        //need to register all $allowed_modifiers as plugins
+        //allowed php functions
         $php_functions = array( 'constant', 'count', 
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     //'array_key_exists', 'array_column', 
@@ -99,7 +101,7 @@ function smartyInit($smarty_templates_dir=null){
                     'floatval','json_encode',
                     'ksort', 'nl2br', 
                     'preg_match_all','print_r','printf', 'range',
-                    'setlocale', 'sort', 'strpos', //'strstr', 'substr',  'strlen', 
+                    'setlocale', 'sort', 'strpos', //'strstr', 'substr', 'strlen', 
                     'time',
                     'utf8_encode');
                     

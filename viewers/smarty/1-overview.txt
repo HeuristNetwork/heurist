@@ -1,98 +1,13 @@
 
 Directory:	/smarty
 
-Overview:	Routines for rendering views of the search subset using Smarty templates
+Overview:	for backward capability. See /hserv/report and /hclient/widgets/report
 
-Notes:      Smarty templates are to a large degree a replacement for the XSL templates in .../printview
+Notes:      Smarty templates are to a large degree a replacement for the XSL templates
 
             Unlike the printview templates, Smarty templates can be edited through the Heurist
             web interface. Although they use internal codes to define variables, routines are
             provided to translate a Smarty templte to global concept codes and vice versa, to
             allow standard templates to be written and exchange of templates between databases
 
-Updated:     26 Nov 2015
-
----------------------------------------------------------------------
-
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-
-
-index.php  1) resolver for file urls (from reports)  2) redirects to main controller
-
-
-smartyInit.php - init global smarty variable, filters, modifiers
-
-To convert to class 
-ReportSmarty.php
-                smartyInit
-                prefilter to tranlate terms
-                postfilter to add progressController
-                
-                outputfilter - strip js, add event handlers, format css and header
-                outputfilter - 
-                save_report_into_file
-                
-                smartyExecute
-                smartyUpdate
-
-ReportSchedule.php ????                    
-                getScheduleInfo
-                    
-
-reportRecord.php  - Access class from smarty to Heurist records and other info                    
-                        rename ReportHeurist.php
-
-reportActions.php - Class to manipulate template files (todo use UFile)
-                    list, get, save, convert, import
-                        rename ReportTemplateMgr.php    
-                    
-old controlllers - all moved to hserv/controller/reportController.php
-
-reportController.php
-        action - template actions: list, get, delete, import, serve (export), check
-                 template - template name
-                 template_body - template content
-        schedule - id from usrReportSchedule
-                   mode -  1 generate report (save into file), generate info page (with urls)
-                           2 executes report and download it under given output name (no file save, no browser output)
-                           3 redirects to the existing report, if it does not exist, recreate it (mode=1)
-                           4 supress any output, if report does not exist, recreate it (mode=1)
-        action   execute
-                 template - template name
-                 snippet - content
-                 template_body  
-                 outputfile
-                 format - output format (html by default) former "mode" param
-                 publish
-                 replevel - report level (1 notices, 2 all, 3 debug mode)
-                 
-                 recordset - set of ids
-                 recIDs    - set of ids
-                 q         - query 
-                 
-
-                 void    - if true use fetch (rather than display)
-                 session - progress session id   
-                 
-                 limit  - for edit node, if not set use smarty-output-limit
-                 emptysetmessage 
-                 cssid     record ID with DT_CMS_CSS or DT_CMS_EXTFILES                       
-                 facet_val - value to be assigned to variable "selected_term"
-        
-
-                    
-templateOperations.php - controller for reportActions.php (to remove)
-showReps.php           - old controller to execute template 
-updateReportOutput.php - old controller to get/update/check generated reports
- 
-----
-showReps.html  - template editor 
-showReps.js      move to hclient/widgets/admin/smartyEditor.js
-                    
-reportProgress.php - move to hserv/controller/progressController.php
-                 
+Updated:     12 Oct 2024
