@@ -88,6 +88,8 @@ if (@$argv) {
 
 }else{
     exit('This function must be run from the shell');
+    //$arg_database = 'libraries_readers_culture_18c_atlantic';
+    //$do_reports = true;
 }
 
 use hserv\entity\DbUsrReminders;
@@ -200,6 +202,12 @@ foreach ($databases as $idx=>$db_name){
                 echo 'Reports with errors:'.$eol;
                 foreach($report[5] as $id=>$err){
                     echo $id.'   '.$err.$eol;
+                }
+            }
+            if(!empty($report[4])){
+                echo 'Long execution reports:'.$eol;
+                foreach($report[4] as $id=>$time){
+                    echo $id.'   '.$time.$eol;
                 }
             }
         }
@@ -358,11 +366,9 @@ if($long_reports_count > 0){
     $email_body = "The following report" . ($long_reports_count > 1 ? "s have" : " has") . " taken longer than 10 seconds to regenerate:\n";
 
     // $report_dtls
-    // [0] => Report name
-    // [1] => Execution time
     foreach($long_reports as $dbname => $report_dtls){
-        foreach($report_dtls as $idx => $report_dtl){
-            $email_body .= "DB: $dbname, Report name: " . $report_dtl[0] . " takes " . $report_dtl[1] . " seconds to regenerate\n";
+        foreach($report_dtls as $id=>$time){
+            $email_body .= "DB: $dbname, Report name: " . $id . " takes " . $time . " seconds to regenerate\n";
         }
     }
 

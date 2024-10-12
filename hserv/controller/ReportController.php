@@ -26,7 +26,13 @@ class ReportController
         }        
 
         $this->system = $system;
-        $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;
+        
+        if(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+            $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;
+        }else{
+            $this->dir = $this->system->getSysDir('smarty-templates');
+        }
+                
         
         $this->repAction = new ReportTemplateMgr($this->system, $this->dir);
     }
@@ -229,12 +235,12 @@ class ReportController
                     
                     if(!$repExec->execute()){
                         $result = 0; //error    
-                        array_push($result_report[4], array($row['rps_ID'].' '.basename($row['rps_Template'])=>$repExec->getError()));
+                        $result_report[5][$row['rps_ID'].' '.basename($row['rps_Template'])] = $repExec->getError();
                     }
                     
                     $proc_length = time() - $proc_start;
-                    if($proc_length > 10){ // report if this report takes more than 10 seconds to generate
-                        array_push($result_report[5], array($row['rps_ID'].' '.basename($row['rps_Template'])=>$proc_length));
+                    if(true || $proc_length > 10){ // report if this report takes more than 10 seconds to generate
+                        $result_report[4][$row['rps_ID'].' '.basename($row['rps_Template'])] = $proc_length;
                     }
                 }
                 
