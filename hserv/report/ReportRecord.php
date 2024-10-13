@@ -222,11 +222,11 @@ class ReportRecord
      */
     public function getRelatedRecords($rec, $smarty_obj = null)
     {
-        $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
+        $rec_ID = $rec['recID'] ?? $rec;
 
-        $relRT = $this->system->defineConstant('RT_RELATION') ? RT_RELATION : 0;
-        $relSrcDT = $this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0;
-        $relTrgDT = $this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0;
+        $relRT = $this->rty_id('2-1'); //$this->system->defineConstant('RT_RELATION') ? RT_RELATION : 0;
+        $relSrcDT =  $this->dty_id('2-7');  //$this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0;
+        $relTrgDT = $this->dty_id('2-5'); //$this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0;
 
         $res = array();
         $rel_records = array();
@@ -324,7 +324,7 @@ class ReportRecord
         $recordID = $rec['rec_ID'];
 
         if (@$this->loaded_recs[$recordID]) {
-            return $this->loaded_recs[$recordID];
+            return $this->loaded_recs[$recordID]; //form cache
         }
 
         $record = array();

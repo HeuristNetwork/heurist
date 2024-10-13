@@ -1682,7 +1682,7 @@ Javascript wrap:<br>
             
     }
     
-    private function prepareCMSgroup(){
+    private function prepareCMSgroup($content){
         $cnt = '';
         foreach($content as $grp){
             $res = $this->prepareCMScontent($grp);
