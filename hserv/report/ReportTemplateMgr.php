@@ -82,21 +82,13 @@ class ReportTemplateMgr
             $ind = strpos($filename, "_");
             $isnot_temp = (!(is_numeric($ind) && $ind == 0));
 
-            if (file_exists($this->dir . $filename) && $ext == "gpl") {
-                $template_body = file_get_contents($this->dir . $filename);
-                $res = $this->convertTemplate($template_body, 1);
-
-                if (is_array($res) && isset($res['template'])) 
-                {
-                    $template_body = $res['template'];
-                    $filename_tpl = $this->saveTemplate($template_body, $filename);
-
-                    if ($filename_tpl) {
-                        $name = substr($filename_tpl, 0, -4);
-                        fileDelete($this->dir . $filename); // Remove .gpl
-                        $results[] = ['filename' => $filename_tpl, 'name' => $name];
-                    }
+            if (file_exists($this->dir . $filename) && $ext == "gpl") {  
+                
+                $processed_template = $this->processGplFile($filename);
+                if ($processed_template) {
+                    $results[] = $processed_template;
                 }
+                
             } elseif (file_exists($this->dir . $filename) && $ext == "tpl" && $isnot_temp) {
                 $name = substr($filename, 0, -4);
                 $results[] = ['filename' => $filename, 'name' => $name];
@@ -106,6 +98,31 @@ class ReportTemplateMgr
 
         return $results;
     }
+
+    /**
+    * Converts gpl file to tpl
+    *     
+    * @param mixed $filename
+    */
+    private function processGplFile($filename)
+    {
+        $template_body = file_get_contents($this->dir . $filename);
+        $res = $this->convertTemplate($template_body, 1);
+
+        if (is_array($res) && isset($res['template'])) {
+            $template_body = $res['template'];
+            $filename_tpl = $this->saveTemplate($template_body, $filename);
+
+            if ($filename_tpl) {
+                $name = substr($filename_tpl, 0, -4);
+                fileDelete($this->dir . $filename); // Remove .gpl
+                return ['filename' => $filename_tpl, 'name' => $name];
+            }
+        }
+
+        return null;
+    }    
+    
 
     /**
      * Returns the content of a specified template file.

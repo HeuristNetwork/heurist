@@ -208,7 +208,7 @@ class ReportExecute
      * @return string The sanitized output file name.
      */
     private function _prepareOutputFile(){
-        $this->outputfile = isset($this->params["output"]) ? $this->params["output"] : ($template_file?$template_file:'heurist_output');    
+        $this->outputfile = $this->params["output"] ?? $this->template_file ?? 'heurist_output';    
         $path_parts = pathinfo($this->outputfile);
         $this->outputfile = USanitize::sanitizeFileName($path_parts['filename']) . '.' . $this->outputmode;
         return $this->outputfile;
@@ -1197,34 +1197,32 @@ class ReportExecute
         //                2 downloads ONLY it under given output name (no file save, no browser output)
         //                3 saving into file and outputs smarty report into browser
        
-        switch ($this->publishmode) {
-            case 2: //download
+        if ($this->publishmode==2) {//download
             
                 header('Pragma: public');
                 header('Content-Disposition: attachment; filename="'.$this->outputfile.'"');
                 header(CONTENT_LENGTH . strlen($smarty_output));
-                             
-            case 0: //browser output only
                 echo $smarty_output;
-                break;
+                             
+        }elseif ($this->publishmode==0) {    //browser output only
             
-            case 3: //save into file and browser output
-            case 1: //save into file and info page
+            echo $smarty_output;
+        }else { 
+            //3 - save into file and browser output
+            //1 - save into file and info page
+            
+            if($this->outputfile!=null){
+                $errors = $this->saveOutputToFile($this->outputfile, $smarty_output);    
+            }
+            if($this->is_void){            
+                return;   
+            }
+            if($this->publishmode==3){
+                echo $smarty_output;
+            }else{
+                $this->generateInfoPage($this->outputfile, $errors);
+            }
                 
-                
-                if($this->outputfile!=null){
-                    $errors = $this->saveOutputToFile($this->outputfile, $smarty_output);    
-                }
-                if($this->is_void){            
-                    return;   
-                }
-                if($this->publishmode==3){
-                    echo $smarty_output;
-                }else{
-                    $this->generateInfoPage($this->outputfile, $errors);
-                }
-                
-                break;
         }
         
     }
