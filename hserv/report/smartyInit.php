@@ -101,7 +101,7 @@ function smartyInit($smarty_templates_dir=null){
                     'floatval','json_encode',
                     'ksort', 'nl2br', 
                     'preg_match_all','print_r','printf', 'range',
-                    'setlocale', 'sort', 'strpos', //'strstr', 'substr', 'strlen', 
+                    'setlocale', 'sort', 'strpos', 'strstr', 'substr', 'strlen', 
                     'time',
                     'utf8_encode');
                     
