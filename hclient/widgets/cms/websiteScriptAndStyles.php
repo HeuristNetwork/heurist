@@ -1089,10 +1089,10 @@ function initLinksAndImages($container, search_data){
         if( ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            ((href?.indexOf('template=')>0) || (href?.indexOf('showReps.php')>0))
+            (href?.indexOf('template=')>0 || href?.indexOf('showReps.php')>0))
             &&
             ($(link).attr('target')!='_blank' || record_view_target!='')
-           )
+          )
         {
                 $(link).on('click', function(event){
 
