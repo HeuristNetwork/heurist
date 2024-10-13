@@ -2591,7 +2591,7 @@ $.widget( "heurist.mapping", {
                 
                 if((that.mapPopUpTemplate && that.mapPopUpTemplate!='standard') || layer.options.popup_template){
                     
-                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?snippet=1&publish=1&debug=0&q=ids:'
+                    popupURL = window.hWin.HAPI4.baseURL + '?snippet=1&publish=1&debug=0&q=ids:'
                             + layer.feature.properties.rec_ID
                             + '&db='+db+'&template='
                             + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);

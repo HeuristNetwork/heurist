@@ -187,7 +187,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
 
         this._super();
-        
+/* to test        
         //add form to edit smarty snippet
         this.dosframe = $( "<iframe>" )
                     .css({'overflow-x': 'none !important', height:'400px', width:'100% !important'})
@@ -212,6 +212,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if($dlg && $dlg.length > 0 && $dlg.parent().find('.ui-dialog-title').length > 0){
             $dlg.parent().find('.ui-dialog-title').text('Add and apply formulae');
         }
+*/        
     },
 
     //

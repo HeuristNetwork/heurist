@@ -43,14 +43,17 @@ $.widget( "heurist.baseAction", {
         //listeners
         onInitFinished:null,  // event listener when dialog is fully inited
         beforeClose:null,     // to show warning before close
-        onClose:null
+        onClose:null,
         
+        keep_instance: false
     },
 
     _$: $, //shorthand for this.element.find
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
+    
+    _is_inited: false,
     
     _need_load_content:true, //flag 
     
@@ -67,6 +70,15 @@ $.widget( "heurist.baseAction", {
     //  load configuration and call _initControls
     //
     _init: function() {
+        
+        if(this.options.keep_instance && this._is_inited){
+            if(this.options.isdialog){
+                this.popupDialog();
+            }else{
+                this.element.show();
+            }
+            return;
+        }
 
         if(this.options.htmlContent==''){
             this.options.htmlContent = this.options.actionName+'.html';
@@ -110,9 +122,6 @@ $.widget( "heurist.baseAction", {
                 window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
         }
-
-        
-        
     },
     
      
@@ -138,7 +147,7 @@ $.widget( "heurist.baseAction", {
 
                 let fele = this.element.children().get(0);
                 
-                if(this._innerTitle.length==0){
+                if(this._innerTitle.length==0){ //not created yet
                     //titlebar            
                     this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;"></div>')
                                         .insertBefore(fele);
@@ -174,6 +183,8 @@ $.widget( "heurist.baseAction", {
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
         
+        this._is_inited = true;
+        
         return true;
     },
 
@@ -200,6 +211,18 @@ $.widget( "heurist.baseAction", {
                             that.doAction(); 
                     }}
                  ];
+    },
+    
+    changeTitle: function(new_title){
+        
+       //this.options.title = new_title; 
+        
+       if(this.options.isdialog){
+           this._as_dialog.parent().find('.ui-dialog-title').text(new_title);        
+       }else{
+           this._$('.ui-heurist-header').text(new_title);
+       } 
+        
     },
 
     //
@@ -233,7 +256,6 @@ $.widget( "heurist.baseAction", {
             let options = this.options,
                 btn_array = this._getActionButtons();
             const that = this;
-        
             if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning on close
@@ -265,8 +287,9 @@ $.widget( "heurist.baseAction", {
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose( that._context_on_close );
                     } 
-                    that._as_dialog.remove();    
-                        
+                    if(!that.options.keep_instance){
+                        that._as_dialog.remove();
+                    }
                 },
                 buttons: btn_array
             }); 
@@ -305,7 +328,6 @@ $.widget( "heurist.baseAction", {
                 let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
-            
         }
     },
     

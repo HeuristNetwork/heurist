@@ -20,6 +20,7 @@
 */
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
+use hserv\controller\FrontController;
 
 require_once dirname(__FILE__).'/autoload.php';
 
@@ -117,17 +118,21 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
                 redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
+    
+}elseif (@$_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)){
+
+    //execute smarty template
+    $controller = new FrontController();
+    $controller->run();
+    exit;
+    
 }elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
-          array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
+          array_key_exists('icon',$_REQUEST)){
 
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
         $script_name = 'hserv/controller/fileGet.php';
-    }elseif(array_key_exists('template',$_REQUEST))
-    {
-        //execute smarty template
-        $script_name = 'viewers/smarty/showReps.php';
     }else {
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';
@@ -136,7 +141,6 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
 
@@ -192,6 +196,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }
 }
 
+
 define('IS_INDEX_PAGE',true);
 if(!defined('PDIR')) {define('PDIR','');}
 
@@ -208,9 +213,6 @@ if($isLocalHost){
 <link rel="stylesheet" type="text/css" href="external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
 <script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
-
-<!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
-number of widgets. Currently it is commented out of the code in layout_default.js -->
 
 <script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>
 
@@ -230,6 +232,9 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
+
+<script type="text/javascript" src="hclient/widgets/report/reportViewer.js"></script>
+<script type="text/javascript" src="hclient/widgets/report/reportEditor.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>

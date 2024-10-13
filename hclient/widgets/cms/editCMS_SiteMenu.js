@@ -508,7 +508,7 @@ title: "Overview"
     // Create new cms menu record 
     //
     function _createMenuRecord(parent_id, page_name, template_name, callback, $dlg_element){
-
+        
         let details = {};
         details['t:'+DT_NAME] = [ page_name ];
         details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];

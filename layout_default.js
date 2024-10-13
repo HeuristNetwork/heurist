@@ -53,6 +53,9 @@ window.cfg_widgets = [
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
     {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
+    {id:'heurist_reportViewer', name:'Report', widgetname:'reportViewer', script:'hclient/widgets/viewers/reportViewer.js'},
+    
+    
     {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'heurist_Map2', name:'Map', title:'Map and timeline',
                 widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js', minh:300, minw:300},  // map in iframe
@@ -180,9 +183,8 @@ window.cfg_layouts = [
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
                     
-                    {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
-                    },
+                    {appid:'heurist_reportViewer', name: 'Custom Reports'},
+
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}
@@ -221,10 +223,8 @@ window.cfg_layouts = [
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off', ui_main:true} }}, 
                     
-                    {appid:'heurist_resultListExt', name: 'Report', options:{title:'Report', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports',
-                                    css:{overflow:'hidden'}}
-                    },
+                    {appid:'heurist_reportViewer', name: 'Report'},
+                        
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}

@@ -315,7 +315,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             let btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
             btn_stop.button();
             this._on(btn_stop,{click:function(){
-                let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+                let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
                 let request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
                 let that = this;
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
@@ -558,6 +558,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }    
     },
 
+    //   @todo use msg.showProgress
     //
     // Requests reportProgress every t_interval ms 
     // is_autohide 
@@ -593,7 +594,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         if(t_interval>900){
 
-            let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+            let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
                 
             this._progressInterval = setInterval(function(){ 
                 

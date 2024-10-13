@@ -75,7 +75,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     /**
     * initialization of hAPI object
     *  1) define paths from top.location
-    *  2) takes regional from  localization.js
+    *  2) takes regional from  localization_xxx.txt
     *
     * @param _db - database name, if omit it takes from url parameter
     * @param _oninit - callback function, obtain parameter true if initialization is successeful
@@ -274,6 +274,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
         if (request.notes) {
             request.notes = null; //unset to reduce traffic
+        }
+        if(!action){
+            action = 'index';
         }
 
         //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm

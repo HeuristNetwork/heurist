@@ -59,9 +59,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     use hserv\utilities\USanitize;
+    use hserv\report\ReportTemplateMgr;
 
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
-    require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
 
     define('DATABASE','DATABASE: ');
 
@@ -220,7 +220,7 @@
                 //$rtStructs['calcfields']['fieldNames'] = $colNames;
                 //$rtStructs['calcfields']['values'] = mysql__select_all($mysqli, $query, 1);
 
-                $repAction = new ReportActions($system, null);
+                $repAction = new ReportTemplateMgr($system, null);
 
                 $res = $mysqli->query($query);
                 if($res){

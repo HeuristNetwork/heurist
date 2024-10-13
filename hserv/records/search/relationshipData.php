@@ -61,7 +61,7 @@ function fetch_relation_details($recID, $i_am_primary) {
                     $bd['RelTermID'] = $row['dtl_Value'];
                 } else {
                     $bd['RelTermID'] = reltype_inverse($row['dtl_Value']);// BUG: assumes reltype_inverse returns ID
-                    //TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". term label requires checking smarty/showReps
+                    //TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". 
                 }
                 $relval = mysql__select_row_assoc($mysqli,
                         'select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' . intval($bd['RelTermID']));

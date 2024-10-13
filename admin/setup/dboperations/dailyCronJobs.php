@@ -88,9 +88,12 @@ if (@$argv) {
 
 }else{
     exit('This function must be run from the shell');
+    //$arg_database = 'libraries_readers_culture_18c_atlantic';
+    //$do_reports = true;
 }
 
 use hserv\entity\DbUsrReminders;
+use hserv\controller\ReportController;
 
 require_once dirname(__FILE__).'/../../../autoload.php';
 
@@ -102,8 +105,6 @@ $system = new hserv\System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
-
-require_once dirname(__FILE__).'/../../../viewers/smarty/updateReportOutput.php';
 
 
 if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');}
@@ -159,6 +160,8 @@ $long_reports_count = 0;
 $mysql_gone_away_error = false;
 $last_processed_database = null;
 
+$reports = new ReportController($system, []);
+
 foreach ($databases as $idx=>$db_name){
 
     $report='';
@@ -179,55 +182,35 @@ foreach ($databases as $idx=>$db_name){
     $system->set_dbname_full($db_name);
 
     if($do_reports){
-        $report = array(0=>0,1=>0,2=>0,3=>0);
-
-        //regenerate all reports
-        $is_ok = false;
-        $res = $mysqli->query('select * from usrReportSchedule');
-        if($res){
-
-            $smarty = null; //reset
-
-            while ($row = $res->fetch_assoc()) {
-                if($smarty==null){ //init smarty for new db if there is at least one entry in schedule table
-                    initSmarty($system->getSysDir('smarty-templates'));//reinit global smarty object for new database
-                    if(!isset($smarty) || $smarty==null){
-                        echo 'Cannot init Smarty report engine for database '.htmlspecialchars($db_name).$eol;
-                        break;
-                    }
-                }
-
-                $proc_start = time();// time execution
-                $rep = doReport($system, 4, 'html', $row);
-                $proc_length = time() - $proc_start;
-
-                if($rep>0){
-                    $report[$rep]++;
-                    $is_ok = true;
-                }
-
-                if($proc_length > 10){ // report if this report takes more than 10 seconds to generate
-
-                    if(!array_key_exists($db_name, $long_reports)){
-                        $long_reports[$db_name] = array();
-                    }
-
-                    $report_file = basename($row['rps_FileName'] != null ? $row['rps_FileName'] : $row['rps_Template']);
-                    $long_reports[$db_name][] = array($report_file, $proc_length);
-
-                    $long_reports_count ++;
-                }
-            }//while
-            $res->close();
-        }
-
-        if($is_ok){
+        
+        $report = $reports->updateTemplate(); //update all templates for database
+        
+        if(@$report[5]['fatal']){
+            echo 'Fatal error for database '.htmlspecialchars($db_name).'  '.$report[5]['fatal'].$eol;
+        }else{
+            if(!empty($report[4])){
+                $long_reports[$db_name] = $report[4];    
+                $long_reports_count = $long_reports_count + count($report[4]);
+            }
+            
             $report_list[$db_name] = $report;
 
             echo $eol.htmlspecialchars($db_name).$tabs;
             echo ' reports errors:'.$report[0].' created:'.$report[1].' updated:'.$report[2].' unchanged:'.$report[3].$eol;
+            
+            if(!empty($report[5])){
+                echo 'Reports with errors:'.$eol;
+                foreach($report[5] as $id=>$err){
+                    echo $id.'   '.$err.$eol;
+                }
+            }
+            if(!empty($report[4])){
+                echo 'Long execution reports:'.$eol;
+                foreach($report[4] as $id=>$time){
+                    echo $id.'   '.$time.$eol;
+                }
+            }
         }
-
     }
 
     if(in_array($db_name,$exclusion_list)){
@@ -326,9 +309,10 @@ echo $text.' Db '.htmlentities($last_processed_database).$eol;
                 $text.' It stopped on '.$last_processed_database);
 }
 
+$errors = 0;
+
 if(!empty($email_list) || !empty($report_list) || !empty($url_list)){
 
-    $errors = 0;
     $created = 0;
     $updated = 0;
     $intacted = 0;
@@ -383,11 +367,9 @@ if($long_reports_count > 0){
     $email_body = "The following report" . ($long_reports_count > 1 ? "s have" : " has") . " taken longer than 10 seconds to regenerate:\n";
 
     // $report_dtls
-    // [0] => Report name
-    // [1] => Execution time
     foreach($long_reports as $dbname => $report_dtls){
-        foreach($report_dtls as $idx => $report_dtl){
-            $email_body .= "DB: $dbname, Report name: " . $report_dtl[0] . " takes " . $report_dtl[1] . " seconds to regenerate\n";
+        foreach($report_dtls as $id=>$time){
+            $email_body .= "DB: $dbname, Report name: " . $id . " takes " . $time . " seconds to regenerate\n";
         }
     }
 
@@ -396,6 +378,23 @@ if($long_reports_count > 0){
 
     sendEmail(HEURIST_MAIL_TO_ADMIN, "Slow report generation on " . HEURIST_SERVER_NAME, $email_body);
 }
+
+if($errors>0){
+    $email_body = "The following report" . ($errors > 1 ? "s have" : " has") . " errors and can not be executed/regenerated:\n";
+    
+    foreach($report_list as $dbname=>$report){
+            if(!empty($report[5])){
+                echo 'Reports with errors:'.$eol;
+                foreach($report[5] as $id=>$err){
+                    $email_body .= "DB: $dbname, Report name: " . $id . '   '.$err."\n";
+                }
+            }
+    }
+    sendEmail(HEURIST_MAIL_TO_ADMIN, "Reports with errors " . HEURIST_SERVER_NAME, $email_body);
+}
+
+
+
 
 function exclusion_list(){
 

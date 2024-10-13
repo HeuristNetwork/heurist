@@ -166,16 +166,15 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             }}},
 
             { data: 'rps_ID', title: "<div style='font-size:10;'>Exec</div>", sortable:false, width:16, //resizeable:false,
-                render: function(data, type) {
+                render: function(rps_ID, type) {
                     if (type === 'display') {
+                       
                         let status = 0;
                         if(status==1){
                             return '';
                         }else{
-                            return '<a href="../../viewers/smarty/updateReportOutput.php?db='
-                            +window.hWin.HAPI4.database+'&publish=1&id='
-                            +data
-                            +'" target="_blank">'
+                            //update report and show info page
+return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=1&template_id=${rps_ID}" target="_blank">`
                             +'<span class="ui-icon ui-icon-refresh" title="'+window.hWin.HR('Run report')+'">'
                             +'</a>';
                         }
@@ -184,16 +183,14 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             }}},
 
             { data: 'rps_ID', title: "<div style='font-size:10;min-width:30px;'>HTML</div>", sortable:false, width:18, //resizeable:false,
-                render: function(data, type) {
+                render: function(rps_ID, type) {
                     if (type === 'display') {
                         let status = 0;
                         if(status==1){
                             return '';
                         }else{
-                            return '<a href="../../viewers/smarty/updateReportOutput.php?db='
-                            +window.hWin.HAPI4.database+'&publish=3&mode=html&id='
-                            +data
-                            +'" target="_blank">'
+                            //update report and show output  controller=ReportController&action=update&
+return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=3&template_id=${rps_ID}&mode=html" target="_blank">`
                             +'<img alt src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
                             +'</a>';
                         }
@@ -208,10 +205,10 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                         if(status==1){
                             return '';
                         }else{
-                            let outputmode = data?data:'txt';
-                            return '<a href="../../viewers/smarty/updateReportOutput.php?db='
-                            +window.hWin.HAPI4.database+'&publish=3&mode='+outputmode+'&id='
-                            +row.rps_ID+'" target="_blank">'+outputmode.toUpperCase()
+                            //show output as javascript wrap row.rps_ID
+                            let outputformat = data?data:'txt';
+return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=3&template_id=${row.rps_ID}&mode=${outputformat}" target="_blank">`
+                            +outputformat.toUpperCase()
                             +'&nbsp;<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
                         }
                     }else{

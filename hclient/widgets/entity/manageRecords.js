@@ -107,7 +107,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                             + '<div class="editFormDialog ent_wrapper editor">'
                                     + '<div class="ui-layout-west"><div class="editStructure">..</div></div>' //container for rts_editor
-                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-center"><div class="editForm">..</div></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
                             +'</div>'
@@ -4837,12 +4837,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(that.editFormSummary && that.editFormSummary.length>0){
             
                 that.editFormSummary.find('.summary-accordion').each(function(idx,item){
-                    let active = $(item).accordion('option','active');
-                    if(active!==false){
+                let active = $(item).accordion('option','active');
+                if(active!==false){
                         activeTabs.push(String(idx));
-                    }
+                }
                             
-                });
+            });
 
                 let myLayout = that.editFormPopup.layout();                
                 

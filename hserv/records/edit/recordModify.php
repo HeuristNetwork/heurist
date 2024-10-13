@@ -4,6 +4,7 @@ use hserv\entity\DbDefRecTypes;
 use hserv\utilities\USanitize;
 use hserv\utilities\UImage;
 use hserv\structure\ConceptCode;
+use hserv\report\ReportRecord;
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -48,8 +49,8 @@ require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.php';
 
-require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
-require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
+require_once dirname(__FILE__).'/../../report/smartyInit.php';
+
 
 global $useNewTemporalFormatInRecDetails;
 global $recstructures, $detailtypes, $terms, $block_swf_email;
@@ -1889,6 +1890,12 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rectypes[$id] = '*';
         }
     }
+    
+    try{   
+        $smarty = smartyInit($system->getSysDir('smarty-templates'));
+    } catch (Exception $e) {
+        return array('message'=>'Smarty init error: '.$e->getMessage());
+    }
 
     if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);
@@ -1906,7 +1913,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
     $cleared_count = 0;   // cleared fields
     $unchanged_count = 0; // unchanged fields
 
-    $heuristRec = new ReportRecord();//helper class - to obtain access to heurist data from smarty report
+    $heuristRec = new ReportRecord($system);//helper class - to obtain access to heurist data from smarty report
 
     foreach ($rectypes as $rty_ID => $record_ids){
 
@@ -1972,7 +1979,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
 
                 $params['records'] = array($recID);
 
-                $new_value = executeSmarty($system, $params, $mode, $heuristRec);
+                $new_value = executeSmarty($system, $smarty, $params, $mode, $heuristRec);
 
                 if(is_array($new_value)){
                     if($new_value[0]=='fatal'){  //fatal smarty error
@@ -2087,15 +2094,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
 //     records - record ids
 //     mode - eval or string (re-use)
 //
-function executeSmarty($system, $params, $mode=null, $heuristRec=null){
-  global $smarty;
-
-  if(!isset($smarty) || $smarty==null){
-      initSmarty();//global function from smartyInit.php
-      if(!isset($smarty) || $smarty==null){
-            return array('fatal', 'Smarty init error');
-      }
-  }
+function executeSmarty($system, $smarty, $params, $mode=null, $heuristRec=null){
 
   $content = (array_key_exists('template',$params)?$params['template']:null);
 
@@ -2117,8 +2116,9 @@ function executeSmarty($system, $params, $mode=null, $heuristRec=null){
   fwrite($file, $content);
   fclose ($file);
   */
-
-  if($heuristRec==null) {$heuristRec = new ReportRecord();}
+  
+  //@todo use ReportExecute class
+  if($heuristRec==null) {$heuristRec = new ReportRecord($system);}
 
   $smarty->assign('heurist', $heuristRec);
 

@@ -540,9 +540,13 @@ window.hWin.HEURIST4.ui = {
         if(rectypes){ 
 
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
-
+            
             if(!Array.isArray(rectypeList)){
-                rectypeList = rectypeList.split(',');
+                if(window.hWin.HEURIST4.util.isPositiveInt(rectypeList)){
+                    rectypeList = [rectypeList];
+                }else{
+                    rectypeList = rectypeList.split(',');
+                }
             }
         }else if(!useGroups){ //all rectypes however plain list (not grouped)
             rectypeList = rectypes.getIds();
@@ -2266,27 +2270,32 @@ window.hWin.HEURIST4.ui = {
     //
     createTemplateSelector: function($select, topOptions, defValue, options){
         
-        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-        let request = {mode:'list', db:window.hWin.HAPI4.database};
-        
-        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
-            function(context){
-                
-                let opts = topOptions?topOptions:[];
-                if(context && context.length>0){
-                    for (let i=0; i<context.length; i++){
-                        opts.push({key:context[i].filename, title:context[i].name});
-                    } // for
+        window.hWin.HAPI4.SystemMgr.reportAction({action:'list'}, 
+            function(response){
+                if (response.status == window.hWin.ResponseStatus.OK) {
+
+                    let context = response.data;
+                    
+                    let opts = topOptions?topOptions:[];
+                    if(context?.length>0){
+                        for (let i=0; i<context.length; i++){
+                            opts.push({key:context[i].filename, title:context[i].name});
+                        } // for
+                    }
+
+                    window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+                    if(defValue){
+                        $select.val( defValue );
+                    }
+                    
+                    window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
+
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-                
-                window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
-                if(defValue){
-                    $select.val( defValue );
-                }
-                window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
-                
-            });
-        
+
+        });
+
 
     },
     
@@ -2417,33 +2426,7 @@ window.hWin.HEURIST4.ui = {
         if(window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             return window.hWin.HEURIST4.ui.showWdigetDialog(widgetName, options);
-            /*
-            let manage_dlg;
-
-            if(!options) options = {};
-            if(options.isdialog!==false) options.isdialog = true; //by default popup      
             
-            if(!options.container){ //container not defined - add new one to body
-            
-                manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
-                    .appendTo( $('body') );
-                manage_dlg[widgetName]( options );
-            }else{
-                if($(options.container)[widgetName]('instance')){
-                    $(options.container)[widgetName]('destroy');
-                }
-                $(options.container).empty();
-                $(options.container).show();
-                
-                if(!$(options.container).attr('id')){
-                    $(options.container).uniqueId()
-                }
-                
-                manage_dlg = $(options.container)[widgetName]( options );
-            }
-            
-            return manage_dlg;
-            */
         }else{
             
             let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
@@ -2654,17 +2637,26 @@ window.hWin.HEURIST4.ui = {
         
             let manage_dlg;
             
-            if(!options.container){ //container not defined - add new one to body
-                
-                manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
+            let container_name = 'heurist-dialog-'+widgetName;
+            if(!options.keep_instance){
+                container_name += '-'+window.hWin.HEURIST4.util.random();
+            }
+
+            if(!options.container){
+                options.container = $('#'+container_name);
+            }
+            
+            if(!options.container || options.container.length==0){ //container not defined - add new one to body
+            
+                manage_dlg = $('<div id="'+container_name+'">')
                     .appendTo( doc_body );
                 manage_dlg[widgetName]( options );
             }else{
                 
                 if($(options.container)[widgetName]('instance')){
                     
-                    if(options.need_reload===false){
-                        $(options.container).show();
+                    if(options.keep_instance){
+                        $(options.container)[widgetName]( options ); //.show();
                         return;
                     }else{
                         $(options.container)[widgetName]('destroy');

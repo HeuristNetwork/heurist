@@ -1428,12 +1428,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // t_interval - checkout interval
     //
     showProgress: function( options ){
+        if(window.hWin.HEURIST4.msg._progressInterval>0){
+            console.log('previous progress is not completed');            
+            return;
+        }
         
         let $progress_div;
-        let content = options.content;
+        let content = options?.content;
         let is_popup = true;
+        
+        if(!options){
+            options = {};
+        }        
 
-        if(options.container){ //container element
+        if(options?.container){ //container element
             is_popup = false;
             $progress_div = options.container;
         }        
@@ -1442,7 +1450,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             //default content
             content = '';
             
-            if(Array.isArray(options.steps)){
+            if(Array.isArray(options?.steps)){
                 
                 content = '<ol type="1" style="font-size:12px;height:80%;padding-top:20px;" class="progress-steps">';
                 
@@ -1476,7 +1484,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         
-        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
         
         let session_id = options.session;
         if(!(session_id>0)) session_id = window.hWin.HEURIST4.util.random();
@@ -1519,7 +1527,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+//response=='' || 
+                if(response?.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     window.hWin.HEURIST4.msg.hideProgress();
                 }else if(response){
                     //it may return terminate,done,
@@ -1614,9 +1623,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     hideProgress: function(){
-        
         $('body').css('cursor','auto');
-        
+
         if(window.hWin.HEURIST4.msg._progressInterval!=null){
             
             clearInterval(window.hWin.HEURIST4.msg._progressInterval);
@@ -1631,6 +1639,68 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.dialog( "close" );
             window.hWin.HEURIST4.msg._progressPopup = null;
         }
+        
+    },
+    
+    
+    //
+    // Warning on exit
+    //             
+    showMsgOnExit: function(sMessage, onSave, onIgnore){
+        let $dlg, buttons = {};
+        buttons['Save'] = function(){ 
+            //that._saveEditAndClose(null, 'close'); 
+            onSave();
+            $dlg.dialog('close'); 
+        }; 
+        buttons['Ignore and close'] = function(){ 
+            onIgnore();
+            $dlg.dialog('close'); 
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            window.hWin.HR('Warn_Lost_Data'),
+            buttons,
+            {title: window.hWin.HR('Confirm'),
+               yes: window.hWin.HR('Save'),
+                no: window.hWin.HR('Ignore and close')},
+            {default_palette_class:'ui-heurist-design'});
+        
+    },
+    
+    //
+    // for smarty reports
+    //
+    showWarningAboutDisabledFunction: function(txt){
+      
+            if(txt.indexOf('Exception on execution: Syntax error in template')==0 
+            && txt.indexOf('not allowed by security setting')>0){
+                
+                    let buttons = null
+                    if(window.hWin.HAPI4.actionHandler){
+                        buttons = 
+                        {   'Send Bug Report': function() {
+                                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
+                                $dlgm.dialog( 'close' );
+                                },
+                            'Cancel':function() {
+                                $dlgm.dialog( 'close' );
+                            }
+                        };
+                    }
+
+                    let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+    '<p>Sorry, native php functions in custom reports are disabled by default<br>'
+    +'as a security precaution. </p>'
+    +'<p>Please use the bug report function to ask that this function be enabled. </p>',
+                        buttons,
+                        'Warning');
+                        
+                        return true;
+                
+            }
+            
+            return false;
         
     },
     

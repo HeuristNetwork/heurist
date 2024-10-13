@@ -1735,6 +1735,8 @@ $mysqli->kill($thread_id);
     // returns value of session file
     // if $value is not set, it returns current value
     //
+    // now it is not database based - session values are in file
+    //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
 
         $session_id = intval($session_id);
@@ -1753,7 +1755,9 @@ $mysqli->kill($thread_id);
             $res = 'terminate';
         }else{
             //get
-            if($is_exist) {$res = file_get_contents($session_file);}
+            if($is_exist) {
+                $res = file_get_contents($session_file);
+            }
 
             if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);

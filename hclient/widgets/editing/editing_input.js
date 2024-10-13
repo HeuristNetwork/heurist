@@ -1110,7 +1110,7 @@ $.widget( "heurist.editing_input", {
                         let parts = org_href.split('/');
 
                         if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
-                            href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
+                            href = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
                         }
                     }else 
                     if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
@@ -3352,7 +3352,7 @@ $.widget( "heurist.editing_input", {
             //hide progress bar
             $progress_dlg.dialog( "close" );
         
-            if(response.result){//????
+            if(response.result){//file upload places our data to 'result'
                 response = response.result;
             }
             if(response.status==window.hWin.ResponseStatus.OK){
