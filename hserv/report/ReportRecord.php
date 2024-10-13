@@ -236,11 +236,11 @@ class ReportRecord
             if ($from_res && $to_res) {
                 if ($from_res->num_rows > 0 || $to_res->num_rows > 0) {
                     while ($reln = $from_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($reln['dtl_RecID'], true);
+                        $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], true);
                         array_push($rel_records, $bd);
                     }
                     while ($reln = $to_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($reln['dtl_RecID'], false);
+                        $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], false);
                         array_push($rel_records, $bd);
                     }
 

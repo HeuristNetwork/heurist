@@ -29,7 +29,6 @@ require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 $system = new hserv\System();
-$inverses = null;
 
 if(!$system->init(@$_REQUEST['db'])){
     include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
@@ -2358,7 +2357,7 @@ function print_relation_details($bib) {
     if($from_res){
 		while ($reln = $from_res->fetch_assoc()) {
 
-			$bd = fetch_relation_details($reln['dtl_RecID'], true);
+			$bd = fetch_relation_details($system, $reln['dtl_RecID'], true);
 
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
@@ -2445,7 +2444,7 @@ function print_relation_details($bib) {
     if($to_res){
         while ($reln = $to_res->fetch_assoc()) {
 
-			$bd = fetch_relation_details($reln['dtl_RecID'], false);
+			$bd = fetch_relation_details($system, $reln['dtl_RecID'], false);
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
 				continue;
