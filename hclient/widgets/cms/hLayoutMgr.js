@@ -115,8 +115,6 @@ function hLayoutMgr(){
 
         if(isFirstLevel===true){
             
-            pnl_counter = 1;
-            
             if(_supp_options.page_name){
                 layout[0].name  = 'Page';
             }

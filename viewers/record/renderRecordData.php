@@ -217,7 +217,6 @@ if(isLocalHost()){
                 var currentImg = obj;
 
                 if (currentImg.parentNode.className != "fullSize"){
-console.log('hide curr image');                    
                     $(currentImg).hide();
                     currentImg.src = url;
                     currentImg.onload=function(){

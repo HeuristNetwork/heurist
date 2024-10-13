@@ -1303,7 +1303,7 @@ $.getMultiScripts2 = function(arr, path) {
           _resolve();
         })()
         .catch((err) => {
-console.log(err);            
+            //console.log(err);            
             // Something went wrong
             _reject(err);
         });
