@@ -189,20 +189,23 @@ class ReportRecord
         }
 
         $currentUser = $this->system->getCurrentUser();
+
+        if ($currentUser['ugr_ID'] == 2) { // db owner
+            return true;
+        }
+
         $res = true;
 
-        if ($currentUser['ugr_ID'] != 2) { // db owner
-            if ($rec['rec_NonOwnerVisibility'] == 'hidden') {
-                $res = false;
-            } elseif ($currentUser['ugr_ID'] > 0 && $rec['rec_NonOwnerVisibility'] == 'viewable') {
-                $wg_ids = @$currentUser['ugr_Groups'] ? array_keys($currentUser['ugr_Groups']) : $this->system->get_user_group_ids();
-                array_push($wg_ids, 0); // Include generic everybody workgroup
+        if ($rec['rec_NonOwnerVisibility'] == 'hidden') {
+            $res = false;
+        } elseif ($currentUser['ugr_ID'] > 0 && $rec['rec_NonOwnerVisibility'] == 'viewable') {
+            $wg_ids = @$currentUser['ugr_Groups'] ? array_keys($currentUser['ugr_Groups']) : $this->system->get_user_group_ids();
+            array_push($wg_ids, 0); // Include generic everybody workgroup
 
-                if (!isEmptyArray($wg_ids) && !in_array($rec['rec_OwnerUGrpID'], $wg_ids)) {
-                    $allowed_groups = mysql__select_list2($this->system->get_mysqli(), 'SELECT rcp_UGrpID FROM usrRecPermissions WHERE rcp_RecID=' . $rec['rec_ID']);
-                    if (empty($allowed_groups) && count(array_intersect($allowed_groups, $wg_ids)) > 0) {
-                        $res = false;
-                    }
+            if (!isEmptyArray($wg_ids) && !in_array($rec['rec_OwnerUGrpID'], $wg_ids)) {
+                $allowed_groups = mysql__select_list2($this->system->get_mysqli(), 'SELECT rcp_UGrpID FROM usrRecPermissions WHERE rcp_RecID=' . $rec['rec_ID']);
+                if (empty($allowed_groups) && count(array_intersect($allowed_groups, $wg_ids)) > 0) {
+                    $res = false;
                 }
             }
         }
@@ -228,41 +231,45 @@ class ReportRecord
         $res = array();
         $rel_records = array();
 
-        if ($rec_ID > 0 && $relRT > 0 && $relSrcDT > 0 && $relTrgDT > 0) {
-            $mysqli = $this->system->get_mysqli();
-            $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=' . $rec_ID);
-            $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=' . $rec_ID);
+        if (!($rec_ID > 0 && $relRT > 0 && $relSrcDT > 0 && $relTrgDT > 0)) {
+             return $res;
+        }
+            
+        $mysqli = $this->system->get_mysqli();
+        $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=' . $rec_ID);
+        $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=' . $rec_ID);
 
-            if ($from_res && $to_res) {
-                if ($from_res->num_rows > 0 || $to_res->num_rows > 0) {
-                    while ($reln = $from_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], true);
-                        array_push($rel_records, $bd);
-                    }
-                    while ($reln = $to_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], false);
-                        array_push($rel_records, $bd);
-                    }
+        if (!($from_res && $to_res && ($from_res->num_rows > 0 || $to_res->num_rows > 0))) {
+             return $res;
+        }
+    
+        while ($reln = $from_res->fetch_assoc()) {
+            $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], true);
+            array_push($rel_records, $bd);
+        }
+        while ($reln = $to_res->fetch_assoc()) {
+            $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], false);
+            array_push($rel_records, $bd);
+        }
 
-                    foreach ($rel_records as $value) {
-                        if (array_key_exists('RelatedRecID', $value) && array_key_exists('RelTerm', $value)) {
-                            $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
+        foreach ($rel_records as $value) {
+            if (array_key_exists('RelatedRecID', $value) && array_key_exists('RelTerm', $value)) {
+                $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
 
-                            $record["recRelationID"] = $value['recID'];
-                            $record["recRelationType"] = $value['RelTerm'];
-                            $record["recRelationNotes"] = $value['Notes'] ?? null;
-                            $record["recRelationStartDate"] = \Temporal::toHumanReadable($value['StartDate']) ?? null;
-                            $record["recRelationEndDate"] = \Temporal::toHumanReadable($value['EndDate']) ?? null;
+                $record["recRelationID"] = $value['recID'];
+                $record["recRelationType"] = $value['RelTerm'];
+                $record["recRelationNotes"] = $value['Notes'] ?? null;
+                $record["recRelationStartDate"] = \Temporal::toHumanReadable($value['StartDate']) ?? null;
+                $record["recRelationEndDate"] = \Temporal::toHumanReadable($value['EndDate']) ?? null;
 
-                            array_push($res, $record);
-                        }
-                    }
-                }
-
-                $from_res->close();
-                $to_res->close();
+                array_push($res, $record);
             }
         }
+    
+        $from_res->close();
+        $to_res->close();
+
+        
         return $res;
     }
 

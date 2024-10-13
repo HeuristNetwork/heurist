@@ -1012,7 +1012,7 @@ class System {
     }
 
     public function getErrorMsg(){
-        $ret = ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+        $ret = $this->errors['message'] ?? '';
         return $ret;
     }
 

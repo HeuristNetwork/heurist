@@ -222,7 +222,25 @@ class ReportExecute
      */
     private function fetchRecordIDs()
     {
-        //Set the search limit based on publishing mode or user preferences.
+        $this->setLimit();
+        $this->message_about_truncation = null;
+
+        if (isset($this->params['recordset'])) {
+            // Handle predefined recordset
+            $qresult = $this->handleRecordset($this->params['recordset']);
+        } else {
+            // Perform a query/search for the recordset
+            $qresult = $this->searchRecords();
+        }
+
+        return $qresult;
+    }
+
+    /**
+    * Sets the search limit based on publishing mode or user preferences.
+    */
+    private function setLimit()
+    {
         if (!isset($this->params["limit"])) {
             if ($this->publishmode == 0) {
                 $limit_for_interface = intval($this->system->user_GetPreference('smarty-output-limit'));
@@ -235,55 +253,66 @@ class ReportExecute
             }
         }
         $this->limit = intval($this->params["limit"]);
-        
-        
-        $this->message_about_truncation = null;
-        
-        if (isset($this->params['recordset'])) {
-            //A. recordset (list of record ids) is already defined
-            
-            if (is_array($this->params['recordset'])) {
-                $qresult = $this->params['recordset'];
-            } else {
-                $qresult = json_decode($this->params['recordset'], true);
-            }
-
-            if ($this->publishmode == 0 && $qresult && isset($qresult['recIDs'])) {
-                $recIDs = prepareIds($qresult['recIDs']);
-                    
-                if($this->limit < count($recIDs) || $this->limit < $qresult['recordCount'] ){
-                    $this->message_about_truncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'
-                        .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
-                }
-                
-                if ($this->limit < count($recIDs)) {
-                    $qresult = [
-                        'records' => array_slice($recIDs, 0, $this->limit),
-                        'reccount' => count($recIDs)
-                    ];
-                    
-                } else {
-                    $qresult = [
-                        'records' => $recIDs,
-                        'reccount' => count($recIDs)
-                    ];
-                }
-            }
+    }  
+    
+    /**
+    * recordset (list of record ids) is already defined
+    *     
+    * @param mixed $recordset
+    */
+    private function handleRecordset($recordset)
+    {
+        if (is_array($recordset)) {
+            $qresult = $recordset;
         } else {
-            //B. get recordset from query/search results
-            $this->params['detail'] = 'ids';
-            $qresult = recordSearch($this->system, $this->params);
+            $qresult = json_decode($recordset, true);
+        }
 
-            if (isset($qresult['status']) && $qresult['status'] == HEURIST_OK) {
-                $qresult = $qresult['data'];
+        if ($this->publishmode == 0 && $qresult && isset($qresult['recIDs'])) {
+            $recIDs = $this->prepareIds($qresult['recIDs']);
+            
+            if($this->limit < count($recIDs) || $this->limit < $qresult['recordCount'] ){
+                $this->message_about_truncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'
+                    .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
+            }
+            
+            if ($this->limit < count($recIDs)) {
+                $qresult = [
+                    'records' => array_slice($recIDs, 0, $this->limit),
+                    'reccount' => count($recIDs)
+                ];
+                
             } else {
-                $this->smarty_error_output();
+                $qresult = [
+                    'records' => $recIDs,
+                    'reccount' => count($recIDs)
+                ];
             }
         }
 
         return $qresult;
-    }
+    }  
+    
+    /**
+    *  get recordset from query/search results
+    */
+    private function searchRecords()
+    {
+        $this->params['detail'] = 'ids';
+        $qresult = recordSearch($this->system, $this->params);
 
+        if (isset($qresult['status']) && $qresult['status'] == HEURIST_OK) {
+            return $qresult['data'];
+        } else {
+            $msg = $this->system->getErrorMsg();
+            if($msg==''){
+                $msg = 'Undefined error on query executtion';
+            }
+            $this->params['emptysetmessage'] = $msg;
+            return null;
+        }
+    }    
+         
     /**
      * Handles empty result sets and outputs an appropriate error message or info.
      *
@@ -292,23 +321,25 @@ class ReportExecute
      */
     private function handleEmptyResultSet($qresult)
     {
-        $emptysetmessage = $this->params['emptysetmessage']?? null;
+        $emptysetmessage = $this->params['emptysetmessage'] ?? null;
 
-        if (!$qresult || !isset($qresult['records']) || !(intval($qresult['reccount']) > 0)) {
-            if ($this->publishmode == 4) {
-                //for calculation field
-                echo USanitize::sanitizeString($emptysetmessage && $emptysetmessage != 'def' ? $emptysetmessage : '');
-            } else {
-                $error = $emptysetmessage && $emptysetmessage != 'def'
-                    ? $emptysetmessage
-                    : ($this->publishmode > 0
-                        ? 'Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility'
-                        : 'Search records to see template output');
-                $this->smarty_error_output($error);
-            }
-            return false;
+        if (isset($qresult['records']) && intval(@$qresult['reccount']) > 0) {
+            return true;    
         }
-        return true;
+            
+        if ($this->publishmode == 4) {
+            //for calculation field
+            echo USanitize::sanitizeString($emptysetmessage && $emptysetmessage != 'def' ? $emptysetmessage : '');
+        } else {
+            $error = $emptysetmessage && $emptysetmessage != 'def'
+                ? $emptysetmessage
+                : ($this->publishmode > 0
+                    ? 'Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility'
+                    : 'Search records to see template output');
+            $this->smarty_error_output($error);
+        }
+        return false;
+        
     }
 
     /**
@@ -322,23 +353,11 @@ class ReportExecute
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
 
         if ($template_file) {
-            if (substr($template_file, -4) !== ".tpl") {
-                $template_file .= ".tpl";
-            }
-
-            $template_path = $this->system->getSysDir('smarty-templates') . $template_file;
-            if (file_exists($template_path)) {
-                $content = file_get_contents($template_path);
-            } else {
-                $error = 'Template file ' . htmlspecialchars($template_file) . ' does not exist';
-                $this->smarty_error_output($error);
-                return false;
-            }
-            $this->template_file = $template_file;
-            
+            $content = $this->loadTemplateFile($template_file);
         } else {
             $content = $template_body;
         }
+
         
         if(!isset($this->params["output"]) && $this->publishmode != 2){
             $this->outputfile = null;
@@ -346,16 +365,39 @@ class ReportExecute
                 //if output is not defined - output to browser by default
                 $this->publishmode = 3;   
             }
+            $this->outputfile = null;
         }else{
             $this->outputfile = $this->_prepareOutputFile();
         }
         
-        if($content==null || strlen(trim($content))==0){
+        if($content!==false && ($content==null || strlen(trim($content))==0)){
             $this->smarty_error_output('Template content is empty');
             return false;
         }
-        
+
         return $content;
+    }
+    
+    /**
+    * Loads template content from file
+    * 
+    * @param mixed $template_file
+    */
+    private function loadTemplateFile($template_file)
+    {
+        if (substr($template_file, -4) !== ".tpl") {
+            $template_file .= ".tpl";
+        }
+
+        $template_path = $this->system->getSysDir('smarty-templates') . $template_file;
+        if (!file_exists($template_path)) {
+            $error = 'Template file ' . htmlspecialchars($template_file) . ' does not exist';
+            $this->smarty_error_output($error);
+            return false;
+        }
+        
+        $this->template_file = $template_file;
+        return file_get_contents($template_path);
     }
 
     /**
@@ -571,8 +613,10 @@ class ReportExecute
     private function smarty_error_output($error_msg=null){
         
         if(!isset($error_msg)){
-            $error_msg = $this->system->getError();
-            $error_msg = (@$error_msg['message'])?$error_msg['message']:'Undefined smarty error';
+            $error_msg = $this->system->getErrorMsg();
+            if($error_msg==''){
+                $error_msg = 'Undefined smarty error';
+            }
         }
         if($this->publishmode>0 && $this->publishmode<4){
             //$error_msg = $error_msg.'<div style="padding:20px;font-size:110%">Currently there are no results</div>';
@@ -776,29 +820,32 @@ class ReportExecute
          if($this->system->defineConstant('DT_CMS_EXTFILES')){
              array_push($css_fields, DT_CMS_EXTFILES);
          }
-         if(!empty($css_fields)){
-             $record = recordSearchByID($this->system, $this->record_with_custom_styles, $css_fields, 'rec_ID');
-             if($record && @$record['details']){
+         if(empty($css_fields)){
+             return '';
+         }
+         
+         $record = recordSearchByID($this->system, $this->record_with_custom_styles, $css_fields, 'rec_ID');
+         if(!@$record['details']){
+            return '';    
+         }
 
-                 if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                     //add to begining
-                     $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
-                 }
+         if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
+             //add to begining
+             $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
+         }
 
-                 if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
-                     //add to header
-                     $external_files = @$record['details'][DT_CMS_EXTFILES];
-                     if($external_files!=null){
-                         if(!is_array($external_files)){
-                             $external_files = array($external_files);
-                         }
-                         foreach ($external_files as $ext_file){
-                             $head .= $ext_file;
-                         }
-                     }
-                 }
+         if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+             //add to header
+             $external_files = $record['details'][DT_CMS_EXTFILES] ?? [];
+             if(!is_array($external_files)){
+                     $external_files = array($external_files);
+             }
+             
+             foreach ($external_files as $ext_file){
+                $head .= $ext_file;
              }
          }
+         
          return $head;
     }
     
@@ -1614,24 +1661,14 @@ Javascript wrap:<br>
 
         if(is_array($content)){
 
-            if(!@$content['type']=='text'){
+            if(@$content['type']=='group' && is_array(@$content['children'])){
                 $convert_links = false;
-                foreach($content as $grp){
-                    $res = $this->prepareCMScontent($grp);
-                    if($res){
-                        $cnt = $cnt.'<br>'.$res;
-                    }
-                }
+                $cnt = $this->prepareCMSgroup($content['children']);
+            }elseif(!@$content['type']=='text'){
+                $convert_links = false;
+                $cnt = $this->prepareCMSgroup($content);
             }elseif(@$content['type']=='text'){
                 $cnt =  @$content['content'];
-            }elseif(@$content['type']=='group' && is_array(@$content['children'])){
-                $convert_links = false;
-                foreach($content['children'] as $grp){
-                    $res = $this->prepareCMScontent($grp);
-                    if($res){
-                        $cnt = $cnt.'<br>'.$res;
-                    }
-                }
             }
         }else{
             $cnt = $content;
@@ -1643,6 +1680,17 @@ Javascript wrap:<br>
 
         return $cnt;
             
+    }
+    
+    private function prepareCMSgroup(){
+        $cnt = '';
+        foreach($content as $grp){
+            $res = $this->prepareCMScontent($grp);
+            if($res){
+                $cnt = $cnt.'<br>'.$res;
+            }
+        }        
+        return $cnt;
     }
     
     //
