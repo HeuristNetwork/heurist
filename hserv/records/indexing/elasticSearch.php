@@ -61,8 +61,8 @@
 
     */
 require_once 'elasticSearchHelper.php';
-    
-// it is assumed that $system is already inited    
+
+// it is assumed that $system is already inited
 class ElasticSearch {
 
      /**
@@ -70,18 +70,17 @@ class ElasticSearch {
      * the outside. This prevents instantiating this class.
      * This is by purpose, because we want a static class.
      */
-    private function __construct() {}    
+    private function __construct() {}
     private static $mysqli = null;
     private static $initialized = false;
 
 
     private static function initialize()
     {
-        if (self::$initialized)
-            return;
+        if (self::$initialized)  {return;}
 
         global $system;
-        self::$mysqli = $system->get_mysqli();    
+        self::$mysqli = $system->get_mysqli();
         self::$initialized = true;
     }
 
@@ -94,22 +93,22 @@ class ElasticSearch {
     * @return bool True if successful
     */
     public static function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
-        
+
         if(isElasticUp()) {
-            
-            self::initialize();                        
-            
+
+            self::initialize();
+
             $record = new stdClass();
 
             // Retrieve record level data
             $query = "SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
-            "from Records where rec_ID=".intval($recID); // omits scratchpad
+            "from Records where rec_ID=".intval($recID);// omits scratchpad
             $res = self::$mysqli->query($query);
 
             // Check if query has succeed
             if ($res) {
-                $row = $res->fetch_row(); // Fetch record data
+                $row = $res->fetch_row();// Fetch record data
 
                 // Construct record
                 $record->URL            = $row[0];
@@ -145,7 +144,7 @@ class ElasticSearch {
             // Check if query has succeeded
             if ($res) {
                 // Append detail level data to record
-                while (($row = $res->fetch_row())) {
+                while ($row = $res->fetch_row()) {
                     // Detail ID is used as key, together with dtl_Value, dtl_UploadedFileID and dtl_Geo
                     // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
                     $record->$row[0] = $row[1].$row[2].$row[3];
@@ -187,7 +186,7 @@ class ElasticSearch {
     */
     public static function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         if(isElasticUp()) {
-            
+
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $query = new stdClass();
@@ -235,7 +234,7 @@ class ElasticSearch {
     */
     public static function deleteIndexForDatabase ($dbName) {
         if(isElasticUp()) {
-            
+
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName);
             $query = new stdClass();
@@ -260,16 +259,16 @@ class ElasticSearch {
     */
     public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
-            
-            self::initialize();                        
-            
-            self::deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
+
+            self::initialize();
+
+            self::deleteIndexForRectype ($dbName, $recTypeID);// clear the existing index
 
             $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
             $res = self::$mysqli->query($query);
 
             if ($res) {
-                while (($row = $res->fetch_row())) { // fetch records
+                while ($row = $res->fetch_row()) { // fetch records
                     // Update all records while successful
                     if(!self::updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/)) {
                         return false;
@@ -292,10 +291,14 @@ class ElasticSearch {
     * @return bool True if OK, false if Error
     */
     public static function buildAllIndices ($dbName, $print=true) {
-        if(isElasticUp()) {
-            if ($print)
-                print "Building all Elasticsearch indices for: $dbName<br>";
+        if(!isElasticUp()) {
+            print "ElasticSearch service not detected";
+            return false;
+        }
 
+            if ($print){
+                print "Building all Elasticsearch indices for: $dbName<br>";
+            }
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = self::$mysqli->query($query);
             $count = 0;
@@ -311,26 +314,24 @@ class ElasticSearch {
                     }
                 }
 
-                if ($print)
+                if ($print){
                     print "ElasticSearch indices have successfully been built for $count record types.";
-
+                }
                 $res->close();
                 return true;
-            }else{
-                error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
-        }else{
-           print "ElasticSearch service not detected"; 
-        }
+
+
+        error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
         return false;
     } // buildAllIndices
-    
+
     /**
      * Checks if ElasticSearch is synchronised, called by functions in elasticSearch.php
      */
     private static function checkElasticSync($dbName) {
-        
-        self::initialize();  
+
+        self::initialize();
         // 1. Retrieve highest MySQL timestamp
         $mysqlTimestamp = self::getHighestMySqlTimestamp();
 
@@ -345,7 +346,7 @@ class ElasticSearch {
             }
         }
     }
-    
+
     /**
      * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
      * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
@@ -354,7 +355,7 @@ class ElasticSearch {
 
         $query = 'SELECT MAX(rec_Modified) FROM Records';
         $res = mysql__select_value(self::$mysqli, $query);
-        
+
         if ($res) {
             return $res; // Gets the rec_Modified value from the first row.
         } else {
@@ -389,7 +390,7 @@ class ElasticSearch {
         }
 
         return NULL;
-    }    
-    
+    }
+
 }
 ?>

@@ -32,15 +32,16 @@ Implementation of the Traditional Japanese Calendar,
 			'': {
 				name: 'Japanese', // The calendar name
 				epochs: ['', ''],
-				monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
-					'July', 'August', 'September', 'October', 'November', 'December'],
-				monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-				dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-				dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-				dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+				monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+				monthNamesShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+				dayNames: ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'],
+				dayNamesShort: ['日', '月', '火', '水', '木', '金', '土'],
+				dayNamesMin: ['日', '月', '火', '水', '木', '金', '土'],
 				dateFormat: 'yyyy/mm/dd', // default date formatting
 				firstDay: 0, // list Sunday as the first day of the week
-				isRTL: false
+				isRTL: false,
+				showMonthAfterYear: true,
+				yearSuffix: '年'
 			}
 		},
 
@@ -50,9 +51,9 @@ Implementation of the Traditional Japanese Calendar,
 		   @return  (boolean) true if this is a leap year, false if not
 		   @throws  error if an invalid year or a different calendar used */
 		leapYear: function (year) {
-			var date = this._validate(year, this.minMonth, this.minDay,
+			let date = this._validate(year, this.minMonth, this.minDay,
 				$.calendars.local.invalidYear || $.calendars.regional[''].invalidYear);
-			var year = date.year() + (date.year() < 0 ? 1 : 0); // No year zero
+			year = date.year() + (date.year() < 0 ? 1 : 0); // No year zero
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 		},
 
@@ -67,7 +68,7 @@ Implementation of the Traditional Japanese Calendar,
 		 */
 		weekOfYear: function (year, month, day) {
 			// Find Thursday of this week starting on Monday
-			var checkDate = this.newDate(year, month, day);
+			let checkDate = this.newDate(year, month, day);
 			checkDate.add(4 - (checkDate.dayOfWeek() || 7), 'd');
 			return Math.floor((checkDate.dayOfYear() - 1) / 7) + 1;
 		},
@@ -81,7 +82,7 @@ Implementation of the Traditional Japanese Calendar,
 		 * @returns {int} count of days within the month
 		 */
 		daysInMonth: function (year, month) {
-			var date = this._validate(year, month, this.minDay,
+			let date = this._validate(year, month, this.minDay,
 				$.calendars.local.invalidMonth || $.calendars.regional[''].invalidMonth);
 			return this.daysPerMonth[date.month() - 1] +
 				(date.month() == 2 && this.leapYear(date.year()) ? 1 : 0);
@@ -173,22 +174,7 @@ Implementation of the Traditional Japanese Calendar,
 			let start_idx = 0;
 			let end_idx = 49;
 
-			if (year <= 999) { // 0 - 50
-				start_idx = 0;
-				end_idx = 49;
-			} else if (year <= 1171) { // 50 - 100
-				start_idx = 50;
-				end_idx = 99;
-			} else if (year <= 1321) { // 100 - 150
-				start_idx = 100;
-				end_idx = 149;
-			} else if (year <= 1624) { // 150 - 200
-				start_idx = 150;
-				end_idx = 199;
-			} else { // 200 - ...
-				start_idx = 200;
-				end_idx = JAPANESE_CALENDAR_DATA.length;
-			}
+			[start_idx, end_idx] = this._getEraIndexes(year);
 
 			if (year == 999 || year == 1171 || year == 1321 || year == 1624) { // at intersection cutoff
 
@@ -318,6 +304,92 @@ Implementation of the Traditional Japanese Calendar,
 		},
 
 		/**
+		 * Get era index from given Japanese date string
+		 * 
+		 * @param {string} str - japanese date
+		 * @return {int} era index
+		 */
+		getEraFromJapaneseStr: function(str){
+
+			if(str.indexOf('年') === -1){
+				return -1;
+			}
+			let year;
+			[year, ] = str.split('年');
+			let era = year.replace(/[0-9]+/, '');
+
+			if(era === ''){
+				return -1;
+			}
+
+			for(let i = 0; i < JAPANESE_CALENDAR_DATA.length; i++){
+
+				if(JAPANESE_CALENDAR_DATA[i]['kanji'] !== era){
+					continue;
+				}
+
+				return i;
+			}
+		},
+
+		/**
+		 * Get era index from given Japanese date string
+		 * 
+		 * @param {CDate} year - calendar date
+		 * @param {int} year - date's year
+		 * @param {int} month - date's month
+		 * @param {int} day - date's day
+		 * @return {int} era index
+		 */
+		getEraFromGregorian: function(year, month, day){
+
+			if(year.year){
+				day = year.day();
+				month = year.month();
+				year = year.year();
+			}
+
+			if(!Number.isInteger(+month) || month <= 0){
+				month = 1;
+			}
+			if(!Number.isInteger(+day) || day <= 0){
+				day = 1;
+			}
+
+			let index = 0;
+			let start_idx = 0;
+			let end_idx = 49;
+
+			[start_idx, end_idx] = this._getEraIndexes(year);
+
+			if (year == 999 || year == 1171 || year == 1321 || year == 1624) { // at intersection cutoff
+
+				let early_end = JAPANESE_CALENDAR_DATA[end_idx];
+
+				index = month > early_end['end'][1] || day > early_end['end'][2] ? (end_idx + 1) : end_idx;
+
+			} else {
+
+				for (let i = start_idx; i < end_idx; i++) {
+
+					let cur_details = JAPANESE_CALENDAR_DATA[i];
+					let cur_end = cur_details['end'];
+
+					if (year > cur_end[0] ||
+						(year == cur_end[0] && (month > cur_end[1] ||
+							(month == cur_end[1] && day > cur_end[2])))) {
+
+						continue;
+					}
+
+					return i;
+				}
+			}
+
+			return -1;
+		},
+
+		/**
 		 * Translate Gregorian date into the Japanese calendar string
 		 * 
 		 * @param {int} year - date's year
@@ -366,18 +438,18 @@ Implementation of the Traditional Japanese Calendar,
 			let kanji = null;
 			[kanji, year] = this._japaneseYearToGregorian(year);
 
-			if (year == NaN || year <= 0) {
+			if (isNaN(year) || year <= 0) {
 				return 'Invalid year';
 			}
 
 			// Remove remaining kanji
 			month = parseInt(month);
-			if (month == NaN || month <= 0) {
+			if (isNaN(month) || month <= 0) {
 				return 'Invalid month';
 			}
 
 			day = parseInt(day);
-			if (day == NaN || day <= 0) {
+			if (isNaN(day) || day <= 0) {
 				return 'Invalid day';
 			}
 
@@ -441,7 +513,7 @@ Implementation of the Traditional Japanese Calendar,
 		 * @param {int} era_index - array index of the japanese era
 		 * @returns {array} [start date, end date] dates in ISO format '/' dividers
 		 */
-		getJapaneseEraLimits: function (era_index) {
+		getEraLimits: function (era_index) {
 
 			if (era_index >= JAPANESE_CALENDAR_DATA.length) {
 				return ['', ''];
@@ -508,6 +580,28 @@ Implementation of the Traditional Japanese Calendar,
 			}
 
 			return [kanji, year];
+		},
+
+		_getEraIndexes: function(year){
+
+			let start_idx = 200;
+			let end_idx = JAPANESE_CALENDAR_DATA.length;
+
+			if (year <= 999) { // 0 - 50
+				start_idx = 0;
+				end_idx = 49;
+			} else if (year <= 1171) { // 50 - 100
+				start_idx = 50;
+				end_idx = 99;
+			} else if (year <= 1321) { // 100 - 150
+				start_idx = 100;
+				end_idx = 149;
+			} else if (year <= 1624) { // 150 - 200
+				start_idx = 150;
+				end_idx = 199;
+			} // else 200 - ...
+
+			return [start_idx, end_idx];
 		}
 	});
 
@@ -753,6 +847,8 @@ Implementation of the Traditional Japanese Calendar,
 		{ "era": "Heisei", "kanji": "平成", "start": [1989, 1, 7], "end": [2019, 4, 30] },
 		{ "era": "Reiwa", "kanji": "令和", "start": [2019, 5, 1], "end": [] }
 	];
+
+	Object.freeze(JAPANESE_CALENDAR_DATA);
 
 	// Japanese calendar implementation
 	$.calendars.calendars.japanese = JapaneseCalendar;

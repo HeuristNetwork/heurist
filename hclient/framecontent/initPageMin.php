@@ -17,18 +17,28 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if(!defined('PDIR')) define('PDIR','../../'); //need for js scripts
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+if(!defined('PDIR')) {define('PDIR','../../');}//need for js scripts
+
+require_once dirname(__FILE__).'/../../autoload.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-
 
 $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
+
+if(defined('ADMIN_PWD_REQUIRED') && ADMIN_PWD_REQUIRED==1){
+    $sysadmin_pwd = USanitize::getAdminPwd();
+
+    if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
+        include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+}
 
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database
@@ -51,13 +61,13 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once 'initPage.php';
 //
+// @todo replacec with userCheckAccess
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
-}else if(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database
+}elseif(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
-}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
+}elseif(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
 }else{
     $invalid_access = false;
@@ -76,7 +86,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
-    if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
+    if($required !== ''){ $message = "To perform this action you need permission to $required records";}
 }
 
 if(isset($message)){
@@ -85,11 +95,11 @@ if(isset($message)){
 }
 
 function echo_flush($msg){
-    //ob_start();
+
     print $msg;
-    //ob_end_flush();
-    //@ob_flush();
-    //@flush();
+
+
+
 }
 
 //

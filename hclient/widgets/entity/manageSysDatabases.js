@@ -54,7 +54,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         this.recordList.resultList('option','rendererHeader',
                     function(){
-        sHeader = '<div style="width:60px"></div><div style="border-right:none">Db Name</div>';
+       let sHeader = '<div style="width:60px"></div><div style="border-right:none">Db Name</div>';
         /*
                 //+'<div style="width:3em">Ver</div>'
                 +'<div style="width:3em">Reg#</div>'
@@ -73,18 +73,18 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
 
         //load at once everything to _cachedRecordset
-        var that = this;
+        let that = this;
         function __onDataResponse(response){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 that._cachedRecordset = response;
                 
-                //that.filterRecordList(null, {});
+               
                 that.recordList.resultList('updateResultSet', response);
             };
             
-        var entityData = window.hWin.HAPI4.EntityMgr.getEntityData2( this.options.entity.entityName );
+        let entityData = window.hWin.HAPI4.EntityMgr.getEntityData2( this.options.entity.entityName );
 
         
         if($.isEmptyObject(entityData)){
@@ -93,7 +93,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 {a:'search', 'entity':this.options.entity.entityName, 'details':'ids'},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                entityData = new hRecordSet(response.data);
+                                entityData = new HRecordSet(response.data);
                                 window.hWin.HAPI4.EntityMgr.setEntityData(
                                             that.options.entity.entityName,
                                             entityData);
@@ -116,7 +116,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 that._cachedRecordset = response;
                 
                 that.filterRecordList(null, {});
-                //that.recordList.resultList('updateResultSet', response);
+               
             });
         */    
             
@@ -138,40 +138,29 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function frm(value, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            var val = window.hWin.HEURIST4.util.htmlEscape(value);
+            //value = window.hWin.HEURIST4.util.htmlEscape(value);
             return '<div class="item" '+swidth+'>'+value+'</div>';  //title="'+val+'"
         }
         
         
-        var recID   = fld('sys_Database');
+        let recID   = fld('sys_Database');
         
-        var dbName = fld('sys_dbName');
+        let dbName = fld('sys_dbName');
         if(dbName=='Please enter a DB name ...') dbName = '';
-        var regID = fld('sys_dbRegisteredID');
-        regID = (regID>0?regID:'');
         
-        var recTitle = frm(recID.substr(4),'40em'); //remove prefix hdb_
-        /*
-        var recTitle = frm(recID.substr(4),'14em')
-                      //+frm(fld('sys_Version'),'4em')
-                      +frm(regID, '4em')
-                      +frm(dbName, '23em')
-                      +frm(fld('sus_Role'), '6em')
-                      +frm(fld('sus_Count'), '5em');
-        */              
-        var recTitleHint = ''//fld('sys_dbDescription');
+        let recTitle = frm(recID.substr(4),'40em'); //remove prefix hdb_
+       
+        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
+        let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
         
-        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
-        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
-        
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('sus_Role')+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('sus_Role')+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -188,7 +177,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     },
 
     updateRecordList: function( event, data ){
-        //this._super(event, data);
+       
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
@@ -200,7 +189,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     
     filterRecordList: function(event, request){
         if(this.options.except_current==true){
-            var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            let subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
             //except current
             subset = subset.getSubSetByRequest({'sys_Database':'!=hdb_'+window.hWin.HAPI4.database}, this.options.entity.fields);
             //update

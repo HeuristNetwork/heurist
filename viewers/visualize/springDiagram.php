@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
@@ -35,7 +35,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <!-- Colpick -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
-        
+
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/overlay.js"></script>
@@ -45,47 +45,47 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>viewers/visualize/visualize.css">
-        
+
         <script type="text/javascript">
 
 var isStandAlone = false;
-        
+
 // Callback function on page initialization - see initPage.php
 function onPageInit(success){
 
-    if(!success) return;
-                
+    if(!success) {return;}
+
         var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
-        
+
         //t:26 f:85:3313  f:1:building
         // Perform database query if possible (for standalone mode - when map.php is separate page)
         if( !window.hWin.HEURIST4.util.isempty(q) )
         {
             isStandAlone = true;
-            
+
             var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
-            
+
             if(!window.hWin.HEURIST4.util.isempty(rules)){
                 try{
                     rules = JSON.parse(rules);
                 }catch(ex){
-                    rules = null;    
+                    rules = null;
                 }
             }else{
                 rules = null;
             }
-            
+
             var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
 
             window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:'detail', l:MAXITEMS},
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recordset = new hRecordSet(response.data);
-                          
+                        var recordset = new HRecordSet(response.data);
+
                         var records_ids = recordset.getIds(MAXITEMS);
                         if(records_ids.length>0){
-                            
+
                             var callback = function(response)
                             {
                                 var resdata = null;
@@ -93,18 +93,18 @@ function onPageInit(success){
                                     // Store relationships
                                     // Parse response to spring diagram format
                                     var data = __parseData(records_ids, response.data);
-                                    
+
                                     showData(data, [], null, null);
-                                    
+
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
-                                
+
                             }
 
                             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
                         }
-                                    
+
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -113,32 +113,32 @@ function onPageInit(success){
             );
         }
 }
-   
+
         </script>
     </head>
 
     <body>
         <!-- Visualize HTML -->
-        <?php 
+        <?php
             $isDatabaseStructure = 0;
-            include_once "visualize.php"; 
+            include_once "visualize.php";
         ?>
 
         <!-- Call from parent iframe -->
         <script>
-        
+
         /**
         * Parses record data and relationship data into usable D3 format
-        * 
+        *
         * @param records    Object containing all record
         * @param relations  Object containing direct & reverse links
-        * 
+        *
         * @returns {Object}
         */
         function __parseData(records_ids, relations) {
-            
-            var data = {}; 
-            var nodes = {};                         
+
+            var data = {};
+            var nodes = {};
             var links = [];
 
             if(records_ids !== undefined && relations !== undefined) {
@@ -151,23 +151,23 @@ function onPageInit(success){
                                 image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                                 count: 0,
                                 depth: 1,
-                                rty_ID: relations.headers[recId][1] 
+                                rty_ID: relations.headers[recId][1]
                                };
                     nodes[recId] = node;
                 }
-                
-                
+
+
                 /**
                 * Determines links between nodes
-                * 
+                *
                 * @param nodes      All nodes
                 * @param relations  Array of relations
                 */
                 function __getLinks(nodes, relations) {
                     var links = [];
-                    
+
                     // Go through all relations
-                    for(var i = 0; i < relations.length; i++) { 
+                    for(var i = 0; i < relations.length; i++) {
                         // Null check
                         var source = relations[i].recID;
                         var target = relations[i].targetID;
@@ -181,27 +181,27 @@ function onPageInit(success){
                         }
 
                         // Link check
-                        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
+                        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) {
                             // Construct link
                             var link = {source: nodes[source],
                                         target: nodes[target],
                                         targetcount: 1,
-                                        relation: {id: dtID>0?dtID:trmID, 
+                                        relation: {id: dtID>0?dtID:trmID,
                                                    name: relationName,
-                                                   type: dtID>0?'resource':'relationship'} 
+                                                   type: dtID>0?'resource':'relationship'}
                                        };
-                            links.push(link); 
-                        }      
-                    }   
-                    
+                            links.push(link);
+                        }
+                    }
+
                     return links;
                 }
-                        
-                       
-                
+
+
+
                 // Links
-                links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
-                links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
+                links = links.concat( __getLinks(nodes, relations.direct)  );// Direct links
+                links = links.concat( __getLinks(nodes, relations.reverse) );// Reverse links
             }
 
             // Construct data object with nodes as array
@@ -211,7 +211,7 @@ function onPageInit(success){
             }
             return {nodes: array, links: links};
         }
-                            
+
         /** Shows data visually */
         function showSelection( selectedRecordsIds ){
              visualizeSelection( selectedRecordsIds );
@@ -236,27 +236,27 @@ function onPageInit(success){
 
                 // Calculates the line length
                 function getLineLength(record) {
-                    var length = getSetting(setting_linelength);
+                    var length = getSetting('setting_linelength');
                     if(record !== undefined && record.hasOwnProperty("depth")) {
                         length = length / (record.depth+1);
                     }
                     return length;
                 }
-                
+
                 $(window).resize(onVisualizeResize);
                 onVisualizeResize();
 
                 $("#visualize").visualize({
                     data: data,
-                    getData: function(data) { return getData(data); },
-                    getLineLength: function(record) { return getLineLength(record); },
+                    getData: function(data) { return getData(data);},
+                    getLineLength: function(record) { return getLineLength(record);},
 
                     selectedNodeIds: selectedRecordsIds,   //assign current selection
                     triggerSelection: onSelectEvent,
                     onRefreshData: onRefreshData,
                     /*function(selection){
                         //parentDocument    top.window.document
-                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
+                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } );//this.element.attr('id')} );
                     },*/
 
                     entityradius: 1,
@@ -268,17 +268,17 @@ function onPageInit(success){
                     gravity: 'off' //'touch', activate gravity, for a moment, to scatter graph
                 });
 
-                //setTimeout(function(){ setGravity('off'); }, 3000); // turn off gravity
+                //setTimeout(function(){ setGravity('off');}, 3000);// turn off gravity
 
                 changeViewMode('icons');
         }
-            
+
         function onVisualizeResize(){
                 var width = $(window).width();
                 var supw = 3.5;//(width<744)?3.8:3.5;
                 $('#divSvg').css('top', supw+'em');
         }
-            
+
         </script>
     </body>
 

@@ -64,7 +64,7 @@ $.widget( "heurist.importStructure", {
         onClose:null
     },
 
-    //cached records hRecordSet for databases
+    //cached records HRecordSet for databases
     _cachedRecordset_dbs:null,
 
     _is_rename_target: false,
@@ -75,7 +75,7 @@ $.widget( "heurist.importStructure", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
 
     //
@@ -89,7 +89,7 @@ $.widget( "heurist.importStructure", {
             this._initDialog();
         }
 
-        var layout, sTop = '0';
+        let layout, sTop = '0';
         if(this.options.innerTitle){
             layout = ('<div class="ui-heurist-header">'+this.options['title']+'</div>');
             sTop = '38px';
@@ -190,10 +190,10 @@ $.widget( "heurist.importStructure", {
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
         //.css({'line-height': '0.9em'})
-        .click(function(){
+        .on('click', function(){
             that.panel_report.hide();
             that.panel_defs.show();
-
+            
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
@@ -241,7 +241,7 @@ $.widget( "heurist.importStructure", {
             }
         });
 
-        var ele = this.element.find('#btn_back_to_databases')
+        let ele = this.element.find('#btn_back_to_databases')
         .button({label:'Back to Databases'});
         if(that.options.source_database_id>0){
             ele.hide();
@@ -279,7 +279,7 @@ $.widget( "heurist.importStructure", {
             groupByField: 'rec_RecTypeID',
             rendererGroupHeader: function(grp_val){
                 if(grp_val==0){
-                    //width:100%;
+                   
                     return '<div style="border-bottom:1px solid lightgray">'
                     +'<div style="padding:24px 0 4px 40px;"><h2 style="margin:0">Curated templates</h2>'
                     +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div></div>';
@@ -297,7 +297,7 @@ $.widget( "heurist.importStructure", {
                 let sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
                 +'<div style="width:2em">&nbsp;</div>'
                 +'<div style="width:52em">Description</div>';
-                //+'<div style="width:3em">URL</div>';
+               
                 return sHeader;
             },
             renderer:
@@ -343,10 +343,10 @@ $.widget( "heurist.importStructure", {
                 that.input_search = that.searchForm_dbs.find('.input_search');
 
                 that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
-                //that._on( this.input_search,  { keyup:this.startSearch_dbs });
+               
                 that._on( that.btn_search_start, { click: that.startSearch_dbs });            
 
-                //that.searchForm_dbs.find('#input_search_type_div2').show();
+               
                 that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
                 that._on(that.input_search_type,  { change:that.startSearch_dbs });
 
@@ -363,11 +363,10 @@ $.widget( "heurist.importStructure", {
         this.options.entity = window.hWin.entityRecordCfg;
 
         //retrieve all template databases from master index server
-        var query_request = {remote:'master'};
+        let query_request = {remote:'master', detail: 'header'};
         if(that.options.source_database_id>0){
             query_request['q'] = 'ids:'+that.options.source_database_id;
         }
-        query_request['detail'] = '398'; //Allow Clone?  @todo - concept code
 
         window.hWin.HAPI4.RecordMgr.search(query_request, 
             function( response ){
@@ -375,33 +374,26 @@ $.widget( "heurist.importStructure", {
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     response.data.fields.push('rec_ScratchPad');
-                    response.data.fields.push('rec_AllowClone');
-                    var clone_recs = {};
 
-                    that._cachedRecordset_dbs = new hRecordSet(response.data);
+                    that._cachedRecordset_dbs = new HRecordSet(response.data);
 
                     //prepare recordset - extract database name and transfer title to notes
                     that._cachedRecordset_dbs.each(function(recID, record){
 
-                        var recURL  = this.fld(record, 'rec_URL');
-                        var recDesc = this.fld(record, 'rec_Title');
-                        var isAllowClone = ( this.fld(record, 398)!=6023 )?1:0; //@todo - concept code
-                        var dbURL = '';
-                        var dbName = 'Broken registration (Db URL is not defined)';
+                        let recURL  = this.fld(record, 'rec_URL');
+                        let recDesc = this.fld(record, 'rec_Title');
+                        let dbURL = '';
+                        let dbName = 'Broken registration (Db URL is not defined)';
                         
                         if(recURL){
-                            var splittedURL = recURL.split('?');
+                            let splittedURL = recURL.split('?');
                             if(splittedURL && splittedURL.length>0){
                                 dbURL = splittedURL[0];
-                                var matches = recURL.match(/db=([^&]*).*$/);
+                                let matches = recURL.match(/db=([^&]{1,65}).*$/);
                                 dbName = (matches && matches.length>1)?matches[1]:'';
-
-                                if(isAllowClone === 1 && recID < 1000){ // need to check that the DB is on current server
-                                    clone_recs[recID] = dbName;
-                                }
                             }
                         }
-                        var url_Error = this.fld(record, 'rec_URLErrorMessage');
+                        let url_Error = this.fld(record, 'rec_URLErrorMessage');
                         if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
                             dbName = dbName + ' (unavailable)';
                             dbURL = '';
@@ -411,24 +403,16 @@ $.widget( "heurist.importStructure", {
                         this.setFld(record, 'rec_Title', dbName);
                         this.setFld(record, 'rec_ScratchPad', recDesc);
                         this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
-                        this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
                     });
 
-                    window.hWin.HAPI4.SystemMgr.check_for_databases(clone_recs, (check_response) => {
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
 
-                        window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                        $.each(clone_recs, (rec_ID, db_name) => {
-                            that._cachedRecordset_dbs.setFldById(rec_ID, 'rec_AllowClone', check_response.data && check_response.data[rec_ID] == 1);
-                        });
-
-                        if(that.options.source_database_id>0){
-                            var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
-                            that._loadDefinitionsForDb( selected_recs );
-                        }else{
-                            that.startSearch_dbs(); //filterRecordList_dbs({}); 
-                        }
-                    });
+                    if(that.options.source_database_id>0){
+                        let selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                        that._loadDefinitionsForDb( selected_recs );
+                    }else{
+                        that.startSearch_dbs();
+                    }
 
                 }else{
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -453,7 +437,7 @@ $.widget( "heurist.importStructure", {
     //    
     startSearchOnEnterPress: function(e){
 
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -463,7 +447,7 @@ $.widget( "heurist.importStructure", {
     },
 
     startSearch_dbs: function(){
-        var request = {};
+        let request = {};
         
         if(!this.input_search) return;
 
@@ -502,13 +486,13 @@ $.widget( "heurist.importStructure", {
     _loadDefinitionsForDb: function(db_ids, skip_pass){
 
         const that = this;
-        var panel_dbs = this.element.find('#panel_dbs');
+        let panel_dbs = this.element.find('#panel_dbs');
 
-        var record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
+        let record = db_ids.getFirstRecord();
 
-        var sDB_ID = db_ids.fld(record, 'rec_ID');
-        var sURL  = db_ids.fld(record, 'rec_URL');
-        var sDB   = db_ids.fld(record, 'rec_Title');
+        let sDB_ID = db_ids.fld(record, 'rec_ID');
+        let sURL  = db_ids.fld(record, 'rec_URL');
+        let sDB   = db_ids.fld(record, 'rec_Title');
         
         if(!sURL) return; //missed
 
@@ -524,7 +508,7 @@ $.widget( "heurist.importStructure", {
 
             this.element.find('#h_source').text('Entities available in '+sDB_ID+':'+sDB);
 
-            var rty_options = {
+            let rty_options = {
                 isdialog: false,
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
@@ -541,7 +525,7 @@ $.widget( "heurist.importStructure", {
 
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -552,70 +536,7 @@ $.widget( "heurist.importStructure", {
                             = (window.hWin.HEURIST4.remote._selectedRtyID == recID)?null:recID;
                             that.panel_rty_list.manageDefRecTypes('refreshRecordList');                     
                         }else if(action=='import'){
-
-                            var $dlg;
-                            var msg = "If you proceed with download, Heurist will download three types of structural information:<br>"
-                                + "<ol>"
-                                + "<li>the selected record type, any fields, and vocabularies that are not yet in the database.</li>"
-                                + "<li>any unrecognised record types (and their fields and vocabularies) connected to the selected record type.</li>"
-                                + "<li>"
-                                    + "additional fields and vocabularies defined for record types already in your database which are connected<br>"
-                                    + "to any of the record types above (the fields will be added to the end of the record type and may be removed or<br>"
-                                    + "customised as desired; they will have no effect on existing data)."
-                                + "</li>"
-                                + "</ol>";
-                                
-                            msg =  msg + '<p style="font-size:smaller">'
-+'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
-+' if you wish the record type names, field names and description, and term '
-+' labels to be replaced by the names and labels being imported. Use with care as this can overwrite existing '
-+'customisation with names which may be quite different and out-of-context with existing data. '
-+'If this is not a new database, we suggest cancelling and making a clone first (please' 
-+' delete the clone once you are happy with the result of the import).</p>';
-
-                            var btns = {};
-
-                            btns['Proceed'] = function(){
-                                
-                                var is_rename = $dlg.find('#rename_target_entities').is(':checked');
-                                that._is_rename_target = is_rename;
-                                if(is_rename){
-                                                            
-                                    var $dlg2, btn2 = {};
-                                    btn2['Yes, overwrite'] = function(){
-                                        $dlg2.dialog('close');
-                                        $dlg.dialog('close');
-
-                                        that.startImport(recID, 'rectype');
-                                    };
-                                    btn2['Get me out of here'] = function(){
-                                        $dlg2.dialog('close');
-                                    };
-                                                            
-                                                            
-                                    $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
-'Are you sure you want to overwrite existing record type names, field names and term labels?', 
-                                                btn2, {title: 'Warning'},
-                                                {default_palette_class: 'ui-heurist-design', 
-                                                 //dialogId: 'dialog-common-messages2'
-                                                }
-                                                );
-                                }else{
-                                    $dlg.dialog('close');
-
-                                    that.startImport(recID, 'rectype');
-                                }
-                                
-                            };
-                            btns['Cancel'] = function(){
-                                $dlg.dialog('close');
-                            }
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                                {title: 'Downloading structure', yes:'Proceed', no:'Cancel'}, 
-                                {default_palette_class: 'ui-heurist-design'}
-                            );  
-                            
+                            that._preImportCheck('rectype', recID);   
                         }
                     }
 
@@ -631,8 +552,8 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var rectypes = window.hWin.HEURIST4.remote.rectypes;
-                        var idx = rectypes.groups.groupIDToIndex[grp_val];
+                        let rectypes = window.hWin.HEURIST4.remote.rectypes;
+                        let idx = rectypes.groups.groupIDToIndex[grp_val];
 
                         return rectypes.groups[idx]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
@@ -640,7 +561,8 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
-                            +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(rectypes.groups[idx].description)?'':rectypes.groups[idx].description)+'</i></div></div></div>'):'';
                     },
                     renderer: this._recordtypeListItemRenderer
                 }
@@ -651,7 +573,7 @@ $.widget( "heurist.importStructure", {
             //open list of record types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
 
-            var dty_options = {
+            let dty_options = {
                 isdialog: false,
                 container: '#panel_dty_list',
                 select_mode: 'select_single',
@@ -670,7 +592,7 @@ $.widget( "heurist.importStructure", {
                 },
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -681,67 +603,7 @@ $.widget( "heurist.importStructure", {
                             = (window.hWin.HEURIST4.remote._selectedDtyID == recID)?null:recID;
                             that.panel_dty_list.manageDefDetailTypes('refreshRecordList');                     
                         }else if(action=='import'){
-
-                            let idx_Type = window.hWin.HEURIST4.remote.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
-                            let record = window.hWin.HEURIST4.remote.detailtypes.typedefs[recID]['commonFields'];
-
-                            var msg = '<p style="font-size:smaller">'
-                                +'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
-                                +' if you wish the field names and description '
-                                +' to be replaced by the names being imported. Use with care as this can overwrite existing '
-                                +'customisation with names which may be quite different and out-of-context with existing data. '
-                                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
-                                +' delete the clone once you are happy with the result of the import).</p>';
-
-                            if(record[idx_Type] == 'resource' || record[idx_Type] == 'enum' || record[idx_Type] == 'relmarker'){
-
-                                let extra = record[idx_Type] == 'resource' ? 'record type(s)' : (record[idx_Type] == 'enum' ? 'term(s)' : 'term(s) and record type(s)')
-                                msg = "If you proceed with the download, Heurist will also download missing related " + extra + " for the selected field.<br>" + msg;
-                            }
-
-                            var $dlg;
-
-                            var btns = {};
-
-                            btns['Proceed'] = function(){
-                                
-                                var is_rename = $dlg.find('#rename_target_entities').is(':checked');
-                                that._is_rename_target = is_rename;
-                                if(is_rename){
-                                                            
-                                    var $dlg2, btn2 = {};
-                                    btn2['Yes, overwrite'] = function(){
-                                        $dlg2.dialog('close');
-                                        $dlg.dialog('close');
-
-                                        that.startImport(recID, 'detailtype');
-                                    };
-                                    btn2['Get me out of here'] = function(){
-                                        $dlg2.dialog('close');
-                                    };
-                                                            
-                                                            
-                                    $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
-                                        'Are you sure you want to overwrite existing field names?', 
-                                        btn2, {title: 'Warning'},
-                                        {default_palette_class: 'ui-heurist-design'}
-                                    );
-                                }else{
-                                    $dlg.dialog('close');
-
-                                    that.startImport(recID, 'detailtype');
-                                }
-                                
-                            };
-                            btns['Cancel'] = function(){
-                                $dlg.dialog('close');
-                            }
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                                {title: 'Downloading base field', yes:'Proceed', no:'Cancel'}, 
-                                {default_palette_class: 'ui-heurist-design'}
-                            );  
-                            
+                            that._preImportCheck('detailtype', recID);
                         }
                     }
 
@@ -757,10 +619,10 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var detailtypes = window.hWin.HEURIST4.remote.detailtypes;
-                        var idx = detailtypes.groups.groupIDToIndex[grp_val];
+                        let detailtypes = window.hWin.HEURIST4.remote.detailtypes;
+                        let idx = detailtypes.groups.groupIDToIndex[grp_val];
 
-                        var output = '';
+                        let output = '';
 
                         if(detailtypes.groups[idx]){
                             output = '<div data-grp="'+grp_val
@@ -769,7 +631,9 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+' '+detailtypes.groups[idx].name+'</h2>'
-                            +'<div style="padding-top:4px;"><i>'+detailtypes.groups[idx].description+'</i></div></div></div>';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(detailtypes.groups[idx].description)?'':detailtypes.groups[idx].description)
+                            +'</i></div></div></div>';
                         }
 
                         return output;
@@ -783,7 +647,7 @@ $.widget( "heurist.importStructure", {
             //open list of detail types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
 
-            var trm_options = {
+            let trm_options = {
                 isdialog: false,
                 container: '#panel_trm_list',
                 select_mode: 'select_single',
@@ -803,7 +667,7 @@ $.widget( "heurist.importStructure", {
                 },
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -814,31 +678,7 @@ $.widget( "heurist.importStructure", {
                             = (window.hWin.HEURIST4.remote._selectedTrmID == recID)?null:recID;
                             that.panel_trm_list.manageDefTerms('refreshRecordList');                     
                         }else if(action=='import'){
-
-                            var $dlg;
-                            var msg = "If you proceed with the download, Heurist will download the selected vocabulary and any child terms within<br>"
-                                + "Do you wish to continue?"
-
-                            var btns = {};
-
-                            btns['Proceed'] = function(){
-
-                                that._is_rename_target = false;
-
-                                $dlg.dialog('close');
-
-                                that.startImport(recID, 'term');
-                                
-                            };
-                            btns['Cancel'] = function(){
-                                $dlg.dialog('close');
-                            }
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                                {title: 'Downloading vocabulary', yes:'Proceed', no:'Cancel'}, 
-                                {default_palette_class: 'ui-heurist-design'}
-                            );  
-                            
+                            that._preImportCheck('term', recID);
                         }
                     }
 
@@ -854,7 +694,7 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var terms = window.hWin.HEURIST4.remote.terms;
+                        let terms = window.hWin.HEURIST4.remote.terms;
 
                         return terms.groups[grp_val]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
@@ -862,7 +702,9 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+terms.groups[grp_val].vcg_Name+'</h2>' //+grp_val+' '
-                            +'<div style="padding-top:4px;"><i>'+terms.groups[grp_val].vcg_Description+'</i></div></div></div>'):'';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(terms.groups[grp_val].vcg_Description)?'':terms.groups[grp_val].vcg_Description)
+                            +'</i></div></div></div>'):'';
                     },
                     renderer: this._termsListItemRenderer
                 }
@@ -914,9 +756,6 @@ $.widget( "heurist.importStructure", {
         // remove generated elements
         if(this.searchForm_dbs) this.searchForm_dbs.remove();
         if(this.recordList_dbs) this.recordList_dbs.remove();
-
-        //if(this.searchForm_rty) this.searchForm_rty.remove();
-        //if(this.recordList_rty) this.recordList_rty.remove();
     },
 
     //----------------------
@@ -925,18 +764,18 @@ $.widget( "heurist.importStructure", {
     //
     _onActionListener:function(event, action){
         if(action=='select-and-close'){
-            //this._selectAndClose();
+           
             return true;
         } else {
-            var recID = 0;
+            let recID = 0;
             if(action && action.action){
                 recID =  action.recID;
                 action = action.action;
             }
 
-            var record = this._cachedRecordset_dbs.getById(recID);
-            var dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
-            var recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
+            let record = this._cachedRecordset_dbs.getById(recID);
+            let dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
+            let recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
 
             if(action=='open'){
                 
@@ -952,13 +791,8 @@ $.widget( "heurist.importStructure", {
 
                 if(!recURL) return;
 
-                /* todo !!!!!
-                var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
-                +'?db='+window.hWin.HAPI4.database
-                +'&templatedb='+dbName;
-
-                window.hWin.HEURIST4.msg.showDialog(cloneURL, { width: 800, height: 400, title:'Clone curated template'});
-                */
+                this._selectedDB = recID;
+                this._preImportCheck('all', 'all');
             }
 
         }
@@ -974,40 +808,38 @@ $.widget( "heurist.importStructure", {
             return recordset.fld(record, fldname);
         }
 
-        var recID = fld('rec_ID');
-        var recURL = fld('rec_URL');
-        var dbName = fld('rec_Title');
-        var recAllowClone = fld('rec_AllowClone');
-        var recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
+        let recID = fld('rec_ID');
+        let recURL = fld('rec_URL');
+        let dbName = fld('rec_Title');
+        let recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
 
-        var rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
-        var recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
+        let rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
+        let recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
         
-        var w = this.recordList_dbs.width()-550;
+        let w = this.recordList_dbs.width()-550;
         if(w<150) w = 150;
         
-            var url_Error = fld('rec_URLErrorMessage');
+            let url_Error = fld('rec_URLErrorMessage');
             if(!window.hWin.HEURIST4.util.isempty(url_Error)){
                 url_Error = 'The indexed database is currently inaccessible. It returned '
                                 +window.hWin.HEURIST4.util.htmlEscape(url_Error);
             }else{
                 url_Error = '';
             }
-        
 
-        var recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
+        let recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
         +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold;':'')+ (url_Error?'color:lightgray':'') + '"'
         + ' title="' + url_Error + '"'
         + '>'+dbName+'</div>'
-        +'<div class="item" style="width:4em">'
-        +((recID<1000 && recAllowClone==1)?'<span data-key="clone" style="cursor:pointer;text-decoration:underline">clone</span>'
-            :'')+'</div>'
+        +'<div class="item" style="width:6.5em">'
+        +   '<span data-key="clone" style="cursor:pointer;text-decoration:underline">add template</span>'
+        +'</div>'
         +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  description
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -1019,7 +851,7 @@ $.widget( "heurist.importStructure", {
         + '</div><div class="action-button-container">';
         
         
-        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
         if(usr_exp_level==0){ //advanced
             html = html
             + '<div title="Click to open database in new window" '
@@ -1040,7 +872,7 @@ $.widget( "heurist.importStructure", {
     //
     _initDialog: function(){
 
-        var options = this.options,
+        let options = this.options,
         btn_array = [], 
         position = null;
         
@@ -1048,15 +880,15 @@ $.widget( "heurist.importStructure", {
 
 
         if(position==null) position = { my: "center", at: "center", of: window };
-        var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
         if(options['width']>maxw) options['width'] = maxw*0.95;
-        var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
 
-        //this.options.window = window.hWin;
+       
         this.element.addClass('ui-heurist-bg-light');
 
-        var $dlg = this.element.dialog({
+        let $dlg = this.element.dialog({
             autoOpen: false ,
             //element: this.element[0],
             height: options['height'],
@@ -1067,7 +899,7 @@ $.widget( "heurist.importStructure", {
             resizeStop: function(){ that._fixWidth(); },
             close:function(){
 
-                if($.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                     //that.options.onClose(that._currentEditRecordset);  
                     that.options.onClose.call();
                 } 
@@ -1083,7 +915,7 @@ $.widget( "heurist.importStructure", {
     // adjust width according to width of parent dialog
     //
     _fixWidth: function() {//fix bug
-        var correctWidth = this.element.parent().width()-24;
+        let correctWidth = this.element.parent().width()-24;
         this.element.css({overflow: 'none !important','width':correctWidth });
 
         /*this.panel_rty_list.css({'width': correctWidth/2});
@@ -1098,7 +930,7 @@ $.widget( "heurist.importStructure", {
 
             this._as_dialog.dialog("open");
 
-            var helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
+            let helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
 
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 null,
@@ -1112,14 +944,13 @@ $.widget( "heurist.importStructure", {
     // listener of onfilter event generated by search
     //
     filterRecordList_dbs: function(request){
-        var subset = null;
+        let subset = null;
         if(this._cachedRecordset_dbs){
             subset = this._cachedRecordset_dbs.getSubSetByRequest(request, this.options.entity.fields);
             this.recordList_dbs.resultList('updateResultSet', subset, request);   
         }
         return subset;
     },
-
 
     //
     //  MAIN METHOD
@@ -1133,10 +964,14 @@ $.widget( "heurist.importStructure", {
         const that = this;
 
         const style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
-        let msg = 'Downloading structure...<br><br>'
-                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>';;
+        let msg = 'Downloading complete database structure...<br><br>'
+                + 'This may take several minutes if the source database is not on your server and if there are a large number of definitions.<br>';
 
-        if(type == 'detailtype'){
+        if(type == 'rectype'){
+
+            msg = 'Downloading structure...<br><br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.<br>';
+        }else if(type == 'detailtype'){
 
             msg = 'Downloading base field...<br><br>'
                 + 'This may take a couple of minutes if there are a number of record type linked to the requested field.<br>';
@@ -1147,7 +982,7 @@ $.widget( "heurist.importStructure", {
 
         msg += 'This is a very complex procedure and sensitive to errors in the configuration of the source database.<br><br>'
                 + 'Please report a bug if it fails (either with or without a message)<br>'
-                + 'including the database and the definition you are trying to download, so that we can investigate and fix.';
+                + 'including the database and the definition(s) you are trying to download, so that we can investigate and fix.';
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
 
@@ -1164,7 +999,12 @@ $.widget( "heurist.importStructure", {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    that.panel_report.find('#btn_close_panel_report').click();
+                    that.panel_report.find('#btn_close_panel_report').trigger('click');
+
+                    if(type == 'all'){
+                        that._processCloneResponse(response);
+                        return;
+                    }
 
                     let report = '';
 
@@ -1232,7 +1072,7 @@ $.widget( "heurist.importStructure", {
                                 +' terms were not properly imported.'
                                 +' Error report has been sent to Heurist support.<ul>');
                             
-                            for(var i=0; i<response.report.broken_terms.length; i++){
+                            for(let i=0; i<response.report.broken_terms.length; i++){
                                 report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
                                 if(i>10){
                                     report += '...';
@@ -1278,17 +1118,17 @@ $.widget( "heurist.importStructure", {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+fld(fldname)+'</div>';
         }
 
-        var dbs = window.hWin.HEURIST4.remote;
-        var recID = fld('rty_ID');
+        let dbs = window.hWin.HEURIST4.remote;
+        let recID = fld('rty_ID');
 
-        var btn_actions = '<div style="width:60px;">'
+        let btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
         + ' style="display:inline-block;height:16px;">'
         +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
@@ -1299,29 +1139,29 @@ $.widget( "heurist.importStructure", {
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
-        var info = '';
+        let info = '';
         if(dbs._selectedRtyID==recID){
-            var rts = dbs.rectypes.typedefs[recID];
+            let rts = dbs.rectypes.typedefs[recID];
 
             info = '<div style="border:2px solid blue;padding:10px 4px;margin-top:10px"><i>' + fld('rty_Description') + "</i><br><br>";   //description
             info += '<table style="text-align: left;font-size:0.9em; font-color:darkgray;width:100%"><tr>';
-            info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
+            info += '<th  style="padding-left:10px;" class="status"><b>Already in DB?</b></th>';
             info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
             info += '<th style="padding-left:10px;"><b>Base field name (shared across record types)</b></th>';
             info += '<th style="width:100px; padding-left:10px;"><b>Field data type</b></th></tr>';
 
 
-            var idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
-            var idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
-            var idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
+            let idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+            let idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            let idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
 
-            var dty;
+            let dty;
             for (dty in rts.dtFields) {
 
-                var rst_fld = rts.dtFields[dty];
+                let rst_fld = rts.dtFields[dty];
 
                 //find in local defintions by concept code - if found - it is already imported
-                var local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
+                let local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
 
                 info += "<tr"+ (local_id>0? ' style="background-color:#CCCCCC;"' : "") +
                 "</td><td style='padding-left:20px;'>" + (local_id>0 == 1? "yes" : "NEW") +
@@ -1334,17 +1174,17 @@ $.widget( "heurist.importStructure", {
             info += "</table></div>";    
         }    
 
-        var recTitle = fld2('rty_Name','15em');
+        let recTitle = fld2('rty_Name','15em');
 
         //find all dependent record types on first level
 
         let linked_rts = $Db.getLinkedRecordTypes(recID, dbs);
 
-        var name_rts = [];
-        for(var i=0;i<linked_rts.length;i++){
+        let name_rts = [];
+        for(let i=0;i<linked_rts.length;i++){
             name_rts.push(dbs.rectypes.names[linked_rts[i]]);
         }
-        var linkedto = '';
+        let linkedto = '';
         if(linked_rts.length>0){
             linkedto = 'Links to: '+ window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','));
         }
@@ -1352,7 +1192,7 @@ $.widget( "heurist.importStructure", {
         + linkedto +'</div>';
 
 
-        var html = '<div class="recordDiv" style="min-height:16px"'
+        let html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
         + btn_actions
         + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
@@ -1539,14 +1379,159 @@ $.widget( "heurist.importStructure", {
 
         if(cur_acc == 2){ // trm
             this.panel_trm_list.find('.searchForm #input_search').val(search);
-            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).change(); // always show all
+            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).trigger('change'); // always show all
         }else if(cur_acc == 1){ // dty
             this.panel_dty_list.find('.searchForm #input_search').val(search);
-            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).change(); // always hide those already in db
+            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).trigger('change'); // always hide those already in db
         }else{ // rty
             this.panel_rty_list.find('.searchForm #input_search').val(search);
-            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).trigger('change');
         }
-    }
+    },
 
+    /**
+     * 
+     * 
+     * @param {string} type - import type {rectype, detailtype, term, all}
+     * @param {int} id - definition ID to be imported
+     */
+    _preImportCheck: function(type, id){
+
+        const that = this;
+
+        let $dlg;
+        let msg = '';
+        let btns = {};
+        let title = "Downloading structure";
+
+        if(type == 'rectype' || type == 'all'){
+
+            let points = '';
+            if(type == 'rectype'){
+                points = '<li>the selected record type, any fields, and vocabularies that are not yet in the database.</li>'
+                + '<li>any unrecognised record types (and their fields and vocabularies) connected to the selected record type.</li>'
+                + '<li>'
+                    + 'additional fields and vocabularies defined for record types already in your database which are connected<br>'
+                    + 'to any of the record types above (the fields will be added to the end of the record type and may be removed or<br>'
+                    + 'customised as desired; they will have no effect on existing data).'
+                + '</li>'
+            }else{
+                points = '<li><strong>ALL</strong> record types, fields and vocabularies/terms not yet in your database</li>'
+                + '<li>additional fields may be added to existing record types - they will be added at the end and may be removed or customised as required</li>'
+                + '<li>additional terms may be added to existing vocabularies</li>';
+            }
+
+            msg = 'If you proceed with download, Heurist will download three types of structural information:<br>'
+            + '<ol>'
+                + `${points}`
+            + '</ol>'
+            +'<p style="font-size:smaller">'
+                +'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
+                +' if you wish the record type names, field names and description, and term '
+                +' labels to be replaced by the names and labels being imported. Use with care as this can overwrite existing '
+                +'customisation with names which may be quite different and out-of-context with existing data. '
+                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
+                +' delete the clone once you are happy with the result of the import).'
+            +'</p>';
+        }else if(type == 'detailtype'){
+
+            title = "Downloading base field";
+            let idx_Type = window.hWin.HEURIST4.remote.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
+            let record = window.hWin.HEURIST4.remote.detailtypes.typedefs[id]['commonFields'];
+
+            msg = '<p style="font-size:smaller">'
+                +'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
+                +' if you wish the field names and description '
+                +' to be replaced by the names being imported. Use with care as this can overwrite existing '
+                +'customisation with names which may be quite different and out-of-context with existing data. '
+                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
+                +' delete the clone once you are happy with the result of the import).</p>';
+
+            if(record[idx_Type] == 'resource' || record[idx_Type] == 'enum' || record[idx_Type] == 'relmarker'){
+
+                let extra = record[idx_Type] == 'resource' ? 'record type(s)' : (record[idx_Type] == 'enum' ? 'term(s)' : 'term(s) and record type(s)')
+                msg = `If you proceed with the download, Heurist will also download missing related ${extra} for the selected field.<br>${msg}`;
+            }
+        }else{
+
+            title = "Downloading vocabulary";
+
+            msg = "If you proceed with the download, Heurist will download the selected vocabulary and any child terms within<br>"
+                + "Do you wish to continue?";
+        }
+
+        btns['Proceed'] = () => {
+
+            that._is_rename_target = $dlg.find('#rename_target_entities').is(':checked');
+
+            if(that._is_rename_target){
+
+                let $dlg2, btn2 = {};
+
+                btn2['Yes, overwrite'] = function(){
+                    $dlg2.dialog('close');
+                    $dlg.dialog('close');
+
+                    that.startImport(id, type);
+                };
+                btn2['Get me out of here'] = function(){
+                    $dlg2.dialog('close');
+                };
+
+                $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Are you sure you want to overwrite existing record type names, field names and term labels?',
+                    btn2, {title: 'Warning'},
+                    { default_palette_class: 'ui-heurist-design' }
+                );
+            }else{
+                $dlg.dialog('close');
+
+                that.startImport(id, type);
+            }
+
+            $dlg.dialog('close');
+        };
+
+        btns['Cancel'] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: title, yes:'Proceed', no:'Cancel'}, 
+            {default_palette_class: 'ui-heurist-design'}
+        );
+    },
+
+    _processCloneResponse: function(response){
+
+        this._selectedDB = null;
+
+        if(!response.report){
+            window.hWin.HEURIST4.msg.showMsgDlg('No definitions imported.<br>All definitions available from the source database already exist in this database.');
+            return;
+        }
+
+        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<div id="rty" style="height: 650px;"><h3>Record types:</h3><br><table>${response.report.rectypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<div id="dty" style="height: 650px;"><h3>Base fields:</h3><br><table>${response.report.detailtypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<div id="trm" style="height: 650px;"><h3>Terms:</h3><br><table>${response.report.terms}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<div id="translation" style="height: 650px;"><h3>Translations:</h3><br><table>${response.report.translations}</table><br></div>` : '');
+
+        msg = '<div id="handled-defs">'
+                    + '<div>'
+                        + '<ul>'
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<li href="#rty">Record types</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<li href="#dty">Base fields</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<li href="#trm">Terms</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<li href="#translation">Translations</li>` : '')
+                        + '</ul>'
+                    + '</div>'
+                    + msg
+                + '</div>';
+
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, {default_palette_class: 'ui-heurist-design', height: 800});
+
+        $dlg.find('#handled-defs').tabs();
+
+        window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', null);
+    }
 });

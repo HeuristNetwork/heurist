@@ -14,7 +14,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -23,10 +23,10 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
-$system = new System();
+$system = new hserv\System();
 
 if(!defined('ERROR_INCLUDE')){
     define('ERROR_INCLUDE', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
@@ -51,7 +51,7 @@ if (@$_REQUEST['bkmk_id']>0) {  //find record by bookmark id
         include_once ERROR_INCLUDE;
         exit;
     }
-} else {   
+} else {
 	$rec_id = @$_REQUEST['recID'];
     if(!($rec_id>0)){
         $_REQUEST['error'] = 'Parameter recID not defined';
@@ -64,7 +64,7 @@ if (@$_REQUEST['bkmk_id']>0) {  //find record by bookmark id
 $rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 
 //validate permissions
-$rec = mysql__select_row_assoc($mysqli, 
+$rec = mysql__select_row_assoc($mysqli,
         'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 
 if($rec==null){
@@ -74,17 +74,17 @@ if($rec==null){
 }
 
 $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
-    ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
-    $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
+    ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged
+    $system->is_member($rec['rec_OwnerUGrpID']) );//owner
 
 if(!$hasAccess){
         $_REQUEST['error'] = 'You are not a member of the workgroup that owns the Heurist record #'
         .$rec_id.', and cannot therefore view or edit this information.';
         include_once ERROR_INCLUDE;
         exit;
-}        
-    
-//find bookmark by rec id    
+}
+
+//find bookmark by rec id
 if(!($bkm_ID>0) && $system->get_user_id()>0 ){ //logged in
     $bkm_ID = mysql__select_value($mysqli, 'select bkm_ID from usrBookmarks where bkm_recID = ' . $rec_id
             . ' and bkm_UGrpID = ' . $system->get_user_id());
@@ -102,10 +102,10 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
         .$hideImages;
 
 if(!@$_REQUEST['popup']){
-    header('Location: '.$record_renderer_url);
-    exit;    
+    redirectURL($record_renderer_url);
+    exit;
 }
-        
+
 ?>
 <!DOCTYPE>
 <html lang="en">

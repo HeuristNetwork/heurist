@@ -20,19 +20,25 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 print '<!DOCTYPE html>';
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
-        
-A:visited {
-    color: #6A7C99;
-    text-decoration: none;
-}
-A:link {
-    color: #6A7C99;
-    text-decoration: none;
-}        
+
+            A:visited {
+                color: #6A7C99;
+                text-decoration: none;
+            }
+            A:link {
+                color: #6A7C99;
+                text-decoration: none;
+            }
+            .external-link{
+                background-image: url('<?php echo ICON_EXTLINK;?>');
+                background-repeat: no-repeat;
+                padding-left: 12px;
+                padding-top: 1px;
+            }
 
             #rectypes {
                 height: 100%;
@@ -49,10 +55,6 @@ A:link {
                 vertical-align: top;
                 margin: 0px;
                 padding: 2px 1px;
-            }
-
-            .show {
-                /*display: none;*/
             }
 
             .empty-row {
@@ -130,33 +132,33 @@ A:link {
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
                 }else{
-       
+
                     var request = {source: 'dbsummary', w:'a',
                                         q:  't:'+rt_ID};
                     if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
-                    window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );                    
-                    
+                    window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );
+
                     if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
-                        window.close();    
+                        window.close();
                     }
-                    
+
                     return false;
                 }
             }
-           
+
            function onPageInit(success){
-                   if(!success) return;
-                   $("#expand").click();
+                   if(!success) {return;}
+                   $("#expand").trigger('click');
             }
-            
+
         </script>
-        
+
     </head>
 
     <body class="popup" style="background-color: #FFF;padding: 0px;margin: 0px;">
-    
+
         <div class="ent_wrapper" style="height: 100%;">
         <div class="layout-container" style="height: 100%;">
 
@@ -185,33 +187,33 @@ A:link {
                             <?php
                             /** RETRIEVING RECORDS WITH CONNECTIONS */
                             // Building query
-                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, rg.rtg_ID as grp_id, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
+                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, rg.rtg_ID as grp_id, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count
                                       FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
-                                      defRecTypeGroups rg 
+                                      defRecTypeGroups rg
                                       WHERE rg.rtg_ID=d.rty_RecTypeGroupID
-                                      GROUP BY id 
+                                      GROUP BY id
                                       ORDER BY rtg_Order, title ASC";
                             // Put record types & counts in the table
                             $res = $system->get_mysqli()->query($query);
-                            $count = 0; 
+                            $count = 0;
                             $grp_name = null;
                             $first_grp  = 'first_grp';
-                            
+
                             while($row = $res->fetch_assoc()) { // each loop is a complete table row
                                 $rt_ID = $row["id"];
                                 $title = htmlspecialchars($row["title"]);
-                            
+
                                 if($grp_name!=$row['grp']){
-                                    if($grp_name!=null) $first_grp = '';
+                                    if($grp_name!=null) {$first_grp = '';}
                                     $grp_name = $row['grp'];
                                     ?>
                             <tr class="row">
                                 <td colspan="5" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
-                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"]; ?>"></td>
+                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"];?>"></td>
                             </tr>
                                     <?php
                                 }
-                                    
+
                                 // ID
                                 echo "<tr class='row'>";
                                 echo "<td align='center'>$rt_ID</td>";
@@ -219,7 +221,7 @@ A:link {
                                 //HAPI4.iconBaseURL
                                 // Image
                                 $rectypeImg = "style='background-image:url(".HEURIST_RTY_ICON.$rt_ID.")'";
-                                $img = "<img src='".PDIR."hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                                $img = "<img src='".ICON_PLACEHOLDER."' title='$title' $rectypeImg class='rft' />";
                                 echo "<td align='center'>$img</td>";
 
                                 // Type
@@ -242,7 +244,7 @@ A:link {
                                     echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp rectype_grp_". $row["grp_id"] ."' name='" .$title. "'></td>";
                                 }
                                 echo "</tr>";
-                            }                      
+                            }
                             ?>
 
                         </table>
@@ -253,7 +255,7 @@ A:link {
 
             <div class="ui-layout-center">
                 <div id="main_content" class="ent_wrapper" style="left:0px;">
-                    <?php 
+                    <?php
                         $isDatabaseStructure = 1;
                         include_once dirname(__FILE__).'/visualize.php';
                     ?>
@@ -263,7 +265,7 @@ A:link {
         </div>
 
         <script>
-            $("#expand").click(function(e) {
+            $("#expand").on('click', function(e) {
                 // Show visualisation elements
                 $(this).remove();
                 //$(".show").slideToggle(500);
@@ -274,7 +276,11 @@ A:link {
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
-                        window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: `Error loading JSON data: ${error.message}`,
+                            error_title: 'Unable to load diagram',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     }
 
                     // Data loaded successfully!
@@ -288,7 +294,7 @@ A:link {
                     ?>
                             isfirst_time = !(getSetting('hdb_'+window.hWin.HAPI4.database)>0);
                             putSetting('hdb_'+window.hWin.HAPI4.database, 1);
-                    <?php  
+                    <?php
                         }
                     ?>
 
@@ -296,9 +302,9 @@ A:link {
                         //restore setting for non empty db
                         $(".show-record").each(function() {
                             var name = $(this).attr("name");
-                            var record = getSetting(name); //@todo - change to recordtype ID
+                            var record = getSetting(name);//@todo - change to recordtype ID
                             if(record>0) {
-                                at_least_one_marked = true;   
+                                at_least_one_marked = true;
                                 $(this).prop("checked", true);
                             }else{
                                 $(this).prop("checked", false);
@@ -306,7 +312,7 @@ A:link {
                         }
                         );
                     }
-                        
+
                     if(isfirst_time || !at_least_one_marked){
                         $(".first_grp").each(function() {
                             $(this).prop("checked", true);
@@ -317,9 +323,9 @@ A:link {
                     }else{
                         putSetting('startup_rectype_'+window.hWin.HAPI4.database, 0);
                     }
-                    
+
                     // Listen to 'show-record' checkbox changes
-                    $(".show-record").change(function(e) {
+                    $(".show-record").on('change', function(e) {
                         // Update record field 'checked' value in localstorage
                         var name = $(e.target).attr("name");
 
@@ -332,7 +338,7 @@ A:link {
                     });
 
                     // Listen to the 'show-all' checkbox
-                    $("#show-all").change(function() {
+                    $("#show-all").on('change', function() {
                         // Change all check boxes
                         var checked = $(this).prop('checked');
                         $(".show-record").prop("checked", checked);
@@ -348,7 +354,7 @@ A:link {
                     });
 
                     // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
-                    $('.group_chkbox').change(function(){
+                    $('.group_chkbox').on('change', function(){
 
                         var group_id = $(this).attr('data-id');
                         var checked = $(this).prop('checked');
@@ -404,11 +410,11 @@ A:link {
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data 
+                    // Visualizes the data
                     function initVisualizeData() {
                         // Call plugin
                         var data_to_vis = getData(json_data);
-                        
+
                         $("#visualisation").visualize({
                             data: json_data,
                             getData: function(data) { return data_to_vis; },
@@ -420,17 +426,17 @@ A:link {
 
                     //reset settings for empty database
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-                        //localStorage.clear();    
+                        //localStorage.clear();
                     }
-                    
+
                     $(window).resize(onVisualizeResize);
-                    
+
                     onVisualizeResize();
                     initVisualizeData();
 
                 });
             });
-            
+
             function onVisualizeResize(){
 
 				/*
@@ -443,7 +449,7 @@ A:link {
                      supw = 2;
                 }
 				*/
-                
+
                 var dbkey = 'db'+window.hWin.HAPI4.database;
                 putSetting(dbkey, '1');
 

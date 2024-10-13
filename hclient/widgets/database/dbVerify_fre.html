@@ -1,0 +1,59 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <h3>Vérifiez les définitions et données non valides (pointeurs non valides, termes, éléments requis manquants, valeurs excédentaires, etc.)</h3>        
+        
+        <div style="display: flex;">
+        <div>
+            <label><input type="checkbox" data-mark-actions="all" checked>Mark all</label>
+            <ul id="actions">
+            </ul>            
+        </div>
+        <div>
+            <span style="padding-left:25px">Slow</span><br>
+            
+            <ul id="actions_slow">
+            </ul>           
+
+            <div style="max-width:400px;padding:5px 5px 5px 25px;" class="heurist-helper2">
+              Remarque : les vérifications marquées comme LENT sont indicatives. Le modèle d'utilisation des différentes fonctions déterminera quelles vérifications sont les plus lentes.
+            </div>
+            <div style="max-width:400px;padding:5px 5px 5px 25px;display:none;" class="heurist-helper2" id="notice_for_large_database">
+Veuillez noter qu'en raison de la taille de la base de données et de la version de MySQL utilisée sur ce serveur, les fonctions indiquées comme LENTES peuvent expirer. Nous vous suggérons de vérifier régulièrement celles qui ne sont pas marquées comme LENTES et de vérifier occasionnellement les autres.
+<br> <br>
+Veuillez soumettre un rapport de bogue si vous rencontrez un problème avec les délais d'expiration.
+            </div>
+        </div>
+        </div>
+        
+        <div>Sélectionnez les actions souhaitées et :
+            <button class="ui-button-action" id="btnVerifyDb">Vérifier l'intégrité</button>
+        </div>
+
+        <div class="slow-checks-in-popup" style="margin-top:20px">
+            <hr style="color:lightgray;width:60%;float:left"><br>
+            <h3>Vérifications lentes (seront ouvertes dans une fenêtre contextuelle séparée)</h3>
+            <button style="margin-right: 25px;" data-type="files">
+                Vérifier la cohérence des fichiers
+            </button>
+            <span class="heurist-helper2">Recherche les fichiers téléchargés manquants, en double et inutilisés</span>
+            <br>
+            <br>
+            <button style="margin-right: 86px;" data-type="urls">
+                Vérifier les URL
+            </button>
+            <span class="heurist-helper2">Vérifie les URL d'enregistrement et les URL référencées dans les champs de texte</span>
+        </div>
+        
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-top:75px;display: none;">
+
+
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+            </ol>
+        </div>
+</div>

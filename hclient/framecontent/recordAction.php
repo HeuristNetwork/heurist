@@ -38,7 +38,7 @@
 /*
 workflow
 
-resultList.js -> resultListMenuSelected.html/resultListMenu.js 
+resultList.js -> resultListMenuSelected.html/resultListMenu.js
 
 detailBatchEditPopup opens either
 
@@ -49,17 +49,17 @@ to convert
     recordAccess - define ownership and access rights  -> h3 executeAction("set_wg_and_vis") or just close window
     recordAdd - define record add initial preferences  -> save prefs and RecordMgr.add -> record_edit.php -> recordModify.php
 
-todo    
-*    recordRate - assign record rating -> EntityMgr.doRequest -> dbUsrBookmarks.php 
-*    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php 
-    
+todo
+*    recordRate - assign record rating -> EntityMgr.doRequest -> dbUsrBookmarks.php
+*    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php
+
 *    recordDelete -> RecordMgr.remove or (EntityMgr.doRequest) -> dbRecords.php
      recordTitle - update titles -> RecordMgr.remove (or EntityMgr.doRequest) -> dbRecords.php use TitleMask class
-    
+
 *    recordTag - add/remove tags in batch   -> EntityMgr.doRequest ->  dbUsrTags (use dbUsrBookmarks)
 
     recordNotify - send email about record
-    
+
 on server side - controller
 RecordMgr.add, save, duplicate, remove  -> record_edit.php -> recordModify.php
 
@@ -67,9 +67,9 @@ RecordMgr.batch_details -> record_batch.php  -> recordsBatch
 
 
 
-*/    
-    
-    
+*/
+
+
 
 
 define('LOGIN_REQUIRED',1);
@@ -84,17 +84,17 @@ $allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
-    header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
+    redirectURL(ERROR_REDIR.'?msg=Action is not defined or not allowed');
     exit;
 }
 
 ?>
-<!-- date picker 
+<!-- date picker
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
--->        
+-->
 
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
@@ -106,12 +106,12 @@ if(!in_array($action_type, $allowed_actions)){
     // Callback function on page init complete
     function onPageInit(success){
         if(success){
-            
+
             var action = window.hWin.HEURIST4.util.getUrlParameter('action', window.location.search);
             var scope = window.hWin.HEURIST4.util.getUrlParameter('scope', window.location.search);
             var field_type = window.hWin.HEURIST4.util.getUrlParameter('ft', window.location.search);
             var field_value = window.hWin.HEURIST4.util.getUrlParameter('value', window.location.search);
-            
+
             var recordAction = new hRecordAction(action, scope, field_type, field_value);
         }
     }
@@ -122,9 +122,9 @@ if(!in_array($action_type, $allowed_actions)){
         display:table-cell;
         font-size:1.1em;
     }
-    
-.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
-.calendars-month-header, .calendars-nav, .calendars-month th, 
+
+.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%;}
+.calendars-month-header, .calendars-nav, .calendars-month th,
 .calendars-month-header select, .calendars-ctrl, .calendars a{
     background-color:lightgray;
     color:black;
@@ -141,7 +141,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden;" class="ui-heurist-explore">
 
-    <div id="div_parameters" class="popup_content_div" style="overflow:auto;bottom:3.5em;">
+    <div id="div_parameters" class="popup_content_div" style="overflow-y:auto;overflow-x:hidden;bottom:3.5em;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 
@@ -153,14 +153,14 @@ if(!in_array($action_type, $allowed_actions)){
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
             <div id="div_sel_fieldtype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_record_scope">Field to modify:</label></div>
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_fieldtype">Field to modify:</label></div>
                 <select id="sel_fieldtype" class="ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
 
             <div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
                 <select id="sel_recordtype" style="max-width:30em"></select>
-                
+
                 <div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>
                 <div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>
             </div>
@@ -170,7 +170,7 @@ if(!in_array($action_type, $allowed_actions)){
                 <div class="header" style="padding:16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
                 <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">
             </div>
-            
+
         </fieldset>
 
         <div id="div_widget" style="padding-left: 16px; width: 100%;">
@@ -183,7 +183,7 @@ if(!in_array($action_type, $allowed_actions)){
     <div id="div_result" class="content_div" style="display: none;">
         RESULT
     </div>
-    
+
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="padding:10px">
         <div class="ui-dialog-buttonset">
             <div id="btn-ok" class="ui-state-disabled">OK</div>

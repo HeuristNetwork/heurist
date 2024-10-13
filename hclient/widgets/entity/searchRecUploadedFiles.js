@@ -23,104 +23,50 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         
         this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
         this.btn_add_record_ext = this.element.find('#btn_add_record_ext');
-        this.btn_add_record_popup = this.element.find('#btn_add_record_popup'); 
-        this.btn_add_record_any = this.element.find('#btn_add_record_any');
         this.btn_edit_mimetypes = this.element.find('#btn_edit_mimetypes');
-        this.btn_remove_dups = this.element.find('#btn_remove_dups');
-        this.btn_remove_unused = this.element.find('#btn_remove_unused');
-        this.btn_refresh_index = this.element.find('#btn_refresh_index');
-        this.btn_create_records = this.element.find('#btn_create_records');
-        this.btn_check_files = this.element.find('#btn_check_files');
-        
-        if(this.options.edit_mode=='none'){
+
+
+        if(this.options.edit_mode=='none' || this.options.select_mode != 'manager'){
             this.element.find('#div_add_record').hide();
         }else{
-            //this.btn_add_record_inline.hide();
-            //.css({position:'absolute',top:0,right:170,'max-width':300,'max-height':150});
-                        
-            
-            this.btn_add_record_loc.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Select file to upload"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .click(function(e) {
-                    that._trigger( "onaddlocal" );
-                }); 
-
-            this.btn_add_record_popup.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Drag and drop file to upload"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .click(function(e) {
-                    that._trigger( "onaddpopup" );
-                }); 
-            
-            this.btn_add_record_ext.css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR("Specify external file/URL"),icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .click(function(e) {
-                    that._trigger( "onaddext" );
-                }); 
-                
-                
             this.btn_edit_mimetypes
                     .button({label: window.hWin.HR("Define mime types"),icons: {
                             primary: "ui-icon-pencil"
                     }})
-                .click(function(e) {
+                .on('click', function(e) {
                     window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});
                 }); 
 
-            this.btn_remove_dups.button({label: window.hWin.HR("Combine duplicates")})
-                .click(function(e) {
-                    that._checkUserPermissions(1, 'onremovedups');
-                });
-
-// Removed by Ian 12 May 2023
-// TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
-// or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.
-//            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
-//                .click(function(e) {
-//                    that._checkUserPermissions(1, 'onremoveunused');
-//                }); 
-
-            this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
-                .click(function() {
-                    that._checkUserPermissions(1, 'onfilerecs')
-                });
-                /*.position({
-                    my: 'right top+5',
-                    at: 'right bottom',
-                    of: this.btn_remove_unused
-                });*/
-
-            this.btn_refresh_index.button({label: window.hWin.HR("Index new files")})
-                .click(function() {
-                    that._checkUserPermissions(1, 'onrefreshindex')
-                });
-
-            this.element.find('#select_all')
-                .change(function() {
-                    that._trigger('onselectall');
-                });
-
-            this.element.find('#selected_only')
-                .change(function() {
-                    that._trigger('onselectedonly');
-                });
-
-            this.btn_check_files.button({label: window.hWin.HR("Check files")})
-                .click(function(){
-                    let url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`;
-                    window.open(url, '_blank');
-                });
+            this.element.find('#btn_menu').buttonsMenu({
+                menuContent:
+                    '<div>'
+                    +'<ul id="menu-file-add-local" link-style="background:#ededed" title="Select file to upload" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-add-ext" link-style="background:#ededed" title="Select external file/URL" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-import-csv" link-style="background:#ededed" title="Import file data from CSV" data-icon="ui-icon-file-table"></ul>'
+                    +'<ul title="Selected" link-style="width:100px" style="margin-left:150px">'
+                    +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
+                    +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
+                    +'<li>---------------</li>'
+                    +'<li id="menu-file-export-csv"><a href="#">Download CSV of information for selection</a></li>'
+                    +'<li id="menu-file-refrec-show"><a href="#">Show records referencing selection</a></li>'
+                    +'<li id="menu-file-refrec-add"><a href="#">Create multimedia records for selection</a></li>'
+                    +'<li id="menu-file-delete-selected"><a href="#">Delete files in selection</a></li>'
+                    +'</ul>'
+                    +'<ul title="Integrity" link-style="width:100px">'
+                    +'<li id="menu-file-merge-dupes"><a href="#">Combine duplicates</a></li>'
+                    +'<li id="menu-file-refresh-index"><a href="#">Refresh index</a></li>'
+                    +'<li id="menu-file-check-files"><a href="#">Check files</a></li></ul></div>',
+                manuActionHandler:function(action){
+                    that._trigger('onaction', null, action);   
+                }
+            });
+                
         }
 
         this.selectGroup = this.element.find('#sel_group');
@@ -153,6 +99,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         //-----------------
         this.input_search_path = this.element.find('#input_search_path');
         this.input_search_type = this.element.find('#input_search_type');
+        this.input_search_referenced = this.element.find('#input_search_referenced');
         this.input_search_url =  this.element.find('#input_search_url');
 
         this.input_search_my = this.element.find('#input_search_my');
@@ -172,8 +119,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         if(this.options.select_mode=='manager'){
 
             this.element.find('#input_search_type_div').css('float','left');
-
-            this._on(this.element.find('#dwnld_refs'), { click: function(){ this._trigger("ondownload"); } });
 
             if(!window.hWin.HAPI4.is_admin()){
                 this.element.find('.admin-only').hide().off('click'); // hide and remove functions 
@@ -203,6 +148,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_url.val('');
         this.input_search_path.val('');
         this.input_search_type.val('');
+        this.input_search_referenced.val('');
     },
     //
     // special case to show recently added record
@@ -210,7 +156,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     searchRecent: function(domain){
         this.clearInputs();
         
-        //this.input_search_recent.prop('checked', true);
+       
         this.input_sort_type.val('recent');
 
         if(!window.hWin.HEURIST4.util.isempty(domain)){
@@ -225,11 +171,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
         
-            var domain = this.currentDomain();
+            let domain = this.currentDomain();
             
             if(domain=='tiled'){
                 
@@ -240,8 +184,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search.parent().hide();
                 this.input_search_path.parent().hide();
                 this.input_search_url.parent().show();
-                //this.element.find('span.local').hide();
-                //this.element.find('span.external').show();
+               
+               
                 this.element.find('.heurist-helper1 > .local').hide();
                 this.element.find('.heurist-helper1 > .external').show();
 
@@ -273,6 +217,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                     request['fxm_MimeType'] = this.input_search_type.val();  
             }
+            if(this.input_search_referenced.val()!='' && this.input_search_referenced.val()!='both'){
+                    request['ulf_Referenced'] = this.input_search_referenced.val();  
+            }
             
             if(this.input_search_my.is(':checked') || !window.hWin.HAPI4.is_admin()){
                 request['ulf_UploaderUGrpID'] = window.hWin.HAPI4.currentUser.ugr_ID; 
@@ -287,51 +234,17 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['sort:ulf_OrigFileName'] = '-1';   
             }
             
-            
-            
-            this._trigger( "onstart" );
-    
-            request['a']          = 'search'; //action
-            request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            var that = this;                                                
-            
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-                    
+            this._search_request = request;
+            this._super();
     },
     
     currentDomain:function(){
-            var domain = this.selectGroup.tabs('option','active');
+            let domain = this.selectGroup.tabs('option','active');
             return domain==1?'external':((domain==2)?'tiled':'local');
     },
     
     getUploadContainer:function(){
-        return this.btn_add_record_inline; //element.find('#btn_add_record_loc');
-    },
-
-    _checkUserPermissions: function(level, event){
-
-        if(!window.hWin.HAPI4.has_access(level)){
-            window.hWin.HEURIST4.msg.showMsgErr('You must be an administrator of the database managers group to use this feature');
-            return;
-        }
-
-        /*if(event == 'defineMimeType'){
-            window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype', {edit_mode:'inline', width:900});
-            return;
-        }*/
-
-        this._trigger(event);
+        return this.btn_add_record_inline;
     }
 
 });

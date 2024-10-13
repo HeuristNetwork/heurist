@@ -3,7 +3,7 @@
 /**
 * Lookup third party web service to return data to client side recordLookups
 * It works as a proxy to avoid cross-origin issues
-* 
+*
 * Currently supporting services:
 * GeoName
 * TLCMap
@@ -11,7 +11,7 @@
 * Nomisma
 * Nakala
 * Opentheso
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -27,8 +27,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-    require_once dirname(__FILE__).'/../System.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
     // allowed and handled services, 'serviceType' => 'service/url base'
     // base url is used to reconstruct url validated request
@@ -40,7 +39,7 @@
             'https://tlcmap.org/ghap/search?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ),
-        'geonames' => 'http://api.geonames.org/',
+        'geonames' => 'http'.'://api.geonames.org/',
 
         'bnflibrary_bib' => $BNF_BASE_URL,
         'bnflibrary_aut' => $BNF_BASE_URL,
@@ -93,7 +92,8 @@
             'country' => $MIXED,
             'postalcode' => $MIXED,
             'placename' => $MIXED,
-            'maxRows' => $NUMBERED
+            'maxRows' => $NUMBERED,
+            'geonameId' => $MIXED
         ),
 
         'bnf' => array(
@@ -117,8 +117,8 @@
     );
 
     // BnF xml namespace urls
-    $BNF_XML_RECORDS_NAMESPACE = 'http://www.loc.gov/zing/srw/'; // srw
-    $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2'; // mxc
+    $BNF_XML_RECORDS_NAMESPACE = 'http'.'://www.loc.gov/zing/srw/';// srw
+    $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2';// mxc
 
     $is_estc = false;
     $valid_service = false;
@@ -135,9 +135,9 @@
             $action = @$_REQUEST['action'];
             $valid_service = @$_REQUEST['db'] == $srv_details['db'] || $action == $srv_details['action'];
             $is_estc = $valid_service;
-        }else if(!is_array($srv_details)){
+        }elseif(!is_array($srv_details)){
             $valid_service = $srv_details == $url || strpos($url, $srv_details) === 0;
-        }else if(in_array($url, $srv_details)){
+        }elseif(in_array($url, $srv_details)){
             $valid_service = true;
         }else{
             foreach ($srv_details as $srv_base) {
@@ -151,25 +151,25 @@
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     $params = $_REQUEST;
 
     $is_debug = (@$params['dbg']==1);
 
     if(!$valid_service){
-        $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST); //exit from script
+        $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST);//exit from script
     }
-    if($cur_type == 'geonames' && (!isset($accessToken_GeonamesAPI) || empty($accessToken_GeonamesAPI))){
+    if($cur_type == 'geonames' && empty($accessToken_GeonamesAPI)){
         $system->error_exit_api('Unable to use the geonames API, API key is missing from configuration file', HEURIST_ACTION_BLOCKED);
     }
 
     $remote_data = false;
     $url = '';
-    
+
     if($is_estc){
 
-        
+
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
         $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
@@ -188,18 +188,18 @@
 
                 if($is_logged_in){ // logged in, begin search
                     $system->getCurrentUserAndSysInfo(false);
-                    
+
                     if(array_key_exists('action', $params)){ // import record for LRC18C lookup
-    
+
                         if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                             require_once dirname(__FILE__).'/importController.php';
                             exit;
-                        }else if($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
+                        }elseif($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
                             require_once dirname(__FILE__).'/record_output.php';
                             exit;
                         }
                     }
-    
+
                     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 
                     $response = recordSearch($system, $params);
@@ -209,15 +209,15 @@
             }else{ // cannot access ESTC DB
                 $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
             }
-        }else if(isset($ESTC_ServerURL)){ // external server
+        }elseif(isset($ESTC_ServerURL)){ // external server
             //change hsapi to hserv when master index will be v6.5
             $base_url = $ESTC_ServerURL
                 .'hserv/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
-                
-                $base_url = $ESTC_ServerURL 
-                    .'hserv/controller/record_lookup.php?';  //record_output
+
+                $base_url = $ESTC_ServerURL
+                    .'hserv/controller/record_lookup.php?';//record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
                 $params2['serviceType'] = 'ESTC';
@@ -227,26 +227,26 @@
                 $params2['org_db'] = $params['org_db'];
                 $params2['q'] = $params['q'];
                 $params2['rules'] = @$params['rules'];
-                $url = $base_url.http_build_query($params2); // forward request to ESTC server
+                $url = $base_url.http_build_query($params2);// forward request to ESTC server
 
                 $is_inited = $system->init(@$params['db']);
-                
-                // save file that produced with record_output.php from source to temp file  
+
+                // save file that produced with record_output.php from source to temp file
                 $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
-                
-                $filesize = saveURLasFile($url, $heurist_path); // perform external request and save results to temp file
+
+                $filesize = saveURLasFile($url, $heurist_path);// perform external request and save results to temp file
 
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
-              
-                    require_once dirname(__FILE__).'/../records/import/importHeurist.php'; 
-                    
+
+                    require_once dirname(__FILE__).'/../records/import/importHeurist.php';
+
                     $params2 = array(
                         'dbg' => ($is_debug?1:0),
                         'owner_id' => $system->get_user_id(),
                         'mapping_defs' => @$params['mapping']
                     );
-                    
+
                     $res = ImportHeurist::importRecords($heurist_path, $params2);
                     if(is_bool($res) && $res === false){
                         $response = $system->getError();
@@ -255,14 +255,14 @@
                     }
 
                     unlink($heurist_path);
-                    
+
                 }else{
                     $response = array('status' => HEURIST_ERROR, 'message' => 'Cannot download records from '.$params['source_db'].'. <br>'.$remote_path.' to '.$heurist_path.'<br><br>URL request: ' . $url);
                 }
 
             }else{
 
-                $url = $base_url.http_build_query($params); // forward request to ESTC server
+                $url = $base_url.http_build_query($params);// forward request to ESTC server
                 $response = loadRemoteURLContentWithRange($url, null, true, 60);
             }
 
@@ -283,16 +283,16 @@
 
         $response = json_encode($response);
 
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($response));
+        header(CTYPE_JSON);
+        header(CONTENT_LENGTH . strlen($response));
         exit($response);
     }
 
     if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
         //get error and response
-        $system->error_exit_api(); //exit from script
-    }else if ( $system->get_user_id()<1 ) {
-        $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED); 
+        $system->error_exit_api();//exit from script
+    }elseif ( $system->get_user_id()<1 ) {
+        $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED);
         //$response = $system->addError(HEURIST_REQUEST_DENIED);
     }
 
@@ -327,26 +327,25 @@
                 case 'opentheso_get_collections':
                     $response = getOpenthesoCollections($system, $params['params']);
                     break;
-                
+
                 default:
                     $system->addError(HEURIST_INVALID_REQUEST, 'Invalid request for Opentheso metadata');
                     break;
             }
 
-        }else if($cur_type == 'nakala'){
+        }elseif($cur_type == 'nakala'){
             $response = getNakalaMetadata($system, @$params['type']);
         }
         $response = json_encode($response);
 
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($response));
+        header(CTYPE_JSON);
+        header(CONTENT_LENGTH . strlen($response));
         exit($response);
     }
 
     // validate url and query
-    
+
     $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
-    //if(!$url){$url = filter_var($params['service'], FILTER_VALIDATE_URL);}
 
     $clean_query = array();
 
@@ -378,7 +377,7 @@
             // Add default extras
             if($cur_type == 'geonames' && !empty($clean_query)){
                 $clean_query['username'] = $accessToken_GeonamesAPI;
-            }else if($cur_type == 'bnf'){
+            }elseif($cur_type == 'bnf'){
                 $clean_query['version'] = '1.2';
                 $clean_query['operation'] = 'searchRetrieve';
                 $clean_query['recordSchema'] = 'unimarcxchange';
@@ -404,7 +403,7 @@
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
         if(strpos($glb_curl_error, '404') !== false && @$params['serviceType'] == 'nomisma'){ // No result for Nomisma returns a 404 error
-            $remote_data = json_encode(array()); // return empty array
+            $remote_data = json_encode(array());// return empty array
         }else{
 
             preg_match("/\d+/", $glb_curl_error, $http_code);
@@ -434,20 +433,20 @@
 
         json_decode($remote_data);
         if(json_last_error() == JSON_ERROR_NONE){
-        }else if(@$_REQUEST['is_XML'] == 1){
+        }elseif(@$_REQUEST['is_XML'] == 1){
             // XML to JSON (no attributes/namespace handling required)
             $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
             $remote_data = json_encode($xml_obj);
         }else{
 
             $hasGeo = false;
-            $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
+            $remote_data = str_getcsv($remote_data, "\n");//parse the rows
             if(is_array($remote_data) && count($remote_data)>1){
-                
+
                 $header = str_getcsv(array_shift($remote_data));
                 $id = 1;
                 foreach($remote_data as &$line){
-                    $line = str_getcsv($line);  
+                    $line = str_getcsv($line);
                     foreach($header as $idx=>$key){
                          $line[$key] = $line[$idx];
                          unset($line[$idx]);
@@ -457,32 +456,28 @@
                             'geometry'=>array('type'=>'Point','coordinates'=>array($line['longitude'], $line['latitude'])));
                         $hasGeo = true;
                     }
-                } 
-                
+                }
+
                 if(!$hasGeo){
                     $system->error_exit_api('Service did not return data in an appropriate format', HEURIST_ACTION_BLOCKED);
                 }
-            }else if(is_array($remote_data) && count($remote_data)==1){
+            }elseif(is_array($remote_data) && count($remote_data)==1){
                     $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
             }else{
                     $system->error_exit_api('Service did not return any data', HEURIST_ERROR);
             }
-    
+
             $remote_data = json_encode($remote_data);
         }
-    }else if(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
+    }elseif(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
 
         $author_codes = '';
         //$contributor_codes = '';
         if(array_key_exists('author_codes', $params) && !empty($params['author_codes']) && $params['author_codes'] != 'all'){
             $author_codes = explode(',', $params['author_codes']);
         }
-        /*if(array_key_exists('contributor_codes', $params) && !empty($params['contributor_codes'])){
-            $contributor_codes = explode(',', $params['contributor_codes']);
-        }*/
-
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -504,7 +499,7 @@
                 if($cf_tag == '001') { // BnF ID
                     $formatted_array['BnF_ID'] = (string)$cf_ele[0];
                     $id = (string)$cf_ele[0];
-                }else if($cf_tag == '003') { // Record URL
+                }elseif($cf_tag == '003') { // Record URL
                     $formatted_array['biburl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -525,7 +520,7 @@
 
                         if($sf_code == 'a') {
                             $formatted_array['title'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'b'){
+                        }elseif($sf_code == 'b'){
 
                             $formatted_array['type'] = (string)$sf_ele[0];
 
@@ -539,8 +534,8 @@
                             }
                         }
                     }
-                }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
-                    
+                }elseif($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
+
                     $value = '';
                     $is_valid = false;
                     $name = array();
@@ -553,25 +548,25 @@
 
                         if($sf_code == 'a'){ // publisher location
                             $location[] = $str_val;
-                        }else if($sf_code == 'c'){ // publisher name
+                        }elseif($sf_code == 'c'){ // publisher name
                             $name[] = $str_val;
-                        }else if($sf_code == 'd'){
+                        }elseif($sf_code == 'd'){
                             $formatted_array['date'][] = $str_val;
-                        }else if($sf_code == 's'){
+                        }elseif($sf_code == 's'){
                             $formatted_array['publisher'][$pub_idx] = $str_val;
                             break;
                         }
                     }
 
                     if(!empty($location)){
-                        $formatted_array['publisher'][$pub_idx]['location'] = '[' . implode(' ; ', $location) . ']';
+                        $formatted_array['publisher'][$pub_idx]['location'] = '[' . implode(' ;', $location) . ']';
                     }
                     if(!empty($name)){
                         $formatted_array['publisher'][$pub_idx]['name'] = implode(', ', $name);
                     }
 
                     $pub_idx ++;
-                }else if($df_tag == '700' || $df_tag == '701' || $df_tag == '702' || $df_tag == '710' || $df_tag == '712' || $df_tag == '716') { // Creator [Author|Contributor]
+                }elseif($df_tag == '700' || $df_tag == '701' || $df_tag == '702' || $df_tag == '710' || $df_tag == '712' || $df_tag == '716') { // Creator [Author|Contributor]
 
                     /**
                      * 3 => ID
@@ -595,7 +590,7 @@
                             $id = (string)$sf_ele[0];
                             $author['id'] = $id;
                             continue;
-                        }else if($sf_code == '4'){
+                        }elseif($sf_code == '4'){
                             $role = (string)$sf_ele[0];
                             $author['role'] = $role;
                             continue;
@@ -609,14 +604,14 @@
 
                                 if($sf_code == 'a') { // Surname
                                     $author['surname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b') { // Given name
+                                }elseif($sf_code == 'b') { // Given name
                                     $author['firstname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'f') { // Years active
+                                }elseif($sf_code == 'f') { // Years active
                                     $author['active'] = (string)$sf_ele[0];
                                 }
 
                                 break;
-                            
+
                             case '710':
                             case '711':
                             case '712':
@@ -624,9 +619,9 @@
 
                                 if($sf_code == 'c') { // Date // $sf_code == 'f' Location
                                     $author['active'] = '(' . (string)$sf_ele[0] . ')';
-                                }else if($sf_code == 'b'){ // Sub unit name
+                                }elseif($sf_code == 'b'){ // Sub unit name
                                     $author['surname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'a') { // Main name
+                                }elseif($sf_code == 'a') { // Main name
                                     $author['firstname'] = (string)$sf_ele[0];
                                 }
 
@@ -640,9 +635,9 @@
                                 if($sf_code == 'a') { // Name
                                     $author['name'] = (string)$sf_ele[0];
                                 }
- 
+
                                 break;
- 
+
                             default:
                                 break;
                         }
@@ -662,8 +657,8 @@
 
                         $aut_idx ++;
                     }
-                    
-                }else if($df_tag == '010') { // ISBN
+
+                }elseif($df_tag == '010') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
@@ -672,7 +667,7 @@
                             $formatted_array['isbn'][] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '215') { // Description
+                }elseif($df_tag == '215') { // Description
 
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -686,7 +681,7 @@
                     if($value != '') {
                         $formatted_array['description'][] = $value;
                     }
-                }else if($df_tag == '101') { // Language, e.g. fre or FR 101
+                }elseif($df_tag == '101') { // Language, e.g. fre or FR 101
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
@@ -695,8 +690,8 @@
                             $formatted_array['language'][] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '327') { // Extended Description
-                    
+                }elseif($df_tag == '327') { // Extended Description
+
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
@@ -715,10 +710,10 @@
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'bnflibrary_aut'){
+    }elseif(@$params['serviceType'] == 'bnflibrary_aut'){
 
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -737,7 +732,7 @@
 
                 if($cf_tag == '001') { // BnF ID
                     $formatted_array['BnF_ID'] = (string)$cf_ele[0];
-                }else if($cf_tag == '003') { // Record URL
+                }elseif($cf_tag == '003') { // Record URL
                     $formatted_array['auturl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -761,16 +756,16 @@
 
                                 if($sf_code == 'a'){ // Surname
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b'){ // First name
-    
+                                }elseif($sf_code == 'b'){ // First name
+
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
                                     }else{
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
-                                }else if($sf_code == 'f' || $sf_code == 'd'){ // Years active
+                                }elseif($sf_code == 'f' || $sf_code == 'd'){ // Years active
                                     $formatted_array['years_active'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Role/Job
+                                }elseif($sf_code == 'c'){ // Role/Job
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -780,9 +775,9 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Location
-                                    $formatted_array['location'] = (string)$sf_ele[0];    
-                                }else if($sf_code == 'b'){ // Type
+                                }elseif($sf_code == 'c'){ // Location
+                                    $formatted_array['location'] = (string)$sf_ele[0];
+                                }elseif($sf_code == 'b'){ // Type
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -792,8 +787,8 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 't'){ // title
-                                    
+                                }elseif($sf_code == 't'){ // title
+
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ' [' . (string)$sf_ele[0] . ']';
                                     }else{
@@ -802,7 +797,7 @@
                                 }
 
                                 break;
-                            
+
                             case '230': // MISSING - $b $h $k $m
 
                                 if($sf_code != 'a' && $sf_code != 'i'){
@@ -839,7 +834,7 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Type
+                                }elseif($sf_code == 'c'){ // Type
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -858,7 +853,7 @@
                 }
             }
 
-            if(count($formatted_array) > 0 && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
+            if(!empty($formatted_array) && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
                 $results['result'][] = $formatted_array;
             }
         }
@@ -868,9 +863,9 @@
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'bnf_recdump'){
+    }elseif(@$params['serviceType'] == 'bnf_recdump'){
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -879,13 +874,13 @@
 
         foreach($records as $key => $details){
             $record = $details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record;
-            $results['record'] = $record->asXML();//json_encode($record, JSON_PRETTY_PRINT);
+            $results['record'] = $record->asXML();
             break;
         }
 
         $remote_data = json_encode($results);
 
-    }else if(@$params['serviceType'] == 'nomisma' && @$params['search_type'] == 'xml'){
+    }elseif(@$params['serviceType'] == 'nomisma' && @$params['search_type'] == 'xml'){
 
 		$xml_obj = new SimpleXMLElement($remote_data, LIBXML_PARSEHUGE);
 
@@ -908,7 +903,7 @@
 
         $remote_data = json_encode(array("status" => HEURIST_OK, "entry" => $results));
 
-    }else if(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
+    }elseif(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
 
         $remote_data = json_decode($remote_data, true);
         if(json_last_error() == JSON_ERROR_NONE){
@@ -917,9 +912,9 @@
             if(array_key_exists('totalResults', $remote_data)){
                 $results['count'] = $remote_data['totalResults'];
                 $results['records'] = array();
-    
+
                 if($remote_data['totalResults'] > 0){
-    
+
                     foreach ($remote_data['datas'] as $records) {
 
                         $id = @$records['identifier'];
@@ -942,7 +937,7 @@
                         $results['records'][$id]['source'] = array();
                         $results['records'][$id]['copyright'] = array();
                         $results['records'][$id]['provenance'] = array();
-                        
+
                         foreach ($records['metas'] as $metadata) {
 
                             if($metadata['value'] == null){
@@ -965,23 +960,23 @@
                                         $results['records'][$id]['author'][] = $aut_name;
                                     }
                                 }
-                            }else if(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
+                            }elseif(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
                                 $results['records'][$id]['author'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
+                            }elseif(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
                                 $results['records'][$id]['title'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+                            }elseif(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
                                 $results['records'][$id]['date'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
+                            }elseif(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
                                 $results['records'][$id]['license'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
+                            }elseif(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
                                 $results['records'][$id]['abstract'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'contributor') !== false){ // Contributor
+                            }elseif(strpos($metadata['propertyUri'], 'contributor') !== false){ // Contributor
                                 $results['records'][$id]['contributor'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'source') !== false){ // Source
+                            }elseif(strpos($metadata['propertyUri'], 'source') !== false){ // Source
                                 $results['records'][$id]['source'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'rightsHolder') !== false){ // Right Holders
+                            }elseif(strpos($metadata['propertyUri'], 'rightsHolder') !== false){ // Right Holders
                                 $results['records'][$id]['copyright'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'provenance') !== false){ // Provenance
+                            }elseif(strpos($metadata['propertyUri'], 'provenance') !== false){ // Provenance
                                 $results['records'][$id]['provenance'][] = $metadata['value'];
                             }
                         }
@@ -1017,8 +1012,8 @@
         }else{
             $system->error_exit_api('Service did not return data in an handled format', HEURIST_ERROR);
         }
-    }else if(@$params['serviceType'] == 'opentheso'){
-        
+    }elseif(@$params['serviceType'] == 'opentheso'){
+
         $def_lang = $system->user_GetPreference('layout_language', 'fr');
         $def_lang = getLangCode2($def_lang);
         $def_lang = !$def_lang ? 'fr' : strtolower($def_lang);
@@ -1031,8 +1026,8 @@
         $code_idx = 'http://purl.org/dc/terms/identifier';
         $label_idx = 'http://www.w3.org/2004/02/skos/core#prefLabel';
 
-        $geopoint_idx = 'http://www.opengis.net/ont/geosparql#P625';
-        $valid_geopoint_type = 'http://www.opengis.net/ont/geosparql#wktLiteral';
+        $geopoint_idx = 'http'.'://www.opengis.net/ont/geosparql#P625';
+        $valid_geopoint_type = 'http'.'://www.opengis.net/ont/geosparql#wktLiteral';
         $notes_idx = 'http://www.w3.org/2004/02/skos/core#editorialNote';
 
         $results = array();
@@ -1056,7 +1051,7 @@
                     $code = $details[$code_idx][0]['value'];
                 }
                 $code_parts = explode('/', $uri);
-                $code .= (!empty($code) ? ' ; ' : '') . implode('/', array_splice($code_parts, -2, 2));
+                $code .= (!empty($code) ? ' ;' : '') . implode('/', array_splice($code_parts, -2, 2));
 
                 foreach ($details[$label_idx] as $label_details) {
                     if($label_details['lang'] == $def_lang){
@@ -1068,14 +1063,14 @@
                     }
 
                     $lang_code = getLangCode3($label_details['lang']);
-                    $translated_labels[$lang_code] = $lang_code . ":" . $label_details['value']; // LANG_CODE:Value
+                    $translated_labels[$lang_code] = $lang_code . ":" . $label_details['value'];// LANG_CODE:Value
                 }
 
                 $notes = array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
                 $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
                                 $details[$geopoint_idx][0]['value'] : '';
 
-                array_push($results, array('label' => $label, 'desc' => $desc, 'code' => $code, 'uri' => $uri, 'translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint));
+                $results[] = ['term_label' => $label, 'term_desc' => $desc, 'term_code' => $code, 'term_uri' => $uri, 'term_translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint];
             }
         }else{
             $system->error_exit_api('An error occurred while attempting to process the search results from Opentheso', HEURIST_UNKNOWN_ERROR);
@@ -1085,10 +1080,9 @@
     }
 
 	// Return response
-    header('Content-Type: application/json');
-    header('Content-Length: ' . strlen($remote_data));
+    dataOutput($remote_data);
 
-    exit($remote_data);
+//------------------------------------------------------------------------------
 
     function getOpenthesoThesauruses($system, $params){
 
@@ -1134,7 +1128,7 @@
 
     /**
      * Get list of thesauruses
-     * 
+     *
      * @param bool $is_refresh
      */
     function updateOpenthesoThesauruses($system, $params = array()){
@@ -1145,8 +1139,8 @@
         $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
 
         // Get existing data
-        $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
-                        file_get_contents($opentheso_file) : []; // retain original collection data
+        $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ?
+                        file_get_contents($opentheso_file) : [];// retain original collection data
         $data_old = json_decode($data_old, TRUE);
         $data_old = json_last_error() !== JSON_ERROR_NONE || !is_array($data_old) ?
                         [] : $data_old;
@@ -1169,7 +1163,7 @@
                 $data_rtn[$server] = array();
                 continue;
             }
-            
+
             $data_rtn[$server] = array();
 
             $thesauruses = loadRemoteURLContentWithRange("{$base_uri}thesaurus", null, true, 60);
@@ -1262,7 +1256,7 @@
         }
         fclose($fd);
 
-        $data = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
+        $data = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ?
                 file_get_contents($opentheso_file) : null;
 
         $data = $data !== null ? json_decode($data, TRUE) : null;
@@ -1274,7 +1268,7 @@
             return $data[$server][$theso]['groups'];
         }
 
-        $url = $service_types['opentheso'][$server] . 'group/' . $theso;
+        $url = $service_types['opentheso'][$server] . 'group/' . urlencode($theso);
 
         $groups = loadRemoteURLContentWithRange($url, null, true, 60);
 
@@ -1312,9 +1306,19 @@
 
         fileSave(json_encode($data), $opentheso_file);
 
-        return $data[$server][$theso]; // return group details only
+        return $data[$server][$theso];// return group details only
     }
 
+    /**
+     * Retrieves Nakala metadata based on the provided type.
+     *
+     * It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
+     * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
+     *
+     * @param object $system The system object for error handling and other functionality.
+     * @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
+     * @return array The metadata corresponding to the requested type, or an empty array if not found.
+     */
     function getNakalaMetadata($system, $type){
         // check NAKALA_metadata_values.json
         // if date in file is old (data.last_update), update metadata first (all types)
@@ -1343,33 +1347,39 @@
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
                     $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.', HEURIST_UNKNOWN_ERROR);
-                    exit;
                 }
                 $data = updateNakalaMetadata($system);
             }
         }
 
-        if(!$data || !is_array($data) || empty($data)){
+        if(isEmptyArray($data)){
             return array();
         }
 
-        $data_rtn = array();
-        if($type == 'types'){
-            $data_rtn = $data['types'];
-        }
-        if($type == 'licenses'){
-            $data_rtn = $data['licenses'];
-        }
-        if($type == 'years'){
-            $data_rtn = $data['years'];
-        }
+        // Return the requested type of data or the entire metadata
+        return getRequestedNakalaData($data, $type);
+    }
 
-        if(empty($data_rtn) || count($data_rtn) == 0){ // all
-            return $data;
-        }else{
-            return $data_rtn;
+    /**
+     * Returns the requested Nakala data type or the full data.
+     *
+     * @param array $data The Nakala metadata.
+     * @param string $type The requested type ('types', 'licenses', 'years', or 'all').
+     * @return array The requested metadata or full data if 'all' is specified.
+     */
+    function getRequestedNakalaData($data, $type) {
+        switch ($type) {
+            case 'types':
+                return $data['types'] ?? array();
+            case 'licenses':
+                return $data['licenses'] ?? array();
+            case 'years':
+                return $data['years'] ?? array();
+            default:
+                return $data;
         }
     }
+
 
     function updateNakalaMetadata($system){
         // update NAKALA_metadata_values.json
@@ -1383,7 +1393,7 @@
         $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace_en.xml', null, true, 60);
         $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
 
-        $handled_types = array(); // type codes already added
+        $handled_types = array();// type codes already added
 
         while ($page <= $totalPages) {
 
@@ -1410,7 +1420,7 @@
                     if(empty($records['metas'])){
                         continue;
                     }
-                    
+
                     foreach ($records['metas'] as $metadata) {
 
                         if($metadata['value'] == null){
@@ -1428,10 +1438,10 @@
                             }
 
                             $handled_year = true;
-                        }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
+                        }elseif(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
                             $data_rtn['licenses'][] = $metadata['value'];
                             $handled_license = true;
-                        }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
+                        }elseif(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
 
                             //Retrieve type name from XML object
                             $code = explode('/', $metadata['value']);
@@ -1445,9 +1455,9 @@
                             if(!in_array($code, $handled_types)){
 
                                 if(strpos($code, 'c_') !== false){
-                                    
+
                                     $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code));
-                                    
+
                                     $escaped_code = str_replace("'", "&apos;", $escaped_code);
 
                                     $nodes = $datatypes_xml->xpath("//node[@id='$escaped_code']");

@@ -47,7 +47,7 @@ $.widget( "heurist.selectMultiValues", {
     // the constructor
     _init: function() {
 
-        var that = this;
+        let that = this;
         
         this.element.empty();
         
@@ -59,29 +59,9 @@ $.widget( "heurist.selectMultiValues", {
                 +'</div>').appendTo( this.element );
                 
         //hide toolbar by default                
-        var ent_header = this.element.find('.ent_header').hide();        
+        let ent_header = this.element.find('.ent_header').hide();        
         
         this.recordList = this.element.find('.recordList');
-
-        /*        
-            this._on( this.recordList, {        
-                        "resultlistonselect": function(event, selected_recs){
-                            
-                                    //var recordset = that.recordList.resultList('getRecordSet');
-                                    //recordset = recordset.getSubSetByIds(selected_recs);
-                                    var recordset = selected_recs;
-                                    var record = recordset.getFirstRecord();
-                                    var filename = recordset.fld(record, 'file_name')
-                                    var res = {url:recordset.fld(record, 'file_url')+filename,
-                                               path:recordset.fld(record, 'file_dir')+filename};
-
-                                    that.options.onselect.call(that, res);           
-                                    if(that._as_dialog){
-                                        that._as_dialog.dialog('close');
-                                    }
-                                }
-                        });        
-         */
 
         $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
@@ -90,34 +70,14 @@ $.widget( "heurist.selectMultiValues", {
         
         
         this._initList();
-
-/*         
-            //search for folders
-            var that = this;                            
-            var opts = {};
-            if(this.options.root_dir){
-                opts.root_dir = this.options.root_dir;
-            }
-       
-            window.hWin.HAPI4.SystemMgr.get_sysfolders(opts, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.options.allValues = response.data;
-                        that._initList();
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-*/     
-         
-         
+      
     }, //end _create
     
     //
     //
     //
     _initList: function(){
-        if($.isArray(this.options.allValues) && this.options.allValues.length>0){
+        if(Array.isArray(this.options.allValues) && this.options.allValues.length>0){
             this._showAsDialog();
             this._initTreeView( this.options.allValues );    
         }else{
@@ -143,24 +103,24 @@ $.widget( "heurist.selectMultiValues", {
         
         if(this.options.isdialog){
             
-            var that = this;
+            let that = this;
             
-            var buttons = {};
+            let buttons = {};
             buttons[window.hWin.HR('Select')]  = function() {
                 
-                var wtrr = that._treeview.fancytree("getTree");
+                let wtrr = that._treeview.fancytree("getTree");
                 // Get a list of all selected TOP nodes
-                var snodes = wtrr.getSelectedNodes(true);
+                let snodes = wtrr.getSelectedNodes(true);
                 // ... and convert to a key array:
-                var res = [];
-                var selRootKeys = $.map(snodes, function(node){
-                    var currname = node.getKeyPath()
+                let res = [];
+                let selRootKeys = $.map(snodes, function(node){
+                    let currname = node.getKeyPath()
                     if(currname[0]=='/') currname = currname.substring(1);
                     
                     res.push(currname);
                 });
                 
-                if($.isFunction(that.options.onselect)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
                     that.options.onselect.call(that, res);           
                 }
                 that._as_dialog.dialog('close');
@@ -169,14 +129,14 @@ $.widget( "heurist.selectMultiValues", {
                 that._as_dialog.dialog('close');
             }; 
 
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: true,
                 height: 640,
                 width: 480,
                 modal: true,
                 title: window.hWin.HR(this.options.title),
                 resizeStop: function( event, ui ) {
-                    var pele = that.element.parents('div[role="dialog"]');
+                    let pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', width:pele.width()-24 });
                 },
                 close:function(){
@@ -195,9 +155,9 @@ $.widget( "heurist.selectMultiValues", {
     //
     _initTreeView: function( treeData ){
       
-        var that = this;
+        let that = this;
         
-        var fancytree_options =
+        let fancytree_options =
         {
             checkbox: true,
             //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -208,12 +168,12 @@ $.widget( "heurist.selectMultiValues", {
             selectMode: 3, // 1:single, 2:multi, 3:multi-hier
             renderNode: function(event, data) {
                     // Optionally tweak data.node.span
-                    var node = data.node;
-                    var $span = $(node.span).find("> span.fancytree-title").css({'font-weight':'normal'});
+                    let node = data.node;
+                    let $span = $(node.span).find("> span.fancytree-title").css({'font-weight':'normal'});
                     if(node.data.files_count>0)
                         $span.html(node.title+' <span style="font-weight:normal">('+node.data.files_count+')</span>');
                     if(node.data.issystem){
-                        $span.addClass('graytext');//.css({color:'red !important'});
+                        $span.addClass('graytext');
                     }
             },            
             extensions: ['edit'], //'filter'],
@@ -230,17 +190,17 @@ $.widget( "heurist.selectMultiValues", {
             },*/
             save:function(event, data){
                 
-                var path = data.node.getParent().getKeyPath();
+                let path = data.node.getParent().getKeyPath();
                 path = (path=='/')?'':(path+'/');
-                var newname = data.input.val();
-                var newpath =  path+newname;
+                let newname = data.input.val();
+                let newpath =  path+newname;
                 
-                var request;
+                let request;
                 if(window.hWin.HEURIST4.util.isempty(data.node.origTitle)){
                     //new folder
                     request = {operation:'create', name:newpath};
                 }else{
-                    var currname = path+data.node.origTitle;
+                    let currname = path+data.node.origTitle;
                     request = {operation:'rename', name:currname, newname:newpath};
                 }
                 
@@ -250,6 +210,7 @@ $.widget( "heurist.selectMultiValues", {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             data.node.setTitle(newname);       
                             data.node.origTitle = newname;
+                            data.node.key = newname;
                             data.node.folder = true;
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -278,12 +239,12 @@ $.widget( "heurist.selectMultiValues", {
         
         if(window.hWin.HEURIST4.util.isempty(this.options.selectedValues)){
             this.options.selectedValues = [];
-        }else if(!window.hWin.HEURIST4.util.isArray(this.options.selectedValues)){
+        }else if(!Array.isArray(this.options.selectedValues)){
             this.options.selectedValues = this.options.selectedValues.split(';');
         }
         
         if(this.options.selectedValues.length>0){
-            var wtrr = that._treeview.fancytree("getTree");
+            let wtrr = that._treeview.fancytree("getTree");
             
             wtrr.visit(function(node){
                     if(!node.data.issystem){
@@ -291,7 +252,7 @@ $.widget( "heurist.selectMultiValues", {
                         /*var path = node.getParent().getKeyPath();
                         path = (path=='/')?'':(path+'/');
                         var currname = path+node.title;*/
-                        var currname = node.getKeyPath();
+                        let currname = node.getKeyPath();
                         //remove leading slash
                         if(currname[0]=='/') currname = currname.substring(1);
                         

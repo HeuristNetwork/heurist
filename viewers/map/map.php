@@ -17,12 +17,12 @@
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
-*/  
+*/
 
 //&callback=initMap" async defer  for gmap
 //<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 //
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
 $system->defineConstants();
@@ -31,7 +31,7 @@ $system->defineConstants();
 
 <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />
 <?php
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+if(isLocalHost()){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
@@ -42,7 +42,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    
+
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
 <?php
 }
@@ -109,7 +109,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 //
 -->
 
-<?php 
+<?php
 if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
@@ -118,21 +118,21 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     body{
         margin:0px;
     }
-    
+
     .leaflet-div-icon {
         background: none;
         border: none;
     }
     .leaflet-editing-icon{
         background: #fff;
-        border: 1px solid #666;        
+        border: 1px solid #666;
     }
     .leaflet-attribution-flag{
         visibility:hidden;
         display:none !important;
     }
 
-    /*   
+    /*
     .vis-item-overflow{
     position:absolute;
     }
@@ -169,7 +169,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     .vis-item-bbox, .vis-item-bbox-start, .vis-item-bbox-end{
         background-color: #5e7fe4;
     }
-    
+
     #term_tree{
          background:none;
          border:none;
@@ -191,20 +191,20 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         width: 22px !important;
         height: 22px !important;
     }
-    
+
     .leaflet-browser-print{
         width: 22px !important;
         height: 22px !important;
         line-height: 22px !important;
         background-position: 3px !important;
     }
-    
+
     .leaflet-zoom-anim
     .leaflet-zoom-animated {
             transition-timing-function: linear;
             transition-duration: 100ms;
-    }    
-    /* print options popup: Landscape, Portrait, Auto */    
+    }
+    /* print options popup: Landscape, Portrait, Auto */
     .v1 .browser-print-mode{
         padding: 3px 10px;
     }
@@ -222,9 +222,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     .leaflet-layer {
         filter: sepia(100%);
         filter: invert(100%); grayscale(100%) sepia(100%) hue-rotate(180deg)
-    }    
+    }
     */
-    
+
 </style>
 
 <!-- map print layout with custom title -->
@@ -257,29 +257,29 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <script type="text/javascript">
 
     var mapping, menu_datasets, btn_datasets;
-    
+
     // Callback function on page initialization - see initPage.php
     function onPageInit(success){
-        
-        if(!success) return;
-        
-        //since 2022-06-09 layout_params as passed via option on map init   
-        
+
+        if(!success) {return;}
+
+        //since 2022-06-09 layout_params as passed via option on map init
+
         function __gp(name){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search);
         }
 
         var layout_params = null;
-        
-        //take layout parameters from url 
-        // params: 
+
+        //take layout parameters from url
+        // params:
         //   nomap, notimeline
         //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
         //   legend: [basemaps,search,mapdocs|onedoc]
         //   basemap: name of initial basemap
-        //   extent: fixed extent    
+        //   extent: fixed extent
         layout_params = {};
-        layout_params['ui_main'] = __gp('ui_main'); //separate toolbar for map controls
+        layout_params['ui_main'] = __gp('ui_main');//separate toolbar for map controls
         layout_params['nomap'] = __gp('nomap');
         layout_params['notimeline'] = __gp('notimeline');
         layout_params['nocluster'] = __gp('nocluster');
@@ -287,20 +287,20 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['smooth_zoom'] = __gp('smooth_zoom');
         layout_params['zoom_delta'] = __gp('zoom_delta');
         layout_params['zoom_to_selected'] = __gp('zoom_to_selected');
-        layout_params['mapdocuments'] = __gp('mapdocuments'); //visible mapdocuments
-        layout_params['basemaps'] = __gp('basemaps'); //visible basemaps
-        layout_params['basemap'] = __gp('basemap');   //name of basemap
-        layout_params['basemap_filter'] = __gp('basemap_filter');  //name of basemap
-        layout_params['extent'] = __gp('extent'); //@todo
-        
-        layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
-        layout_params['legend'] = __gp('legend'); //legend configuration: csv basemaps,mapdocs,search,off,width
-        layout_params['template'] = __gp('template'); //smarty template for popup info
+        layout_params['mapdocuments'] = __gp('mapdocuments');//visible mapdocuments
+        layout_params['basemaps'] = __gp('basemaps');//visible basemaps
+        layout_params['basemap'] = __gp('basemap');//name of basemap
+        layout_params['basemap_filter'] = __gp('basemap_filter');//name of basemap
+        layout_params['extent'] = __gp('extent');//@todo
 
-        layout_params['popup_behaviour'] = __gp('popup_behaviour'); // fixed size, fixed width, scale to content
-        layout_params['popup_width'] = __gp('popup_width'); // = width, for scale = max-width
-        layout_params['popup_height'] = __gp('popup_height'); // = height, for scale = max-height
-        layout_params['popup_resizing'] = __gp('popup_resizing'); // whether to enable resizing, currently turned off
+        layout_params['controls'] = __gp('controls');//comma separated list of visible controls
+        layout_params['legend'] = __gp('legend');//legend configuration: csv basemaps,mapdocs,search,off,width
+        layout_params['template'] = __gp('template');//smarty template for popup info
+
+        layout_params['popup_behaviour'] = __gp('popup_behaviour');// fixed size, fixed width, scale to content
+        layout_params['popup_width'] = __gp('popup_width');// = width, for scale = max-width
+        layout_params['popup_height'] = __gp('popup_height');// = height, for scale = max-height
+        layout_params['popup_resizing'] = __gp('popup_resizing');// whether to enable resizing, currently turned off
 
         layout_params['published'] = __gp('published');
         layout_params['popup'] = __gp('popup');
@@ -309,9 +309,9 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['maxzoom'] = __gp('maxzoom');
         layout_params['minzoom'] = __gp('minzoom');
         layout_params['pntzoom'] = __gp('pntzoom');
-        layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
+        layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style'));//default style
         layout_params['selection_style'] = window.hWin.HEURIST4.util.isJSON(__gp('selection_style'));
-        
+
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
             element_map: '#map',
@@ -325,7 +325,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     // init map data based on url parameters
     //
     function onMapInit( mapwdiget ){
-        
+
         //take url parameters and open mapdocument or/and perform query
             //take from frame
             var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
@@ -336,24 +336,24 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
                     mapdocument = null;
                 }
             }
-            
+
             var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
 
             if( with_mapdoc ){
-                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument ); //load map document
+                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument );//load map document
             }
-        
+
             var request = window.hWin.HEURIST4.query.parseHeuristQuery(location.search );
             if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
                 //do not zoom to current search if mapdoc is defined - preserve viewport
                 mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
             }
-            
+
             var app_timemap_widget = window.hWin.HEURIST4.util.getUrlParameter('widget', location.search);
             if(app_timemap_widget && window.hWin && window.hWin.HAPI4){
                 window.hWin.HAPI4.LayoutMgr.executeWidgetMethod(app_timemap_widget,'app_timemap','onMapInit');
             }
-            
+
     }
 
     //
@@ -415,7 +415,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         <div class="ui-layout-center">
                 <div id="map" style="width:100%; height:100%" class="ui-layout-content"><span id="map-loading">Mapping...</span></div>
                 <div id="map_empty_message" style="margin:7px;display: none;position: absolute;left: 50px;top: 0px;z-index: 1000;">There are no spatial objects to plot on map</div>
-            
+
         </div>
 
         <!-- Toolbar -->
@@ -423,25 +423,25 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             <div id="mapToolbarContentDiv">
 
                 <span style="font-size: small;cursor: pointer;">
-                    Map 
+                    Map
                     <select id="mapDocumentSel"></select>
                 </span>
 
                 <a id="btn_add_mapdoc" style="display:inline-block; width:10px; height:15px; padding:0px;"</a>
-                
+
                 <button id="btn_layout_map" class="ui-heurist-button" style="height: 24px;display:inline-block;margin-left: 20px;">Map</button>
                 <button id="btn_layout_timeline" class="ui-heurist-button" style="height: 24px;display:inline-block;">Timeline</button>
 
-                <a id="btn_legend_map" class="toggle-legend ui-icon ui-icon-list" 
+                <a id="btn_legend_map" class="toggle-legend ui-icon ui-icon-list"
                         style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 5px;"></a>
-                <a class="toggle-legend">Legend</a>                  
+                <a class="toggle-legend">Legend</a>
 
                 <a class="ui-icon ui-icon-plus" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
                 <a class="ui-icon ui-icon-minus" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
                 <a class="ui-icon ui-icon-bookmark" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
                 <a class="ui-icon ui-icon-search" style="width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
-                <a id="btn_digitizing" class="ui-icon ui-icon-fullscreen-off" style=" min-width:0px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>                
+                <a id="btn_digitizing" class="ui-icon ui-icon-fullscreen-off" style=" min-width:0px;width: 22px; height: 22px;padding:0px;display:inline-block;"></a>
 
 
                 <a class="ui-icon ui-icon-print" style="width: 22px; height: 22px;padding:0px;display:inline-block;margin-left: 20px;"></a>
@@ -458,22 +458,22 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             <div id="timeline_toolbar" style="position:absolute;top:1;left:1;height:20px;"></div>
         </div>
     </div>
-    
+
     <div id="timeline-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
-        
+
             <div style="padding:5px">
                 <label><input type="radio" name="time-label" checked value="0">Full length labels</label><br>
                 <label><input type="radio" name="time-label" value="1">Truncate label to bar</label><br>
                 <label><input type="radio" name="time-label" value="2">Fixed label width</label><br>
                 <label><input type="radio" name="time-label" value="3">Hide labels</label>
             </div>
-            
+
             <div style="padding:5px">
                 <label><input type="radio" name="time-label-pos" checked value="0">Label within the bar</label><br>
                 <!-- <label><input type="radio" name="time-label-pos" value="1">Label to the right of the bar</label><br> -->
                 <label><input type="radio" name="time-label-pos" value="2">Label above the bar</label>
             </div>
-        
+
             <div style="padding:5px">
                 <label><input type="radio" name="time-label-stack" checked value="0">Bars stacked on the above the other</label><br>
                 <label><input type="radio" name="time-label-stack" value="1">Bars wrapped to minimise height of timeline</label>
@@ -482,10 +482,10 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             <div style="padding:5px">
                 <label><input type="checkbox" name="time-filter-map" value="1">Filter map with current timeline range</label>
             </div>
-        
+
     </div>
-    
+
     <!-- Heurist map printing out -->
-    <div class="grid-map-print-title" leaflet-browser-print-content><h3></h3></div>    
+    <div class="grid-map-print-title" style="display:none;" leaflet-browser-print-content><h3></h3></div>
 </body>
 </html>

@@ -21,8 +21,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var Hul = window.hWin.HEURIST4.util;
-
 $.widget( "heurist.resultListCollection", {
 
     // default options
@@ -44,7 +42,7 @@ $.widget( "heurist.resultListCollection", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.element
         // prevent double click to select text
@@ -60,9 +58,9 @@ $.widget( "heurist.resultListCollection", {
                 .appendTo($('<div style="display:inline-block;vertical-align:bottom">').appendTo(this.element));
 
         this._initBtn('Add');
-        //this._initBtn('Remove');
+       
         this._initBtn('Clear');
-        //this._initBtn('List');
+       
         
         this._initBtn('Action');    
         if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
@@ -77,7 +75,7 @@ $.widget( "heurist.resultListCollection", {
         this.labelInstruction = $('<div>').text(this.options.instructionText)
                             .addClass('heurist-helper2').css({padding:'4px'}).appendTo(this.element); //float:'right',
         //-----------------------     listener of global events
-        var sevents = window.hWin.HAPI4.Event.ON_REC_SELECT+' '
+        let sevents = window.hWin.HAPI4.Event.ON_REC_SELECT+' '
                         +window.hWin.HAPI4.Event.ON_REC_COLLECT;
 
         $(window.hWin.document).on(sevents, function(e, data) {
@@ -110,10 +108,10 @@ $.widget( "heurist.resultListCollection", {
                        show_toolbar: false,
                        view_mode: 'list',
                        renderer:function( recordset, record ){
-                           var recIcon = window.hWin.HAPI4.iconBaseURL +
+                           let recIcon = window.hWin.HAPI4.iconBaseURL +
                                         recordset.fld(record, 'rec_RecTypeID');
-                           var recTitle = recordset.fld(record, 'rec_Title'); 
-                           var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle);
+                           let recTitle = recordset.fld(record, 'rec_Title'); 
+                           let recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle);
                            
                            return '<div class="recordDiv collected_perm" style="height:18px;padding:0px 2px;"><div class="recordIcons">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -180,11 +178,11 @@ $.widget( "heurist.resultListCollection", {
 
     _initBtn: function(name){
         
-        var label = (name=='Action')?this.options.action_Label:name;
+        let label = (name=='Action')?this.options.action_Label:name;
 
-        var link = $('<a>',{
+        let link = $('<a>',{
             text: window.hWin.HR(label), href:'#'
-        });//IJ 2015-06-26 .css('font-weight','bold');
+        });
         
         this['btn_'+name] = $('<li data-action="'+name+'">')
             .css({background: 'lightgray','margin-right':'10px'})
@@ -201,13 +199,13 @@ $.widget( "heurist.resultListCollection", {
 
     menuActionHandler: function(event){
 
-        var that = this;
-        var ele = $(event.target);
+        let that = this;
+        let ele = $(event.target);
         if(!ele.is('li')){
             ele = ele.parents('li');
         }
         
-        var action = ele.attr('data-action');
+        let action = ele.attr('data-action');
 
         if(action == "Add"){
 
@@ -262,32 +260,35 @@ $.widget( "heurist.resultListCollection", {
         
         if(!this.options.target_db){
             
-            window.hWin.HEURIST4.msg.showMsgErr('Wrong configuration. Target database for mapspace is not defined');
-            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Wrong configuration. Target database for mapspace is not defined',
+                error_title: 'Missing target database'
+            });
+
         }else
-        if(!Hul.isempty(this._collection)){
+        if(!window.hWin.HEURIST4.util.isempty(this._collection)){
             
             //create virtual record set for temporal mapspace
             
             //open
-            var url = window.hWin.HAPI4.baseURL 
+            let url = window.hWin.HAPI4.baseURL 
             +'viewers/map/mapPreview.php?db='+window.hWin.HAPI4.database
             +'&ids='+this._collection.join(",")
             +'&target_db='+this.options.target_db;
 
-            var init_params = {'ids': this._collection.join(","), target_db:this.options.target_db};
+            let init_params = {'ids': this._collection.join(","), target_db:this.options.target_db};
 
             window.hWin.HEURIST4.msg.showDialog(url, {height:'600', width:'1000',
                 window: window.hWin,  //opener is top most heurist window
                 dialogid: 'map_preview_dialog',
                 params: init_params,
                 title: window.hWin.HR('Preview mapspace'),
-                class:'ui-heurist-bg-light',
-                callback: function(location){
-                    if( !window.hWin.HEURIST4.util.isempty(location) ){
-                        
-                    }
-                }
+                class:'ui-heurist-bg-light'
+                //callback: function(location){
+                //    if( !window.hWin.HEURIST4.util.isempty(location) ){
+                //        
+                //    }
+                //}
             } );
         
         }else{
@@ -303,7 +304,7 @@ $.widget( "heurist.resultListCollection", {
                 (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
                 
         if(_collection && _collection.length>0){
-            this.recordList.resultList('updateResultSet', new hRecordSet(_collection));
+            this.recordList.resultList('updateResultSet', new HRecordSet(_collection));
             this.recordList.show();
             $('#mywidget_3249').css('top',175); //hardcode for tlcmap
             
@@ -317,10 +318,10 @@ $.widget( "heurist.resultListCollection", {
     
     warningOnExit: function( callback_continue ){
 
-        var col = this._collection; //window.hWin.HEURIST4.collection.collectionGet();
+        let col = this._collection; 
         if( col && col.length>0 ){
             
-                var that = this, $dlg, buttons = {};
+                let that = this, $dlg, buttons = {};
                 buttons['Save Map'] = function(){ 
                     that.createMapSpace();
                     $dlg.dialog('close'); 

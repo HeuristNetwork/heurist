@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global HEditing */
 
 $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
    
@@ -35,8 +35,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _external_repositories: {}, // list of external repositories
     _last_upload_details: [], // last uploaded file details
 
-    _selectAllFiles: false, // checked when perform certain operations
-    _downloadAllFiles: false, // download selected files, or all files
+    _selectAllFiles: false, // to keep all files (across all tabs) selected
 
     _lastFileDetails: null, // holds the saved final details for the current file, to be returned
 
@@ -52,7 +51,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 700;
         this.options.edit_width = 950;
@@ -130,7 +129,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         }else{
         
-            var iheight = 7.4;
+            let iheight = 7.4;
             
             if(this.options.edit_mode=='inline'){            
                 iheight = iheight + 8;
@@ -141,46 +140,62 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         //init viewer 
-        var that = this;
-        
-        if(this.options.select_mode=='manager'){
-            //init image viewer for result list
-            this.recordList.resultList('option','onPageRender',function(){
-                //$(that.recordList.find('.ent_content_full'))
-                var ele = $(that.recordList.find('.ent_content_full')); //.find('a')
-                
-//@todo repalce with fancybox                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
-            });
-        }
-
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
         
         this._on( this.searchForm, {
-                "searchrecuploadedfilesonresult": this.updateRecordList,
-                "searchrecuploadedfilesonaddext": function() { this._additionMode='remote'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddpopup": function() {this._additionMode='local'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
-                "searchrecuploadedfilesondownload": this._downloadFileRefs,
-                "searchrecuploadedfilesonremoveunused": this._deleteUnused,
-                "searchrecuploadedfilesonremovedups": this._combineDups,
-                "searchrecuploadedfilesonrefreshindex": this._refreshIndex,
-                "searchrecuploadedfilesonfilerecs": this._createMediaRecords,
-                "searchrecuploadedfilesonselectall": function(event){ 
-                    this._selectAllFiles = true;
-                    if($(event.target).find('#select_all').length > 0){
-                        this._selectAllFiles = $(event.target).find('#select_all').prop('checked') ? true : false;
+            
+                "searchrecuploadedfilesonaction": function(event, action) { 
+                    if(action=='menu-file-add-local'){
+                        this._uploadFileAndRegister();
+                        
+                    }else if(action=='menu-file-add-ext'){ 
+                        this._additionMode='remote'; this.addEditRecord(-1);
+                        
+                    }else if(action=='menu-file-import-csv'){ 
+
+                        window.hWin.HAPI4.actionHandler.executeActionById('menu-files-data');
+                        
+                    }else if(action=='menu-file-select-all'){ 
+                        this._selectAllFiles = true;
+                        this.recordList.resultList('setSelected', 'all');
+                        
+                    }else if(action=='menu-file-select-none'){ 
+                        this._selectAllFiles = false;
+                        this.recordList.resultList('setSelected', '');
+                        
+                    }else if(action=='menu-file-refrec-show'){ 
+                        
+                        this._showMediaRecords();
+
+                    }else if(action=='menu-file-refrec-add'){ 
+                        
+                        this._createMediaRecords();
+                        
+                    }else if(action=='menu-file-export-csv'){ 
+                        
+                        this._downloadFileRefs()
+
+                    }else if(action=='menu-file-delete-selected'){ 
+                        
+                        this._deleteSelected();
+                        
+                    }else if(action=='menu-file-merge-dupes'){ 
+                        
+                        this._combineDups();
+                        
+                    }else if(action=='menu-file-refresh-index'){ 
+                        
+                        this._refreshIndex();
+                        
+                    }else if(action=='menu-file-check-files'){ 
+                        
+                        this._checkFiles();
+                        
                     }
-                    this.recordList.resultList('setSelected', this._selectAllFiles ? 'all' : '');
                 },
-                "onselectedonly": function(event){
-                    this._downloadAllFiles = false;
-                    if($(event.target).find('#selected_only').length > 0){
-                        this._downloadAllFiles = $(event.target).find('#selected_only').prop('checked') ? false : true;
-                    }
-                }
+                "searchrecuploadedfilesonresult": this.updateRecordList
         });
 
         return true;
@@ -193,9 +208,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         this._currentEditRecordset = recordset; 
 
-        var i_id = this.getEntityFieldIdx('ulf_ID');
+        let i_id = this.getEntityFieldIdx('ulf_ID');
         
-        var isLocal = true;
+        let isLocal = true;
         if(recordset!=null){
             //edit
             this.options.entity.fields[i_id].dtFields['rst_Display'] = 'readonly'; //path to download
@@ -206,42 +221,42 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             isLocal = (this._additionMode=='local');
         }
         
-        var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
-        var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
-        var i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
-        var i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
+        let i_url = this.getEntityFieldIdx('ulf_HeuristURL');
+        let i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
+        let i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
+        let i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
 
-        var i_mime_loc = this.getEntityFieldIdx('fxm_MimeType'); // for local
-        var i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
+        let i_mime_loc = this.getEntityFieldIdx('fxm_MimeType'); // for local
+        let i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
 
-        var i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
-        var i_descr = this.getEntityFieldIdx('ulf_Description');   // for external
+        let i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
+        let i_descr = this.getEntityFieldIdx('ulf_Description');   // for external
         
         this.options.entity.fields[i_url_ext].dtFields['rst_DisplayHelpText'] =
             'URL of an external file. This must DIRECTLY point to a renderable file or stream eg. image, video.<br>'
             +'Note: the URL MUST load the image alone without any page furniture or labelling<br>'
             +'NOT the page containing the image (the extension at the end of the URL can be misleading)';
-        
+
         if(this._additionMode=='any' ||  this._additionMode=='tiled'){ //uncertain addition show both upload and url
-          //only addition
+            //only addition
             this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden'; //show DnD zone
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url //
-            
+
             if(this._additionMode=='tiled'){
                 this.options.entity.fields[i_url_ext].dtFields['rst_DisplayHelpText'] =
                 '<br>URL to TileMapService (for example openstreetmap.org or maptiler.com) or image service (iiif manifest).'
                 +'<br>For uploaded tile stack this field will be filled automatically with name of selected stack (folder).';
             }
-        
+
             this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
-            
+
             this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden'; //temp till ext will be defined
             this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden'; //readonly fxm_MimeType
-        
-            this._edit_dialog.dialog('option','height',500);
+
+            this._edit_dialog.dialog('option', 'height', 600);
 
         }else
         if(isLocal){ //local
@@ -295,11 +310,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _afterInitEditForm: function(){
 
-        var that = this;
+        let that = this;
 
         this._super();
 
-        var isLocal = true;
+        let isLocal = true;
 
         if(this._currentEditRecordset){ //edit       
 
@@ -317,15 +332,15 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype
                 
             //list of records that refer to this file    
-            var relations = this._currentEditRecordset.getRelations();    
-            if(relations && relations.direct && relations.direct.length>0){
+            let relations = this._currentEditRecordset.getRelations();    
+            if(relations?.direct?.length>0){
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
                 
-                var direct = relations.direct;
-                var headers = relations.headers;
-                var ele1=null;
-                for(var k in direct){
-                    var targetID = direct[k].targetID;
+                let direct = relations.direct;
+                let headers = relations.headers;
+
+                for(let k in direct){
+                    let targetID = direct[k].targetID;
                     
                     if(!headers[targetID]){
                         //there is not such record in database
@@ -339,16 +354,21 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                 }, true);
                 }//for
             }
-            
-            
+
             isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
+
+            if(window.hWin.HEURIST4.util.isempty(this._editing.getValue('ulf_WhoCanView')[0])){
+                // force option to public, without changes
+                let ele = this._editing.getFieldByName('ulf_WhoCanView');
+                ele.editing_input('setValue', 'viewable', true);
+            }
         }else{
             //new record
             isLocal = (this._additionMode=='local');
             
             if(isLocal){
                 //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
-                var ele = this._edit_dialog.find('input[type=file]');
+                let ele = this._edit_dialog.find('input[type=file]');
                 if(ele.length>0){
                     ele.fileupload('option','pasteZone',this._edit_dialog);
                 }
@@ -356,12 +376,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 //add two button on top
                 //select and register at once + close this dialog and open file selector
 
-                sAdditional_Controls = '<h2 style="margin: 0;">Existing</h2><div><div class="header optional" style="vertical-align: top; display: table-cell;">'
+                let sAdditional_Controls = '<h2 style="margin: 0;">Existing</h2><div><div class="header optional" style="vertical-align: top; display: table-cell;">'
                     +'<label>Select:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
                     +'<div class="input-cell" style="padding-bottom: 12px;">'
                     +'<div id="btn_select_file"></div></div></div>';
 
-                sHelp = '<div class="heurist-helper1" style="padding: 0.2em 0px;">'
+                let sHelp = '<div class="heurist-helper1" style="padding: 0.2em 0px;">'
                     +'<br>Store as a file on the Heurist server. '
                     +((this._additionMode=='tiled')?
                     ('<br>Note: you can upload a tile stack generated by a tiling program such as gdal2tiles, MapTiler, MapWarper. '
@@ -414,7 +434,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister(false);
                     }); 
 
@@ -423,7 +443,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister( true );
                     }); 
                     
@@ -443,7 +463,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             response = response.result;
                             that._last_upload_details = [];
                             if(response.status==window.hWin.ResponseStatus.OK){
-                                var data = response.data;
+                                let data = response.data;
                                 $.each(data.files, function (index, file) {
 
                                     if(file.error){
@@ -460,16 +480,17 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                     }
                                 });
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                                 
-                            var inpt = this;
+                            let inpt = this;
                             that._edit_dialog.find('#btn_upload_file_repository').off('click');
                             that._edit_dialog.find('#btn_upload_file_repository').on({click: function(){
-                                $(inpt).click();
+                                $(inpt).trigger('click');
                             }});                
                         },
                         fail: function (e, response) {
+                            response = response.message ? response : {message: response, error_title: 'File upload error'};
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
@@ -495,7 +516,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._external_repositories[repo_name] = [ repo_details ];
 
                             window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                        }); //DEBUG console.log(that._external_repositories, response.data);
+                        });
 
                         if($select.hSelect('instance') !== undefined){
                             $select.hSelect('refresh');
@@ -521,7 +542,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-grid"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                          that._currentEditID = null;
                          that.editFormPopup.dialog('close');
                          if(that.options.edit_addrecordfirst){
@@ -538,7 +559,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }})
                     .click((e) => {
                         if(that._edit_dialog.find('#external_repos').val() != ''){
-                            that._edit_dialog.find('#upload_file_repository').click();
+                            that._edit_dialog.find('#upload_file_repository').trigger('click');
                         }
                     });
                 
@@ -552,7 +573,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .click(function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_folder_dlg){
                                 that.select_folder_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
@@ -562,17 +583,17 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                onselect:function(newsel){
                                     if(newsel){
                                         if(that.options.edit_addrecordfirst){
-                                            //that.options.edit_addrecordfirst = false;
+                                           
                                             that._initControls();
                                              
                                             that._currentEditID = null;
                                             that._editing.setFieldValueByName2('ulf_ExternalFileReference', newsel+'/', false);
                                             
-                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
-                                            //that.onEditFormChange();
-                                            var interval = setInterval(function(){
+                                           
+                                            let interval = setInterval(function(){
                                                 if(!window.hWin.HAPI4.is_callserver_in_progress()){
                                                     clearInterval(interval);
                                                     interval = 0;
@@ -599,7 +620,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .click(function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_file_dlg){
                                 that.select_file_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
@@ -613,17 +634,17 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                     if(res){
                                         
                                         if(that.options.edit_addrecordfirst){
-                                            //that.options.edit_addrecordfirst = false;
+                                           
                                             that._initControls();
                                              
                                             that._currentEditID = null;
                                             that._editing.setFieldValueByName2('ulf_ExternalFileReference', res.filename, false);
                                             
-                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
-                                            //that.onEditFormChange();
-                                            var interval = setInterval(function(){
+                                           
+                                            let interval = setInterval(function(){
                                                 if(!window.hWin.HAPI4.is_callserver_in_progress()){
                                                     clearInterval(interval);
                                                     interval = 0;
@@ -647,21 +668,19 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         if(!isLocal){ //remote - detect mimetype when URL is changed
 
-            var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-            var inpt = ele.editing_input('getInputs');
+            let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
+            let inpt = ele.editing_input('getInputs');
             //ele.editing_input('option', 'change', function(){
                 this._on($(inpt[0]), {
                     blur:function(){
                         
-                        var ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
+                        let ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
                     
                         if (ele.editing_input('instance')==undefined) return;
                         
                         //auto detect extension of external service
-                        var curr_url = ele.editing_input('getValues'); 
-                        // remarked since we need to check it on server side
-                        //var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
-                        //if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
+                        let curr_url = ele.editing_input('getValues'); 
+
                         if( !window.hWin.HEURIST4.util.isempty(curr_url[0]) && curr_url[0]!=that._previousURL ){    
     
                             that._previousURL = curr_url[0];
@@ -669,19 +688,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._requestMimeTypeByURL();
                         }
                     }
-                    /*,paste: function(){
-                        let ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-                        if(ele.editing_input('instance') !== undefined){ // trigger blur event on paste
-                            ele.editing_input('getInputs')[0].blur();
-                        }
-                    } */
+
                 });
             
             ele.editing_input('focus');
         }else{
-            //this.onEditFormChange(false); 
             //force show save button
-            var ele = this._toolbar;
+            let ele = this._toolbar;
             if(ele){
                 ele.find('#btnRecSave').css('visibility', 'visible');
             }
@@ -694,13 +707,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
             if(this._init_MimeExt){
                 //this._editing.setFieldValueByName2('ulf_MimeExt', this._init_MimeExt, false);    
-                var ele3 = this._editing.getFieldByName('ulf_MimeExt');
+                let ele3 = this._editing.getFieldByName('ulf_MimeExt');
                 ele3.editing_input('setValue', this._init_MimeExt, false );
                 ele3.show();
             }
             
         }else{
-            var urls = this._editing.getValue('ulf_ExternalFileReference');
+            let urls = this._editing.getValue('ulf_ExternalFileReference');
             if(urls){
                 this._previousURL = urls[0];    
             }else{
@@ -709,22 +722,24 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
 
         //hide after edit init btnRecRemove
-        ele = this._toolbar;
-        ele.find('#btnRecRemove').hide();
+        this._toolbar.find('#btnRecRemove').hide();
     },    
     
     _getValidatedValues: function(){
         
-        var res = this._super();
+        let res = this._super();
         
-        var val = this._editing.getValue('ulf_ExternalFileReference');
-        var isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
+        let val = this._editing.getValue('ulf_ExternalFileReference');
+        let isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
         if(!isLocal && res){
             
-            var mimeext = this._editing.getValue('ulf_MimeExt');
-            var err_msg = this._validateExt( mimeext[0] );        
+            let mimeext = this._editing.getValue('ulf_MimeExt');
+            let err_msg = this._validateExt( mimeext[0] );        
             if(err_msg){
-                window.hWin.HEURIST4.msg.showMsgErr( err_msg );
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: err_msg,
+                    error_title: 'File type error'
+                });
                 res = null;
             }
         }
@@ -734,7 +749,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _validateExt: function( ext ){
         
-        var msg_error = '';
+        let msg_error = '';
         if(ext==null) ext = '';
 
         if(!ext){
@@ -752,7 +767,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }else{
 
             //allowed extensions
-            var allowed_ext = window.hWin.HAPI4.sysinfo.media_ext+',soundcloud,vimeo,youtube,json'.split(',');
+            let allowed_ext = window.hWin.HAPI4.sysinfo.media_ext+',soundcloud,vimeo,youtube,json'.split(',');
 
             if(allowed_ext.indexOf(ext)<0){
 
@@ -772,7 +787,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 // if(ext=='bin'){
                 // ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
                 // +' or mimetype was not found among allowed types.'
-                //    +' Generic mimetype has been selected. Please select or add mimetype manually.');
+               
 
                 /*
                 window.hWin.HEURIST4.msg.showMsgDlg();
@@ -792,7 +807,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         if(this._additionMode=='tiled' || this._editing.getValue('ulf_OrigFileName')[0].indexOf('_tiled')==0 ){
             //special case for tiled image stack            
-            var ele2 = this._editing.getFieldByName('ulf_MimeExt');
+            let ele2 = this._editing.getFieldByName('ulf_MimeExt');
             if(this._previousURL){
                 ele2.show();
             }else{
@@ -804,9 +819,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
   
         window.hWin.HEURIST4.msg.showMsgFlash('Getting resource type', false);
   
-        var that = this;
+        let that = this;
 
-        var url = that._previousURL;
+        let url = that._previousURL;
 
         that._requestForMimeType_Timeout = 0;
         that._requestForMimeType = true;                          
@@ -814,14 +829,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         window.hWin.HAPI4.SystemMgr.get_url_content_type(url, function(response){
             
             that._requestForMimeType = false;
-            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
             
-            var ext = '';
+            let ext = '';
             if(response.status == window.hWin.ResponseStatus.OK){
                 ext = response.data.extension;
                 
                 if(response.data.needrefresh){
-                    var cfg = ele2.editing_input('getConfigMode');
+                    let cfg = ele2.editing_input('getConfigMode');
                     window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
                 }
                 
@@ -829,21 +844,20 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             if(ext==null) ext = '';
 
             
-            var msg_error = that._validateExt( ext );
+            let msg_error = that._validateExt( ext );
             
             ele2.editing_input('setValue', ext );
             ele2.show();
             that.onEditFormChange();
             
-            
             if(msg_error){
                 ele2.editing_input('showErrorMsg', msg_error);    
-                that.editForm.animate({scrollTop: ele.offset().top}, 1);
+                that.editForm.animate({scrollTop: ele2.offset().top}, 1);
             }else{
                 ele2.editing_input('showErrorMsg', ''); //hide
             }
             /*
-            var ele = that._toolbar;
+            let ele = that._toolbar;
             if(ele){
                 ele.find('#btnRecSave').css('visibility', msg_error?'hidden':'visible');
             }*/
@@ -867,22 +881,22 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        var recID   = fld('ulf_ID');
+        let recID   = fld('ulf_ID');
         
-        var rectype = fld('ulf_ExternalFileReference')?'external':'local';
-        //var isEnabled = (fld('ugr_Enabled')=='y');
+        let rectype = fld('ulf_ExternalFileReference')?'external':'local';
+       
         
-        var recTitle;
-        var recTitleHint;
+        let recTitle;
+        let recTitleHint;
         if(rectype=='external'){
-            var val = fld('ulf_OrigFileName');
+            let val = fld('ulf_OrigFileName');
             if(val.indexOf('_tiled')==0){
                 rectype = 'tiled';
                 if(val.indexOf('_tiled@')==0){ 
@@ -907,9 +921,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp; [ '+fld('ulf_FilePath')+' ] &nbsp;&nbsp; [ '+fld('ulf_FileSizeKB')+'KB ]</div>';
         }
         
-        var recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
+        let recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
         
-        var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
+        let html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
             
@@ -932,18 +946,24 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         +     recTitle
         + '</div>';
         
+        let action_style = 'style="height:20px;margin-left:0px;"';
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
 
-            let style = 'style="height:20px;margin-left:0px;"';
             html = html 
-                + '<div title="Click to edit file" '+style+' role="button" aria-disabled="false" data-key="edit" '
+                + `<div title="Click to edit file" ${action_style} role="button" aria-disabled="false" data-key="edit" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
-                + '<div title="Click to delete file" '+style+' role="button" aria-disabled="false" data-key="delete" '
+                + `<div title="Click to delete file" ${action_style} role="button" aria-disabled="false" data-key="delete" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div>';
+        }else{
+
+            html += `<div title="Click to view file" ${action_style} role="button" aria-disabled="false" data-key="view" `
+                +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-search"></span><span class="ui-button-text"></span>'
                 + '</div>';
         }
         
@@ -956,6 +976,37 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         return html;
         
+    },
+
+    _onActionListener: function(event, action){
+
+        let is_resolved = this._super(event, action);
+
+        if(is_resolved){
+            return true;
+        }else if(!window.hWin.HEURIST4.util.isObject(action)){
+            return false;
+        }
+
+        let ulf_ID = action.recID;
+        action = action.action;
+
+        if(action == 'view'){
+            let popup_opts = {
+                isdialog: true, 
+                select_mode: 'manager',
+                edit_mode: 'editonly',
+                rec_ID: ulf_ID,
+                default_palette_class: 'ui-heurist-populate',
+                width: 950
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+
+            is_resolved = true;
+        }
+
+        return is_resolved;
     },
 
     addEditRecord: function(recID, is_proceed){
@@ -986,7 +1037,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _uploadFileAndRegister: function( is_tiled ){
         
         //find file element
-        var that = this;
+        let that = this;
         
     
         function __initEditForm_cont(){
@@ -1004,32 +1055,32 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         }
                     }], null);
                 that._editing_uploadfile.getContainer().hide(); //this form is hidden
-                var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
-                ele.find('.fileupload').click(); //open file select dialog
+                let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
+                ele.find('.fileupload').trigger('click'); //open file select dialog
         }        
         
         if(!this._editing_uploadfile){ //form is not yet defined
 
-                var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
+                let container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
-                this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
+                this._editing_uploadfile = new HEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
                     //registerAtOnce is true, so we get new file id
                     
-                    var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
-                    var res = ele.editing_input('getValues'); 
-                    var ulf_ID = res[0];
+                    let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
+                    let res = ele.editing_input('getValues'); 
+                    let ulf_ID = res[0];
 
                     if(ulf_ID>0){
                         if(that.options.edit_addrecordfirst){
                             
-                            var fields = that._editing_uploadfile.getValues(false);     
+                            let fields = that._editing_uploadfile.getValues(false);     
                             fields['ulf_ID'] = (''+ulf_ID);
                             that._afterSaveEventHandler(ulf_ID, fields ); //trigger onselect
                             
-                            //that.editFormPopup.dialog('close');
-                            //that._trigger( "onselect", null, {selection:[ulf_ID]});
+                           
+                           
                         }else{
                             that._currentEditID = null;//to prevent warn about save
                             that.addEditRecord(ulf_ID, true);
@@ -1049,30 +1100,30 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     
     _saveEditAndClose: function(fields, afterAction, ignoreCheck){
 
-        var that = this;
+        let that = this;
         
-        var ignoreCheck = true; //ARTEM 2021-07-27 - always ignore check for rendereability
+        const ignoreCheck2 = true; //ARTEM 2021-07-27 - always ignore check for rendereability
 
-        if(this._previousURL && !ignoreCheck){
+        if(this._previousURL && !ignoreCheck2){
 
-            var ele = this._editing.getFieldByName('ulf_MimeExt');
-            var extension = ele.editing_input("getValues");
+            let ele = this._editing.getFieldByName('ulf_MimeExt');
+            let extension = ele.editing_input("getValues");
 
             if(!window.hWin.HEURIST4.util.isempty(extension) && extension[0] == "bin"){
 
-                var btns = {};
+                let btns = {};
 
                 btns[window.hWin.HR('Re-Specify URL')] = function(){
-                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                     $dlg.dialog('close');
                 };
                 btns[window.hWin.HR('Accept as is')] = function(){
-                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                     $dlg.dialog('close');
                     that._saveEditAndClose(fields, afterAction, true);
                 };
 
-                var labels = {};
+                let labels = {};
 
                 labels['title'] = 'Invalid URL for renderable media';
                 labels['no'] = window.hWin.HR('Re-Specify URL');
@@ -1092,14 +1143,14 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             
             if(this._additionMode=='tiled'){
                 //check mime type
-                var ele = this._editing.getFieldByName('ulf_MimeExt');
-                var extension = ele.editing_input("getValues");
+                let ele = this._editing.getFieldByName('ulf_MimeExt');
+                let extension = ele.editing_input("getValues");
                 if(!extension || !extension[0] || 
                     extension[0].match(/(gif|jpg|jpeg|png|json)?/i)[0]=='')
                 {
                     window.hWin.HEURIST4.msg.showMsgDlg(  
                         'You have to define the correct image type for tile image stack (normally image/jpeg or png)',
-                        btns, labels,
+                        null, null,
                         {default_palette_class: 'ui-heurist-populate'});
                     return;
                 }
@@ -1124,25 +1175,25 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     
                 this._currentEditID = null; //to avoid warning
                 this.editFormPopup.dialog('close');
-                //this._trigger( "onselect", null, {selection:[this._currentEditID]});
+               
             }
             if(this.options.edit_addrecordfirst || this._additionMode=='local'){ //close dialog after save
             
                 this._additionMode = null; //reset
                 if(this.options.select_mode=='select_single'){
-                    this._selection = new hRecordSet();
+                    this._selection = new HRecordSet();
                     this._selection.addRecord(recID, fieldvalues);
                     this._selectAndClose();
                     return;        
                 }else if(this.searchForm && this.searchForm.searchRecUploadedFiles('instance')){ // trigger search refresh
                     
-                    var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
+                    let domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
                     //it was insert - select recent and search
                     this.searchForm.searchRecUploadedFiles('searchRecent', domain);
                 }else if(this.options.select_mode == 'manager' && this.options.edit_mode == 'editonly'){
 
                     // update cached record set
-                    this._lastFileDetails = new hRecordSet();
+                    this._lastFileDetails = new HRecordSet();
                     this._lastFileDetails.addRecord(recID, fieldvalues);
                 }
             }
@@ -1156,19 +1207,18 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             this._super(); 
         }else{
             
-            var that = this;
+            let that = this;
             
             //get full field info to update local definitions
-            var request = {
-                'a'          : 'search',
-                'entity'     : that.options.entity.entityName,
-                'details'    : 'related_records', 
-                'ulf_ID': this._currentEditID};
+            const request = {
+                'a': 'batch',
+                'entity': this.options.entity.entityName,
+                'get_media_records': this._currentEditID};
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recs = response.data;
+                    let recs = response.data;
                     if(recs.length==0){
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(
@@ -1177,7 +1227,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             {default_palette_class:that.options.default_palette_class});        
                         
                     }else{
-                        var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
+                        let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
+                        
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         ((recs.length==1)?'There is a reference':('There are '+recs.length+' references'))
                         +' from record(s) to this File.<br>You must delete the records'
@@ -1199,17 +1250,42 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     // Download file references for current resultset
     //
-    _downloadFileRefs: function(){
-
-        let ids = this.recordList && !this._downloadAllFiles && !this._selectAllFiles ? 
-                    this.recordList.resultList('getSelected', true) : 'all';
-
-        if(ids.length == 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('No files in current search', 2000);
+    _downloadFileRefs: function(_download_entire_set){
+        
+        if(!this._checkUserPermissions(1)){
             return;
         }
+        
+        let ids = 'all';
+        
+        if(_download_entire_set){
+            ids = 'all'
+        }else{
+        
+            ids = this._getSelected(0);
+            
+            const that = this;
 
-        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
+            if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+                window.hWin.HEURIST4.msg.showMsg('There are not selected files/url references. Download CSV for entire set?',
+                            {buttons:function(){that._downloadFileRefs(true);}, 
+                            labels:{title:'Warning',yes:'Proceed',no:'Cancel'},
+                            default_palette_class:this.options.default_palette_class});
+                    
+                return;
+            }else if(ids.length > 5000){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: "Please limit selection to approximately 5000 files, or else select none, and<br>"
+                            +"click the download again, in which case the information for all files is downloaded.",
+                    error_title: "Too many files selected",
+                    status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                });
+                return;
+            }
+            ids = ids.join(',');
+        }
+
+        let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&file_refs=1&ids=${ids}`;
         window.open(url, '_blank');
     },
 
@@ -1218,7 +1294,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _handleExternalRepository: function(){
 
-        var that = this;
+        let that = this;
         let selected_repo = this._edit_dialog.find('#external_repos').val();
         let uploaded_file = this._edit_dialog.find('#upload_file_repository').attr('filename');
 
@@ -1228,8 +1304,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         switch (selected_repo) {
             case 'Nakala':
-
-                var $dlg;
+            {
+                let $dlg;
                 let content = '<div style="margin-bottom: 15px;">' // Warning text
                                 + '<strong>Please note</strong>, that in order for Heurist to utilise the uploaded file as a remote resource from Nakala that it will be published on Nakala.<br>'
                                 + 'Please <strong>DO NOT</strong> upload personal or private files, or any documents you do not wish to be publicly available.<br>'
@@ -1354,7 +1430,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             err_msg = 'Year/date created should be dash separated';
                         }else if(created.length > 4){
 
-                            var date = new Date(created);
+                            let date = new Date(created);
                             let time = date.getTime();
                             if(Number.isNaN(time)){
                                 err_msg = 'Invalid Year/date created';
@@ -1458,14 +1534,14 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 $dlg.find('#fcreator').val(fullname[0]);
                 $dlg.find('#lcreator').val((fullname.length == 2) ? fullname[1] : '');
 
-                var request = {
+                let request = {
                     serviceType: 'nakala',
                     service: 'nakala_get_metadata' // file types used by Nakala
                 };
                 window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
 
                     data = window.hWin.HEURIST4.util.isJSON(data);
-                    can_assign = 0;
+                    let can_assign = 0;
 
                     if(data.status && data.status != window.hWin.ResponseStatus.OK){
                         $dlg.dialog('close');
@@ -1475,14 +1551,16 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                     let selected_type = 'c_1843'; // other - by default
                     let $select = $dlg.find('#type'); 
-                    if(data.hasOwnProperty('types') && Object.keys(data['types']).length > 0){
+                    if(Object.hasOwn(data, 'types') && Object.keys(data['types']).length > 0){
 
                         $.each(data['types'], (idx, type) => {
 
                             window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
 
-                            if(that._last_upload_details && that._last_upload_details.length > 0 && that._last_upload_details[0].type.indexOf(type[0].toLowerCase()) !== -1){
-                                selected_type = code;
+                            if(that._last_upload_details && that._last_upload_details.length > 0 
+                                && that._last_upload_details[0].type.indexOf(type[0].toLowerCase()) !== -1)
+                            {
+                                selected_type = type[1];
                             }
                         });
                         window.hWin.HEURIST4.ui.initHSelect($select, false);
@@ -1491,7 +1569,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     $select.val(selected_type).hSelect('refresh');
 
                     $select = $dlg.find('#license');
-                    if(data.hasOwnProperty('licenses') && data['licenses'].length > 0){
+                    if(Object.hasOwn(data, 'licenses') && data['licenses'].length > 0){
                         $.each(data['licenses'], (idx, license) => {
                             window.hWin.HEURIST4.ui.addoption($select[0], license, license);
                         });
@@ -1503,8 +1581,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         $dlg.dialog('widget').show();
                     }else{
                         $dlg.dialog('close');
-                        window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the data types and license metadata values.<br>'
-                            + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An unknown error has occurred while attempting to retrieve the data types and license metadata values.<br>'
+                                    +'If this problem persists, please contact the Heurist team.',
+                            error_title: 'Unable to retrieve Nakala metadata values',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     }
                 });
 
@@ -1528,9 +1610,13 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 $accounts.trigger('change');
 
                 break;
-
+            }    
             default:
-                window.hWin.HEURIST4.msg.showMsgErr('The external service "' + selected_repo + '" is not supported.<br>Please contact the Heurist team.');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `The external service "${selected_repo}" is not supported.`,
+                    error_title: 'Service not supported',
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                });
                 break;
         }
     },
@@ -1540,7 +1626,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _afterExternalUpload: function(external_url){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(external_url)){
             return;
@@ -1606,119 +1692,21 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     },
 
     //
-    // 
-    //
-    _deleteUnused: function(){
-
-        var that = this;
-
-        if(!this._checkUserPermissions(1)){
-            return;
-        }
-
-        let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
-
-        var request = {
-            'a': 'batch',
-            'entity': that.options.entity.entityName,
-            'delete_unused': ids,
-            'operate': 'get'
-        };
-
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-        function(response){
-            if(response.status == window.hWin.ResponseStatus.OK){
-
-                const files = response.data;
-                let text = 'No files to delete';
-                if(Object.keys(files).length > 0){
-
-                    const keys = Object.keys(files);
-                    let $dlg;
-                    text = keys.length + ' file(s) found unused: <br>';
-
-                    let del_func = function() {
-
-                        var req = {
-                            'a': 'batch',
-                            'entity': that.options.entity.entityName,
-                            'delete_unused': keys.join(','),
-                            'operate': 'delete'
-                        };
-
-                        window.hWin.HAPI4.EntityMgr.doRequest(req, function(res){
-                            if(res.status == window.hWin.ResponseStatus.OK){
-                                if(res.data > 0){
-                                    text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
-                                }
-                
-                                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
-                                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(res);
-                            }
-                        });
-                    };
-
-                    for (const ulf_ID in files) {
-                        if (Object.hasOwnProperty.call(files, ulf_ID)) {
-
-                            const file = files[ulf_ID];
-                            let name = file['filename'];
-                            let extra = '';
-
-                            if(name == '_remote'){
-                                name = file['url'];
-                                extra = '<a href="'+ name +'" target="_blank"><span class="ui-icon ui-icon-extlink"></span></a>';
-                            }
-
-                            text += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
-                        }
-                    }
-
-                    text += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
-
-                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(text, del_func, {title: 'Deleting unused files'}, {default_palette_class: 'ui-heurist-admin'});
-
-                    $dlg.parent().css('min-width', '250px');
-                    $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
-                        let id = $(this).attr('data-fid');
-
-                        let popup_opts = {
-                            isdialog: true, 
-                            select_mode: 'manager',
-                            edit_mode: 'editonly',
-                            rec_ID: id,
-                            default_palette_class: 'ui-heurist-populate',
-                            width: 950,
-                            onClose: () => {}
-                        };
-
-                        let $m_dlg = window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
-                    });
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgFlash('No unused files detected', 3000);
-                }
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }
-        });
-    },
-    
-    //
     // Merge duplicate files into one record
     //
     _combineDups: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
         }
+        
+        const session_id = window.hWin.HEURIST4.msg.showProgress( {interval:900, 
+            steps:['Uploaded files by fullpath','External resources','Uploaded files by name and checksum','Merging, Update reference records, Delete']} );
 
-        var ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
-
-        var request = {
+        let request = {
+            'session': session_id,
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'merge_duplicates': 'all' //ids
@@ -1726,40 +1714,53 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
+            
+            window.hWin.HEURIST4.msg.hideProgress();
+                
             if(response.status == window.hWin.ResponseStatus.OK){
                 
                 let res = response.data;
                 let msg = '';
 
-                if(res.local > 0 || res.location_local > 0){
-                    let local_other = res.location_local > 0 ? res.location_local > 0 : 0;
-                    msg = (res.local + local_other) + ' local files processed';
-                }
-                if(res.remote > 0){
-                    msg += (msg == '' ? '<br>' : '') + res.remote + ' remote files processed';
-                }
+                if(res?.local > 0){
+                    msg += res.local + ' duplications by fullpath<br><br>';
+                } 
+                if(res?.local_checksum > 0){
+                    msg += res.local_checksum + ' duplications by checksum and original file name<br><br>';
+                } 
+                if(res?.remote > 0){
+                    msg += res.remote + ' duplications for remote resources<br>';
+                } 
+                if(res?.tumbnails > 0){
+                    msg += res.tumbnails + ' redundant thumbnails<br>';
+                } 
 
                 if(msg == ''){
-                    msg = 'No duplicates found';
+                    window.hWin.HEURIST4.msg.showMsgFlash('No duplicates found', 3000);
+                }else{
+                    msg = `<div style="font-size:1.em">${msg}</div>`;
+                    window.hWin.HEURIST4.msg.showMsg(msg, {title:window.hWin.HR('Combine duplicates')});
+                    that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh    
                 }
-
-                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
-                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
     },
 
+    //
+    //
+    //
     _refreshIndex: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
         }
 
-        var request = {
+        let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'request_id': window.hWin.HEURIST4.util.random(),
@@ -1779,7 +1780,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     window.hWin.HEURIST4.msg.showMsgFlash('No new files to index', 3000);
                 }else{
 
-                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(response.data, {'OK': function(){
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(response.data, {'OK': function(){
                         $dlg.dialog('close');
                         that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
                     }}, {title: 'Refresh indexes results', 'OK': window.HR('OK')}, {default_palette_class: 'ui-heurist-admin'});
@@ -1789,40 +1790,110 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }
         });
     },
-
-    _createMediaRecords: function(){
-
-        var that = this;
-
-        if(!this._checkUserPermissions(1)){
-            return;
+    
+    _getSelected: function(limit){
+        
+        let ids;
+        
+        if(this._selectAllFiles){
+            ids = this.getRecordSet().getIds();
+        }else{
+            ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
         }
 
-        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
-
-        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
-            window.hWin.HEURIST4.msg.showMsgFlash('Select some files to create media records...', 4000);
-            return;
+        if(limit>0){
+            if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+                window.hWin.HEURIST4.msg.showMsgFlash('Select some files first...', 4000);
+                return false;
+            }else if(ids.length > limit){
+                window.hWin.HEURIST4.msg.showMsgFlash('The number of selected files exceeds the limit', 2000);
+                return false;
+            }
         }
+        
+        return ids;
+        
+    },
+    
+    //
+    //
+    //
+    _showMediaRecords: function(){
 
-        var request = {
+        let ids = this._getSelected(5000);
+        if(!ids){
+            return;
+        }        
+
+        let request = {
             'a': 'batch',
-            'entity': that.options.entity.entityName,
-            'create_media_records': ids
+            'entity': this.options.entity.entityName,
+            'get_media_records': ids.join(',')
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 
+                let rec_ids = response.data;
+
+                if(rec_ids?.length > 0){
+                    
+                    if(rec_ids.length > 5000){
+                        window.hWin.HEURIST4.msg.showMsgFlash('The number ('+rec_ids.length
+                            +') of referencing records exceeds the limit. Try to reduce the number of selected files', 2000);
+                    }else{                    
+                        let url = window.hWin.HAPI4.baseURL+"?db="+window.hWin.HAPI4.database+"&q=ids:"+rec_ids.join(',');
+                        window.open(url, '_blank');
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgFlash('No referencing records found for selected files/urls');
+                    
+                }
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });        
+    },
+    
+    //
+    //
+    //
+    _createMediaRecords: function(){
+
+        let that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+        
+        let ids = this._getSelected(5000);
+        if(!ids){
+            return;
+        }        
+
+        let request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'create_media_records': ids.join(',')
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                
+                //returns ('new' => ids of new records, 'error' , 'skipped')
+                
                 let counts = response.data;
                 let msg = '';
-                if(counts.new.length > 0){
-                    let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+counts.new.join(',');
-                    msg = counts.new.length + ' new media record(s) created (search <a href="window.open(\''+url+'\', \'_blank\')">here</a>)<br>';
+                if(counts['new'].length > 0){
+                    
+                    let url = window.hWin.HAPI4.baseURL+"?db="+window.hWin.HAPI4.database+"&q=ids:"+counts['new'].join(',');
+                    msg = counts['new'].length 
+                            + ' new media record(s) created (search <a href="#" onclick="window.open(\''+url+'\', \'_blank\')">here</a>)<br>';
                 }
                 if(counts.skipped > 0){
-                    msg += counts.skipped + ' already have a media record<br>';
+                    msg += counts.skipped + ' selected file/url reference already have a media record<br>';
                 }
                 if(counts.error.length > 0){
                     msg += counts.error.length + ' skipped due to an error (file id(s): '+ counts.error.join(', ') +')';
@@ -1836,21 +1907,171 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         });
     },
 
+    //
+    //
+    //
     _checkUserPermissions: function(level){
 
         if(!window.hWin.HAPI4.has_access(level)){
 
             let msg = 'You do not have permission to perform this action';
-            msg = level == 1 ? 'You must be an administrator of the database managers group to use this feature' : msg;
-            window.hWin.HEURIST4.msg.showMsgErr(msg);
+            msg = (level == 1) ? 'You must be an administrator of the database managers group to use this feature' : msg;
+            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: msg,
+                error_title: 'Invalid permissions'
+            });
+                    
             return false;
         }
 
         return true;
     },
 
+    //
+    //
+    //
     contextOnClose: function(){
         return this._lastFileDetails;
-    }
+    },
+    
+    //
+    //
+    //
+    _checkFiles: function(){
+        
+        /*
+        let body = $(window.hWin.document).find('body');
+
+        let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
+                            window.innerHeight : body.innerHeight();
+        let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
+        */
+
+        window.hWin.HEURIST4.msg.showDialog(
+            `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`
+            , {height:'80%', width:'80%'} );                
+    },
+    
+    //
+    //
+    //
+    _deleteSelected: function(){
+
+        let that = this;
+
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
+
+        let ids = this._getSelected(100);
+        if(!ids){
+            return;
+        }        
+        
+        let request = {
+            'a': 'batch',
+            'entity': that.options.entity.entityName,
+            'delete_selected': ids.join(','),
+            'mode': 'get'
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+        function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+
+                const files = response.data.files;
+                
+                let msg = '<br>You must delete the records or the File field values in order to be able to delete selected files/urls.'
+                        +'<br><br>Click <a href="#" id="show_referencing">here</a> '
+                        +'for records which reference selected files/urls';
+                let $dlg;
+                        
+                if(Object.keys(files).length > 0){
+
+                    const keys = Object.keys(files);
+                    
+                    if(response.data.cnt_in_use>0){
+                        msg = `${response.data.cnt_in_use} files are referencing in ${response.data.cnt_ref_recs} records. ${msg}<br><br>`;
+                    }else{
+                        msg = '';
+                    }
+                    
+                    msg = msg + keys.length + ' file(s) are ready to delete: <br>';
+
+                    let del_func = function() {
+
+                        let req = {
+                            'a': 'batch',
+                            'entity': that.options.entity.entityName,
+                            'delete_selected': keys.join(','),
+                            'mode': 'delete'
+                        };
+
+                        window.hWin.HAPI4.EntityMgr.doRequest(req, function(res){
+                            if(res.status == window.hWin.ResponseStatus.OK){
+                                let text = '';
+                                if(res.data > 0){
+                                     text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
+                                }
+                
+                                window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
+                                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(res);
+                            }
+                        });
+                    };
+
+                    for (const ulf_ID in files) {
+                        if (Object.hasOwn(files, ulf_ID)) {
+
+                            const file = files[ulf_ID];
+                            let name = file['filename'];
+                            let extra = '';
+
+                            if(name == '_remote'){
+                                name = file['url'];
+                                extra = '<a href="'+ name +'" target="_blank"><span class="ui-icon ui-icon-extlink"></span></a>';
+                            }
+
+                            msg += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
+                        }
+                    }
+
+                    msg += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
+
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, del_func, {title: 'Deleting files'}, {default_palette_class: 'ui-heurist-admin'});
+
+                    $dlg.parent().css('min-width', '250px');
+                    $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
+                        const id = $(this).attr('data-fid');
+
+                        const popup_opts = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            rec_ID: id,
+                            default_palette_class: 'ui-heurist-populate',
+                            width: 950,
+                            onClose: () => {}
+                        };
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                    });
+                }else{
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Nothing to delete. All selected files have referencing records.'+msg,null,
+                        {title:'Delete blocked'},
+                        {default_palette_class:that.options.default_palette_class});
+                }
+                that._on($dlg.find('#show_referencing'),{click:that._showMediaRecords});
+                
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    },
+    
     
 });

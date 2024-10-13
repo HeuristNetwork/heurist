@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 $script_name = 'springDiagram.php';
-//to avoid "Open Redirect" security warning    
+//to avoid "Open Redirect" security warning
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 

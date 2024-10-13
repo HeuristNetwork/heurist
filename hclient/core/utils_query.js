@@ -33,9 +33,9 @@ window.hWin.HEURIST4.query = {
     // JSON to URL
     // hQueryComposeURL
     composeHeuristQueryFromRequest: function(query_request, encode){
-            var query_string = 'db=' + window.hWin.HAPI4.database;
+            let query_string = 'db=' + window.hWin.HAPI4.database;
             
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            let mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
             if(mapdocument>0){
                 query_string = query_string + '&mapdocument='+mapdocument;
             }
@@ -48,7 +48,9 @@ window.hWin.HEURIST4.query = {
                 
                 if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
                     
-                    if($.isArray(query_request.q) || $.isPlainObject(query_request.q)){
+                    let sq;
+
+                    if(Array.isArray(query_request.q) || $.isPlainObject(query_request.q)){
                         sq = JSON.stringify(query_request.q);
                     }else{
                         sq = query_request.q;
@@ -61,9 +63,9 @@ window.hWin.HEURIST4.query = {
                     query_string = query_string + '&q=' + sq;
                 }
                 
-                var rules = query_request.rules;
+                let rules = query_request.rules;
                 if(!window.hWin.HEURIST4.util.isempty(rules)){
-                    if($.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
+                    if(Array.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
                         rules = JSON.stringify(query_request.rules);
                     }
                     //@todo simplify rules array - rempove redundant info
@@ -98,8 +100,8 @@ window.hWin.HEURIST4.query = {
     composeHeuristQuery2: function(params, encode){
         if(params){
 
-            var query, rules = params.rules;
-            var query_to_save = [];
+            let query, rules = params.rules;
+            let query_to_save = [];
 
             if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=='all' || params.w=='a')){
                 query_to_save.push('w='+params.w);
@@ -107,7 +109,7 @@ window.hWin.HEURIST4.query = {
 
             if(!window.hWin.HEURIST4.util.isempty(params.q)){
 
-                if($.isArray(params.q) || $.isPlainObject(params.q)){
+                if(Array.isArray(params.q) || $.isPlainObject(params.q)){
                     query = JSON.stringify(params.q);
                 } else{
                     query = params.q;
@@ -119,7 +121,7 @@ window.hWin.HEURIST4.query = {
             if(!window.hWin.HEURIST4.util.isempty(rules)){
 
 
-                if($.isArray(params.rules) || $.isPlainObject(params.rules)){
+                if(Array.isArray(params.rules) || $.isPlainObject(params.rules)){
                     rules = JSON.stringify(params.rules);
                 } else{
                     rules = params.rules;
@@ -161,11 +163,11 @@ window.hWin.HEURIST4.query = {
             return null;
         }
         
-        for(var k=0; k<rules.length; k++){
+        for(let k=0; k<rules.length; k++){
             delete rules[k]['codes'];
-            var rl = null;
+            let rl = null;
             if(rules[k]['levels'] && rules[k]['levels'].length>0){
-                var rl = window.hWin.HEURIST4.query.cleanRules(rules[k]['levels']);
+                rl = window.hWin.HEURIST4.query.cleanRules(rules[k]['levels']);
             }
             if(rl==null){
                 delete rules[k]['levels'];    
@@ -183,11 +185,11 @@ window.hWin.HEURIST4.query = {
     //
     mergeHeuristQuery: function(){
         
-        var res_query = [];
+        let res_query = [];
         
         if(arguments.length>0){
 
-            var idx=1, len = arguments.length;
+            let idx=1, len = arguments.length;
             
             res_query = arguments[0];
             for (;idx<len;idx++){
@@ -204,10 +206,10 @@ window.hWin.HEURIST4.query = {
         //return object  {q:, rules:, plain:}
         function __prepareQuery(query){
             
-            var query_a, rules = false, sPlain = false;
-            var isJson = false;
+            let rules = false, sPlain = false;
+            let isJson = false;
             
-            var query_a = window.hWin.HEURIST4.util.isJSON(query);
+            let query_a = window.hWin.HEURIST4.util.isJSON(query);
             if( query_a ){
                 query = query_a; //converted to json    
                 
@@ -234,7 +236,7 @@ window.hWin.HEURIST4.query = {
                     query = {plain: encodeURIComponent(query)}; //query1.split('"').join('\\\"')};    
                 }
             }
-            var res = {q:query};    
+            let res = {q:query};    
             if(rules){
                 res['rules'] = rules;
             }
@@ -252,7 +254,7 @@ window.hWin.HEURIST4.query = {
         if(jQuery.type(query2) === "string"){
             var notJson = true;
             try{
-                //query2 = JSON.parse(query2);
+               
                 var query2a = window.hWin.HEURIST4.util.isJSON(query2);
                 if( query2a ){
                     if(query2a['q']){
@@ -281,14 +283,15 @@ window.hWin.HEURIST4.query = {
         }
 */        
 
-        var q1 = __prepareQuery(query1);
-        var q2 = __prepareQuery(query2);
+        let q1 = __prepareQuery(query1);
+        let q2 = __prepareQuery(query2);
 
         if(q1['plain'] && q2['plain'])
         {
             return q1['plain']+' '+q2['plain'];
         }else{
-            var query1 = q1['q'], query2 = q2['q'];
+            query1 = q1['q'];
+            query2 = q2['q'];
             
             if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
                 return query2;
@@ -296,10 +299,10 @@ window.hWin.HEURIST4.query = {
             if(window.hWin.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
                 return query1;
             }
-            if(!$.isArray(query1)){
+            if(!Array.isArray(query1)){
                 query1 = [query1];
             }
-            if(!$.isArray(query2)){
+            if(!Array.isArray(query2)){
                 query2 = [query2];
             }
         
@@ -315,13 +318,12 @@ window.hWin.HEURIST4.query = {
     //
     parseHeuristQuery: function(qsearch)
     {
+
+        let res = {};
+        let type = -1;
         
-        var type = -1;
-        
-        var query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
+        let query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
         if(qsearch){
-            
-            var res = {};
             
             if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is query in form of URL params 
                 domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
@@ -336,11 +338,11 @@ window.hWin.HEURIST4.query = {
                 
             }else{ //it may be aquery in form of json
             
-                var r = window.hWin.HEURIST4.util.isJSON(qsearch);
+                let r = window.hWin.HEURIST4.util.isJSON(qsearch);
                 if(r!==false){
                     
-                    if(window.hWin.HEURIST4.util.isArray(r.rectypes)){
-                        r.type = 3; //'faceted';
+                    if(Array.isArray(r.rectypes)){
+                        r.type = 3; // faceted
                         r.w = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
                         r.domain = r.w;
                         return r;
@@ -399,15 +401,15 @@ window.hWin.HEURIST4.query = {
     //    
     hQueryStringify: function(request, query_only){
         
-        var res = {};
+        let res = {};
         
         if(window.hWin.HEURIST4.util.isempty(request.q)){
             return '';
         }else {
-            var r = window.hWin.HEURIST4.util.isJSON(request.q);
+            let r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
-                res['q'] = r; //JSON.stringify(r);
+                res['q'] = r;
             }else{
                 res['q'] = request.q;
             }
@@ -419,10 +421,10 @@ window.hWin.HEURIST4.query = {
         
             if(!window.hWin.HEURIST4.util.isempty(request.rules)){
                 //cleanRules?
-                var r = window.hWin.HEURIST4.util.isJSON(request.rules);
+                let r = window.hWin.HEURIST4.util.isJSON(request.rules);
                 if(r!==false){
                     if(r.facets) return ''; //faceted search not allowed for map queries
-                    res['rules'] = r; //JSON.stringify(r);
+                    res['rules'] = r;
                 }else{
                     res['rules'] = request.rules;
                 }
@@ -453,32 +455,30 @@ window.hWin.HEURIST4.query = {
     //
     hQueryCopyPopup: function(request, pos_element){
         
-        var res = window.hWin.HEURIST4.query.hQueryStringify(request);
+        let res = window.hWin.HEURIST4.query.hQueryStringify(request);
         
-        var buttons = {};
+        let buttons = {};
         buttons[window.hWin.HR('Copy')]  = function() {
             
-            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-            var target = $dlg.find('#dlg-prompt-value')[0];
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            let target = $dlg.find('#dlg-prompt-value')[0];
             target.focus();
             target.setSelectionRange(0, target.value.length);
-            var succeed;
+            let succeed;
             try {
-                succeed = document.execCommand("copy");
-                
+                document.execCommand("copy");
                 $dlg.dialog( "close" );
             } catch(e) {
-                succeed = false;
-                alert('Not supported by browser');
+               alert('Not supported by browser');
             }                            
             
         }; 
         buttons[window.hWin.HR('Close')]  = function() {
-            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
             $dlg.dialog( "close" );
         };
         
-        var opts = {width:450, buttons:buttons, default_palette_class: 'ui-heurist-explore'}
+        let opts = {width:450, buttons:buttons, default_palette_class: 'ui-heurist-explore'}
         if(pos_element){
             if(pos_element.my){
                 opts.my = pos_element.my;
@@ -492,7 +492,7 @@ window.hWin.HEURIST4.query = {
         }        
         
         window.hWin.HEURIST4.msg.showPrompt(
-            '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
+            '<label for="dlg-prompt-value">Edit and copy the string and paste into the Mappable Query filter field</label>'
             + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
             + ' style="min-width: 200px; margin-left:0.2em;margin-top:10px;" rows="3" cols="70">'
             + res
@@ -505,12 +505,12 @@ window.hWin.HEURIST4.query = {
     //
     createFacetQuery: function(code, need_query, respect_relation_direction){
 
-        var result = {};
+        let result = {};
         
         code = code.split(':');
 
-        var dtid = code[code.length-1];
-        var linktype = dtid.substr(0,2);
+        let dtid = code[code.length-1];
+        let linktype = dtid.substr(0,2);
         if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
             //unconstrained link
             code.push('0');         //!!!!!!!!
@@ -525,20 +525,20 @@ window.hWin.HEURIST4.query = {
 
             //create query to search facet values
             function __crt( idx ){
-                var res = null;
+                let res = null;
                 if(idx>0){  //this is relation or link
 
                     res = [];
 
-                    var pref = '';
-                    var qp = {};
+                    let pref = '';
+                    let qp = {};
 
                     if(code[idx]>0){ //if 0 - unconstrained
                         qp['t'] = code[idx];
                         res.push(qp);
                     }
 
-                    var fld = code[idx-1]; //link field
+                    let fld = code[idx-1]; //link field
                     if(fld.indexOf('lf')==0){
                         pref = 'linked_to';    
                     }else if(fld.indexOf('lt')==0){
@@ -553,7 +553,7 @@ window.hWin.HEURIST4.query = {
                     qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
                     res.push(qp);
                 }else{ //this is simple field
-                    res = '$IDS'; //{'ids':'$IDS}'};
+                    res = '$IDS';
                 }
                 return res;
             }

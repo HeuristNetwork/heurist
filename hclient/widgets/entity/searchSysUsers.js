@@ -22,10 +22,10 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
 
         if(this.options.subtitle){
-            var ele = this.element.find('.sub-title');
+            let ele = this.element.find('.sub-title');
             if(ele.length>0){
                 ele.html('<h3>'+this.options.subtitle+'</h3>');
             }
@@ -43,7 +43,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         this._super();
 
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
@@ -56,13 +56,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New User"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onadd" );
                 }); 
 
             this.btn_find_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Find/Add User"), icon: "ui-icon-search"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onfind" );
                 }); 
                 
@@ -115,10 +115,8 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
-        
-            this._super();
             
-            var request = {}
+            let request = {}
         
             if(this.input_search.val()!=''){
                 request['ugr_Name'] = this.input_search.val();
@@ -135,7 +133,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 
                 this.input_search_role.parent().show();
 
-                var gr_role = this.input_search_role.val();
+                let gr_role = this.input_search_role.val();
                 if(gr_role!='' && gr_role!='any'){
                     
                     if(gr_role=='admin'){
@@ -173,40 +171,9 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             }else{
                 request['sort:ugr_Name'] = '1';   
             }
-                 
             
-/*
-            if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = window.hWin.HAPI4.get_prefs('recent_Users');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                var d = new Date(); 
-                //d = d.setDate(d.getDate()-7);
-                d.setTime(d.getTime()-7*24*60*60*1000);
-                request['ugr_Modified'] = '>'+d.toISOString();
-            }
-*/            
-            this._trigger( "onstart" );
-    
-            request['a']          = 'search'; //action
-            request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            //we may search users in any database
-            request['db']     = this.options.database;
-
-            var that = this;                                                
-       
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
+            this._search_request = request;
+            this._super();
                            
     }
 });

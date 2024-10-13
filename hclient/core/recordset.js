@@ -23,13 +23,13 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global parseWKT */
 
-
-function hRecordSet(initdata) {
-    var _className = "hRecordSet",
+function HRecordSet(initdata) {
+    const _className = "HRecordSet",
     _version   = "0.4";
 
-    var total_count = 0,   //number of records in query  - not match to  length()
+    let total_count = 0,   //number of records in query  - not match to  length()
     queryid = null, //unique query id
     offset = 0,
     //limit = 1000, use length()
@@ -46,7 +46,7 @@ function hRecordSet(initdata) {
 
     limit_warning = null;
     
-    var _progress = null,
+    let _progress = null,
         _isMapEnabled = false,
         _request = null;
     
@@ -55,7 +55,7 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
         
-        if($.isArray(response)){
+        if(Array.isArray(response)){
             response = {entityName:'Records',count:response.length,offset:0,records:response};
         }
         
@@ -78,19 +78,19 @@ function hRecordSet(initdata) {
                 fields = response.fields;
                 rectypes = response.rectypes;
                 structures = response.structures;
-                records = response.records;  //$.isArray(records)
-                order = $.isArray(response.order)?response.order:[response.order];
+                records = response.records;  //Array.isArray(records)
+                order = Array.isArray(response.order)?response.order:[response.order];
                 relationship = response.relationship;
                 relations_ids = response.relations;
                 
                 fields_detail = response.fields_detail;
                 
                 _isMapEnabled = response.mapenabled;
-                //@todo - merging
+
             }else{
                     
                 if(response.order){
-                    order = $.isArray(response.order)?response.order:[response.order];    
+                    order = Array.isArray(response.order)?response.order:[response.order];    
                     records = response.records?response.records:{};   
                 }else{
                     order = response.records;  //ids only   
@@ -112,17 +112,15 @@ function hRecordSet(initdata) {
     */
     function _makeKeyValueArray(namefield){
         
-        var ids, record, key, rec_title;
+        let result = [];
         
-        var result = [];
-        
-        for(idx in order){
+        for(let idx in order){
             if(idx)
             {
-                key = order[idx];
+                const key = order[idx];
                 
-                record = records[key];
-                rec_title = _getFieldValue(record, namefield);
+                let record = records[key];
+                const rec_title = _getFieldValue(record, namefield);
                 
                 result.push({key:key, title:rec_title});
             }
@@ -136,12 +134,12 @@ function hRecordSet(initdata) {
     //
     function _getDetailsFieldTypes(){
         
-        var dty_ids = null;
+        let dty_ids = null;
         if(fields_detail){
               dty_ids = fields_detail;
         }else{
             if(order.length>0){     
-                var rec = records[order[0]];
+                let rec = records[order[0]];
                 if(!isnull(rec) && rec['d']){
                     dty_ids = Object.keys(rec['d']);
                 }
@@ -176,23 +174,21 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     */
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
-        var aitems = [], titems = [];
-        var item, titem, shape, idx, 
-            min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
-        var mapenabled = 0,
+        let aitems = [], titems = [];
+        let item, titem, idx;
+        let mapenabled = 0,
             timeenabled = 0;
             
-        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+        const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
         
-        var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
-        var DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        var DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
-        var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
+        const localIds = window.hWin.HAPI4.sysinfo['dbconst'];
+        const DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
+        const DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR'];
+        const DT_BG_COLOR = localIds['DT_BG_COLOR'];
+        const DT_OPACITY = localIds['DT_OPACITY'];
         
         //make bounding box for map datasource transparent and unselectable
-        var disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
+        let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
                                     localIds['RT_GEOTIFF_SOURCE'],
                                     localIds['RT_KML_SOURCE'],
                                     localIds['RT_MAPABLE_QUERY'],
@@ -201,7 +197,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
         dataset_name = dataset_name || "main";
         
-        var iconColor, fillColor, lineColor, fillOpacity, iconMarker = null;
+        let iconColor, fillColor, lineColor, fillOpacity, iconMarker = null;
         if(symbology){
             iconColor = symbology.iconColor;
             iconMarker = symbology.iconMarker;
@@ -222,41 +218,38 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 strokeWeight:6,
 */         
 
-        var geofields = [], timefields = [];
+        let geofields = [], timefields = [];
         
-        var dty_ids = _getDetailsFieldTypes(); 
+        let dty_ids = _getDetailsFieldTypes(); 
         
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            
-            for (var i=0; i<dty_ids.length; i++) {
-                var dtype = $Db.dty(dty_ids[i],'dty_Type');
+            dty_ids.forEach((dty_id)=>{
+                const dtype = $Db.dty(dty_id,'dty_Type');
                 if(dtype=='date' || dtype=='year'){
-                    timefields.push(dty_ids[i]);
+                    timefields.push(dty_id);
                 }else if(dtype=='geo'){
-                    geofields.push(dty_ids[i]);
+                    geofields.push(dty_id);
                 }
-            }
+            });
         }
         
-        var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
+        let linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
         //linkedRecs - records linked to this place
         //shape - coordinates
         //item - item object to be added to timemap 
-        var linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
-        
-        var tot = 0;
+        let linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
         
         for(idx in records){
             if(idx)
             {
-                var record = records[idx];
-                var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
+                let record = records[idx];
+                let recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
                 
                 if(filter_rt && recTypeID!=filter_rt) continue;
 
-                var
+                let
                 recID       = _getFieldValue(record, 'rec_ID'),
                 recName     = _getFieldValue(record, 'rec_Title'),
 
@@ -271,31 +264,30 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(!iconId) iconId = recTypeID; //by default 
                 
                 //symbology per record overwrite layer symbology
-                var pr_iconMarker = _getFieldValue(record, DT_SYMBOLOGY_POINTMARKER);
-                var pr_iconColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_SYMBOLOGY_COLOR));
-                var pr_fillColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_BG_COLOR));
-                var pr_Opacity    = _getFieldValue(record, DT_OPACITY);
+                let pr_iconMarker = _getFieldValue(record, DT_SYMBOLOGY_POINTMARKER);
+                let pr_iconColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_SYMBOLOGY_COLOR));
+                let pr_fillColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_BG_COLOR));
+                let pr_Opacity    = _getFieldValue(record, DT_OPACITY);
 
                 if(pr_iconMarker){
                     pr_iconMarker  = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                         +'&file='+pr_iconMarker[0];
                 }
                 
-                var fillOpacity_thisRec = pr_Opacity?pr_Opacity:fillOpacity;
+                let fillOpacity_thisRec = pr_Opacity?pr_Opacity:fillOpacity;
                 
                 
-                var html_thumb = '';
+                let html_thumb = '';
                 if(recThumb){                             //class="timeline-event-bubble-image" 
                     html_thumb = '<img alt src="'+recThumb+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; 
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
                 
-                var k, m, dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
-                for(k=0; k<timefields.length; k++){
-                    var datetime = _getFieldValues(record, timefields[k]);
+                let dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
+                for(let k=0; k<timefields.length; k++){
+                    const datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
-                        var m, res = [];
-                        for(m=0; m<datetime.length; m++){
+                        for(let m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
@@ -328,7 +320,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(dres){
                     dates.push(dres);
                 }
-                for(k=0; k<dates.length; k++){
+                for(let k=0; k<dates.length; k++){
                         
                         if(timeenabled<MAXITEMS){
                      
@@ -373,23 +365,21 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //a record may have several geofields/placemarks for example place of birth and death
                 //besides it may be linked (several times) to "place" record types
                 //we need to treat them as separate timemap item
-                //var geovalues = array(); 
-                var shapes = (recShape && geoType!=1)?recShape:[];
-                if(!$.isArray(shapes)){
+                let shapes = (recShape && geoType!=1)?recShape:[];
+                if(!Array.isArray(shapes)){
                     shapes = [];
                 }
                 
-                var has_linked_places = [];
+                let has_linked_places = [];
                 
                 if(geoType!=2){ //get coordinates from geo fields
                     
-                    var k, m, i, j;
-                    for(k=0; k<geofields.length; k++){
+                    for(let k=0; k<geofields.length; k++){
                         
-                        var geodata = _getFieldGeoValue(record, geofields[k]);
+                        let geodata = _getFieldGeoValue(record, geofields[k]);
                         if(geodata){
-                            for(m=0; m<geodata.length; m++){
-                                var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
+                            for(let m=0; m<geodata.length; m++){
+                                const shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
 
                                 if(shape){ //main shape
                                         
@@ -407,14 +397,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
                                         }else{
                                             linkedPlaces[geodata[m].recID] = {linkedRecs:[recID],
-                                                                                shape:$.isArray(shape)?shape:[shape]}
+                                                                                shape:Array.isArray(shape)?shape:[shape]}
                                         }
                                         has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
                                     }else{
                                         //this is usual geo
-                                        if($.isArray(shapes)){
-                                            if($.isArray(shape)){
+                                        if(Array.isArray(shapes)){
+                                            if(Array.isArray(shape)){
                                                 shapes = shapes.concat(shape);                                            
                                             }else{
                                                 shapes.push(shape);    
@@ -430,7 +420,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     recID = recID + "_link"; //for Digital Harlem
                 }
                 
-                        var iconImgEvt, iconImg;
+                        let iconImgEvt, iconImg;
                         if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0) ){
                             //icon is set in data (top prioriry)
                             iconImgEvt = iconId;    
@@ -445,7 +435,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId; // + '.png';
+                            iconImgEvt = iconId;
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '&color='
                                         + encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
@@ -458,7 +448,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                         
                         //disable selection for map source databaset bboxes
-                        var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
+                        let is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
                         
                         item = {
                             title: recName,
@@ -509,7 +499,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                 //keep item object for addition separate items for places
                 if(has_linked_places.length>0){
-                    for(var k=0; k<has_linked_places.length;k++){
+                    for(let k=0; k<has_linked_places.length;k++){
                         if(!linkedPlaces[ has_linked_places[k] ]['item']){
                             linkedPlaces[ has_linked_places[k] ]['item'] = window.hWin.HEURIST4.util.cloneJSON(item);    
                         }
@@ -520,31 +510,26 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
-                        //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
-                /*}
-                if(geoType!=2 || shapes.length>0){*/
                     aitems.push(item);
                 }
-
-                tot++;
         }}//for records
       
         //add linked places as separate items 
         //if place was found separetely consider is as one of linked records
-        for(var placeID in linkedPlaces){
+        for(let placeID in linkedPlaces){
             if(placeID>0){
                 
                 if(records[placeID]){
                     linkedPlaces[placeID]['linkedRecs'].push(placeID);
                 }
                 
-                var item = linkedPlaces[placeID]['item']; //item that linked to this place
+                let item = linkedPlaces[placeID]['item']; //item that linked to this place
                 item.placemarks = linkedPlaces[placeID]['shape'];
                 item.options.linkedRecIDs = linkedPlaces[placeID]['linkedRecs'];
                 if(item.options.linkedRecIDs.length>1 && item.options.icon.indexOf('s.png&color=')>0){
-                    var clr = encodeURIComponent(item.options.color);
+                    let clr = encodeURIComponent(item.options.color);
                     item.options.icon = item.options.icon +'&circle='+clr;
                 }
                 aitems.push(item);
@@ -553,7 +538,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }
             
             
-        var dataset = 
+        let dataset = 
             {
                 id: dataset_name, 
                 title: dataset_name, 
@@ -583,39 +568,21 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 
     */
     function _toGeoJSON(filter_rt, geoType, max_limit){
-
-        var aitems = [], titems = [];
-        var item, titem, shape, idx, 
-            min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
-        var mapenabled = 0,
-            timeenabled = 0;
             
-        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
-        
-        var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
-        var DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        var DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-551;
-        var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
-        var DT_SYMBOLOGY = localIds['DT_SYMBOLOGY']; //3-1092;
+        let localIds = window.hWin.HAPI4.sysinfo['dbconst'];
+        let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY'];
         
         //make bounding box for map datasource transparent and unselectable
-        var disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
-                                    localIds['RT_GEOTIFF_SOURCE'],
-                                    localIds['RT_KML_SOURCE'],
-                                    localIds['RT_MAPABLE_QUERY'],
-                                    localIds['RT_SHP_SOURCE']];
                                     
-        var geofields = [], timefields = [];
+        let geofields = [], timefields = [];
         
-        var dty_ids = _getDetailsFieldTypes(); 
+        let dty_ids = _getDetailsFieldTypes(); 
         
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            for (var i=0; i<dty_ids.length; i++) {
-                var dtype = $Db.dty(dty_ids[i], 'dty_Type');
+            for (let i=0; i<dty_ids.length; i++) {
+                let dtype = $Db.dty(dty_ids[i], 'dty_Type');
                 if(dtype=='date' || dtype=='year'){
                     timefields.push(dty_ids[i]);
                 }else if(dtype=='geo'){
@@ -624,28 +591,23 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         }
         
-        var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
         //linkedRecs - records linked to this place
         //shape - coordinates
         //item - item object to be added to timemap 
-        var linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
-        
-        var tot = 0;
-        
         //{"geojson":[]}
         function __getGeoJsonFeature(record, extended, simplify){
                  
-            var rec_ID = _getFieldValue(record, 'rec_ID');
+            let rec_ID = _getFieldValue(record, 'rec_ID');
             
-            var res = {type:'Feature', id: rec_ID, properties: _getAllFields(record), geometry:null};
+            let res = {type:'Feature', id: rec_ID, properties: _getAllFields(record), geometry:null};
 
                        
             //time --------------------------           
-            var k, m, dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
-                for(k=0; k<timefields.length; k++){
-                    var datetime = _getFieldValues(record, timefields[k]);
+            let dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
+                for(let k=0; k<timefields.length; k++){
+                    let datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
-                        for(m=0; m<datetime.length; m++){
+                        for(let m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
@@ -678,24 +640,19 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(dres){
                     dates.push(dres);
                 }
-                var timevalues = [];
-                for(k=0; k<dates.length; k++){
+                let timevalues = [];
+                for(let k=0; k<dates.length; k++){
                         
-                        //if(true || timeenabled<MAXITEMS){
-                     
                             dres = dates[k];
                             
-                            var date_start = (dres[0]==null)?dres[1]:dres[0];
-                            var date_end = null;
+                            let date_start = (dres[0]==null)?dres[1]:dres[0];
+                            let date_end = null;
                             if(dres[1] && date_start!=dres[1]){
                                 date_end = dres[1];
                             }
                             if(date_start==null) date_start = '';
                             if(date_end==null) date_end = '';
                             timevalues.push([date_start, '', '', date_end, '']);
-                                
-                        //}
-                        timeenabled++;
                 }                      
                 if(timevalues.length>0){
                     res['when'] = {timespans:timevalues};    
@@ -704,26 +661,22 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
  
                        
             //geo -----------------------           
-            var recShape = _getFieldValue(record, 'rec_Shape');  //additional shapes - special field created on client side
+            let recShape = _getFieldValue(record, 'rec_Shape');  //additional shapes - special field created on client side
             
-                var geovalues = [];  
+                let geovalues = [];  
                 if(recShape && geoType!=1){  //geoType==1 from geo fields only, ignore recShape
                     geovalues = [recShape];
                 }
                 
-                var has_linked_places = [];
-                
                 if(geoType!=2){ //get coordinates from geo fields geoType==2 form recShape only - ignore native geo coords   
                     
-                    var k, m, i, j;
-                    for(k=0; k<geofields.length; k++){
+                    for(let k=0; k<geofields.length; k++){
                         
-                        var geodata = _getFieldGeoValue(record, geofields[k]);
+                        let geodata = _getFieldGeoValue(record, geofields[k]);
                         if(geodata){
-                            for(m=0; m<geodata.length; m++){
+                            for(let m=0; m<geodata.length; m++){
                                 
-                                var geo_json = parseWKT(geodata[m].wkt);
-                                //var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
+                                let geo_json = parseWKT(geodata[m].wkt);
 
                                 if(geo_json){ //main shape
                                     geovalues.push(geo_json);
@@ -743,7 +696,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
                                         }else{
                                             linkedPlaces[geodata[m].recID] = {linkedRecs:[recID], shape:geo_json};
-                                                                                //art $.isArray(shape)?shape:[shape]}
+                                                                                //art Array.isArray(shape)?shape:[shape]}
                                         }
                                         has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
@@ -756,22 +709,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }
                         
                     }//for geo fields
-                }else{
-                    recID = recID + "_link"; //for Digital Harlem
                 }
                                                
-                //disable selection for map source databaset bboxes
-                var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
-                
                 if(geovalues.length>1){
                     res['geometry'] = {type:'GeometryCollection', geometries:geovalues};
                 }else if(geovalues.length==1){
                     res['geometry'] = geovalues[0];
-                }else{
-                    //res['geometry'] = [];
                 }
                 
-                var symbology = _getFieldValue(record, DT_SYMBOLOGY);
+                let symbology = _getFieldValue(record, DT_SYMBOLOGY);
                 symbology = window.hWin.HEURIST4.util.isJSON(symbology);
                 if(symbology){
                     res['style'] = symbology;
@@ -781,19 +727,19 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }//end __getGeoJsonFeature
         
         
-        var res_geo = [],
+        let res_geo = [],
             res_time = [],
             res_geo_ids = [];
         
-        for(idx in records){
+        for(let idx in records){
             if(idx)
             {
-                var record = records[idx];
+                const record = records[idx];
 
-                var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
+                const recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
                 if(filter_rt && recTypeID!=filter_rt) continue;
                 
-                var feature = __getGeoJsonFeature($record, 2, true);
+                let feature = __getGeoJsonFeature(record, 2, true);
                 if(feature['when']){
                             res_time.push({rec_ID: feature.id, 
                                             when: feature['when']['timespans'], 
@@ -816,9 +762,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     
    
     // some important id for record and detail types in local values
-    var RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
+    const RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
         DT_TARGET_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
-        DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
         DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
         DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
         //DT_YEAR = window.hWin.HAPI4.sysinfo['dbconst']['DT_YEAR'],     //73
@@ -834,29 +779,29 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _getLinkedRecords(forRecID, forRecTypeID){
         
         
-        var record = records[forRecID];
-        var dty_ids = _getDetailsFieldTypes(); 
-        var links = []; //{related, relation:0, rel_rt}
+        let record = records[forRecID];
+        let dty_ids = _getDetailsFieldTypes(); 
+        let links = []; //{related, relation:0, rel_rt}
         
         if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
 
-            //find resource fields and its values
+            //find record pointer fields and its values
             
-            for (var i=0; i<dty_ids.length; i++) {
-                var dtype = $Db.dty(dty_ids[i], 'dty_Type');
+            for (let i=0; i<dty_ids.length; i++) {
+                let dtype = $Db.dty(dty_ids[i], 'dty_Type');
                 if(dtype=='resource'){
                     
-                    var fldvalue = _getFieldValues(record, dty_ids[i]);
+                    let fldvalue = _getFieldValues(record, dty_ids[i]);
                     
                     if(!isnull(fldvalue)){   
-                         var m, n, res = [];
-                         for(m=0; m<fldvalue.length; m++){
-                            var g = fldvalue[m].split(',');
-                            for(n=0; n<g.length; n++){
-                                var relRec_ID = g[n];
-                                var relRec = records[relRec_ID];
+
+                         for(let m=0; m<fldvalue.length; m++){
+                            let g = fldvalue[m].split(',');
+                            for(let n=0; n<g.length; n++){
+                                let relRec_ID = g[n];
+                                let relRec = records[relRec_ID];
                                 if(!isnull(relRec)){
-                                    var relRec_RecTypeID = Number(_getFieldValue(relRec, 'rec_RecTypeID'));
+                                    let relRec_RecTypeID = Number(_getFieldValue(relRec, 'rec_RecTypeID'));
                                     if(isnull(forRecTypeID) || forRecTypeID == relRec_RecTypeID)
                                     {
                                         links.push({related:relRec_ID, relation:0, rel_rt:relRec_RecTypeID}); 
@@ -881,15 +826,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     // returns array of objects  {relation:recID, related:recTarget, relrt:relRecTypeID}
     //
     function _getRelationRecords(forRecID, forRecTypeID){
-        var idx, relations = [];
+        let relations = [];
         
-        for(idx in relationship){
+        for(let idx in relationship){
             if(idx)
             {
-                var record = relationship[idx];
-                var recID = _getFieldValue(record, 'rec_ID');
-                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
-                    recTarget, recSource, relRecTypeID; 
+                const record = relationship[idx];
+                const recID = _getFieldValue(record, 'rec_ID');
+                const recTypeID   = _getFieldValue(record, 'rec_RecTypeID');
+                let recTarget, recSource, relRecTypeID; 
                     
                 if(recTypeID == RT_RELATION){
                     
@@ -952,18 +897,18 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     // WKT - coordinates
     function _getFieldGeoValue(record, fldname){
 
-        var geodata = _getFieldValues(record, fldname);
+        let geodata = _getFieldValues(record, fldname);
         if(!isnull(geodata)){   
-             var m, res = [];
+             let m, res = [];
              for(m=0; m<geodata.length; m++){
-                var g = geodata[m].split(' ');
-                var gt = g[0].split(':');
-                var geoRecID = (gt && gt.length==2)?gt[1]:0;
+                let g = geodata[m].split(' ');
+                let gt = g[0].split(':');
+                let geoRecID = (gt && gt.length==2)?gt[1]:0;
                 gt = gt[0];  //geotype
                 
                 g.shift(); //remove first
-                var wkt = g.join(' ');           
-                oRes = {geotype:gt, wkt:wkt};
+                let wkt = g.join(' ');           
+                let oRes = {geotype:gt, wkt:wkt};
                 
                 if(geoRecID>0){
                     oRes['recID'] = geoRecID;
@@ -984,7 +929,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _getFieldValues(record, fldname){
         if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
 
-        if( (!$.isPlainObject(record)) && !isnull(record) && !$.isArray(record)){
+        if( (!$.isPlainObject(record)) && !isnull(record) && !Array.isArray(record)){
             if(records[record]){
                 record = records[record];    
             }else{
@@ -996,7 +941,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return null
         }else{  //@todo calcfields
         
-            var idx = $.inArray(fldname, fields);
+            let idx = $.inArray(fldname, fields);
             if(idx>-1){
                 return record[idx];
             }else if(  (isNaN(Number(fldname)) && fldname.indexOf("dtl_")!=0) && record[fldname] ){
@@ -1017,10 +962,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     */
     function _getAllFields(record){
         
-        var res = {};
+        let res = {};
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(fields)){
         
-            for(var idx in fields)
+            for(let idx in fields)
             if(idx>-1){
                 //field to index
                 if(typeof record[idx]!=='undefined'){
@@ -1057,12 +1002,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return null;
         }
         
-        if(that.calcfields && $.isFunction(that.calcfields[fldname])){
+        if(that.calcfields && window.hWin.HEURIST4.util.isFunction(that.calcfields[fldname])){
             return that.calcfields[fldname].call(that, record, fldname);
         }
         
         //this is field type ID  or field name (nominal for most common fields)
-        var d = record['d'];
+        let d = record['d'];
         if(d){   
             //if fieldname is numeric index of starts with dtl_
             if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
@@ -1090,13 +1035,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     }
                 }else if(fldname=="dtl_EndDate"){
                     return _getFieldValue(record, DT_END_DATE);
-                    //if(d[11] && d[11][0]){ return d[11][0]; }
+
                 }else if(fldname=="dtl_Description"){
                     return _getFieldValue(record, DT_SHORT_SUMMARY);
-                    //if(d[3] && d[3][0]){return d[3][0];}
                     
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[DT_GEO_OBJECT] && d[DT_GEO_OBJECT][0]){
-                    var g = d[DT_GEO_OBJECT][0].split(' ');
+                    let g = d[DT_GEO_OBJECT][0].split(' ');
 
                     if(fldname=="dtl_Geo"){
                         g.shift();
@@ -1112,11 +1056,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 
         //either take value by index or by name
         // record can be either array or object
-        var idx = $.inArray(fldname, fields);
+        let idx = $.inArray(fldname, fields);
         if(idx>-1){
             return record[idx];
         }else{
-            return isnull(record[fldname])?null:record[fldname]; //return null;
+            return isnull(record[fldname])?null:record[fldname];
         }
     }
     
@@ -1127,11 +1071,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _setFieldValue(record, fldname, newvalue){
 
         if(!isNaN(Number(fldname))){  //@todo - search detail by its code
-            var d = record['d'];
+            let d = record['d'];
             if(!d){
                 record['d'] = {};
             }
-            if($.isArray(newvalue)){
+            if(Array.isArray(newvalue)){
                 record['d'][fldname] = newvalue;
             }else{
                 record['d'][fldname] = [newvalue];    
@@ -1141,11 +1085,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }else {
             //header fields always single values except rec_Shape
 
-            if($.isArray(newvalue) && fldname!='rec_Shape'){
+            if(Array.isArray(newvalue) && fldname!='rec_Shape'){
                 newvalue = (newvalue.length>0)?newvalue[0]:null;
             }
             
-            var idx = $.inArray(fldname, fields);
+            let idx = $.inArray(fldname, fields);
             if(idx>-1){
                 record[idx] = newvalue;
             }else{
@@ -1155,10 +1099,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
+        isA: function (strClass) {return (strClass === _className || strClass === 'hRecordSet');},
         getVersion: function () {return _version;},
         entityName:'',
         calcfields:{}, //set of callback functions for calculation fields
@@ -1168,7 +1112,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         //                                      
         getFieldVisibilites: function(record, fldId){
-            var res = null;
+            let res = null;
             
             if(!isnull(record) && fldId>0 && 
                 record['v'] && record['v'][fldId])
@@ -1215,7 +1159,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         transFld: function(recordTo, recordFrom, fldName, isNoNull){
             
-            var value = _getFieldValue(recordFrom, fldName);
+            let value = _getFieldValue(recordFrom, fldName);
             if( window.hWin.HEURIST4.util.isempty(value) && isNoNull) {
                 return false
             }else{
@@ -1243,7 +1187,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // returns record as JSON object
         //
         getRecord: function(recID){
-            var record = this.getById(recID);
+            let record = this.getById(recID);
             if(record){
                 return _getAllFields(record);
             }else{
@@ -1270,8 +1214,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //get ids for given array of records
         getIds2: function( recs, limit ){
             
-            var aitems = [];
-            var recID;
+            let aitems = [];
+            let recID;
             if(limit>0){
                 for(recID in recs)
                     if(recID){
@@ -1294,14 +1238,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         getIdsByRectypeId: function(rty_ID){
 
-            var rty_ID = Number(rty_ID);
-            var res = [];
+            rty_ID = Number(rty_ID);
+            let res = [];
             
             if(rty_ID>0)
-            for(recID in records)
+            for(let recID in records)
                 if(recID){
-                    var rec = records[recID];
-                    var recTypeID = Number(_getFieldValue(rec, 'rec_RecTypeID'));
+                    let rec = records[recID];
+                    let recTypeID = Number(_getFieldValue(rec, 'rec_RecTypeID'));
                     if(rty_ID==recTypeID){
                         res.push(recID);
                     }
@@ -1331,8 +1275,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         },*/
 
         getBookmarkIds: function(){
-            var aitems = [];
-            var recID, bkmID;
+            let aitems = [];
+            let recID, bkmID;
             for(recID in records)
             if(recID){
                 bkmID = _getFieldValue(records[recID], 'bkm_ID');
@@ -1348,10 +1292,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         */
         each: function( callback ){
         
-            for(var i=0; i<order.length; i++){
-                var recID = order[i];
-                var record = records[recID];
-                var res = callback.call(that, recID, record);
+            for(let i=0; i<order.length; i++){
+                let recID = order[i];
+                let record = records[recID];
+                let res = callback.call(that, recID, record);
                 if(res === false){
                     break;
                 }
@@ -1362,10 +1306,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // returns record in callback as json with fieldnames
         each2: function( callback ){
         
-            for(var i=0; i<order.length; i++){
-                var recID = order[i];
-                var record = that.getRecord(recID);
-                var res = callback.call(that, recID, record);
+            for(let i=0; i<order.length; i++){
+                let recID = order[i];
+                let record = that.getRecord(recID);
+                let res = callback.call(that, recID, record);
                 if(res === false){
                     break;
                 }
@@ -1379,7 +1323,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 
         * @param  _records - list of objects/records
         * 
-        * @returns {hRecordSet}
+        * @returns {HRecordSet}
         */
         getSubSet: function(_records, _order){
             
@@ -1390,7 +1334,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 _order = that.getIds2(_records);    
             }
             
-            return new hRecordSet({
+            return new HRecordSet({
                 entityName: that.entityName,
                 queryid: queryid,
                 count: _order.length,
@@ -1409,23 +1353,23 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         //
         getSubSetByIds: function(rec_ids){
-            var _records = {};
+            let _records = {};
+            let _order = [];
             //find all records
             
             if($.isEmptyObject(records)) return null;
             
-            var recID;
+            let recID;
             if(Object.keys(records).length<rec_ids.length){
 
                 for(recID in records)
                     if(recID && window.hWin.HEURIST4.util.findArrayIndex(recID, rec_ids)>-1) {
                         _records[recID] = records[recID];
+                        _order.push(recID);
                     }
 
             }else{
-                var idx;
-                var _order = [];
-                for(idx=0; idx<rec_ids.length; idx++)
+                for(let idx=0; idx<rec_ids.length; idx++)
                 {
                     recID = rec_ids[idx];
                     if(records[recID]){
@@ -1444,13 +1388,13 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         sort: function(sortFields){
             
-            var recID, fieldName, dataTypes={};
+            let fieldName, dataTypes={};
             
             if(sortFields==null || $.isEmptyObject(sortFields)) return
             
             for (fieldName in sortFields) {
-                if (sortFields.hasOwnProperty(fieldName) ){
-                    var dt_type = 'freetext';
+                if (Object.hasOwn(sortFields,fieldName) ){
+                    let dt_type = 'freetext';
                     if(fieldName=='rec_RecTypeID' || fieldName=='rec_ID'){
                         dt_type = 'integer';
                     }else 
@@ -1468,18 +1412,18 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             if(Object.keys(dataTypes).length>0){
 
                 order.sort(function(a,b){  
-                        var res = 0;                        
+                        let res = 0;                        
                         for (fieldName in sortFields) {
-                            if (sortFields.hasOwnProperty(fieldName) ){
-                                var val1 = that.fld(records[a], fieldName);
-                                var val2 = that.fld(records[b], fieldName);
+                            if (Object.hasOwn(sortFields, fieldName) ){
+                                let val1 = that.fld(records[a], fieldName);
+                                let val2 = that.fld(records[b], fieldName);
                                 if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='float'){
                                     if(Number(val1)!=Number(val2)){
                                         res = sortFields[fieldName]*(Number(val1)<Number(val2)?-1:1);
                                     }
                                 }else{
                                     if(dataTypes[fieldName]=='date'){
-                                        var dres = window.hWin.HEURIST4.util.parseDates(val1, val2);
+                                        let dres = window.hWin.HEURIST4.util.parseDates(val1, val2);
                                         val1 = dres[0];
                                         val2 = dres[1];
                                     }
@@ -1508,21 +1452,20 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //    if structure not defined - default type is freetext
         getSubSetByRequest: function(request, structure){
             
-            var _records = {}, _order=[], that = this;
+            let _records = {}, _order=[], that = this;
             
-            //if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
 
             // if structure not defined - default type is freetext            
             function __getDataType(fieldname, struct){
-                var idx;
+                let idx;
                 if(struct!=null){
                     for (idx in struct){
                         if(struct[idx]['children']){
                             return __getDataType(fieldname, struct[idx]['children']);
                         }else
                         if(struct[idx]['dtID']==fieldname){
-                              var res = struct[idx]['dtFields']['dty_Type'];  
+                              let res = struct[idx]['dtFields']['dty_Type'];  
                               return (res=='resource' 
                                     || (res=='enum' && that.entityName=='Records') )
                                         ?'integer':res;
@@ -1534,14 +1477,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
             }
             
-            var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
-            var isexact = {};
-            var isnegate= {};
-            var isless= {};
-            var isgreat= {};
+            let fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
+            let isexact = {};
+            let isnegate= {};
+            let isless= {};
+            let isgreat= {};
             //remove empty fields from request
             for (fieldName in request) {
-                if (request.hasOwnProperty(fieldName) ){
+                if (Object.hasOwn(request, fieldName) ){
                     if(window.hWin.HEURIST4.util.isempty(request[fieldName])) {
                         delete request[fieldName];    
                     }else if(fieldName.indexOf('sort:')<0){
@@ -1554,7 +1497,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             || dataTypes[fieldName]=='integer'
                             || dataTypes[fieldName]=='enum')
                         {
-                            request[fieldName] = String(request[fieldName]);
+                            request[fieldName] = String(request[fieldName]).trim();
                             
                             request[fieldName] = request[fieldName].toLowerCase();
                             
@@ -1580,7 +1523,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             
                         }
                     }else{
-                        var realFieldName = fieldName.substr(5);
+                        let realFieldName = fieldName.substr(5);
                         sortFieldsOrder.push(Number(request[fieldName])); //1 - ASC, -1 DESC
                         sortFields.push(realFieldName);
                         dataTypes[realFieldName] = __getDataType(realFieldName, structure);
@@ -1592,23 +1535,24 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 
             
             //search
-            for(recID in records){
-                var record = records[recID];
-                var isOK = true;
+            for(let recID in records){
+                let record = records[recID];
+                let isOK = true;
                 for(fieldName in request){
-                    if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
+                    if(fieldName.indexOf('sort:')<0 && Object.hasOwn(request, fieldName)){
+
+                        let fldvalue = this.fld(record,fieldName);
+                            
                         if(dataTypes[fieldName]=='freetext' 
                             || dataTypes[fieldName]=='blocktext'
                             || dataTypes[fieldName]=='integer'
                             || dataTypes[fieldName]=='enum'){
                                 
-                            var fldvalue = this.fld(record,fieldName);
-                            
                             if(window.hWin.HEURIST4.util.isnull(fldvalue)){
-                                isOK = (cmp_value=='NULL');
+                                isOK = (fldvalue=='NULL');
                                 break;                            
                             }else{
-                                var cmp_value;
+                                let cmp_value;
                                 if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='float'){
                                     fldvalue = Number(fldvalue);
                                     cmp_value = Number(request[fieldName]);
@@ -1661,8 +1605,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     
                 }else{
                     _order.sort(function(a,b){  
-                        var val1 = that.fld(records[a], sortFields[0]);
-                        var val2 = that.fld(records[b], sortFields[0]);
+                        let val1 = that.fld(records[a], sortFields[0]);
+                        let val2 = that.fld(records[b], sortFields[0]);
                         if(val1) val1 = val1.toLowerCase();
                         if(val2) val2 = val2.toLowerCase();
                         return sortFieldsOrder[0]*(val1<val2?-1:1);
@@ -1684,7 +1628,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             if($.isEmptyObject(fields)) fields = recordset2.getFields();
             if(!$.isEmptyObject(rectypes)) {
-                rectypes2 = recordset2.getRectypes();
+                let rectypes2 = recordset2.getRectypes();
                 if(!$.isEmptyObject(rectypes2)) {
                     jQuery.merge( rectypes2, rectypes );
                     rectypes = jQuery.unique( rectypes2 );
@@ -1692,11 +1636,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }else{
                 rectypes = recordset2.getRectypes();
             }    
-            //structures = response.structures;
+           
             
-            var records2 = recordset2.getRecords();
-            var order2 = recordset2.getOrder();
-            var idx, recid;
+            let records2 = recordset2.getRecords();
+            let order2 = recordset2.getOrder();
+            let idx, recid;
             
             for (idx=0;idx<order2.length;idx++){
                 recid = order2[idx];
@@ -1716,16 +1660,16 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 return that;
             }
             
-            var insert_at = -1;
+            let insert_at = -1;
             if(before_rec_id>0){
                 insert_at = window.hWin.HEURIST4.util.findArrayIndex(before_rec_id, order);
             }
             
             //join records
-            var records2 = recordset2.getRecords();
-            var order2 = recordset2.getOrder();
+            let records2 = recordset2.getRecords();
+            let order2 = recordset2.getOrder();
             
-            var order_new = order, records_new = records, idx, recid;
+            let order_new = order, records_new = records, idx, recid;
             
             for (idx=0;idx<order2.length;idx++){
                 recid = order2[idx];
@@ -1756,7 +1700,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             jQuery.merge( fields2, fields );
             fields2 = jQuery.unique( fields2 );*/
 
-            var rectypes2 = recordset2.getRectypes();
+            let rectypes2 = recordset2.getRectypes();
             if(!rectypes2) {
                 rectypes2 = rectypes;
             }else{
@@ -1764,7 +1708,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 rectypes2 = jQuery.unique( rectypes2 );
             }
             
-            var relationship2 = recordset2.getRelationship();
+            let relationship2 = recordset2.getRelationship();
             if(!relationship2) {
                 relationship2 = relationship;   
             }else{
@@ -1772,7 +1716,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 relationship2 = jQuery.unique( relationship2 );
             }
             
-            return new hRecordSet({
+            return new HRecordSet({
                 entityName: that.entityName,
                 queryid: queryid,
                 count: Math.max(order_new.length,total_count), //keep from original
@@ -1793,7 +1737,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         */
         length: function(){
             //return Object.keys(records)
-            return order.length; //$(records).length;
+            return order.length;
         },
 
         /**
@@ -1975,7 +1919,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         removeRecord:function(recID){
             delete records[recID];           //@todo check how it affect select_multi
-            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            let idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx>=0){
                 order.splice(idx,1);
                 total_count = total_count-1;
@@ -2002,7 +1946,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // add/replace record with given ID
         //    
         addRecord:function(recID, record, add_to_begin){
-            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            let idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
                 
                 if(fields && fields.length>0){
@@ -2026,7 +1970,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // direct copy record
         //
         addRecord2:function(recID, record){
-            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            let idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
                 order.push(recID);
                 total_count = total_count+1;
@@ -2038,17 +1982,17 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // add/replace record with given ID
         //    
         setRecord:function(recID, record){
-            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            let idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx>=0){
                 
                 if($.isPlainObject(record)){
-                    var fldname;
+                    let fldname;
                     for (fldname in record) {
-                        if (record.hasOwnProperty(fldname) ){
+                        if (Object.hasOwn(record,fldname) ){
                             _setFieldValue(records[recID], fldname, record[fldname]);    
                         }
                     }
-                }else if($.isArray(record)){
+                }else if(Array.isArray(record)){
                     records[recID] = record;
                 }
                 return records[recID];
@@ -2076,10 +2020,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             */
             
             //find vocabs only - ids that have children
-            var recID, vocabs = [];
+            let recID, vocabs = [];
             for(recID in records){
-                var record = records[recID];
-                var id = this.fld(record, fieldLink);
+                let record = records[recID];
+                let id = this.fld(record, fieldLink);
                 if(!window.hWin.HEURIST4.util.isempty(id) && id>0 
                     && window.hWin.HEURIST4.util.findArrayIndex(recID,vocabs)<0) { //  $.inArray(recID, vocabs)
                     vocabs.push(id);
@@ -2087,17 +2031,17 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
             
             function __addChilds(that, parentId){
-                var recID, res = [];
+                let recID, res = [];
                 for(recID in records){
-                    var record = records[recID];
+                    let record = records[recID];
                     
-                    var id = that.fld(record, fieldLink);
+                    let id = that.fld(record, fieldLink);
                     if(window.hWin.HEURIST4.util.isempty(id) || id==0) id = null;
                     
                     if(parentId==id){
-                        var node = {title: that.fld(record,fieldTitle), key: recID};
+                        let node = {title: that.fld(record,fieldTitle), key: recID};
                         if(window.hWin.HEURIST4.util.findArrayIndex(recID, vocabs)>-1){  //$.inArray(recID, vocabs)>-1
-                            var children = __addChilds( that, recID );
+                            let children = __addChilds( that, recID );
                             if(children.length>0){
                                 node['children'] = children;
                                 node['folder'] = true;
@@ -2114,7 +2058,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 return res;
             }
             
-            var res = __addChilds(this, rootID);
+            let res = __addChilds(this, rootID);
             
             if(rootID>0){
                 //res = [{key:rootID, title:'root', folder:true, children:res }];    
@@ -2151,7 +2095,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             }//for
 */            
-            refs = null;
             return res;
         },
         
@@ -2163,10 +2106,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             if(rootID>0){
                 
                 //find vocabs only - ids that have children
-                var recID, vocabs = [];
+                let recID, vocabs = [];
                 for(recID in records){
-                    var record = records[recID];
-                    var id = this.fld(record, fieldLink);
+                    let record = records[recID];
+                    let id = this.fld(record, fieldLink);
                     if(!window.hWin.HEURIST4.util.isempty(id) && id>0 
                         && window.hWin.HEURIST4.util.findArrayIndex(recID,vocabs)<0) { //  $.inArray(recID, vocabs)
                         vocabs.push(id);
@@ -2174,11 +2117,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
                 
                 function __addChilds(that, parentId){
-                    var recID, res = [];
+                    let recID, res = [];
                     for(recID in records){
-                        var record = records[recID];
+                        let record = records[recID];
                         
-                        var id = that.fld(record, fieldLink);
+                        let id = that.fld(record, fieldLink);
                         if(window.hWin.HEURIST4.util.isempty(id) || id==0) id = null;
                         
                         if(parentId==id){
@@ -2186,7 +2129,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             res.push(recID);
                             
                             if(window.hWin.HEURIST4.util.findArrayIndex(recID, vocabs)>-1){  //$.inArray(recID, vocabs)>-1
-                                var children = __addChilds( that, recID );
+                                let children = __addChilds( that, recID );
                                 if(children.length>0){
                                     res = res.concat(children);
                                 }
@@ -2196,7 +2139,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     return res;
                 }
                 
-                var res = __addChilds(this, rootID);
+                let res = __addChilds(this, rootID);
                 return res;
             }
         }

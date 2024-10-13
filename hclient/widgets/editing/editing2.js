@@ -19,12 +19,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hEditing(_options) {
-     var _className = "Editing",
+function HEditing(_options) {
+     const _className = "Editing",
          _version   = "0.4";
 
-     var $container = null,
-         recdata = null,     //hRecordSet with data to be edited
+     let $container = null,
+         recdata = null,     //HRecordSet with data to be edited
          editing_inputs = [],
          recstructure,
          onChangeCallBack=null,
@@ -70,7 +70,7 @@ function hEditing(_options) {
         
         if(!_options.className) {
             if($container.parents('.editor').length==0){
-                //2020-12-29 _options.className = 'ui-heurist-bg-light';
+               
             }else {
                 _options.className = '';
             }
@@ -80,7 +80,7 @@ function hEditing(_options) {
         
         _initEditForm(_options.recstructure, _options.recdata);
         
-        if($.isFunction(_options.oninit)){ //init completed
+        if(window.hWin.HEURIST4.util.isFunction(_options.oninit)){ //init completed
             _options.oninit.call(that);
         }
     }
@@ -94,7 +94,7 @@ function hEditing(_options) {
        script.id = 'tiny-mce-script';
        script.onload = function(){  //() => 
          // tinymce is loaded at this point
-         //this.setState({tinymceLoaded: true});
+        
          callback.call(this);
        };
        script.src = tinyMCEPath;
@@ -114,20 +114,15 @@ function hEditing(_options) {
 
         //create form, fieldset and input elements according to record type/entity structure
 
-        var record = recdata.getFirstRecord();
-        /*if(record){
-            var recID = recdata.fld(record, 'rec_ID');
-            var rectypeID = recdata.fld(record, 'rec_RecTypeID');
-            //load recordtype/entity structure
-            var rectypes = recdata.getStructures();
-        }*/
+        let record = recdata.getFirstRecord();
+
         if(record!=null){
             //fill form with values
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                var val = recdata.values(record, ele.editing_input('option', 'dtID'));
-                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
+                let val = recdata.values(record, ele.editing_input('option', 'dtID'));
+                if(!Array.isArray(val)) val = [val];
                 ele.editing_input('setValue', val );
             }
             
@@ -135,7 +130,7 @@ function hEditing(_options) {
     }
     
     function _setDisabled(mode){
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 ele.editing_input('setDisabled', mode);
@@ -151,28 +146,27 @@ function hEditing(_options) {
         $container.empty(); //clear previous edit elements
         editing_inputs = [];
         recdata = _recdata;
-        record = null;
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
-            //$('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
+           
             $container.show();
             return;     
         } 
         
         if(_recstructure) recstructure = _recstructure;
                 
-        var recID = '';
+        let record;
+        let recID = '';
         if(window.hWin.HEURIST4.util.isRecordSet(recdata)){
             //for edit mode
                 //get record ID
-                //recID = recdata.getIds(1)[0];
+               
                 record = recdata.getFirstRecord();
                 
                 function __findRecID(fields){
-                    var idx;
-                    for (idx=0; idx<fields.length; idx++){
+                    for (let idx=0; idx<fields.length; idx++){
                        if(fields[idx].groupType){
-                           var _recID = __findRecID(fields[idx].children)
+                           let _recID = __findRecID(fields[idx].children)
                            if(_recID>0) return _recID;
                        }else
                        if(fields[idx]['keyField']){
@@ -220,8 +214,8 @@ function hEditing(_options) {
         
         function __processGroupInside(fields){
         
-            var prev_children = null;
-            var idx = 0;
+            let prev_children = null;
+            let idx = 0;
             while(idx<fields.length){
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                     
@@ -250,14 +244,14 @@ function hEditing(_options) {
         __processGroupInside(recstructure);
         
         function __createGroup(fields, groupContainer, fieldContainer){
-            var idx, tab_index;
+            let idx, tab_index;
                 
-            var currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
-            var groupTabHeader, groupEle;
-            var hasVisibleFields = false;
+            let currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
+            let groupTabHeader, groupEle;
+            let hasVisibleFields = false;
             
-            //var groupEle,      //current accordion or tab control
-            //    fieldContainer, groupTabHeader;
+            //    groupEle,      //current accordion or tab control
+           
                 
             for (idx=0; idx<fields.length; idx++){
                 
@@ -274,9 +268,9 @@ function hEditing(_options) {
                         continue;                        
                     }else if(fields[idx].groupType=='group'){ //group inside
 
-                        var headerText = fields[idx]['groupHeader'];
-                        var headerHelpText = fields[idx]['groupHelpText'];
-                        var is_header_visible = fields[idx]['groupTitleVisible'];
+                        let headerText = fields[idx]['groupHeader'];
+                        let headerHelpText = fields[idx]['groupHelpText'];
+                        const is_header_visible = fields[idx]['groupTitleVisible'];
 
                         if(headerText == '-'){ // Placeholder for no text, just use a simple divider
                             headerText = '';
@@ -285,12 +279,12 @@ function hEditing(_options) {
                             headerHelpText = '';
                         }
 
-                        var hele = $('<h4>')
+                        let hele = $('<h4>')
                             .text(headerText).addClass('separator').appendTo(fieldContainer);
                         
                         hele.css({'margin-bottom':'4px'});
                         
-                        var div_prompt = $('<div>').text(headerHelpText)
+                        let div_prompt = $('<div>').text(headerHelpText)
                                .addClass('heurist-helper1')
                                .addClass('separator-helper').css({'padding-left':'20px','padding-bottom':'4px'})
                                .appendTo(fieldContainer);
@@ -300,7 +294,7 @@ function hEditing(_options) {
                         }
 
                         //container for gear-wheel                              
-                        var ele = $('<div>').appendTo(fieldContainer);    
+                        let ele = $('<div>').appendTo(fieldContainer);    
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             ele.attr('data-dtid', fields[idx]['dtID']);
                         }
@@ -377,11 +371,11 @@ function hEditing(_options) {
                         tab_index = 0;
                     }
                     
-                    var headerText = fields[idx]['groupHeader'];
-                    var headerHelpText = fields[idx]['groupHelpText'];
-                    var is_header_visible = fields[idx]['groupTitleVisible'];
+                    let headerText = fields[idx]['groupHeader'];
+                    let headerHelpText = fields[idx]['groupHelpText'];
+                    const is_header_visible = fields[idx]['groupTitleVisible'];
                     
-                    var newFieldContainer = $('<fieldset>').uniqueId();
+                    let newFieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
                         newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
@@ -420,7 +414,7 @@ function hEditing(_options) {
                     }
                     else{
                         
-                        var ele = $('<h4>').text(headerText).addClass('separator');
+                        let ele = $('<h4>').text(headerText).addClass('separator');
                         
                         ele.appendTo(groupContainer);    
 
@@ -430,9 +424,9 @@ function hEditing(_options) {
 
                         newFieldContainer.appendTo(groupContainer);
                     }
-
-                    if(true){ // || headerHelpText!=''
-                         var div_prompt = $('<div>').text(headerHelpText)
+                    const is_show_header_help_text = true;
+                    if(is_show_header_help_text){ // || headerHelpText!=''
+                         let div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
                          if(currGroupType == 'tabs' || currGroupType == 'accordion'){
@@ -465,19 +459,17 @@ function hEditing(_options) {
                     
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h4>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
-                        var div_prompt = $('<div>')
+                        $('<div>')
                             .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))
                             .addClass('heurist-helper1').appendTo(fieldContainer);
                         //see applyCompetencyLevel
-                        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                     }else  
-                    //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
                         
                         //assign values from record
                         if(record!=null){
                             
-                            var val;
+                            let val;
                             if(fields[idx]['dty_Type']=="geo"){
                                 val = recdata.getFieldGeoValue(record, fields[idx]['dtID']);
                             }else{
@@ -485,10 +477,10 @@ function hEditing(_options) {
                             }
 
                             if(!window.hWin.HEURIST4.util.isnull(val)){
-                                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
+                                if(!Array.isArray(val)) val = [val];
                                 fields[idx].values = val;
                             }else{
-                                fields[idx].values = null; //[''];
+                                fields[idx].values = null;
                             }  
                             
                         }else{
@@ -503,7 +495,7 @@ function hEditing(_options) {
                         fields[idx].is_insert_mode = _is_insert;
                         
                         
-                        var inpt = $('<div>').css('display','block !important')
+                        let inpt = $('<div>').css('display','block !important')
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
                         //mark each field with dty_ID         
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
@@ -555,7 +547,7 @@ function hEditing(_options) {
         _setFocus();
         adjustHelpWidth();
         
-        var $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
+        let $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
                 .addClass('hidden_field_warning')
@@ -567,16 +559,16 @@ function hEditing(_options) {
         let is_Records = recdata && recdata.entityName=='Records';
         if(is_Records && $container.find('ul[role="tablist"]').length>0){
             
-            var tab_groups = $container.find('ul[role="tablist"]');
+            let tab_groups = $container.find('ul[role="tablist"]');
             $.each(tab_groups, function(idx, group){
-                var $tabs = $(group).find('a');
-                var max_char = 30;
+                let $tabs = $(group).find('a');
+                let max_char = 30;
 
                 $tabs.attr('style', 'max-width:'+max_char+'ex;width:auto;padding-right:30px !important;cursor:pointer;').addClass('truncate');
             });
 			
 			if($container.find('ul[role="tablist"]').length>1){
-                var groups = $container.children('div');
+                let groups = $container.children('div');
 
                 $.each(groups, function(idx, group){
                     if(idx == 0){
@@ -600,7 +592,7 @@ function hEditing(_options) {
     //
     function _setFocus(){
         if(editing_inputs.length>0){
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 if(ele.editing_input('instance') && ele.editing_input('focus')){
@@ -615,9 +607,9 @@ function hEditing(_options) {
     //
     function adjustHelpWidth(){
         
-        var maxW = 300;
+        let maxW = 300;
         if(editing_inputs.length>0){
-            var idx, ele; 
+            let idx, ele; 
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 maxW = Math.max(maxW, ele.editing_input('getInputWidth'));
@@ -631,7 +623,7 @@ function hEditing(_options) {
                }
         });
         
-        //$container.find('.input-cell > .heurist-helper1').width(maxW);
+       
     }
     
 
@@ -647,11 +639,11 @@ function hEditing(_options) {
     // returns array with at least one empty value
     //
     function _getValue(dtID){
-        var idx, ele, values = [];
+        let idx, ele, values = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
-                var vals = ele.editing_input('getValues');
+                let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
                     return ele.editing_input('getValues');
                 }else{
@@ -667,15 +659,14 @@ function hEditing(_options) {
     //    
     function _getValues(needArrays){
         
-        var idx, ele, details = {};
-        for (idx in editing_inputs) {
-            ele = $(editing_inputs[idx]);
-            var vals = ele.editing_input('getValues');
-            //var vals = ele.list("getValues"); 
-            //var vals = ele.data("editing_input").getValues();
+        let details = {};
+        for (let idx in editing_inputs) {
+            let ele = $(editing_inputs[idx]);
+            let vals = ele.editing_input('getValues');
+
             if(vals && vals.length>0){
                 
-                var a_val;
+                let a_val;
                 if(needArrays || vals.length>1 || $.isPlainObject(vals[0])){
                     a_val = vals;
                 }else{
@@ -693,13 +684,13 @@ function hEditing(_options) {
     // 
     function _getFieldsVisibility(){
         
-        var idx, ele, details = {};
+        let idx, ele, details = {};
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+            let dty_ID = ele.editing_input('option', 'dtID'); //field type id
             
             if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
-                var vals = ele.editing_input('getVisibilities');
+                let vals = ele.editing_input('getVisibilities');
                 if(vals && vals.length>0){
                     details[ dty_ID ] = vals;
                 }
@@ -714,16 +705,15 @@ function hEditing(_options) {
     function _setFieldsVisibility( recdata ){
 
         if(recdata!=null){ //for edit mode
-            record = recdata.getFirstRecord();
+            let record = recdata.getFirstRecord();
         
-            var idx, ele;
-            for (idx in editing_inputs) {
-                ele = $(editing_inputs[idx]);
+            for (let idx in editing_inputs) {
+                let ele = $(editing_inputs[idx]);
                 
-                var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+                let dty_ID = ele.editing_input('option', 'dtID'); //field type id
                 
                 if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
-                    var visibilities = recdata.getFieldVisibilites(record, dty_ID); //from record['v']
+                    let visibilities = recdata.getFieldVisibilites(record, dty_ID); //from record['v']
                     ele.editing_input('setVisibilities', visibilities);
                 }
             }
@@ -736,12 +726,11 @@ function hEditing(_options) {
     function _assignValuesIntoRecord(){
     
         if(recdata!=null){ //for edit mode
-            record = recdata.getFirstRecord();
-
-            var idx, ele, details = {};
-            for (idx in editing_inputs) {
-                ele = $(editing_inputs[idx]);
-                var vals = ele.editing_input('getValues');
+            let record = recdata.getFirstRecord();
+            
+            for (let idx in editing_inputs) {
+                let ele = $(editing_inputs[idx]);
+                let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
                     recdata.setFld(record, ele.editing_input('option', 'dtID'), vals);
                 }
@@ -757,9 +746,8 @@ function hEditing(_options) {
         }else if(that.wasModified==1){
             return true;
         }else{
-            var idx;
-            for (idx in editing_inputs) {
-                ele = $(editing_inputs[idx]);
+            for (let idx in editing_inputs) {
+                let ele = $(editing_inputs[idx]);
                 
                 if(ele.editing_input('instance') && ele.editing_input('isChanged')) {
                     return true;   
@@ -770,14 +758,14 @@ function hEditing(_options) {
     }
     
     function _onChange(){
-        if($.isFunction(onChangeCallBack)){
+        if(window.hWin.HEURIST4.util.isFunction(onChangeCallBack)){
             onChangeCallBack.call( this );    
         }
     }
     
     function _validate(){
         
-        var idx, res = true;
+        let idx, res = true;
         for (idx in editing_inputs) {
             res = $(editing_inputs[idx]).editing_input('validate') && res;
         }
@@ -789,7 +777,7 @@ function hEditing(_options) {
     // returns input element for given field
     // 
     function _getFieldByName(fieldName){
-        var idx, ele;
+        let idx, ele;
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')  == fieldName){
@@ -803,7 +791,7 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByValue(fieldName, value){
-        var idx, ele, ress = [], val;
+        let idx, ele, ress = [], val;
         if(value==='[not empty]'){
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
@@ -828,7 +816,7 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByClass(className){
-        var idx, ele, ress = [];
+        let idx, ele, ress = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.hasClass(className)){
@@ -844,7 +832,7 @@ function hEditing(_options) {
     // fieldName is rec_XXX or dty_ID
     // 
     function _getInputs(fieldName){
-        var ele = _getFieldByName(fieldName);
+        let ele = _getFieldByName(fieldName);
         if(ele && ele.length>0){
             return ele.editing_input('getInputs');
         }
@@ -855,7 +843,7 @@ function hEditing(_options) {
     //
     function _displayValueErrors(fieldNames){
 
-        if(!window.hWin.HEURIST4.util.isArray(fieldNames)){
+        if(!Array.isArray(fieldNames)){
             fieldNames = fieldNames.split(',');
         }
 
@@ -872,7 +860,7 @@ function hEditing(_options) {
 
 
     //public members
-    var that = {
+    let that = {
         
         wasModified: 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
 
@@ -946,13 +934,13 @@ function hEditing(_options) {
         // editing element will be recreated!
         //
         setFieldValueByName:function(fieldName, value, is_changed){
-            var ele = _getFieldByName(fieldName);
+            let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
-                ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
+                ele.editing_input('setValue', Array.isArray(value)?value:[value], (is_changed===false));
                 if(is_changed!==false){
                     ele.editing_input('isChanged', true);    
                     ele.editing_input('onChange');
-                    //_onChange();
+                   
                 }
             }
         },
@@ -964,10 +952,10 @@ function hEditing(_options) {
         //
         setFieldValueByName2:function(fieldName, value, is_changed){
         
-            var ele = _getFieldByName(fieldName);
+            let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
                 
-                    var elements = ele.editing_input('getInputs') //_getInputs(fieldName);               
+                    let elements = ele.editing_input('getInputs') //_getInputs(fieldName);               
                     $(elements[0]).val( value );
                             
                     if(is_changed!==false){
@@ -1010,9 +998,8 @@ function hEditing(_options) {
             
             if(val===0){
                 that.wasModified = 0;    
-                var idx;
-                for (idx in editing_inputs) {
-                    ele = $(editing_inputs[idx]);
+                for (let idx in editing_inputs) {
+                    let ele = $(editing_inputs[idx]);
                     
                     if(ele.editing_input('instance')){
                         ele.editing_input('setUnchanged');
@@ -1058,55 +1045,3 @@ function hEditing(_options) {
     _init(_options);
     return that;  //returns object
 }
-/*
-           var rfrs = rectypes.typedefs[rectypeID].dtFields;
-            var fi = rectypes.typedefs.dtFieldNamesToIndex;
-
-            var order = rectypes.dtDisplayOrder[rectypeID];
-            if(order){
-                var i, l = order.length;
-
-                //???? move outside????
-                var $header = $('<div>')
-                        .css('padding','0.4em')
-                        .addClass('ui-widget-header ui-corner-all')
-                        .appendTo($container);
-                $('<div style="display:inline-block"><span>'
-                        + rectypes.names[rectypeID]
-                        +'</span><h3 id="recTitle">'
-                        +recdata.fld(record, 'rec_Title')
-                        +'</h3></div>')
-                        .appendTo($header);
-
-                var $toolbar = $('<div>')
-                    .css('float','right')
-                    .appendTo( $header );
-
-                _create_toolbar($toolbar);
-
-                $('<button>', {text:'Save'}).button().on("click", function(event){ _save(); } ).appendTo($toolbar);
-                $('<button>', {text:'Cancel'}).button().appendTo($toolbar);
-                //???? END move outside????
-
-                var $formedit = $("<div>").appendTo($container);
-                var $fieldset = $("<fieldset>").appendTo($formedit);
-
-                for (i = 0; i < l; ++i) {
-                    var dtID = order[i];
-                    if (rfrs[dtID][fi['rst_RequirementType']] == 'forbidden') continue;
-
-                    var values = recdata.fld(record, dtID);
-
-                    $("<div>").editing_input(
-                              {
-                                recID: recID,
-                                rectypeID: rectypeID,
-                                dtID: dtID,
-                                rectypes: rectypes,
-                                values: values
-                              })
-                              .appendTo($fieldset);
-
-                }
-            }
-*/

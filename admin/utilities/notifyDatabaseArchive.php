@@ -1,10 +1,10 @@
 <?php
 
 /**
-* notifyDatabaseArchive.php: 
+* notifyDatabaseArchive.php:
 *   Send emails about creating DB archives to DB owners
 *   Owners will recieve the email if records in their DB has been modified within the last month
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2022 University of Sydney
@@ -24,12 +24,12 @@
 
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/notifyDatabaseArchive.php -- -db=database_1,database_2
-//  If dbs are not specified, all dbs are processed 
+//  If dbs are not specified, all dbs are processed
 
 /*
  This routine:
  Checks each database's last modification (in records or record structure)
- If the last modification was within the last month, 
+ If the last modification was within the last month,
     send a notification to DB owner about making an archive of their database
 */
 
@@ -48,7 +48,7 @@ if (@$argv) {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
-            } else if(strpos($argv[$i],'-db=')===0){
+            } elseif(strpos($argv[$i],'-db=')===0){
                 $ARGV['-db'] = substr($argv[$i],4);
             }
         } else {
@@ -56,13 +56,13 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-db']) $arg_database = explode(',', $ARGV['-db']);
+    if (@$ARGV['-db']) {$arg_database = explode(',', $ARGV['-db']);}
 
 }else{
     /*web browser
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
 
     if(array_key_exists('db', $_REQUEST)){
         $arg_database = explode(',',$_REQUEST['db']);
@@ -73,19 +73,18 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
+use hserv\utilities\USystem;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
 
 // Setup server name
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}
 
 if(!defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME)){
     exit('The script was unable to determine the server\'s name, please define it within heuristConfigIni.php then re-run this script.');
@@ -97,7 +96,7 @@ $base_url = '';
 if(defined('HEURIST_BASE_URL_PRO')){
     $base_url = HEURIST_BASE_URL_PRO;
 }else{
-    $base_url = 'https://' . HEURIST_SERVER_NAME . '/heurist/';
+    $base_url = 'https://' . HEURIST_SERVER_NAME . HEURIST_DEF_DIR;
 }
 
 if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'https://') == 0){
@@ -107,8 +106,8 @@ if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'h
 if(substr($base_url, -1, 1) != '/'){
     $base_url .= '/';
 }
-if(strpos($base_url, '/heurist/') === false){
-    $base_url = rtrim($base_url, '/') . '/heurist/';
+if(strpos($base_url, HEURIST_DEF_DIR) === false){
+    $base_url = rtrim($base_url, '/') . HEURIST_DEF_DIR;
 }
 
 $mysqli = $system->get_mysqli();
@@ -130,7 +129,7 @@ $email_body = "This is a reminder that you can download an archive package of yo
 . "Please note: some very large databases could create files which are too large to download.<br>"
 . "In that case please ".CONTACT_SYSADMIN." so that we are aware of the problem and can arrange an alternative procedure.";
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $month_ago = strtotime('-1 month');
@@ -144,7 +143,7 @@ foreach ($databases as $idx=>$db_name){
     }
 
     echo $eol.htmlspecialchars($db_name).' Checking'.$eol;
-    
+
     $res = mysql__usedatabase($mysqli, $db_name);
     if(!$res){
         echo $tabs0.@$res[1].$eol;
@@ -182,7 +181,7 @@ foreach ($databases as $idx=>$db_name){
     if($success){
         echo $tabs0.'Email sent.'.$eol;
     }else{
-        echo $tabs0.'Unable to send email; Error: ' . $system->getError()['message'] . $eol;
+        echo $tabs0.'Unable to send email; Error: ' . $system->getErrorMsg() . $eol;
     }
 }//for
 

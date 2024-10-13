@@ -17,7 +17,6 @@
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">A page of contact information and location</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;
 &lt;p&gt; &lt;/p&gt;</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-118</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
@@ -34,7 +33,6 @@
 <detail conceptID="2-1" name="Menu label / page name" id="1" basename="Name or Title (please rename appropriately)">Discover</detail>
 <detail conceptID="2-3" name="Menu rollover description (optional)" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;folder&quot;:true,&quot;children&quot;:[{&quot;name&quot;:&quot;Header&quot;,&quot;type&quot;:&quot;text&quot;,&quot;content&quot;:&quot;&lt;p&gt;This is an unconfigured page. Remove &lt;strong&gt; these instructions &lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;\n&lt;p&gt;This page is set up as a container for database searches. Select [Insert] in menu (gear icon or context menu in tree on the left) to add text elements and widgets: search, results list and visualisation (map, timeline, network diagram, report etc.). &lt;/p&gt;\n&lt;p&gt;Click on [Style] in this menu to modify appearance and configure parameters for each of the components.&lt;/p&gt;&quot;,&quot;css&quot;:{&quot;display&quot;:&quot;block&quot;,&quot;border-style&quot;:&quot;none&quot;},&quot;dom_id&quot;:&quot;cms-content-8&quot;},{&quot;name&quot;:&quot;Discover&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;appid&quot;:&quot;heurist_SearchTree&quot;,&quot;name&quot;:&quot;Saved filters&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:200,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot; 1 150px&quot;},&quot;options&quot;:{&quot;allowed_UGrpID&quot;:&quot;4&quot;,&quot;searchTreeMode&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-10&quot;},{&quot;appid&quot;:&quot;heurist_Map&quot;,&quot;name&quot;:&quot;Map and timeline&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;height&quot;:&quot;100&#37;&quot;,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;map_rollover&quot;:true,&quot;controls&quot;:&quot;legend&quot;,&quot;legend&quot;:&quot;off&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;,&quot;basemap&quot;:&quot;&quot;},&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-11&quot;},{&quot;appid&quot;:&quot;heurist_resultList&quot;,&quot;name&quot;:&quot;Standard filter result&quot;,&quot;css&quot;:{&quot;position&quot;:&quot;relative&quot;,&quot;minWidth&quot;:150,&quot;minHeight&quot;:300,&quot;flex&quot;:&quot;2 1 300px&quot;},&quot;options&quot;:{&quot;search_realm&quot;:&quot;sr3&quot;,&quot;rec_ID&quot;:528},&quot;dom_id&quot;:&quot;cms-widget-12&quot;}],&quot;folder&quot;:true,&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;flex&quot;:&quot;1 1 auto&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100&#37;&quot;},&quot;dom_id&quot;:&quot;cms-content-9&quot;}],&quot;css&quot;:{&quot;border-style&quot;:&quot;none&quot;,&quot;display&quot;:&quot;flex&quot;,&quot;flex-direction&quot;:&quot;column&quot;,&quot;width&quot;:&quot;100&#37;&quot;,&quot;height&quot;:&quot;100&#37;&quot;},&quot;dom_id&quot;:&quot;cms-content-7&quot;}]</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-65</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="CMS Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
@@ -56,7 +54,6 @@
 <detail conceptID="99-761" name="Submenus of this menu (optional)" id="917" basename="CMS Menu leaf" isRecordPointer="true">317</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5442" termConceptID="2-531" ParentTerm="Flag (yes, no, unknown)">No</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-192</detail>
 </record>
 <record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>315</id>
@@ -73,7 +70,6 @@
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-114</detail>
 </record>
 <record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>316</id>
@@ -90,7 +86,6 @@
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="99-952" name="Show page title (override global setting)" id="920" basename="Show page title" termID="5444" termConceptID="2-532" ParentTerm="Flag (yes, no, unknown)">Yes</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-110</detail>
 </record>
 <record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>317</id>
@@ -104,7 +99,6 @@
 <detail conceptID="2-4" name="Page content" id="4" basename="Extended description">BLOG TEMPLATE</detail>
 <detail conceptID="99-949" name="Target element" id="918" basename="Target element">main-content</detail>
 <detail conceptID="2-928" name="Type of page" id="928" basename="Type of page" termID="6253" termConceptID="2-6253" ParentTerm="Type of web page /menu">Menu + page in Heurist CMS</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-271</detail>
 </record>
 <record visibility="viewable" visnote="logged in users" selected="no" depth="0">
 <id>397</id>
@@ -132,7 +126,6 @@
 
 Remember to indicate the institution and/or project, target audience and nature of the content.</detail>
 <detail conceptID="2-4" name="Website home page content" id="4" basename="Extended description">[{&quot;name&quot;:&quot;Page&quot;,&quot;type&quot;:&quot;group&quot;,&quot;children&quot;:[{&quot;name&quot;:&quot;Content&quot;,&quot;type&quot;:&quot;text&quot;,&quot;css&quot;:{},&quot;content&quot;:&quot;&lt;p&gt; &lt;/p&gt;\n&lt;p&gt;This is default content generated by the Heurist CMS function. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;\n&lt;p&gt;The pages may embed images and dynamic components such as facet searches, maps, network diagrams and reports using buttons at the end of the toolbar (when viewed in the website editor).&lt;/p&gt;\n&lt;p&gt;Please visit The database to read more about Heurist, or visit the &lt;a title=\&quot;Heurist Network website\&quot; href=\&quot;http://HeuristNetwork.org\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Project website&lt;/a&gt; or &lt;a href=\&quot;https://heuristref.net/heurist/?db=Heurist_Help_System&amp;amp;website\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener\&quot;&gt;Heurist Help pages&lt;/a&gt; for further information.&lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;table style=\&quot;border-collapse: collapse;\&quot; border=\&quot;1\&quot;&gt;\n&lt;tbody&gt;\n&lt;tr&gt;\n&lt;td style=\&quot;width: 100&#37;; padding-left: 30px; padding-right: 30px;\&quot;&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;If you come across this page with default content (these instructions), please email the website owner &lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;p&gt;&lt;strong&gt;&lt;span style=\&quot;color: #ff0000;\&quot;&gt;(link below) and ask them to update or delete the page.&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;\n&lt;/td&gt;\n&lt;/tr&gt;\n&lt;/tbody&gt;\n&lt;/table&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;\n&lt;p&gt; &lt;/p&gt;&quot;,&quot;dom_id&quot;:&quot;cms-content-16&quot;}],&quot;folder&quot;:true,&quot;dom_id&quot;:&quot;cms-content-15&quot;,&quot;css&quot;:{}}]</detail>
-<detail conceptID="2-36" name="Original ID" id="36" basename="Original ID">2-190</detail>
 <detail conceptID="2-38" name="Logo image" id="38" basename="File(s) - uploaded or remote">
 <file>
 <id>26</id>

@@ -19,27 +19,28 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+use hserv\utilities\USanitize;
 
 $mode = $_REQUEST['mode'];
 if($mode!='serve'){ // OK to serve tempalte files without login
     define('LOGIN_REQUIRED',1);
 }
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
-
 
     $dir = HEURIST_SMARTY_TEMPLATES_DIR;
+
+    $req_params = USanitize::sanitizeInputArray();
 
     if($mode){ //operations with template files
 
         //get name of template file
-        $template_file = (array_key_exists('template',$_REQUEST)?  USanitize::sanitizeFileName(basename(urldecode($_REQUEST['template'])),false) :null);
+        $template_file = (array_key_exists('template',$req_params)?  USanitize::sanitizeFileName(basename(urldecode($req_params['template'])),false) :null);
         //get template body from request (for execution from editor)
-        $template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
-        
+        $template_body = (array_key_exists('template_body',$req_params)?$req_params['template_body']:null);
+
         $repAction = new ReportActions($system, $dir);
 
         try{
@@ -55,10 +56,10 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                     break;
 
                 case 'save':
-                    
+
                     //add extension and save in default template directory
                     $template_body = urldecode($template_body);
-                    
+
                     $res = $repAction->saveTemplate($template_body, $template_file);
 
                     print json_encode($res);
@@ -73,52 +74,53 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                         throw new Exception("Template file does not exist");
                     }
 
-                    header("Content-type: text/javascript");
+                    header(CTYPE_JS);
                     print json_encode(array("ok"=>$mode));
 
                     break;
 
                 case 'import':
-                
+
                     $for_cms = null;
-                    if(@$_REQUEST['import_template']['cms_tmp_name']){ 
+                    if(@$req_params['import_template']['cms_tmp_name']){
                         //for CMS
-                        $for_cms = basename($_REQUEST['import_template']['cms_tmp_name']);
+                        $for_cms = basename($req_params['import_template']['cms_tmp_name']);
                         $params['size'] = 999;
-                        $params['name'] = @$_REQUEST['import_template']['name'];
+                        $params['name'] = @$req_params['import_template']['name'];
                     }else{
                         //for impport uloaded gpl
                         $params = @$_FILES['import_template'];
                     }
-                
+
                     $repAction->importTemplate($params, $for_cms);
-                
+
                     break;
                 case 'serve':
                     // convert template file to global concept IDs and serve up to caller
                     if($template_file){
                         $template_body = null;
                     }
-                    $repAction->smartyLocalIDsToConceptIDs($template_file, $template_body);    
-                    
-                    
+                    $repAction->smartyLocalIDsToConceptIDs($template_file, $template_body);
+
+
                     break;
 
                 case 'check':
                     // check if the template exists
                     if($template_file && file_exists($dir.$template_file)){
-                        header("Content-type: text/javascript");
+                        header(CTYPE_JS);
                         print json_encode(array("ok"=>"Template file exists"));
                     }else{
                         throw new Exception("Template file does not exist");
                     }
                     break;
+                default;
             }
 
         }
         catch(Exception $e)
         {
-            header("Content-type: text/javascript");
+            header(CTYPE_JS);
             print json_encode(array("error"=>$e->getMessage()));
         }
 

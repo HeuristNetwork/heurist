@@ -22,7 +22,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
         
         this._super();
 
@@ -35,7 +35,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New Entry"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onadd" );
                 }); 
 
@@ -43,26 +43,26 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 .hide()
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Save New Order"), icon: "ui-icon-move-v"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onorder" );
                 }); 
 
         this.btn_set_mode = this.element.find('#btn_set_mode')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("View shortcuts")})
-                .click(function(e) {
+                .on('click', function(e) {
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
                         {show_as_ribbon:1, 
                          show_on_startup: 1 });     
                     that._trigger( "onclose" );
                     
-                    //that._trigger( "viewmode" );
+                   
                 }); 
 
         this.btn_close_mode = this.element.find('#btn_close_mode')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Hide shortcuts")})
-                .click(function(e) {
+                .on('click', function(e) {
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
                         {show_as_ribbon:1, 
                          show_on_startup:0 });     
@@ -73,10 +73,10 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.btn_show_on_startup = this.element.find('#btn_show_on_startup2')
                 .css({'min-width':'9m'})
                     .button({label: window.hWin.HR("Don't show again")})
-                .click(function(e) {
+                .on('click', function(e) {
                     
                     //don't show  dashboard on startup
-                    var params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );
+                    let params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );
                     params['show_on_startup'] = 0;
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
                     
@@ -101,9 +101,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
             
             if(this.options.isViewMode){
                 
@@ -134,27 +132,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 request['sort:dsh_Order'] = '1' 
             }
             
-           
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                //we may search users in any database
-                request['db']     = this.options.database;
-
-                var that = this;                                                
-           
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
+            this._search_request = request;
+            this._super();
     }
 });

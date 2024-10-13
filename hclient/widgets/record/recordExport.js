@@ -29,27 +29,26 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
         
         format: 'xml',
         
-        htmlContent: 'recordExport.html',
-        helpContent: 'recordExport.html' //in context_help folder
+        htmlContent: 'recordExport.html'
     },
 
     _initControls: function() {
 
-        var that = this;
+        let that = this;
 
         this._super();    
         
                     
         this.options.title += (' '+ this.options.format.toUpperCase());     
 
-        if(!this.options.isdialog && this.options.is_h6style){
+        if(!this.options.isdialog){
             
             //add action button to bottom bar
-            var fele = this.element.find('.ent_wrapper:first');
+            let fele = this._$('.ent_wrapper:first');
             fele.css({top:'36px',bottom:'40px'});
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
 
-            var toolbar_height = '20px';
+            let toolbar_height = '20px';
             if(navigator.userAgent.indexOf('Firefox') >= 0){
                 toolbar_height = '40px';
             }
@@ -57,16 +56,16 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
 
             //append action buttons
             this.toolbar.empty();
-            this.element.find('.kml-buttons').empty();
-            var btns = this._getActionButtons();
+            this._$('.kml-buttons').empty();
+            let btns = this._getActionButtons();
 
-            for(var idx in btns){
+            for(let idx in btns){
                 
-                var $cont = this.toolbar;
+                let $cont = this.toolbar;
                 if(this.options.format=='kml'){
-                    $cont = this.element.find('.kml-buttons');
+                    $cont = this._$('.kml-buttons');
                 }else if (this.options.format=='iiif'){
-                    $cont = this.element.find('.iiif-buttons');
+                    $cont = this._$('.iiif-buttons');
                 }
                 
                 this._defineActionButton2(btns[idx], $cont);
@@ -77,11 +76,11 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
         this.selectRecordScope.parent().hide();
         
         if(this.options.format=='kml'){
-            this.element.find('.ent_content').hide();
-            this.element.find('.kml-info').show();
+            this._$('.ent_content').hide();
+            this._$('.kml-info').show();
         }else if(this.options.format=='iiif'){
-            this.element.find('.ent_content').hide();
-            this.element.find('.iiif-info').show();
+            this._$('.ent_content').hide();
+            this._$('.iiif-info').show();
         }
         
 
@@ -92,8 +91,8 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
-        var that = this;
+        let res = this._super();
+        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
         return res;
@@ -104,12 +103,13 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = this.selectRecordScope.val();
+            let scope_val = this.selectRecordScope.val();
             
             scope_val = 'current';
            
-            var isEntireDb = false;
-            var scope = [], //ids to be exported
+            let q;
+            let isEntireDb = false;
+            let scope = [], //ids to be exported
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -137,7 +137,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                 return;
             }
             
-            var request = {
+            let request = {
                 //'request_id' : window.hWin.HEURIST4.util.random(),
                 'db': window.hWin.HAPI4.database,
                 'format': this.options.format,
@@ -146,16 +146,16 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
 
             if(!isEntireDb){                
                 
-                var linksMode = this.element.find('input[name="links"]:checked').val();
+                let linksMode = this._$('input[name="links"]:checked').val();
                 request['linkmode'] = linksMode; 
                 
                 if(rec_RecTypeID>0){
                     request['rec_RecTypeID'] = rec_RecTypeID;
                 }
             }
-            //request['file'] = 1;
+           
             
-            var url = window.hWin.HAPI4.baseURL;
+            let url = window.hWin.HAPI4.baseURL;
                            
             if(this.options.format=='kml'){
                 url += 'export/xml/kml.php';
@@ -166,18 +166,19 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                 request['defs'] = 0; //don't include defintions
                 url += 'hserv/controller/record_output.php';
             }
-            
-            if(false){
+
+            const open_in_popup  = false;
+            if(open_in_popup){
                 request['ids'] = scope;
                 
                 //posting via form allows send large list of ids
-                this.element.find('#postdata').val( JSON.stringify(request) );
-                this.element.find('#postform').attr('action', url);
-                this.element.find('#postform').submit();
+                this._$('#postdata').val( JSON.stringify(request) );
+                this._$('#postform').attr('action', url);
+                this._$('#postform').submit();
             }else{
                 
                 url = url + q;
-                for(var key in request){
+                for(let key in request){
                     url += ('&' + key + '=' + request[key]);
                 }
                 

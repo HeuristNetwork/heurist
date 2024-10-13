@@ -426,38 +426,6 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 		end if;
 	end$$
 
-
--- dynamic expression is not allowed in triggers
---    DROP PROCEDURE IF EXISTS logRecord$$
---    CREATE PROCEDURE logRecord(rec_ID INT)
---    BEGIN
---        SET @colnames = (SELECT GROUP_CONCAT('COALESCE(CONCAT(\'"\',',COLUMN_NAME,',\'"\'),\'NULL\')') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Records' AND TABLE_SCHEMA = (SELECT DATABASE()));
---        SET @exp = CONCAT('SELECT CONCAT_WS(\',\',', @colnames, ') FROM Records where rec_ID=', @rec_ID, ' INTO @raw_record');
---
---        PREPARE stmt FROM @exp;
---        EXECUTE stmt;
---        DEALLOCATE PREPARE stmt;  
-            
---        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
---            values ('rec', rec_ID, COALESCE(@logged_in_user_id,0), OLD.rec_OwnerUGrpID, rec_ID, @raw_record, 'raw');
-
---    END$$
-
---    DROP PROCEDURE IF EXISTS logRecordDetail$$
---    CREATE PROCEDURE logRecordDetail(dtl_RecID INT, dtl_RecID INT)
---    
---        SET @colnames = (SELECT GROUP_CONCAT('COALESCE(CONCAT(\'"\',',COLUMN_NAME,',\'"\'),\'NULL\')') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'recDetails' AND TABLE_SCHEMA = (SELECT DATABASE()));
---        SET @exp = CONCAT('SELECT CONCAT_WS(\',\',', @colnames, ') FROM Records where rec_ID=', @rec_ID, ' INTO @raw_record');
---
---        PREPARE stmt FROM @exp;
---        EXECUTE stmt;
---        DEALLOCATE PREPARE stmt;  
-            
---        insert into sysArchive (arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_DataBeforeChange, arc_ContentType)
---            values ('dtl', dtl_ID, COALESCE(@logged_in_user_id,0), NULL, dtl_RecID, @raw_record, 'raw');
-
---    END$$
-
 --   ON UPDATE RECORD --------------------------------------------
 
     DROP TRIGGER IF EXISTS update_record_trigger$$

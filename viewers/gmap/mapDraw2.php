@@ -19,19 +19,19 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
 
         <script type="text/javascript" src="mapDraw2.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
-        
+
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/latlon-ellipsoidal.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/utm.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/dms.js"></script>        
-        
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/dms.js"></script>
+
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
         <!-- Initializing -->
@@ -42,34 +42,34 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
             // Callback function on map initialization
             function onPageInit(success){
-                
-                if(!success) return;
+
+                if(!success) {return;}
 
                 // init helper (see utils.js)
-                window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'), 
-                            title:'Mapping Drawing Overview', 
-                            url:'../../context_help/mapping_drawing.html #content'});
+                window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'),
+                            title:'Mapping Drawing Overview',
+                            url: window.hWin.HRes('mapping_drawing #content')});
 
 
                 if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
                     handleApiReady();
-                }else{                            
+                }else{
                     $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
-                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');                                           
+                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');
                 }
 
             } //onPageInit
-            
+
             function handleApiReady(){
                 var initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
                 // Mapping data
                 mapping = new hMappingDraw('map_digitizer', initial_wkt);
             }
-            
+
             function assignParameters(params){
                 if(params && params['wkt']){
                     var initial_wkt = params['wkt'];
-                    
+
                     mapping.loadWKT(initial_wkt);
                 }else{
                     mapping.clearAll();
@@ -85,13 +85,13 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 right: 200px;
                 bottom: 0px;
                 background-color: #ffffff;
-            }  
+            }
             #map_digitizer {
                 height:100%;
                 width:100%;
-            }  
-            
-            
+            }
+
+
             .color-button {
                 width: 14px;
                 height: 14px;
@@ -99,8 +99,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 margin: 2px;
                 float: left;
                 cursor: pointer;
-            }      
-            
+            }
+
           .delete-menu {
             position: absolute;
             background: white;
@@ -117,8 +117,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
           }
           .delete-menu:hover {
             background: #eee;
-          }         
-          
+          }
+
             #rightpanel{
                 text-align:center;
                 position: absolute;
@@ -130,10 +130,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             #rightpanel > div{
                 width:100%;
                 padding:0.2em;
-            }   
+            }
             #rightpanel > div > button{
                 width:14em;
-            }   
+            }
             #coords1 {
                 padding: 5px;
                 font-weight: normal;
@@ -152,10 +152,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <div style="height:100%; width:100%;">
 
             <div id="mapToolbarDiv" style="height:50px;padding:1em 0.2em">
-                    
+
                 <div class="div-table-cell">
-                    <label>Find:</label>
-                    <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                    <label for="input_search">Find:</label>
+                    <input id="input_search" class="text ui-widget-content ui-corner-all"
                             style="max-width: 100px; min-width: 6em; width: 100px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
                 </div>
@@ -167,66 +167,66 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 </div>
                 <div class="div-table-cell" id="coords2" style="padding-left: 1em;">
                 </div>
-                
+
                 <div class="div-table-cell" style="padding-left: 2em;">
                     <label for="sel_overlays">Background</label>
                     <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px">
                         <option>none</option>
                     </select>
                 </div>
-            
+
                 <div style="position: absolute; right: 0.2em; top:1em;" class="map-inited">
                     <button id="btn_help">Help</button>
                 </div>
             </div>
-            
+
             <div id="map_container">
                 <div id="map_digitizer">Mapping</div>
             </div>
 
             <div id="rightpanel">
 
-                <label style="display:inline-block;">Draw color:</label>
+                <span style="display:inline-block;">Draw color:</span>
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
 
-                
+
                 <div style="padding-top:20px">
-                    <label>Select shape to draw</label><br>
-                    <label>Click to add points</label><br><br>
+                    <span>Select shape to draw</span><br>
+                    <span>Click to add points</span><br><br>
                     <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
                     <button id="save-button" style="font-weight:bold">Save</button>
-                </div> 
+                </div>
                 <div style="padding-top:20px">
                     <button id="delete-all-button">Clear all</button>
-                </div> 
+                </div>
                 <div>
                     <button id="delete-button">Clear Selected</button>
-                </div> 
+                </div>
                 <div>
                     <button id="cancel-button">Cancel</button>
                 </div>
                 <div style="padding-top:20px">
                     <button id="load-geometry-button">Add Geometry</button>
-                </div> 
+                </div>
                 <div>
                     <button id="get-geometry-button">Get Geometry</button>
-                </div> 
-                
+                </div>
+
                 <div style="bottom:30;position: absolute;height:160px">
-                    <div id="coords_hint" style="padding:0 4px 2px 4px"></div>    
+                    <div id="coords_hint" style="padding:0 4px 2px 4px"></div>
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
-                </div> 
-            </div>            
+                </div>
+            </div>
         </div>
-        
+
         <div id="get-set-coordinates" style="display: none;">
             <!--
-            
-            
+
+
             -->
             <div>
-                <label>Paste geo data in supported format (GeoJSON,.....)</label>
+                <span>Paste geo data in supported format (GeoJSON,.....)</span>
             </div>
             <textarea cols="" rows="" id="geodata_textarea"
                 style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>

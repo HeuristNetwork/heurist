@@ -28,8 +28,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         title:  'Export records to comma or tab separated text files',
         default_palette_class: 'ui-heurist-publish', 
         
-        htmlContent: 'recordExportCSV.html',
-        helpContent: 'recordExportCSV.html' //in context_help folder
+        htmlContent: 'recordExportCSV.html'
     },
 
     selectedFields:null,
@@ -42,7 +41,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     _destroy: function() {
         this._super(); 
         
-        var treediv = this.element.find('.rtt-tree');
+        let treediv = this._$('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -54,13 +53,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     _initControls: function() {
 
 
-        var that = this;
-        if(!$.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+        let that = this;
+        if(!window.hWin.HEURIST4.util.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
 
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/configEntity.js', 
                 function(){ 
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -72,7 +71,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         if(window.hWin.HAPI4.has_access()){
 
-            this.element.find('#divLoadSettings').configEntity({
+            this._$('#divLoadSettings').configEntity({
                 entityName: 'defRecTypes',
                 configName: 'csvexport',
     
@@ -80,26 +79,26 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
     
                 //divLoadSettingsName: this.element
-                divSaveSettings: this.element.find('#divSaveSettings'),  //element
+                divSaveSettings: this._$('#divSaveSettings'),  //element
                 showButtons: true
     
             });
     
-            this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+            this._$('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
         }else{
-            this.element.find('#divLoadSettings, #divSaveSettings').hide();
+            this._$('#divLoadSettings, #divSaveSettings').hide();
         }
 
         // Initialize field advanced pane.
         this._resetAdvancedControls();
-        //this.hideAdvancedPane();
+       
         
-        if(!this.options.isdialog && this.options.is_h6style){
-            var fele = this.element.find('.ent_wrapper:first');
+        if(!this.options.isdialog){
+            let fele = this._$('.ent_wrapper:first');
             fele.css({top:'36px',bottom:'40px'});
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
 
-            var toolbar_height = '20px';
+            let toolbar_height = '20px';
             if(navigator.userAgent.indexOf('Firefox') >= 0){
                 toolbar_height = '40px';
             }
@@ -107,14 +106,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
             //append action buttons
             this.toolbar.empty();
-            var btns = this._getActionButtons();
-            for(var idx in btns){
+            let btns = this._getActionButtons();
+            for(let idx in btns){
                 this._defineActionButton2(btns[idx], this.toolbar);
             }
         }
         
-        this.element.find('.export-to-bottom-button').on('click', function () {
-            var container = $(this).parent();
+        this._$('.export-to-bottom-button').on('click', function () {
+            let container = $(this).parent();
             container.scrollTop(container[0].scrollHeight);
         });
 
@@ -124,7 +123,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 let order = $('[name="tree_order"]:checked').val();
                 sessionStorage.setItem('heurist_ftorder_exportcsv', order);
 
-                var treediv = that.element.find('.rtt-tree');
+                let treediv = that.element.find('.rtt-tree');
 
                 if(treediv.length > 0 && treediv.fancytree('instance')!==undefined){
                     window.hWin.HEURIST4.ui.reorderFancytreeNodes_rst(treediv, order);
@@ -144,14 +143,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         if(settings){
         
-            var that = this;
+            let that = this;
             //restore selection
             that.selectedFields = settings.fields; 
 
             that._assignSelectedFields(null);
 
             // Set advanced options.
-            if (settings.hasOwnProperty('advanced_options') && settings.advanced_options) {
+            if (Object.hasOwn(settings,'advanced_options') && settings.advanced_options) {
                 that._setFieldAdvancedOptions(settings.advanced_options);
             }
             
@@ -177,8 +176,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     _assignSelectedFields: function(rnode){
         
-            var that = this;
-            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
+            let that = this;
+            let tree = that.element.find('.rtt-tree').fancytree("getTree");           
 
             if(rnode==null){
                 rnode = tree.getRootNode();  
@@ -187,7 +186,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             rnode.visit(function(node){
                 node.setSelected(false);
-                var has_child = node.hasChildren();
+                let has_child = node.hasChildren();
                 if(has_child===undefined){
                     node.setExpanded(true);
                     setTimeout(function(){
@@ -196,7 +195,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
                 }else{
                     if(that.selectedFields && that.selectedFields.length>0 && has_child===false){
-                            for(var i=0; i<that.selectedFields.length; i++){
+                            for(let i=0; i<that.selectedFields.length; i++){
                                 if(that.selectedFields[i]==node.data.code){
                                     node.setSelected(true);
                                     break;
@@ -212,8 +211,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
-        var that = this;
+        let res = this._super();
+        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
         /*
@@ -237,32 +236,30 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        var opt, selScope = this.selectRecordScope.get(0);
-
+        let selScope = this.selectRecordScope.get(0);
         
-        var scope_types = [];   
+        let scope_types = [];   
         
-        var rectype_Ids = this._currentRecordset.getRectypes();
+        let rectype_Ids = this._currentRecordset.getRectypes();
         
         if(rectype_Ids.length>1){
             
-            var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+            let opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
             $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-        
-            for (var rty in rectype_Ids){
-                if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Name') ){
-                    rty = rectype_Ids[rty];
-                    var name = $Db.rty(rty,'rty_Plural');
+
+            rectype_Ids.forEach(rty => {
+                if(rty>0 && $Db.rty(rty,'rty_Name') ){
+                    let name = $Db.rty(rty,'rty_Plural');
                     if(!name) name = $Db.rty(rty,'rty_Name');
                     window.hWin.HEURIST4.ui.addoption(selScope,rty,'only: '+name);
                 }
-            }
+            });
         }
 
         
         if (this._currentRecordset &&  this._currentRecordset.length() > 0) {
             
-                var msg = (rectype_Ids.length>1)?'Basic record fields only':'Current result set';
+                let msg = (rectype_Ids.length>1)?'Basic record fields only':'Current result set';
                     
                 window.hWin.HEURIST4.ui.addoption(selScope,
                     (rectype_Ids.length>1)?'current':rectype_Ids[0],
@@ -335,16 +332,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
-        //this.selectRecordScope.val(this.options.init_scope);    
-        //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
         
         window.hWin.HEURIST4.ui.initHSelect(selScope);
-        
-        var wmenu = $(selScope).hSelect( "menuWidget" );  //was menu
-        //wmenu.find('li.ui-state-disabled').css({'display':'none !important'});
-        //$(selScope).hSelect('widget').text('select...');
-        //this.element.find('li.ui-state-disabled').css({'display':'none !important'});
         
     },
             
@@ -353,9 +343,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     doAction: function(mode){
 
-        var scope_val = this.selectRecordScope.val();
+        let scope_val = this.selectRecordScope.val();
         
-        var scope = [], 
+        let scope = [], 
         rec_RecTypeID = 0;
         
         if(scope_val == 'selected'){
@@ -373,10 +363,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             return;
         }
         
-        var settings = this.getSettings(true);
+        let settings = this.getSettings(true);
         if(!settings) return;
 
-        var request = {
+        let request = {
             'request_id' : window.hWin.HEURIST4.util.random(),
             'db': window.hWin.HAPI4.database,
             'ids'  : scope,
@@ -387,16 +377,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             request['rec_RecTypeID'] = rec_RecTypeID;
         }
         
-        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
+        let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
 
         //posting via form allows send large list of ids
-        this.element.find('#postdata').val( JSON.stringify(request) );
-        this.element.find('#postform').attr('action', url);
-        this.element.find('#postform').submit();
+        this._$('#postdata').val( JSON.stringify(request) );
+        this._$('#postform').attr('action', url);
+        this._$('#postform').submit();
             
-        //if(mode==1){ //open in new window
-        //}else{ //download
-        //}
     },
     
     //
@@ -404,7 +391,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     getSettings: function( mode_action ){
 
-        var header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
+        let header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
             typeid: 'rec_RecTypeID', typename: 'rec_RecTypeName', added: 'rec_Added', addedby: 'rec_AddedByUGrpID', 
             owner: 'rec_OwnerUGrpID', access: 'rec_NonOwnerVisibility', notes: 'rec_ScratchPad'};
 
@@ -412,21 +399,21 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             if(header_fields[dtid]){
                 dtid = header_fields[dtid];
             }else{
-                var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                let linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
                 if(isNaN(Number(linktype))){
                     dtid = dtid.substr(2);
                 }
             }
             return dtid;
         }
-        var mainRecordTypeIDs = [];
+        let mainRecordTypeIDs = [];
         function __addSelectedField(ids, lvl, constr_rt_id){
             
             if(ids.length < lvl) return;
             
             //take last two - these are rt:dt
-            var rtid = ids[ids.length-lvl-1];
-            var dtid = __removeLinkType(ids[ids.length-lvl]);
+            let rtid = ids[ids.length-lvl-1];
+            let dtid = __removeLinkType(ids[ids.length-lvl]);
 
             if(!selectedFields[rtid]){
                 selectedFields[rtid] = [];    
@@ -448,15 +435,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     selectedFields[rtid].push(dtid);
                 }
             } 
-            //add resource field for parent recordtype
+            //add resource (record pointer) field for parent recordtype
             __addSelectedField(ids, lvl+2, rtid);
         }
         
         //get selected fields from treeview
-        var selectedFields = mode_action?{}:[];
-        var tree = this.element.find('.rtt-tree').fancytree("getTree");
-        var fieldIds = tree.getSelectedNodes(false);
-        var k, len = fieldIds.length;
+        let selectedFields = mode_action?{}:[];
+        let tree = this._$('.rtt-tree').fancytree("getTree");
+        let fieldIds = tree.getSelectedNodes(false);
+        const len = fieldIds.length;
         
         if(len<1){
             window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -464,15 +451,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             return false;
         }
 
-        for (k=0;k<len;k++){
+        for (let k=0;k<len;k++){
 
-            var node =  fieldIds[k];
+            let node =  fieldIds[k];
             
             if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
 
             if(mode_action){
 
-                var ids = node.data.code.split(":");
+                let ids = node.data.code.split(":");
 
                 if(isNaN(ids[ids.length - 1]) && ids[ids.length - 1].match(/\d/)){
 
@@ -499,21 +486,21 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         return {
             'fields': selectedFields,
             'main_record_type_ids': mainRecordTypeIDs,
-            'join_record_types': this.element.find('#chkJoinRecTypes').is(':checked')?1:0,
+            'join_record_types': this._$('#chkJoinRecTypes').is(':checked')?1:0,
             'advanced_options': this._getFieldAdvancedOptions(mode_action),
-            'csv_delimiter':  this.element.find('#delimiterSelect').val(),
-            'csv_enclosure':  this.element.find('#quoteSelect').val(),
+            'csv_delimiter':  this._$('#delimiterSelect').val(),
+            'csv_enclosure':  this._$('#quoteSelect').val(),
             'csv_mvsep':'|',
             'csv_linebreak':'nix', //not used at tne moment
-            'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
-            'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
-            'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
-            'include_file_url': this.element.find('#cbIncludeMediaURL').is(':checked')?1:0,
-            'include_record_url_html': this.element.find('#cbIncludeRecURLHTML').is(':checked')?1:0,
-            'include_record_url_xml': this.element.find('#cbIncludeRecURLXML').is(':checked')?1:0,
-            'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
-            'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0,
-            'include_temporals':  this.element.find('#cbIncludeTemporals').is(':checked')?1:0
+            'csv_header': this._$('#cbNamesAsFirstRow').is(':checked')?1:0,
+            'include_term_ids': this._$('#cbIncludeTermIDs').is(':checked')?1:0,
+            'include_term_codes': this._$('#cbIncludeTermCodes').is(':checked')?1:0,
+            'include_file_url': this._$('#cbIncludeMediaURL').is(':checked')?1:0,
+            'include_record_url_html': this._$('#cbIncludeRecURLHTML').is(':checked')?1:0,
+            'include_record_url_xml': this._$('#cbIncludeRecURLXML').is(':checked')?1:0,
+            'include_term_hierarchy': this._$('#cbIncludeTermHierarchy').is(':checked')?1:0,
+            'include_resource_titles': this._$('#cbIncludeResourceTitles').is(':checked')?1:0,
+            'include_temporals':  this._$('#cbIncludeTemporals').is(':checked')?1:0
 
         };
         
@@ -526,7 +513,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     {
         let isdisabled = this._super();
         
-        //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
+        
         
         let rtyID = this.selectRecordScope.val();
         rtyID = rtyID == 'collected' && this._collected_rtyid ? this._collected_rtyid : rtyID;
@@ -540,17 +527,17 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         if(rtyID=='' || rtyID==null){
             $('.rtt-tree').parent().hide();
-            this.element.find('#export_format_container').hide();
+            this._$('#export_format_container').hide();
         }else{
             $('.rtt-tree').parent().show();
-            this.element.find('#export_format_container').show();
+            this._$('#export_format_container').show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
         }
         
-        if(this.element.find('#divLoadSettings').configEntity('instance')){
-            this.element.find('#divLoadSettings').configEntity( 'updateList', rtyID );    
+        if(this._$('#divLoadSettings').configEntity('instance')){
+            this._$('#divLoadSettings').configEntity( 'updateList', rtyID );    
         }
         
         this._resetAdvancedControls();
@@ -563,7 +550,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     _loadRecordTypesTreeView: function(rtyID){
         
-        var that = this;
+        let that = this;
 
         if(this._selectedRtyID!=rtyID ){
             
@@ -573,15 +560,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             if(window.hWin.HEURIST4.util.isempty(node_order) || !Number.isInteger(+node_order)){
                 node_order = 0; // default to form order
             }
-            this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
+            this._$('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'], null, node_order );
+            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'], null, node_order );
             
             treedata[0].expanded = true; //first expanded
             
             //load treeview
-            var treediv = this.element.find('.rtt-tree');
+            let treediv = this._$('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }
@@ -597,8 +584,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     if( data.node.data.type== 'rectype' && data.node.hasChildren() ){
                         
                         if(data.node.isExpanded()){
-                            for(var i=0; i<data.node.children.length; i++){
-                                var node = data.node.children[i];
+                            for(let i=0; i<data.node.children.length; i++){
+                                let node = data.node.children[i];
                                 if(node.key=='rec_ID' || node.key=='rec_Title'){
                                     node.setSelected(true);
                                 }
@@ -665,15 +652,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                 },
                 lazyLoad: function(event, data){
-                    var node = data.node;
-                    var parentcode = node.data.code; 
-                    var rectypes = node.data.rt_ids;
+                    let node = data.node;
+                    let parentcode = node.data.code; 
+                    let rectypes = node.data.rt_ids;
                     
                     if(parentcode.split(":").length< that.MAX_LEVEL*2+1){  //7 limit with 4 levels (till 2021-10-15 were 3 levels)
                     
                         let node_order = that.element.find('[name="tree_order"]:checked').val();
 
-                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                        let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                                             rectypes, ['header_ext','all','parent_link'], parentcode, node_order );
                         if(res.length>1){
                             data.result = res;
@@ -689,7 +676,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        //that._assignSelectedFields( data.node );
+                       
                     },500);
                 },
                 select: function(e, data) {
@@ -725,8 +712,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         return false;
                     }
 
-                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-                    var setDefaults = !data.node.isExpanded();
+                    let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                    let setDefaults = !data.node.isExpanded();
 
                     if($(e.originalEvent.target).is('span') && !isExpander && data.node.children && data.node.children.length > 0){
                         data.node.setExpanded(!data.node.isExpanded());
@@ -736,21 +723,21 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 },
                 expand: function(e, data) {
                     if(data.node.data.type== 'rectype' && data.node.children.length > 0){
-                        for(var i = 0; i < data.node.children.length; i++){
-                            var node = data.node.children[i];
+                        for(let i = 0; i < data.node.children.length; i++){
+                            let node = data.node.children[i];
                             if(node.key=='rec_ID' || node.key=='rec_Title'){
                                 node.setSelected(true);
                             }
                         }
                     }
-                    var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
-                    for(var j = 0; j < selected_nodes.length; j++){
+                    let selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    for(let j = 0; j < selected_nodes.length; j++){
                         that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }
                 },
                 collapse: function(e, data) {
-                    var selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
-                    for(var j = 0; j < selected_nodes.length; j++){
+                    let selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    for(let j = 0; j < selected_nodes.length; j++){
                         that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }
                 },
@@ -781,10 +768,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _getTemplateContent: function (templateName, variables) {
-        var content = this.element.find('#' + templateName).html();
+        let content = this._$('#' + templateName).html();
         if (typeof variables === 'object' && variables !== null) {
-            for (var name in variables) {
-                if (variables.hasOwnProperty(name)) {
+            for (let name in variables) {
+                if (Object.hasOwn(variables,name)) {
                     content = content.replaceAll('{' + name + '}', variables[name]);
                 }
             }
@@ -797,8 +784,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _resetAdvancedControls: function () {
-        this.element.find('.export-advanced-list').html('');
-        this.element.find('.export-advanced-list').hide();
+        this._$('.export-advanced-list').html('');
+        this._$('.export-advanced-list').hide();
     },
 
     /**
@@ -819,7 +806,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     _displayAdvOption: function(fieldCode, showField, item){
-        var $ele = this.element.find('div[data-field-code="'+ fieldCode +'"]');
+        let $ele = this._$('div[data-field-code="'+ fieldCode +'"]');
         if($ele.length == 0){
             return;
         }
@@ -831,7 +818,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }
 
         if(item){
-            var pos_top = item.offsetTop;
+            let pos_top = item.offsetTop;
             $ele.css({
                 'position': 'absolute',
                 'top': pos_top+'px',
@@ -852,21 +839,21 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      */
     _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, item, rectypeId) {
 
-        if(this.element.find('div[data-field-code="'+ fieldCode +'"]').length != 0){
+        if(this._$('div[data-field-code="'+ fieldCode +'"]').length != 0){
             this._displayAdvOption(fieldCode, true, item);
             return;
         }
 
-        var content = this._getTemplateContent('templateAdvancedFieldOptions', {
+        let content = this._getTemplateContent('templateAdvancedFieldOptions', {
             "fieldName": fieldName,
             "fieldType": fieldType,
             "fieldCode": fieldCode
         });
-        var fieldElement = $(content);
-        this.element.find('.export-advanced-list').append(fieldElement);
+        let fieldElement = $(content);
+        this._$('.export-advanced-list').append(fieldElement);
         this._populateFieldAdvancedTotalSelectOptions(fieldElement.find('.export-advanced-list-item-total-select')[0], fieldType === 'float');
-        this.element.find('.export-advanced-list-item-total-select').on('change', function () {
-            var itemElement = $(this).closest('.export-advanced-list-item');
+        this._$('.export-advanced-list-item-total-select').on('change', function () {
+            let itemElement = $(this).closest('.export-advanced-list-item');
             itemElement.find('.export-advanced-list-item-percentage-checkbox').prop('checked', false);
             if ($(this).val() === 'count' || $(this).val() === 'sum') {
                 itemElement.find('.export-advanced-list-item-percentage').show();
@@ -879,7 +866,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             fieldElement.data('rectype-id', rectypeId);
         }
 
-        var pos_top = item.offsetTop;
+        let pos_top = item.offsetTop;
         fieldElement.css({
             'position': 'absolute',
             'top': pos_top+'px',
@@ -888,7 +875,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         this._on(fieldElement.find('.ui-icon'), {
             'click': function(event){
-                var val = null;
+                let val = null;
                 if($(event.target).hasClass('ui-icon-circle-b-arrow-n')){
                     val = 'asc';
                 }else if($(event.target).hasClass('ui-icon-circle-b-arrow-s')){
@@ -910,7 +897,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _removeFieldAdvancedOptionsByCode: function (fieldCode) {
-        this.element.find('.export-advanced-list-item').each(function () {
+        this._$('.export-advanced-list-item').each(function () {
             if ($(this).data('field-code') === fieldCode) {
                 $(this).remove();
             }
@@ -919,12 +906,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
     _handleSortByField: function(code, isGet, new_value=''){
 
-        var iconSet = $('div[data-code="'+code+'"]');
+        let iconSet = $('div[data-code="'+code+'"]');
         if(iconSet.length == 0){
             return null;
         }
 
-        var value = iconSet.attr('data-value');
+        let value = iconSet.attr('data-value');
 
         if(!value && value != ''){
 
@@ -982,22 +969,22 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      */
     _getFieldAdvancedOptions: function (for_export) {
 
-        var that = this;
+        let that = this;
 
-        if (this.element.find('.export-advanced-list-item').length > 0) {
+        if (this._$('.export-advanced-list-item').length > 0) {
 
-            var options = {};
+            let options = {};
 
-            this.element.find('.export-advanced-list-item').each(function () {
+            this._$('.export-advanced-list-item').each(function () {
 
-                var option = {};
+                let option = {};
 
-                var totalSelectValue = $(this).find('.export-advanced-list-item-total-select').val();
+                let totalSelectValue = $(this).find('.export-advanced-list-item-total-select').val();
                 if (totalSelectValue) {
                     option.total = totalSelectValue;
                 }
 
-                var sortSelectValue = that._handleSortByField($(this).attr('data-field-code'), true);
+                let sortSelectValue = that._handleSortByField($(this).attr('data-field-code'), true);
                 if (sortSelectValue) {
                     option.sort = sortSelectValue;
                 }
@@ -1029,23 +1016,23 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @private
      */
     _setFieldAdvancedOptions: function (options) {
-        var that = this;
+        let that = this;
         if (options) {
-            this.element.find('.export-advanced-list-item').each(function () {
-                var fieldCode = $(this).data('field-code');
-                var option;
-                if (options.hasOwnProperty(fieldCode)) {
+            this._$('.export-advanced-list-item').each(function () {
+                let fieldCode = $(this).data('field-code');
+                let option;
+                if (Object.hasOwn(options,fieldCode)) {
                     option = options[fieldCode];
-                    if (option.hasOwnProperty('total')) {
+                    if (Object.hasOwn(option,'total')) {
                         $(this).find('.export-advanced-list-item-total-select').val(option.total);
                         if (option.total === 'sum' || option.total === 'count') {
                             $(this).find('.export-advanced-list-item-percentage').show();
                         }
                     }
-                    if (option.hasOwnProperty('sort')) {
+                    if (Object.hasOwn(option,'sort')) {
                         that._handleSortByField($(this).attr('data-code'), false, option.sort);
                     }
-                    if (option.hasOwnProperty('use_percentage') && option.use_percentage) {
+                    if (Object.hasOwn(option,'use_percentage') && option.use_percentage) {
                         $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked', true);
                     }
                 }

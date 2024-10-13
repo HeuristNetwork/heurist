@@ -27,16 +27,16 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Notification',
-        helpContent: ''  //'usrTags.html'
+        helpContent: false  //'usrTags'
     },
-    
+
     _reminderWidgetContainer:null,
     _reminderWidget:null,
     
 
     _initControls:function(){
         
-        this.element.find('#div_header')
+        this._$('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html('Share these records with other users via email<br>'
@@ -45,7 +45,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         
         this._reminderWidgetContainer = $('<div>').addClass('ent_wrapper').css({'top':'120px'}).appendTo( this.element );
         
-        var that = this;
+        let that = this;
         
         this._reminderWidget = window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
                 isdialog: false,
@@ -62,8 +62,8 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         
         
         //align scope selector and edit form
-        this.element.find('#div_fieldset').css({'padding':'10px 0px'});
-        this.element.find('#div_fieldset .header').css({'padding':'0 24px 0 0'});
+        this._$('#div_fieldset').css({'padding':'10px 0px'});
+        this._$('#div_fieldset .header').css({'padding':'0 24px 0 0'});
         
         return this._super();
     },
@@ -74,7 +74,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     },
     
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Notify');
         return res;
     },
@@ -84,14 +84,14 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     //
     doAction: function(){
 
-        var scope_val = this.selectRecordScope.val();
+        let scope_val = this.selectRecordScope.val();
         if(scope_val=='')    return;
         
-        var editForm = $(this._reminderWidgetContainer).manageUsrReminders('instance');
-        var fields = editForm._getValidatedValues();//this._reminderWidget.manageUsrReminders('_getValidatedValues'); 
+        let editForm = $(this._reminderWidgetContainer).manageUsrReminders('instance');
+        let fields = editForm._getValidatedValues();//this._reminderWidget.manageUsrReminders('_getValidatedValues'); 
         if(fields==null) return; //validation failed
 
-        var scope = [], 
+        let scope = [], 
         rec_RecTypeID = 0;
         
         if(scope_val == 'selected'){
@@ -103,7 +103,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
             }   
         }
         
-        var request = {                                                                                        
+        let request = {                                                                                        
             'a'          : 'batch',
             'entity'     : 'usrReminders',
             'request_id' : window.hWin.HEURIST4.util.random(),
@@ -115,8 +115,8 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
             
-            var that = this;                                                
-            var dlged = editForm._getEditDialog();
+            let that = this;                                                
+            let dlged = editForm._getEditDialog();
             if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 

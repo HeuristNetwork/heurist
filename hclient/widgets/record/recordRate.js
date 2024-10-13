@@ -27,7 +27,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Set Record Rating',
-        helpContent: 'recordBookmark.html'
+        helpContent: 'recordBookmark'
     },
 
     _initControls:function(){
@@ -40,13 +40,13 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 +'<tr><td><input type="radio" value="3" name="r" id="r3"></td><td><label for="r3" class="yellow_star" style="width:38px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="4" name="r" id="r4"></td><td><label for="r4" class="yellow_star" style="width:50px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="5" name="r" id="r5"></td><td><label for="r5" class="yellow_star" style="width:64px;"></label></td></tr>'
-        +'</tbody></table>').appendTo( this.element.find('#div_fieldset'));
+        +'</tbody></table>').appendTo( this._$('#div_fieldset'));
         
         return this._super();
     },
     
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Set Rating');
         return res;
     },    
@@ -56,17 +56,21 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = this.selectRecordScope.val();
+            let scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
-            var rating = this.element.find('input[type=radio]:checked').val();
+            let rating = this._$('input[type=radio]:checked').val();
             
             if(!(rating>=0 && rating<6)){
-                window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please specify rating value',
+                    error_title: 'Missing rating',
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST
+                });
                 return;
             }
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -79,7 +83,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
             }
             
         
-            var request = {
+            let request = {
                 'a'          : 'batch',
                 'entity'     : 'usrBookmarks',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -91,7 +95,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

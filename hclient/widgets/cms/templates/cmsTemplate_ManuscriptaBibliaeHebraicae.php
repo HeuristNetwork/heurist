@@ -1,29 +1,29 @@
 <?php
 
     /**
-    *  CMS website template 
-    * 
+    *  CMS website template
+    *
     *  You may use several templates per server (for specific websites).
     *  We encourage the following of naming convention cmsTemplate_OrganisationName.php
-    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922) 
+    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922)
     *  in the Advanced tab of the CMS home page record.
-    * 
+    *
     *  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
     *  should ONLY be used for development as it uses a path which might change and local changes could
     *  get overwritten by code updates.
-    * 
+    *
     *  The template must contain at least two html elements main-header with main-menu and
     *  main-content
-    * 
+    *
                 <div id="main-header" style="width:100%;min-height:40px;">
-                    <div id="main-menu" class="mceNonEditable header-element" 
-                        style="width:100%;min-height:40px;color:black;font-size:1.1em;" 
+                    <div id="main-menu" class="mceNonEditable header-element"
+                        style="width:100%;min-height:40px;color:black;font-size:1.1em;"
                         data-heurist-app-id="heurist_Navigation" data-generated="1">
                         <?php print $page_header_menu; ?>
 </div>
 </div>
 <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?>
+    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
     data-viewonly="<?php print ($hasAccess)?0:1;?>">
 </div>
 *
@@ -90,15 +90,15 @@
                 font-weight: bold;
                 color: blue;
             }
-            
-            
+
+
 /**
 * Header video
 */
 #wrapper-video {
     z-index:9999999;
     cursor:pointer;
-    background: linear-gradient(rgba(120, 120, 120, 1), rgba(0, 0, 0, 1), rgba(120, 120, 120, 1));    
+    background: linear-gradient(rgba(120, 120, 120, 1), rgba(0, 0, 0, 1), rgba(120, 120, 120, 1));
 }
 
 #wrapper-video > .slogan {
@@ -111,34 +111,33 @@
     text-align: center;
 }
 
-            
+
         </style>
     </head>
 
     <body>
         <?php
 /*
-default content consists of 
+default content consists of
     #main-header - header width logo, banner, hostinfo and main menu
         #main-logo, #main-logo-alt, #main-host, #main-menu, #main-pagetitle
-        
-    #main-content-container > #main-content - target the content of particular page will be loaded  
+
+    #main-content-container > #main-content - target the content of particular page will be loaded
 */
 if(!$edit_OldEditor && $system->is_member(1)){
-        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:70px; top:5px; z-index: 9999;" class="cms-button">DB</a>'
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
+        .'style="position:absolute;right:110px; top:5px;color:blue !important;z-index:9999;" class="cms-button">DB</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
-        .'style="position:absolute;right:10px; top:5px; z-index: 9999;" class="cms-button">Editor</a>';
-    
+        .'style="position:absolute;right:10px;top:5px;color:blue !important;z-index:9999;" class="cms-button">Editor</a>';
     }
 
-if($isWebPage){ //set in websiteRecord.php 
+if($isWebPage){ //set in websiteRecord.php
 //WEB PAGE - EMBED
 ?>
         <div class="ent_wrapper heurist-website">
             <?php
     if($showWarnAboutPublic){
-        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
+        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
     }
 ?>
             <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px"
@@ -149,8 +148,8 @@ if($isWebPage){ //set in websiteRecord.php
             </div>
         </div>
         <?php
-        
-//WEB SITE      
+
+//WEB SITE
 }else{
 ?>
 
@@ -160,7 +159,7 @@ if($isWebPage){ //set in websiteRecord.php
                 <div class="container">
                     <div class="navbar-title">Manuscripta Bibliae Hebraicae</div>
                     <div id="custom-logo" class="navbar-header"><a class="logo navbar-btn pull-left" href="#"
-                            title="Manuscripta Bibliae Hebraicae" style="background-image: none!important;"> 
+                            title="Manuscripta Bibliae Hebraicae" style="background-image: none!important;">
                             <!-- Need to override default Heurist styles, which impose the Heurist logo on anything classed 'logo' TODO: Future-proof MBH stylesheet with new class -->
                             <img src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=dada5f621fea794510e1abf27f8799783f1a1684"
                                 alt="Manuscripta Bibliae Hebraicae">
@@ -178,7 +177,7 @@ if($isWebPage){ //set in websiteRecord.php
                                 src="<?php echo HEURIST_BASE_URL?>?db=MBH_Manuscripta_Bibliae_Hebraicae&file=082682853f46e477acd87c3c8e55cabd1aeb9bbc"
                                 width="24" alt="Facebook"></a>
                     </div>
-                    
+
 <!-- Removed 22 dec 2023 on request, site only in English
                     <div class="region region-language-switcher">
                         <section id="block-locale-language" class="block block-locale clearfix">
@@ -191,26 +190,26 @@ if($isWebPage){ //set in websiteRecord.php
                         </section>
                     </div>
     -->
-                        
+
 
                     <div id="main-menu" class="navbar-collapse collapse" data-heurist-app-id="heurist_Navigation"
                         data-generated="1"></div>
                 </div>
             </div>
 
-            <?php        
+            <?php
     }//header
 
-    
+
     ?>
         </div>
-        
+
         <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container">
             <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?>
+                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':'';?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
-            
+
             <footer class="footer">
                 <div class="open-book-effect-sym">
                     <span class="b"></span>
@@ -264,7 +263,7 @@ if($isWebPage){ //set in websiteRecord.php
                                     href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1414"
                                     title="Legal information">Legal information</a> - <a
                                     href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1415">General conditions of use</a>&nbsp;-&nbsp;<a
-                                    href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> - 
+                                    href="/?db=MBH_Manuscripta_Bibliae_Hebraicae&website&id=1408&pageid=1413">Contact</a> -
                                 Proudly served by <a href="https://heuristnetwork.org/">Heurist</a> @
                                 <a href="https://huma-num.fr">Huma-Num</a>
                             </p>
@@ -274,16 +273,16 @@ if($isWebPage){ //set in websiteRecord.php
             </footer>
         </div>
 
-        
-        
+
+
         <!-- References to old MBH website, for reference
-             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg 
-             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4 
+             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg
+             https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4
              document.getElementById('wrapper-video').style.display = 'none';
              -->
-             
-        <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
-          <video autoplay="" loop="" muted="" 
+
+        <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}" role="button" tabIndex={0}>
+          <video autoplay="" loop="" muted=""
           poster="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
             <source src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">
           </video>
@@ -299,7 +298,7 @@ if($isWebPage){ //set in websiteRecord.php
               </span>
           <h1>Enter site &gt;&gt;</h1>
           <p class="slogan">The database dedicated to Hebrew Bible Manuscripts</p>
-        </div>        
+        </div>
     </body>
 
     </html>

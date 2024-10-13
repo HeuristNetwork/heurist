@@ -298,6 +298,9 @@ div.input-div > .show-onhover, .show-onhover {
 div.input-div > .btn_input_move, .btn_input_move {
     display: none;
     cursor: grab;
+
+    vertical-align: top;
+    margin-top: 3px;
 }
 div.input-div:active > .btn_input_move, .btn_input_move:active {
     cursor: grabbing;
@@ -1000,7 +1003,7 @@ div.div-result-list-content.icons_list{
 }
 
 .icons .rt-icon{
-    display: none;
+    vertical-align: middle;
 }
 
 .rt-icon{
@@ -1460,6 +1463,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     float: left;
     width: auto;
     margin: 0px 2px;
+}
+
+.horizontalmenu  a.ui-state-active{
+    margin:0px;
 }
 
 /* List view - Datatable */

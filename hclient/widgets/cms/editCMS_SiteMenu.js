@@ -17,14 +17,16 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global page_cache */
 //
 //
 //
 function editCMS_SiteMenu( $container, editCMS2 ){
 
-    var _className = 'editCMS_SiteMenu';
+    const _className = 'editCMS_SiteMenu';
     
-    var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+    const RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
         DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
         DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
         DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
@@ -69,10 +71,10 @@ function editCMS_SiteMenu( $container, editCMS2 ){
     //
     function _initControls(){
 
-        var tree_element = $container;        
+        let tree_element = $container;        
         
         //get treedata from main menu
-        var treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
+        let treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
         
         //add node for home page
 /*
@@ -89,10 +91,10 @@ title: "Overview"
 */
         if(tree_element.fancytree('instance')){
             
-            var tree = tree_element.fancytree('getTree');
+            let tree = tree_element.fancytree('getTree');
 
             //keep_expanded_nodes
-            var keep_expanded_nodes = [];
+            let keep_expanded_nodes = [];
             tree.visit(function(node){
                     if(node.isExpanded()){
                         keep_expanded_nodes.push(node.key)
@@ -109,7 +111,7 @@ title: "Overview"
 
         }else{
 
-            var fancytree_options =
+            let fancytree_options =
             {
                 checkbox: false,
                 //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -118,8 +120,7 @@ title: "Overview"
                 selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
                 renderNode: function(event, data) {
                     
-                        //if(data.has_access){}
-                        var item = data.node;
+                        let item = data.node;
                         _defineActionIcons( item );
                     
                 },
@@ -134,23 +135,23 @@ title: "Overview"
                     dragEnter: function(node, data) {
                         //data.otherNode - dragging node
                         //node - target node
-                        return true; //node.folder ?['over'] :["before", "after"];
+                        return true;
                     },
                     dragDrop: function(node, data) {
                         //data.otherNode - dragging node
                         //node - target node
-                        var source_parent = data.otherNode.parent.data.page_id;
+                        let source_parent = data.otherNode.parent.data.page_id;
                         if(!(source_parent>0))
                             source_parent = window.hWin.home_page_record_id;
 
                         data.otherNode.moveTo(node, data.hitMode);
 
-                        var target_parent = data.otherNode.parent.data.page_id;
+                        let target_parent = data.otherNode.parent.data.page_id;
                         if(!(target_parent>0))
                             target_parent = window.hWin.home_page_record_id;
                         data.otherNode.data.parent_id = target_parent;
 
-                        var request = {actions:[]};
+                        let request = {actions:[]};
                         if(source_parent!=target_parent){
                             //remove from source
                             request.actions.push(
@@ -160,7 +161,7 @@ title: "Overview"
                                     sVal:data.otherNode.data.page_id}); 
 
                         }
-                        //return;
+                       
                         //change order in target
                         
                         //at first - remove all current children
@@ -170,9 +171,9 @@ title: "Overview"
                                 dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
 
                         //add children in new order        
-                        for (var i=0; i<data.otherNode.parent.children.length; i++){
+                        for (let i=0; i<data.otherNode.parent.children.length; i++){
 
-                            var menu_node = data.otherNode.parent.children[i];
+                            let menu_node = data.otherNode.parent.children[i];
                             request.actions.push(
                                 {a: 'add',
                                     recIDs: target_parent,
@@ -183,9 +184,8 @@ title: "Overview"
 
                         //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                was_something_edited = true;
                                 window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                 //reload main menu
                                 _refreshMainMenu( false ); //after DnD
@@ -220,7 +220,7 @@ title: "Overview"
                     },                                    
                     save:function(event, data){
                         if(''!=data.input.val()){
-                            var new_name = data.input.val();
+                            let new_name = data.input.val();
                             _renameMenuEntry(data.node.data.page_id, new_name, function(){
                                 
                             });
@@ -233,7 +233,7 @@ title: "Overview"
 
             tree_element.fancytree(fancytree_options).addClass('tree-cms');
             
-            tree = tree_element.fancytree('getTree');
+            let tree = tree_element.fancytree('getTree');
             tree.visit(function(node){
                 node.setExpanded(true);
             });            
@@ -249,19 +249,19 @@ title: "Overview"
     function _defineActionIcons(item)
     {
         
-        var tree_element = $container;
+        let tree_element = $container;
         
-                var item_li = $(item.li), 
+                let item_li = $(item.li), 
                 menu_id = item.data.page_id,
 
                 is_top = (item.data.parent_id==window.hWin.home_page_record_id);
 
                 if($(item).find('.svs-contextmenu3').length==0){
 
-                    var parent_span = item_li.children('span.fancytree-node');
+                    let parent_span = item_li.children('span.fancytree-node');
 
                     //add,edit menu,edit page,remove
-                    var actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                    let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
                         +item.data.parent_id+'" data-menuid="'+menu_id+'">'
                         //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
@@ -273,11 +273,11 @@ title: "Overview"
 
                     $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
 
-                    actionspan.find('.ui-icon').click(function(event){
-                        var ele = $(event.target);
+                    actionspan.find('.ui-icon').on('click', function(event){
+                        let ele = $(event.target);
                         window.hWin.HEURIST4.util.stopEvent(event);
                         
-                        var parent_span = ele.parents('span.fancytree-node');
+                        let parent_span = ele.parents('span.fancytree-node');
                         
                         function __in_progress(){
                             parent_span.find('.svs-contextmenu4').show();
@@ -286,9 +286,9 @@ title: "Overview"
 
                         //timeout need to activate current node    
                         setTimeout(function(){                         
-                            var ele2 = ele.parents('.svs-contextmenu3');
-                            var menuid = ele2.attr('data-menuid');
-                            var parent_id = ele2.attr('data-parentid');
+                            let ele2 = ele.parents('.svs-contextmenu3');
+                            let menuid = ele2.attr('data-menuid');
+                            let parent_id = ele2.attr('data-parentid');
 
                             if(ele.hasClass('ui-icon-plus')){ //add new menu to 
 
@@ -307,8 +307,8 @@ title: "Overview"
                                             onselect:function(event, data){
                                                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                                     
-                                                    var recordset = data.selection;
-                                                    var page_id = recordset.getOrder()[0];
+                                                    let recordset = data.selection;
+                                                    let page_id = recordset.getOrder()[0];
                                                     page_cache[page_id] = null; //remove from cache
                                                     delete page_cache[page_id];
                                                     
@@ -363,16 +363,14 @@ title: "Overview"
                                 if(ele.hasClass('ui-icon-trash')){    //remove menu entry
 
                                     function __doRemove(){
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                        var isDelete = $dlg.find('#del_menu').is(':checked');
+                                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                        let isDelete = $dlg.find('#del_menu').is(':checked');
                                         $dlg.dialog( "close" );
 
-                                        var to_del = [];
-                                        if(remove_menu_records){
-                                            item.visit(function(node){
+                                        let to_del = [];
+                                        item.visit(function(node){
                                                 to_del.push(node.data.page_id);
                                                 },true);
-                                        }
 
                                         if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
                                             to_del = null;
@@ -389,21 +387,14 @@ title: "Overview"
                                         });
                                     }
 
-                                    var menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+                                    let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
                                     
-                                    var buttons = {};
+                                    let buttons = {};
                                     buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
-                                        remove_menu_records = true;
                                         __doRemove();
                                     };
-                                    /*        
-                                    buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
-                                    remove_menu_records = false;
-                                    __doRemove();
-                                    };
-                                    */
                                     buttons[window.hWin.HR('Cancel')]  = function() {
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                                         $dlg.dialog( "close" );
                                     };
 
@@ -422,7 +413,7 @@ title: "Overview"
 
                     //hide icons on mouse exit
                     function _onmouseexit(event){
-                        var node;
+                        let node;
                         if($(event.target).is('li')){
                             node = $(event.target).find('.fancytree-node');
                         }else if($(event.target).hasClass('fancytree-node')){
@@ -432,21 +423,21 @@ title: "Overview"
                             node = $(event.target).parents('.fancytree-node');
                             if(node) node = $(node[0]);
                         }
-                        var ele = node.find('.svs-contextmenu3');
+                        let ele = node.find('.svs-contextmenu3');
                         ele.hide();
                     }               
 
                     $(parent_span).hover(
                         function(event){
-                            var node;
+                            let node;
                             if($(event.target).hasClass('fancytree-node')){
                                 node =  $(event.target);
                             }else{
                                 node = $(event.target).parents('.fancytree-node');
                             }
                             if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-                                var ele = $(node).find('.svs-contextmenu3');
-                                ele.css({'display':'inline-block'});//.css('visibility','visible');
+                                let ele = $(node).find('.svs-contextmenu3');
+                                ele.css({'display':'inline-block'});
                             }
                         }
                     );               
@@ -462,7 +453,7 @@ title: "Overview"
     //
     function _renameMenuEntry(rec_id, newvalue, callback){
 
-        var request = {a: 'replace',
+        let request = {a: 'replace',
             recIDs: rec_id,
             dtyID:  DT_NAME,
             rVal:    newvalue};
@@ -471,7 +462,7 @@ title: "Overview"
             if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
                 if($container.fancytree('instance')){                                 
-                    var node = $container.fancytree('getTree').getNodeByKey(''+rec_id);
+                    let node = $container.fancytree('getTree').getNodeByKey(''+rec_id);
                     if(node){
                         $(node.span).removeClass("pending");
                         node.setTitle( newvalue ); 
@@ -482,7 +473,7 @@ title: "Overview"
                 _refreshMainMenu( false ); //after Rename   
                 
                 
-                if($.isFunction(callback)) callback.call();
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -499,7 +490,7 @@ title: "Overview"
             $('.btn-website-homepage').css({'text-decoration':'underline'});
         }else
         if( $container.fancytree('instance')){
-                var tree = $container.fancytree('getTree');
+                let tree = $container.fancytree('getTree');
                 
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
@@ -518,21 +509,21 @@ title: "Overview"
     //
     function _createMenuRecord(parent_id, page_name, template_name, callback, $dlg_element){
 
-        var details = {};
+        let details = {};
         details['t:'+DT_NAME] = [ page_name ];
         details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
         if(DT_CMS_PAGETITLE>0 && window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
             details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
         }
 
-        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
         $.getJSON(sURL, 
         function( template_json ){
 
             if($dlg_element && $dlg_element.dialog('instance') !== undefined){
                 $dlg_element.dialog( "close" );
             }
-            if(!$.isFunction(callback)){
+            if(!window.hWin.HEURIST4.util.isFunction(callback)){
                 callback = function(new_page_id){
                     window.hWin.current_page_id = new_page_id;
                     _refreshMainMenu(); //after addition of new page
@@ -543,16 +534,16 @@ title: "Overview"
                 
                 details['t:'+DT_EXTENDED_DESCRIPTION] = [ JSON.stringify(tmp_json) ];
                 //add new record
-                var request = {a: 'save', 
+                let request = {a: 'save', 
                     ID:0, //new record
                     RecTypeID: RT_CMS_MENU,
                     details: details };     
 
                 window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                     function(response){
-                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        let  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
-                            var menu_id = response.data;
+                            let menu_id = response.data;
                             if(menu_id > 0){
                                 _addMenuEntry(parent_id, menu_id, callback)
                             }
@@ -576,7 +567,9 @@ title: "Overview"
     //
     function _defineMenuRecordSimple(parent_id, callback){
         
-        var buttons= [
+        let $dlg;
+        
+        let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 id:'btnCancel',
                 css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
@@ -626,7 +619,7 @@ title: "Overview"
     //
     function _defineMenuRecord(parent_id, callback)
     {
-        var popup_options = {
+        let popup_options = {
             select_mode: 'select_single', //select_multi
             select_return_mode: 'recordset',
             edit_mode: 'popup',
@@ -637,9 +630,9 @@ title: "Overview"
             default_palette_class: 'ui-heurist-publish',
             onselect:function(event, data){
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                    var recordset = data.selection;
-                    var record = recordset.getFirstRecord();
-                    var menu_id = recordset.fld(record,'rec_ID');
+                    let recordset = data.selection;
+                    let record = recordset.getFirstRecord();
+                    let menu_id = recordset.fld(record,'rec_ID');
 
                     _addMenuEntry(parent_id, menu_id, callback)
                 }
@@ -647,7 +640,7 @@ title: "Overview"
         };//popup_options
 
 
-        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
             {width: null,  //null triggers default width within particular widget
                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
 
@@ -684,7 +677,7 @@ title: "Overview"
     //
     function _addMenuEntry(parent_id, menu_id, callback){
 
-        var request = {a: 'add',
+        let request = {a: 'add',
             recIDs: parent_id,
             dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             val:    menu_id};
@@ -692,9 +685,9 @@ title: "Overview"
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
-                if($.isFunction(callback)) callback.call( this, menu_id );
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call( this, menu_id );
             }else{
-                hWin.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });                                        
 
@@ -706,7 +699,7 @@ title: "Overview"
     function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
 
         //delete detail from parent menu
-        var request = {a: 'delete',
+        let request = {a: 'delete',
             recIDs: parent_id,
             dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             sVal:   menu_id};
@@ -720,19 +713,19 @@ title: "Overview"
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 //refresh treeview
-                                if($.isFunction(callback)) callback.call();
+                                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                             }else{
-                                hWin.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         }      
                     );
 //
                 }else{
                     //refresh treeview
-                    if($.isFunction(callback)) callback.call();
+                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                 }
             }else{                                                     
-                hWin.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });                                        
 
@@ -801,7 +794,7 @@ title: "Overview"
         
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

@@ -14,7 +14,7 @@
     */
 
     /**
-    * fixCmsAbsPaths - replace absolute paths in CMS records to relative 
+    * fixCmsAbsPaths - replace absolute paths in CMS records to relative
     *
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
@@ -24,33 +24,30 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
- 
-define('PDIR','../../');  //need for proper path to js and css    
+
+define('ADMIN_PWD_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordsBatch.php';
 
-if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    exit;
-}
 //clear url parameters
-?>            
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          
-       
-       
+?>
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
+
+
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
     <p>Fix absolute paths in web page content</p>
-<?php            
+<?php
 
 $mysqli = $system->get_mysqli();
-    
-//find all database
-$databases = mysql__getdatabases4($mysqli, false);   
 
-// 
+//find all database
+$databases = mysql__getdatabases4($mysqli, false);
+
+//
 $servers = array('https:\/\/heuristref.net', 'https:\/\/heurist.sydney.edu.au', 'https:\/\/heuristplus.sydney.edu.au', 'https:\/\/heurist.huma-num.fr', 'https:\/\/heuristest.fdm.uni-hamburg.de:443');
-if (is_array($absolutePathsToRemoveFromWebPages) && count($absolutePathsToRemoveFromWebPages)>0){
+if (!isEmptyArray($absolutePathsToRemoveFromWebPages)){
     foreach($absolutePathsToRemoveFromWebPages as $srv){
         $srv = str_replace("/","\/",$srv);
         $servers[] = $srv;
@@ -59,20 +56,20 @@ if (is_array($absolutePathsToRemoveFromWebPages) && count($absolutePathsToRemove
 print 'Servers: '.implode('<br>',$servers).'<br>';
 
  __correctAbsPaths();
-   
+
 //
 //
 //
 function __correctAbsPaths(){
 
-    global $system, $mysqli, $databases; 
+    global $system, $mysqli, $databases;
 
     $dbRecDetails = new RecordsBatch($system, null);
-    
-    //$databases = array('amade_testnewsystem');
-    //$databases = array('osmak_9c');
-    //$databases = array('CBAP_Uncovering_Pacific_Pasts');    
-    
+
+
+
+
+
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
@@ -83,9 +80,9 @@ function __correctAbsPaths(){
     *       dtyID  - detail field to be added,replaced or deleted
     *       for addition: val: | geo: | ulfID: - value to be added
     *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
-    *       for delete: sVal, subs= 1 | 0   
+    *       for delete: sVal, subs= 1 | 0
     *       tag  = 0|1  - add system tag to mark processed records
-*/        
+*/
 
         $query = 'select rty_ID from defRecTypes where rty_OriginatingDBID=99 and rty_IDInOriginatingDB in (51, 52)';
         $rty_IDs = mysql__select_list2($mysqli, $query);
@@ -100,67 +97,72 @@ function __correctAbsPaths(){
         'dt_extended_description'=>$dty_ID,
         'sVal'=>'https://heurist',
         'rVal'=>'replaceAbsPathinCMS',
-        'subs'=>1, //substring
+        'substr'=>1, //substring
         'debug'=>0,
         'tag'=>0
         );
-        
+
         print '<h4>'.htmlspecialchars($db_name).'</h4><br>';
-        
+
         print 'Rectypes: '.htmlspecialchars(implode(',',$rty_IDs)).' Fields: '.intval($dty_ID).'<br>';
-        
+
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();
         if(!$res){
-            print 'ERROR: '.$system->getError()['message'];
+            print 'ERROR: '.$system->getErrorMsg();
         }
-     
-        print '<hr>';   
+
+        print '<hr>';
     }//for
-    
+
 }
 
+function replaceAbsPath($absPath, &$text){
+
+        $cnt = 0;
+        $matches = array();
+
+        if(preg_match($absPath, $text, $matches)){
+
+            $res = preg_replace($absPath, './', $text);
+            if($res!=null && $text != $res){
+                $text = $res;
+                $cnt = $cnt + count($matches);
+            }
+
+            foreach ($matches as $fnd) {print $fnd.' &nbsp;&nbsp;&nbsp; ';}
+        }
+        return $cnt;
+}
+
+
 function replaceAbsPathinCMS($recID, $val){
-    
+
     global $servers;
-    
-//print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
 
-$paths0 = array('\/HEURIST', '\/html', ''); 
-$paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
 
-$cnt = 0;
 
-foreach ($servers as $srv) {
-    foreach ($paths0 as $path0) {
-        foreach ($paths as $path) {
-            $s = '/'.$srv.$path0.'\/'.$path.'\//i';
-            
-            $matches = array();
-            
-            if(preg_match($s, $val, $matches)){
-            
-                $res = preg_replace($s, './', $val);    
-                if($res!=null && $val != $res){
-                    $val = $res;
-                    $cnt = $cnt + count($matches);
-                }
-                
-                foreach ($matches as $fnd) print $fnd.' &nbsp;&nbsp;&nbsp; ';
+    $paths0 = array('\/HEURIST', '\/html', '');
+    $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
+
+    $cnt = 0;
+
+    foreach ($servers as $srv) {
+        foreach ($paths0 as $path0) {
+            foreach ($paths as $path) {
+                $absPath = '/'.$srv.$path0.'\/'.$path.'\//i';
+
+                $cnt = $cnt + replaceAbsPath($s, $val);
             }
         }
     }
-}
-//print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
-
-//report if anything has been fixed
-if($cnt > 0){
-    print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
-}
 
 
-             
-return $val;    
-    
+    //report if anything has been fixed
+    if($cnt > 0){
+        print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
+    }
+
+    return $val;
 }
 ?>

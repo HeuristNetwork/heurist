@@ -17,7 +17,7 @@
  * Smarty Heurist translation modifier plugin
  * Type:     modifier
  * Name:     returns translated value for given array of field values
- * Purpose:  
+ * Purpose:
  *
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
@@ -29,11 +29,11 @@
  *
  * @return string translated string
  */
-$path = (dirname(__FILE__).'/../../../../../hserv/utilities/uLocale.php'); 
+$path = (dirname(__FILE__).'/../../../../../hserv/utilities/ULocale.php');
 //file_exists($path);
 require_once $path;
 
 function smarty_modifier_translate($input, $lang, $field=null)
 {
-    return getTranslation($input, $lang, $field);  //see uLocale
+    return getTranslation($input, $lang, $field);//see uLocale
 }

@@ -61,9 +61,9 @@ $.widget( "heurist.configEntity", {
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
-        var that = this;
+        let that = this;
 
-        var st = '';
+        let st = '';
         if(!this.options.is_vertical_layout){
             st = ' style="display:table-cell"';
         }
@@ -113,7 +113,7 @@ $.widget( "heurist.configEntity", {
             window.hWin.HEURIST4.ui.initHSelect(this.sel_saved_settings, false);
 
             if(this.sel_saved_settings.hSelect("instance")!=undefined){
-                var w = (this.options.configName=="datatable")?226:302;
+                let w = (this.options.configName=="datatable")?226:302;
                 this.sel_saved_settings.hSelect("widget").css("width", w+'px');
             }
         }
@@ -130,10 +130,10 @@ $.widget( "heurist.configEntity", {
             
             if(!this.options.buttons) this.options.buttons = {rename:'', openedit:false, remove:''};
             
-            var ele = this.element.find('.btn-rename');
+            let ele = this.element.find('.btn-rename');
             if(this.options.buttons['rename']!==false){
                 
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-pencil', 
                         label:this.options.buttons['rename'],
                         showLabel:showLabel}).show();
@@ -141,10 +141,10 @@ $.widget( "heurist.configEntity", {
                 this._on(ele, {click:function(){
        
                     //default rename action
-                    var fileName = this.sel_saved_settings.val();
+                    let fileName = this.sel_saved_settings.val();
                     if(fileName!=''){
 
-                        var entity_ID = that.options.entityID; 
+                        let entity_ID = that.options.entityID; 
                         if(fileName.indexOf('/')>0){
                             fileName = fileName.split('/');
                             entity_ID = fileName[0];
@@ -155,7 +155,7 @@ $.widget( "heurist.configEntity", {
                         window.hWin.HEURIST4.msg.showPrompt('Enter new name: ',
                             function(value){
 
-                                var request = {
+                                let request = {
                                     'a'          : 'files',
                                     'operation'  : 'rename',
                                     'entity'     : that.options.entityName,
@@ -169,8 +169,8 @@ $.widget( "heurist.configEntity", {
                                     function(response){
                                         if(response.status == window.hWin.ResponseStatus.OK){
 
-                                            var filename = response.data;
-                                            var ele = that.sel_saved_settings.find('option:selected')
+                                            let filename = response.data;
+                                            let ele = that.sel_saved_settings.find('option:selected')
                                             ele.attr('value',entity_ID+'/'+filename)
                                               .text( filename.substring(0,filename.indexOf('.cfg')) )
                                             
@@ -196,9 +196,9 @@ $.widget( "heurist.configEntity", {
             //
             //
             ele = this.element.find('.btn-openedit');
-            if(this.options.buttons['openedit']!==false && $.isFunction(this.options.openEditAction)){
+            if(this.options.buttons['openedit']!==false && window.hWin.HEURIST4.util.isFunction(this.options.openEditAction)){
                 
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
                 ele = ele.button({icon:null, //showLabel?null:'ui-icon-pencil', 
                         label:this.options.buttons['openedit'],
                         showLabel:showLabel}).css({'margin-left':10}).show();
@@ -217,30 +217,30 @@ $.widget( "heurist.configEntity", {
             //        
             ele = this.element.find('.btn-remove');
             if(this.options.buttons['remove']!==false){
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-delete', 
                         label:this.options.buttons['remove'],
                         showLabel:showLabel}).css({'margin-left':10}).show();
                 
                 this._on(ele, {click:function(){
-                var fileName = that.sel_saved_settings.val();
+                let fileName = that.sel_saved_settings.val();
                 if(fileName!=''){
 
 
                     //show confirmation dialog
-                    var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    let $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                         'Delete selected settings?',
                         {'Yes, delete' :function(){ 
                             
                             
-                            var entity_ID = that.options.entityID; 
+                            let entity_ID = that.options.entityID; 
                             if(fileName.indexOf('/')>0){
                                 fileName = fileName.split('/');
                                 entity_ID = fileName[0];
                                 fileName = fileName[1];
                             }
 
-                            var request = {
+                            let request = {
                                 'a'          : 'files',
                                 'operation'  : 'delete',
                                 'entity'     : that.options.entityName,
@@ -308,7 +308,7 @@ $.widget( "heurist.configEntity", {
         //
         this._on(this.sel_saved_settings, {change: function(){
 
-            var fileName = this.sel_saved_settings.val();
+            let fileName = this.sel_saved_settings.val();
             if(fileName=='new'){
                 this.options.openEditAction.call(this, true);
                 this.sel_saved_settings[0].selectedIndex = 0;
@@ -319,7 +319,7 @@ $.widget( "heurist.configEntity", {
                 return;
             }
             
-            var entity_ID = this.options.entityID; 
+            let entity_ID = this.options.entityID; 
             if(fileName.indexOf('/')>0){
                 fileName = fileName.split('/');
                 entity_ID = fileName[0];
@@ -332,7 +332,7 @@ $.widget( "heurist.configEntity", {
             }
             this.element.find('.btn-action-div').show();
 
-            var request = {
+            let request = {
                 'a'          : 'files',
                 'operation'  : 'get',
                 'entity'     : this.options.entityName,
@@ -341,10 +341,10 @@ $.widget( "heurist.configEntity", {
                 'file'       : fileName
             };
 
-            var that = this;                                                
+            let that = this;                                                
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
-                    var settings = null;
+                    let settings = null;
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         settings = window.hWin.HEURIST4.util.isJSON(response.data);
@@ -361,7 +361,7 @@ $.widget( "heurist.configEntity", {
                         
                     }
                     //callback function to apply configuration
-                    if($.isFunction(that.options.setSettings)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.setSettings)){
                         settings.cfg_name = that.sel_saved_settings.val();
                         that.options.setSettings( settings );      
                     }
@@ -378,7 +378,7 @@ $.widget( "heurist.configEntity", {
     //
     isSomethingChanged: function(){
 
-        var new_settings = this.options.getSettings();            
+        let new_settings = this.options.getSettings();            
         if(!new_settings) return '';
         
         if((this.original_settings != JSON.stringify(new_settings))){
@@ -400,9 +400,9 @@ $.widget( "heurist.configEntity", {
     //
     saveSettings: function(callback){
 
-        var fileName = this.inpt_save_setting_name.val();
+        let fileName = this.inpt_save_setting_name.val();
         
-        var entity_ID = this.options.entityID; 
+        let entity_ID = this.options.entityID; 
 
         if(fileName.trim()==''){
             if(this.options.saveOnExit){
@@ -419,12 +419,12 @@ $.widget( "heurist.configEntity", {
             fileName = fileName[1];
         }*/
         
-        var settings = this.options.getSettings();            
+        let settings = this.options.getSettings();            
         if(!settings) return;
         
         this.original_settings = JSON.stringify(settings);
 
-        var request = {
+        let request = {
             'a'          : 'files',
             'operation'  : 'put',
             'entity'     : this.options.entityName,
@@ -434,18 +434,16 @@ $.widget( "heurist.configEntity", {
             'content'    : JSON.stringify(settings)    
         };
 
-        var that = this;
+        let that = this;
         
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     that.inpt_save_setting_name.val('');
-                    var filename = response.data;
-                    var ele = that.sel_saved_settings.find('option[value="'+filename+'"]');
-                    if(ele.length>0){
-                        
-                    }else{
+                    let filename = response.data;
+                    let ele = that.sel_saved_settings.find('option[value="'+filename+'"]');
+                    if(ele.length==0){
                         window.hWin.HEURIST4.ui.addoption(that.sel_saved_settings[0], 
                             entity_ID+'/'+filename, 
                             filename.substring(0,filename.indexOf('.cfg')) );    
@@ -457,7 +455,7 @@ $.widget( "heurist.configEntity", {
                     that.element.show();    
                     window.hWin.HEURIST4.msg.showMsgFlash('Settings have been saved');
                     
-                    if($.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call( this, entity_ID+'/'+filename );
                     } 
 
@@ -487,7 +485,7 @@ $.widget( "heurist.configEntity", {
         
         //get list of settings
 
-        var request = {
+        let request = {
                 'a'          : 'files',
                 'operation'  : 'list',
                 'entity'     : this.options.entityName,
@@ -495,30 +493,30 @@ $.widget( "heurist.configEntity", {
                 'rec_ID'     : this.options.entityID
             };
             
-        var that = this;                                                
+        let that = this;                                                
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var ele = that.sel_saved_settings.empty();
+                    let ele = that.sel_saved_settings.empty();
                     window.hWin.HEURIST4.ui.addoption(ele[0], '', 'select...');
-                    if($.isFunction(that.options.openEditAction)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.openEditAction)){
                         window.hWin.HEURIST4.ui.addoption(ele[0], 'new', 'Create new field list');    
                     }
                     ele[0].selectedIndex = 0;
                     
-                    var recset = new hRecordSet(response.data);
+                    let recset = new HRecordSet(response.data);
                     if(recset.length()>0){
                         
                         recset.each(function(recID, rec){
-                            var filename = recset.fld(rec, 'file_name');
+                            let filename = recset.fld(rec, 'file_name');
                             
-                            var entity_id = recset.fld(rec, 'file_dir');
+                            let entity_id = recset.fld(rec, 'file_dir');
                             entity_id = entity_id.split('/')
                             entity_id = entity_id[entity_id.length-2];
                             entity_id  = entity_id+'/'+filename;
                             filename = filename.substring(0,filename.indexOf('.cfg'))
 
-                            var opt = window.hWin.HEURIST4.ui.addoption(ele[0], 
+                            let opt = window.hWin.HEURIST4.ui.addoption(ele[0], 
                                                     entity_id, 
                                                     filename);
                             if(initial_value==entity_id){
@@ -529,7 +527,7 @@ $.widget( "heurist.configEntity", {
                                 }
                             }
                         });
-                        //ele[0].selectedIndex = sel_idx;
+                       
                         
                         that.element.show();    
                     }

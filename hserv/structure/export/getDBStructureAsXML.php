@@ -4,7 +4,7 @@
 * getDBStructureAsXML.php: returns database definitions (rectypes, details etc.) as XML (HML)
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -21,12 +21,14 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 
 header("Content-Type: application/xml");
 
 // Normally jsut outputs definitions, this will include users/groups
-$includeUgrps = @$_REQUEST["includeUgrps"];    // returns null if not set
+$includeUgrps = @$_REQUEST["includeUgrps"];// returns null if not set
 
 $sysinfo = $system->get_system();
 $db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
@@ -39,13 +41,13 @@ $rty_ID = @$_REQUEST["rty"];
 $dty_ID = @$_REQUEST["dty"];
 $trm_ID = @$_REQUEST["trm"];
 if($rty_ID!=null){
-    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));    
+    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));
 }
 if($dty_ID!=null){
-    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));    
+    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));
 }
 if($trm_ID!=null){
-    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));    
+    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));
 }
 $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 
@@ -54,13 +56,12 @@ $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
 // Version info in common/config/initialise.php
 // admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_HeuristCoreDefinitions database and insert where indicated in file
-// admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql, delete non-definition tables for temp db creation speed
 // admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
 // admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface lsiting in exchange format)
 // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)
 
 
-print '<?xml version="1.0" encoding="UTF-8"?>';
+print XML_HEADER;
 print "\n\n<hml_structure>";
 
 // TODO: ADD OTHER XML HEADER INFORMATION *************
@@ -115,20 +116,20 @@ if(!$is_subset || $trm_ID>0){
 // RECORD TYPES (this will be repeated for each of the tables)
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecTypes', $rty_ID);    
+    do_print_table2('defRecTypes', $rty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
 if(!$is_subset || $dty_ID>0){
 
-    do_print_table2('defDetailTypes', $dty_ID);    
+    do_print_table2('defDetailTypes', $dty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecStructure', $rty_ID);    
-    
+    do_print_table2('defRecStructure', $rty_ID);
+
 }
 
 if(!$is_subset){
@@ -207,7 +208,7 @@ do_print_table2('usrTags');
 
 }
 
-print "\n</hml_structure>"; // end of file
+print "\n</hml_structure>";// end of file
 
 
 //
@@ -218,10 +219,10 @@ function do_print_table2( $tname, $id=0 )
     global $mysqli;
 
     $tname_tag = substr($tname,3);
-    
+
     print "\n\n<$tname_tag>";
 
-    
+
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
@@ -231,40 +232,40 @@ function do_print_table2( $tname, $id=0 )
     $id_field = $flds_names[0];
     $prefix = substr($id_field,0,3);
     $where = '';
-    
+
     if($id>0){
         if($prefix=='rst'){
-            $where = ' where rst_RecTypeID='.intval($id);       
+            $where = ' where rst_RecTypeID='.intval($id);
         }else{
-            $where = " where $id_field=".intval($id);       
+            $where = " where $id_field=".intval($id);
         }
     }
-    
-    
+
+
     $query = "select $flds from $tname".$where;
     $res = $mysqli->query($query);
 
-    while ($row = $res->fetch_assoc()) { 
-        
-        if($prefix=='rty' && !(@$row[$id_field]>0)) continue;
-        
+    while ($row = $res->fetch_assoc()) {
+
+        if($prefix=='rty' && !(@$row[$id_field]>0)) {continue;}
+
         print "<$prefix>";
         foreach($flds_list as $fld => $type){
-            
+
             $val = $row[$fld];
             if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                 $val = htmlspecialchars($mysqli->real_escape_string($val));
-            }else if(strpos($fld,'OriginatingDBID')!==false){
+            }elseif(strpos($fld,'OriginatingDBID')!==false){
                 if(!($val>0)){
                     $val = HEURIST_DBID;
                 }
-            }else if(strpos($fld,'IDInOriginatingDB')!==false){
+            }elseif(strpos($fld,'IDInOriginatingDB')!==false){
                 if(HEURIST_DBID>0 && !($val>0)){
                     $val = $val[$id_field];
                 }
             }
             print "<$fld>$val</$fld>";
-        }   
+        }
         print "</$prefix>\n";
 
     }

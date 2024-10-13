@@ -19,11 +19,9 @@ Notes:    -- assets
           -- widgets
                  admin
                  cms
-                 digital_harlem - bespoke code from ~2013
-                 dropdownmenus
+                 cpanel
                  editing
                  entity
-                 expertnation
                  lookup
                  profile
                  record

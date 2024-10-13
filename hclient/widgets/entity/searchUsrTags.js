@@ -23,9 +23,6 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
-
-        
         this.input_search_group = this.element.find('#input_search_group');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
             [{key:'any', title:window.hWin.HR('Any')},
@@ -48,7 +45,7 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
         this._on( this.input_search, { keyup: this.startSearch });
         
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1 > span').hide();
         this.element.find('.heurist-helper1 > span.'+smode+',span.common_help').show();
         
@@ -64,9 +61,7 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
         
             /* we don't filter by group - just hide acccordion
             if(this.input_search_group.val()!='any'){

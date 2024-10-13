@@ -1,7 +1,7 @@
 <?php
     /**
     * UploadHandlerInit.php
-    * Entry point for fileupload widget. It is used in multi file uploads. 
+    * Entry point for fileupload widget. It is used in multi file uploads.
     * For single file upload see fileUpload.php
     *
     * @package     Heurist academic knowledge management system
@@ -21,22 +21,32 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    //@todo move to controller
 
 error_reporting(E_ALL | E_STRICT);
 
-require_once dirname(__FILE__).'/../System.php';
+use hserv\utilities\USanitize;
+use hserv\utilities\UploadHandler;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 
 $options = array();
 
 $system = null;
 
-if(@$_REQUEST['db']){
-    $system = new System(); //to init folder const without actual coonection to db
-    $dbname = @$_REQUEST['db'];
-    $error = System::dbname_check($dbname);
-    if($error){
+$params = USanitize::sanitizeInputArray();
+
+
+if(@$params['db']){
+    $system = new hserv\System();//to init folder const without actual coonection to db
+
+    $error = mysql__check_dbname(@$params['db']);
+    if($error!=null){
+        //database name is wrong
+        header('HTTP/1.1 400 Bad Request');
         exit;
     }else{
+        $dbname = $params['db'];
         $system->initPathConstants($dbname);
     }
     $options['database'] = $dbname;
@@ -47,23 +57,22 @@ if(@$_REQUEST['db']){
 }
 
 
-if(@$_REQUEST['acceptFileTypes']!=null){
-    $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];   
+if(@$params['acceptFileTypes']!=null){
+    $options['accept_file_types'] = $params['acceptFileTypes'];
 }
-if(@$_REQUEST['unique_filename']!=null){
-    $options['unique_filename'] = ($_REQUEST['unique_filename']!='0');   
+if(@$params['unique_filename']!=null){
+    $options['unique_filename'] = ($params['unique_filename']!='0');
 }
-if(@$_REQUEST['max_file_size']>0){
-    $options['max_file_size'] = $_REQUEST['max_file_size']; 
+if(@$params['max_file_size']>0){
+    $options['max_file_size'] = $params['max_file_size'];
 }
-if(@$_REQUEST['upload_subfolder']){
-    $options['upload_subfolder'] = $_REQUEST['upload_subfolder']; 
+if(@$params['upload_subfolder']){
+    $options['upload_subfolder'] = $params['upload_subfolder'];
+    $options['image_versions'] = array('' => array('auto_orient' => true)); //disable thumbnails
 }
 
 //if(@$_REQUEST['upload_folder']){
-//    $options['upload_dir'] = $_REQUEST['upload_folder'];   
+//    $options['upload_dir'] = $_REQUEST['upload_folder'];
 //}
-
-require_once 'UploadHandler.php';
 $upload_handler = new UploadHandler($options);
 

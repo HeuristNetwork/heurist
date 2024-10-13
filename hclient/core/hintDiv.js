@@ -38,11 +38,11 @@
 function HintDiv(_id, _width, _height, _initcontent) {
 
 	//private members
-	var _className = "HintDiv";
+	const _className = "HintDiv";
 
-	var popup_div = null,
+	let popup_div = null,
 		hideTimer,
-		needHideTip = true;
+		needHideTip = true,
 		id = _id,
 		width = _width,
 		height = _height,
@@ -52,7 +52,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	{
 		if(popup_div===null){
 
-			var _map_popup = document.createElement('div');
+			let _map_popup = document.createElement('div');
 			_map_popup.id = id;
 			document.body.appendChild(_map_popup);
 			popup_div = $("#"+id);
@@ -87,7 +87,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			//tooltip div mouse out
 			function __hideToolTip2() {
 				needHideTip = true;
-				hideTimer = window.setTimeout(_hideToolTip, 500); //_hideToolTip();
+				hideTimer = window.setTimeout(_hideToolTip, 500);
 			}
 			//tooltip div mouse over
 			function __clearHideTimer2() {
@@ -117,14 +117,14 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	*/
 	function _getMousePos(e){
 
-		var posx = 0;
-		var posy = 0;
-		if (!e) var e = window.event;
-		if (e.pageX || e.pageY) 	{
-				posx = e.pageX;
-				posy = e.pageY;
+		let posx = 0;
+		let posy = 0;
+		if (!e) e = window.event;
+		if (e.pageX || e.pageY){
+			posx = e.pageX;
+			posy = e.pageY;
 		}
-		else if (e.clientX || e.clientY) 	{
+		else if (e.clientX || e.clientY){
 			posx = e.clientX + document.body.scrollLeft
 				+ document.documentElement.scrollLeft;
 			posy = e.clientY + document.body.scrollTop
@@ -139,16 +139,14 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	*/
 	function _showPopupDivAt(xy, border_top, border_right, border_height, offset){
 
-		var div_height =  popup_div.height();
-		var div_width =  popup_div.width();
-		var pageHeight = popup_div.parents().height();
-		var scrollValue = popup_div.parents().scrollTop();
+		let div_height =  popup_div.height();
+		let div_width =  popup_div.width();
 		if(!offset) {
 			offset = 5;
 		}
-		//var lft = popup_div.css('left');
-		left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
- 		top_pos=Math.max(xy[1]-(div_height/2)+offset,0);//-scrollValue;
+
+		let left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
+		let top_pos=Math.max(xy[1]-(div_height/2)+offset,0);
 
 		popup_div.css( {left:left_pos+'px',
 					top:top_pos+'px',
@@ -161,26 +159,22 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _showAt(event)
 	{
-			var xy = _getMousePos(event);
-			_showAtXY(xy);
+		let xy = _getMousePos(event);
+		_showAtXY(xy);
 	}
 
 	function _showAtXY(xy){
 
-			_init();
-			//xy = [posx = event.target.x,posy = event.target.y];
+		_init();
 
-			//var _map_popup = $("#mapPopup");
-			//_map_popup.html(xy[0]+",  "+xy[1]+"<br>");
+		let border_top = $(window).scrollTop();
+		let border_right = $(window).width();
+		let border_height = $(window).height();
+		let offset =0;
 
-			var border_top = $(window).scrollTop();
-			var border_right = $(window).width();
-			var border_height = $(window).height();
-			var offset =0;
+		_showPopupDivAt(xy, border_top ,border_right ,border_height, offset );
 
-			_showPopupDivAt(xy, border_top ,border_right ,border_height, offset );
-
-			return popup_div;
+		return popup_div;
 	}
 
 	//
@@ -196,14 +190,14 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _hideToolTip(){
 		if(needHideTip && popup_div){
-			//!!! currentTipId = null;
+		
 			_clearHideTimer();
 			popup_div.css( {visibility:"hidden",opacity:"0"});
 		}
 	}
 
 	//public members
-	var that = {
+	let that = {
 
 		showAt: function(event){
 			_showAt(event);
@@ -213,15 +207,15 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		},
 		showInfoAt: function(xy, divid, divcontent){
 
-					if(!divid){
-						divid = id+"-content";
-					}
+			if(!divid){
+				divid = id+"-content";
+			}
 
-					var my_tooltip = $("#"+divid);
-					my_tooltip.html(divcontent);
+			let my_tooltip = $("#"+divid);
+			my_tooltip.html(divcontent);
 
-                    _setSize([my_tooltip.width(), my_tooltip.height()+25]);
-					_showAtXY(xy);
+			_setSize([my_tooltip.width(), my_tooltip.height()+25]);
+			_showAtXY(xy);
 		},
 		setSize: function(wh){
 			_setSize(wh);

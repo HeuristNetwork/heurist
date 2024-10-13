@@ -17,20 +17,23 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global editCMS_WidgetCfg, CodeMirror, default_language, current_language, website_languages */
+
 //
 //
 //
 function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $container, main_callback, already_changed ){
 
-    var _className = 'editCMS_ElementCfg';
-    var element;
-    var l_cfg, //copy of json config
+    const _className = 'editCMS_ElementCfg';
+    let element;
+    let l_cfg, //copy of json config
         widget_cfg; //WidgetCfg object
-    var codeEditor = null,
+    let codeEditor = null,
         codeEditorDlg = null,
         codeEditorBtns = null;
-    var textAreaCss;
-    var margin_mode_full = true;
+    let textAreaCss;
+    let margin_mode_full = true;
     
     function _init(){
 
@@ -69,13 +72,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _initControls(){
 
-        var cont = $container;
+        let cont = $container;
 
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
         cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
         cont.find('textarea[name="elementClasses"]').val(l_cfg.classes);
 
-        var etype = (l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
+        let etype = (l_cfg.type?l_cfg.type:(l_cfg.appid?'widget':'text'));
 
         cont.find('h4').css({margin:0});
         cont.find('.props').hide(); //hide all
@@ -83,7 +86,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         cont.find('input[data-type="element-id"]').parent().show();
         cont.find('.props.'+etype).show(); //show required only
 
-        var activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
+        let activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
 
         cont.find('fieldset:first .heurist-helper3').position({
             my: 'left top', at: 'left bottom', of: cont.find('fieldset:first div:nth(1)')
@@ -120,18 +123,18 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         if(etype=='group' && l_cfg.children && l_cfg.children.length>0){
 
             //4a.add list of children with flex-grow and flex-basis
-                var item_ele = cont.find('div[data-flexitem]');
-                var item_last = item_ele;
-                for(var i=0; i<l_cfg.children.length; i++){
+                let item_ele = cont.find('div[data-flexitem]');
+                let item_last = item_ele;
+                for(let i=0; i<l_cfg.children.length; i++){
 
-                    var child = l_cfg.children[i];
+                    let child = l_cfg.children[i];
 
-                    var item = item_ele.clone().insertAfter(item_last);
+                    let item = item_ele.clone().insertAfter(item_last);
                     item.attr('data-flexitem',i).show();
-                    var lbl = item.find('.header_narrow');
+                    let lbl = item.find('.header_narrow');
                     lbl.text((i+1)+'. '+lbl.text());
 
-                    var val = (child.css)?child.css['flex']:null;
+                    let val = (child.css)?child.css['flex']:null;
                     if(val){
                         val = val.split(' '); //grow shrink basis
                     }else{
@@ -140,9 +143,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     if(val[0]) item.find('input[data-type="flex-grow"]').val(val[0]);
                     if(val.length==3 && val[2]) item.find('input[data-type="flex-basis"]').val(val[2]);
 
-                    item.find('input').change(function(e){
-                        var item = $(e.target).parent();//('div[data-flexitem]');
-                        var k = item.attr('data-flexitem');
+                    item.find('input').on('change', function(e){
+                        let item = $(e.target).parent();
+                        let k = item.attr('data-flexitem');
 
                         if(!l_cfg.children[k].css) l_cfg.children[k].css = {};
 
@@ -153,7 +156,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                         l_cfg.children[k].css['border-radius'] = '4px';
                         l_cfg.children[k].css['margin'] = '4px';*/
 
-                        var child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
+                        let child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
                         child_ele.removeAttr('style');
                         child_ele.css(l_cfg.children[k].css);
                     });
@@ -163,17 +166,17 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }else 
         if(etype=='cardinal'){ //assign cardinal properties
             
-            for(var i=0; i<l_cfg.children.length; i++){
-                var lpane = l_cfg.children[i];
-                var pane = lpane.type;
+            for(let i=0; i<l_cfg.children.length; i++){
+                let lpane = l_cfg.children[i];
+                let pane = lpane.type;
 
                 if(lpane.options){
-                   var keys = Object.keys(lpane.options); 
-                   for(var k=0; k<keys.length; k++){
-                       var key = keys[k];
-                       var ele = cont.find('[data-type="cardinal"][data-pane="'+pane+'"][name="'+key+'"]');
+                   let keys = Object.keys(lpane.options); 
+                   for(let k=0; k<keys.length; k++){
+                       let key = keys[k];
+                       let ele = cont.find('[data-type="cardinal"][data-pane="'+pane+'"][name="'+key+'"]');
                        if(ele.length>0){
-                            var val = lpane.options[key];   
+                            const val = lpane.options[key];   
                             if(ele.attr('type')=='checkbox'){
                                 ele.attr('checked', (val=='true' || val===true));
                             }else {
@@ -193,11 +196,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         //4. listeners for selects    
         cont.find('select').hSelect({change:function(event){
             
-            var ele = $(event.target);
+            let ele = $(event.target);
             
             if((ele).attr('data-type')=='cardinal') return;
             
-            var name = ele.attr('id');
+            let name = ele.attr('id');
             
             if(name=='display'){
                 if(ele.val()=='flex'){
@@ -207,10 +210,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 }
             }
             _getCss();
-            
-            //var css = 
-            //element.removeAttr('style');
-            //element.css(css);
             
             _enableSave();
         }});
@@ -222,14 +221,14 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         cont.find('input[name="background"]').change(_getCss);
         /*
             var css = _getCss();
-            //element.removeAttr('style');
-            //element.css(css);
+           
+           
         });*/
         
         //4c. button listeners
         cont.find('.margin-mode').button()
             .css({'font-size':'0.7em'})
-            .click(function(e){
+            .on('click', function(e){
             //show hide short and full margin/padding
             margin_mode_full = !margin_mode_full;
             _onMarginMode();
@@ -253,20 +252,20 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
 
         //save entire page (in background)
-        cont.find('.btn-save-page').button().css('border-radius','4px').click(function(){
+        cont.find('.btn-save-page').button().css('border-radius','4px').on('click', function(){
             __saveWidgetConfig();
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save_close'); //save and close
         });
 
-        cont.find('.btn-save-element').button().css('border-radius','4px').click(function(){
+        cont.find('.btn-save-element').button().css('border-radius','4px').on('click', function(){
             __saveWidgetConfig();
             //5. save in layout cfg
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save'); //save only
             window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         });
-        cont.find('.btn-cancel').css('border-radius','4px').button().click(function(){
+        cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
             //6. restore old settings 
             element.removeAttr('style');
             if(element_cfg.css) element.css(element_cfg.css);
@@ -284,17 +283,17 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         textAreaCss.change(function(){
 
-            var vals = textAreaCss.val();
-            //vals = vals.replace(/;/g, ";\n");
+            let vals = textAreaCss.val();
+           
             vals = vals.replace(/"/g, ' ');
             
             vals = vals.split(';')
-            var new_css = {};
-            for (var i=0; i<vals.length; i++){
-                var vs = vals[i].split(':');
+            let new_css = {};
+            for (let i=0; i<vals.length; i++){
+                let vs = vals[i].split(':');
                 if(vs && vs.length==2){
-                     var key = vs[0].trim();
-                     var val = vs[1].trim();
+                     let key = vs[0].trim();
+                     let val = vs[1].trim();
                      new_css[key] = val;
                 }
             }
@@ -303,15 +302,15 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             element.css(new_css);
             l_cfg.css = new_css;
 
-            //element.attr('style',textAreaCss.val());
-            //l_cfg.css = element.css();
+           
+           
 
             _assignCssToUI();
            
         }).trigger('change');
         
         
-        var btnDirectEdit = cont.find('div.btn-html-edit');
+        let btnDirectEdit = cont.find('div.btn-html-edit');
         if(etype=='text'){
              btnDirectEdit.parent().show();               
              btnDirectEdit.button().click(_initCodeEditor);
@@ -330,8 +329,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _getCfgFromUI(){            
         
-            var cont = $container;
-            var css = _getCss();
+            let cont = $container;
+            let css = _getCss();
             l_cfg.css = css;
             l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
             if(!l_cfg.name) l_cfg.name = 'Define name of element';
@@ -354,16 +353,16 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
             //get cardinal parameters  
             if(l_cfg.type=='cardinal')
-            for(var i=0; i<l_cfg.children.length; i++){
-                    var lpane = l_cfg.children[i];
-                    var pane = lpane.type;
+            for(let i=0; i<l_cfg.children.length; i++){
+                    let lpane = l_cfg.children[i];
+                    let pane = lpane.type;
 
                     l_cfg.children[i].options = {}; //reset
             
                     $.each(cont.find('[data-type="cardinal"][data-pane="'+pane+'"]'), function(k, item){
                          item = $(item);
-                         var name = item.attr('name');
-                         var val = item.val();
+                         let name = item.attr('name');
+                         let val = item.val();
                          if(item.attr('type')=='checkbox'){
                              val = item.is(':checked'); 
                              l_cfg.children[i].options[name] = val;    
@@ -380,8 +379,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _getCss()
     {
-        var cont = $container;
-        var css = {};
+        let cont = $container;
+        let css = {};
         if(cont.find('#display').val()=='flex'){
             css['display'] = 'flex';
 
@@ -397,10 +396,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
 
         //style - border
-        var val = cont.find('#border-style').val();
+        let val = cont.find('#border-style').val();
         css['border-style'] = val;
 
-        fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
+        let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
         if(val=='none'){
             fieldset.hide();
 
@@ -443,8 +442,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
 
         function __setDim(name){
-            var ele = cont.find('input[name="'+name+'"]');
-            var val = ele.val();
+            let ele = cont.find('input[name="'+name+'"]');
+            let val = ele.val();
             if( (val!='' || val!='auto') && parseInt(val)>0){
                 if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
                     val = val + 'px';
@@ -471,15 +470,15 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
 
         if(l_cfg.css){
-            var old_css = l_cfg.css;
+            let old_css = l_cfg.css;
             //remove these parameters from css and assign from form
-            var params = ['display','width','height',
+            let params = ['display','width','height',
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
                 'background','background-image','bg-image',
                 'flex-direction','flex-wrap','justify-content','align-items','align-content'];
-            for(var i=0; i<params.length; i++){
-                var prm = params[i];
+            for(let i=0; i<params.length; i++){
+                let prm = params[i];
                 if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
                     old_css[prm] = null;
                     delete old_css[prm];
@@ -501,13 +500,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _onMarginSync(event){
         
-        var type = $(event.target).attr('data-type');
+        let type = $(event.target).attr('data-type');
         
         if($(event.target).is(':checked')){
             
             //disable
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), true);
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-left"]'), false);
+            
+            
 
             $container.find('input[name^="'+type+'-"]').prop('readonly',true);
             $container.find('input[name^="'+type+'-left"]').removeProp('readonly');
@@ -516,7 +515,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             
         }else{
             $container.find('input[name^="'+type+'-"]').removeProp('readonly');
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), false);
+            
         }       
     }
     
@@ -532,7 +531,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         if($container.find('.cb_sync[data-type="'+type+'"]').is(':checked')){
         
-                var val = $container.find('input[name="'+type+'-left"]').val();
+                let val = $container.find('input[name="'+type+'-left"]').val();
                 $container.find('input[name="'+type+'-top"]').val(val);
                 $container.find('input[name="'+type+'-bottom"]').val(val);
                 $container.find('input[name="'+type+'-right"]').val(val);
@@ -544,8 +543,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     //
     function _onMarginMode(){
-        var cont = $container;
-        var btn = cont.find('.margin-mode').hide();
+        let cont = $container;
+        let btn = cont.find('.margin-mode').hide();
         if(margin_mode_full){
             btn.text('short');
             cont.find('.margin-short').hide();
@@ -573,6 +572,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         let s = '';
         let has_border_prop = false;
         if(l_cfg.css){
+            
+            let border_styles = [];
+            $("#border-style option").each(function()
+            {
+                border_styles.push($(this).val());
+            });
 
             s = [];
             for(const [style, value] of Object.entries(l_cfg.css)){
@@ -586,8 +591,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
                     let parts = value.split(' ');
 
-                    let part_zero_style = (parts.length == 2 && parts[0].indexOf(border_styles) !== -1);
-                    let part_one_style = (parts.length == 2 && parts[1].indexOf(border_styles) !== -1);
+                    let part_zero_style = (parts.length == 2 && border_styles.indexOf(parts[0]) !== -1);
+                    let part_one_style = (parts.length == 2 && border_styles.indexOf(parts[1]) !== -1);
 
                     // Width
                     if(parts.length == 3 || part_one_style){
@@ -657,20 +662,20 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _assignCssToUI(){        
             
-            var cont = $container;
+            let cont = $container;
             
             //assign flex css parameters
-            var params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
-            for(var i=0; i<params.length; i++){
-                var prm = params[i];
+            let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+            for(let i=0; i<params.length; i++){
+                let prm = params[i];
                 if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
             }
 
-            var no_margin_values = true, mode_full = false;    
+            let no_margin_values = true, mode_full = false;    
             //assign other css parameters
             cont.find('[data-type="css"]').each(function(i,item){
-                var key = $(item).attr('name');
-                var val = l_cfg.css[key];
+                let key = $(item).attr('name');
+                let val = l_cfg.css[key];
                 if(key=='background'){
                     $(item).prop('checked', val='none');
                 }else if(val){
@@ -687,7 +692,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     }
                 }
             });
-            margin_mode_full = true; //no_margin_values || mode_full;
+            margin_mode_full = true;
             //init file picker
             cont.find('input[name="bg-image"]')
                     .click(_selecHeuristMedia);
@@ -713,7 +718,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 cont.find('.flex-select').each(function(i,item){ $(item).parent().hide(); })
             }
             
-            var fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
+            let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
             if(cont.find('#border-style').val()=='none'){
                 fieldset.hide();
             }else{
@@ -735,13 +740,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     
    
-    //
+    // NOT USED
     // from UI to element properties/css
     //
     function _getValues(){
-        
-
-        //return opts;
+        return '';
     }//_getValues
 
 
@@ -750,9 +753,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _initCodeEditor() {
         
-        var $dlg;
+        let $dlg;
         
-        var ce_container = $container.find('#codemirror-body');
+        let ce_container = $container.find('#codemirror-body');
 
         if(codeEditor==null){
             
@@ -775,9 +778,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 });
         }        
 
-        var contents = null; //keep translations
+        let contents = null; //keep translations
                 
-        var codeEditorBtns = [
+        let codeEditorBtns = [
                     {text:window.hWin.HR('Cancel'), 
                         id:'btnCancel',
                         css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
@@ -790,7 +793,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                         //disabled:'disabled',
                         css:{'float':'right'}, 
                         click: function() { 
-                            var newval = codeEditor.getValue();
+                            let newval = codeEditor.getValue();
 
                             if(contents==null){ //no languages defined
                                 if(l_cfg.content != newval){
@@ -801,8 +804,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                             }else{ //multilang
                                 let cur_lang = ce_container.attr('data-lang');
                                 contents[cur_lang] = newval;
-                                var langs = Object.keys(contents);
-                                for(var i=0; i<langs.length; i++){
+                                let langs = Object.keys(contents);
+                                for(let i=0; i<langs.length; i++){
                                     let lang_key = 'content'+langs[i];
                                     if(default_language.toUpperCase()==langs[i]){
                                         lang_key = 'content';
@@ -822,11 +825,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 
         //add language buttons
         if(website_languages!=''){
-            var langs = website_languages.split(',');
+            let langs = website_languages.split(',');
             if(langs.length>0){
                 contents ={};
                 
-                for(var i=0;i<langs.length;i++){
+                for(let i=0;i<langs.length;i++){
 
                      let lang = langs[i].toUpperCase();                     
                      if(Object.hasOwn(l_cfg, 'content'+lang)){
@@ -843,7 +846,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 click: function(event) {  //switch language
                     
                     //keep previous
-                    var newval = codeEditor.getValue();
+                    let newval = codeEditor.getValue();
                     let cur_lang = ce_container.attr('data-lang');
                     
                     if(contents[cur_lang]!=newval){
@@ -898,7 +901,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         */
 
 
-        var initial_content, init_lang;
+        let initial_content, init_lang;
         if(contents==null){
             //languages not defined
             //assign content to editor (default language)
@@ -928,15 +931,15 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         //autoformat
         setTimeout(function(){
-                    //codeEditorDlg.find('div.CodeMirror').css('height','100%').show();
+                   
                     
-                    var totalLines = codeEditor.lineCount();  
+                    let totalLines = codeEditor.lineCount();  
                     codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
                     codeEditor.scrollTo(0,0);
                     codeEditor.setCursor(0,0); //clear selection
                     
                     codeEditor.focus()
-                    //setTimeout(function(){;},200);
+                   
                 },500);
     }
     
@@ -953,7 +956,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //
     function _selecHeuristMedia(){
 
-        var popup_options = {
+        let popup_options = {
             isdialog: true,
             select_mode: 'select_single',
             edit_addrecordfirst: false, //show editor atonce
@@ -967,13 +970,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 if(data){
 
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                        var recordset = data.selection;
-                        var record = recordset.getFirstRecord();
+                        let recordset = data.selection;
+                        let record = recordset.getFirstRecord();
                         
-                        var sUrl = recordset.fld(record,'ulf_ExternalFileReference');
+                        let sUrl = recordset.fld(record,'ulf_ExternalFileReference');
                         if(!sUrl){
                             //always add media as reference to production version of heurist code (not dev version)
-                            var sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                            sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
                             +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
                             $container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
                         }else{
@@ -1003,20 +1006,20 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         if(!$container.find('.btn-save-element').prop('disabled')){
             
-            var $dlg;
-            var _buttons = [
+            let $dlg;
+            let _buttons = [
                 {text:window.hWin.HR('Save'), 
                     click: function(){
-                        $container.find('.btn-save-element').click();
+                        $container.find('.btn-save-element').trigger('click');
                         $dlg.dialog('close');
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
-                        $container.find('.btn-cancel').click();
+                        $container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close'); 
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
@@ -1024,7 +1027,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                 }
             ];            
             
-            var sMsg = '"'+ window.hWin.HEURIST4.util.stripTags(l_cfg.name) 
+            let sMsg = '"'+ window.hWin.HEURIST4.util.stripTags(l_cfg.name) 
                     +'" '+window.hWin.HR('element has been modified');
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Element changed')});   
 
@@ -1039,7 +1042,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

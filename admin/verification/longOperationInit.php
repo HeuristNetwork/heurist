@@ -1,9 +1,10 @@
 <?php
 
 /**
-* longOperationInit.php: 
-* 
-* iframe (wait) wrapper for listUploadedFilesErrors and listDatabaseErrors and rebuild titles
+* longOperationInit.php:
+*
+* iframe (wait) wrapper for listUploadedFilesErrors,rebuildRecordTitles,
+* rebuildCalculatedFields and checkRecURL
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -30,18 +31,18 @@ $dbname = htmlspecialchars($_REQUEST['db']);
 
 if(@$_REQUEST['type']=='titles'){
     if($recTypeIDs){
-        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
+        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;
     }else{
-        $srcURL = 'rebuildRecordTitles.php?db='.$dbname;    
+        $srcURL = 'rebuildRecordTitles.php?db='.$dbname;
     }
     $sTitle = 'Recalculation of composite record titles';
 
 }else
 if(@$_REQUEST['type']=='calcfields'){
     if($recTypeIDs){
-        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
+        $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;
     }else{
-        $srcURL = 'rebuildCalculatedFields.php?db='.$dbname;    
+        $srcURL = 'rebuildCalculatedFields.php?db='.$dbname;
     }
     $sTitle = 'Recalculation of calculated fields';
 
@@ -54,8 +55,7 @@ if(@$_REQUEST['type']=='urls'){
     $srcURL = 'checkRecURL.php?db='.$dbname;
     $sTitle = 'Check Records URL';
 }else{
-    $srcURL = 'listDatabaseErrors.php?db='.$dbname;
-    $sTitle = 'Verifying database';
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -65,22 +65,22 @@ if(@$_REQUEST['type']=='urls'){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
-        
+
         <script type="text/javascript">
-        
-        $(document).ready(function() {   
-        
+
+        $(document).ready(function() {
+
             setTimeout(function(){
                 var $dosframe = $('#verification_output');
                 $dosframe.on('load', function(){
-                    $dosframe.css({width:'97%',height:'97%'}).show(); 
+                    $dosframe.css({width:'97%',height:'97%'}).show();
                     $('#in_porgress').hide()
                 });
-                
+
                 $dosframe.attr("src", "<?php echo $srcURL; ?>");
              },500);
         });
-        
+
         </script>
         <style>
         div#in_porgress{
@@ -93,10 +93,10 @@ if(@$_REQUEST['type']=='urls'){
             height:100%;
             min-height:250px;
         }
-        </style>            
+        </style>
     </head>
     <body class="popup" style="overflow:hidden">
-        <div id='in_porgress'><h2><?php echo $sTitle; ?>. This may take up to a few minutes for large databases...</h2></div>    
+        <div id='in_porgress'><h2><?php echo $sTitle; ?>. This may take up to a few minutes for large databases...</h2></div>
         <iframe  title="Verification Output" id="verification_output" style="display:none;border:none;width:1;height:1;position:absolute;">
         </iframe>
     </body>

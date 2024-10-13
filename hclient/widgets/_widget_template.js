@@ -28,8 +28,6 @@ $.widget( "heurist.widgetname", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
-
         this.element
         // prevent double click to select text
         .disableSelection();
@@ -63,7 +61,7 @@ $.widget( "heurist.widgetname", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //this.select_rectype.remove();
+       
     }
 
 });

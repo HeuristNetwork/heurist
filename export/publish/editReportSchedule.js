@@ -34,24 +34,18 @@
 
 function ReportScheduleEditor() {
 
-        var _className = "ReportScheduleEditor",
-            _entity, //object (report schedule) to edit
+        const _className = "ReportScheduleEditor";
+        let _entity, //object (report schedule) to edit
             _recID,     // its ID
             _updatedFields = [], //field names which values were changed to be sent to server
             _updatedDetails = []; //field values
             
-        var _reports = [];    
+        let _reports = [];    
 
     /**
     * Initialization of input form
     */
     function _init() {
-
-        var typeID = "smarty",
-            templatefile = '',
-            qlabel = '',
-            hquery = '';
-
 
         document.getElementById("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ window.hWin.HAPI4.database + "/generated-reports)";
 
@@ -60,8 +54,8 @@ function ReportScheduleEditor() {
 
         if (!Number(_recID)>0) { _recID = 0; }
             
-        var _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
-        var request = {method:'getreport', recID:_recID};
+        const _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
+        const request = {method:'getreport', recID:_recID};
             
         window.hWin.HEURIST4.util.sendRequest(_url, request, null, _continueInit);
         
@@ -69,11 +63,6 @@ function ReportScheduleEditor() {
     }
     
     function _continueInit(response){
-
-        var typeID = "smarty",
-            templatefile = '',
-            qlabel = '',
-            hquery = '';
         
         if(response.status != window.hWin.ResponseStatus.OK){
             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -81,11 +70,12 @@ function ReportScheduleEditor() {
         }
 
         _reports = response['data'];
+
+        let qlabel;
+        let typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
+        let templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
         
-        typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
-        templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
-        
-        hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
+        let hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
             
             
         if(window.hWin.HEURIST4.util.isempty(typeID)){
@@ -94,7 +84,7 @@ function ReportScheduleEditor() {
         if(window.hWin.HEURIST4.util.isnull(hquery)){
             hquery = '';
         }else{
-            var _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
+            let _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
             if(!window.hWin.HEURIST4.util.isnull(_qlabel)){
                 qlabel = _qlabel;
             }
@@ -130,7 +120,7 @@ function ReportScheduleEditor() {
     */
     function _updateTemplatesList(context) {
 
-            var sel = document.getElementById('rps_Template'),
+            let sel = document.getElementById('rps_Template'),
                 option,
                 keepSelIndex = sel.selectedIndex;
 
@@ -140,7 +130,7 @@ function ReportScheduleEditor() {
             }
 
             if(!window.hWin.HEURIST4.util.isnull(context) && context.length>0){
-                for (i in context){
+                for(let i in context){
                     if(i!==undefined){
                         window.hWin.HEURIST4.ui.addoption(sel, context[i].filename, context[i].name);
                     }
@@ -156,9 +146,9 @@ function ReportScheduleEditor() {
     * loads list of templates
     */
     function _reload_templates(){
-                var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-                var callback = _updateTemplatesList;
-                var request = {mode:'list'};
+                let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+                let callback = _updateTemplatesList;
+                let request = {mode:'list'};
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
 
@@ -169,12 +159,12 @@ function ReportScheduleEditor() {
     */
     function _fromArrayToUI(){
 
-        var i,
+        let i,
             el,
             fnames = _reports.fieldNames;
 
-        for (i = 0, l = fnames.length; i < l; i++) {
-            var fname = fnames[i];
+        for(let i = 0, l = fnames.length; i < l; i++) {
+            let fname = fnames[i];
             el = document.getElementById(fname);
             if(!window.hWin.HEURIST4.util.isnull(el)){
                 el.value = _entity[i];
@@ -191,7 +181,7 @@ function ReportScheduleEditor() {
             document.getElementById("statusMsg").innerHTML = "";
         }
         //set interval to 1440 (1 day) in case not defined
-        var interval = document.getElementById("rps_IntervalMinutes").value;
+        let interval = document.getElementById("rps_IntervalMinutes").value;
         if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<0){
             document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
@@ -218,19 +208,22 @@ function ReportScheduleEditor() {
         _updatedFields = [];
         _updatedDetails = [];
 
-        var interval = document.getElementById("rps_IntervalMinutes").value;
+        let interval = document.getElementById("rps_IntervalMinutes").value;
         if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<0){
             document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
         
-        var i,
+        let i,
             fnames = _reports.fieldNames;
 
         //take only changed values
-        for (i = 0, l = fnames.length; i < l; i++){
-            var fname = fnames[i];
-            el = document.getElementById(fname);
-            if( !window.hWin.HEURIST4.util.isnull(el) && fname!='rps_ID' ){
+        for(let i = 0, l = fnames.length; i < l; i++){
+            let fname = fnames[i];
+            let el = document.getElementById(fname);
+            if( window.hWin.HEURIST4.util.isnull(el) || fname=='rps_ID' ){
+                continue;
+            }
+            
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
                     _updatedFields.push(fname);
@@ -246,7 +239,7 @@ function ReportScheduleEditor() {
                     _updatedFields = [];
                     return "mandatory";
                 }
-            }
+            
         }
 
         return "ok";
@@ -266,13 +259,13 @@ function ReportScheduleEditor() {
             return;   
         }
         
-        var error = false,
+        let error = false,
             report = "",
             ind;
 
         for(ind in response.data){
             if( !window.hWin.HEURIST4.util.isnull(ind) ){
-                var item = response.data[ind];
+                let item = response.data[ind];
                 if(isNaN(item)){
                     window.hWin.HEURIST4.msg.showMsgErr(item);
                     error = true;
@@ -287,9 +280,9 @@ function ReportScheduleEditor() {
         }
 
         if(!error){
-            var ss = (_recID < 0)?"added":"updated";
+            let ss = (_recID < 0)?"added":"updated";
 
-            // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
+           
             window.close(response); //send back new HEURIST strcuture
         }
         
@@ -310,18 +303,18 @@ function ReportScheduleEditor() {
             return;
         }
 
-        var str = null;
+        let str = null;
 
         //2. creates object to be sent to server
         if(_recID !== null && _updatedFields.length > 0){
-            var k,
+            let k,
                 val;
-            var oDataToServer = {report:{
+            let oDataToServer = {report:{
                 colNames:[],
                 defs: {}
             }};
 
-            var values = [];
+            let values = [];
             for(k = 0; k < _updatedFields.length; k++) {
                 oDataToServer.report.colNames.push(_updatedFields[k]);
                 values.push(_updatedDetails[k]);
@@ -333,9 +326,9 @@ function ReportScheduleEditor() {
                 oDataToServer.report.defs[_recID].push(values[val]);
             }
             // 3. sends data to server
-            var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
-            var callback = _updateResult;
-            var request = {method:'savereport', data:oDataToServer};
+            let baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
+            let callback = _updateResult;
+            let request = {method:'savereport', data:oDataToServer};
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
         } else {
             window.close(null);
@@ -343,7 +336,7 @@ function ReportScheduleEditor() {
     }
 
     //public members
-    var that = {
+    let that = {
 
             /**
              *    Apply form - sends data to server and closes this pop-up window in case of success
@@ -358,7 +351,7 @@ function ReportScheduleEditor() {
             cancel : function () {
                 _fromUItoArray(false);
                 if(_updatedFields.length > 0) {
-                    var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
+                    let areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
                     if(areYouSure) {
                         window.close(null);
                     }

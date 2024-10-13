@@ -19,18 +19,19 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     define('LOGIN_REQUIRED',1);
-    define('PDIR','../../');    
+    define('PDIR','../../');
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     ?>
+	    <script type="text/javascript" src="importBase.js"></script>
 	    <script type="text/javascript" src="importFileData.js"></script>
 
 	    <script type="text/javascript">
             function onPageInit(success){
             	if(success){
-            		var importFileData = new hImportFileData();
+            		var importFileData = new HImportFileData();
             	}
             }
         </script>
@@ -53,8 +54,8 @@
         	{
         		font-size: 1em;
         	}
-			
-			div.top-div, 
+
+			div.top-div,
 			div.bottom-div{
 				display: flex;
 				align-content: center;
@@ -78,7 +79,7 @@
 				flex: 0 1 200px;
 			}
         </style>
-        
+
     </head>
 
     <!-- HTML -->
@@ -91,16 +92,17 @@
 
     				<p><b>Step 1</b></p>
     				<p>
-    					Paste content in area below (each line MUST contain an ID), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br><br>
+    					Paste content in area below (each line MUST contain an ID), with usual delimiters (eg. commas) and enclosing (e.g. double quotes).<br>
+    					The visibility field can only have one value, the newest value will be used (except when retaining existing values).<br><br>
 
-						It is recommend to download the CSV file reference (Found at Admin > Manage files) and then use the values under the ID column (first column) here.
+    					It is recommend to download the CSV file reference (Found at Admin > Manage files) and then use the values under the ID column (first column) here.
     				</p>
     				<input type="file" id="uploadFile" style="display:none">
     				<div style="padding-top:4px">
     					<h2 style="display: inline-block;margin:0">or</h2>
     					<div id="btnUploadFile">Upload File</div>
 
-    					<div style="float:right">encoding: 
+    					<div style="float:right">encoding:
     						<select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
     						</select>
     					</div>
@@ -108,7 +110,7 @@
 
     			</div>
 
-    			<textarea id="sourceContent" rows="25" cols="0" 
+    			<textarea id="sourceContent" rows="25" cols="0"
     			style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;margin-top: 10px;"></textarea>
 
     		</div>
@@ -118,7 +120,7 @@
     			<div style="height:10em;">
     				<p><b>Step 2</b></p>
     				<div>
-    					<input id="csv_header" 
+    					<input id="csv_header"
     					style="margin:0 0.5em 0 0"
     					class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
     					<label for="csv_header">Labels in line 1</label>
@@ -145,11 +147,11 @@
     					</select>
     				</div>
 
-			    </fieldset>            
+			    </fieldset>
 
 			</div>
 
-			<div id="divStep3"> 
+			<div id="divStep3">
 
 				<div style="height:1em;">
 					<p><b>Step 3</b></p>
@@ -160,42 +162,48 @@
 					<p style="margin: 0px 0px 10px;">Select field assignment<br>(ID and Descriptor fields)</p>
 
 					<div>
-						<label style="color:red">ID Field</label><br>
+						<span style="color:red">ID Field</span><br>
 						<select id="file_id" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
                     <div>
-						<label style="color:red">ID Type</label><br>
+						<span style="color:red">ID Type</span><br>
 						<select id="file_id_type" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                             <option value="ulf_ID">Heurist File ID</option>
                             <option value="ulf_ObfuscatedFileID">Obfuscated ID</option>
                             <option value="ulf_FullPath">File path + name</option>
-                            <!--<option value="ulf_Checksum">Checksum</option>-->
 						</select>
 					</div>
 					<div>
-						<label>Description</label><br>
+						<span>Description</span><br>
 						<select id="file_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Caption</label><br>
+						<span>Caption</span><br>
 						<select id="file_cap" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Copyright</label><br>
+						<span>Copyright</span><br>
 						<select id="file_rights" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Copy owner</label><br>
+						<span>Copy owner</span><br>
 						<select id="file_owner" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
+					<div>
+						<span>Visibility</span><br>
+						<select id="file_vis" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
+						</select>
+						<br>
+						<span class="heurist-helper1">Allowed values: <strong>public</strong> or <strong>private</strong></span>
+					</div>
 
 				</fieldset>
-				
+
 				<div style="margin: 5px">
 					<label>
 						<input type="radio" name="dtl_handling" value="1" class="text ui-widget-content ui-corner-all" checked="checked">

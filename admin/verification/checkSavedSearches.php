@@ -24,16 +24,12 @@
 
 ini_set('max_execution_time', '0');
 
+define('ADMIN_PWD_REQUIRED',1);
 define('MANAGER_REQUIRED', 1);
-define('PDIR', '../../');  //need for proper path to js and css
+define('PDIR', '../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php'; // for recordSearch()
-
-if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    exit;
-}
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';// for recordSearch()
 
 $mysqli = $system->get_mysqli();
 
@@ -41,6 +37,8 @@ $databases = mysql__getdatabases4($mysqli);
 
 // Generic record fields
 $rec_meta = array('title','typeid','typename','added','modified','addedby','url','notes','owner','access','tag');
+
+$databases = array_map('htmlentities', $databases);
 
 $results = array_fill_keys(array_values($databases), array());
 
@@ -53,7 +51,7 @@ foreach($databases as $db){
     mysql__usedatabase($mysqli, $db);
 
     $saved_searches = mysql__select_assoc($mysqli, 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches');
-    $ss_err = empty($saved_searches) ? $mysqli->error : ''; // save possible error
+    $ss_err = empty($saved_searches) ? $mysqli->error : '';// save possible error
 
     $owners = mysql__select_list2($mysqli, 'SELECT ugr_ID FROM sysUGrps', 'intval');
 
@@ -63,15 +61,15 @@ foreach($databases as $db){
 
         $svs_Query = $svs_Details['svs_Query'];
 
-        $query_obj = json_decode($svs_Query, true); // filter/facet search
+        $query_obj = json_decode($svs_Query, true);// filter/facet search
 
-        $query_str = is_string($svs_Query) && strpos($svs_Query, '?') === 0 ? $svs_Query : ""; // simple search
+        $query_str = is_string($svs_Query) && strpos($svs_Query, '?') === 0 ? $svs_Query : "";// simple search
 
         $results[$db][$svs_ID] = array();
 
         if(json_last_error() !== JSON_ERROR_NONE && empty($query_str)){
             $results[$db][$svs_ID][] = "Query is in unknown format, " . htmlspecialchars($svs_Query);
-        }else if(is_array($query_obj) && !array_key_exists('facets', $query_obj) && !array_key_exists('q', $query_obj)){
+        }elseif(is_array($query_obj) && !array_key_exists('facets', $query_obj) && !array_key_exists('q', $query_obj)){
             $results[$db][$svs_ID][] = "Unknown formatting for saved search";
         }
 
@@ -84,11 +82,11 @@ foreach($databases as $db){
             $results[$db][$svs_ID][] = "Saved search belongs to a non-existant user/workgroup, formerly #" . $svs_Details['svs_UGrpID'];
         }
 
-        $is_filter_facet = is_array($query_obj) && !empty($query_obj); // is a simple filter or facet search
+        $is_filter_facet = is_array($query_obj) && !empty($query_obj);// is a simple filter or facet search
         $type = 'unknown';
         if($is_filter_facet && array_key_exists('q', $query_obj)){ // is simple query
 
-            $query_obj['detail'] = 'count'; // 'ids' return something simple
+            $query_obj['detail'] = 'count';// 'ids' return something simple
             $res = recordSearch($system, $query_obj);
 
             if(!is_array($res) || $res['status'] != HEURIST_OK){
@@ -105,7 +103,7 @@ foreach($databases as $db){
 
             $type = !empty($query_str) ? 'simple' : 'filter';
 
-        }else if($is_filter_facet && array_key_exists('facet', $query_obj)){ // is facet, check facets=>[]=>code
+        }elseif($is_filter_facet && array_key_exists('facet', $query_obj)){ // is facet, check facets=>[]=>code
 
             foreach($query_obj['facet'] as $facet){
 
@@ -148,7 +146,7 @@ foreach($databases as $db){
                     continue;
                 }
 
-                $top_dty = filter_var($top_dty, FILTER_SANITIZE_NUMBER_INT); // strip possible 'lt', 'rt', etc...
+                $top_dty = filter_var($top_dty, FILTER_SANITIZE_NUMBER_INT);// strip possible 'lt', 'rt', etc...
 
                 $res = $mysqli->query(str_replace(array('dtyID', 'rtyID'), array(intval($top_dty), intval($top_rty)), $field_in_rst));
 
@@ -171,7 +169,7 @@ foreach($databases as $db){
                     $dty_id = $code_parts[$j];
 
                     $rty_id = strpos($rty_id, ',') !== false ? explode(',', $rty_id)[0] : $rty_id;
-                    
+
                     if(in_array($dty_id, $rec_meta)){ // uses record data field
 
                         // check rectype exists
@@ -188,7 +186,7 @@ foreach($databases as $db){
                         continue;
                     }
 
-                    $dty_id = filter_var($dty_id, FILTER_SANITIZE_NUMBER_INT); // strip possible 'lt', 'rt', etc...
+                    $dty_id = filter_var($dty_id, FILTER_SANITIZE_NUMBER_INT);// strip possible 'lt', 'rt', etc...
 
                     $res = $mysqli->query(str_replace(array('dtyID', 'rtyID'), array(intval($dty_id), intval($rty_id)), $field_in_rst));
 
@@ -211,10 +209,10 @@ foreach($databases as $db){
 
             $results[$db][$svs_ID] = "<div style='padding: 10px 5px;' data-type='$type' data-name='". $svs_Details['svs_Name'] ."'>"
                                         . "ID: <strong style='padding-right: 15px;'>$svs_ID</strong> "
-                                        . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>" 
-                                        . implode("<br>", $results[$db][$svs_ID]) 
-                                    ."</div>";
-        }else if(array_key_exists($svs_ID, $results[$db])){
+                                        . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>"
+                                        . implode("<br>", $results[$db][$svs_ID])
+                                    .DIV_E;
+        }elseif(array_key_exists($svs_ID, $results[$db])){
             unset($results[$db][$svs_ID]);
         }
     }
@@ -231,7 +229,7 @@ foreach($databases as $db){
 
         $results[$db] = $results_str;
     }else{
-        unset($results[$db]); // omit from results
+        unset($results[$db]);// omit from results
     }
 }
 ?>
@@ -244,10 +242,10 @@ foreach($databases as $db){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Check saved searches</title>
 
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <script type="text/javascript">
-            
+
             window.onload = () => {
 
                 if(document.querySelector('#db_filter').length == 0){ // no additional setup necessary
@@ -256,7 +254,7 @@ foreach($databases as $db){
 
                 // Filter db name
                 document.querySelector('#db_filter').onkeyup = (event) => {
-                    
+
                     let filter = event.target.value;
 
                     document.querySelectorAll('[data-db]').forEach((ele) => {
@@ -273,7 +271,7 @@ foreach($databases as $db){
 
                 // Filter saved search name
                 document.querySelector('#ss_filter').onkeyup = (event) => {
-                    
+
                     let filter = event.target.value;
 
                     document.querySelectorAll('[data-name]').forEach((ele) => {
@@ -302,7 +300,7 @@ foreach($databases as $db){
                 if(chkboxes.length === 4){
 
                     chkboxes.forEach(
-                        ele => document.querySelectorAll(`[data-type="${ele.value}"]`).length === 0 ? 
+                        ele => document.querySelectorAll(`[data-type="${ele.value}"]`).length === 0 ?
                                     ele.parentNode.style.display = 'none' : ele.parentNode.style.display = 'inline'
                     );
                 }
@@ -310,17 +308,17 @@ foreach($databases as $db){
         </script>
 
     </head>
-    
+
     <body class="popup" style="overflow:auto">
 
-        <?php 
-        if(!empty($results)){ 
+        <?php
+        if(!empty($results)){
         ?>
 
         <div>
             <label style="padding-right: 10px;">Database name: <input type="text" id="db_filter"></label>
             <label style="padding-right: 20px;">Search name: <input type="text" id="ss_filter"></label>
-            Search type: 
+            Search type:
             <label><input type="checkbox" class="search_type" value="filter" checked="checked"> Filter</label>
             <label><input type="checkbox" class="search_type" value="facet" checked="checked"> Facet</label>
             <label><input type="checkbox" class="search_type" value="simple" checked="checked"> Simple</label>
@@ -328,12 +326,12 @@ foreach($databases as $db){
         </div>
 
         <?php
-            echo implode('<hr>', $results); 
-        }else if(empty($databases)){
+            echo implode('<hr>', $results);
+        }elseif(empty($databases)){
             echo "<h2>An error occurred with retrieving a list of available databases</h2>";
-        }else{ 
-            echo "<h2>No issues found with any saved filters or facets</h2>"; 
-        } 
+        }else{
+            echo "<h2>No issues found with any saved filters or facets</h2>";
+        }
         ?>
 
     </body>

@@ -16,14 +16,16 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global layoutMgr */
+
 //
 // widget_cfg -json cfg for widget to be edited 
 // _layout_content- json cfg for website
 //
 function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
-    var _className = 'editCMS_WidgetCfg';
-    //var isWebPage = false;
+    const _className = 'editCMS_WidgetCfg';
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -35,7 +37,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             empty_remark_def: 'resultList_empty_remark'
         },
         heurist_resultListExt: {
-            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.html
+            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.htm
             empty_remark_def: 'No default'
         },
         heurist_resultListDataTable: {
@@ -53,7 +55,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
     
     function _init(){
 
-        var buttons= [
+        let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 id:'btnCancel',
                 css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
@@ -66,12 +68,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 //disabled:'disabled',
                 css:{'float':'right'}, 
                 click: function() { 
-                        var config = _getValues();
+                        let config = _getValues();
                         if(config!==false){
                             main_callback.call(this, config);
                             $dlg.dialog( "close" );    
                         }
         }}];
+
+        if(!window.hWin.HEURIST4.util.isFunction(on_change)){
+            on_change = $.noop();
+        }
         
         if($dlg && $dlg.length>0){
             //container provided
@@ -120,8 +126,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
     //
     function _initControls(){
         
-        var widget_name = widget_cfg.appid;
-        var opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
+        let widget_name = widget_cfg.appid;
+        let opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
 
         if(_using_dialog){
 
@@ -158,21 +164,21 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         $dlg.find('div.'+widget_name+', hr.'+widget_name).show();
         
         //fill page list
-        var selPage = $dlg.find('select[name="search_page"]');
+        let selPage = $dlg.find('select[name="search_page"]');
         
-        var main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
+        let main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
         
         if(main_menu.length>0 && widget_name!='heurist_StoryMap'){
-            pages = main_menu.navigation('getMenuContent','list');
+            let pages = main_menu.navigation('getMenuContent','list');
             if(!pages){
                 selPage.parent().hide();
             }else{
                 pages.unshift({key:'',title:''});   
                 window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
             }
-            //isWebPage = false;
+           
         }else{
-            //isWebPage = true;
+           
             selPage.parent().hide();
         }
         
@@ -181,7 +187,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find map widget on this page
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
-                    var ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    const ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
@@ -192,11 +198,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
             if(!opts.search_realm){ //not defined yet
             
-                if(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)
-                {
-                    
-                }else{
-                    var sg = layoutMgr.layoutContentFindMainRealm(_layout_content);    
+                if(!(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
+                    let sg = layoutMgr.layoutContentFindMainRealm(_layout_content);    
                     if(sg=='') sg = 'search_group_1';
                     opts.search_realm = sg;
                 }
@@ -206,7 +209,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             
             if(opts.search_page) {
                 $(selPage).val(opts.search_page);        
-                //selPage.hSelect('refresh');
+               
             }
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
@@ -228,12 +231,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     $dlg.find("#zoom_delta").val(opts.layout_params.zoom_delta>0?opts.layout_params.zoom_delta:1);    
                     $dlg.find("#zoom_to_selected").prop('checked', opts.layout_params.zoom_to_selected);    
 
-                    var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
+                    let ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
                     $dlg.find('input[name=""]').each(
                         function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
                     );
                                                                 
-                    var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
+                    let legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
                     if(legend.length>0){
 
                         $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0); //expand on start
@@ -242,7 +245,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             if(parseInt(val)>0){
                                 $dlg.find('input[name="legend_width"]').val(val);        
                             }else if(val!='off'){
-                                var is_exp = (val[0]!='-')
+                                let is_exp = (val[0]!='-')
                                 if (!is_exp) legend[i] = val.substring(1);
                                 $dlg.find('input[name="legend_exp"][value="'+legend[i]+'"]').prop('checked',is_exp);
                             }
@@ -264,7 +267,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['template']){
                         $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                     }
-                    var popup = 'standard';
+                    let popup = 'standard';
                     if(opts.layout_params['template']=='none'){
                         popup = 'none';
                     }else if(opts.layout_params['popup']) {
@@ -291,8 +294,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     if(opts.layout_params['popup_width']){
 
-                        var value = opts.layout_params['popup_width'];
-                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        let value = opts.layout_params['popup_width'];
+                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
                         value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
 
                         $dlg.find('input[name="popup_width"]').val(value); // first index
@@ -300,8 +303,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     if(opts.layout_params['popup_height']){
 
-                        var value = opts.layout_params['popup_height'];
-                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        let value = opts.layout_params['popup_height'];
+                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
                         value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
 
                         $dlg.find('input[name="popup_height"]').val(value); // first index
@@ -346,7 +349,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     .button()
                     .css('font-size','0.7em')
                     .on( { click: function(){
-                        var cfg = window.hWin.HEURIST4.util.isJSON($dlg.find('input[name="map_basemap_filter"]').val());
+                        let cfg = window.hWin.HEURIST4.util.isJSON($dlg.find('input[name="map_basemap_filter"]').val());
                         if(!cfg) cfg = null;
                         window.hWin.HEURIST4.ui.showImgFilterDialog(cfg, function(filter){
                             $dlg.find('input[name="map_basemap_filter"]').val( JSON.stringify(filter) );
@@ -368,7 +371,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
                         }else if(item.attr('type')=='radio'){
                             item.prop('checked', item.val()== String(opts[item.attr('name')]));
-                        }else {  //if(item.val()!=''){
+                        }else {
                             item.val( opts[item.attr('name')] );
                         }
                     }
@@ -496,14 +499,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             // init special edit elements            
             if(widget_name=='heurist_Navigation'){
 
-                var rval = $dlg.find('input[name="menu_recIDs"]').val();
+                let rval = $dlg.find('input[name="menu_recIDs"]').val();
                 rval =  rval?rval.split(','):[];
 
-                var ele = $dlg.find('#menu_recIDs');
+                let ele = $dlg.find('#menu_recIDs');
 
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,                                                                                       
                         dtID: ele.attr('id'), //'group_selector',
                         //show_header: false,
@@ -516,7 +519,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
                                 window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                             rst_FieldConfig: {entity:'records', csv:false}
-                        }
+                        },
+                        change: on_change
                     };
 
                     ele.editing_input(ed_options);
@@ -524,10 +528,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 $dlg.find('select[name="orientation"]')
-                .change(function(e){
+                .on('change', function(e){
 
-                    var is_horiz = ($(e.target).val()=='horizontal');
-                    var is_vertical = ($(e.target).val()=='vertical');
+                    let is_horiz = ($(e.target).val()=='horizontal');
+                    let is_vertical = ($(e.target).val()=='vertical');
 
                     if($(e.target).val()=='treeview'){
                         $dlg.find('#expandLevels').show();
@@ -536,9 +540,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
 
                     if($dlg.find('#widgetCss').length>0){
-                        var vals = $dlg.find('#widgetCss').val().split(';');
-                        for (var i=0; i<vals.length; i++){
-                            var vs = vals[i].split(':');
+                        let vals = $dlg.find('#widgetCss').val().split(';');
+                        for (let i=0; i<vals.length; i++){
+                            let vs = vals[i].split(':');
                             if(vs && vs.length==2){
                                 vs[0] = vs[0].trim();
                                 if(is_horiz){
@@ -572,13 +576,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }else 
             if (widget_name=='heurist_recordAddButton'){
 
-                    var ele = $dlg.find('button[name="add_record_cfg"]');
+                    let ele = $dlg.find('button[name="add_record_cfg"]');
 
                     if(!ele.button('instance')){
                         
                         function __human_readble(){
                             
-                            var rty_ID = $dlg.find('input[name="RecTypeID"]').val();
+                            const rty_ID = $dlg.find('input[name="RecTypeID"]').val();
                             if(rty_ID>0){
                                 $('#add_record_desc').html(
                                 '&nbsp;&nbsp;<i>Record type: </i>'+$Db.rty(rty_ID,'rty_Name')
@@ -593,8 +597,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         ele.button().click(
                             function(){
                                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
-                                    title: 'Select record type',
-                                    height: 520,
+                                    title: 'Select type and other parameters for new record',
+                                    height: 520, width: 540,
                                     get_params_only: true,
                                     onClose: function(context){
                                         if(context && context.RecTypeID>0){
@@ -616,10 +620,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }else
             if(widget_name=='heurist_SearchTree'){
 
-                var ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                .change(function(e){
+                let ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                .on('change', function(e){
 
-                    var selval = __getSearchTreeMode();
+                    let selval = __getSearchTreeMode();
 
                     $dlg.find('#simple_search_header').parent().css('display','none');
                     $dlg.find('#simple_search_text').parent().css('display','none');
@@ -631,7 +635,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
                         $dlg.find('#allowed_svsIDs').editing_input('setDisabled', false);
 
-                        var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                        let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
                         if(is_vis){
                             $dlg.find('#simple_search_header').parent().css('display','table-row');
                             $dlg.find('#simple_search_text').parent().css('display','table-row');
@@ -657,7 +661,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                 });
 
-                var selval = __getSearchTreeMode();
+                let selval = __getSearchTreeMode();
                 if(window.hWin.HEURIST4.util.isempty(selval)
                     || !(selval==0 || selval==1 || selval==2)){
                     selval = 0;
@@ -665,15 +669,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 //visible for buttons and tree mode
-                var ele = $dlg.find('#allowed_UGrpID');
+                let ele = $dlg.find('#allowed_UGrpID');
                 if(!ele.editing_input('instance')){
 
-                    var init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
+                    let init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
                     if(init_val=='' && selval!=2 && $dlg.find('input[name="allowed_svsIDs"]').val()==''){
                         init_val = 5;//web search  by default
                     }
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [init_val], 
@@ -689,6 +693,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#allowed_svsIDs').editing_input('setValue','');
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
+                            on_change();
                         }
                     };
 
@@ -701,7 +706,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 ele = $dlg.find('#allowed_svsIDs');
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
@@ -716,6 +721,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#allowed_UGrpID').editing_input('setValue','');
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
+                            on_change();
                         }
                     };
 
@@ -727,7 +733,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 ele = $dlg.find('#init_svsID');
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [$dlg.find('input[name="init_svsID"]').val()],
@@ -737,7 +743,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             dty_Type:"resource", rst_MaxValues:1,
                             rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
                             rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
-                        }
+                        },
+                        change: on_change
                     };
 
 
@@ -747,8 +754,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 function __getSearchTreeMode(){
-                    var ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                    var selval = '';
+                    let ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                    let selval = '';
                     $.each(ele_rb, function(idx, item){
                         item = $(item);
                         if(item.is(':checked')){
@@ -761,17 +768,17 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 function __restFilterForInitSearch(){
 
-                    var ifilter = null; 
-                    var val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
-                    // $dlg.find('input[name="allowed_svsIDs"]').val();
+                    let ifilter = null; 
+                    let val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
+                   
                     if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                        if($.isArray(val)) val = val.join(',');
+                        if(Array.isArray(val)) val = val.join(',');
                         ifilter = {svs_ID:val};
                     }else{
                         val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
-                        //$dlg.find('input[name="allowed_UGrpID"]').val();
+                       
                         if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
-                            if($.isArray(val)) val = val.join(',');
+                            if(Array.isArray(val)) val = val.join(',');
                             ifilter = {svs_UGrpID:val};
                         }
                     }
@@ -784,7 +791,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
                                 initial_filter:ifilter, search_form_visible:(ifilter==null)    
                             } 
-                        }
+                        },
+                        change: on_change
                     }); 
                 }
 
@@ -792,8 +800,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 ele_rb.change();
 
-                $dlg.find('input[name="simple_search_allowed"]').change(function(){
-                    var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                $dlg.find('input[name="simple_search_allowed"]').on('change', function(){
+                    let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
                     if(is_vis){
                         $dlg.find('#simple_search_header').parent().css('display','table-row');
                         $dlg.find('#simple_search_text').parent().css('display','table-row');
@@ -803,7 +811,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                 });
 
-                var is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
                 if(is_vis){
                     $dlg.find('#simple_search_header').parent().css('display','table-row');
                     $dlg.find('#simple_search_text').parent().css('display','table-row');
@@ -815,15 +823,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             if(widget_name=='heurist_Map' && 
                 $dlg.find('select[name="mapdocument"]').find('options').length==0){
                     
-                var allMapDocuments = [];
+                let allMapDocuments = [];
                 
-                $selectedDocuments =  $('input[name="mapdocuments"]');
-                $selectedBasemaps =  $('input[name="basemaps"]');
+                let $selectedDocuments =  $('input[name="mapdocuments"]');
+                let $selectedBasemaps =  $('input[name="basemaps"]');
                 
                 function __assignMapDocNames(newsel){
                     if(newsel){
                         newsel = newsel.split(';');
-                        var newsel_names = [];
+                        let newsel_names = [];
                         $.each(allMapDocuments, function(i,item){
                             if(newsel.indexOf(item.key)>=0){
                                 newsel_names.push(item.title)    
@@ -835,9 +843,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                 }
 
-                var $selectMapDoc = $dlg.find('select[name="mapdocument"]');
+                let $selectMapDoc = $dlg.find('select[name="mapdocument"]');
                 //fill list of mapdpcuments
-                var request = {
+                let request = {
                     q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
                     detail: 'header',
                     source: 'cms_edit'};
@@ -847,12 +855,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
 						if(response.status == window.hWin.ResponseStatus.OK){
 
-							var resdata = new hRecordSet(response.data);
-							var idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
+							let resdata = new HRecordSet(response.data);
+							let idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
 							for(idx in records){
 								if(idx)
 								{
-									var record = records[idx];
+									let record = records[idx];
 									opts.push({key:resdata.fld(record, 'rec_ID'), title:resdata.fld(record, 'rec_Title')});
 								}
 							}//for
@@ -874,16 +882,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                 );
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
                     .insertBefore($selectedDocuments);
-                var $select_documents_dlg = $('<div/>').hide().appendTo( $selectedDocuments.parent() );
+                let $select_documents_dlg = $('<div/>').hide().appendTo( $selectedDocuments.parent() );
                 
                 $gicon.on({ click: function(){                                 
                        $select_documents_dlg.selectMultiValues({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 $selectedDocuments.attr('data-mapdocuments', newsel);
                                 __assignMapDocNames(newsel);
                             }
@@ -895,7 +903,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 
                 //======================================
 
-                var $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
+                let $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectMapTemplate
                     ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template')
@@ -904,9 +912,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 //======================================
                     
-                var $selectBaseMap = $dlg.find('select[name="map_basemap"]');
+                let $selectBaseMap = $dlg.find('select[name="map_basemap"]');
 
-                var baseMapOptions = [
+                const baseMapOptions = [
                     {key:'OpenStreetMap', title:'OpenStreetMap'},
                     {key:'OpenTopoMap', title:'OpenTopoMap'},
                     {key:'MapBox.StreetMap', title:'MapBox.StreetMap'},
@@ -935,16 +943,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     $selectBaseMap.hSelect('widget').css('width', '200px');
                 }
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
                     .insertBefore($selectedBasemaps);
-                var $select_basemaps_dlg = $('<div/>').hide().appendTo( $selectedBasemaps.parent() );
+                let $select_basemaps_dlg = $('<div/>').hide().appendTo( $selectedBasemaps.parent() );
                 
                 $gicon.on({ click: function(){                                 
                        $select_basemaps_dlg.selectMultiValues({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 $selectedBasemaps.val(newsel);
                             }
                         }, 
@@ -956,9 +964,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 //======================================================
                     
                 $dlg.find('input[name="popup_behaviour"]')
-                    .change(function(event){
+                    .on('change', function(event){
 
-                        var val = $dlg.find('input[name="popup_behaviour"]:checked').val();
+                        let val = $dlg.find('input[name="popup_behaviour"]:checked').val();
 
                         if(val == 'scale'){
                             $dlg.find('span#pw_label').text('Max width:');
@@ -990,7 +998,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 $dlg.find('select[name="reportOverviewMode"]').val(opts['reportOverviewMode']);
                 $dlg.find('select[name="reportEndPageMode"]').val(opts['reportEndPageMode']);
                 
-                var $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
+                let $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
                     ,[{key:'',title:'Standard record view'}], opts['reportOverview'], {extraOptions: {menu_parent: $dlg}});
@@ -1006,7 +1014,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     ,[{key:'',title:'Standard record view'}], opts['reportElement'], {extraOptions: {menu_parent: $dlg}});
 
                     
-                var $elementOrder = $dlg.find('select[name="elementOrder"]'); 
+                let $elementOrder = $dlg.find('select[name="elementOrder"]'); 
 
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect( $elementOrder[0], null, ['date','year','integer']
                     ,[{key:'',title:'As is (order in record)'},{key:'def',title:'Common date fields (##9,10,11)'}]
@@ -1018,17 +1026,17 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         null, 'resource', 
                         [{key:'',title:''}], {selectedValue:opts['storyFields']});
                 */
-                var defValue = $dlg.find('input[name="storyFields"]').val();
+                let defValue = $dlg.find('input[name="storyFields"]').val();
                 
                 if(window.hWin.HEURIST4.util.isempty(defValue)){
-                    var DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');// Story element field    
+                    let DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');// Story element field    
                     if(DT_STORY_FIELD>0) defValue = DT_STORY_FIELD;
                 }
                 
                 
-                var ele = $dlg.find('#storyFields');
+                let ele = $dlg.find('#storyFields');
 
-                var ed_options = {
+                const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [defValue],
@@ -1040,8 +1048,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_DisplayHelpText: 'Defines the field that points to story element records (such as Life event, Ocuppation etc)',
                             rst_FieldConfig: {entity:'defDetailTypes', csv:true, filters:{types:['resource']}}
                         },
-                        change:function(){
-                        }
+                        change: on_change
                     };
 
                 ele.editing_input(ed_options);
@@ -1072,7 +1079,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 */
                 
                 $dlg.find('select[name="reportElementMode"]')
-                .change(function(e){
+                .on('change', function(e){
 
                     $dlg.find('select[name="reportElementSlideEffect"]').parent().hide();
                     $dlg.find('select[name="reportElementDistinct"]').parent().hide();
@@ -1084,10 +1091,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     
                 })
-                .val(opts['reportElementMode']).change();
+                .val(opts['reportElementMode']).trigger('change');
 
                 $dlg.find('select[name="reportElementMapMode"]')
-                .change(function(e){
+                .on('change', function(e){
 
                     if($(e.target).val()=='filtered'){
                         $dlg.find('input[name="reportElementMapFilter"]').parent().show();
@@ -1096,19 +1103,19 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     
                 })
-                .val(opts['reportElementMapMode']).change();
+                .val(opts['reportElementMapMode']).trigger('change');
                 
                 
             }else
             if(widget_name=='heurist_resultListExt' && 
                 $dlg.find('select[name="rep_template"]').find('options').length==0){
 
-                    var $select3 = $dlg.find('select[name="rep_template"]'); 
+                    let $select3 = $dlg.find('select[name="rep_template"]'); 
 
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
                         ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
 
-                     $dlg.find('#is_popup_report').change(function(e){
+                     $dlg.find('#is_popup_report').on('change', function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
                             $dlg.find('#popup_report_position').parent().show();       
 
@@ -1119,30 +1126,28 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#is_popup_report').parent().find('.header').addClass('row-spacing');
                         }    
                      });
-                     $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).change();
+                     $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).trigger('change');
                      $dlg.find('#popup_report_position').val(opts['popup_position']);
 
             }else 
             if(widget_name=='heurist_resultList'){
 
                 if($dlg.find('select[name="rendererExpandDetails"]').find('options').length==0){
-                    var $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
+                    let $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
 
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select4
                         ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
                 }
 
                 if($dlg.find('select[name="field_for_ext_classes"]').find('options').length==0){ // list of record fields that are enum
-                    var $select5 = $dlg.find('select[name="field_for_ext_classes"]');
+                    let $select5 = $dlg.find('select[name="field_for_ext_classes"]');
 
                     window.hWin.HEURIST4.ui.createRectypeDetailSelect($select5[0], null, ['enum'], [{key: 0, title: 'None'}], 
                         {'selectedValue': $select5.attr('fld-id')}, {extraOptions: {menu_parent: $dlg}});
                 }
             }
 
-            if($.isFunction(on_change)){
-                $dlg.find(`div.${widget_name} input, div.${widget_name} select, div.${widget_name} textarea`).on('change', on_change);
-            }
+            $dlg.find(`div.${widget_name} input, div.${widget_name} select, div.${widget_name} textarea`).on('change', on_change);
         }
     }
     
@@ -1163,13 +1168,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         }
         
         
-        var widget_name = widget_cfg.appid;
+        let widget_name = widget_cfg.appid;
 
-        var opts = {};
+        let opts = {};
 
         if(widget_name=='heurist_Map'){
 
-            var layout_params = {};//special option for leaflet mapping
+            let layout_params = {};//special option for leaflet mapping
             //parameters for controls
             layout_params['notimeline'] = !$dlg.find("#use_timeline").is(':checked');
             layout_params['nocluster'] = !$dlg.find("#use_cluster").is(':checked');
@@ -1179,7 +1184,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             layout_params['zoom_to_selected'] = $dlg.find("#zoom_to_selected").is(':checked');
             layout_params['zoom_delta'] = $dlg.find("#zoom_delta").val();
 
-            var ctrls = [];
+            let ctrls = [];
             $dlg.find('input[name="controls"]:checked').each(
                 function(idx,item){ctrls.push($(item).val());}
             );
@@ -1193,7 +1198,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 $dlg.find('input[name="legend"]').each( //visible section in legend
                     function(idx,item){
                         if($(item).is(':checked')){
-                            var is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
+                            let is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
                             ctrls.push(is_exp+$(item).val());
                         }
                     }
@@ -1203,7 +1208,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(!$dlg.find('input[name="legend_exp2"]').is(':checked')){
                         layout_params['legend'] += ',off';    
                     }
-                    var w = $dlg.find('input[name="legend_width"]').val();
+                    let w = $dlg.find('input[name="legend_width"]').val();
                     if(w>100 && w<600){
                         layout_params['legend'] += (','+w);
                     }
@@ -1238,12 +1243,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 //  use_timeline use_cluster editstyle map_rollover controls legend legend_exp legend_exp2 map_popup  mapdocument      
 //  map_template map_basemap_filter  map_template
   
-            var popup = $dlg.find('input[name="map_popup"]:checked').val();
+            let popup = $dlg.find('input[name="map_popup"]:checked').val();
             if(popup!='standard'){
                 layout_params['popup'] = popup;
             }
 
-            var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
+            let mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
             if(mapdoc_id>0) {opts['mapdocument'] = mapdoc_id;}
 
             if($dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments')){
@@ -1264,7 +1269,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['leaflet'] = true;
         }//heurist_Map
 
-        var cont = $dlg.find('div.'+widget_name);
+        let cont = $dlg.find('div.'+widget_name);
 
         if(widget_name=='heurist_SearchTree'){
             cont.find('input[name="allowed_UGrpID"]').val( 
@@ -1275,27 +1280,30 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 cont.find('#init_svsID').editing_input('getValues') );
         }else 
         if(widget_name=='heurist_Navigation'){
-            var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
+            let menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
             if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
-                ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
+                (Array.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
             {
-                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one top level menu item',
+                    error_title: 'Missing required setting'
+                });
                 return false;   
             }
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
         }else
-        if(widget_name=='heurist_StoryMap'){
-            //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
-            //cont.find('input[name="storyRectypes"]').val( storyRectypes );
-            
-            //cont.find('select[name="storyFields"]').val
-            var storyFields = cont.find('#storyFields').editing_input('getValues');
+        if(widget_name=='heurist_StoryMap')
+        {
+            let storyFields = cont.find('#storyFields').editing_input('getValues');
             cont.find('input[name="storyFields"]').val( storyFields );
             
             if(window.hWin.HEURIST4.util.isempty(storyFields) || 
-                ($.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
+                (Array.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
             {
-                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one story field',
+                    error_title: 'Missing story field'
+                });                     
                 return false;   
             }
         }
@@ -1434,14 +1442,20 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
         }
 
-        var selval = opts.searchTreeMode;
+        let selval = opts.searchTreeMode;
         if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
 
             if(selval==1){
-                window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "tree" mode you have to select groups to be displayed',
+                    error_title: 'Missing required setting'
+                });
                 return false;
             }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
-                window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you must select either workgroups or filters individually');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "button" mode you must select either workgroups or filters individually',
+                    error_title: 'Missing required setting(s)'
+                });
                 return false;
             }
         }
@@ -1457,7 +1471,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

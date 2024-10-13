@@ -2,7 +2,7 @@
 * editng_exts.js - additional functions for editing_input
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
-*  3) browseRecords - browse records for resource fields 
+*  3) browseRecords - browse records for record type fields 
 *     browseTerms
 *       3a) openSearchMenu
 *  4) translationSupport - opens popup dialog with ability to define translations for field values
@@ -24,6 +24,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global HEditing */
+
 //
 //  mode_edit 2 - symbology for general map draw style
 //            1 - symbology editor from map legend
@@ -33,11 +35,11 @@
 // 
 function editSymbology(current_value, mode_edit, callback){
 
-    var edit_symb_dialog = null; //assigned on popup_dlg.dialog
+    let edit_symb_dialog = null; //assigned on popup_dlg.dialog
     
-    var dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
+    let dialog_div_id = 'heurist-dialog-editSymbology'+(mode_edit>=3?mode_edit:'');
     
-    var popup_dlg = $('#'+dialog_div_id);
+    let popup_dlg = $('#'+dialog_div_id);
     
     if(popup_dlg.length>0){
         popup_dlg.empty();
@@ -47,30 +49,30 @@ function editSymbology(current_value, mode_edit, callback){
     }
     
     //heurist query for map query layer is passed via symbology value
-    var maplayer_rty = null; //record types in mapquery resultset
-    var maplayer_query = true;
+    let maplayer_rty = null; //record types in mapquery resultset
+    let maplayer_query = true;
     if(current_value && current_value.maplayer_query){
         maplayer_query = current_value.maplayer_query;
         delete current_value.maplayer_query;
     }
 
-    var editForm = $('<div class="ent_content_full editForm" style="top:0">')
+    let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    var _editing_symbology = new hEditing({container:editForm, 
+    let _editing_symbology = new HEditing({container:editForm, 
         onchange:
         function(){
-            var isChanged = _editing_symbology.isModified();
-            var mode = isChanged?'visible':'hidden';
+            let isChanged = _editing_symbology.isModified();
+            let mode = isChanged?'visible':'hidden';
             edit_symb_dialog.parent().find('#btnRecSave').css('visibility', mode);
 
             if(isChanged){
 
-                var ele = _editing_symbology.getFieldByName('iconType');
+                let ele = _editing_symbology.getFieldByName('iconType');
                 if(ele!=null){
-                    var res = ele.editing_input('getValues'); 
-                    var ele_icon_url = _editing_symbology.getFieldByName('iconUrl').hide();
-                    var ele_icon_font = _editing_symbology.getFieldByName('iconFont').hide();
+                    let res = ele.editing_input('getValues'); 
+                    let ele_icon_url = _editing_symbology.getFieldByName('iconUrl').hide();
+                    let ele_icon_font = _editing_symbology.getFieldByName('iconFont').hide();
                     if(res[0]=='url'){
                         ele_icon_url.show();
                     }else if(res[0]=='iconfont'){
@@ -86,10 +88,10 @@ function editSymbology(current_value, mode_edit, callback){
             
             if(current_value){
                 //detect base layer symbology
-                if($.isArray(current_value)){
-                    var thematicMap = [];
-                    var baseSymb = {};
-                    for(var i=0; i<current_value.length; i++){
+                if(Array.isArray(current_value)){
+                    let thematicMap = [];
+                    let baseSymb = {};
+                    for(let i=0; i<current_value.length; i++){
                         if(current_value[i].fields){
                             //thematic map
                             thematicMap.push(current_value[i]);
@@ -114,7 +116,7 @@ function editSymbology(current_value, mode_edit, callback){
                 
             }
             
-            var recdata = current_value ? new hRecordSet({count:1, order:[1], 
+            let recdata = current_value ? new HRecordSet({count:1, order:[1], 
                 records:{1:current_value}, 
                 fields: {'stub':0}}) :null;
                 //Object.getOwnPropertyNames(current_value)
@@ -134,7 +136,7 @@ function editSymbology(current_value, mode_edit, callback){
     fillColor
     animation
     */                    
-    var editFields;
+    let editFields;
     if(mode_edit==2){
         editFields = [
         
@@ -250,16 +252,16 @@ function editSymbology(current_value, mode_edit, callback){
     }    
     else{
         
-        var ptr_fields = [];
+        let ptr_fields = [];
         if(mode_edit===3){ 
             
             if(maplayer_query){
             
-                var request = { q: maplayer_query,
+                let request = { q: maplayer_query,
                         w: 'a',
                         detail: 'count_by_rty'};
 
-                var that = this;
+                let that = this;
                 window.HAPI4.RecordMgr.search(request, function(response){ 
 
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -275,18 +277,16 @@ function editSymbology(current_value, mode_edit, callback){
             }else{
             
                 //get list of pointer fields
-                var rty_as_place = window.hWin.HAPI4.sysinfo['rty_as_place']; 
+                let rty_as_place = window.hWin.HAPI4.sysinfo['rty_as_place']; 
                 rty_as_place = (rty_as_place)?rty_as_place.split(','):[];
                 rty_as_place.push((''+window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE']));
                 
                 $Db.dty().each2(function(dty_ID, record){
                     
-                    var dty_Type = record['dty_Type'];
+                    let dty_Type = record['dty_Type'];
                     if(record['dty_Type']=='resource') 
                     {
-                        is_parent = false;
-                        
-                        var ptr = record['dty_PtrTargetRectypeIDs'];
+                        let ptr = record['dty_PtrTargetRectypeIDs'];
                         if(ptr){
                             ptr = ptr.split(',');  
                             const has_entry = ptr.filter(value => rty_as_place.includes(value));
@@ -523,7 +523,7 @@ function editSymbology(current_value, mode_edit, callback){
     
     _editing_symbology.initEditForm( editFields, recdata );
 
-    var edit_buttons = [
+    let edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
             id:'btnRecCancel',
             css:{'float':'right'}, 
@@ -534,11 +534,11 @@ function editSymbology(current_value, mode_edit, callback){
             id:'btnRecSave',
             css:{'visibility':'hidden', 'float':'right'},  
             click: function() { 
-                var res = _editing_symbology.getValues(); //all values
+                let res = _editing_symbology.getValues(); //all values
                 //remove empty values
-                var propNames = Object.getOwnPropertyNames(res);
-                for (var i = 0; i < propNames.length; i++) {
-                    var propName = propNames[i];
+                let propNames = Object.getOwnPropertyNames(res);
+                for (let i = 0; i < propNames.length; i++) {
+                    let propName = propNames[i];
                     if (window.hWin.HEURIST4.util.isempty(res[propName])) {
                         delete res[propName];
                     }
@@ -558,7 +558,7 @@ function editSymbology(current_value, mode_edit, callback){
                 _editing_symbology.setModified(false);
                 edit_symb_dialog.dialog('close');
                 
-                if($.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                     callback.call(this, res);
                 }
 
@@ -575,15 +575,15 @@ function editSymbology(current_value, mode_edit, callback){
         modal:  true,
         title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
         resizeStop: function( event, ui ) {//fix bug
-            //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+           
         },
         beforeClose: function(){
             //show warning in case of modification
             if(_editing_symbology.isModified()){
-                var $dlg, buttons = {};
+                let $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
-                    edit_symb_dialog.parent().find('#btnRecSave').click();
+                    edit_symb_dialog.parent().find('#btnRecSave').trigger('click');
                     $dlg.dialog('close'); 
                 }; 
                 buttons['Ignore and close'] = function(){ 
@@ -611,9 +611,9 @@ function editSymbology(current_value, mode_edit, callback){
     
     if(mode_edit==3 && maplayer_query){
             
-            var intputs  = _editing_symbology.getInputs('geofield');
-            var geofield_input = $(intputs[0]);
-            var geofield_lbls = $('<div>').insertBefore(geofield_input);
+            let intputs  = _editing_symbology.getInputs('geofield');
+            let geofield_input = $(intputs[0]);
+            let geofield_lbls = $('<div>').insertBefore(geofield_input);
             geofield_lbls
                 .css({background:geofield_input.css('background'), 
                       cursor:'pointer',
@@ -624,13 +624,13 @@ function editSymbology(current_value, mode_edit, callback){
                      'text-decoration':'underline'});
             geofield_input.hide();
             
-            var titles = [];
+            let titles = [];
             if(current_value['geofield']){
-                var codes = current_value['geofield'].split(',');
-                for(var i=0; i<codes.length; i++){
-                    var code = codes[i];
+                let codes = current_value['geofield'].split(',');
+                for(let i=0; i<codes.length; i++){
+                    let code = codes[i];
                     if(code && code.indexOf(':')>0){
-                        var harchy = $Db.getHierarchyTitles(code);
+                        let harchy = $Db.getHierarchyTitles(code);
                         if(harchy){
                             titles.push(harchy.harchy.join(''));
                         }
@@ -647,18 +647,20 @@ function editSymbology(current_value, mode_edit, callback){
 
             $(geofield_lbls).on({click: function(e){
                 
-                if(!maplayer_rty || maplayer_rty.length==0) return;
+                if(!maplayer_rty || maplayer_rty.length==0) {return;}
                 
-                maplayer_rty_treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, maplayer_rty, ['geo','resource'] );                 
+                let maplayer_rty_treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, maplayer_rty, ['geo','resource'] );                 
                 
-            var popele = edit_symb_dialog.find('#divFieldSelector');
-            if(popele.length==0){
+                let popele = edit_symb_dialog.find('#divFieldSelector');
+                if(popele.length==0){
                    popele = $('<div id="divFieldSelector"><div class="rtt-tree"/></div>').appendTo(edit_symb_dialog);
-            }
+                }
             
-            maplayer_rty_treedata[0].expanded = true;
+                if(maplayer_rty_treedata && maplayer_rty_treedata.length>0){
+                    maplayer_rty_treedata[0].expanded = true;
+                } 
                 
-            var treediv = popele.find('.rtt-tree');
+                let treediv = popele.find('.rtt-tree');
             
                 treediv.fancytree({
             checkbox: true,
@@ -679,13 +681,13 @@ function editSymbology(current_value, mode_edit, callback){
                 }
             },
             lazyLoad: function(event, data){
-                var node = data.node;
-                var parentcode = node.data.code; 
-                var rectypes = node.data.rt_ids;
+                let node = data.node;
+                let parentcode = node.data.code; 
+                let rectypes = node.data.rt_ids;
 
                 if(parentcode.split(":").length<5){  //limit with 3 levels
                 
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                    let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                         rectypes, (parentcode.split(":").length<3?['geo','resource']:['geo']), parentcode );
                     if(res.length>1){
                         data.result = res;
@@ -701,13 +703,13 @@ function editSymbology(current_value, mode_edit, callback){
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             click: function(e, data){
                 
-                var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-                var setDefaults = !data.node.isExpanded();
+                let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                let setDefaults = !data.node.isExpanded();
 
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                     if(!isExpander){
@@ -725,28 +727,28 @@ function editSymbology(current_value, mode_edit, callback){
             }
         });
                 
-                var dlg2, btns = [
+                let $dlg2, btns = [
                     {text:window.hWin.HR('Apply'),
                         click: function(){
                             
-                            var tree = treediv.fancytree("getTree");
-                            var fieldIds = tree.getSelectedNodes(false);
-                            var k, len = fieldIds.length;
-                            var selectedFields = [], titles = [];
+                            let tree = treediv.fancytree("getTree");
+                            let fieldIds = tree.getSelectedNodes(false);
+                            let k, len = fieldIds.length;
+                            let selectedFields = [], titles = [];
                             
                             for (k=0;k<len;k++){
-                                var node =  fieldIds[k];
+                                let node =  fieldIds[k];
                                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
                                 
                                 if(!node.children || node.children.length==0){
-                                    var code = node.data.code;
+                                    let code = node.data.code;
                                     selectedFields.push(code);
-                                    var harchy = $Db.getHierarchyTitles(code);
+                                    let harchy = $Db.getHierarchyTitles(code);
                                     titles.push(harchy.harchy.join(''));
                                 }
                             }                            
-                            //geofield_input.val(selectedFields.join(','));
-                            //_editing_symbology.setModified(true);
+                           
+                           
                             _editing_symbology.setFieldValueByName2('geofield',selectedFields.join(','),true);
                             geofield_lbls.html(titles.join('<br>'));
                             $dlg2.dialog('close');
@@ -795,11 +797,11 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
     //
     // calculate extent based on worldfile parameters
     //
-    var dtId_File = window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
-    var ele = _editing.getFieldByName( dtId_File );
+    let dtId_File = window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
+    let ele = _editing.getFieldByName( dtId_File );
     if(ele && !ulf_ID){
 
-        var val = ele.editing_input('getValues');
+        let val = ele.editing_input('getValues');
         if(val && val.length>0){
 
             ulf_ID = val[0]['ulf_ObfuscatedFileID'];
@@ -816,7 +818,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
                 window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         let record = recordset.getFirstRecord();
                         if(record){
                             calculateImageExtentFromWorldFile(_editing, recordset.fld(record,'ulf_ObfuscatedFileID'));
@@ -833,10 +835,10 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
         }
     }
 
-    var dtId_WorldFile = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'];
+    let dtId_WorldFile = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'];
     ele = _editing.getFieldByName( dtId_WorldFile );
     if(ele){
-        var val = ele.editing_input('getValues');
+        let val = ele.editing_input('getValues');
         if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
             worldFile = val[0];    
         }
@@ -844,11 +846,14 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 
     if(ulf_ID && worldFile){
 
-        var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        let dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
         ele = _editing.getFieldByName( dtId_Geo );
         if(!ele){
-            window.hWin.HEURIST4.msg.showMsgErr('Image map source record must have Bounding Box field! '
-                +'Please correct record type structure.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Image map source record must have Bounding Box field! '
+                        +'Please correct record type structure.',
+                error_title: 'Missing bounding box'
+            });
         }else{
 
             window.hWin.HEURIST4.msg.showMsgDlg(
@@ -863,17 +868,22 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
                                 if($.isPlainObject(response.data) && 
                                     response.data.width>0 && response.data.height>0)
                                 {
-                                    var extentWKT = window.hWin.HEURIST4.geo.parseWorldFile(worldFile, 
+                                    let extentWKT = window.hWin.HEURIST4.geo.parseWorldFile(worldFile, 
                                         response.data.width, response.data.height);
 
                                     if(extentWKT){
                                         _editing.setFieldValueByName(dtId_Geo, 'pl '+extentWKT);
                                     }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr( 'Cannot calculate image extent. Verify your worldfile parameters' );
+                                        window.hWin.HEURIST4.msg.showMsgErr({
+                                            message: 'Cannot calculate image extent. Verify your worldfile parameters',
+                                            error_title: 'Invalid image extent'
+                                        });
                                     }
 
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr( response.data.error ? response.data.error : response.data );
+                                    let error = response.data.error ? response.data.error : response.data;
+                                    error = $.isPlainObject(error) ? error : {message: error, error_title: 'Data error'};
+                                    window.hWin.HEURIST4.msg.showMsgErr( error );
                                 }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr( response );
@@ -901,8 +911,8 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 //
 function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 
-    var $menu = $select.hSelect('menuWidget');
-    var $inpt = $menu.find('input.input_menu_filter'); //filter input
+    let $menu = $select.hSelect('menuWidget');
+    let $inpt = $menu.find('input.input_menu_filter'); //filter input
 
     if(!$inpt.attr('data-inited')){
 
@@ -912,7 +922,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         that._on($menu.find('span.smallbutton'), {click:
         function(event){
             window.hWin.HEURIST4.util.stopEvent(event); 
-            var $mnu = $select.hSelect('menuWidget');
+            let $mnu = $select.hSelect('menuWidget');
             $mnu.find('input.input_menu_filter').val('');
             $mnu.find('li').css('display','list-item');
             $mnu.find('div.not-found').hide();
@@ -920,14 +930,14 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 
         that._on($menu.find('span.show-select-dialog'), {click:
         function(event){
-            var $mnu = $select.hSelect('menuWidget');
+            let $mnu = $select.hSelect('menuWidget');
             if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')!='progress'){
-                var foo = $select.hSelect('option','change');//.trigger('change');
+                let foo = $select.hSelect('option','change');
                 foo.call(this, null, 'select'); //call __onSelectMenu
             }
         }});
         
-        var _timeout = 0;
+        let _timeout = 0;
         
         //set filter
         that._on($menu, {
@@ -936,9 +946,9 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                 return false;                       
             },
             keyup:function(event){
-                var val = $(event.target).val().toLowerCase();
+                let val = $(event.target).val().toLowerCase();
                 window.hWin.HEURIST4.util.stopEvent(event);                       
-                var $mnu = $select.hSelect('menuWidget');
+                let $mnu = $select.hSelect('menuWidget');
                 if(val.length<2){
                     $mnu.find('li').css('display','list-item');
                     $mnu.find('div.not-found').hide();
@@ -959,7 +969,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                     $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
 
                         let title = $(item).text().toLowerCase();
-                        if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
+                        if($select.attr('rectype-select') == 1 && Object.hasOwn(window.hWin.HEURIST4.browseRecordCache,key)){
                             title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
                             title = title.replace(/[\r\n]+/g, ' ');
                         }
@@ -1098,7 +1108,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                         window.hWin.HEURIST4.util.stopEvent(event);
                         event.stopImmediatePropagation();
 
-                        $($menu.find('.ui-menu-item:visible')[1]).click();
+                        $($menu.find('.ui-menu-item:visible')[1]).trigger('click');
                     }else if(is_tab && $menu.find('.ui-menu-item:visible').length > 1){ // focus first item
 
                         window.hWin.HEURIST4.util.stopEvent(event);
@@ -1184,15 +1194,15 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 			});
 		}
         
-        var btn_add_term = $menu.find('.add-trm');
+        let btn_add_term = $menu.find('.add-trm');
         if(btn_add_term.length>0){
             that._on(btn_add_term, {
                 click: function(){
 
-                    var suggested_name = $menu.find('input.input_menu_filter').val();
-                    var vocab_id = that.f('rst_FilteredJsonTermIDTree');
+                    let suggested_name = $menu.find('input.input_menu_filter').val();
+                    let vocab_id = that.f('rst_FilteredJsonTermIDTree');
 
-                    var rg_options = {
+                    let rg_options = {
                         isdialog: true, 
                         select_mode: 'manager',
                         edit_mode: 'editonly',
@@ -1202,14 +1212,14 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                         suggested_name: suggested_name, 
                         create_one_term: true,
                         onClose: function(trm_id){
-                            var trm_info = $Db.trm(trm_id, 'trm_ParentTermID'); 
+                            let trm_info = $Db.trm(trm_id, 'trm_ParentTermID'); 
                             if(trm_info > 0){
                                 if(that.selObj){
-                                    var ref_id = that.selObj.attr('ref-id');
+                                    let ref_id = that.selObj.attr('ref-id');
                                     that.selObj.remove();    
                                     that.selObj = null;
                                     
-                                    var $input = that.element.find('#'+ref_id);
+                                    let $input = that.element.find('#'+ref_id);
                                     browseTerms(that, $input, trm_id);                                    
                                 }
                             }
@@ -1237,7 +1247,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
             $('<span>', {style: 'position: absolute;right: 5px;'}).html(icon).appendTo($(option).css('padding-right', '25px'));
         });
 
-        var $trm_btns = $select.parents('.input-div').find('.btn_add_term, .btn_add_term');
+        let $trm_btns = $select.parents('.input-div').find('.btn_add_term, .btn_add_term');
         if($trm_btns.length > 0){
             $trm_btns.clone(true, true).css({
                 'position': 'relative',
@@ -1270,24 +1280,24 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 // It returns selection function that opens record selection popup dialog
 //
 function browseRecords(_editing_input, $input){
+
+    let that = _editing_input;
     
-    var that = _editing_input;
-    
-    var $inputdiv = $input.parent(); //div.input-div
-    var __current_input_id = $input.attr('id');
+    let $inputdiv = $input.parent(); //div.input-div
+    let __current_input_id = $input.attr('id');
 
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
     
-    var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
-    var pointerMode = that.f('rst_PointerMode');
+    let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+    let pointerMode = that.f('rst_PointerMode');
     
     if(isparententity && pointerMode!='addonly'){
-        pointerMode = 'dropdown_add'; //was 'addorbrowse';
+        pointerMode = 'dropdown_add';
     }
     
-    var is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
+    let is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
     
-    var s_action = '';
+    let s_action = '';
     if(pointerMode=='addonly'){
         s_action = 'create';
     }else if(pointerMode=='browseonly' || pointerMode=='dropdown'){
@@ -1298,7 +1308,7 @@ function browseRecords(_editing_input, $input){
         pointerMode = 'addorbrowse';
     }
 
-    var popup_options = {
+    let popup_options = {
                     select_mode: (that.configMode.csv==true?'select_multi':'select_single'),
                     select_return_mode: 'recordset',
                     edit_mode: 'popup',
@@ -1314,22 +1324,21 @@ function browseRecords(_editing_input, $input){
                     parententity: (isparententity)?that.options.recID:0,
                     
                     onselect: function(event, data){
-                        
                              if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
 
-                                var f_id = $('#'+__current_input_id).parents('fieldset').attr('id');
+                                let f_id = $('#'+__current_input_id).parents('fieldset').attr('id');
                                 
                                 if(!f_id && that.options.editing){
                                     //for parent-child there is chance that edit form can be reloaded after open this popup
                                     //and original target elements will be missed (it saves record to obtain title)
                                     //we have to find new targets 
-                                    var edit_ele = that.options.editing.getFieldByName(that.options.dtID);    
+                                    let edit_ele = that.options.editing.getFieldByName(that.options.dtID);    
                                             
                                     $input = null;   
-                                    var inputs = edit_ele.editing_input('getInputs');
-                                    for (var idx in inputs) {
+                                    let inputs = edit_ele.editing_input('getInputs');
+                                    for (let idx in inputs) {
                                         //$(edit_ele.editing_input('getInputs')[idx])
-                                        if($(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
+                                        if($(inputs[idx]) && $(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
                                             $inputdiv = $(inputs[idx]).parent();
                                             $input = inputs[idx];
                                             break;
@@ -1339,33 +1348,37 @@ function browseRecords(_editing_input, $input){
                                        $input = inputs[inputs.length-1];
                                        $inputdiv = $input.parent(); 
                                     }
+                                }else{
+                                     let inpt = that.element.find('#'+__current_input_id);
+                                     if(inpt.length>0){
+                                        $input = inpt;   
+                                     }
                                 }
                                 
                                  
-                                var recordset = data.selection;
-                                var record = recordset.getFirstRecord();
+                                let recordset = data.selection;
+                                let record = recordset.getFirstRecord();
                                 
-                                var rec_Title = recordset.fld(record,'rec_Title');
+                                const rec_Title = recordset.fld(record,'rec_Title');
                                 if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                                     // no proper selection 
                                     // consider that record was not saved - it returns FlagTemporary=1 
                                     return;
                                 }
                                
-                                var targetID = recordset.fld(record,'rec_ID');
-                                var rec_Title = recordset.fld(record,'rec_Title');
-                                var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                const targetID = recordset.fld(record,'rec_ID');
+                                const rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                 
                                 that.newvalues[$input.attr('id')] = targetID;
                                 $input.attr('data-value', targetID); //that's more reliable
-                                
+
                                 //save last 25 selected records
-                                var now_selected = data.selection.getIds(25);
+                                let now_selected = data.selection.getIds(25);
                                 window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
                                 
                                 
                                 $input.empty();
-                                var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
+                                let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
                                     {rec_ID: targetID, 
                                      rec_Title: rec_Title, 
                                      rec_RecTypeID: rec_RecType,
@@ -1374,6 +1387,8 @@ function browseRecords(_editing_input, $input){
                                 
                                 that.onChange();
                                 ele.css({margin:'4px', 'border':'2px red solid !important'});
+                                
+                                let $inputdiv = $input.parent();
                                 $inputdiv.css('border','4px green solid !important');
                                 $input.css('border','1px blue solid');
 
@@ -1393,7 +1408,7 @@ function browseRecords(_editing_input, $input){
     //
     // event is false for confirmation of select mode for parent entity
     // 
-    var __show_select_dialog = function(event){
+    let __show_select_dialog = function(event){
         
             if(that.is_disabled) return;
         
@@ -1415,15 +1430,14 @@ function browseRecords(_editing_input, $input){
             
              // Save record first without validation, only if this is a new record
             if(that.options.editing){
-                var et = that.options.editing.getFieldByName('rec_Title');
+                let et = that.options.editing.getFieldByName('rec_Title');
                 
-                var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
-                
+                let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
                 if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == '' && isparententity){
 
-                    var is_empty = true;
-                    var fields = that.options.editing.getValues(false);
-                    for (var dtid in fields) {
+                    let is_empty = true;
+                    let fields = that.options.editing.getValues(false);
+                    for (let dtid in fields) {
                         if(parseInt(dtid)>0 && fields[dtid]!=''){
                             is_empty = false;
                             break;
@@ -1432,7 +1446,7 @@ function browseRecords(_editing_input, $input){
                     if(is_empty){
                         window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
                         return;
-                    }else if(that.options.editing && $.isFunction(that.options.editing.getOptions().onaction)){
+                    }else if(that.options.editing && window.hWin.HEURIST4.util.isFunction(that.options.editing.getOptions().onaction)){
                         //quick save without validation
                         that.options.editing.getOptions().onaction(null, 'save_quick');
                     }
@@ -1440,7 +1454,7 @@ function browseRecords(_editing_input, $input){
             }
             
             
-            var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
+            let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+that.configMode.entity, 
                 {width: null,  //null triggers default width within particular widget
                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
 
@@ -1449,11 +1463,11 @@ function browseRecords(_editing_input, $input){
             
             if(pointerMode!='browseonly' && that.options.editing && that.configMode.entity=='records'){
                 
-                var ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
+                let ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
                 if(ele){
-                    var vals = ele.editing_input('getValues');
+                    let vals = ele.editing_input('getValues');
                     ele = that.options.editing.getFieldByName('rec_NonOwnerVisibility');
-                    var vals2 = ele.editing_input('getValues');
+                    let vals2 = ele.editing_input('getValues');
                     popup_options.new_record_params = {};
                     popup_options.new_record_params['ro'] = vals[0];
                     popup_options.new_record_params['rv'] = vals2[0];
@@ -1469,11 +1483,11 @@ function browseRecords(_editing_input, $input){
         
         // select target record from cached drop down
         //
-        var __show_select_dropdown = function(event_or_id){
+        let __show_select_dropdown = function(event_or_id){
           
             if(that.is_disabled) return;
             
-            var $input, $inputdiv, ref_id;
+            let $input, $inputdiv, ref_id;
             
             if(typeof event_or_id == 'string'){
                 
@@ -1484,7 +1498,7 @@ function browseRecords(_editing_input, $input){
             }else
             if(event_or_id && event_or_id.target){
                 
-                var event = event_or_id;
+                let event = event_or_id;
             
                 $inputdiv = $(event.target).parents('.input-div');
                 $input = $inputdiv.find('div:first');
@@ -1494,8 +1508,8 @@ function browseRecords(_editing_input, $input){
             }
             
             
-            var key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-			var recordMax = 1000;
+            let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
+			let recordMax = 1000;
     
             if(!window.hWin.HEURIST4.browseRecordCache){
                 window.hWin.HEURIST4.browseRecordCache = {};
@@ -1516,9 +1530,9 @@ function browseRecords(_editing_input, $input){
                     $inputdiv.find('.sel_link2 > .ui-button-icon').removeClass('ui-icon-triangle-1-e');
                     $inputdiv.find('.sel_link2 > .ui-button-icon').addClass('ui-icon-loading-status-circle rotate');
                 
-                    var rectype_set = that.f('rst_PtrFilteredIDs');
-                    var qobj = (rectype_set)?[{t:rectype_set}]:null;
-                    var pointer_filter = that.f('rst_PointerBrowseFilter');
+                    let rectype_set = that.f('rst_PtrFilteredIDs');
+                    let qobj = (rectype_set)?[{t:rectype_set}]:null;
+                    let pointer_filter = that.f('rst_PointerBrowseFilter');
                     if(pointer_filter){
                         if(qobj==null){
                             qobj = pointer_filter;
@@ -1534,7 +1548,7 @@ function browseRecords(_editing_input, $input){
                     
                     qobj.push({"sortby":"t"}); //sort by title
                     
-                    var request = {
+                    let request = {
                         q: qobj,
                         w: 'a',
                         source:'_browseRecords',
@@ -1551,7 +1565,7 @@ function browseRecords(_editing_input, $input){
                                    if(!rectype_set) rectype_set = 'any';
                                    rectype_set = rectype_set.split(',');
                                    $.each(rectype_set, function(i,rty_id){
-                                       var rty_id = ''+rty_id;
+                                       rty_id = ''+rty_id;
                                        if(!window.hWin.HEURIST4.browseRecordTargets[rty_id]){
                                            window.hWin.HEURIST4.browseRecordTargets[rty_id] = [];
                                        }
@@ -1568,7 +1582,7 @@ function browseRecords(_editing_input, $input){
                                 setTimeout(__show_select_dialog, 1000);
                             }else{
                                 
-                                var request = {
+                                let request = {
                                     q: qobj,
                                     restapi: 1,
                                     columns:['rec_ID', 'rec_RecTypeID', 'rec_Title'],
@@ -1619,15 +1633,15 @@ function browseRecords(_editing_input, $input){
                         $(that.selObj).remove();
                     }
                     
-                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);//, [{key:'select', title:'Search/Add'}]);
+                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);
 
                     $(that.selObj).attr('rectype-select', 1);
                     $(that.selObj).appendTo($inputdiv);
                     $(that.selObj).hide();
 
-                    var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
+                    let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
                         filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
-                    var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
+                    let opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
                     '<div style="width:300px;padding:15px 0px">'
                     +'<span style="padding:0px 4px 0 10px;vertical-align:sub">'
                     +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -1642,23 +1656,23 @@ function browseRecords(_editing_input, $input){
                     + '</span><div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
                     +window.hWin.HR('No records match the filter')+'</div></div>');
                     
-                    //$(opt).attr('icon-url', search_icon);
+                   
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
                         let title = item['rec_Title'].substr(0,64).replace(/[\r\n]+/g, ' ');
                         
-                        var opt = window.hWin.HEURIST4.ui.addoption(that.selObj, item['rec_ID'], title); 
+                        let opt = window.hWin.HEURIST4.ui.addoption(that.selObj, item['rec_ID'], title); 
                         
-                        var icon = window.hWin.HAPI4.iconBaseURL + item['rec_RecTypeID'];
+                        let icon = window.hWin.HAPI4.iconBaseURL + item['rec_RecTypeID'];
                         $(opt).attr('icon-url', icon);
                         $(opt).attr('data-rty', item['rec_RecTypeID']);
                     });
                     
-                    var events = {};
+                    let events = {};
                     events['onOpenMenu'] = function(){
 
-                        var ele = that.selObj.hSelect('menuWidget');
+                        let ele = that.selObj.hSelect('menuWidget');
                         ele.css('max-width', '500px');
                         ele.find('div.ui-menu-item-wrapper').addClass('truncate');
                         ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
@@ -1669,41 +1683,41 @@ function browseRecords(_editing_input, $input){
 
                     events['onSelectMenu'] = function ( event ){
                         
-                        var $mnu = that.selObj.hSelect('menuWidget');
+                        let $mnu = that.selObj.hSelect('menuWidget');
                         if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')=='progress'){
                             openSearchMenu(that, that.selObj, false, false);
                             return;
                         }
                         
-                        var targetID = (event) ?$(event.target).val() :$(that.selObj).val();
+                        let targetID = (event) ?$(event.target).val() :$(that.selObj).val();
                         if(!targetID) return;
 
                         that._off($(that.selObj),'change');
                         
+                        let ref_id = $(that.selObj).attr('ref-id');
+                        
                         if(targetID=='select'){
+                            __current_input_id = ref_id;
                            __show_select_dialog(); 
                         }else{
-
-                            var ref_id = $(that.selObj).attr('ref-id');
                             
-                            var $input = $('#'+ref_id);
-                            var $inputdiv = $('#'+ref_id).parent();
+                            let $input = $('#'+ref_id);
+                            let $inputdiv = $('#'+ref_id).parent();
 
-                            var opt = $(that.selObj).find('option:selected');
+                            let opt = $(that.selObj).find('option:selected');
                             
-                            var rec_Title = opt.text();
-                            var rec_RecType = opt.attr('data-rty');
+                            let rec_Title = opt.text();
+                            let rec_RecType = opt.attr('data-rty');
                             that.newvalues[$input.attr('id')] = targetID;
                             $input.attr('data-value', targetID); //that's more reliable
-                            
                             $input.empty();
-                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
+                            let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
                                 {rec_ID: targetID, 
                                  rec_Title: rec_Title, 
                                  rec_RecTypeID: rec_RecType,
                                  rec_IsChildRecord:false
                                 }, __show_select_dropdown);
-                            //ele.appendTo($inputdiv);
+                           
                             that.onChange();
                             
                             if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
@@ -1726,9 +1740,9 @@ function browseRecords(_editing_input, $input){
                 let org_scroll = $inputdiv.parents('.editForm').length > 0 ?
                                     $inputdiv.parents('.editForm')[0].scrollTop : null;
                 
-                var $inpt_ele = $inputdiv.find('.sel_link2'); //button
-                var _ref_id = $input.attr('id');
-                //$input.addClass('selectmenu-parent');
+                let $inpt_ele = $inputdiv.find('.sel_link2'); //button
+                let _ref_id = $input.attr('id');
+               
                 
                 if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
                     $inpt_ele = $inputdiv.find('.link-div');
@@ -1738,7 +1752,7 @@ function browseRecords(_editing_input, $input){
                 that.selObj.hSelect('open');
                 that.selObj.hSelect('widget').hide();
 
-                var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
+                let prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
                 if(prn.length>0){
                     prn.css({'position':'fixed'}); //to show above all 
                     if(org_scroll !== null){ // fix scroll
@@ -1767,9 +1781,9 @@ function browseRecords(_editing_input, $input){
 //
 function browseTerms(_editing_input, $input, value){
     
-    var that = _editing_input;
+    let that = _editing_input;
     
-    var $inputdiv = $input.parent(); //div.input-div
+    let $inputdiv = $input.parent(); //div.input-div
 
         
     function __recreateTrmLabel($input, trm_ID){
@@ -1781,30 +1795,25 @@ function browseTerms(_editing_input, $input, value){
                 __recreateTrmLabel($input, trm_ID);
             });
             lang_code = '';
-            //return;
+           
         }
 
         $input.empty();
         if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
             
-            var trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
-            var trm_info = $Db.trm(trm_ID);
+            let trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
+            let trm_info = $Db.trm(trm_ID);
 
-            if(trm_info && trm_info.trm_ParentTermID != 0){
-                
-                while(1){
+            while(trm_info && trm_info.trm_ParentTermID > 0){
 
-                    let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
-                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
+                trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                    if(trm_info.trm_ParentTermID == 0){
-                        break;
-                    }else{
-                        trm_Label = label + '.' +  trm_Label;
-                    }
+                if(trm_info && trm_info.trm_ParentTermID > 0){
+                    trm_Label = label + '.' +  trm_Label;
                 }
             }
-
+        
             window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
             $input.css('min-width', '');
         }else{
@@ -1821,10 +1830,10 @@ function browseTerms(_editing_input, $input, value){
 
     function __createTermTooltips($input){
 
-        var $menu = $input.hSelect('menuWidget');
+        let $menu = $input.hSelect('menuWidget');
         if(!$input.attr('data-tooltips')){
 
-            var $tooltip = null;
+            let $tooltip = null;
             $input.attr('data-tooltips', 1);
 
             $menu.find('div.ui-menu-item-wrapper')//.filter(() => { return $(this).children().length == 0; })
@@ -1914,9 +1923,9 @@ function browseTerms(_editing_input, $input, value){
         }
 
 
-        var allTerms = that.f('rst_FilteredJsonTermIDTree');        
+        let allTerms = that.f('rst_FilteredJsonTermIDTree');        
         //headerTerms - disabled terms
-        var headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
+        let headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
         let lang_code = that.options.language;
 
         if(window.hWin.HEURIST4.util.isempty(allTerms) &&
@@ -1932,9 +1941,9 @@ function browseTerms(_editing_input, $input, value){
         }
 
 
-        var search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
+        let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
 
-        var  filter_form = '<div style="padding:10px 0px">'
+        let  filter_form = '<div style="padding:10px 0px">'
         +'<span style="padding-right:10px;vertical-align:sub">'
         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
@@ -1946,9 +1955,9 @@ function browseTerms(_editing_input, $input, value){
         + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
         +'</div></div>';
 
-        var topOptions = [{key:'select',title:filter_form},{key:'',title:'&lt;blank&gt;'}];
+        let topOptions = [{key:'select',title:filter_form},{key:'',title:'&lt;blank&gt;'}];
 
-        var events = {};
+        let events = {};
         events['onOpenMenu'] = function(){
             __createTermTooltips(that.selObj);
             openSearchMenu(that, that.selObj, true, true);
@@ -1956,15 +1965,13 @@ function browseTerms(_editing_input, $input, value){
 
         events['onSelectMenu'] = function ( event ){
 
-            var trm_ID = (event) ?$(event.target).val() :$(that.selObj).val();
+            let trm_ID = (event) ?$(event.target).val() :$(that.selObj).val();
 
             that._off($(that.selObj),'change');
 
-            var ref_id = $(that.selObj).attr('ref-id');
+            let ref_id = $(that.selObj).attr('ref-id');
 
-            var $input = $('#'+ref_id);
-            //var $inputdiv = $('#'+ref_id).parent();
-            //var opt = $(that.selObj).find('option:selected');
+            let $input = $('#'+ref_id);
             that.newvalues[$input.attr('id')] = trm_ID;
             $input.attr('data-value', trm_ID); //that's more reliable
 
@@ -2008,11 +2015,11 @@ function browseTerms(_editing_input, $input, value){
     //
     // select term from drop down
     //
-    var __show_select_dropdown = function(event_or_id){
+    let __show_select_dropdown = function(event_or_id){
         
         if(that.is_disabled) return;
         
-        var $input, $inputdiv, ref_id; 
+        let $input, $inputdiv, ref_id; 
         
         if(typeof event_or_id == 'string'){ //id
             
@@ -2023,7 +2030,7 @@ function browseTerms(_editing_input, $input, value){
         }else 
         if(event_or_id && event_or_id.target){ //event
             
-            var event = event_or_id;
+            let event = event_or_id;
         
             $inputdiv = $(event.target).parents('.input-div');
             $input = $inputdiv.find('select');
@@ -2045,8 +2052,8 @@ function browseTerms(_editing_input, $input, value){
         }
             
         //Adjust position
-        var _ref_id = $input.attr('id');
-        var menu_location = $input;
+        let _ref_id = $input.attr('id');
+        let menu_location = $input;
 
         if($input.hSelect('instance') !== undefined){
             menu_location = $input.hSelect('widget');
@@ -2056,7 +2063,7 @@ function browseTerms(_editing_input, $input, value){
         that.selObj.hSelect('open');
         that.selObj.hSelect('widget').hide();
 
-        var prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
+        let prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
         if(prn.length>0){
             prn.css({'position':'fixed'}); //to show above all 
             if(org_scroll !== null){ // fix scroll
@@ -2092,21 +2099,25 @@ function browseTerms(_editing_input, $input, value){
 //
 function translationSupport(_input_or_values, is_text_area, callback){
 
-    if(!$.isFunction($('body')['editTranslations'])){
+    if(!window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
             function() {  //+'?t='+(new Date().getTime())
-                if($.isFunction($('body')['editTranslations'])){
+                if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Widget editTranslations not loaded. Verify your configuration',
+                        error_title: 'Translation widget loading failed',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }
         });
     }else{
         //open popup
-        var that = _input_or_values;    
-        var _dlg, values, fieldtype;
+        let that = _input_or_values;    
+        let _dlg, values, fieldtype;
         
-        if($.isArray(that)){
+        if(Array.isArray(that)){
             values = that;
             _dlg = $('<div/>').hide().appendTo($('body'));
             fieldtype = is_text_area?'blocktext':'freetext';
@@ -2121,7 +2132,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
             fieldtype: fieldtype,
             onclose:function(res){
                 if(res){
-                    if($.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call(this, res);
                     }else{
                         that.setValue(res);    
@@ -2153,7 +2164,7 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     //clear previous values, except default
     $(Object.keys(params)).each(function(i, key){
 
-        var key2 = key;        
+        let key2 = key;        
         if(key.length>5 && key.indexOf(':')==key.length-4){
             key2 = key.substring(0, key.length-4);
             if(key2 == keyname){
@@ -2163,15 +2174,15 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
     });
     
     //find all elements with given name
-    var ele_type = is_text_area?'textarea':'input';
+    let ele_type = is_text_area?'textarea':'input';
     
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
         item = $(item);
-        var lang = item.attr('data-lang');
+        let lang = item.attr('data-lang');
         if(lang=='def') lang = ''
         else lang = ':'+lang;
         
-        var value = item.val().trim();
+        let value = item.val().trim();
         if(!window.hWin.HEURIST4.util.isempty(value) || lang===''){
             params[keyname+lang] = value;    
         }
@@ -2184,14 +2195,14 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
 //
 function translationToUI(params, $container, keyname, name, is_text_area){
     
-    var def_ele = null;
+    let def_ele = null;
     
-    var ele_type = is_text_area?'textarea':'input';
+    let ele_type = is_text_area?'textarea':'input';
     
     //find element assign data-lang for default, remove others
     //1. Removes all except default (first one)
     $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
-        var lang  = $(item).attr('data-lang');
+        let lang  = $(item).attr('data-lang');
         if(lang=='def' || !lang){
             def_ele = $(item);
         }else{
@@ -2206,7 +2217,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
       params[keyname] = def_ele.val();  
     } 
     
-    var sTitle = '';
+    let sTitle = '';
     
     //init input element for default value and button
     def_ele.attr('data-lang','def').val(params[keyname]);
@@ -2215,7 +2226,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     if($container.find('span[name="'+name+'"]').length==0){
 
         //translation button    
-        var btn_add = $( "<span>")
+        let btn_add = $( "<span>")
             .attr('data-lang','def')
             .attr('name',name)
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
@@ -2234,12 +2245,12 @@ function translationToUI(params, $container, keyname, name, is_text_area){
         
         btn_add.on({click: function(e){//--------------------------
             
-            var values = [];
+            let values = [];
             //$(e.target).attr('data-lang')
             
             //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
-                var lang  = $(item).attr('data-lang');
+                let lang  = $(item).attr('data-lang');
                 if(lang=='def' || !lang){
                     values.push($(item).val())
                 }else{
@@ -2250,9 +2261,9 @@ function translationToUI(params, $container, keyname, name, is_text_area){
             //open dialog
             translationSupport( values, is_text_area, function(newvalues){
                 
-                var res2 = {};
-                for(var i=0; i<newvalues.length; i++){
-                    var keyname2=keyname, value = newvalues[i];
+                let res2 = {};
+                for(let i=0; i<newvalues.length; i++){
+                    let keyname2=keyname, value = newvalues[i];
                     
                     if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){
                         keyname2 = keyname2+':'+value.substr(0,3);
@@ -2277,20 +2288,16 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     
     //3. add new hidden lang elements
     $(Object.keys(params)).each(function(i, key){
-        if(key==keyname){
+        if(key!=keyname && keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
+            let lang = key.substring(key.length-3);
             
-        }else if(keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
-            var lang = key.substring(key.length-3);
-            
-            var ele = $('<'+ele_type+'>')
+            let ele = $('<'+ele_type+'>')
                 .attr('name',name).attr('data-lang',lang)
                 
                 .val(params[key]).insertAfter(def_ele);
                 
             if(is_text_area){
                 ele.css('display','none');
-            }else{
-                //ele.attr('type','hidden');
             }
                 
             sTitle += (lang+':'+params[key]+'\n');
@@ -2306,7 +2313,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
 //
 function selectRecord(options, callback)
 {
-        var popup_options = {
+        let popup_options = {
             select_mode: 'select_single', //select_multi
             select_return_mode: 'recordset', //or ids
             edit_mode: 'popup',//'none'
@@ -2316,20 +2323,14 @@ function selectRecord(options, callback)
             parententity: 0,
             default_palette_class: 'ui-heurist-populate',
             onselect:function(event, data){
-                //if( window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                //    callback(data.selection[0]);
-                //}
-                
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                    var recordset = data.selection;
-                    //var record = recordset.getFirstRecord();
-                    //var record_id = recordset.fld(record,'rec_ID');
+                    let recordset = data.selection;
                     callback(data.selection);
                 }
             }
         };//popup_options
         
-        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
             {width: null,  //null triggers default width within particular widget
                 height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
 

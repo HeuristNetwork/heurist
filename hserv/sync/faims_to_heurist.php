@@ -20,13 +20,13 @@
 */
 
 
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../records/edit/recordModify.php';
 
 //@todo HARDCODED id of OriginalID
 $dt_SourceRecordID = 36;
 
-$system = new System();
+$system = new hserv\System();
 
 if(! $system->init(@$_REQUEST['db'], true) ){
     //@todo - redirect to error page
@@ -41,7 +41,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
-        
+
         <link rel="stylesheet" type="text/css" href="../../style.css">
     </head>
     <body style="padding:44px;">
@@ -89,7 +89,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             }
             catch(PDOException $e)
             {
-                print_r($e->getMessage());                
+                print_r($e->getMessage());
                 print_r("<br><br>Database NOT loaded");
                 die();
             }
@@ -102,7 +102,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
             echo $row[0]."<br>";
             }*/
-            
+
             $need_debug_info = false;
 
             if($need_debug_info){
@@ -134,7 +134,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $query2 =  "SELECT AEntTypeID, AttributeID, AEntDescription, IsIdentifier, MinCardinality, MaxCardinality FROM IdealAEnt where AEntTypeID=".intval($row[0]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
-                        echo "<div style='padding-left:30px'>".$row2[1]."  ".$row2[2]."</div>";
+                        echo "<div style='padding-left:30px'>{$row2[1]}  {$row2[2]}</div>";
                     }
                 }
 
@@ -156,7 +156,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $query2 =  "SELECT * FROM AEntValue where uuid=".intval($row[0])." and VersionNum=".intval($row[7]);
                     foreach ($dbfaims->query($query2) as $row2)
                     {
-                        echo "<div style='padding-left:30px'>".$row2[3]."  ".$row2[5]."  ".$row2[2]."</div>";
+                        echo "<div style='padding-left:30px'>{$row2[3]}  {$row2[5]}  {$row2[2]}</div>";
                     }
                 }
 
@@ -179,7 +179,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 if($row){
 
                     $dtyId = intval($row[0]);
-                    
+
                     print  "DT ".intval($dtyId)."  ".htmlspecialchars($row[1])."  =>".htmlspecialchars($attrID)."<br>";
 
                     $dtyName = $row[1];
@@ -203,7 +203,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     $detailMap[$attrID] = $dtyId;
 
-                    print  "DT added ".intval($dtyId)."  based on ".htmlspecialchars($attrID." ".$row1[1]." ".$row1[3])."<br>";
+                    $dtyId = intval($dtyId);
+                    print  "DT added $dtyId based on ".htmlspecialchars($attrID." ".$row1[1]." ".$row1[3])."<br>";
                 }
 
 
@@ -250,7 +251,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                         $termsMap[$row_vocab[0]] = $trm_ID;
 
-                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added ".intval($trm_ID)."  based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
+                        $trm_ID = intval($trm_ID);
+                        print  "&nbsp;&nbsp;&nbsp;&nbsp;Term added $trm_ID based on ".htmlspecialchars($row_vocab[0]." ".$row_vocab[1])."<br>";
                     }//add terms
 
                 }
@@ -377,7 +379,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 foreach ($dbfaims->query($query2) as $row2)
                 {
                     //attr id, freetext, measure, certainity, vocabid
-                    echo "<div style='padding-left:30px'>".$row2[3]."  ".$row2[5]."  ".$row2[4]."  ".$row2[6]."  ".$row2[2]."</div>";
+                    echo "<div style='padding-left:30px'>{$row2[3]}  {$row2[5]} {$row2[4]}  {$row2[6]}  {$row2[2]}</div>";
 
                     //detail type
                     $key = intval(@$detailMap[$row2[3]]);
@@ -392,11 +394,11 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                                 print "TERM NOT FOUND for Vocabulary ".$vocabID."<br>";
                                 continue;
                             }
-                        }else if($row2[5]){ //freetext
+                        }elseif($row2[5]){ //freetext
                             $value = $row2[5];
-                        }else if($row2[4]){ //measure
+                        }elseif($row2[4]){ //measure
                             $value = $row2[4];
-                        }else if($row2[6]){ //Certainty
+                        }elseif($row2[6]){ //Certainty
                             $value = $row2[6];
                         }else{
                             continue;

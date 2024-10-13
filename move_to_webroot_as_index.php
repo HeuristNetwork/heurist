@@ -23,7 +23,7 @@
 
     header( 'Location: /HEURIST/startup');
 
-    
+
 /*   This is the html alternative - not tested
 
 <!DOCTYPE HTML>

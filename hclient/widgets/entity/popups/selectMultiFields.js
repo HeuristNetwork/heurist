@@ -17,14 +17,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hMultiSelect(){
+function HMultiSelect(){
 
-	var rtyID = null;	// Current Record Type ID
+	let rtyID = null;	// Current Record Type ID
 
-	var assigned_fields = [];	// List of newly assigned fields
-	var selected_fields = [];	// List of checked options
+	let assigned_fields = [];	// List of newly assigned fields
+	let selected_fields = [];	// List of checked options
 
-	var all_fields = [];	// Base Fields [ [ dty id, dty name, [rst name 1, rst name 2, ...] ], ... ]
+	let all_fields = [];	// Base Fields [ [ dty id, dty name, [rst name 1, rst name 2, ...] ], ... ]
 	
 	/*
 	 * Assign more standard names to dty_Types
@@ -102,13 +102,13 @@ function hMultiSelect(){
 			return 0;
 		}
 
-		var min_len = Math.min(a.length, b.length);
-		var i = 0;
+		let min_len = Math.min(a.length, b.length);
+		let i = 0;
 
 		for(; i < min_len; i++){
 
-			var c = a[i].toUpperCase();
-            var d = b[i].toUpperCase();
+			let c = a[i].toUpperCase();
+            let d = b[i].toUpperCase();
 
             if (c < d) {
                 return -1;
@@ -142,14 +142,14 @@ function hMultiSelect(){
 
 	function isInArray(needle, haystack, check_partial) {
 
-		var idx = haystack.indexOf(needle);
+		let idx = haystack.indexOf(needle);
 
 		if(!check_partial){
 			return idx >= 0;
 		}
 
 		if(idx == -1){ // Check for partial match
-			for(i in haystack){
+			for(let i in haystack){
 				idx = haystack[i].indexOf(needle);
 
 				if(idx >= 0){
@@ -197,14 +197,11 @@ function hMultiSelect(){
 
 	function getAssignedFields(rty_ID) {
 
-		var recset = $Db.rst(rty_ID);
+		let recset = $Db.rst(rty_ID);
 
 		if(window.hWin.HEURIST4.util.isempty(recset)){ return; } // skip if there are no base fields
 
 		recset.each2(function(fID, fields){ // proceed through all fields and record each id
-
-			var type = getTypeById(fields['rst_DetailTypeID']);
-
 			assigned_fields.push(fID);
 		});
 	}
@@ -218,25 +215,25 @@ function hMultiSelect(){
 	 */
 
 	function populateBaseFields() {
-		var a_list = $('.tabs-list');
-		var tabs_container = $('.tabs');
+		let a_list = $('.tabs-list');
+		let tabs_container = $('.tabs');
 
 		$Db.dtg().each2(function(gID, group){
-			var arr = [];
+			let arr = [];
 
 			if(group['dtg_Name'] == 'Trash') { return; }
 
 			// Create Grouping
 			a_list.append('<li class="tabs-items"><a href="#'+ gID +'" class="no-overflow-item tabs-text">'+ group['dtg_Name'] +'</a></li>');
 
-			var tab_page = '<div id="'+ gID +'" style="border:1px solid lightgrey;background:#C9BFD4;height:540px;">'
+			let tab_page = '<div id="'+ gID +'" style="border:1px solid lightgrey;background:#C9BFD4;height:540px;">'
 				+ '<div class="tabs-desc no-overflow-item">'+ group['dtg_Description'] +'</div><hr style="margin-bottom:5.5px;"/><div class="field-group">';
 
 			// Get all Base Fields belonging to this group
 			$Db.dty().each2(function(dID, field){
 
 			    if(field['dty_DetailTypeGroupID'] == gID && $Db.getConceptID('dty', dID) != '2-247'){
-			    	var type = getTypeName(field['dty_Type']);
+			    	let type = getTypeName(field['dty_Type']);
 
 			    	arr.push([dID, field['dty_Name'], type, field['dty_HelpText']]);
 			    }
@@ -252,7 +249,7 @@ function hMultiSelect(){
 				3 => Help Text/Additional Info
 			*/
 			// Display Base Fields
-			for(var i = 0; i < arr.length; i++){
+			for(let i = 0; i < arr.length; i++){
 
 		        tab_page = tab_page + '<div class="field-container">';
 
@@ -277,10 +274,10 @@ function hMultiSelect(){
 
 		tabs_container.on('click', function(e){
 
-			var ele = $(e.target);
+			let ele = $(e.target);
 
 			if(!ele.is('.field-group, .tabs-desc, input, div[role="tabpanel"], a, ul, li')){
-				var cb = $(ele.parent('div').find('input')[0]);
+				let cb = $(ele.parent('div').find('input')[0]);
 				
 				if(!cb.prop('disabled')){
 					cb.click();
@@ -298,12 +295,12 @@ function hMultiSelect(){
 	 */
 
 	function getCheckedFields(){
-		var tabs_container = $('.tabs');
+		let tabs_container = $('.tabs');
 
-		var checked_opts = tabs_container.find('input:checked').not(':disabled');
-		var cnt = checked_opts.length;
+		let checked_opts = tabs_container.find('input:checked').not(':disabled');
+		let cnt = checked_opts.length;
 
-		for(var i = 0; i < cnt; i++){
+		for(let i = 0; i < cnt; i++){
 			selected_fields.push($(checked_opts[i]).attr('data-id')); // Get each field's ID
 		}
 	}
@@ -318,13 +315,13 @@ function hMultiSelect(){
 
 	function searchBaseField() {
 
-		var search_field = $('#field_search');
-		var search_container = $('.field_search_container');
-		var result_container = $('#field_result');
+		let search_field = $('#field_search');
+		let search_container = $('.field_search_container');
+		let result_container = $('#field_result');
 
-		var searched = search_field.val().toLowerCase();
+		let searched = search_field.val().toLowerCase();
 
-		var has_result = false;
+		let has_result = false;
 
 		if(search_field.length == 0) {
 			return false;
@@ -347,7 +344,7 @@ function hMultiSelect(){
 			result_container.empty();
 
 			// For instances where the entered value has an exact match
-			var first_entry = $('<div class="no-overflow-item">').appendTo(result_container);
+			let first_entry = $('<div class="no-overflow-item">').appendTo(result_container);
 
 			// Ensure there are fields to compare against
 			if(all_fields.length > 0) {
@@ -362,7 +359,7 @@ function hMultiSelect(){
 
 					if(!isInArray(id, assigned_fields, false) && (name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
 
-						var main_ele;
+						let main_ele;
 
 						if(name.toLowerCase == searched || in_other_array == true){
 							main_ele = first_entry;
@@ -374,22 +371,23 @@ function hMultiSelect(){
 						main_ele
 						.attr({'d-id': id, 'title': name})
 						.text(name)
-						.click(function(e){
+						.on('click', function(e){
 
 							let id = $(e.target).attr('d-id');
 							let name = $(e.target).text();
 
-							var cb = $('.tabs').find('input[data-id="'+ id +'"]');
+							let cb = $('.tabs').find('input[data-id="'+ id +'"]');
 
 							if(cb.length > 0) {
 								cb.prop('checked', true);
 
 								window.hWin.HEURIST4.msg.showMsgFlash('Checked ' + name, 5000);
 							}else{
-								window.hWin.HEURIST4.msg.showMsgErr(
-									'An error has occurred with the selection of base field ' + name + ' (' + id + ')<br>'
-								  + 'Please contact the Heurist Team if this problem persists.'
-								);
+								window.hWin.HEURIST4.msg.showMsgErr({
+									message: `An error has occurred with the selection of base field ${name} (${id})`,
+									error_title: 'Invalid base field',
+									status: window.hWin.ResponseStatus.UNKNOWN_ERROR									
+								});
 							}
 
 							result_container.hide();
@@ -397,29 +395,30 @@ function hMultiSelect(){
 
 						for(const rst_name of dty_field[2]) {
 
-							var sub_ele = $('<div class="no-overflow-item sub-text">').appendTo(result_container);
+							let sub_ele = $('<div class="no-overflow-item sub-text">').appendTo(result_container);
 
 							// Add customised version of base field
 							sub_ele
 							.attr({'d-id': id, 'title': name + '(' + rst_name + ')', 'd-name': name})
 							.html('&nbsp;' + rst_name)
-							.click(function(e){
+							.on('click', function(e){
 
 								let id = $(e.target).attr('d-id');
 								let name = $(e.target).attr('d-name');
-								var sel_name = $(e.target).text();
+								let sel_name = $(e.target).text();
 
-								var cb = $('.tabs').find('input[data-id="'+ id +'"]');
+								let cb = $('.tabs').find('input[data-id="'+ id +'"]');
 
 								if(cb.length > 0) {
 									cb.prop('checked', true);
 
 									window.hWin.HEURIST4.msg.showMsgFlash('Checked ' + name + ' (' + sel_name + ')', 5000);
 								}else{
-									window.hWin.HEURIST4.msg.showMsgErr(
-										'An error has occurred with the selection of base field ' + sel_name + ' (' + id + ' => ' + name + ')<br>'
-									  + 'Please contact the Heurist Team if this problem persists.'
-									);
+									window.hWin.HEURIST4.msg.showMsgErr({
+										message: `An error has occurred with the selection of base field ${sel_name} (${id} => ${name})`,
+										error_title: 'Invalid base field',
+										status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+									});
 								}
 
 								result_container.hide();
@@ -453,7 +452,7 @@ function hMultiSelect(){
 
 	function setupVariables() {
 
-		rectypes = $Db.rty().getIds();
+		let rectypes = $Db.rty().getIds();
 		let idx = rectypes.indexOf(rtyID);
 
 		if(idx >= 0) { rectypes.splice(idx, 1); }
@@ -487,7 +486,10 @@ function hMultiSelect(){
 			getCheckedFields();
 
 			if(window.hWin.HEURIST4.util.isempty(selected_fields)){
-				window.hWin.HEURIST4.msg.showMsgErr('No fields have been selected');
+				window.hWin.HEURIST4.msg.showMsgErr({
+					message: 'No fields have been selected',
+					error_title: 'Missing fields'
+				});
 				return;
 			}
 			else{
@@ -523,7 +525,10 @@ function hMultiSelect(){
 		rtyID = window.hWin.HEURIST4.util.getUrlParameter('rtyID', location.search);
 
 		if(window.hWin.HEURIST4.util.isempty(rtyID)){
-			window.hWin.HEURIST4.msg.showMsgErr('A record type is required to use this tool');
+			window.hWin.HEURIST4.msg.showMsgErr({
+				message: 'A record type is required to use this tool',
+				error_title: 'Missing record type'
+			});
 			window.close();
 		}
 
@@ -534,7 +539,7 @@ function hMultiSelect(){
 		populateBaseFields();
 	}
 
-	var that = {
+	let that = {
 
 		init: function(){
 			_init();

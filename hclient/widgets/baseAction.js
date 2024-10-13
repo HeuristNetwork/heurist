@@ -37,7 +37,8 @@ $.widget( "heurist.baseAction", {
         
         path: '',  // non default path to html content 
         htmlContent: '', //general layout
-        helpContent: null,
+        helpContent: null, //if false help button is hidden, if null it sets name of help file to widgetName,
+                           // help file must be in context_help folder
         
         //listeners
         onInitFinished:null,  // event listener when dialog is fully inited
@@ -46,7 +47,7 @@ $.widget( "heurist.baseAction", {
         
     },
 
-    _$: $,
+    _$: $, //shorthand for this.element.find
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
@@ -55,15 +56,10 @@ $.widget( "heurist.baseAction", {
     
     _context_on_close:false, //variable to be passed to options.onClose event listener
     
-    _progressInterval:null,
-    
-    //controls
-    //.....selectRecordScope:null,
-    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        // it prevents inputs in FF this.element.disableSelection();
+       
         this._$ = selector => this.element.find(selector);
     }, //end _create
     
@@ -74,7 +70,7 @@ $.widget( "heurist.baseAction", {
 
         if(this.options.htmlContent==''){
             this.options.htmlContent = this.options.actionName+'.html';
-                    //+(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
+                   
         }
         
         if(this.options.isdialog){  //show this widget as popup dialog
@@ -84,38 +80,35 @@ $.widget( "heurist.baseAction", {
         }
         
         //init layout
-        var that = this;
-        
+        let that = this;
+
         //load html from file
         if(this._need_load_content && this.options.htmlContent){  //load general layout      
             
-            var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
+            let url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
                     ?this.options.htmlContent
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + this.options.path + this.options.htmlContent
                         +'?t='+window.hWin.HEURIST4.util.random();
-console.log(url);        
             
             this.element.load(url, 
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else{
-                    if(that._initControls()){
-                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
+                }else if(that._initControls() && 
+                        window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
-                        }        
-                    }
                 }
             });
-            return;
-        }else{
-            if(that._initControls()){
-                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
+            
+        }else if(that._initControls() &&
+                window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
-                }        
-            }
         }
 
         
@@ -128,23 +121,31 @@ console.log(url);
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
         
         //find and activate event listeners for elements
         
         if(this.options.isdialog){
+            this._$('.ui-dialog-buttonset').hide();
+            this._$('.ui-heurist-header').hide();
             
             this.popupDialog();
             
-        }else{
+        }else {
+            this._innerTitle = this._$('.ui-heurist-header');
             
             if(this.options.innerTitle){ 
 
-                var fele = this.element.children().get(0);//('fieldset');
+                let fele = this.element.children().get(0);
                 
-                //titlebar            
-                this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
-                .insertBefore(fele);
+                if(this._innerTitle.length==0){
+                    //titlebar            
+                    this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;"></div>')
+                                        .insertBefore(fele);
+                    $(fele).css('margin-top', '38px');
+                }
+            
+                this._innerTitle.text(this.options.title);
 
                 this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:window.hWin.HR('Close')}) 
                 .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
@@ -155,13 +156,20 @@ console.log(url);
                 }});
                 this.closeBtn.find('.ui-icon-closethick').css({'color': 'rgb(255,255,255)'});
                 
-                $(fele).css('margin-top', '38px'); //this._innerTitle.height());
                 
+            }else{
+                this._innerTitle.hide();
             }
-
+         
+            // bottom bar buttons
+            let btnPanel = this._$('.ui-dialog-buttonset');
+            if(btnPanel.length>0){
+                let btn_array = this._getActionButtons();
+                btn_array.forEach(function(btn){
+                     $('<button>',btn).button().appendTo(btnPanel);
+                });
+            }
         }
-        
-        
         
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
@@ -169,35 +177,13 @@ console.log(url);
         return true;
     },
 
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
-        this._superApply( arguments );
-    },
-
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-
-    },
-    
-    // 
-    // custom, widget-specific, cleanup.
-    _destroy: function() {
-        // remove generated elements
-        //if(this.selectRecordScope) this.selectRecordScope.remove();
-
-    },
-    
     //----------------------
     //
     // array of button defintions
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        let that = this;        
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
@@ -221,9 +207,9 @@ console.log(url);
     //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
-        var btn = $('<button>').button(btn_opts)
+        let btn = $('<button>').button(btn_opts)
                     .click(options.click)
                     .appendTo(container);
         if(options.id){
@@ -244,28 +230,25 @@ console.log(url);
     //
     _initDialog: function(){
         
-            var options = this.options,
-                btn_array = this._getActionButtons(), 
-                that = this;
+            let options = this.options,
+                btn_array = this._getActionButtons();
+            const that = this;
         
             if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning on close
-                        //that.saveUiPreferences();
                         return true;
                     };
             }
             
             if(options.position==null) options.position = { my: "center", at: "center", of: window };
             
-            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
-            var that = this;
-            
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -297,7 +280,7 @@ console.log(url);
     popupDialog: function(){
         if(this.options.isdialog){
 
-            var $dlg = this._as_dialog.dialog("open");
+            let $dlg = this._as_dialog.dialog("open");
             
             
             if(this._as_dialog.attr('data-palette')){
@@ -313,10 +296,13 @@ console.log(url);
             }
 
             if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
-            
+
+            if(this.options.helpContent==null){
+                this.options.helpContent = this.widgetName;
+            }
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -335,7 +321,7 @@ console.log(url);
             this._as_dialog.dialog("close");
         }else{
             
-            var canClose = true;
+            let canClose = true;
             if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
@@ -360,106 +346,9 @@ console.log(url);
     //  after action event handler
     //
     _afterActionEvenHandler: function( response ){
-        
-            
+       return; 
     },
-    
-    //
-    // Requests reportProgress every t_interval ms 
-    // is_autohide 
-    //    true  - stops progress check if it returns null/empty value
-    //    false - it shows rotating(loading) image for null values and progress bar for n,count values
-    //                  in latter case _hideProgress should be called explicitely
-    //
-/*    
-    _showProgress: function ( session_id, is_autohide, t_interval ){
 
-        if(!(session_id>0)) {
-             this._hideProgress();
-             return;
-        }
-        var that = this;
-       
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-
-        this.element.find('#div_fieldset').hide();
-        this.element.find('.ent_wrapper').hide();
-        var progress_div = this.element.find('.progressbar_div').show();
-        $('body').css('cursor','progress');
-        var btn_stop = progress_div.find('.progress_stop').button({label:window.hWin.HR('Abort')});
-        
-        this._on(btn_stop,{click: function() {
-            
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
-                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    that._hideProgress();
-                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        console.error(response);                   
-                    }
-                });
-            }});
-        
-        var div_loading = progress_div.find('.loading').show();
-        var pbar = progress_div.find('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
-        pbar.progressbar({value:0});
-                
-        this._progressInterval = setInterval(function(){ 
-            
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-               
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    that._hideProgress();
-                }else{
-                    //it may return terminate,done,
-                    var resp = response?response.split(','):[];
-                    if(response=='terminate' || resp.length!=2){
-                        if(response=='terminate' || is_autohide){
-                            that._hideProgress();
-                        }else{
-                            div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
-                        }
-                    }else{
-                        div_loading.hide();
-                        if(resp[0]>0 && resp[1]>0){
-                            var val = resp[0]*100/resp[1];
-                            pbar.progressbar( "value", val );
-                            progressLabel.text(resp[0]+' of '+resp[1]);
-                        }else{
-                            progressLabel.text(window.hWin.HR('preparing')+'...');
-                            pbar.progressbar( "value", 0 );
-                        }
-                    }
-                    
-                    progressCounter++;
-                    
-                }
-            },'text');
-          
-        
-        }, t_interval);                
-        
-    },
-    
-    _hideProgress: function (){
-        
-        $('body').css('cursor','auto');
-        
-        if(this._progressInterval!=null){
-            
-            clearInterval(this._progressInterval);
-            this._progressInterval = null;
-        }
-        this.element.find('.progressbar_div').hide();
-        this.element.find('#div_fieldset').show();
-        
-    },
-*/   
   
 });
 

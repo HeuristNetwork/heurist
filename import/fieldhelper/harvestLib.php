@@ -1,50 +1,53 @@
 <?php
-  
-    $rep_counter = null;
-    $rep_issues = null;
-    $reg_info = array('reg'=>array(),'nonreg'=>array());
-  
+use hserv\utilities\USanitize;
+
+global $rep_counter, $rep_issues, $reg_info;
+
+$rep_counter = null;
+$rep_issues = null;
+$reg_info = array('reg'=>array(),'nonreg'=>array());
+
 
 //
 // return folders and extents to index
 //
 function getMediaFolders($mysqli) {
-    
+
     // Find out which folders to parse for XML manifests - specified for FieldHelper indexing in Advanced Properties
     $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
     $row1 = mysql__select_row($mysqli, $query1);
     if (!$row1) {
         return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
-            .'. Possibly wrong database format, please '.CONTACT_HEURIST_TEAM);
+            .'. Possibly wrong database format.'.CONTACT_HEURIST_TEAM_PLEASE);
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
     $mediaFolders = $row1[0];
-    
+
     if($mediaFolders==null || $mediaFolders == ''){
         $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
         folderCreate( $mediaFolders, true );
     }
-    $dirs = explode(';', $mediaFolders); // get an array of folders
+    $dirs = explode(';', $mediaFolders);// get an array of folders
 
     //sanitize folder names
-    $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
+    $dirs = array_map(array('hserv\utilities\USanitize', 'sanitizePath'), $dirs);
     //$mediaFolders = implode(';', $dirs);
-    
+
     // The defined list of file extensions for FieldHelper indexing.
     if($row1[1]==null){
         $mediaExts = HEURIST_ALLOWED_EXT;
     }else{
-        $mediaExts = $row1[1]; // user gets to define from scratch so they can restrict what's indexed
+        $mediaExts = $row1[1];// user gets to define from scratch so they can restrict what's indexed
     }
-    
+
     $mediaExts = explode(',', $mediaExts);
 
     if (count($dirs) == 0) {
-        $dirs = array(HEURIST_FILESTORE_DIR); // default to the data folder for this database
+        $dirs = array(HEURIST_FILESTORE_DIR);// default to the data folder for this database
         //print "<p><b>It seems that there are no media folders specified for this database</b>";
     }
-                
+
     return array('dirs'=>$dirs, 'exts'=>$mediaExts);
 
 }
@@ -52,18 +55,21 @@ function getMediaFolders($mysqli) {
 //
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
+// folders "thumbnail" will be skipped
 //
-function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
+function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
-    global $rep_counter, $rep_issues;
-    
+    global $rep_counter, $rep_issues, $reg_info;
+
+    $reg_info = array('reg'=>array(),'nonreg'=>array());
+
     $system_folders = $system->getSystemFolders();
-    
+
     if(@$dirs_and_exts['error']){
-        print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
+        print "<div style=\"color:red\">".$dirs_and_exts['error'].DIV_E;
         return;
     }
-    
+
     $dirs = $dirs_and_exts['dirs'];
     $mediaExts = $dirs_and_exts['exts'];
 
@@ -75,25 +81,16 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
         }else{
 
-            if(substr($dir, -1) != '/'){
-                $dir .= "/";
-            }
+            $dir = USanitize::sanitizePath($dir);
 
-            $dir = str_replace('\\','/',$dir);
-            if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                $orig = $dir;
-                chdir(HEURIST_FILESTORE_DIR);
-                $dir = realpath($dir);
-                if($dir!==false){
-                    $dir = str_replace('\\','/',$dir);         
+            $real_path = isPathInHeuristUploadFolder($dir, true);
+
+            if(!$real_path){
+                if($is_report){
+                    print error_Div(htmlspecialchars($dir).' is ignored. Folder '
+                    (($real_path==null)?'does not exist':'must be in Heurist filestore directory'));
                 }
-                
-                if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                    if($is_report){
-                        print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";    
-                    }
-                    continue;
-                }
+                continue;
             }
 
             if(substr($dir, -1) != '/'){
@@ -102,17 +99,19 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
         }
 
-        if(in_array($dir, $system_folders)){
+        $is_allowed = is_array($allowed_system_folders) && !empty($allowed_system_folders) && in_array($dir, $allowed_system_folders);
+
+        if(!$is_allowed && in_array($dir, $system_folders)){
 
             if($is_report){
                 print "<div style=\"color:red\">Files are not scanned in system folder $dir</div>";
             }
 
-        }else if($dir && file_exists($dir) && is_dir($dir))
+        }elseif($dir && file_exists($dir) && is_dir($dir))
         {
 
             $files = scandir($dir);
-            if(is_array($files) && count($files)>0)
+            if(!isEmptyArray($files))
             {
                 $subdirs = array();
 
@@ -123,10 +122,10 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
                     if(!($filename=="." || $filename=="..")){
                         if(is_dir($dir.$filename)){
                             $subdir = $dir.$filename."/";
-                            if(!in_array($subdir, $system_folders)){
+                            if($filename!='thumbnail' && !in_array($subdir, $system_folders)){
                                     array_push($subdirs, $subdir);
                             }
-                        }else if($isfirst){ //if($filename == "fieldhelper.xml"){
+                        }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                             $isfirst = false;
                             if($dir == HEURIST_FILESTORE_DIR){
                                 if($is_report){
@@ -139,33 +138,27 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
                     }
                 }
 
-                if(count($subdirs)>0){
- 
+                if(!empty($subdirs)){
+
                     doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
-                    if($is_report) flush();
+                    if($is_report) {flush();}
                 }
             }
-        }else if ($dir) {
+        }elseif($dir) {
             if($is_report){
                 print "<div style=\"color:red\">Folder was not found: $dir</div>";
             }
         }
     }
-} //doHarvest 
+} //doHarvest
 
 //
 // @todo - move code here from syncWithFieldHelper
 /*
 function doHarvestInDir($dir) {
-    
+
 }
 */
-//
-// remove all files from given array
-//
-function cleanFiles($files) {
-    
-}
 
 function getRegInfoResult(){
     global $reg_info;
@@ -174,46 +167,53 @@ function getRegInfoResult(){
 
 //
 // return arrays registered and non-registered files
-// $imode 
+// $imode
 // 0 - all
 // 1 - reg and unreg separately
 //
 function getFilesInDir($system, $dir, $mediaExts, $imode) {
-    
+
     global $reg_info;
-    
+
     $all_files = scandir($dir);
-    $registered = array();
-    $non_registered = array();
-    
+
     foreach ($all_files as $filename){
-        if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
-            $filename_base = $filename;
-            $filename = $dir.$filename;
-            $currfile = $filename;
-            $flleinfo = pathinfo($filename);
-            $recordNotes = null;
+        if(is_dir($dir.$filename) || $filename=="." || $filename==".."
+            || $filename=="fieldhelper.xml" || $filename=="index.html" || $filename==".htaccess"){
+            continue;
+        }
 
-            //checks for allowed extensions
-            if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
-            {
-                if($imode==1){
-                
-                    $file_id = fileGetByFileName( $system, $filename);  //see recordFile.php
+        $filename_base = $filename;
+        $filename = $dir.$filename;
+        $flleinfo = pathinfo($filename);
 
-                    if($file_id>0){
-                        array_push($reg_info['reg'], $filename);
-                    }else{
-                        array_push($reg_info['nonreg'], $filename);
+        //checks for allowed extensions
+        if(in_array(strtolower(@$flleinfo['extension']),$mediaExts)){
+
+            if($imode==1){
+
+                $file_id = fileGetByFileName( $system, $filename );//see recordFile.php
+
+                if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
+                    //Check if this is just a thumbnail version of an image
+
+                    $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+
+                    if(in_array($temp_name, $reg_info['nonreg'])){
+                        continue;
                     }
-                
-                }else{
-                    array_push($reg_info, $filename);
                 }
+
+                if($file_id>0){
+                    array_push($reg_info['reg'], $filename);
+                }else{
+                    array_push($reg_info['nonreg'], $filename);
+                }
+
+            }else{
+                array_push($reg_info, $filename);
             }
-            
-            
         }
     }  //for all_files
 }

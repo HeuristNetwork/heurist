@@ -16,13 +16,16 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global prepared_params */
+
+let login_dialog = null;
 
 //
 //isforsed - if true - it is not possible to get out from login other than switch database
 //
 function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
-    var is_secondary_parent = false;
+    let is_secondary_parent = false;
     if(!parentwin){
         parentwin = window.hWin;  
     }else{
@@ -31,14 +34,14 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
     if(!dialog_id) dialog_id = 'heurist-login-dialog';
     
-    var login_dialog = $(parentwin.document['body']).find('#'+dialog_id);
+    login_dialog = $(parentwin.document['body']).find('#'+dialog_id);
     
     function __onDialogClose($dlg) {
              
-            var allFields = $dlg.find('input');       
+            let allFields = $dlg.find('input');       
             allFields.val( "" ).removeClass( "ui-state-error" );
             
-            if($.isFunction(callback)){
+            if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback(window.hWin.HAPI4.has_access());
             }else
             if( isforsed && !window.hWin.HAPI4.has_access() ){
@@ -56,30 +59,40 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         $dlg.dialog('option','close',function(){ 
                 $dlg.remove(); 
         });;
-        var sel = $dlg.find('#saml_sp');
+        let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             $dlg.dialog('close');
             doSamlLogin(callback, parentwin, sel.val());
         }
 */
-
-        var sel = $dlg.find('#saml_sp');
+        let $dlg = login_dialog;
+        let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             
-        var sp_entity = sel.val();
+        let sp_entity = sel.val();
         
+        let surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
+        
+        let isFrameAllowed = false;
+        if(!isFrameAllowed){
+            surl = surl + '&noframe=1';
+            window.hWin.location = surl;
+            return;
+        }
+
+
         //loads saml dialog into iframe
         window.hWin.HEURIST4.msg.showDialog(
-        window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
+        surl,
         {
-            title: 'BnF Authentification',
+            title: 'External Authentification',
             width: 980,
             height: 420,
             //noClose: true,
             
             afterclose: function(context) {
                 //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                //                                                [window.hWin.HAPI4.currentUser]);
+               
                 /*
                 if(!window.hWin.HAPI4.has_access() ){
                     //redirects to startup page - list of all databases
@@ -172,7 +185,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             .addClass('ui-heurist-bg-light')
             .appendTo( $(parentwin.document['body']) );
 
-        var $dlg = login_dialog;
+        let $dlg = login_dialog;
 
         //load login dialogue
         $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="
@@ -180,31 +193,50 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             function(){ 
 
             
-            var iWidth = 450;
+            let iWidth = 600; //was 450 if only Heurist login visible
+            
+            let show_guest_login = (typeof prepared_params !== 'undefined' && prepared_params['guest_data']);
+            
             if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
-                var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                let sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                 if(sp_keys.length>0){
+
+                    let sel = $dlg.find('#saml_sp');
                     
                     //hide standard login
                     if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
-                        $dlg.find('#login_saml > label:first').html('Select: ');
-                        $dlg.find('#login_saml').css({'margin-left':'14%'});
+                       
+                       
+                        
+                        $dlg.find('#login_guest').hide();
+                        $dlg.find('.login_heurist').hide();
+                        show_guest_login = false;
                     }else{
-                        iWidth = 700;    
-                        $dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
+                       
+                        
                     }
                     
-                    var sel = $dlg.find('#saml_sp');
                     for(let id of sp_keys){
                         window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
                     }
                     
-                    $dlg.find('#login_saml').css({'display':'inline-block'});
-                    $dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
+                    sel.on({change:function(event){$(event.target).val()==0?$dlg.find('.login_heurist').show():$dlg.find('.login_heurist').hide();}})
                     
+                    $dlg.find('#login_saml').show();
+                   
                 }
             }
             
+            if(show_guest_login){
+
+                if(iWidth == 700){
+                    $dlg.find('#login_guest').css({'display': 'inline-block','margin-left':'-10px'});    
+                }else{
+                    $dlg.find('#login_guest').css({'display': 'block', 'margin-left':'133px'});
+                }
+
+                $dlg.find('#btn_guest_auth').button().click(()=>doRegister( parentwin, true ));
+            }
                 
             $dlg.find('#span-database').text(window.hWin.HAPI4.database);
 
@@ -239,15 +271,20 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 $dlg.find('#span-reccount').text('');
             }
             
-            var allFields = $dlg.find('input');
+            let allFields = $dlg.find('input');
             
             const saml_login_only = window.hWin.HAPI4.sysinfo.hideStandardLogin==1 && 
                                     $.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides);
 
             function __doLogin(){
 
+                
+                if($dlg.find('#saml_sp').val()!=0){
+                        __onSamlLogin();
+                        return;
+                }else
                 if(saml_login_only){
-                        var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                        let sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                         if(sp_keys.length>0){
                             __onSamlLogin();
                             return;
@@ -255,7 +292,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
 
                 allFields.removeClass( "ui-state-error" );
-                //var message = login_dialog.find('.messages');
+               
 
                 let mode = $dlg.attr('data-mode');
 
@@ -267,16 +304,16 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     resetPassword($dlg);
                 }else{
 
-                    var username = $dlg.find('#username');
-                    var password = $dlg.find('#password');
-                    var session_type = $dlg.find('input[name="session_type"]');
+                    let username = $dlg.find('#username');
+                    let password = $dlg.find('#password');
+                    let session_type = $dlg.find('input[name="session_type"]');
                     if(session_type.is("input[type=checkbox]")){
                         session_type = 'remember';
                     }else{
                         session_type = session_type.val();
                     }
 
-                    var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1 )
+                    let bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1 )
                     && window.hWin.HEURIST4.msg.checkLength( password, "password", null, 1 );         //3,63
 
                     if ( bValid ) {
@@ -287,10 +324,15 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             //start login on enter press
             allFields.on("keypress",function(event){
-                var code = (event.keyCode ? event.keyCode : event.which);
+                let code = (event.keyCode ? event.keyCode : event.which);
                 if (code == 13) {
                     __doLogin();
                 }
+            });
+
+            // Avoid submitting the form, it returns the user to the switchboard
+            $dlg.find('form').on('submit', function(event){
+                window.hWin.HEURIST4.util.stopEvent(event);
             });
 
             $dlg.find("#link_restore").on("click", function(){
@@ -304,7 +346,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 setupResetPin($dlg);
             });
 
-            var arr_buttons = [];
+            let arr_buttons = [];
             let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
             if(2 & reg_status){
                 arr_buttons.push({text:window.hWin.HR('Import profile from another DB'), click: function(){
@@ -348,8 +390,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             /*if(isforsed){
-            var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
-            var btn_db = $( "<button>" ).appendTo( left_pane )
+            let left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
+            let btn_db = $( "<button>" ).appendTo( left_pane )
             .button( {title: window.hWin.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
             }*/
             
@@ -613,30 +655,36 @@ function setupCaptcha($dlg){
 //
 //
 //
-function doRegister( parentwin ){
+function doRegister( parentwin, is_guest=false ){
 
-    var is_secondary_parent = false;
+    let is_secondary_parent = false;
     if(!parentwin){
         parentwin = window.hWin;  
     }else{
         is_secondary_parent = true;
     } 
-    var $doc = $(parentwin.document['body']);
+    let $doc = $(parentwin.document['body']);
 
-    if($.isFunction($doc.profile_edit)){
+    if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
 
-        var profile_edit_dialog = $('#heurist-profile-dialog');
+        let profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
-        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin});
+        
+        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
+                 'is_guest':is_guest, 'afterRegistration': onAuthentication});
         
     }else{
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if($.isFunction($doc.profile_edit)){
-                doRegister( parentwin );
+            if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
+                doRegister( parentwin, is_guest );
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Widget "Profile edit" cannot be loaded!',
+                    error_title: 'Script loading failed',
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                });
             }
         });
     }
@@ -720,7 +768,7 @@ function doImport(){
             }
         };
 
-        usr_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
     }
 
     function _showDatabases(){
@@ -746,7 +794,7 @@ function doImport(){
             }
         };    
     
-        db_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     }
 
     _showDatabases();
@@ -758,30 +806,29 @@ function doImport(){
 //
 function doAuthentication(login_data, login_dialog)
 {
+    //allow guest login
+    if(typeof prepared_params !== 'undefined' && prepared_params['guest_data']){
+        login_data['is_guest'] = 1;
+    }
+
     //get hapi and perform login
     window.hWin.HAPI4.SystemMgr.login(login_data,
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
 
-                window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
-                window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-
-                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-                                [window.hWin.HAPI4.currentUser]);
-
-                if(login_dialog) login_dialog.dialog( "close" );
+                onAuthentication(response);
                 
                 if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
                     //version is old 
                     return;
                 }
                 /*
-                if($.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback(true);
                 }
                 */
                 
-                //that._refresh();
+               
             }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                 if(login_dialog){
                     updateStatus(login_dialog, false, response.message);
@@ -793,6 +840,19 @@ function doAuthentication(login_data, login_dialog)
         }
 
     );
+}
+
+function onAuthentication(response){
+
+    if(response.status == window.hWin.ResponseStatus.OK){
+        window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
+        window.hWin.HAPI4.sysinfo = response.data.sysinfo;
+
+        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                        [window.hWin.HAPI4.currentUser]);
+
+        if(login_dialog && login_dialog.dialog('instance') !== undefined) login_dialog.dialog( "close" );
+    }
 }
 
 //
@@ -811,7 +871,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
         
         afterclose: function(context) {
             //$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-            //                                                [window.hWin.HAPI4.currentUser]);
+           
             /*
             if(!window.hWin.HAPI4.has_access() ){
                 //redirects to startup page - list of all databases

@@ -30,28 +30,43 @@ $.widget( "heurist.selectFile", {
 
         onselect: null,
         
-        source:'assets', //or uploaded_tilestacks
+        source:'assets', //or uploaded_tilestacks or id of archive folder
         
-        extensions: null,
+        extensions: null, //string comma separated list of exts
         
         title: 'Select Image',
         
-        size: 64
+        size: 64,
+        
+        keep_dialogue: false
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _cachedRecordset: null,
+    _is_archive_folder: false,
+    _is_source_changed: false,
+    _emptyMessage: '',
 
     // the constructor
     _init: function() {
 
-        var that = this;
+        if(this.options.isdialog && this._as_dialog){
+            
+            if(this._is_source_changed){
+                this._gettingFiles();    
+            }else{
+                this._as_dialog.dialog('open');
+            }
+            return;
+        }
         
-        var sFilter = '';
+        let that = this;
+        
+        let sFilter = '';
         
         if(this.options.showFilter){
             sFilter = '<div class="ent_header">'
-            +'<div class="header4" style="display: inline-block;width:7em;text-align:right;">'+window.hWin.HR('Find')+' </div>'
+            +'<div class="header4" style="display: inline-block;width:7em;text-align:right;">'+window.hWin.HR('Find')+'&nbsp;&nbsp;</div>'
             +'<input class="input_search text ui-widget-content ui-corner-all" style="width:90px; margin-right:0.2em" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">'
             +'</div>';
         }
@@ -66,9 +81,11 @@ $.widget( "heurist.selectFile", {
         }else{
             this.element.find('.recordList').css('top',0);
         }
+        
+        this._is_archive_folder = parseInt(this.options.source)>0;
 
-        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `
-            +(parseInt(this.options.source)>0?'given foldeer':this.options.source);
+        this._emptyMessage = `Specified files (${this.options.extensions}) are not found in `
+            +(this._is_archive_folder?'given folder':this.options.source);
         
         //resultList with images
 //init record list
@@ -80,17 +97,20 @@ $.widget( "heurist.selectFile", {
                        multiselect: false,
 
                        select_mode: 'select_single',
-                       show_toolbar: false,
+                       show_toolbar: true,
+                       show_viewmode: false,
+                       
                        
                        entityName: this._entityName,
-                       view_mode: 'thumbs',
+                       view_mode: this._is_archive_folder?'list':'thumbs',
                        
                        pagesize: 500,
-                       empty_remark: emptyMessage,
+                       
+                       empty_remark: this._emptyMessage,
                        renderer: function(recordset, record){ 
                            
-                           var recID   = recordset.fld(record, 'file_id');
-                           var recThumb;
+                           let recID   = recordset.fld(record, 'file_id');
+                           let recThumb;
                            if(recordset.fld(record, 'file_url')){
                                 recThumb = recordset.fld(record, 'file_url')+recordset.fld(record, 'file_name');    
                            }else{
@@ -98,25 +118,34 @@ $.widget( "heurist.selectFile", {
                                             + recordset.fld(record, 'file_dir')
                                             + recordset.fld(record, 'file_name');
                            }
+                           
+                           let html;
         
                            if(that.options.source.indexOf('assets')<0) {
                                
-                               var sz = (that.options.extensions=='zip')
+                               let sz = (that.options.extensions=='zip')
                                ? Math.round(recordset.fld(record, 'file_size')/1024/1024)+'MB'
                                : Math.round(recordset.fld(record, 'file_size')/1024)+'KB';
 
-                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                               + '" style="width:250px !important;height:50px !important"><p>'
-                               + recordset.fld(record, 'file_name')+'</p>size: '
-                               + sz+'</div>';
-
+                               if(that._is_archive_folder){
+                                   html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                                   + '" style="height:20px !important"><p style="margin-top: 4px;">'
+                                   + recordset.fld(record, 'file_name')+'<span style="float:right">'
+                                   + sz+'</span></p></div>';
+                               }else{
+                                   html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                                   + '" style="width:250px !important;height:50px !important"><p>'
+                                   + recordset.fld(record, 'file_name')+'</p>size: '
+                                   + sz+'</div>';
+                               }
+                               
                            }else{
 
-                               var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
+                               let html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
                                +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
                                +'</div>';
 
-                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                               html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                                + '" style="width:'+(that.options.size+4)+'px !important;height:'
                                + (that.options.size+4)+'px !important">'
                                + html_thumb + '</div>';
@@ -128,12 +157,10 @@ $.widget( "heurist.selectFile", {
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
                             
-                                    //var recordset = that.recordList.resultList('getRecordSet');
-                                    //recordset = recordset.getSubSetByIds(selected_recs);
-                                    var recordset = selected_recs;
-                                    var record = recordset.getFirstRecord();
-                                    var filename = recordset.fld(record, 'file_name')
-                                    var res = { filename: filename,
+                                    let recordset = selected_recs;
+                                    let record = recordset.getFirstRecord();
+                                    let filename = recordset.fld(record, 'file_name')
+                                    let res = { filename: filename,
                                                 url:recordset.fld(record, 'file_url')+filename,
                                                 path:recordset.fld(record, 'file_dir')+filename};
 
@@ -144,51 +171,7 @@ $.widget( "heurist.selectFile", {
                                 }
                         });        
          
-
-            //search for images in given array of folder
-            var that = this;                                                
-       
-            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        let recset = new hRecordSet(response.data);
-                        if(recset.length()>0){
-                            
-                            if(that.options.isdialog){
-
-                                var $dlg = that.element.dialog({
-                                    autoOpen: true,
-                                    height: 640,
-                                    width: 840,
-                                    modal: true,
-                                    title: window.hWin.HR(that.options.title),
-                                    resizeStop: function( event, ui ) {
-                                        var pele = that.element.parents('div[role="dialog"]');
-                                        that.element.css({overflow: 'none !important', width:pele.width()-24 });
-                                    },
-                                    close:function(){
-                                        that._as_dialog.remove();    
-                                    }
-                                });
-                                
-                                that._as_dialog = $dlg; 
-                            }
-                            
-                            that._cachedRecordset = recset;
-                            
-                            that.recordList.resultList('updateResultSet', recset);
-                        }else{
-                            if(that._as_dialog) that._as_dialog.dialog('close');
-                            window.hWin.HEURIST4.msg.showMsgFlash(emptyMessage);    
-                        }
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-     
-         
+                this._gettingFiles();
          
     }, //end _create
 
@@ -201,6 +184,21 @@ $.widget( "heurist.selectFile", {
     _destroy: function() {
         // remove generated elements
         this.recordList.remove();
+        if(this._as_dialog) this._as_dialog.remove();        
+    },
+    
+    _setOption: function( key, value ){
+        if(key==='extensions'){
+            if(this.options.extensions!=value){
+                this.options.extensions = value;
+                this._is_source_changed = true;
+            }
+        }else if(key==='source'){
+            if(this.options.source!=value){
+                this.options.source = value;
+                this._is_source_changed = true;
+            }
+        }
     },
     
     //
@@ -208,8 +206,8 @@ $.widget( "heurist.selectFile", {
     //
     filterRecordList: function(event){
         
-        var val = this.element.find('.input_search').val().trim();
-        var subset;
+        let val = this.element.find('.input_search').val().trim();
+        let subset;
         if(val==''){
             subset = this._cachedRecordset;
         }else{
@@ -218,5 +216,74 @@ $.widget( "heurist.selectFile", {
             
         this.recordList.resultList('updateResultSet', subset);
     },
+    
+    //
+    //
+    //
+    _gettingFiles: function(){
+        
+            //search for images in given array of folder
+            let that = this;           
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
+            $('body').css('cursor','progress');
+       
+            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
+                function(response){
+                    $('body').css('cursor','auto');
+                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        that._is_source_changed = false;
+                        
+                        let recset = new HRecordSet(response.data);
+                        if(recset.length()>0){
+                            
+                            if(that.options.isdialog){
+                                
+                                if(that._as_dialog){
+                                    that._as_dialog.dialog('open');
+                                }else{
+
+                                    let $dlg = that.element.dialog({
+                                        autoOpen: true,
+                                        height: 640,
+                                        width: 840,
+                                        modal: true,
+                                        title: window.hWin.HR(that.options.title),
+                                        resizeStop: function( event, ui ) {
+                                            let pele = that.element.parents('div[role="dialog"]');
+                                            that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                                        },
+                                        close:function(){
+                                            if(that.option.keep_dialogue){
+                                                that._as_dialog.remove();        
+                                            }else{
+                                                that._as_dialog.dialog('close');
+                                            }
+                                        }
+                                    });
+                                    
+                                    that._as_dialog = $dlg; 
+                                    
+                                }
+                            }
+                            
+                            that._cachedRecordset = recset;
+                            
+                            that.recordList.resultList('updateResultSet', recset);
+                        }else{
+                            if(that._as_dialog) that._as_dialog.dialog('close');
+                            window.hWin.HEURIST4.msg.showMsgFlash(that._emptyMessage);    
+                        }
+
+                    }else{
+                        if(that._as_dialog) that._as_dialog.dialog('close');
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        
+    }
 
 });

@@ -23,8 +23,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
 
-        var that = this;
-        
         /*
         this.btn_add_record = this.element.find('#btn_add_record');
         if(this.options.edit_mode=='none'){
@@ -34,7 +32,7 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Add New File Type"), icons: {
                             primary: "ui-icon-plus"
                     }})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onaddrecord" );
                 }); 
             if(this.options.edit_mode=='inline'){
@@ -47,11 +45,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
         this.input_search_type = this.element.find('#input_search_type');
         this._on( this.input_search_type, { change: this.startSearch });
         
-        if(this.options.select_mode=='manager'){
-//            this.element.find('#input_search_type_div').css('float','left');
-        }
-                      
-        //this.startSearch();            
     },  
 
     //
@@ -59,9 +52,7 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {};
+            let request = {};
             
             if(this.input_search.val()!=''){
                 request['fxm_Extension'] = this.input_search.val();

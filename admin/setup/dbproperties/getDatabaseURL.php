@@ -15,7 +15,7 @@
 
 /**
 * BACKWARD capabilities for old versions. It has been replaced with DbRegis::registrationGet
-* 
+*
 * getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Reference Index
 *
 * this script may be inited via http, otherwise it is included and $database_id already defined
@@ -28,33 +28,35 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+use hserv\structure\ConceptCode;
 
-$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false); //this is reference server
-if($isOutSideRequest){ //this is request from outside - redirect to master index    
+require_once dirname(__FILE__).'/../../../autoload.php';
 
-    $reg_url = HEURIST_INDEX_BASE_URL 
+$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);//this is reference server
+if($isOutSideRequest){ //this is request from outside - redirect to master index
+
+    $reg_url = HEURIST_INDEX_BASE_URL
     .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
     .'&remote=1&id='.$database_id;
 
-    $data = loadRemoteURLContentSpecial($reg_url); //get registered database URL
+    $data = loadRemoteURLContentSpecial($reg_url);//get registered database URL
 
     if (!$data) {
-        global $glb_curl_error;
+
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
         $error_msg = "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
             . $error_code . "<br>"
-            . "URL requested: ".$reg_url."<br><br>";        
+            . "URL requested: ".$reg_url."<br><br>";
     }else{
 
         $data = json_decode($data, true);
 
         // Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
-        // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found 
+        // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found
         if(@$data['error_msg']){
             $error_msg = $data['error_msg'];
-        }else if(!@$data['rec_URL']){
+        }elseif(!@$data['rec_URL']){
             $error_msg = "Heurist Reference Index returns incorrect data for registered database # ".$database_id.
             " The page may contain an invalid database reference (0 indicates no reference has been set)";
         }else{
@@ -65,15 +67,15 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 }else{
     //on this server
 
-    $system2 = new System();
-    $system2->init(HEURIST_INDEX_DATABASE, true, false); //init without paths and consts
+    $system2 = new hserv\System();
+    $system2->init(HEURIST_INDEX_DATABASE, true, false);//init without paths and consts
 
-    if(@$_REQUEST['remote']){ 
-        $database_id = @$_REQUEST["id"];   
+    if(@$_REQUEST['remote']){
+        $database_id = @$_REQUEST["id"];
     }
     $rec = array();
     if($database_id>0){
-        
+
         ConceptCode::setSystem($system2);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
@@ -81,32 +83,32 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             'select rec_Title, rec_URL from Records where rec_RecTypeID='
             .$rty_ID_registered_database.' and rec_ID='  //1-22
             .$database_id);
-            
+
         if ($rec!=null){
             $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
                 $error_msg = 'Database URL is not set in Heurist_Reference_Index database for database ID#'.$database_id;
             }
-                
+
         }else{
             $err = $system2->get_mysqli()->error;
             if(err){
                 $error_msg = 'Heurist Reference Index database is not accessible at the moment. Please try later';
             }else{
-                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';    
+                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';
             }
         }
     }else{
-        $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';    
+        $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';
     }
 
     if(@$_REQUEST['remote']) {
-        header('Content-type: text/javascript');
+        header(CTYPE_JS);
 
         if(isset($error_msg)){
-            $res = array('error_msg'=>$error_msg);    
+            $res = array('error_msg'=>$error_msg);
         }else{
-            $res = array('rec_URL'=>$database_url);    
+            $res = array('rec_URL'=>$database_url);
         }
         print json_encode($res);
     }

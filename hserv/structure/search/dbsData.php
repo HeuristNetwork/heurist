@@ -1,9 +1,9 @@
 <?php
     /**
     * dbsData.php - retrieveing database definitions
-    * 
+    *
     * Library of function that provides database structure information: rectypes, fieldtypes and terms defined in database
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
@@ -25,16 +25,16 @@
     * dbs_GetTerms
     * dbs_GetDetailTypes
     * dbs_GetDtLookups
-    * 
-    * TERMS RELATED FUNCTION - to be public methods, 
+    *
+    * TERMS RELATED FUNCTION - to be public methods,
     * they work with global $terms array - need to be defined by dbs_GetTerms before call these methods
     * getTermOffspringList
     * getTermTopMostParent
     * getTermChildren
     * getTermChildrenAll - get all children including by reference as a flat array
-    * getTermInTree    
-    * getTermByLabel  
-    * getTermByCode  
+    * getTermInTree
+    * getTermByLabel
+    * getTermByCode
     * getTermById
     * getTermFullLabel
     * getTermListAll - get tree for domain
@@ -58,10 +58,12 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\utilities\USanitize;
+
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
-    require_once dirname(__FILE__).'/../../utilities/uMail.php';
     require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
-    
+
+    define('DATABASE','DATABASE: ');
 
     /**
     * @return    object iformation describing all the rectypes defined in the database
@@ -132,18 +134,29 @@
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");
-        //add dty_ConceptID     
+        //add dty_ConceptID
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
         } else {
             $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
         }
-        array_push($colNames, $dty_ConceptID); 
+        array_push($colNames, $dty_ConceptID);
 
         $query = "select " . join(",", $colNames) .
         " from defRecStructure".
         " left join defDetailTypes on rst_DetailTypeID = dty_ID".
         " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)";
+
+        if(!is_array($rectypeids) && !is_numeric($rectypeids) && strpos($rectypeids, '-') !== false){ // concept code, get local id
+
+            $concept_code = explode('-', $rectypeids);
+            $concept_code[0] = is_numeric($concept_code[0]) && $concept_code[0] > 0 ? intval($concept_code[0]) : $dbID;
+            $concept_code[1] = intval($concept_code[1]);
+
+            $rectypeids = mysql__select_value($mysqli, "SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = ? AND rty_IDInOriginatingDB = ?", ["ii", $concept_code[0], $concept_code[1]]);
+            $rectypeids = !$rectypeids ? 0 : intval($rectypeids);
+        }
+
         if($rectypeids){
             $querywhere = " where rst_RecTypeID in (".(is_array($rectypeids)?implode(",", $rectypeids) :$rectypeids).")";
         } else {
@@ -193,7 +206,7 @@
                 }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
 
@@ -208,14 +221,14 @@
                 //$rtStructs['calcfields']['values'] = mysql__select_all($mysqli, $query, 1);
 
                 $repAction = new ReportActions($system, null);
-                
+
                 $res = $mysqli->query($query);
                 if($res){
                     while ($row = $res->fetch_assoc()) {
                         $cfn_code = $row['cfn_FunctionSpecification'];
                         //convert to concept codes
                         $row['cfn_FunctionSpecification'] = $repAction->convertTemplate($cfn_code, 0);
-                        
+
                         $rtStructs['calcfields'][$row['cfn_ID']]  = $row; //array_slice($row, 1);
                     }
                 }
@@ -224,7 +237,7 @@
 
         // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
         $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", $columns);
-        $query = preg_replace("/rty_ConceptID/", "", $query);
+        $query = str_replace('rty_ConceptID', '', $query);
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
         } else {
@@ -232,13 +245,7 @@
         }
 
         if($rectypeids){
-            
-            if(!is_array($rectypeids)){
-                $rectypeids = array($rectypeids);
-            }
-            $rectypeids = prepareIds($rectypeids);
-            
-            $querywhere = ' where rty_ID '.(count($rectypeids)>1?(' IN ('.implode(',', $rectypeids).')') :('='.intval($rectypeids[0])));
+            $querywhere = SQL_WHERE.predicateId('rty_ID', $rectypeids);
         } else {
             $querywhere = "";
         }
@@ -274,7 +281,7 @@
                     //convert concept code title mask to human readable
                     $mask_concept_codes = $commonFields[$ind_TitleMask];
                     $commonFields[$ind_CanonicalTitleMask] = $mask_concept_codes; //keep
-                    $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, _ERR_REP_SILENT);
+                    $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, ERROR_REP_SILENT);
 
                     $rtStructs['typedefs'][$rtyID]['commonFields'] = $commonFields;
                 }
@@ -283,7 +290,7 @@
             }
             $res->close();
         }else{
-            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
+            USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
         }
 
 
@@ -323,22 +330,28 @@
         $index = 0;
         $res = $mysqli->query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
         while ($row = $res->fetch_assoc()) {
-            
+
             array_push($rtGroups, array('id' => $row["rtg_ID"], 'name' => $row["rtg_Name"], 'order' => $row["rtg_Order"], 'description' => $row["rtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
             $rtGroups['groupIDToIndex'][$row["rtg_ID"]] = $index++;
         }
         $res->close();
-        
-            
-        if($load_rectypes){
+
+
+        if(!$load_rectypes){
+            return $rtGroups;
+        }
+
             $query = 'select rty_ID, rty_RecTypeGroupID, rty_ShowInLists from defRecTypes order by rty_OrderInGroup, rty_Name';
 
             $res = $mysqli->query($query);
-            if($res){
+            if(!$res){
+                return $rtGroups;
+            }
+
                 while ($row = $res->fetch_row()) {
-                    
+
                     $rtg_ID = $row[1];
-                    
+
                     if(@$rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]){
                         $rtyID = $row[0];
 
@@ -349,9 +362,7 @@
                         }
                     }
                 }
-            }
-        }
-        
+
         return $rtGroups;
     }
 
@@ -377,48 +388,48 @@
 
     /**
     * returns array of rectype names for given ids
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $rty_IDs
     */
     function dbs_GetRectypeNames($mysqli, $rty_IDs=null){
-        
+
         $query = 'select rty_ID, rty_Name from defRecTypes';
-        
+
         if($rty_IDs){
             $rty_IDs = prepareIds($rty_IDs);
-            
+
             $labels = array();
-            if (is_array($rty_IDs) && count($rty_IDs)>0) {
+            if (!isEmptyArray($rty_IDs)) {
                     $query = $query.' where rty_ID in ('.implode(',', $rty_IDs).')';
             }
         }
-        $labels = mysql__select_assoc2($mysqli, $query); 
+        $labels = mysql__select_assoc2($mysqli, $query);
         return $labels;
-        
+
     }
 
     function dbs_GetRectypeIDs($mysqli, $_rty_IDs){
-        
+
         if(is_true($_rty_IDs)){
             $rty_IDs = true;  //returns all
         }else{
             $rty_IDs = prepareIds($_rty_IDs);
         }
-        
+
         $labels = array();
         if ($rty_IDs) {
             $query = 'select rty_ID from defRecTypes';
-            if(is_array($rty_IDs) && count($rty_IDs)>0){
-                $query = $query . ' where rty_ID in ('.implode(',', $rty_IDs).')';    
+            if(!isEmptyArray($rty_IDs)){
+                $query = $query . ' where rty_ID in ('.implode(',', $rty_IDs).')';
             }
             $labels = mysql__select_list2($mysqli, $query);
         }
         return $labels;
-        
+
     }
-    
-    
+
+
 /**
 * get rectype constraint structure with lookups by target and term id index by srcID
 * constraints = array( [recID | any] => array(
@@ -439,7 +450,7 @@
 * @uses      getTermOffspringList()
 */
 function dbs_GetRectypeConstraint($system) {
-    
+
     $query = "select rcs_SourceRectypeID as srcID,
     rcs_TermID as trmID,
     rcs_TargetRectypeID as trgID,
@@ -456,9 +467,9 @@ function dbs_GetRectypeConstraint($system) {
     rcs_TermID,
     rcs_TargetRectypeID is null,
     rcs_TargetRectypeID";
-    
+
     $mysqli = $system->get_mysqli();
-     
+
     $res = $mysqli->query($query);
     $cnstrnts = array();
     while ($row = $res->fetch_assoc()) {
@@ -480,7 +491,7 @@ function dbs_GetRectypeConstraint($system) {
         }
         if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {//first instance of this recType as bytarget target, create structure
             $cnstrnts[$srcID]['byTarget'][$trgID] = array($trmID => array('limit' => $max, "notes" => $notes));
-        } else if (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
+        } elseif (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
             $cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit' => $max, "notes" => $notes);
         }
         if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {//new target for term lookup
@@ -504,7 +515,7 @@ function dbs_GetRectypeConstraint($system) {
     $res->close();
     return $cnstrnts;
 }
-   
+
 
     /**
      * Get translation records for given values
@@ -514,7 +525,7 @@ function dbs_GetRectypeConstraint($system) {
      */
     function dbs_GetTranslations($system, $fields){
 
-        if(empty($fields) || !is_array($fields)){
+        if(isEmptyArray($fields)){
             return array('response' => 'data is in wrong format');
         }
 
@@ -539,9 +550,8 @@ function dbs_GetRectypeConstraint($system) {
         $translations_id_mapping = array();
 
         foreach ($fields as $key => $field) {
-            
-            if(!array_key_exists('trn_Source', $field) || empty($field['trn_Source']) 
-                || !array_key_exists('trn_Code', $field) || empty($field['trn_Code'])){
+
+            if(empty(@$field['trn_Source']) || empty(@$field['trn_Code'])){
                 continue;
             }
 
@@ -566,14 +576,14 @@ function dbs_GetRectypeConstraint($system) {
             $query = str_replace($to_replace, array($trn_Source, $trn_Code), $search_query);
 
             $records = mysql__select_assoc($mysqli, $query);
-            if(!$records || empty($records)){ // no translations found
+            if(isEmptyArray($records)){ // no translations found
                 continue;
             }
-            $translations = array_replace($translations, $records); // $translations + $records
+            $translations = array_replace($translations, $records);// $translations + $records
             $translations_id_mapping[$key] = array_keys($records);
         }
 
-        if(count($translations) > 0){
+        if(!isEmptyArray($translations)){
             $results['translations'] = $translations;
             $results['key_mapping'] = $translations_id_mapping;
         }
@@ -595,7 +605,7 @@ function dbs_GetRectypeConstraint($system) {
 
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');
-        
+
 
         /* ARTEM
         $cacheKey = DATABASE . ":dbs_GetTerms";
@@ -606,18 +616,18 @@ function dbs_GetRectypeConstraint($system) {
         }
         }*/
         $query = "select " . join(",", __getTermColNames());
-        $query = preg_replace("/trm_ConceptID/", "", $query);
-        
+        $query = str_replace('trm_ConceptID', '', $query);
+
         //in case database v1.2 there is not field trm_VocabularyGroupID
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         if($dbVer==1 && $dbVerSub<3){
-            $query = preg_replace("/trm_VocabularyGroupID/", "1 as trm_VocabularyGroupID", $query);
+            $query = str_replace('trm_VocabularyGroupID', '1 as trm_VocabularyGroupID', $query);
         }
         if($dbVer==1 && $dbVerSub<4 && $system->get_system('sys_dbSubSubVersion')<6){
-            $query = preg_replace("/trm_OrderInBranch/", "0 as trm_OrderInBranch", $query);
+            $query = str_replace('trm_OrderInBranch', '0 as trm_OrderInBranch', $query);
         }
-        
+
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), concat('$dbID-',cast(trm_ID as char(5)))) as trm_ConceptID";
         } else {
@@ -626,36 +636,36 @@ function dbs_GetRectypeConstraint($system) {
         $query.= " from defTerms order by trm_Domain, trm_Label";
 
         $res = $mysqli->query($query);
-        
+
         $terms = array('termsByDomainLookup' =>  array('relation' => array(),
             'enum' => array()),
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
             'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTermColNames(), 1)));
-        
+
         if($res){
-            
+
             while ($row = $res->fetch_row()) {
                 $domain = $row[9];
                 //array_push($row, false);
-                
+
                 if($domain=='relation' && HEURIST_UNITED_TERMS){
                     $terms['termsByDomainLookup']['enum'][$row[0]] = array_slice($row, 1);
                 }
                 $terms['termsByDomainLookup'][$domain][$row[0]] = array_slice($row, 1);
             }
-            
+
             $res->close();
         }else{
-            USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
+            USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
-                'relation' => __getTermTree($system, "relation", "exact"), 
+                'relation' => __getTermTree($system, "relation", "exact"),
                 'enum' => __getTermTree($system, "enum", "exact"));
 
 
         $vcgGroups = array();//'groupIDToIndex' => array());
-        $matches_refs = array(); 
-                
+        $matches_refs = array();
+
         //see dbDefTerms->getTermLinks
         if($dbVer==1 && $dbVerSub>2){
             $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
@@ -663,11 +673,11 @@ function dbs_GetRectypeConstraint($system) {
             $query = 'SELECT trm_ParentTermID, trm_ID FROM defTerms ORDER BY trm_ParentTermID';
         }
         $res = $mysqli->query($query);
-        
+
         $matches = array();
         if ($res){
             while ($row = $res->fetch_row()){
-                    
+
                 if(@$matches[$row[0]]){
                     $matches[$row[0]][] = $row[1];
                 }else{
@@ -677,29 +687,29 @@ function dbs_GetRectypeConstraint($system) {
             $res->close();
             $terms['trm_Links'] = $matches;
         }
-                    
+
         if($dbVer==1 && $dbVerSub>2){
-            //get vocabulary groups 
+            //get vocabulary groups
             $query = 'SELECT vcg_ID, vcg_Name, vcg_Domain, vcg_Order, vcg_Description FROM defVocabularyGroups';
             $res = $mysqli->query($query);
             if($res){
                 while ($row = $res->fetch_assoc()) {
                     $vcgGroups[$row['vcg_ID']] = $row;
                     //groupIDToIndex['groupIDToIndex'][$row["vcg_ID"]] = $index++;
-                }                
+                }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
             }
-            
-            
+
+
             //terms by reference
             $query = 'select trl_ParentID,trl_TermID from defTermsLinks r, defTerms t '
             .'where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID ORDER BY trl_ParentID';
             $res = $mysqli->query($query);
             if ($res){
                 while ($row = $res->fetch_row()){
-                        
+
                     if(@$matches_refs[$row[0]]){
                         $matches_refs[$row[0]][] = $row[1];
                     }else{
@@ -708,24 +718,24 @@ function dbs_GetRectypeConstraint($system) {
                 }
                 $res->close();
             }else{
-                USanitize::errorLog('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+                USanitize::errorLog(DATABASE.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
-            
+
         }//$dbVer==1 && $dbVerSub>2
         else{
-            $vcgGroups[1] = array('vcg_ID'=>1, 'vcg_Name'=>'General');        
+            $vcgGroups[1] = array('vcg_ID'=>1, 'vcg_Name'=>'General');
         }
-        
+
         $terms['groups'] = $vcgGroups;
         $terms['references'] = $matches_refs;
-        
+
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
-        
+
     }
-    
+
     // to public method ------>
-    
+
     /**
     * returns array list of all terms under a given term
     * @param     int $termID
@@ -733,58 +743,62 @@ function dbs_GetRectypeConstraint($system) {
     * @return    array  of term IDs
     */
     function getTermOffspringList($mysqli, $termID, $parentlist = null) {
-        
-        if($parentlist==null) $parentlist = array($termID);
-        $offspring = array();
-        if ($termID) {
-            $emailsent = false;
-            
-            $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=".intval($termID));
-            if ($res && $res->num_rows>0 ) { //child nodes exist
-                while ($row = $res->fetch_assoc()) { // for each child node
-                
-                    $subTermID = $row['trm_ID'];
-                    if(array_search($subTermID, $parentlist)===false){
-                        array_push($offspring, $subTermID);
-                        array_push($parentlist, $subTermID);
-                        $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
-                    }else{
-                        $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
-                        
-                        $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
 
-                        if(!$emailsent){
-                            
-                            $emailsent = true;
-                            $dbowner = user_getDbOwner($mysqli); //info about user #2
-                            
-                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname
-                            .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
-                            'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
-                            .'\nUser was unable to load the database due to a corrupted terms tree. '
-                            .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
-                        }
-                    }
-                }
+        if($parentlist==null) {$parentlist = array($termID);}
+        $offspring = array();
+        if (!isPositiveInt($termID)) {
+             return $offspring;
+        }
+
+        $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=".intval($termID));
+        if (!($res && $res->num_rows>0)) { //child nodes exist
+            return $offspring;
+        }
+
+        $emailsent = false;
+
+        while ($row = $res->fetch_assoc()) { // for each child node
+
+            $subTermID = $row['trm_ID'];
+            if(array_search($subTermID, $parentlist)===false){
+                array_push($offspring, $subTermID);
+                array_push($parentlist, $subTermID);
+                $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
+
+            }elseif(!$emailsent){
+
+                    $dbname = htmlspecialchars(mysql__select_value($mysqli, 'SELECT database() AS the_db'));
+                    $sMsg = 'DATABASE '.$dbname.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
+
+                    $emailsent = true;
+                    $dbowner = user_getDbOwner($mysqli);//info about user #2
+
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname
+                    .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
+                    'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
+                    .'\nUser was unable to load the database due to a corrupted terms tree. '
+                    .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
             }
         }
+
+
         return $offspring;
     }
-    
+
 
     //
-    // Finds real vocabulary for given term 
+    // Finds real vocabulary for given term
     //
     function getTermTopMostParent($mysqli, $termId, $terms=null){
-        
-        if(!$terms) $terms = array($termId); //to prevent recursion
+
+        if(!$terms) {$terms = array($termId);}//to prevent recursion
 
         $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
 
         $parentId = mysql__select_value($mysqli, $query);
-        
+
         if($parentId>0){
-            
+
             if(in_array($parentId, $terms)){ //avoid recursion
                 return $termId;
             }else{
@@ -795,18 +809,18 @@ function dbs_GetRectypeConstraint($system) {
             return $termId;
         }
     }
-        
-    
+
+
     /**
     * return all terms's children as a plain array
-    * 
+    *
     * @param mixed $system
     */
     function getTermChildren($parentID, $system, $firstlevel_only){
-        
+
         $mysqli = $system->get_mysqli();
         $children = array();
-    
+
         $query = 'select trm_ID from defTerms where trm_ParentTermID = ' . intval($parentID);
         $res = $mysqli->query($query);
         if ($res) {
@@ -817,34 +831,27 @@ function dbs_GetRectypeConstraint($system) {
                 }
             }
         }
-        
+
         return $children;
-        
+
     }
-    
+
     //
     // get inverse term and all its children terms
     //
     function getTermInverseAll($mysqli, $parent_ids, $all_levels=true){
-        
+
         //compose query
-        $query = 'SELECT trm_InverseTermID FROM defTerms WHERE trm_ID';
-        
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';    
-        }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
-            $query = $query . ' = '.$parent_ids;    
-        }
+        $query = 'SELECT trm_InverseTermID FROM defTerms WHERE '
+            .predicateId('trm_ID', $parent_ids);
 
         $ids = mysql__select_list2($mysqli, $query, 'intval');
-        if(is_array($ids) && count($ids)>0){
+        if(is_array($ids) && !empty($ids)){
             return array_merge($ids, getTermChildrenAll($mysqli, $ids, $all_levels));
         }else{
             return array();
         }
-        
+
     }
 
     //
@@ -853,30 +860,21 @@ function dbs_GetRectypeConstraint($system) {
     function getTermChildrenAll($mysqli, $parent_ids, $all_levels=true){
 
         //compose query
-        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID';
-        
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';    
-        }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
-            $query = $query . ' = '.$parent_ids;    
-        }
-        
+        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE '
+                .predicateId('trl_ParentID', $parent_ids);
+
         $ids = mysql__select_list2($mysqli, $query, 'intval');
-        if(!is_array($ids)){
-            $ids = array();
-        }
-        if($all_levels && count($ids)>0){
+
+        if($all_levels && !empty($ids)){
             $ids = array_merge($ids, getTermChildrenAll($mysqli, $ids, true));
         }
-        
+
         return $ids;
     }
-    
+
     /**
     * prints term label including parents term labels
-    * 
+    *
     * @param mixed $dtTerms
     * @param mixed $term
     * @param mixed $domain
@@ -888,38 +886,44 @@ function dbs_GetRectypeConstraint($system) {
         $fi = $dtTerms['fieldNamesToIndex'];
         $parent_id = $term[ $fi['trm_ParentTermID'] ];
 
+        $term_label = $term[ $fi['trm_Label']];
+
+        if(!isPositiveInt($parent_id)){
+            return $term_label;
+        }
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if(!$term_parent){
+            return $term_label;
+        }
+
         $parent_label = '';
 
-        if($parent_id!=null && $parent_id>0){
-            $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
-            if($term_parent){
-                if(!$withVocab){
-                    $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
-                    if(!($parent_id>0)){
-                        return $term[ $fi['trm_Label']];
-                    }
-                }
-                
-                if($parents==null){
-                    $parents = array();
-                }
-                
-                if(array_search($parent_id, $parents)===false){
-                    array_push($parents, $parent_id);
-                    
-                    $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);    
-                    if($parent_label) $parent_label = $parent_label.'.';
-                }
-            }    
+        if(!$withVocab){
+            $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+            if(!isPositiveInt($parent_id)){
+                return $term_label;
+            }
         }
-        return $parent_label.$term[ $fi['trm_Label']];
+
+        if($parents==null){
+            $parents = array();
+        }
+
+        if(array_search($parent_id, $parents)===false){
+            array_push($parents, $parent_id);
+
+            $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);
+            if($parent_label) {$parent_label = $parent_label.'.';}
+        }
+
+        return $parent_label.$term_label;
     }
-    
+
     //
     // get tree for domain
     //
     function getTermListAll($mysqli, $termDomain){
-        
+
         $terms = array();
         $res = $mysqli->query('SELECT * FROM defTerms
             where (trm_Domain="'.$termDomain.'") and (trm_ParentTermId=0 or trm_ParentTermId is NULL)');
@@ -932,7 +936,7 @@ function dbs_GetRectypeConstraint($system) {
             }
         }else{
         }
-        return $terms;        
+        return $terms;
     }
 
 
@@ -942,23 +946,23 @@ function dbs_GetRectypeConstraint($system) {
     function getTermLabels($mysqli, $termIDs) {
         $labels = array();
         if ($termIDs) {
-            $labels = mysql__select_assoc2($mysqli, 
+            $labels = mysql__select_assoc2($mysqli,
             'select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
         }
         return $labels;
-    }    
-    
+    }
+
     //
     //
     //
     function getTermCodes($mysqli, $termIDs) {
         $labels = array();
         if ($termIDs) {
-            $labels = mysql__select_assoc2($mysqli, 
+            $labels = mysql__select_assoc2($mysqli,
             'select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
         }
         return $labels;
-    }    
+    }
     //
     // find tree in term tree
     // return branch with childs
@@ -966,9 +970,9 @@ function dbs_GetRectypeConstraint($system) {
     function getTermInTree($term_id){
 
         global $terms;
-        
+
         $res = null;
-        
+
         if($term_id>0){
 
             $domain = 'enum';
@@ -982,16 +986,16 @@ function dbs_GetRectypeConstraint($system) {
             }
         }
         return $res;
-    }    
-    
+    }
+
     function getTermInTree2($tree, $term_id){
-        
+
         if(@$tree[$term_id]){
             return $tree[$term_id];
         }else{
-        
+
             foreach($tree as $pID => $children){
-                if(is_array($children) && count($children)>0){
+                if(!isEmptyArray($children)){
                     $res = getTermInTree2($children, $term_id);
                     if($res!=null){
                         return $res;
@@ -1039,8 +1043,8 @@ function dbs_GetRectypeConstraint($system) {
 
         return null;
     }
-    
-    // 
+
+    //
     //
     //
     function getTermById($term_id, $field='trm_Label'){
@@ -1055,9 +1059,9 @@ function dbs_GetRectypeConstraint($system) {
             }
 
             if($term){
-                
+
                 $idx = @$terms['fieldNamesToIndex'][$field];
-                    
+
                 if($idx>=0){
                     return $term[$idx];
                 }else{
@@ -1068,8 +1072,8 @@ function dbs_GetRectypeConstraint($system) {
 
         return null;
     }
-    
-    
+
+
     //
     // get term ids from json string - parse values in dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs
     //
@@ -1090,7 +1094,7 @@ function dbs_GetRectypeConstraint($system) {
             $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
             $termIDs = explode(",",$temp);
         }
-        return $termIDs;        
+        return $termIDs;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -1121,7 +1125,7 @@ function dbs_GetRectypeConstraint($system) {
         return $columnsNameIndexMap;
     }
     function __getRectypeStructureFieldColNames() {
-        return array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DisplayOrder", 
+        return array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DisplayOrder",
             "rst_DisplayWidth", "rst_DisplayHeight",
             "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
             "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
@@ -1139,48 +1143,54 @@ function dbs_GetRectypeConstraint($system) {
     * @return    object $terms
     */
     function __attachChild($system, $parentIndex, $childIndex, $terms, $parents) {
-        
-        /*if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
+
+        if (!array_key_exists($childIndex, $terms)) {//check if this child is parent itself
             return $terms;
-        }*/
-        
-        if (array_key_exists($childIndex, $terms)) {//check if this child is parent itself
-            if (is_array($terms[$childIndex]) && count($terms[$childIndex])>0) { //has children
-            
-                if($parents==null){
-                    $parents = array($childIndex);
-                }else{
-                    array_push($parents, $childIndex);
+        }
+
+        if(isEmptyArray($terms[$childIndex])) { //no children
+            $terms[$parentIndex][$childIndex] = null;
+            unset($terms[$childIndex]);
+            return $terms;
+        }
+
+
+            if($parents==null){
+                $parents = array($childIndex);
+            }else{
+                array_push($parents, $childIndex);
+            }
+
+            $emailsent = false;
+
+            foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
+                if ($gChildID == null) {
+                    continue;
                 }
-                
-                $emailsent = false;
-            
-                foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
-                    if ($gChildID != null) {
-                        if(array_search($gChildID, $parents)===false){
-                            $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
-                        }else{
-                            $dbname = $system->dbname();
-                            $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
-                                    .'. Cannot add term '.$gChildID;
-                            USanitize::errorLog($sMsg);        
-                            if(!$emailsent){
-                                $dbowner = user_getDbOwner($system->get_mysqli()); //info about user #2
-                                $emailsent = true;
-                                
-                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
-                                    'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
-                                    .'User was unable to load the database due to a corrupted terms tree. '
-                                    .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
-                                    .'  Child:'.$gChildID);
-                            }
+
+                    if(array_search($gChildID, $parents)===false){
+                        $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
+                    }else{
+                        $dbname = $system->dbname();
+                        $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
+                                .'. Cannot add term '.$gChildID;
+                        USanitize::errorLog($sMsg);
+                        if(!$emailsent){
+                            $dbowner = user_getDbOwner($system->get_mysqli());//info about user #2
+                            $emailsent = true;
+
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
+                                'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
+                                .'User was unable to load the database due to a corrupted terms tree. '
+                                .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
+                                .'  Child:'.$gChildID);
                         }
                     }
-                }
-            }
+            } //foreach
+
             $terms[$parentIndex][$childIndex] = $terms[$childIndex];
             unset($terms[$childIndex]);
-        }
+
         return $terms;
     }
 
@@ -1195,9 +1205,9 @@ function dbs_GetRectypeConstraint($system) {
     */
     function __getTermTree($system, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
         $mysqli = $system->get_mysqli();
-        
+
         if($termDomain=='enum' && HEURIST_UNITED_TERMS){
-            $whereClause = '1=1';    
+            $whereClause = '1=1';
         }else{
             $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
         }
@@ -1219,12 +1229,12 @@ function dbs_GetRectypeConstraint($system) {
             }
         }//we have all the branches, now lets build a tree
         $res->close();
-        
+
         foreach ($terms as $parentID => $childIDs) {
             foreach ($childIDs as $childID => $n) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
-                    if (is_array($terms[$childID]) && count($terms[$childID])>0) {//yes then attach it and it's children's branches
+                    if (!isEmptyArray($terms[$childID])) {//yes then attach it and it's children's branches
                         $terms = __attachChild($system, $parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);
@@ -1232,7 +1242,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
             }
         }
-        
+
         return $terms;
     }
 
@@ -1242,8 +1252,8 @@ function dbs_GetRectypeConstraint($system) {
     function __getTermColNames() {
         return array("trm_ID", "trm_Label", "trm_InverseTermID", "trm_Description", "trm_Status", "trm_OriginatingDBID",
             //                    "trm_NameInOriginatingDB",
-            "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", 
-            "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", 
+            "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount",
+            "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code",
             "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_OrderInBranch", "trm_NameInOriginatingDB", "trm_ConceptID" );
     }
 
@@ -1319,7 +1329,7 @@ function dbs_GetRectypeConstraint($system) {
     *         1 - only structure
     *         2 - full, both headers and structures
     *         3 - ids only
-    *         4 - assoc dty_ID => dty_Type  
+    *         4 - assoc dty_ID => dty_Type
     */
     function dbs_GetDetailTypes($system, $dettypeids=null, $imode=2){
 
@@ -1338,7 +1348,7 @@ function dbs_GetRectypeConstraint($system) {
         */
 
         $dtStructs = array();
-        
+
         if($imode==0 || $imode==2){
             $dtG = getDetailTypeGroups($mysqli);
             $dtStructs['groups'] = $dtG;
@@ -1354,7 +1364,7 @@ function dbs_GetRectypeConstraint($system) {
             //$dtStructs['usageCount']   = getDetailTypeUsageCount($mysqli);
         }
 
-        $where_exp = null;        
+        $where_exp = null;
         if($dettypeids!=null || $dettypeids!='' && $dettypeids!='all'){
             if(!is_array($dettypeids)){
                 $dettypeids = array($dettypeids);
@@ -1363,14 +1373,14 @@ function dbs_GetRectypeConstraint($system) {
                 //detect ID or TYPE
                 if(is_numeric($dettypeids[0])){
                     $dettypeids = prepareIds($dettypeids);
-                    $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
+                    $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';
                 }else{
-                    escapeValues($mysqli, $dettypeids); 
-                    $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        
+                    escapeValues($mysqli, $dettypeids);
+                    $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';
                 }
             }
         }
-        
+
         if($imode==3){ //ids only
             //$query = "select dty_ID from defDetailTypes";
             if($where_exp==null){
@@ -1378,21 +1388,21 @@ function dbs_GetRectypeConstraint($system) {
             }
             $res = mysql__select_list($mysqli, 'defDetailTypes', 'dty_ID', $where_exp);
             return $res;
-        }else if($imode==4){ //dty_ID => dty_Type
-        
+        }elseif($imode==4){ //dty_ID => dty_Type
+
             $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes';
             if($where_exp!=null && $where_exp != ''){
-                $query = $query.' WHERE '.$where_exp;    
+                $query = $query.SQL_WHERE.$where_exp;
             }
-            
+
             $res = mysql__select_assoc2($mysqli, $query);
             return $res;
-        
+
         }else{
 
             $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
-            $query = preg_replace("/dty_ConceptID/", "", $query);
-    
+            $query = str_replace('dty_ConceptID', '', $query);
+
             if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
                 $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
             } else {
@@ -1400,7 +1410,7 @@ function dbs_GetRectypeConstraint($system) {
             }
             $query.= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID";
             if($where_exp!=null){
-                $query = $query.' where '.$where_exp;    
+                $query = $query.SQL_WHERE.$where_exp;
             }
             $query = $query . " order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
         }
@@ -1413,7 +1423,7 @@ function dbs_GetRectypeConstraint($system) {
                 while ($row = $res->fetch_row()) {
                     $dty_ID = $row[2];
                     if($imode==0 || $imode==2){
-                        $dtg_ID = $row[0]; 
+                        $dtg_ID = $row[0];
                         $idx = @$dtStructs['groups']['groupIDToIndex'][$dtg_ID];
                         if(!@$dtStructs['groups'][$idx]){
                             $idx = 0; //orphaned detail without group
@@ -1436,7 +1446,7 @@ function dbs_GetRectypeConstraint($system) {
             USanitize::errorLog('QUERY: '.$query);
             USanitize::errorLog('Database: '.$system->dbname());
         }
-        
+
         //SPECIAL CASE for relation type #6
         if($imode>0){
             if($system->defineConstant('DT_RELATION_TYPE') && @$dtStructs['typedefs'][DT_RELATION_TYPE]){
@@ -1446,7 +1456,7 @@ function dbs_GetRectypeConstraint($system) {
                 $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = '';
             }
         }
-        
+
         //ARTEM setCachedData($cacheKey, $dtStructs);
 
         return $dtStructs;
@@ -1537,13 +1547,13 @@ function dbs_GetRectypeConstraint($system) {
             //"urlinclude" => "File/URL of include content",
             "boolean" => "Boolean (T/F)");
     }
-    
+
     //
     // utility
-    //    
+    //
     function removeLastNum($name){
 
-        $k = strrpos($name," "); //find last space
+        $k = strrpos($name," ");//find last space
 
         if( $k>0 && is_numeric(substr($name, $k+1)) ){
             $name = substr($name,0,$k);

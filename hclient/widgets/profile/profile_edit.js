@@ -31,14 +31,17 @@ $.widget( "heurist.profile_edit", {
         parentwin: null,
 
         needclear: true, //clear input everytime for registration
+        
+        is_guest: false, //guest user registration
 
         // callbacks
-        callback:null
+        callback:null,
+        afterRegistration: null
     },
 
     // the widget's constructor
     _create: function() {
-        
+
         if(!this.options.parentwin){
             this.options.parentwin = window.hWin;  
         }
@@ -53,7 +56,7 @@ $.widget( "heurist.profile_edit", {
         .appendTo( this.element );
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);
+       
 
         this._refresh();
 
@@ -65,10 +68,12 @@ $.widget( "heurist.profile_edit", {
 
         if(this.edit_form.is(':empty') ){
 
-            var that = this;
+            let that = this;
 
             this.edit_form.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
                 function(){
+                    
+                    $('#divConditions').load(window.hWin.HAPI4.baseURL+'documentation_and_templates/terms_and_conditions.html #content');
                     
                     that.edit_form.css('overflow','hidden');
                     
@@ -76,7 +81,7 @@ $.widget( "heurist.profile_edit", {
                     that.edit_form.find('label').each(function(){
                         $(this).html(window.hWin.HR($(this).html()));
                     });
-                    var allFields = that.edit_form.find('input');
+                    let allFields = that.edit_form.find('input');
 
                     that.edit_form.find( "#accordion" ).accordion({collapsible: true, heightStyle: "content", active: false});
 
@@ -141,6 +146,8 @@ $.widget( "heurist.profile_edit", {
         if(key==='ugr_ID'){
             this.options.ugr_ID = value;
             this._init();
+        }else if(key==='is_guest'){
+            this.options.is_guest = value;
         }else if(key==='parentwin'){
             this.options.parentwin = value;
             if(!this.options.parentwin){
@@ -160,13 +167,13 @@ $.widget( "heurist.profile_edit", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //this.select_rectype.remove();
+       
     },
 
     //----
     _fromDataToUI: function(){
 
-        var allFields = this.edit_form.find('input, textarea');
+        let allFields = this.edit_form.find('input, textarea');
 
         allFields.val( "" ).removeClass( "ui-state-error" );
 
@@ -180,16 +187,20 @@ $.widget( "heurist.profile_edit", {
             if(this.options.edit_data && this.options.edit_data['ugr_ID']==this.options.ugr_ID) {
                 this.options.edit_data['ugr_Password']='';
             }else{
-                var that = this;
+                let that = this;
                 window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: this.options.ugr_ID},
                     function(response){
-                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        let  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             that.options.edit_data = response.data;
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
                                 that._fromDataToUI();
                             }else{
-                                that.options.parentwin.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
+                                that.options.parentwin.HEURIST4.msg.showMsgErr({
+                                    message: "Unexpected user data obtained from server",
+                                    error_title: 'Invalid user data',
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             }
                         }else{
                             that.options.parentwin.HEURIST4.msg.showMsgErr(response, true);
@@ -230,10 +241,9 @@ $.widget( "heurist.profile_edit", {
             this.edit_form.find(".mode-admin").hide();
         }
 
-        for(id in this.options.edit_data){
+        for(let id in this.options.edit_data){
             if(!window.hWin.HEURIST4.util.isnull(id)){
-                var inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
-                //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
+                this.edit_form.find("#"+id).val(this.options.edit_data[id]);
             }
         }
         //restore repeat password also
@@ -256,36 +266,37 @@ $.widget( "heurist.profile_edit", {
                 : window.hWin.HR('Registration')  );
             this.edit_form.dialog("open");
             this.edit_form.parent().addClass('ui-dialog-heurist');
-            //css({'font-size':'0.8em'});
+           
             this.edit_form.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
         }
     },
 
     _refreshCaptcha: function(){
-        var that = this;
+        let that = this;
         that.edit_form.find('#ugr_Captcha').val('');
-        var $dd = that.edit_form.find('#imgdiv');
-        var id = window.hWin.HEURIST4.util.random();
-        if(true){  //simple captcha
+        let $dd = that.edit_form.find('#imgdiv');
+        let id = window.hWin.HEURIST4.util.random();
+        const is_simple_captcha = true;
+        if(is_simple_captcha){  //simple captcha
             $dd.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
-            $dd.empty(); //find("#img").remove();
+            $dd.empty();
             $('<img id="img" src="hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     },
 
     _doSave: function(){
         
-        var parentWin = this.options.parentwin;
+        let parentWin = this.options.parentwin;
 
-        var that = this;
-        var allFields = this.edit_form.find('input, textarea');
-        var err_text = '';
+        let that = this;
+        let allFields = this.edit_form.find('input, textarea');
+        let err_text = '';
 
         // validate mandatory fields
         allFields.each(function(){
-            var input = $(this);
+            let input = $(this);
             if(input.hasClass('mandatory') && input.val()==''){
                 input.addClass( "ui-state-error" );
                 err_text = err_text + ', '+that.edit_form.find('label[for="' + input.attr('id') + '"]').html();
@@ -293,10 +304,10 @@ $.widget( "heurist.profile_edit", {
         });
         if(this.options.isregistration){
         	//remove/trim spaces
-        	var ele = this.edit_form.find("#ugr_Captcha");
-        	var val = ele.val().trim().replace(/\s+/g,'');
+        	let ele = this.edit_form.find("#ugr_Captcha");
+        	let val = ele.val().trim().replace(/\s+/g,'');
         	
-            var ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
+            const ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
                 err_text = err_text + ', Humanity check';
             }else{
@@ -307,26 +318,26 @@ $.widget( "heurist.profile_edit", {
         if(err_text==''){
             // validate email
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
-            var email = this.edit_form.find("#ugr_eMail");
-            var bValid = parentWin.HEURIST4.util.checkEmail(email);
+            let email = this.edit_form.find("#ugr_eMail");
+            let bValid = parentWin.HEURIST4.util.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }
 
             // validate login
-            var login = this.edit_form.find("#ugr_Name");
+            let login = this.edit_form.find("#ugr_Name");
             if(!parentWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
-                var ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
+                const ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
             }
             // validate passwords
-            var password = this.edit_form.find("#ugr_Password");
-            var password2 = this.edit_form.find("#password2");
+            let password = this.edit_form.find("#ugr_Password");
+            let password2 = this.edit_form.find("#password2");
             if(password.val()!=password2.val()){
                 err_text = err_text + ', '+window.hWin.HR(' Passwords do not match');
                 password.addClass( "ui-state-error" );
@@ -335,7 +346,7 @@ $.widget( "heurist.profile_edit", {
                 if(!parentWin.HEURIST4.util.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+window.hWin.HR('Wrong password format');
                 }else{*/
-                var ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
+                const ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -354,7 +365,7 @@ $.widget( "heurist.profile_edit", {
         if(err_text==''){
             // fill data with values from UI
             allFields.each(function(){
-                var input = $(this);
+                let input = $(this);
                 if(input.attr('id').indexOf("ugr_")==0){ // that.options.edit_data[input.attr('id')]!=undefined)
 
                     if(input.attr('type') === "checkbox"){
@@ -367,8 +378,9 @@ $.widget( "heurist.profile_edit", {
 
             that.options.edit_data['ugr_Type'] = 'user';
             that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
+            that.options.edit_data['is_guest'] = that.options.is_guest?1:0;
 
-            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && $.isFunction(that.options.callback) ){
+            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && window.hWin.HEURIST4.util.isFunction(that.options.callback) ){
 
                 that.edit_form.dialog("close");
                 that.options.callback.call(that);
@@ -380,12 +392,16 @@ $.widget( "heurist.profile_edit", {
                 window.hWin.HAPI4.SystemMgr.user_save( that.options.edit_data,
                     function(response){
                         that.enable_register(true);
-                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        let  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");
                                 if(that.options.isregistration){
-                                    parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    if(that.options.is_guest && window.hWin.HEURIST4.util.isFunction(that.options.afterRegistration)){
+                                        that.options.afterRegistration.call(that, response);
+                                    }else{
+                                        parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    }
                                 }else{
                                     parentWin.HEURIST4.msg.showMsgDlg("User information saved");
                                 }
@@ -404,8 +420,12 @@ $.widget( "heurist.profile_edit", {
             }
 
         }else{
-            parentWin.HEURIST4.msg.showMsgErr(err_text);
-            /*var message = $dlg.find('.messages');
+            parentWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Missing required fields',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
+            /*let message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
             setTimeout(function() {
             message.removeClass( "ui-state-highlight", 1500 );
@@ -420,15 +440,15 @@ $.widget( "heurist.profile_edit", {
 
     //these functions is used in edit_profile.html
     autofill_login: function (value){
-        var ele = this.edit_form.find('#ugr_Name');
+        let ele = this.edit_form.find('#ugr_Name');
         if(ele && ele.val()==''){
             ele.val(value);
         }
     },
     
     enable_register: function (value){
-        var that = this;
-        var ele = this.edit_form.parent().find('#btn_save');
+        let that = this;
+        let ele = this.edit_form.parent().find('#btn_save');
         if(ele){
             if(value){
                 ele.removeAttr("disabled");

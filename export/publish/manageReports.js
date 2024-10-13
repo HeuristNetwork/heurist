@@ -21,7 +21,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var reportManager;
+let reportManager = null;
 
 
 /**
@@ -35,8 +35,8 @@ var reportManager;
 */
 function ReportManager(_isFilterMode, _isWindowMode) {
 
-		var _className = "ReportManager",
-            _dataTable,
+		const _className = "ReportManager";
+        let  _dataTable,
             _dataTableParams,
             
 			_myDataTable,
@@ -66,7 +66,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
 				if (window.hWin.HEURIST4.util.isnull(usrID) && location.search.length > 1) { //for selection mode
 					
 					//list of selected
-					var sIDs = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
+					let sIDs = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
 					if (sIDs) {
 							_arr_selection = sIDs.split(',');
 					}
@@ -77,7 +77,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                                 window.hWin.HEURIST4.util.getUrlParameter('template', location.search))))
 					{
 						_keepParameters = location.search;
-						//auto open _onAddEditRecord(_keepParameters);
+					
 					}
 				}
 
@@ -128,7 +128,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                     if (type === 'display') {
                         
                         if(data>0){
-                            var simg, sfont='', shint='';
+                            let simg, sfont='', shint='';
                             if(data==1){
                                 simg = 'url_error.png';
                                 shint = 'template file does not exsist';
@@ -168,7 +168,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_ID', title: "<div style='font-size:10;'>Exec</div>", sortable:false, width:16, //resizeable:false,
                 render: function(data, type) {
                     if (type === 'display') {
-                        var status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{
@@ -186,7 +186,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_ID', title: "<div style='font-size:10;min-width:30px;'>HTML</div>", sortable:false, width:18, //resizeable:false,
                 render: function(data, type) {
                     if (type === 'display') {
-                        var status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{
@@ -204,7 +204,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
             { data: 'rps_URL', title: "<div style='font-size:10;'>Raw</div>", sortable:false, width:16,  //resizeable:false,width:7,
                 render: function(data, type, row) {
                     if (type === 'display') {
-                        var status = 0; //@todo Number(oRecord.getData('status'));
+                        let status = 0;
                         if(status==1){
                             return '';
                         }else{
@@ -254,7 +254,7 @@ return '<div align="center" data-id="'+data+'">'
 	*/
 	function _onAddEditRecord(params){
 
-		var url = window.hWin.HAPI4.baseURL + "export/publish/editReportSchedule.html";
+		let url = window.hWin.HAPI4.baseURL + "export/publish/editReportSchedule.html";
 		if(!window.hWin.HEURIST4.util.isempty(params)){
 			url = url + params;
 		}
@@ -268,7 +268,7 @@ return '<div align="center" data-id="'+data+'">'
 				if(!window.hWin.HEURIST4.util.isnull(context)){
 
 					//update id
-					var recID = Math.abs(Number(context.data[0]));
+					let recID = Math.abs(Number(context.data[0]));
 
 					//refresh table
 					_refreshReports();
@@ -298,9 +298,9 @@ return '<div align="center" data-id="'+data+'">'
                                     }
                                 }
 
-                                var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
-                                var callback = _updateAfterDelete;
-                                var request = {method:'deletereport', db:window.hWin.HAPI4.database, recID:recID};
+                                let baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
+                                let callback = _updateAfterDelete;
+                                let request = {method:'deletereport', db:window.hWin.HAPI4.database, recID:recID};
                                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
                             }, 
                             {title:'Confirm',yes:'Continue',no:'Cancel'});
@@ -325,15 +325,15 @@ return '<div align="center" data-id="'+data+'">'
                     }
                 };
 
-                var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
-                var request = {method:'searchreports', db:window.hWin.HAPI4.database};
+                let baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
+                let request = {method:'searchreports', db:window.hWin.HAPI4.database};
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __updateRecordsList);
     };    
 
 	//
 	//public members
 	//
-	var that = {
+	let that = {
 
 				/**
 				* Reinitialization of form for new detailtype

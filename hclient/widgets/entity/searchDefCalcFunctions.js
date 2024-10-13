@@ -23,12 +23,9 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
-        
-        
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_add_record
-                    .button({label: window.hWin.HR('Add New Calculation'), showLabel:true, 
+                    .button({label: window.hWin.HR('Add New Formula'), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
                     .css({padding:'2px'})
@@ -48,34 +45,16 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
         
             request['cfn_Name'] = this.input_search.val();    
             
             if($.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
+                this._trigger( "onresult", null, {recordset:new HRecordSet()} );
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
                 request['details']    = 'list';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                var that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
+                this._search_request = request;
+                this._super();                
             }  
                      
     },

@@ -20,32 +20,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
+$.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 
     // default options
     options: {
-    
+
         height: 750,
         width:  700,
-        modal:  true,
-        
+
         title:  "Search Opentheso records",
-        
-        htmlContent: 'lookupOpentheso.html',
-        helpContent: null, //in context_help folder
 
-        mapping: null, //configuration from record_lookup_config.json
-               
-        add_new_record: false, //if true it creates new record on selection
-        
-        pagesize: 20 // result list's number of records per page
+        htmlContent: 'lookupOpentheso.html'
     },
-    
-    recordList: null,
-
-    tabs_container: null,
-
-    _forceClose: false, // skip saving additional mapping and close dialog
 
     _servers: {},
 
@@ -67,65 +53,10 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        //this.element => dialog inner content
-        //this._as_dialog => dialog container
-
-        const that = this;
+        let that = this;
 
         // Extra field styling
         this.element.find('#frm-search .header').css({width: '125px', 'min-width': '125px', display: 'inline-block'});
-
-        // Action button styling
-        this.element.find('#btnStartSearch').addClass("ui-button-action");
-
-        // Prepare result list options
-        this.options.resultList = $.extend(this.options.resultList, 
-        {
-            recordDivEvenClass: 'recordDiv_blue',
-            eventbased: false,  //do not listent global events
-
-            multiselect: false, // allow only one record to be selected
-            select_mode: 'select_single', // only accept one record for selection
-
-            view_mode: 'list', // result list viewing mode [list, icon, thumb]
-            show_viewmode:false,
-            
-            entityName: this._entityName,
-            
-            pagesize: this.options.pagesize, // number of records to display per page
-            empty_remark: '<div style="padding:1em 0 1em 0">No records match the search</div>', // For empty results
-            renderer: this._rendererResultList // Record render function, is called on resultList updateResultSet
-        });                
-
-        // Init record list
-        this.recordList = this.element.find('.div_result');
-
-        this.recordList.resultList( this.options.resultList );
-        this.recordList.resultList('option', 'pagesize', this.options.pagesize); // so the pagesize doesn't get set to a different value
-        
-        // Init select & double click events for result list
-        this._on( this.recordList, {        
-            "resultlistonselect": function(event, selected_recs){
-                window.hWin.HEURIST4.util.setDisabled( 
-                    this.element.parents('.ui-dialog').find('#btnDoAction'), 
-                    (selected_recs && selected_recs.length()!=1));
-            },
-            "resultlistondblclick": function(event, selected_recs){
-                if(selected_recs && selected_recs.length()==1){
-                    this.doAction();                                
-                }
-            }
-        });        
-
-        // Handling for 'Search' button        
-        this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
-        });
-
-        // For capturing the 'Enter' key while typing
-        this._on(this.element.find('input'),{
-            'keypress':this.startSearchOnEnterPress
-        });
 
         this._sel_elements = {
             server: this.element.find('#inpt_server'),
@@ -156,11 +87,17 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                 let url = new URL(that._servers[server]);
                 that._servers[server] = { title: url.hostname, uri: url.href };
                 options.push({key: server, title: that._servers[server]['title']});
+
+                that._collections[server] = {};
             }
             window.hWin.HEURIST4.ui.fillSelector(that._sel_elements['server'][0], options);
             window.hWin.HEURIST4.ui.initHSelect(that._sel_elements['server'], false, null, {
                 onSelectMenu: () => { that._displayThesauruses(); }
             });
+
+            if(that._sel_elements['server'].hSelect('instance') !== undefined){
+                that._sel_elements['server'].hSelect('widget').css('width', '170px');
+            }
 
             that._updateThesauruses();
         });
@@ -188,9 +125,6 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
         // ----- LANGUAGE SELECT -----
         window.hWin.HEURIST4.ui.createLanguageSelect(this._sel_elements['lang'], [{key: '', title: 'select a language...'}]);
-
-        this.tabs_container = this.element.find('#tabs-cont').tabs();
-        this.element.find('#inpt_search').focus();
 
         // ----- REFRESH BUTTONS -----
         this._on(this.element.find('#btn_refTheso').button({showLabel: false, icon: 'ui-icon-refresh'}), {
@@ -224,7 +158,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _updateThesauruses: function(is_refresh = false){
 
-        const that = this;
+        let that = this;
 
         let ser_id = this._sel_elements['server'].val();
 
@@ -248,38 +182,38 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                 return;
             }
 
-            for(const server in that._servers){
-
-                const theso = Object.hasOwn(response, server) ? response[server] : [];
-                let options = [];
-
-                if(!Object.hasOwn(that._collections, server)){
-                    that._collections[ser_id] = {};
-                }
-
-                for(const key in theso){
-                    options.push({key: key, title: theso[key]['name']});
-
-                    if(!Object.hasOwn(that._collections[ser_id], key)){
-                        that._collections[ser_id][key] = [];
-                    }
-
-                    if(theso[key]['groups'].length > 0){
-                        for(const g_key in theso[key]['groups']){
-                            that._collections[server][key].push({key: g_key, title: theso[key]['groups'][g_key]});
-                        }
-                    }else if(!is_refresh){
-                        that._refreshCollections = true;
-                    }
-                }
-
-                that._thesauruses[server] = options;
-            }
+            that._updateThesaurusList(response, is_refresh);
 
             that._displayThesauruses();
         });
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
+    },
+
+    _updateThesaurusList: function(response, is_refresh){
+
+        for(const server in this._servers){
+
+            const theso = Object.hasOwn(response, server) ? response[server] : [];
+            let options = [];
+
+            for(const key in theso){
+                options.push({key: key, title: theso[key]['name']});
+
+                this._collections[server][key] = [];
+
+                if(theso[key]['groups'].length <= 0){
+                    this._refreshCollections = !is_refresh;
+                    continue;
+                }
+
+                for(const g_key in theso[key]['groups']){
+                    this._collections[server][key].push({key: g_key, title: theso[key]['groups'][g_key]});
+                }
+            }
+
+            this._thesauruses[server] = options;
+        }
     },
     
     /**
@@ -289,7 +223,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _displayThesauruses: function(){
 
-        if(!this._sel_elements || !this._sel_elements['theso']){
+        if(!this._sel_elements?.['theso']){
             return;
         }
 
@@ -320,7 +254,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _updateCollections: function(is_refresh = false){
 
-        const that = this;
+        let that = this;
 
         let ser_id = this._sel_elements['server'].val();
         let th_id = this._sel_elements['theso'].val();
@@ -371,7 +305,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _displayCollections: function(){
 
-        if(!this._sel_elements || !this._sel_elements['group']){
+        if(!this._sel_elements?.['group']){
             return;
         }
 
@@ -400,29 +334,12 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
         this._sel_elements['group'].find('option').css('padding', '5px 10px');
     },
-    
-    /**
-     * Function handler for pressing the enter button while focused on input element
-     * 
-     * Param:
-     *  e (event trigger)
-     */
-    startSearchOnEnterPress: function(e){
-        
-        var code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 13) {
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
-            this._doSearch();
-        }
 
-    },
-    
     /**
      * Result list rendering function called for each record
      * 
      * Param:
-     *  recordset (hRecordSet) => Heurist Record Set
+     *  recordset (HRecordSet) => Heurist Record Set
      *  record (json) => Current Record being rendered
      * 
      * Return: html
@@ -442,47 +359,22 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
             let s = recordset.fld(record, fldname);
 
-            s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
+            s = window.hWin.HEURIST4.util.htmlEscape(s || '');
 
-            title = s;
+            let title = s;
 
-            if(fldname == 'uri'){
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
+            if(fldname == 'term_uri'){
+                s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
                 title = 'View record';
             }
 
-            if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
-            }
-
-            return s;
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
+        
+        const recTitle = fld('term_label', 25) + fld('term_desc', 70) + fld('term_uri', 10); 
+        recordset.setFld(record, 'rec_Title', recTitle);
 
-        // Generic details, not completely necessary
-        const recID = fld('rec_ID');
-        const rectypeID = fld('rec_RecTypeID');
-        const recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        const html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-
-        const recTitle = fld('label', 25) + fld('desc', 70) + fld('uri', 10); 
-
-        return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-            + html_thumb
-                + '<div class="recordIcons">'
-                +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                + '</div>'
-                +  recTitle
-            + '</div>';
-    },
-
-    /**
-     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
-     */
-    _getActionButtons: function(){
-        let res = this._super(); //dialog buttons
-        res[1].text = window.hWin.HR('Select');
-        return res;
+        return this._super(recordset, record);
     },
 
     /**
@@ -496,83 +388,48 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Preparing values for record editor...</span>');
 
         // get selected recordset
-        let recset = this.recordList.resultList('getSelected', false);
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
+            return;
+        }
 
-        if(recset && recset.length() == 1){
+        let res = {};
+        res['ext_url'] = recset.fld(record, 'term_uri'); // add Opentheso link
 
-            let res = {};
-            let rec = recset.getFirstRecord(); // get selected record
+        res = this.prepareValues(recset, record, res);
 
-            res['ext_url'] = recset.fld(rec, 'uri'); // add Opentheso link
+        // Account for label translations
+        let label_dty_ID = this.options.mapping.fields['term_label'];
+        if(label_dty_ID > 0
+            && window.hWin.HEURIST4.util.isArrayNotEmpty(res[label_dty_ID])
+            && res[label_dty_ID].length == 2 && window.hWin.HEURIST4.util.isObject(res[label_dty_ID][1])){
 
-            for(const field in this.options.mapping.fields){
+                res[label_dty_ID].push(...Object.values(res[label_dty_ID][1]));
+                res[label_dty_ID].splice(1, 1);
+        }
 
-                let dtyID = this.options.mapping.fields[field];
+        // Setup value for insertion into enum field
+        let term_field_dty_ID = this.options.mapping.fields['term_field'];
+        if(term_field_dty_ID > 0){
 
-                if(window.hWin.HEURIST4.util.isempty(dtyID)) { continue; }
-                else if(!res[dtyID]) { res[dtyID] = []; }
-
-                if(field == 'term_field'){
-    
-                    let type = $Db.dty(dtyID, 'dty_Type');
-                    let trm_val = {
-                        'label': recset.fld(rec, 'label'),
-                        'desc': recset.fld(rec, 'desc'),
-                        'code': recset.fld(rec, 'code'),
-                        'uri': recset.fld(rec, 'uri'),
-                        'translations': recset.fld(rec, 'translations')
-                    };
-    
-                    if(type != 'enum'){
-                        trm_val = type == 'blocktext' ? JSON.stringify(trm_val) : trm_val['label']; // Object.values(trm_val).join(' ; ')
-                    }
-    
-                    trm_val = Array.isArray(trm_val) ? trm_val : [trm_val];
-
-                    res[dtyID] = res[dtyID].concat(trm_val);
-                }else{
-
-                    let fld = field.slice(5);
-
-                    let value = recset.fld(rec, fld);
-
-                    if(fld == 'translations'){
-                        value = Object.keys(value).map((lang) => `${lang}: ${value[lang]}`);
-                    }
-
-                    value = Array.isArray(value) ? value : [value];
-
-
-                    res[dtyID] = res[dtyID].concat(value);
-                }
+            let type = $Db.dty(term_field_dty_ID, 'dty_Type');
+            let value = {
+                label: recset.fld(record, 'term_label'),
+                desc: recset.fld(record, 'term_desc'),
+                code: recset.fld(record, 'term_code'),
+                uri: recset.fld(record, 'term_uri'),
+                translations: recset.fld(record, 'term_translations')
             }
 
-            this.closingAction(res);
-        }
-    },
+            value = type == 'blocktext' ? JSON.stringify(value) : value;
+            value = type != 'enum' && type != 'blocktext' ? value['label'] : value;
 
-
-    /**
-     * Perform final actions before exiting popup
-     * 
-     * Param:
-     *  dlg_reponse (json) => mapped values to fields
-     */
-    closingAction: function(dlg_response){
-
-        var that = this;
-
-        if(window.hWin.HEURIST4.util.isempty(dlg_response)){
-            dlg_response = {};
+            res[term_field_dty_ID] = [value];
         }
 
-        window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
-
-        // Pass mapped values back and close dialog
-        this._context_on_close = dlg_response;
-        this._as_dialog.dialog('close');
+        this.closingAction(res);
     },
-    
+
     /**
      * Create search URL using user input within form
      * Perform server call and handle response
@@ -581,7 +438,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _doSearch: function(){
 
-        var that = this;
+        let that = this;
 
         let sURL = this._servers[this._sel_elements['server'].val()]['uri'];
         let th_id = this._sel_elements['theso'].val();
@@ -604,23 +461,23 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         sURL += `concept/${th_id}/search?`;
 
         // Add search
-        sURL += 'q=' + encodeURIComponent(search);
+        sURL += `q=${encodeURIComponent(search)}`;
 
         // Add language
         if(!window.hWin.HEURIST4.util.isempty(language)){
 
             language = window.hWin.HAPI4.sysinfo.common_languages[language]['a2']; // use 2 char version
-            sURL += '&lang=' + language;
+            sURL += `&lang=${language}`;
         }
         // Add groupings
         if(!window.hWin.HEURIST4.util.isempty(grouping) && !window.hWin.HEURIST4.util.isempty(grouping[0])){
-            sURL += '&group=' + grouping.join(',');
+            sURL += `&group=${grouping.join(',')}`;
         }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Performing search...</span>'); // show loading cover
 
         // for record_lookup.php
-        var request = {
+        let request = {
             service: sURL, // request url
             serviceType: 'opentheso', // requesting service, otherwise no
             preferred_lang: window.hWin.HEURIST4.util.isempty(language) || language.length != 2 ? 'fr' : language
@@ -629,78 +486,48 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
             window.hWin.HEURIST4.msg.sendCoverallToBack(that.element); // hide loading cover
 
-            if(window.hWin.HEURIST4.util.isJSON(response)){
+            response = window.hWin.HEURIST4.util.isJSON(response);
 
-                if(response.status && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else if(response.length > 0){
-                    that._onSearchResult(response);
-                }else{ // No results
-
-                    window.hWin.HEURIST4.msg.showMsgFlash('No results returned', 3000);
-
-                    that.recordList.show();
-                    that.recordList.resultList('updateResultSet', null);
-                }
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
             }
+
+            that._onSearchResult(response);
         });
     },
-    
+
     /**
      * Prepare json for displaying via the Heuirst resultList widget
-     * 
-     * Param:
-     *  json_data (json) => search response
+     *
+     * @param {json} json_data - search response
      */
     _onSearchResult: function(json_data){
 
-        this.recordList.show();
-
-        var is_wrong_data = true;
-
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if (json_data) {
-
-            let res_records = {}, res_orders = [];
-
-            // Prepare fields for mapping
-            let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-            fields = fields.concat(['label', 'desc', 'code', 'uri', 'translations']);
-            
-            // Parse json to Record Set
-            let i=0;
-            for(;i<json_data.length;i++){
-
-                let record = json_data[i];             
-                let recID = i+1;
-                let values = [recID, this.options.mapping.rty_ID, ...Object.values(record)];
-
-                res_orders.push(recID);
-                res_records[recID] = values;
-            }
-
-            if(res_orders.length>0){
-                // Create the record set for the resultList
-                let res_recordset = new hRecordSet({
-                    count: res_orders.length,
-                    offset: 0,
-                    fields: fields,
-                    rectypes: [this.options.mapping.rty_ID],
-                    records: res_records,
-                    order: res_orders,
-                    mapenabled: true
-                });
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
-            }
+        if(!json_data){
+            return this._super(false);
         }
 
-        if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+        let res_records = {}, res_orders = [];
+
+        // Prepare fields for mapping
+        let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
+        fields = fields.concat(['term_label', 'term_desc', 'term_code', 'term_uri', 'term_translations']);
+        
+        // Parse json to Record Set
+        let i = 1;
+        for(const record of json_data){
+
+            let recID = i++;
+            let values = [recID, this.options.mapping.rty_ID, ...Object.values(record)];
+
+            res_orders.push(recID);
+            res_records[recID] = values;
         }
 
-        this.tabs_container.tabs('option', 'active', 1); // switch to results tab
+        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        this._super(res);
     }
 });

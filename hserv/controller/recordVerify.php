@@ -1,19 +1,19 @@
 <?php
 
     /**
-    * Application interface. 
+    * Application interface.
     * @see recordFindDuplicates.js for client side
     * @see recordDupes.php for actions
-    * 
+    *
     * parameters
     * db - heurist database
-    * a or action 
+    * a or action
     *   dupes
             mode - levenshtein or metaphone
-            rty_ID 
+            rty_ID
             fields - comma separated list or array of dty_IDs and header fields
-            distance  
-    * 
+            distance
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -31,32 +31,33 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../records/search/recordsDupes.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     $response = array();
     $res = false;
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         $response = $system->getError();
 
     }else {
-        
+
         set_time_limit(0);
 
         if(@$_REQUEST['a'] == 'dupes' || @$_REQUEST['action'] == 'dupes'){
-            
+
             if( @$_REQUEST['ignore'] ){
                 $response = RecordsDupes::setIgnoring( $_REQUEST );
+            }elseif(@$_REQUEST['export']){
+                $response = RecordsDupes::exportList($_REQUEST);
             }else{
-                $response = RecordsDupes::findDupes( $_REQUEST );    
+                $response = RecordsDupes::findDupes( $_REQUEST );
             }
 
             $system->dbclose();
-            
+
             if( is_bool($response) && !$response ){
                 $response = $system->getError();
                 //$system->error_exit_api();

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -30,15 +30,15 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-define('MANAGER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $mysqli = $system->get_mysqli();
 
 $woots = array();
-$res = $mysqli->query("select * from woots");// where woot_Title='record:96990'");
+$res = $mysqli->query("select * from woots");
 if($res){
     while ($row = $res->fetch_assoc()) {
         array_push($woots, $row);
@@ -46,27 +46,28 @@ if($res){
     $res->close();
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Check Wysiwyg Texts</title>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 	</head>
-    
+
     <body class="popup">
         <div class="banner"><h2>Check Wysiwyg Texts</h2></div>
-        
+
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr></div>
-        
-            <table class="wysiwygCheckTable">
+
+            <table class="wysiwygCheckTable" role="presentation">
                 <?php
 
                 foreach ($woots as $woot) {
 	                $valid = true;
 	                $errs = array();
 
-	                //print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
+
 
 	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . intval($woot["woot_ID"]) . " and chunk_IsLatest and not chunk_Deleted");
                     if($res){
@@ -81,7 +82,7 @@ if($res){
                     }
 
 	                if ($valid) {
-		                //print "ok\n";
+
 	                } else {
                         print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
 		                print $woot["woot_Title"] . "'>";
@@ -93,7 +94,7 @@ if($res){
                 }
 
                 function check($html) {
-                //print "text: $html\n";
+
 	                $descriptorspec = array(
 		                0 => array("pipe", "r"),
 		                2 => array("pipe", "w"),
@@ -107,8 +108,8 @@ if($res){
 	                fclose($pipes[2]);
 
 	                $rv = proc_close($proc);
-                //print "rv: $rv\n";
-                //print "out: $out\n";
+
+
 
 	                if ($rv != 0) {
 		                return $out;
@@ -119,7 +120,7 @@ if($res){
 
                 ?>
             </table>
-            
+
             <p>&nbsp;</p>
             <p>
             [end of check]

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -30,9 +30,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
-header('Content-type: text/javascript; charset=utf-8');
+header(CTYPE_JSON);
 
 $title = '';
 
@@ -40,12 +40,12 @@ $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
 
 $rv = array('num'=>$_REQUEST['num']);
 
-$system = new System();
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     print json_encode( $system->getError() );
-}else if(!$system->has_access() ){
+}elseif(!$system->has_access() ){
     print json_encode( $system->addError(HEURIST_REQUEST_DENIED) );
-}else if ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
+}elseif ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
     print json_encode( $system->addError(HEURIST_INVALID_REQUEST), 'URL is not defined' );
 }else{
 
@@ -57,7 +57,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
 		preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
 		if ($matches) {
-            $title = preg_replace('/\s+/', ' ', $matches[1]);   
+            $title = preg_replace('/\s+/', ' ', $matches[1]);
         }
 
 		if ($title) {
@@ -76,7 +76,7 @@ if(!$system->init(@$_REQUEST['db'])){
 		$rv['error']='URL could not be retrieved';
 	}
 
-    
+
     print json_encode(array('status'=>HEURIST_OK, 'data'=>$rv));
 }
 ?>

@@ -9,7 +9,7 @@
 
 /**
 * recordsExportCSV.php - produces output to CSV format
-* 
+*
 * Controller is records_output
 *
 * @package     Heurist academic knowledge management system
@@ -20,38 +20,43 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-require_once dirname(__FILE__).'/../../../vendor/autoload.php'; //for geoPHP
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
+use hserv\entity\DbDefRecStructure;
+
+require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
-require_once dirname(__FILE__).'/../../entity/dbDefRecStructure.php';
+if(!defined('H_ID')){
+    define('H_ID',' H-ID');
+}
 
 /**
-* 
+*
 *  setSession - work with different database
 *  output - main method
-* 
+*
 */
 class RecordsExportCSV {
-    private function __construct() {}    
+
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;
     private static $version = 3;
-    
+
     private static $defRecTypes = null;
     private static $defDetailtypes = null;
     private static $defTerms = null;
-    
+
 //
 //
-//    
+//
 private static function initialize()
 {
-    if (self::$initialized)
-        return;
+    if (self::$initialized) {return;}
 
     global $system;
     self::$system  = $system;
@@ -81,32 +86,32 @@ $data  - recordset array('status'=>HEURIST_OK,
                                 'offset'=>get_offset($params),
                                 'reccount'=>count($records),
                                 'records'=>$records));
-                                
+
 if parameter prefs.fields is defined it creates separate file for every record type
-                               
-fields {rtid:{id, url, title, dt1, dt2, ....  dt4:resource_rt1, dt4:resource_rt2  } }                               
-                               
-for constrained resource fields we use "dt#:rt#"                                
+
+fields {rtid:{id, url, title, dt1, dt2, ....  dt4:resource_rt1, dt4:resource_rt2  } }
+
+for constrained resource (record pointer) fields we use "dt#:rt#"
 @todo for enum fields use dt#:code,dt#:id,dt#:label
-                               
+
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
 */
 public static function output($data, $params){
 
     if (!($data && @$data['status']==HEURIST_OK)){
-        print print_r($data, true); //print out error array
+        print print_r($data, true);//print out error array
         return;
     }
 
     $data = $data['data'];
 
     if(!(@$data['reccount']>0)){
-        print 'EMPTY RESULT SET'; //'empty result set';
+        print 'EMPTY RESULT SET';
         return;
     }
 
-    self::initialize();        
-    
+    self::initialize();
+
     $isJoinTable = (isset($params['prefs']['join_record_types']) && $params['prefs']['join_record_types']) ? true : false;
 
     // Get the main record type IDs.
@@ -131,11 +136,11 @@ public static function output($data, $params){
     $include_temporals = (@$params['prefs']['include_temporals']==1);
 
     $fields = @$params['prefs']['fields'];
-    $details = array();  //array of detail fields included into output
-    $relmarker_details = array(); //relmarker fields included into output
+    $details = array();//array of detail fields included into output
+    $relmarker_details = array();//relmarker fields included into output
 
     // Handle final filename + directory
-    $filename = 'Export_'.self::$system->dbname();
+    $filename = basename('Export_'.self::$system->dbname());
     if(!empty(@$params['file']['filename'])){
 
         $filename = basename($params['file']['filename']);
@@ -153,12 +158,13 @@ public static function output($data, $params){
                 return "Unable to write to requested directory";
             }
 
-            $filename = rtrim($directory, '/') . "/$filename"; 
+            $filename = rtrim($directory, '/') . "/$filename";
         }
     }
 
-    if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);    
-    
+    if(self::$defRecTypes==null) {
+        self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+    }
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
@@ -182,7 +188,7 @@ public static function output($data, $params){
     $countColIndices = [];
     $sumColIndices = [];
     $percentageColIndices = [];
-    
+
     $has_advanced = $isJoinTable;
     $need_check_memory = true;
 
@@ -216,8 +222,8 @@ public static function output($data, $params){
                 }
             }
         }
-        
-        
+
+
     }
 
     $memory_limit = USystem::getConfigBytes('memory_limit');
@@ -234,7 +240,7 @@ public static function output($data, $params){
             }
 
             //always include ID field into output
-            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            if($flds[0]!='rec_ID') {array_unshift($flds, 'rec_ID');}
             $fields[$rt] = $flds;
 
             $details[$rt] = array();
@@ -248,7 +254,7 @@ public static function output($data, $params){
                 $fieldFullID = $dt_id;
 
                 $constr_rt_id = 0;
-                if(strpos($dt_id,':')>0){ //for constrained resource fields
+                if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                     //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
@@ -266,20 +272,20 @@ public static function output($data, $params){
                         $field_type = self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     }
                     if($constr_rt_id>0){
-                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
+                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name),
                             strtolower(self::$defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.($rectypename_is_in_fieldname
                             ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' Record Title';
 
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' H-ID';
+                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
                     }else{
                         $field_name_title = $field_name.' Record Title';
                     }
                     if($field_type=='relmarker'){
-                        $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
+                        $relmarker_details[$rt][$dt_id] = $constr_rt_id;
                     }else{
-                        array_push($details[$rt], $dt_id);    
+                        array_push($details[$rt], $dt_id);
                     }
 
                 }else{
@@ -287,7 +293,7 @@ public static function output($data, $params){
 
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].' H-ID';
+                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;
@@ -300,7 +306,7 @@ public static function output($data, $params){
                 if($field_type=='enum' || $field_type=='relationtype'){
 
                     if(!$term_ids_only){
-                        array_push($headers[$rt], $field_name);  //labels are always included by default
+                        array_push($headers[$rt], $field_name);//labels are always included by default
                         $csvColIndex = count($headers[$rt]) - 1;
                         $columnInfo[$rt][] = [
                             'index' => $csvColIndex,
@@ -327,18 +333,18 @@ public static function output($data, $params){
                         ];
                     }
 
-                    
+
                 }else{
-                    array_push($headers[$rt], $field_name);                
+                    array_push($headers[$rt], $field_name);
                     $csvColIndex = count($headers[$rt]) - 1;
                     $columnInfo[$rt][] = [
                         'index' => $csvColIndex,
                         'type' => 'value',
                         'field_id' => $fieldFullID,
                     ];
-                    
+
                     if($include_temporals && $field_type=='date'){
-                        array_push($headers[$rt], $field_name.'(temporal)');                
+                        array_push($headers[$rt], $field_name.'(temporal)');
                         $csvColIndex = count($headers[$rt]) - 1;
                         $columnInfo[$rt][] = [
                             'index' => $csvColIndex,
@@ -395,8 +401,8 @@ public static function output($data, $params){
                         ];
                     }
                 }
-                
-                //add title for resource fields
+
+                //add title for resource (record pointer) fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
 
                     array_push($headers[$rt], $field_name_title);
@@ -454,13 +460,13 @@ public static function output($data, $params){
     $csv_delimiter =  $params['prefs']['csv_delimiter']?$params['prefs']['csv_delimiter']:',';
     $csv_enclosure =  $params['prefs']['csv_enclosure']?$params['prefs']['csv_enclosure']:'"';
     $csv_mvsep =  $params['prefs']['csv_mvsep']?$params['prefs']['csv_mvsep']:'|';
-    $csv_linebreak =  $params['prefs']['csv_linebreak']?$params['prefs']['csv_linebreak']:'nix'; //not used
+    $csv_linebreak =  $params['prefs']['csv_linebreak']?$params['prefs']['csv_linebreak']:'nix';//not used
     $csv_header =  $params['prefs']['csv_header']?$params['prefs']['csv_header']:true;
 
     //------------
-    $records = $data['records'];    
+    $records = $data['records'];
 
-    $streams = array(); //one per record type
+    $streams = array();//one per record type
     $rt_counts = array();
     $csvData = [];
 
@@ -469,7 +475,8 @@ public static function output($data, $params){
 
     $idx = 0;
     if(is_array($records))
-    while ($idx<count($records)){ //replace to WHILE
+    {
+        while ($idx<count($records)){
 
         $recID = $records[$idx];
         $record = recordSearchByID(self::$system, $recID, false);
@@ -477,11 +484,11 @@ public static function output($data, $params){
 
         $idx++;
 
-        if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
+        if(!@$fields[$rty_ID]) {continue;} //none of fields for this record type marked to output
 
 
         if($has_advanced){ // everything is putting into memory
-            
+
             if (!isset($csvData[$rty_ID])) {
                 $csvData[$rty_ID] = [];
                 if($csv_header) {
@@ -492,38 +499,39 @@ public static function output($data, $params){
             } else {
                 $rt_counts[$rty_ID]++;
             }
-            
-        }else {        
+
+        }else {
             if(!@$streams[$rty_ID]){
                 // create a temporary file
-                $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+                $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
                 if (false === $fd) {
                     self::$system->error_exit_api('Failed to create temporary file for csv output');
-                }        
+                }
                 $streams[$rty_ID] = $fd;
-                
+
                 //write header
-                if($csv_header)
+                if($csv_header){
                     fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
-                
+                }
+
                 $rt_counts[$rty_ID] = 1;
             }else{
                 $fd = $streams[$rty_ID];
-                
+
                 $rt_counts[$rty_ID]++;
             }
         }
 
-        if(is_array(@$details[$rty_ID]) && count($details[$rty_ID])>0){
+        if(!isEmptyArray(@$details[$rty_ID])){
             //fils $record
             recordSearchDetails(self::$system, $record, $details[$rty_ID]);
         }
-        if(is_array(@$relmarker_details[$rty_ID]) && count($relmarker_details[$rty_ID])>0){
+        if(!isEmptyArray(@$relmarker_details[$rty_ID])){
             $related_recs = recordSearchRelated(self::$system, array($recID), 0);
             if(@$related_recs['status']==HEURIST_OK){
                 $related_recs = $related_recs['data'];
             }else{
-                $related_recs = array();    
+                $related_recs = array();
             }
         }else{
             $related_recs = array();
@@ -533,7 +541,7 @@ public static function output($data, $params){
         $record_row = array();
         foreach($fields[$rty_ID] as $dt_id){
 
-            //suppl.fields for enum and resource fields
+            //suppl.fields for enum (terms) and resource (record pointer) fields
             $date_temporals = array();
             $enum_label = array();
             $enum_code = array();
@@ -545,7 +553,7 @@ public static function output($data, $params){
             $file_paths = array();
 
             $constr_rt_id = 0;
-            if(strpos($dt_id,':')>0){ //for constrained resource fields
+            if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                 list($dt_id, $constr_rt_id) = explode(':', $dt_id);
             }
 
@@ -561,14 +569,14 @@ public static function output($data, $params){
 
                             $all_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
                             $nonsel_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
-                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);
 
                             if($is_allowed){
                                 //if record type among selected -  add record to list to be exported
                                 //otherwise export only ID  as field "Rectype H-ID"
                                 if($fields[$target_rt]){ //record type exists in output
                                     if(!in_array($relation->targetID, $records)){
-                                        array_push($records, $relation->targetID);  //add to be exported  
+                                        array_push($records, $relation->targetID);//add to be exported
                                     }
                                 }
                                 $vals[] = $relation->targetID;
@@ -589,14 +597,14 @@ public static function output($data, $params){
 
                             $all_terms = self::$defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_tree];
                             $nonsel_terms = self::$defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_nosel];
-                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);
 
                             if($is_allowed){
                                 //if record type among selected -  add record to list to be exported
                                 //otherwise export only ID  as field "Rectype H-ID"
                                 if($fields[$source_rt]){ //record type exists in output
                                     if(!in_array($relation->sourceID, $records)){
-                                        array_push($records, $relation->sourceID);  //add to be exported  
+                                        array_push($records, $relation->sourceID);//add to be exported
                                     }
                                 }
                                 $vals[] = $relation->sourceID;
@@ -606,7 +614,7 @@ public static function output($data, $params){
                                 }
                             }
                         }
-                    }                    
+                    }
 
                     $value = implode($csv_mvsep, $vals);
 
@@ -619,14 +627,14 @@ public static function output($data, $params){
                     if($dt_id == DT_PARENT_ENTITY){
                         $dt_type = 'resource';
                     }else{
-                        $dt_type = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];    
+                        $dt_type = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];
                     }
 
                     $values = @$record['details'][$dt_id];
 
                     if(isset($values)){
 
-                        //$values = array_values($values); //get plain array
+                        //$values = array_values($values);//get plain array
                         $vals = array();
 
                         if($dt_type=="resource"){
@@ -638,7 +646,7 @@ public static function output($data, $params){
 
                                     if($fields[$val['type']]){ //record type exists in output
                                         if(!in_array($val['id'], $records)){
-                                            array_push($records, $val['id']);  //add to be exported  
+                                            array_push($records, $val['id']);//add to be exported
                                         }
                                     }
                                     $vals[] = $val['id'];
@@ -648,22 +656,22 @@ public static function output($data, $params){
                                     }
                                 }
                             }
-                        }else if($dt_type=='geo'){
+                        }elseif($dt_type=='geo'){
                             foreach($values as $val){
                                 $vals[] = $val['geo']['wkt'];
                             }
-                        }else if($dt_type=='file'){
+                        }elseif($dt_type=='file'){
                             foreach($values as $val){
 
                                 $vals[] = 'ulf_' . $val['file']['ulf_ObfuscatedFileID'];
 
                                 $file_ids[] = $val['file']['ulf_ID'];
-                                $file_names[] = !empty($val['file']['ulf_OrigFileName']) ? $val['file']['ulf_OrigFileName'] : '_remote'; //$val['file']['ulf_ExternalFileReference']
+                                $file_names[] = !empty($val['file']['ulf_OrigFileName']) ? $val['file']['ulf_OrigFileName'] : ULF_REMOTE;//$val['file']['ulf_ExternalFileReference']
 
                                 if(!empty($val['file']['fullPath'])){
                                     $file_paths[] = $val['file']['fullPath'];
-                                }else if(!empty($val['file']['ulf_ExternalFileReference'])){
-                                    $file_paths[] = $val['file']['ulf_ExternalFileReference']; //'_remote'
+                                }elseif(!empty($val['file']['ulf_ExternalFileReference'])){
+                                    $file_paths[] = $val['file']['ulf_ExternalFileReference'];//ULF_REMOTE
                                 }else{
                                     $file_paths[] = '';
                                 }
@@ -672,36 +680,36 @@ public static function output($data, $params){
                                     if(@$val['file']['ulf_ExternalFileReference']){
                                         $file_urls[] = $val['file']['ulf_ExternalFileReference'];
                                     }else{
-                                        $file_urls[] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$val['file']['ulf_ObfuscatedFileID'];    
+                                        $file_urls[] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$val['file']['ulf_ObfuscatedFileID'];
                                     }
                                 }
-                            }                        
-                        }else if($dt_type=='date'){
+                            }
+                        }elseif($dt_type=='date'){
                             foreach($values as $val){
                                 $vals[] = Temporal::toHumanReadable(trim($val));
                                 if($include_temporals){
                                     $date_temporals[] = trim($val);
                                 }
-                            }                        
-                        }else if($dt_type=='enum' || $dt_type=='relationtype'){
+                            }
+                        }elseif($dt_type=='enum' || $dt_type=='relationtype'){
 
-                            if(!empty($defTerms) && is_array($values) && count($values)>0){
+                            if(!empty($defTerms) && !isEmptyArray($values) ){
                                 foreach($values as $val){
                                     $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
                                     // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
                                     $enum_code[] = $defTerms->getTermCode($val);
                                     //@$defTerms[$val][$idx_term_code]?$defTerms[$val][$idx_term_code]:'';
-                                }                        
+                                }
                             }else{
                                 $enum_label[] = '';
-                                $enum_code[] = ''; 
+                                $enum_code[] = '';
                             }
                             $vals = $values;
-                        }else if($dt_type == 'freetext' && $dt_type == 'blocktext'){ // escape all line feed (\n) within text values, to avoid confusing the import
+                        }elseif($dt_type == 'freetext' && $dt_type == 'blocktext'){
+                            // escape all line feed (\n) within text values, to avoid confusing the import
                             // freetext shouldn't have any, but just in case
-                            foreach($values as $val){ 
-                                //$val = preg_replace("/\\r/", "\\r", $val);
-                                $vals[] = preg_replace("/\\n/", "\\n", $val);
+                            foreach($values as $val){
+                                $vals[] = str_replace("\n", "\\n", $val);
                             }
                         }else{
                             $vals = $values;
@@ -717,32 +725,32 @@ public static function output($data, $params){
                         if($dt_type=='enum' || $dt_type=='relationtype'){
 
                             $enum_label[] = '';
-                            $enum_code[] = ''; 
+                            $enum_code[] = '';
 
-                        }else if($include_resource_titles && $dt_type=='resource'){
+                        }elseif($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
-                        }else if($dt_type=='file'){
+                        }elseif($dt_type=='file'){
                             $file_ids[] = '';
                             $file_names[] = '';
                             $file_paths[] = '';
                             if($include_file_url){
                                 $file_urls[] = '';
                             }
-                        }else if($dt_type=='date' && $include_temporals){
+                        }elseif($dt_type=='date' && $include_temporals){
                             $date_temporals[] = '';
                         }
                     }
 
                 }
 
-            }else if ($dt_id=='rec_Tags'){
+            }elseif($dt_id=='rec_Tags'){
 
                 $value = recordSearchPersonalTags(self::$system, $recID);
                 $value = ($value===null)?'':implode($csv_mvsep, $value);
 
-            }else if ($dt_id=='rec_RecTypeName'){
+            }elseif($dt_id=='rec_RecTypeName'){
                 $value = self::$defRecTypes['names'][$rty_ID];
-            }else if ($dt_id=='rec_ID'){
+            }elseif($dt_id=='rec_ID'){
                 $value = @$record[$dt_id];
                 $rec_url_base = HEURIST_BASE_URL_PRO . '?db=' . HEURIST_DBNAME . '&recID=' . $value;
                 if($include_record_url_html){ // html
@@ -752,43 +760,43 @@ public static function output($data, $params){
                     $record_urls[] = $rec_url_base;
                 }
             }else{
-                $value = @$record[$dt_id]; //from record header
+                $value = @$record[$dt_id];//from record header
             }
-            if($value===null) $value = '';                       
+            if($value===null) {$value = ''; }
 
 
-            if(is_array($enum_label) && count($enum_label)>0){
-                if(!$term_ids_only) $record_row[] = implode($csv_mvsep,$enum_label);    
-                if($include_term_ids) $record_row[] = $value;
-                if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);    
+            if(!isEmptyArray($enum_label)){
+                if(!$term_ids_only) {$record_row[] = implode($csv_mvsep,$enum_label);}
+                if($include_term_ids) {$record_row[] = $value;}
+                if($include_term_codes) {$record_row[] = implode($csv_mvsep,$enum_code);}
             }else {
                 $record_row[] = $value;
 
                 // Additional Date Field
-                if(count($date_temporals)>0){
-                    $record_row[] = implode($csv_mvsep, $date_temporals);    
+                if(!empty($date_temporals)){
+                    $record_row[] = implode($csv_mvsep, $date_temporals);
                 }
-                
+
                 // Additional File Fields
-                if (count($file_ids)>0){
+                if (!empty($file_ids)){
                     $record_row[] = implode($csv_mvsep,$file_ids);
                 }
-                if (count($file_names)>0){
+                if (!empty($file_names)){
                     $record_row[] = implode($csv_mvsep,$file_names);
                 }
-                if (count($file_paths)>0){
+                if (!empty($file_paths)){
                     $record_row[] = implode($csv_mvsep,$file_paths);
                 }
 
-                if (count($resource_titles)>0){
-                    $record_row[] = implode($csv_mvsep,$resource_titles);    
-                }else if (count($file_urls)>0){
-                    $record_row[] = implode($csv_mvsep,$file_urls);    
-                }else if (count($record_urls)>0){
-                    $record_row[] = implode($csv_delimiter,$record_urls); // two separate columns
+                if (!empty($resource_titles)){
+                    $record_row[] = implode($csv_mvsep,$resource_titles);
+                }elseif (!empty($file_urls)){
+                    $record_row[] = implode($csv_mvsep,$file_urls);
+                }elseif (!empty($record_urls)){
+                    $record_row[] = implode($csv_delimiter,$record_urls);// two separate columns
                 }
 
-                if($value == '' && $dt_type=="resource" && $include_resource_titles && count($resource_titles)==0){ // to avoid mismatched rows when adding details
+                if($value == '' && $dt_type=="resource" && $include_resource_titles && empty($resource_titles)){ // to avoid mismatched rows when adding details
                     $record_row[] = $value;
                 }
             }
@@ -796,31 +804,31 @@ public static function output($data, $params){
         }//for fields
 
         // write the data to csv
-        if(is_array($record_row) && count($record_row)>0) {
+        if(!isEmptyArray($record_row)) {
             if($has_advanced){
-                $csvData[$rty_ID][] = $record_row;    
-                
+                $csvData[$rty_ID][] = $record_row;
+
                 if($need_check_memory){
                     $cnt = count($records);
-                    
+
                     if($cnt>2000){
-                        
+
                         if(strlen(implode(',',$record_row))*$cnt*1.5>$memory_limit){
-                            self::$system->error_exit_api('Sorry, this export exceeds the limit set for this server. Please reduce the number of records or the number of fields selected');                                            
+                            self::$system->error_exit_api('Sorry, this export exceeds the limit set for this server. Please reduce the number of records or the number of fields selected');
                         }
-                        
+
                     }
                     $need_check_memory = false;
                 }
-                
-                
+
+
             }else{
-                fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);    
+                fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
             }
         }
 
     }//for records
-
+    }
     // Join csv tables.
     if ($isJoinTable && !empty($mainRecordTypeIDs)) {
         $mainRecordTypeID = $mainRecordTypeIDs[0];
@@ -842,7 +850,7 @@ public static function output($data, $params){
     // Save data to streams.
     if ($has_advanced && !empty($csvData)) {
         foreach ($csvData as $recordTypeID => $rows) {
-            $streams[$recordTypeID] = fopen('php://temp/maxmemory:1048576', 'w');
+            $streams[$recordTypeID] = fopen(TEMP_MEMORY, 'w');
 
             if (is_array($rows) && count($rows) > 0) {
                 if ($csv_header) {
@@ -886,7 +894,7 @@ public static function output($data, $params){
     $count_streams = 0;
     foreach($headers as $rty_ID => $columns){
         if(is_array($columns) && count($columns)>1){
-            $count_streams++;        
+            $count_streams++;
         }
     }
 
@@ -900,9 +908,9 @@ public static function output($data, $params){
 //
 public static function output_header($data, $params)
 {
-    
-    self::initialize();        
-    
+
+    self::initialize();
+
     $include_term_ids = (@$params['prefs']['include_term_ids']==1);
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
@@ -911,16 +919,17 @@ public static function output_header($data, $params)
     $include_record_url_html = (@$params['prefs']['include_record_url_html']==1);
     $include_record_url_xml = (@$params['prefs']['include_record_url_xml']==1);
     $include_temporals = (@$params['prefs']['include_temporals']==1);
-    $output_rows = (@$params['prefs']['output_rows'] == 1); // default output details as columns
-    
+    $output_rows = (@$params['prefs']['output_rows'] == 1);// default output details as columns
+
     $fields = @$params['prefs']['fields'];
-    $details = array();  //array of detail fields included into output
-    $relmarker_details = array(); //relmarker fields included into output
+    $details = array();//array of detail fields included into output
+    $relmarker_details = array();//relmarker fields included into output
     $fld_type_names = dbs_GetDtLookups();
     $base_fld_names = dbs_GetDetailTypes(self::$system, null, 0);
-    
-    if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
 
+    if(self::$defRecTypes==null) {
+        self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+    }
     $idx_cid = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_ConceptID'];
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
@@ -928,9 +937,9 @@ public static function output_header($data, $params)
     $idx_require = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-    
+
     $fld_usages = array();
-    $header_details = array('Field ID', 'Field name', 'Field type', 'Multivalue', 'Requirement', 'Usage count', 'Concept ID', 'Base name'); // field details being exported
+    $header_details = array('Field ID', 'Field name', 'Field type', 'Multivalue', 'Requirement', 'Usage count', 'Concept ID', 'Base name');// field details being exported
     $defRecStructure = new DbDefRecStructure(self::$system, null);
     $rst_data = array('a' => 'counts', 'mode' => 'rectype_field_usage', 'get_meta_counts' => 1, 'rtyID' => null);
 
@@ -947,14 +956,14 @@ public static function output_header($data, $params)
             }
 
             //always include ID field into output
-            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            if($flds[0]!='rec_ID') {array_unshift($flds, 'rec_ID');}
             $fields[$rt] = $flds;
-            
+
             $details[$rt] = array();
             $headers[$rt] = array();
             $fld_details[$rt] = array();
             $relmarker_details[$rt] = array();
-            
+
             // Get field usages
             if($rt > 0 && !array_key_exists($rt, $fld_usages)){
                 // update rectype id
@@ -963,22 +972,22 @@ public static function output_header($data, $params)
                 // retrieve usages
                 $cnt_res = $defRecStructure->run();
                 // save
-                $fld_usages[$rt] = $cnt_res !== false ? $cnt_res : self::$system->getError()['message'];
+                $fld_usages[$rt] = $cnt_res !== false ? $cnt_res : self::$system->getErrorMsg();
                 //$fld_usages[$rt] = $cnt_res !== false ? $cnt_res : array();
             }
-            
+
             foreach($flds as $dt_id){
-                
+
                 $constr_rt_id = 0;
-                if(strpos($dt_id,':')>0){ //for constrained resource fields
+                if(strpos($dt_id,':')>0){ //for constrained resource (record pointer) fields
                     //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
-                
+
                 $field_name_title = '';
-                
+
                 if(is_numeric($dt_id) && $dt_id>0){
-                    
+
                     if($dt_id==DT_PARENT_ENTITY){
                         $field_name = 'Parent entity';
                         $field_type = 'resource';
@@ -988,29 +997,29 @@ public static function output_header($data, $params)
                         $field_type = self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     }
                     if($constr_rt_id>0){
-                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
+                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name),
                                             strtolower(self::$defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.' '
                                                 //.($rectypename_is_in_fieldname?'':(self::$defRecTypes['names'][$constr_rt_id].' '))
                                                 .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' H-ID';
+                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
                     }else{
                         $field_name_title = $field_name.' RecordTitle';
                     }
                     if($field_type=='relmarker'){
-                        $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
+                        $relmarker_details[$rt][$dt_id] = $constr_rt_id;
                     }else{
-                        array_push($details[$rt], $dt_id);    
+                        array_push($details[$rt], $dt_id);
                     }
-                    
+
                 }else{
                     //record header
                     $field_type = null;
-                    
+
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].' H-ID';
+                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;
@@ -1019,11 +1028,11 @@ public static function output_header($data, $params)
                         $field_name = $dt_id; //record header field
                     }
                 }
-    
+
                 if($field_type=='separator'){ // skip separator
                     continue;
                 }
-    
+
                 $fld = self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id];
                 $count = $fld[$idx_count] != 1 ? 'Multivalue' : 'Single';
                 $typename = !empty($fld_type_names[$field_type]) ? $fld_type_names[$field_type] : 'Built-in';
@@ -1033,7 +1042,7 @@ public static function output_header($data, $params)
                 $base_name = $base_fld_names['names'][$dt_id];
 
                 if($requirement == ''){
-                    if($dt_id == 'rec_ID'){ 
+                    if($dt_id == 'rec_ID'){
                         $requirement = 'required';
                     }else{
                         $requirement = 'optional';
@@ -1044,81 +1053,81 @@ public static function output_header($data, $params)
 
                 if($field_type=='enum' || $field_type=='relationtype'){
 
-                    array_push($headers[$rt], $field_name);  // labels are always included
+                    array_push($headers[$rt], $field_name);// labels are always included
 
                     if($include_term_ids){
-                        array_push($headers[$rt], $field_name.' ID');            
+                        array_push($headers[$rt], $field_name.' ID');
                     }
-                    
+
                     if($include_term_codes){
-                        array_push($headers[$rt], $field_name.' StdCode' );   
-                    }    
-                    
+                        array_push($headers[$rt], $field_name.' StdCode' );
+                    }
+
                     //add terms pickup list
-                    if(!@$terms_pickup[$rt]) $terms_pickup[$rt] = array();
+                    if(!@$terms_pickup[$rt]) {$terms_pickup[$rt] = array();}
                     $terms_pickup[$rt][$dt_id] = array('name'=>$field_name, 'domain'=>$field_type,
                                              'term_ids'=>self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree],
                                              'nonsel'=>self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree]);
-                    
+
                 }else{
-                    array_push($headers[$rt], $field_name);                
+                    array_push($headers[$rt], $field_name);
                     if($include_temporals && $field_type=='date'){
-                        array_push($headers[$rt], $field_name.'(temporal)');                
+                        array_push($headers[$rt], $field_name.'(temporal)');
                     }
                 }
-                
-                //add title for resource fields
+
+                //add title for resource (record pointer) fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
-                    array_push($headers[$rt], $field_name_title);            
+                    array_push($headers[$rt], $field_name_title);
                 }
             }
         }
     }
-    
-    
-    if(is_array($terms_pickup) && count($terms_pickup)>0) {
+
+
+    if(!isEmptyArray($terms_pickup)) {
         $defTerms = dbs_GetTerms(self::$system);
         $defTerms = new DbsTerms(self::$system, $defTerms);
     }
-    
-    
+
+
     $csv_delimiter =  $params['prefs']['csv_delimiter']?$params['prefs']['csv_delimiter']:',';
     $csv_enclosure =  $params['prefs']['csv_enclosure']?$params['prefs']['csv_enclosure']:'"';
-   
-    $streams = array(); //one per record type
-    
-    $temp_name = null;    
+
+    $streams = array();//one per record type
+
+    $temp_name = null;
     $print_header = true;
     //------------
     foreach($headers as $rty_ID => $columns){
-        
+
         $placeholders = null;
         $cnt_cols = count($columns);
         if($cnt_cols>1){
-            if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
-            
+            if(!@$fields[$rty_ID]) {continue;} //none of fields for this record type marked to output
+
             //prepare terms
             if(is_array(@$terms_pickup[$rty_ID])){  //there are enum fields for this rt
-                
+
                 $max_count = 0;
-                $placeholders = array(); //array_fill(0, $cnt_cols, '');
-                
+                $placeholders = array();
+
                 foreach($terms_pickup[$rty_ID] as $dtid => $field){
-                    //$headers[$rty_ID][] = $field['name'].': Lookup list';
+
                     $placeholders[] = strtoupper($field['name']);
                     $ph_help[] = '<Use to create value control lists>';
                     //get list of terms
                     $vocabId = $field['term_ids'];
                     $terms = $defTerms->treeData($vocabId, 3);
-                    array_unshift($terms, $vocabId); 
-                    $max_count = max($max_count, count($terms));    
+                    array_unshift($terms, $vocabId);
+                    $max_count = max($max_count, count($terms));
                     $terms_pickup[$rty_ID][$dtid]['terms'] = $terms;
                 }
             }
-            
-            $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+
+            $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
             $streams[$rty_ID] = $fd;
-            
+
             $header = $headers[$rty_ID];
             if($output_rows){
                 $header = $header_details;
@@ -1131,7 +1140,7 @@ public static function output_header($data, $params)
 
                 $print_header = $output_rows ? false : true; // print header once for rows output
             }
-              
+
             //write field details
             if(array_key_exists($rty_ID, $fld_details)){
 
@@ -1161,71 +1170,77 @@ public static function output_header($data, $params)
 
             //write terms
             if($placeholders!=null){
-                
+
                 fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
                 fputcsv($fd, $ph_help, $csv_delimiter, $csv_enclosure);
-            
+
                 $k = 0;
                 while ($k<$max_count){
 
-                    $placeholders = array(); //no need to create empty columns: array_fill(0, $cnt_cols, '');
-                    
+                    $placeholders = array(); //no need to create empty columns: array_fill(0, $cnt_cols, '')
+
                     foreach($terms_pickup[$rty_ID] as $dtid => $field){
-                        
+
                         $terms = $terms_pickup[$rty_ID][$dtid]['terms'];
 
                         if($k<count($terms)){
                             $placeholders[] =  $defTerms->getTermLabel($terms[$k], true);
                         }else{
-                            $placeholders[] = '';    
+                            $placeholders[] = '';
                         }
                     }//for fields
-                    
+
                     fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
-            
+
                     $k++;
                 }//while
-            
+
             }
 
-            if($temp_name==null)
+            if($temp_name==null){
                 $temp_name = 'Heurist_'.self::$system->dbname();//.'_t'.$rty_ID.'_'.self::$defRecTypes['names'][$rty_ID];
+            }
         }
     }
     self::writeResults( $streams, $temp_name, $headers, null );
 }
 
-   
+
 //
-// save CSV streams into file and zip 
-//        
+// save CSV streams into file and zip
+//
 private static function writeResults( $streams, $temp_name, $headers, $error_log, $save_to_file=false ) {
-  
+
     if(is_array($streams) && count($streams)<2){
-        
+
         $out = false;
         $rty_ID = 0;
-        
-        if(count($streams)==0){
-            if($error_log) array_push($error_log, "Streams are not defined");
+
+        if(empty($streams)){
+            if($error_log) {array_push($error_log, "Streams are not defined");}
         }else{
             $rty_ID = array_keys($streams);
             $rty_ID = intval($rty_ID[0]);
 
             if(!$save_to_file || empty($temp_name)){
 
-                $filename = $temp_name;
+                $csv_filename = basename($temp_name);
                 if($rty_ID>0){
                     $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
-                    $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
+                    $csv_filename = basename($csv_filename.'_t'.$rty_ID.'_'.$rty_Name);
                 }
             }
-            $filename = strpos($filename, '.') !== false ? $filename : $filename.'.csv'; //'_'.date("YmdHis").
-        
+            $csv_filename = strpos($csv_filename, '.') !== false
+                                    ? $csv_filename
+                                    : $csv_filename.'.csv';//'_'.date("YmdHis").
+
+                                    
+            $csv_filename = basename($csv_filename);
+                                    
             $fd = $streams[$rty_ID];
 
             if($fd==null){
-                if($error_log) array_push($error_log, "Stream for record type $rty_ID is not defined");
+                if($error_log) {array_push($error_log, "Stream for record type $rty_ID is not defined");}
             }else{
                 rewind($fd);
                 $out = stream_get_contents($fd);
@@ -1238,18 +1253,18 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         if( !isset($out) || $out===false || strlen($out)==0){
             $out = "Stream for record type $rty_ID is empty";
             if($error_log) {
-                array_push($error_log, $out);   
+                array_push($error_log, $out);
                 $out = implode(PHP_EOL, $error_log);
             }
         }
-        
+
         //header('Content-Description: File Transfer');
         //header('Content-Type: application/octet-stream');
         //header('Content-Transfer-Encoding: binary');
 
-        
+
         $content_len = strlen($out);
-        if(!($content_len>0)) $content_len = 0;
+        if(!($content_len>0)) {$content_len = 0;}
 
         if($save_to_file){
             if($content_len > 0){ // save csv/error log to file
@@ -1262,35 +1277,35 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         }
 
         $content_len = $content_len+3;
-        
+
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.rawurlencode($filename));
-        header('Content-Length: ' . $content_len);
-        echo "\xEF\xBB\xBF"; // Byte Order Mark        
+        header('Content-Disposition: attachment; filename='.rawurlencode($csv_filename));
+        header(CONTENT_LENGTH . $content_len);
+        echo "\xEF\xBB\xBF";// Byte Order Mark
         exit($out);
-        
+
     }else{
-    
+
         $zipname = $temp_name.'_'.date("YmdHis").'.zip';
         $destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "zip");
-        
+
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-            array_push($error_log, "Cannot create zip $destination");    
+            array_push($error_log, "Cannot create zip $destination");
         }else{
             $is_first = true;
-        
+
             foreach($streams as $rty_ID => $fd){
-                
+
                 if($fd==null){
                     array_push($error_log, "Stream for record type $rty_ID is not defined");
                 }else{
                     // return to the start of the stream
                     rewind($fd);
-                    
+
                     if($is_first || (is_array($headers[$rty_ID]) && count($headers[$rty_ID])>1)){
                         $is_first = false;
-                    
+
                         $content = stream_get_contents($fd);
 
                         if($content===false || strlen($content)==0){
@@ -1300,45 +1315,45 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                             $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
                             $zip->addFromString('rectype-'.$rty_ID.'-'.$rty_Name.'.csv',  $content);
                         }
-                        
+
                     }
                     //close the file
                     fclose($fd);
                 }
-            }    
-            
-            if(is_array($error_log) && count($error_log)>0){
+            }
+
+            if(!isEmptyArray($error_log)){
                 $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
             }
-            
+
             // close the archive
             $zip->close();
         }
-        
+
         if(@file_exists($destination)>0){
-        
+
             header('Content-Type: application/zip');
             header('Content-Disposition: attachment; filename='.$zipname);
-            header('Content-Length: ' . filesize($destination));
+            header(CONTENT_LENGTH . filesize($destination));
             readfile($destination);
 
             // remove the zip archive
-            unlink($destination);    
-        
+            unlink($destination);
+
         }else{
             array_push($error_log, "Zip archive ".$destination." doesn't exist");
-            
+
             $out = implode(PHP_EOL, $error_log);
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename=log.txt');
-            header('Content-Length: ' . strlen($out));
+            header(CONTENT_LENGTH . strlen($out));
             exit($out);
-            
+
         }
-        
-    }    
-    
-}       
+
+    }
+
+}
 
 /**
  * Group by columns for exported CSV rows.
@@ -1433,7 +1448,7 @@ private static function usePercentageForCSVRows(array $rows, array $usePercentag
             for ($j = 0; $j < count($usePercentageColIndices); $j++) {
                 $colIndex = $usePercentageColIndices[$j];
                 if($colTotal[$colIndex]>0){
-                    $percentage = round(self::valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;    
+                    $percentage = round(self::valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;
                 }else{
                     $percentage = 0;
                 }
@@ -1517,12 +1532,13 @@ private static function createJointCSVTables($csvData, &$columnInfo, $mainRecord
             if (!isset($csvRowLookups[$recordTypeID])) {
                 $csvRowLookups[$recordTypeID] = [];
             }
-            foreach ($rows as $index => $row) {
-                if ($includeHeader && $index === 0) {
-                    $csvRowLookups[$recordTypeID]['header'] = $row;
-                } else {
-                    $csvRowLookups[$recordTypeID][$row[0]] = $row;
-                }
+
+            if ($includeHeader) {
+                $csvRowLookups[$recordTypeID]['header'] = array_shift($rows); //$rows[0];
+            }
+
+            foreach ($rows as $row) {
+                $csvRowLookups[$recordTypeID][$row[0]] = $row;
             }
         }
     }

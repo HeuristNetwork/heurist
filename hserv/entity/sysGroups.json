@@ -4,7 +4,7 @@
         "tableName": "sysUGrps",
         "tablePrefix": "ugr",
         
-        "helpContent": "sysGroups.html",
+        "helpContent": "sysGroups.htm",
         
         "searchFormContent": "searchSysGroups.html",
         

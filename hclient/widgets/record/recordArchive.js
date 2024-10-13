@@ -29,7 +29,6 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         title:  'Lookup and restore archive records',
         
         htmlContent: 'recordArchive.html',
-        helpContent: 'recordArchive.html', //in context_help folder
         
         mapping:null, //maps external fields to heurist field details
         add_new_record: false  //if true it creates new record on selection
@@ -43,10 +42,10 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        var that = this;
+        let that = this;
         
        
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'120px'})
+        this._$('fieldset > div > .header').css({width:'80px','min-width':'120px'})
         
         this.options.resultList = $.extend(this.options.resultList, 
         {
@@ -72,7 +71,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         });                
 
         //init record list
-        this.recordList = this.element.find('#div_result');
+        this.recordList = this._$('#div_result');
         this.recordList.resultList( this.options.resultList );     
         
         this._on( this.recordList, {        
@@ -91,16 +90,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         
         
-        this._on(this.element.find('#btnStartSearch').button(),{
+        this._on(this._$('#btnStartSearch').button(),{
             'click':this._doSearch
         });
         
-        this._on(this.element.find('input'),{
+        this._on(this._$('input'),{
             'keypress':this.startSearchOnEnterPress
         });
         
         
-        this.element.find('#inpt_date').datepicker({
+        this._$('#inpt_date').datepicker({
                             showOn: "button",
                             showButtonPanel: true,
                             changeMonth: true,
@@ -116,7 +115,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -147,7 +146,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     _rendererResultList: function(recordset, record){
         
         function fld(fldname, width){
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
             s = s?s:'';
             if(width>0){
                 s = '<div style="display:inline-block;width:'+width+'px" class="truncate">'+s+'</div>';
@@ -155,25 +154,25 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
             return s;
         }
         
-        var arcID = fld('arc_ID');
-        var arcUser = fld('arc_ChangedByUGrpID',40);
-        var arcDate = fld('arc_TimeOfChange',120);
-        var arcMode = '<div style="display:inline-block;width:80px" class="truncate">'
+        let arcID = fld('arc_ID');
+        let arcUser = fld('arc_ChangedByUGrpID',40);
+        let arcDate = fld('arc_TimeOfChange',120);
+        let arcMode = '<div style="display:inline-block;width:80px" class="truncate">'
             +(fld('arc_ContentType')=='del'?'deleted':'updated')+'</div>';
         
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recTitle = fld('rec_Title',400); 
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recTitle = fld('rec_Title',400); 
         
         recTitle = fld('rec_ID',30) + recTitle + arcMode + arcUser + arcDate; 
         
         
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
         
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+arcID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+arcID+'" rectype="'+rectypeID+'">'
             + html_thumb
             
                 + '<div class="recordIcons">'
@@ -192,9 +191,9 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super(); //dialog buttons
+        let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Restore');
-        //res[1].disabled = null;
+       
         return res;
     },
 
@@ -204,16 +203,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     doAction: function(){
 
             //detect selection
-            var sel = this.recordList.resultList('getSelected', false);
+            let sel = this.recordList.resultList('getSelected', false);
             
             if(sel && sel.length() == 1){
                 
-                showMsgDlg('Are you sure?');
+                window.hWin.HEURIST4.msg.showMsgDlg('Are you sure?');
                 
                 /*
                 if(this.options.add_new_record){
                     //create new record 
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+                    
                     //this._addNewRecord(this.options.rectype_for_new_record, sel);                     
                 }else{
                     //pass mapped values and close dialog
@@ -232,30 +231,30 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_user').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_user').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or user', 500);
             return;
         }
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_date').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_date').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or date', 500);
             return;
         }
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
-        var request = {}
+        let request = {}
     
-        if(this.element.find('#inpt_recid').val()!=''){
-            request['arc_PriKey'] = this.element.find('#inpt_recid').val();
+        if(this._$('#inpt_recid').val()!=''){
+            request['arc_PriKey'] = this._$('#inpt_recid').val();
         }
-        if(this.element.find('#inpt_user').val()!=''){
-            request['arc_ChangedByUGrpID'] = this.element.find('#inpt_user').val();
+        if(this._$('#inpt_user').val()!=''){
+            request['arc_ChangedByUGrpID'] = this._$('#inpt_user').val();
         }
-        if(this.element.find('#inpt_state').val()!=''){
-            request['arc_ContentType'] = this.element.find('#inpt_state').val();
+        if(this._$('#inpt_state').val()!=''){
+            request['arc_ContentType'] = this._$('#inpt_state').val();
         }
-        if(this.element.find('#inpt_date').val()!=''){
-            request['arc_TimeOfChange'] = this.element.find('#inpt_date').val();
+        if(this._$('#inpt_date').val()!=''){
+            request['arc_TimeOfChange'] = this._$('#inpt_date').val();
         }
         
         request['arc_Table'] = 'rec';
@@ -263,16 +262,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         request['a']          = 'search'; //action
         request['entity']     = 'sysArchive';
-        request['details']    = 'full'; //'id';
+        request['details']    = 'full';
         request['convert']    = 'records_list';
 
         //returns recordset of heurist records with additional fields
-        var that = this;
+        let that = this;
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            that._onSearchResult(new hRecordSet(response.data));
+                            that._onSearchResult(new HRecordSet(response.data));
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
@@ -343,7 +342,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                 res_records[recID] = values;
             }
 
-            var res_recordset = new hRecordSet({
+            var res_recordset = new HRecordSet({
                 count: res_orders.length,
                 offset: 0,
                 fields: fields,

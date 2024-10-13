@@ -1,0 +1,72 @@
+<fieldset id="div_fieldset">
+
+            <legend style="padding:5px" class="heurist-helper3">
+                This function processes the current query looking for records in another (or the same) entity type,<br>
+                based on matching the values of a field in each entity type. Fields to be matched may be text or numeric.<br><br>
+                The current query must contain only a single record type (this is enforced to avoid accidental errors).<br><br>
+                Where a match is found it will insert the ID of the matched record into a record pointer field in the source record.
+            </legend>
+            
+            <!-- Ian 31/7/24: this is not really needed here, since it will always be the query result -->
+            <div>
+                <div class="header" style="width:200px">Source records scope:</div>
+                <select id="sel_record_scope" class="text ui-widget-content ui-corner-all"></select>
+            </div>
+            
+                
+            <div>
+                <div class="header">Field to be matched (in current query result):</div>
+                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="min-height: 24px;"></select>
+                <span id="count_source_unique" style="padding-left:5px;font-weight:bold"></span>
+            </div>
+
+            <!-- link field selector -->
+            <div>
+                <div class="header">Record pointer field to update with ID of matched records:</div>
+                <select id="sel_pointer_field" class="text ui-widget-content ui-corner-all"></select>
+                <!-- <div id="source_field"  style="margin-bottom:15px;max-height: 40%;overflow: auto;border:none;"></div> -->
+            </div>
+                
+
+            <div>
+            </div>
+            
+            <div>
+                <div class="header">Entity type in which to seek matches:</div>
+                <select id="target_record_type" class="text ui-widget-content ui-corner-all"></select>
+                <span id="count_target_rty" style="padding-left:5px;font-weight:bold"></span>
+                <div class="heurist-helper2">Only entity types compatible with the selected record pointer field are shown</div>
+            </div>
+            
+            <!-- target field selector -->
+            <div>
+                <div class="header">Field in which to seek matches:</div>
+                <select id="sel_fieldtype_target" class="ui-widget-content ui-corner-all" style="margin-top:15px;margin-bottom:15px;min-height: 24px;"></select>
+                <span id="count_target_matches" style="padding-left:5px;font-weight:bold"></span>
+            </div>
+
+
+            <div>
+                <div class="header">
+                    Existing values behaviour:
+                </div>
+                <label><input name="to_replace" type="radio" checked value="add"/>add value (no duplication)</label>
+                <label><input name="to_replace" type="radio" value="replace"/>replace existing value(s)</label>
+                <label><input name="to_replace" type="radio" value="nonmatch"/>non-match report only</label>
+            </div>
+
+</fieldset>            
+            
+<div class="ent_wrapper progressbar_div" style="display: none; background:white">
+        <div class="loading" style="display:none;height:100%"></div>
+        <div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">
+            <div id="progressbar">
+                <div class="progress-label">Processing data...</div>
+            </div>
+            <div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
+</div>            
+
+<div id="div_result" class="ent_wrapper" style="display: none;font-size: 1.4em">
+    RESULT
+</div>

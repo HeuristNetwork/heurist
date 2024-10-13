@@ -28,12 +28,12 @@ if(@$isDatabaseStructure == 1){
    <div id="toolbar" style="display:none;">
 
         <div id="setSelectMode" class="toolbar-section" style="min-width:40px">
-            
+
             <button id="btnSingleSelect" name="selectMode" value="single">"Select and drag nodes"</button>
             <button id="btnMultipleSelect" name="selectMode" value="multi">Select multiple nodes</button>
-            
+
             <span style="display:inline-block;width:15px"></span>
-            
+
             <button id="btnZoomIn" style="width:20px">Zoom In</button>
             <button id="btnZoomOut" style="width:20px">Zoom Out</button>
             <button id="btnFitToExtent" style="width:20px">Fit to extent</button>
@@ -45,66 +45,66 @@ if(@$isDatabaseStructure == 1){
             <button id="btnViewModeFull" name="videMode" value="infoboxes_full">Info + Links</button>
         </div>
 
-        <div id="setDivGravity" class="toolbar-section" 
+        <div id="setDivGravity" class="toolbar-section"
             style="border-left: solid 1px gray; min-width:90px">
-            
+
             <div id="setGravityMode">
-                <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
+                <span class="ui-controlgroup-label" style="border:none;background:none">gravity</span>
                 <button id="gravityMode0" name="gravityMode" value="off">off</button>
-                <button id="gravityMode1" name="gravityMode" value="touch">on</button>           
+                <button id="gravityMode1" name="gravityMode" value="touch">on</button>
             </div>
         </div>
 
         <div id="divRefresh" class="toolbar-section" style="min-width: 45px">
             <button id="btnRefreshData">Refresh data</button>
         </div>
-        
+
         <div id="setAdvancedMode" class="toolbar-section" style="border-left: solid 1px gray;padding-left:15px;min-height:22px;vertical-align:middle;font-size:0.8em">
                 <span class="ui-icon ui-icon-triangle-1-w advanced" title="Hide advanced functions" style="height: 22px;">&nbsp;</span>
                 <a href="#">advanced functions&nbsp;<span class="ui-icon ui-icon-triangle-1-e"
                  style="display: inline-block;vertical-align: middle;height: 22px;"></span></a></div>
 
         <!-- -->
-        <div id="setDivNodes" class="toolbar-section advanced" 
+        <div id="setDivNodes" class="toolbar-section advanced"
             style="display:none;padding-left:15px; min-width:190px">
-            <label>Nodes</label>
+            <span>Nodes</span>
             <div class="colorblock" style="margin-top:-4px;width:auto;" title="Color of nodes">
                 <input id="entityColor" style="width:0px;border:none"/></div>
-                
+
             <div id="setNodesMode" style="display:inline-block">
-                <button id="nodesMode0" name="nodesMode" value="linear" 
+                <button id="nodesMode0" name="nodesMode" value="linear"
                     title="radius of nodes changes linearly">lin</button>
                 <button id="nodesMode1" name="nodesMode" value="logarithmic"
                     title="radius of nodes changes logarithmically">log</button>
-                <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" 
+                <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked"
                     title="radius of nodes has fixed size">fixed</button>
             </div>
             <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" />
         </div>
 
         <!-- add advanced class to toggle this section -->
-        <div id="setDivLinks" class="toolbar-section advanced" 
+        <div id="setDivLinks" class="toolbar-section advanced"
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
-            <label>Links</label>
+            <span>Links</span>
             <label><input id="linksEmpty" title="Show empty links" type="checkbox"/>&nbsp;empty</label>
             <label><input id="expand-links" title="Expand all links" type="checkbox"/>&nbsp;expand</label>
         </div>
-        
-        <div id="setDivLinks2" class="toolbar-section" 
+
+        <div id="setDivLinks2" class="toolbar-section"
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
-            <label>Links</label>
+            <span>Links</span>
 
             <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/<input id="linksPathColor_inpt" style="width:0px;border:none"/></div>
-            
+
             <div id="linksMarkerColor" class="colorblock" title="Color of markers/arrows on links"></div>
             <div style="display:inline-block;width:0"><input id="linksMarkerColor_inpt" style="width:0px;border:none;"/></div>
             <div id="setLinksMode" style="display:inline-block">
-                <button id="linksMode0" name="linksMode" value="straight" 
+                <button id="linksMode0" name="linksMode" value="straight"
                     title="link shape is straight">straight</button>
 
-                <button id="linksMode1" name="linksMode" value="curved" checked="checked" 
+                <button id="linksMode1" name="linksMode" value="curved" checked="checked"
                     title="link shape is curved">curved</button>
-                
+
                 <button id="linksMode2" name="linksMode" value="stepped"
                     title="link shape is stepped">stepped</button>
             </div>
@@ -112,13 +112,13 @@ if(@$isDatabaseStructure == 1){
             <input id="linksLength" title="Links Length" class="number-input medium" type="number" min="1" step="25" />
             x
             <input id="linksWidth" title="Links Thickness" class="number-input small" type="number" min="1" max="25" step="1" />
-            
+
         </div>
 
         <!-- add advanced class to toggle this section -->
-        <div id="setDivLabels" class="toolbar-section" 
+        <div id="setDivLabels" class="toolbar-section"
             style="display:none;border-left: solid 1px gray; padding-left: 10px; min-width:140px;">
-            <label>Labels</label>
+            <span>Labels</span>
 
             <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden" style="margin: 5px;">
             <div id="textColor" class="xcolorblock" title="Text color">Text</div>
@@ -127,9 +127,9 @@ if(@$isDatabaseStructure == 1){
             x
             <input id="fontSize" title="Font Size" class="number-input small" type="number" min="8" max="25" step="1" />
         </div>
-        
-        
-        <div id="setDivExport" class="toolbar-section advanced" 
+
+
+        <div id="setDivExport" class="toolbar-section advanced"
             style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;">
             <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
             <button type="button" id="embed-export">Embed</button>
@@ -143,9 +143,9 @@ if(@$isDatabaseStructure == 1){
     <!-- SVG -->
     <svg id="d3svg" class="fullscreen">
         <text x="25" y="25" fill="black">Building graph ...</text>
-    </svg>  
+    </svg>
 
-    <div id="net_limit_warning" 
+    <div id="net_limit_warning"
         style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
     </div>
 </div>
@@ -157,24 +157,20 @@ if(@$isDatabaseStructure == 1){
     <ul class="split_bar">
         <div class="dropdown1" style="position:absolute;left:0px;top:10px;">
 
-            <label id="nodecontrolbox">Node Control</label>
+            <span id="nodecontrolbox">Node Control</span>
             <div class="dropdown-content1"></a></li>
 
                 <div>
-                    <label>Select Mode: </label>
+                    <span>Select Mode: </span>
                     <button id="btnSingleSelect" name="selectMode" value="single">"Select and drag nodes"</button>
                     <button id="btnMultipleSelect" name="selectMode" value="multi">Select multiple nodes</button>
                 </div>
 
                 <div>
-                    <label style="border:none;background:none">Gravity:</label>
+                    <span style="border:none;background:none">Gravity:</span>
                     <div id="setGravityMode" style="padding-left:10px">
                         <button id="gravityMode0" name="gravityMode" value="off">off</button>
-                        <button id="gravityMode1" name="gravityMode" value="touch">on</button> <!-- onclick="refreshButton();" -->
-                        <!-- <button id="gravityMode2" name="gravityMode" value="off"
-                            onclick="refreshGravityOff()">off</button>
-                        <button id="gravityMode3" name="gravityMode" value="touch"
-                            onclick="refreshGravityOn()">on</button> -->
+                        <button id="gravityMode1" name="gravityMode" value="touch">on</button>
                     </div>
                 </div>
             </div>
@@ -183,10 +179,10 @@ if(@$isDatabaseStructure == 1){
 
     <ul class="split_bar">
         <div class="dropdown2" style="position: absolute;left: 130px;top:10px; ">
-            <label id="nodecontrolbox">Link Control</label>
+            <span id="nodecontrolbox">Link Control</span>
             <div class="dropdown-content2">
                 <div>
-                    <label>Links</label>
+                    <span>Links</span>
                     <label><input id="linksEmpty" title="Show empty links" type="checkbox" />&nbsp;empty</label>
                     <label><input id="expand-links" title="Expand all links" type="checkbox" />&nbsp;expand</label>
                 </div>
@@ -207,7 +203,7 @@ if(@$isDatabaseStructure == 1){
 
     <ul class="split_bar">
         <div class="dropdown3" style="position: absolute;left: 250px;top:10px;">
-            <label id="nodecontrolbox">Graph Control</label>
+            <span id="nodecontrolbox">Graph Control</span>
             <div class="dropdown-content3">
                 <!-- Added Refresh Graph Buttons - Travis Doyle 19/9-->
                 <div>
@@ -216,22 +212,22 @@ if(@$isDatabaseStructure == 1){
                     <button type="button" id="closegraphbutton" onclick="window.close();">Close Fullscreen</button>
                 </div>
                 <div>
-                    <label id="viewnode" class="ui-controlgroup-label" style="border:none;background:none">View Mode:
-                    </label>
+                    <span id="viewnode" class="ui-controlgroup-label" style="border:none;background:none">View Mode:
+                    </span>
                     <button id="btnViewModeIcon" name="videMode" value="icons">Icons</button>
                     <button id="btnViewModeInfo" name="videMode" value="infoboxes">Info</button>
                     <button id="btnViewModeFull" name="videMode" value="infoboxes_full">Info + Links</button>
                 </div>
 
                 <div>
-                    <label class="ui-controlgroup-label" style="border:none;background:none">Set Zoom: </label>
+                    <span class="ui-controlgroup-label" style="border:none;background:none">Set Zoom: </span>
                     <button id="btnZoomIn" style="width:20px">Zoom In</button>
                     <button id="btnZoomOut" style="width:20px">Zoom Out</button>
                     <button id="btnFitToExtent" style="width:20px">Fit to extent</button>
                 </div>
 
                 <div id="setDivExport">
-                    <label class="ui-controlgroup-label" style="border:none;background:none">Export:</label>
+                    <span class="ui-controlgroup-label" style="border:none;background:none">Export:</span>
                     <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
                     <button type="button" id="embed-export">Embed</button>
                 </div>
@@ -239,7 +235,7 @@ if(@$isDatabaseStructure == 1){
 
             <!-- add advanced class to toggle this section -->
             <div id="setDivLabels" style="display:none; padding-left: 10px; min-width:140px;">
-                <label>Labels</label>
+                <span>Labels</span>
                 <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden"
                     style="margin: 5px;">
                 <div id="textColor" class="xcolorblock" title="Text color">Text</div>
@@ -276,7 +272,9 @@ if(@$isDatabaseStructure == 1){
     *ADDED BY ISH
 -->
 <div id="iframeDiv">
-    <button id="closeButton" onclick="hideNodeInformation()">X</button>
+    <button id="btnCtrlNewtab" class="iframeControls" onclick="handleNodeAction('tab')" title="Open in new tab"><span class="ui-icon ui-icon-newwin"></span></button>
+    <button id="btnCtrlPopup" class="iframeControls" onclick="handleNodeAction('popup')" title="Open in popup"><span class="ui-icon ui-icon-comment"></span></button>
+    <button id="btnCtrlClose" class="iframeControls" onclick="handleNodeAction('close')" title="Close record viewer"><span class="ui-icon ui-icon-close"></span></button>
     <iframe title id="iframeInfo"></iframe>
 </div>
 
@@ -285,11 +283,11 @@ if(@$isDatabaseStructure == 1){
 ?>
 
 <div id="embed-dialog" style="display:none">
-     <p>Embed this Network Diagram in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; 
+     <p>Embed this Network Diagram in your own web page. Enclose within &lt;code&gt; &lt;/code&gt;
  for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
      <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the graph, or use the URL on its own. The graph will be generated live from the database using the current search criteria whenever the graph is loaded. Use the web-safe version if the readable version does not work</p>
-     <label style="font-size:0.9em">Readable code:</label>
+     <label style="font-size:0.9em" for="code-textbox">Readable code:</label>
      <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
-     <label style="font-size:0.9em">Web-safe code:</label>
+     <label style="font-size:0.9em" for="code-textbox2">Web-safe code:</label>
      <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
 </div>

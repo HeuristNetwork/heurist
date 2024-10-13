@@ -65,24 +65,44 @@
 * - translatey: 0,
 * - scale: 1
 */
+/* global svg, data, settings, zoomBehaviour, force, iconSize, currentMode, circleSize, maxLinkWidth, maxEntityRadius, truncateText, 
+getSetting, putSetting, checkStoredSettings, handleSettingsInUI, addSelectionBox, 
+addNodes,  updateNodes,
+createOverlay, getRelationOverlayData, removeOverlay,
+isStandAlone */
 
-var settings;   // Plugin settings object
-var svg;        // The SVG where the visualisation will be executed on
+window.settings = null;   // Plugin settings object
+window.svg = null;        // The SVG where the visualisation will be executed on
+
+window.data = null; // Currently visualised dataset
+window.zoomBehaviour = null;
+window.force = null;
+
+//public settings
+window.iconSize = 16; // The icon size
+window.circleSize = 12; //iconSize * 0.75; // Circle around icon size
+window.currentMode = 'infoboxes_full'; //or 'icons';
+window.maxEntityRadius = 40;
+window.maxLinkWidth = 25;
+
+//private
+let maxCountForNodes, maxCountForLinks; 
+
 (function ( $ ) {
     // jQuery extension
     $.fn.visualize = function( options ) {
         
         // Select and clear SVG.
-        svg = d3.select("#d3svg");
+        window.svg = window.d3.select("#d3svg");
         svg.selectAll("*").remove();
         svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25");   
         
         
         // Default plugin settings
-        settings = $.extend({
+        window.settings = $.extend({
             // Custom functions
             getData: $.noop(), // Needs to be overriden with custom function
-            getLineLength: function() { return getSetting(setting_linelength,200); },
+            getLineLength: function() { return getSetting('setting_linelength',200); },
             
             selectedNodeIds: [],
             onRefreshData: function(){},
@@ -129,7 +149,7 @@ var svg;        // The SVG where the visualisation will be executed on
             markercolor: "#000",
             
             entityradius: 30,
-            entitycolor: setting_entitycolor,//"#b5b5b5"
+            entitycolor: "#b5b5b5",
             
             labels: true,
             fontsize: "8px",
@@ -152,12 +172,12 @@ var svg;        // The SVG where the visualisation will be executed on
         handleSettingsInUI();
 
         // Check visualisation limit
-        var amount = Object.keys(settings.data.nodes).length;
-        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        let amount = Object.keys(settings.data.nodes).length;
+        const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         
         visualizeData();    
 
-        var ele_warn = $('#net_limit_warning');
+        let ele_warn = $('#net_limit_warning');
         if(amount >= MAXITEMS) {
             ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
         }else{
@@ -166,19 +186,19 @@ var svg;        // The SVG where the visualisation will be executed on
 
         $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
             function(){
-                 zoomBtn(true);
+                zoomBtn(true);
             }
         );
 
         $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
             function(){
-                 zoomBtn(false);
+                zoomBtn(false);
             }
         );
 
         $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).click(
             function(){
-                 zoomToFit();
+                zoomToFit();
             }
         );
 
@@ -194,19 +214,19 @@ var svg;        // The SVG where the visualisation will be executed on
     
 
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
-var maxCountForNodes, maxCountForLinks; 
+
 function determineMaxCount(data) {
     maxCountForNodes = 1;
     maxCountForLinks = 1;
     if(data && data.nodes.length > 0) {
-        for(var i = 0; i < data.nodes.length; i++) {
+        for(let i = 0; i < data.nodes.length; i++) {
             if(data.nodes[i].count > maxCountForNodes) {
                 maxCountForNodes = data.nodes[i].count;
             } 
         }
     }
     if(data && data.links.length > 0) {
-        for(var i = 0; i < data.links.length; i++) {
+        for(let i = 0; i < data.links.length; i++) {
             if(data.links[i].targetcount > maxCountForLinks) {
                 maxCountForLinks = data.links[i].targetcount;
             } 
@@ -216,7 +236,7 @@ function determineMaxCount(data) {
 
 function getNodeDataById(id){
     if(data && data.nodes.length > 0) {
-        for(var i = 0; i < data.nodes.length; i++) {
+        for(let i = 0; i < data.nodes.length; i++) {
             if(data.nodes[i].id==id) {
                 return data.nodes[i];
             } 
@@ -238,11 +258,11 @@ function _addDropShadowFilter(){
 // read more about SVG filter effects here: http://www.w3.org/TR/SVG/filters.html
 
 // filters go in defs element
-var defs = svg.append("defs");
+let defs = svg.append("defs");
 
 // create filter with id #drop-shadow
 // height=130% so that the shadow is not clipped
-var filter = defs.append("filter")
+let filter = defs.append("filter")
     .attr("id", "drop-shadow")
     .attr("height", "120%");
 
@@ -264,20 +284,13 @@ filter.append("feOffset")
 
 // overlay original SourceGraphic over translated blurred opacity by using
 // feMerge filter. Order of specifying inputs is important!
-var feMerge = filter.append("feMerge");
+let feMerge = filter.append("feMerge");
 
 feMerge.append("feMergeNode")
     .attr("in", "offsetBlur")
 feMerge.append("feMergeNode")
     .attr("in", "SourceGraphic");
 }
-
-var iconSize = 16; // The icon size
-var circleSize = 12; //iconSize * 0.75; // Circle around icon size
-var currentMode = 'infoboxes_full'; //or 'icons';
-var maxEntityRadius = 40;
-var maxLinkWidth = 25;
-
 
 /** Executes the chosen formula with a chosen count & max size */
 
@@ -287,7 +300,7 @@ function executeFormula(count, maxCount, maxSize) {
         count = 1;
     }
     
-    var formula = getSetting(setting_formula);
+    let formula = getSetting('setting_formula');
     if(formula == "logarithmic") { // Log                                                           
         return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
     }
@@ -300,23 +313,24 @@ function executeFormula(count, maxCount, maxSize) {
 
 /** Returns the line length */
 function getLineLength(record) {
-    return getSetting(setting_linelength,200);
+    return getSetting('setting_linelength',200);
 }
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
 
     count = Number(count);
-    var maxWidth = Number(getSetting(setting_linewidth, 3));
+    let maxWidth = Number(getSetting('setting_linewidth', 3));
     
+    let maxSize = 1;
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
-    else if(maxWidth<1) {maxSize = 1;}
+    if(maxWidth<1) {maxSize = 1;}
     
     if(count > maxCountForLinks) {
         maxCountForLinks = count;
     }
     
-    var val = (count==0)?0:executeFormula(count, maxCountForLinks, maxWidth);
+    let val = (count==0)?0:executeFormula(count, maxCountForLinks, maxWidth);
     if(val<1) val = 1;
     return val;
 }            
@@ -330,11 +344,11 @@ function getMarkerWidth(count) {
 /** Calculates the entity raadius that should be used */
 function getEntityRadius(count) {
     
-    var maxRadius = getSetting(setting_entityradius);
+    let maxRadius = getSetting('setting_entityradius');
     if(maxRadius>maxEntityRadius) {maxRadius = maxEntityRadius;}
     else if(maxRadius<1) {maxRadius = 1;}
     
-    if(getSetting(setting_formula)=='unweighted'){
+    if(getSetting('setting_formula')=='unweighted'){
         return maxRadius;
     }else{
         if(count==0){
@@ -345,7 +359,7 @@ function getEntityRadius(count) {
                 maxCountForNodes = count;
             }
             
-            var val = circleSize + executeFormula(count, maxCountForNodes, maxRadius);
+            let val = circleSize + executeFormula(count, maxCountForNodes, maxRadius);
             if(val<circleSize) val = circleSize;
             return val;
         }
@@ -354,62 +368,7 @@ function getEntityRadius(count) {
 
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
 /** Visualizes the data */ 
-var data; // Currently visualised dataset
-var zoomBehaviour;
-var force;
 
-
-function getDataFromServer(){
-
-    var url = window.hWin.HAPI4.baseURL+"hserv/controller/rectype_relations.php" + window.location.search;
-    d3.json(url, function(error, json_data) {
-        // Error check
-        if(error) {
-            window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
-        }
-        
-        settings.data = json_data; //all data
-        filterData(json_data);
-        
-    });
-    
-}
-
-function filterData(json_data) {
-    
-        if(!json_data) json_data = settings.data; 
-        var names = [];
-        $(".show-record").each(function() {
-            var name = $(this).attr("name");
-            if(!$(this).is(':checked')){ //to exclude
-                names.push(name);
-            }
-        });    
-        
-        // Filter nodes
-        var map = {};
-        var size = 0;
-        var nodes = json_data.nodes.filter(function(d, i) {
-            if($.inArray(d.name, names) == -1) {
-                map[i] = d;
-                return true;
-            }
-            return false;
-        });      
-        
-        // Filter links
-        var links = [];
-        json_data.links.filter(function(d) {
-            if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
-                var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
-                links.push(link);
-            }
-        });
-
-        var data_visible = {nodes: nodes, links: links};
-        settings.getData = function(all_data) { return data_visible; }; 
-        visualizeData();
-}
 
 function visualizeData() {
     
@@ -424,15 +383,15 @@ function visualizeData() {
     determineMaxCount(data);
 
     // Container with zoom and force
-    var container = addContainer();
+    let container = addContainer();
     svg.call(zoomBehaviour); 
-    force = addForce();
+    window.force = addForce();
 
     // Markers
     addMarkerDefinitions(); // all marker/arrow types on lines
 
     // Lines 
-    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 1); // larger than top-line, shows connections
+    addLines("bottom-lines", getSetting('setting_linecolor', '#000'), 1); // larger than top-line, shows connections
     addLines("top-lines", "#FFF", 1); // small line that is for displaying direction arrows
     addLines("rollover-lines", "#FFF", 3); // invisible thicker line for rollover
    
@@ -442,9 +401,9 @@ function visualizeData() {
     
     if(settings.isDatabaseStructure){
         
-        var cnt_vis = data.nodes?data.nodes.length:0;
-        var cnt_tot = (settings.data && settings.data.nodes)?settings.data.nodes.length:0;
-        
+        let cnt_vis = data.nodes?data.nodes.length:0;
+        let cnt_tot = (settings.data && settings.data.nodes)?settings.data.nodes.length:0;
+        let sText;
         if(cnt_vis==0){
             sText = 'Select record types to show';
         }else{
@@ -468,7 +427,6 @@ function visualizeData() {
     }
 
     tick()// update display
-    //setTimeout(function(){tick();},10000); 
     
 } //end visualizeData
 
@@ -480,11 +438,11 @@ function visualizeData() {
 function addContainer() {
 
     // Zoom settings, these affect adding/removing nodes as well
-    var scale = getSetting(setting_scale, 1);
-    var translateX = getSetting(setting_translatex, 200);
-    var translateY = getSetting(setting_translatey, 200);
+    let scale = getSetting('setting_scale', 1);
+    let translateX = getSetting('setting_translatex', 200);
+    let translateY = getSetting('setting_translatey', 200);
     
-    var s ='';
+    let s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
         Math.abs(translateX)==Infinity || Math.abs(translateY)==Infinity){
         
@@ -498,11 +456,11 @@ function addContainer() {
 
     //s = "translate(1,1)scale(1)";    
     // Append zoomable container
-    var container = svg.append("g")
+    let container = svg.append("g")
                        .attr("id", "container")
                        .attr("transform", s);
 
-    var scaleExtentVals = [0.9, 2]; ////[0.75, 7.5]
+    let scaleExtentVals = [0.9, 2]; ////[0.75, 7.5]
 
     if(!settings.isDatabaseStructure){
         //scaleExtentVals = [0.5, 3];
@@ -512,7 +470,7 @@ function addContainer() {
     }
 
     // Zoom behaviour                   
-    this.zoomBehaviour = d3.behavior.zoom()
+    this.zoomBehaviour = window.d3.behavior.zoom()
                            .translate([translateX, translateY])
                            .scale(scale)
                            .scaleExtent(scaleExtentVals)
@@ -542,34 +500,34 @@ function zoomed() {
     updateLabels();
 
     //keep current setting Translate   
-    var translateXY = [];
-    var notDefined = false;
-    var transform = "translate(0,0)";
-    if(d3.event.translate !== undefined) {
-        if(isNaN(d3.event.translate[0]) || !isFinite(d3.event.translate[0])) {           
-            d3.event.translate[0] = 0;
+    let translateXY = [];
+    let notDefined = false;
+    let transform = "translate(0,0)";
+    if(window.d3.event.translate !== undefined) {
+        if(isNaN(window.d3.event.translate[0]) || !isFinite(window.d3.event.translate[0])) {           
+            window.d3.event.translate[0] = 0;
             notDefined = true;
         }else{
-            putSetting(setting_translatex, d3.event.translate[0]); 
+            putSetting('setting_translatex', window.d3.event.translate[0]); 
         }
 
-        if(isNaN(d3.event.translate[1]) || !isFinite(d3.event.translate[1])) {           
-            d3.event.translate[1] = 0;
+        if(isNaN(window.d3.event.translate[1]) || !isFinite(window.d3.event.translate[1])) {           
+            window.d3.event.translate[1] = 0;
             notDefined = true;
         }else{
-            putSetting(setting_translatey, d3.event.translate[1]);
+            putSetting('setting_translatey', window.d3.event.translate[1]);
         }
 
-        transform = "translate("+d3.event.translate+')';
+        transform = "translate("+window.d3.event.translate+')';
     }else{
         notDefined = true;
     }
     
-    var scale = d3.event.scale; //Math.pow(d3.event.scale,0.75);
+    let scale = window.d3.event.scale; //Math.pow(window.d3.event.scale,0.75);
     
     //keep current setting Scale
-    if(!isNaN(d3.event.scale) && isFinite(d3.event.scale)&& scale!=0){
-        putSetting(setting_scale, scale);
+    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale)&& scale!=0){
+        putSetting('setting_scale', scale);
         transform = transform + "scale("+scale+")";
     }
 
@@ -577,12 +535,10 @@ function zoomed() {
 }  
 
 function onZoom( transform ){
-    d3.select("#container").attr("transform", transform);
+    window.d3.select("#container").attr("transform", transform);
     
-    var scale = this.zoomBehaviour.scale();
+    let scale = this.zoomBehaviour.scale();
     if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
-
-    updateOverlays();
 }
 
 //
@@ -590,31 +546,31 @@ function onZoom( transform ){
 //
 function zoomToFit(){
 
-    var fullWidth = $("#divSvg").width();
-    var fullHeight = $("#divSvg").height();
+    let fullWidth = $("#divSvg").width();
+    let fullHeight = $("#divSvg").height();
     
-    const box = d3.select("#container").node().getBBox();
+    const box = window.d3.select("#container").node().getBBox();
     
-    var width  = box.width,
+    let width  = box.width,
         height = box.height;
         
-    var midX = box.x + width / 2,
+    let midX = box.x + width / 2,
         midY = box.y + height / 2;
 
-    var scale = getFitToExtentScale();
+    let scale = getFitToExtentScale();
     if (scale == null && isNaN(Number(scale)) ) return; // nothing to fit
 
-    var translate = [
+    let translate = [
         fullWidth  / 2 - scale * midX,
         fullHeight / 2 - scale * midY
     ];
 
-    var zoom = this.zoomBehaviour; 
+    let zoom = this.zoomBehaviour; 
 
     //reset
     zoom.scale(scale)
         .translate(translate);    
-    var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
+    let transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
     onZoom(transform);
 }
 
@@ -623,12 +579,12 @@ function zoomToFit(){
 //
 function getFitToExtentScale(){
 
-    var fullWidth = $("#divSvg").width();
-    var fullHeight = $("#divSvg").height();
+    let fullWidth = $("#divSvg").width();
+    let fullHeight = $("#divSvg").height();
 
-    const box = d3.select("#container").node().getBBox();
+    const box = window.d3.select("#container").node().getBBox();
 
-    var width  = box.width,
+    let width  = box.width,
         height = box.height;
 
     if (width == 0 || height == 0) return null; // nothing to fit
@@ -637,9 +593,9 @@ function getFitToExtentScale(){
 
 //handle the zoom buttons
 function zoomBtn(zoom_in){
-    var zoom = this.zoomBehaviour; 
+    let zoom = this.zoomBehaviour; 
     
-    var scale = zoom.scale(),
+    let scale = zoom.scale(),
         extent = zoom.scaleExtent(),
         translate = zoom.translate(),
         x = translate[0], y = translate[1],
@@ -652,22 +608,22 @@ function zoomBtn(zoom_in){
     // If we're already at an extent, done
     if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
     // If the factor is too much, scale it down to reach the extent exactly
-    var clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
+    let clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
     if (clamped_target_scale != target_scale){
         target_scale = clamped_target_scale;
         factor = target_scale / scale;
     }
 
-    var width = $("#divSvg").width();
-    var height = $("#divSvg").height();
-    var center = [width / 2, height / 2];
+    let width = $("#divSvg").width();
+    let height = $("#divSvg").height();
+    let center = [width / 2, height / 2];
     // Center each vector, stretch, then put back
     x = (x - center[0]) * factor + center[0];
     y = (y - center[1]) * factor + center[1];
 
     zoom.scale(target_scale)
         .translate([x,y]);    
-    var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
+    let transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
     onZoom(transform);
 }
 
@@ -676,16 +632,16 @@ function zoomBtn(zoom_in){
 * Constructs a force layout
 */
 function addForce() {
-    var width = parseInt(svg.style("width"));
-    var height = parseInt(svg.style("height"));
-    var attraction = getSetting(setting_attraction);
+    let width = parseInt(svg.style("width"));
+    let height = parseInt(svg.style("height"));
+    let attraction = getSetting('setting_attraction');
     
-    var force = d3.layout.force()
-                  .nodes(d3.values(data.nodes))
+    let force = window.d3.layout.force()
+                  .nodes(window.d3.values(data.nodes))
                   .links(data.links)
                   .charge(attraction)        // Using the attraction setting
                   .linkDistance(function(d) {         
-                     var linkDist = settings.getLineLength.call(this, d.target);
+                     let linkDist = settings.getLineLength.call(this, d.target);
                      return linkDist;//linkDist;
                   })  // Using the linelength setting 
                   .on("tick", tick)
@@ -701,9 +657,9 @@ function addForce() {
 */
 function addMarkerDefinitions() {
 
-    var markercolor = getSetting(setting_markercolor, '#000');
+    let markercolor = getSetting('setting_markercolor', '#000');
 
-    var markers = d3.select('#container').append('defs'); // create container
+    let markers = window.d3.select('#container').append('defs'); // create container
 
     // *** Marker Mid ***
     markers.append('svg:marker') // Single arrow, pointing from field to rectype (for resources/pointers)
@@ -830,12 +786,12 @@ function addMarkerDefinitions() {
 */
 function addLines(name, color, thickness) {
     // Add the chosen lines [using the linetype setting]
-    var lines;
+    let lines;
     
-    var linetype = getSetting(setting_linetype, 'straight');
-    var hide_empty = (getSetting(setting_line_empty_link, 1)==0);
+    let linetype = getSetting('setting_linetype', 'straight');
+    let hide_empty = (getSetting('setting_line_empty_link', 1)==0);
     
-    lines = d3.select("#container")
+    lines = window.d3.select("#container")
            .append("svg:g")
            .attr("id", name)
            .selectAll("path")
@@ -843,7 +799,7 @@ function addLines(name, color, thickness) {
            .enter()
            .append("svg:path");
 
-    var scale = this.zoomBehaviour.scale(); //current scale
+    let scale = this.zoomBehaviour.scale(); //current scale
     
     // Adding shared attributes
     lines.attr("class", function(d) {
@@ -860,7 +816,7 @@ function addLines(name, color, thickness) {
          })
          .attr("stroke-linecap", "round")
          .style("stroke-width", function(d) { 
-             var w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+             let w = getLineWidth(d.targetcount)+thickness; //width for scale 1
              if(name == 'top-lines'){
                 w = w*0.2;
              }else if(name == 'rollover-lines'){
@@ -915,12 +871,12 @@ function addLines(name, color, thickness) {
 
         lines.on("mouseover", function(d) {
             if(!(hide_empty && d.targetcount == 0)){
-                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
+                let selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                createOverlay(window.d3.event.offsetX, window.d3.event.offsetY, "relation", selector, getRelationOverlayData(d));
             }
         })
         .on("mouseout", function(d) {
-            var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+            let selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
             removeOverlay(selector, 0);
         });
     }
@@ -934,15 +890,13 @@ function addLines(name, color, thickness) {
 function tick() {
     
     //grab each set of lines
-    var topLines = d3.selectAll(".top-lines"); 
-    var bottomLines = d3.selectAll(".bottom-lines");
-    var rolloverLines = d3.selectAll(".rollover-lines");
+    let topLines = window.d3.selectAll(".top-lines"); 
+    let bottomLines = window.d3.selectAll(".bottom-lines");
+    let rolloverLines = window.d3.selectAll(".rollover-lines");
 
-    // Junze: no removal for those exsiting object just update their attributes to improve performance
-    // remove additional visible lines
-    // $(".offset_line").remove();
+    //$(".offset_line").hide(); // hide additional lines
 
-    var linetype = getSetting(setting_linetype, 'straight');
+    let linetype = getSetting('setting_linetype', 'straight');
     if(linetype == "curved") {
         updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);
@@ -962,15 +916,12 @@ function tick() {
 
     // Update node locations
     updateNodes();
-    
-    // Update overlay
-    updateOverlays(); 
 
     // Update the furthest possible zoom
     if(!settings.isDatabaseStructure){
 
-        var cur_scaleExtend = zoomBehaviour.scaleExtent();
-        var lower_extent = getFitToExtentScale();
+        let cur_scaleExtend = zoomBehaviour.scaleExtent();
+        let lower_extent = getFitToExtentScale();
 
         if(lower_extent != null && !isNaN(Number(lower_extent))){
             zoomBehaviour.scaleExtent([lower_extent, cur_scaleExtend[1]]);
@@ -987,50 +938,47 @@ function tick() {
 */
 function updateCurvedLines(lines) {
     
-    var pairs = {};
+    let pairs = {};
     
     // Calculate the curved segments
     lines.attr("d", function(d) {
         
-       var key = d.source.id+'_'+d.target.id; 
-       if(!pairs[key]){
-           pairs[key] = 1.5;
-       }else{
-           pairs[key] = pairs[key]+0.25;
-       } 
-       var k = pairs[d.source.id+'_'+d.target.id];
-       
-       var target_x = d.target.x,
-           target_y = d.target.y;
-       if(d.target.id==d.source.id){
-           // Self Link, Affects Loop Size
-           target_x = d.source.x+70;
-           target_y = d.source.y-70;
-       }
+        let key = d.source.id+'_'+d.target.id; 
+        if(!pairs[key]){
+            pairs[key] = 1.5;
+        }else{
+            pairs[key] = pairs[key]+0.25;
+        } 
+        let k = pairs[d.source.id+'_'+d.target.id];
         
-        var dx = target_x - d.source.x,
+        let target_x = d.target.x,
+            target_y = d.target.y;
+
+        if(d.target.id==d.source.id){
+            // Self Link, Affects Loop Size
+            target_x = d.source.x+70;
+            target_y = d.source.y-70;
+        }
+
+        let dx = target_x - d.source.x,
             dy = target_y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
 
-       if(d.target.id==d.source.id){ // Self Linking Node
+        if(d.target.id==d.source.id){ // Self Linking Node
 
-            return [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              "A",dr,dr,0,0,1,target_x,target_y,
-              "A",dr,dr,0,0,1,d.source.x,d.source.y
-            ].join(" ");
-           
-       }else{ // Node to Node Link
+            return `M ${d.source.x} ${d.source.y} `
+                 + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                 + `A ${dr} ${dr} 0 0 1 ${target_x} ${target_y} `
+                 + `A ${dr} ${dr} 0 0 1 ${d.source.x} ${d.source.y}`;
             
-            return [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              "A",dr,dr,0,0,1,target_x,target_y
-            ].join(" ");
-       }
+        }else{ // Node to Node Link
+            
+            return `M ${d.source.x} ${d.source.y} `
+                 + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                 + `A ${dr} ${dr} 0 0 1 ${target_x} ${target_y}`;
+        }
     });
 
 }
@@ -1041,13 +989,13 @@ function updateCurvedLines(lines) {
 */
 function updateStraightLines(lines, type) {
     
-    var pairs = {};
-    var isExpanded = $('#expand-links').is(':Checked');
+    let pairs = {};
+    let isExpanded = $('#expand-links').is(':Checked');
     
     $(".icon_self").each(function() {
         $(this).remove();
     });
-    let container = d3.select('#container');
+    let container = window.d3.select('#container');
     
     // Calculate the straight points
     lines.attr("d", function(d) {
@@ -1063,7 +1011,7 @@ function updateStraightLines(lines, type) {
             }
         }
         
-        var key = d.source.id+'_'+d.target.id,
+        let key = d.source.id+'_'+d.target.id,
             indent = 20;
 
         if(pairs[d.target.id+'_'+d.source.id]){
@@ -1083,29 +1031,29 @@ function updateStraightLines(lines, type) {
             pairs[key] = 1;
         }
 
-        var R = pairs[key];
-        var pnt = [];
+        let R = pairs[key];
+        let pnt = '';
 
-        var s_x = d.source.x,
+        let s_x = d.source.x,
             s_y = d.source.y,
             t_x = d.target.x,
             t_y = d.target.y;
 
-        var ismultivalue = settings.isDatabaseStructure && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != 1 && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != null;
+        let ismultivalue = settings.isDatabaseStructure && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != 1 && $Db.rst(d.source.id, d.relation.id, 'rst_MaxValues') != null;
 
         if(d.target.id==d.source.id){ // Self Linking Node
         
-            var target_x, target_y, dx, dy, dr, mx, my;
+            let target_x, target_y, dx, dy, dr, mx, my;
 
             if(currentMode == 'infoboxes_full'){
 
-                var $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]'),
+                let $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]'),
                     $source_rect = $($('.id'+d.source.id).find('rect[rtyid="'+ d.source.id +'"]')[0]);
 
                 if($detail.length == 1){
 
                     // Get detail's y location within the source object
-                    var detail_y = $detail[0].getBBox().y;
+                    const detail_y = $detail[0].getBBox().y;
                     s_y += detail_y - iconSize * 0.6;
                 }
 
@@ -1113,7 +1061,7 @@ function updateStraightLines(lines, type) {
                 s_x -= (iconSize / 1.5);
 
                 // Prepare extra lines
-                var s_x2 = s_x;
+                const s_x2 = s_x;
                 s_x -= 12;
 
                 if(type == 'bottom-lines'){
@@ -1132,7 +1080,7 @@ function updateStraightLines(lines, type) {
                         .attr("marker-start", "url(#self-link)");
                     }
 
-                    selectedLine
+                    selectedLine.style('display', 'inline')
                             .attr("x1", s_x)
                             .attr("y1", s_y)
                             .attr("x2", s_x2)
@@ -1150,46 +1098,44 @@ function updateStraightLines(lines, type) {
                 mx = s_x + dx;
                 my = s_y + dy;
 
-                pnt = [
-                    "M",s_x,s_y,
-                    "A",dr,dr,0,0,1,mx,my,
-                    "L",s_x+35,s_y-35,
-                    "L",s_x,s_y
-                ];
+                return `M ${s_x} ${s_y} `
+                     + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                     + `L ${s_x + 35} ${s_y - 35} `
+                     + `L ${s_x} ${s_y}`;
             }
         }else{ // Node to Node Link
 
-            var dx, dy, tg, dx2, dy2, mdx, mdy, s_x2, t_x2, t_y2;
-            var elevation_diff = false;
-            var threshold = 60;
+            let dx, dy, tg, dx2, dy2, mdx, mdy, s_x2, t_x2, t_y2;
+            let elevation_diff = false;
+            let threshold = 60;
 
             if(currentMode == 'infoboxes_full'){
 
                 // Relevant svg Elements/Items
-                var $source_rect = $($('.id'+d.source.id).find('rect[rtyid="'+ d.source.id +'"]')[0]),
+                let $source_rect = $($('.id'+d.source.id).find('rect[rtyid="'+ d.source.id +'"]')[0]),
                     $target_rect = $($('.id'+d.target.id).find('rect[rtyid="'+ d.target.id +'"]')[0]),
                     $detail = $('.id'+d.source.id).find('[dtyid="'+ d.relation.id +'"]');
 
                 // Get the width for source and target rectangles
-                var source_width = Number($source_rect.attr('width')),
+                let source_width = Number($source_rect.attr('width')),
                     target_width = Number($target_rect.attr('width'));
 
                 if($detail.length > 0){ // Check that the location of the detail can be found
 
                     // Get detail's y location within the source object
-                    var detail_y = $detail[0].getBBox().y;
+                    const detail_y = $detail[0].getBBox().y;
                     s_y += detail_y - iconSize * 0.6;
                 }
 
                 // Get target's bottom y location
-                var b_target_y = t_y + Number($target_rect.attr('height')) - iconSize + 2;
+                let b_target_y = t_y + Number($target_rect.attr('height')) - iconSize + 2;
 
                 // Left Side: x Point for starting and ending nodes
                 s_x -= iconSize;
                 t_x -= iconSize;
                 // Right Side: x Point for starting and ending nodes
-                var r_source_x = s_x + source_width + iconSize / 4;
-                var r_target_x = t_x + target_width + iconSize / 4;
+                let r_source_x = s_x + source_width + iconSize / 4;
+                let r_target_x = t_x + target_width + iconSize / 4;
 
                 if(r_source_x + threshold < t_x){ // Right to Left Connection, Change source x location
                     
@@ -1223,8 +1169,8 @@ function updateStraightLines(lines, type) {
                     }
 
                     // Differences between points (x coord)
-                    var left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
-                    var right_diff = (t_x - r_source_x > r_source_x - t_x) ? t_x - r_source_x : r_source_x - t_x;
+                    let left_diff = (t_x - s_x > s_x - t_x) ? t_x - s_x : s_x - t_x;
+                    let right_diff = (t_x - r_source_x > r_source_x - t_x) ? t_x - r_source_x : r_source_x - t_x;
 
                     if(right_diff < left_diff){ // right 2 right
 
@@ -1257,14 +1203,14 @@ function updateStraightLines(lines, type) {
                         .attr("marker-end", "url(#blob)");
                     }
 
-                    selectedLine
+                    selectedLine.style('display', 'inline')
                             .attr("x1", s_x)
                             .attr("y1", s_y)
                             .attr("x2", s_x2)
                             .attr("y2", s_y);
                     
-                    var linecolour = (!ismultivalue) ? 'darkgray' : 'dimgray';
-                    var linewidth = (!ismultivalue) ? '3px' : '2px';
+                    let linecolour = (!ismultivalue) ? 'darkgray' : 'dimgray';
+                    let linewidth = (!ismultivalue) ? '3px' : '2px';
                     // Junze: Node2NodeInfoBoxesFullBottomLineTarget
                     id = `n2nibfbltgt_${d.target.id}_${d.relation.id}_${d.source.id}`;
                     selectedLine = container.select(`#${id}`);
@@ -1279,10 +1225,10 @@ function updateStraightLines(lines, type) {
                             .attr("id", id)
                             .attr("stroke", linecolour)
                             .attr("stroke-linecap", "round")
-                            .style("stroke-width", linewidth)
+                            .style("stroke-width", linewidth);
                         }
                         // Junze: update the coordinates
-                        selectedLine
+                        selectedLine.style('display', 'inline')
                                 .attr("x1", t_x)
                                 .attr("y1", t_y)
                                 .attr("x2", t_x2)
@@ -1303,13 +1249,13 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("class", "offset_line")
                                 .attr("stroke-linecap", "round")
-                                .attr("fill", "none")
+                                .attr("fill", "none");
                             }
-                            selectedLine
+
+                            selectedLine.style('display', 'inline')
                                 .attr("stroke-width", linewidth)
                                 .attr("stroke", linecolour)
                                 .style("display", null)
-                                //   .attr("d", "M " + t_x2 + " " + (t_y+5) + " L " + t_x + " " + t_y + " L " + t_x2 + " " + (t_y-5))
                                 .attr("d", `M ${t_x2} ${t_y + 5} L ${t_x} ${t_y} L ${t_x2} ${t_y - 5}`);
                         }
                     }else{
@@ -1322,10 +1268,10 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("stroke", linecolour)
                                 .attr("stroke-linecap", "round")
-                                .style("stroke-width", linewidth)
+                                .style("stroke-width", linewidth);
                             }
                             // add extra ending line
-                            selectedLine
+                            selectedLine.style('display', 'inline')
                                     .attr("x1", t_x)
                                     .attr("y1", t_y)
                                     .attr("x2", t_x)
@@ -1342,16 +1288,13 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("class", "offset_line")
                                 .attr("stroke-linecap", "round")
-                                .attr("fill", "none")
+                                .attr("fill", "none");
                             }
-                            selectedLine
-                                .style("display", null)
+
+                            selectedLine.style("display", 'inline')
                                 .attr("stroke", linecolour)
                                 .attr("stroke-width", linewidth)
                                 .attr("fill", "none")
-
-                                //   .attr("d", "M " + (t_x+5) + " " + t_y2 + " L " + t_x + " " + t_y + " L " + (t_x-5) + " " + t_y2);
-                                // Junze: use format to improve performance and reduce GC pressure
                                 .attr("d", `M ${t_x + 5} ${t_y2} L ${t_x} ${t_y} L ${t_x - 5} ${t_y2}`);
                         }else{
 
@@ -1374,11 +1317,6 @@ function updateStraightLines(lines, type) {
                 mdx = s_x + dx;
                 mdy = s_y + dy;
 
-                pnt = [
-                    "M", s_x, s_y,
-                    "L", mdx, mdy,
-                    "L", t_x, t_y 
-                ];
             }else{
 
                 dx = (t_x-s_x)/2;
@@ -1391,121 +1329,107 @@ function updateStraightLines(lines, type) {
 
                 mdx = s_x + dx2;
                 mdy = s_y + dy2;
-                
-                pnt = [
-                    "M", s_x, s_y,
-                    "L", mdx, mdy,
-                    "L", t_x, t_y 
-                ];
 
             }
 
+            pnt = `M ${s_x} ${s_y} `
+                + `L ${mdx} ${mdy} `
+                + `L ${t_x} ${t_y}`;
+
         }
        
-        return pnt.join(' '); 
+        return pnt; 
     });
     
 }
 
 function updateSteppedLines(lines, type){
-    var pairs = {};
-    
-    
+
+    let pairs = {};
+
     $(".hidden_line_for_markers").remove();
-    
-    var mode = 0; //
-    
+
     // Calculate the straight points
     lines.attr("d", function(d) {
-        
-       var dx = (d.target.x-d.source.x)/2,
-           dy = (d.target.y-d.source.y)/2;
-       
-       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
-       
-       var key = d.source.id+'_'+d.target.id;
-       if(pairs[d.target.id+'_'+d.source.id]){
-           key = d.target.id+'_'+d.source.id;
-       }else if(!pairs[key]){
-           pairs[key] = 1-indent;
-       }
-       
-       pairs[key] = pairs[key]+indent;
-       var k = pairs[key];
-       
-       var target_x = d.target.x,
-           target_y = d.target.y;
-       var res = [];
 
-       var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr-mid)' : 'url(#marker-rel-mid)';
-           
+        let dx = (d.target.x-d.source.x)/2,
+            dy = (d.target.y-d.source.y)/2;
+
+        let indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+
+        let key = d.source.id+'_'+d.target.id;
+        if(pairs[d.target.id+'_'+d.source.id]){
+            key = d.target.id+'_'+d.source.id;
+        }else if(!pairs[key]){
+            pairs[key] = 1-indent;
+        }
+
+        pairs[key] = pairs[key]+indent;
+        let k = pairs[key];
+
+        let target_x = d.target.x,
+            target_y = d.target.y;
+        let res = [];
+
+        let marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr-mid)' : 'url(#marker-rel-mid)';
+
        if(d.target.id==d.source.id){ // Self Linking Node
-           // Affects Loop Size
-           target_x = d.source.x+65;
-           target_y = d.source.y-65;
-           
-           var dx = target_x - d.source.x,
-               dy = target_y - d.source.y,
-               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
-               mx = d.source.x + dx,
-               my = d.source.y + dy;
-           
-            res = [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              //"A",dr,dr,0,0,1,target_x,target_y,
-              "L",d.source.x+35,d.source.y-35,
-              "L",d.source.x,d.source.y
-              //"A",dr,dr,0,0,1,d.source.x,d.source.y
-            ];
+            // Affects Loop Size
+            target_x = d.source.x+65;
+            target_y = d.source.y-65;
+
+            dx = target_x - d.source.x;
+            dy = target_y - d.source.y;
             
-            if($.isFunction($(this).attr)){
+            let dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+                mx = d.source.x + dx,
+                my = d.source.y + dy;
+
+            res = `M ${d.source.x} ${d.source.y} `
+                + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                + `L ${d.source.x + 35} ${d.source.y -35} `
+                + `L ${d.source.x} ${d.source.y}`;
+
+            if(window.hWin.HEURIST4.util.isFunction($(this).attr)){
                 $(this).attr("marker-mid", marker_type);
             }
-           
-       }else{  // Node to Node Link
-      
-           var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
-           var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
 
-           //path
-           res = [
-                  "M",d.source.x,d.source.y,
-                  "L",(d.source.x + dx2),(d.source.y + dy2 ),
-                  "L",(d.source.x + dx2 + dx + k),(d.source.y + dy2),
-                  "L",(d.source.x + dx2 + dx + k),target_y,
-                  "L",target_x,target_y
-                ];
-           
-           
-           if(type=='bottom'){
+       }else{  // Node to Node Link
+
+            let dx2 = 45*(dx==0?0:((dx<0)?-1:1));
+            let dy2 = 45*(dy==0?0:((dy<0)?-1:1));
+
+            //path
+            res = `M ${d.source.x} ${d.source.y} `
+                + `L ${d.source.x + dx2} ${d.source.x + dy2} `
+                + `L ${d.source.x + dx2 + dx + k} ${d.source.y + dy2} `
+                + `L ${d.source.x + dx2 + dx + k} ${target_y} `
+                + `L ${target_x} ${target_y}`;
+
+            if(type=='bottom'){
                 //add 3 lines - specially for markers
-                var g = d3.select("#container").append("svg:g").attr("class", "hidden_line_for_markers");
+                let g = window.d3.select("#container").append("svg:g").attr("class", "hidden_line_for_markers");
                 
-                var pnt = [
-                  "M",(d.source.x + dx2),(d.source.y + dy2 ),
-                  "L",(d.source.x + dx2 + dx/2 + k),(d.source.y + dy2)];
-                
+                let pnt = `M ${d.source.x + dx2} ${d.source.y + dy2} `
+                        + `L M ${d.source.x + dx2 + dx / 2 + k} ${d.source.y + dy2}`;
+
                 g.append("svg:path")
-                        .attr("d", pnt.join(' '))
+                        .attr("d", pnt)
                         //reference to marker id
                         .attr("marker-end", marker_type);
 
-                pnt = [
-                  "M",(d.source.x + dx2 + dx + k), (d.source.y + dy2),
-                  "L",(d.source.x + dx2 + dx + k), d.source.y + dy2 + (target_y - d.source.y - dy2)/2 ];
-                        
+                pnt = `M ${d.source.x + dx2 + dx + k} ${d.source.y + dy2} `
+                    + `L ${d.source.x + dx2 + dx + k} ${d.source.y + dy2 + (target_y - d.source.y - dy2) / 2}`;
                 g.append("svg:path")
                         //.attr("class", "hidden_line_for_markers")
                         .attr("d", pnt.join(' '))
                         //reference to marker id
                         .attr("marker-end", marker_type);
-
-           }
-           dx = dx + k;
-       }
-       
-       return res.join(' ');      
+            }
+            dx = dx + k;
+        }
+        
+        return res;      
     });
     
 }
@@ -1515,7 +1439,7 @@ function updateSteppedLines(lines, type){
 * Adds <title> elements to all nodes 
 */
 function addTitles() {
-    var titles = d3.selectAll(".node")
+    let titles = window.d3.selectAll(".node")
                    .append("title")
                    .text(function(d) {
                         return d.name;
@@ -1528,8 +1452,8 @@ function addTitles() {
 * These circles can be styled in the settings bar
 */
 function addBackgroundCircles() {
-    var entitycolor = getSetting(setting_entitycolor);
-    var circles = d3.selectAll(".node")
+    let entitycolor = getSetting('setting_entitycolor');
+    let circles = window.d3.selectAll(".node")
                     .append("circle")
                     .attr("r", function(d) {
                         return getEntityRadius(d.count);
@@ -1544,8 +1468,9 @@ function addBackgroundCircles() {
 * These circles are white
 */
 function addForegroundCircles() {
-    //var circleSize = getSetting(setting_circlesize);
-    var circles = d3.selectAll(".node")
+    let entitycolor = getSetting('setting_entitycolor');
+
+    let circles = window.d3.selectAll(".node")
                     .append("circle")
                     .attr("r", circleSize)
                     .attr("fill", entitycolor)
@@ -1565,7 +1490,7 @@ function addForegroundCircles() {
 * The image is based on the "image" attribute
 */
 function addIcons() {
-    var icons = d3.selectAll(".node")
+    let icons = window.d3.selectAll(".node")
                   .append("svg:image")
                   .attr("class", "icon")
                   .attr("xlink:href", function(d) {
@@ -1585,8 +1510,8 @@ function addIcons() {
 * Task is performed when the nodes are added
 */
 function addLabels(name, color) {
-    var maxLength = getSetting(setting_textlength);
-    var labels = d3.selectAll(".node")
+    let maxLength = getSetting('setting_textlength');
+    let labels = window.d3.selectAll(".node")
                   .append("text")
                   .attr("x", iconSize)
                   .attr("y", iconSize/4)
@@ -1604,14 +1529,14 @@ function addLabels(name, color) {
 //
 function showEmbedDialog(){
 
-    var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    let query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    var url = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
+    let url = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
 
     //encode
     query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    var url_enc = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
+    let url_enc = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
 
     window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
 
@@ -1622,34 +1547,27 @@ function inIframe() {
     let fullscreenbtn = document.getElementById("windowPopOut");
     let closewindowbtn = document.getElementById("closegraphbutton");
     let refreshData = document.getElementById("resetbutton");
-    //let refreshbuttonfullscreen = document.getElementById("resetbuttonfullscreen");
 
     let gravitymodeZero = document.getElementById("gravityMode0");
     let gravitymodeOne = document.getElementById("gravityMode1");
-    //let gravitymodeTwo = document.getElementById("gravityMode2");
-    //let gravitymodeThree = document.getElementById("gravityMode3");
 
     if (window.location !== window.parent.location) {
         //Page is in iFrame
         fullscreenbtn.style.visibility = 'visible';
         closewindowbtn.style.display = 'none';
         refreshData.style.visibility = 'visible';
-        //refreshbuttonfullscreen.style.display = 'none';
+
         gravitymodeZero.style.visibility = 'visible';
         gravitymodeOne.style.visibility = 'visible';
-        //gravitymodeTwo.style.display = 'none';
-        //gravitymodeThree.style.display = 'none';
 
     } else {
         //Page is not in iFrame
         fullscreenbtn.style.display = 'none';
         closewindowbtn.style.visibility = 'visible';
         refreshData.style.display = 'visible';
-        //refreshbuttonfullscreen.style.visibility = 'visible';
+
         gravitymodeZero.style.display = 'visible';
         gravitymodeOne.style.display = 'visible';
-        //gravitymodeTwo.style.visibility = 'visible';
-        //gravitymodeThree.style.visibility = 'visible';
 
     }
 
@@ -1666,44 +1584,51 @@ function refreshButton() {
     }
 }
 
-//refresh graph while in fullscreen mode - Travis Doyle 28/9
-function refreshButtonFullscreen() {
-    return;
-    //var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    //location.href = url2;
-}
-//Gravity Fullscreen Button Fix - Travis Doyle 6/10
-function refreshGravityOn() {
-    return;
-    /*var gravitystat = getSetting(setting_gravity);
-
-    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    location.href = url2;
-
-    if (gravitystat == 'off') {
-        setGravity('touch');
-    }*/
-}
-function refreshGravityOff() {
-    return;
-    /*var gravitystat = getSetting(setting_gravity);
-
-    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    location.href = url2;
-
-    if (gravitystat == 'touch') {
-        setGravity('off');
-    }*/
-}
 //open graph in fullscreen - Travis Doyle 28/9
 function openWin() {
-    var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+    let hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
     hrefnew = hrefnew + ((hrefnew == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
-    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + hrefnew;
+    let url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + hrefnew;
     window.open(url2);
 }
 //close fullscreen graph - Travis Doyle 28/9
 function closeWin() {
     window.close();
     return;
+}
+
+function filterData(json_data) {
+    
+    if(!json_data) json_data = settings.data; 
+    let names = [];
+    $(".show-record").each(function() {
+        const name = $(this).attr("name");
+        if(!$(this).is(':checked')){ //to exclude
+            names.push(name);
+        }
+    });    
+    
+    // Filter nodes
+    let map = {};
+    let size = 0;
+    let nodes = json_data.nodes.filter(function(d, i) {
+        if($.inArray(d.name, names) == -1) {
+            map[i] = d;
+            return true;
+        }
+        return false;
+    });      
+    
+    // Filter links
+    let links = [];
+    json_data.links.filter(function(d) {
+        if(Object.hasOwn(map, d.source) && Object.hasOwn(map, d.target)) {
+            let link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
+            links.push(link);
+        }
+    });
+
+    let data_visible = {nodes: nodes, links: links};
+    settings.getData = function(all_data) { return data_visible; }; 
+    visualizeData();
 }

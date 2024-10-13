@@ -29,9 +29,9 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.edit_mode = 'popup';
+       
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
         this.options.height = 640;
@@ -41,7 +41,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            //this.options.height = 640;
+           
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -62,7 +62,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             show_toolbar: false,  
             show_viewmode: false,  
             rendererHeader: function(){
-                var s = '<div style="width:40px"></div>'
+                let s = '<div style="width:40px"></div>'
             +'<div style="width:12em;border:none;">Name</div>'
             +'<div style="width:12em;border-right:none;border-left:1px solid gray;">Notes</div>'
             +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Group</div>'
@@ -84,11 +84,13 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             this._initEditorOnly();
             return;
         }
+
+        let that = this;
         
         //update dialog title
         if(this.options.isdialog){ // &&  !this.options.title
-            var title = null;
-            var usr_ID = 0;
+            let title = null;
+            let usr_ID = 0;
             
             
             if(this.options.title){
@@ -112,13 +114,12 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
                 if(window.hWin.HAPI4.is_admin()){
                     title = 'Manage All Filters as Database Administrator';    
                 }else{                    
-                    //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                   
                     title = 'Manage Saved Filters';    
                 }
             }
             
             if(usr_ID>0 && title){
-                var that = this;
                 function __set_dlg_title(res){
                     if(res && res.status==window.hWin.ResponseStatus.OK){
                         that._as_dialog.dialog('option','title', title+res.data[usr_ID]);    
@@ -133,7 +134,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchUsrSavedSearches(this.options);
         
-        var iheight = 7;
+        let iheight = 7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
@@ -145,7 +146,6 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
         this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
-        var that = this;
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -170,7 +170,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
@@ -183,12 +183,12 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         //rem_ToUserName        
         
         
-        var recID   = fld('svs_ID');
+        let recID   = fld('svs_ID');
         
-        var qsearch = recordset.fld(record, 'svs_Query');
-        var params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+        let qsearch = recordset.fld(record, 'svs_Query');
+        let params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
         
-        var iconBtn = 'ui-icon-search';
+        let iconBtn = 'ui-icon-search';
         if(params.type==3){
             iconBtn = 'ui-icon-box';
         }else {
@@ -201,14 +201,14 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             }
         }
         
-        var group_id = recordset.fld(record, 'svs_UGrpID');
-        //var group_name = window.hWin.HAPI4.usr_names({UGrpID:group_id});
-        var group_name = (group_id==window.hWin.HAPI4.user_id())
+        let group_id = recordset.fld(record, 'svs_UGrpID');
+
+        let group_name = (group_id==window.hWin.HAPI4.user_id())
                             ?window.hWin.HAPI4.currentUser['ugr_FullName']
                             :window.hWin.HAPI4.sysinfo.db_usergroups[group_id];
         
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + '<div class="recordSelector"><input type="checkbox" /></div>'
                 + '<div class="recordIcons"><span class="ui-icon '+iconBtn+'"/></div>'
                 + fld2('svs_Name','39ex')
@@ -239,7 +239,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
-        var request = {
+        let request = {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
@@ -247,7 +247,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
                 'db'         : this.options.database  
                 
         };
-        var svs_UGrpID = this.searchForm.find('#input_search_group').val();
+        let svs_UGrpID = this.searchForm.find('#input_search_group').val();
         if(svs_UGrpID>0){
             request['svs_UGrpID'] = svs_UGrpID;
         }
@@ -284,7 +284,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(!window.hWin.HAPI4.is_admin()){
             var input_ele = this._editing.getFieldByName('ugr_Enabled');
             input_ele.hide();
-            //input_ele.editing_input('f', 'rst_Display', 'hidden');
+           
         }
         */
     },    
@@ -296,12 +296,14 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
-                this._selection = new hRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection = new HRecordSet();
+               
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;        
-        }if (this._currentEditID<0) {
+        }
+        
+        if (this._currentEditID<0) {
             fieldvalues['ugl_Role'] = 'member';    
         }
         
@@ -320,7 +322,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this filter?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        

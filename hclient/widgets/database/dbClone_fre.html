@@ -1,13 +1,18 @@
 <div id="div_header" class="ent_wrapper" style="margin-left:40px;width:540px;font-size:0.95em">
     <div class="heurist-helper1" style="margin-top:50px">       
-        This function simply copies the current database <b><span class="dbname"></span></b> to a new one with no changes.
-        The new database is identical to the old in all respects including users, access and attachments
-        (beware of making many copies of databases containing many large files, as all uploaded files are copied).
-        The target database is unregistered with the Heurist central index even if the source database is registered.    
+Cette fonction copie simplement la base de données actuelle <b><span class="dbname"></span></b> vers une nouvelle sans aucune modification.
+La nouvelle base de données est identique à l'ancienne à tous égards, y compris les utilisateurs, l'accès et les pièces jointes
+(attention à ne pas faire de nombreuses copies de bases de données contenant de nombreux fichiers volumineux, car tous les fichiers téléchargés sont copiés).
+La ​​base de données cible n'est pas enregistrée auprès de l'index central Heurist même si la base de données source est enregistrée.
         
-        
+        <p class="large-db">
+Si la base de données est volumineuse (par exemple, de nombreux enregistrements ou de nombreux fichiers téléchargés), le clonage prendra beaucoup de temps et votre navigateur peut devenir impatient et afficher un délai d'attente. Le clonage devrait se terminer car il s'agit d'une opération côté serveur.
+        </p>
+        <p class="large-db">
+Veuillez lui laisser un peu de temps (15 minutes à une heure après l'expiration du délai) pour terminer l'opération, puis vérifiez la base de données clonée. Si elle affiche le même nombre d'enregistrements que l'original, l'opération a réussi        
+        </p>        
         <p>
-            <label>No data (copy structure definitions only):&nbsp;<input type="checkbox" id="nodata" value="1"></label>
+            <label>Aucune donnée (copier uniquement les définitions de structure):&nbsp;<input type="checkbox" id="nodata" value="1"></label>
         </p>
     </div>
     
@@ -15,62 +20,62 @@
     <div id="div_need_password" class="heurist-helper1" style="display:none">
 
         <p style="color:red">
-            Because this database contains new structural elements, you must register it before you can clone it.
+            Étant donné que cette base de données contient de nouveaux éléments structurels, vous devez l’enregistrer avant de pouvoir la cloner.
         </p>
         
         <p>     
-            This database contains new definitions: <span id="new_defs_warning"></span> which are local to the database.<br>
-            Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
-            This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
+            Cette base de données contient de nouvelles définitions : <span id="new_defs_warning"></span> qui sont locales à la base de données.<br>
+Avant de pouvoir être clonées, il faut leur attribuer un identifiant global unique appelé code conceptuel.<br>
+Pour cela, il faut enregistrer la base de données. Veuillez utiliser Conception > Configuration > Enregistrer avant le clonage.<br><br>                
         </p>         
         
-        <label class="ui-heurist-title" style="display:inline-block" for="pwd">Sysadmin bypass</label>
+        <label class="ui-heurist-title" style="display:inline-block" for="pwd">Contournement de l'administrateur système</label>
         <div style="margin-top: 0px;display:inline-block;">
             <input type="password" maxlength="64" size="25" id="pwd" name="pwd">
         </div>
         <div class="heurist-helper2">
-            The password set by your system administrator to allow clone not registered database with new defintions
+            Le mot de passe défini par votre administrateur système pour autoriser le clonage de la base de données non enregistrée avec de nouvelles définitions
         </div>
     </div>
     
 
     <div class="entry-box">
-        <h3>Enter a name for the cloned database:</h3>
+        <h3>Entrez un nom pour la base de données clonée :</h3>
         
         <div>
             hdb_<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
                     maxlength="64" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
 
-            <button class="ui-button-action" id="btnCreateDb">Clone <span class="dbname"></span></button>
+            <button class="ui-button-action" id="btnCreateDb">Cloner <span class="dbname"></span></button>
         </div>
         
     </div>
     
     <div class="heurist-helper1">                
-        Do not use punctuation except underscore. Names are case sensitive.
+        N'utilisez pas de ponctuation, à l'exception du trait de soulignement. Les noms sont sensibles à la casse.
     </div>
 </div>
 
 <div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
         <div class="loading" style="display:none;height:100%">
             <ol type="1" style="margin-top:40px">
-                <li>Database name and template validation</li>
-                <li>Database folders creation and copy</li>
-                <li>Database creation</li>
-                <li>Copying data</li>
-                <li>Addition of Referential Constraints And Triggers</li>
-                <li>Update paths for uploaded files</li>
+<li>Validation du nom et du modèle de la base de données</li>
+<li>Création et copie des dossiers de la base de données</li>
+<li>Création de la base de données</li>
+<li>Copie des données</li>
+<li>Ajout de contraintes référentielles et de déclencheurs</li>
+<li>Mise à jour des chemins pour les fichiers téléchargés</li>
             </ol>
         </div>
 </div>
 
 <div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
-    <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">New database  [ <span id="newdbname"></span>  ]  has been created</h4>
+    <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">Une nouvelle base de données [ <span id="newdbname"></span> ] a été créée</h4>
     
     <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
-    <div style="padding-top:20px">Please access your new database with the following link:</div>
+    <div style="padding-top:20px">Veuillez accéder à votre nouvelle base de données avec le lien suivant :</div>
     <div style="padding-top:20px"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
         title="" target="blank"></a></b></div>
-    <div>Admin username and password are same as the account you are currently logged in as</div>
+    <div>Le nom d'utilisateur et le mot de passe de l'administrateur sont les mêmes que ceux du compte auquel vous êtes actuellement connecté</div>
 
 </div>

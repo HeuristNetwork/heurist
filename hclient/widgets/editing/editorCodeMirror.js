@@ -16,6 +16,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global CodeMirror */
       
 class EditorCodeMirror {
   
@@ -46,14 +48,14 @@ class EditorCodeMirror {
   //
   #getCodeMirror()
   {  
-        var path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
-        var scripts = [ //'lib/codemirror.css', included in index.php
+        let path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
+        let scripts = [ //'lib/codemirror.css', included in index.php
                         'lib/codemirror.js',
                         'lib/util/formatting.js',
                         'mode/xml/xml.js',
                         'mode/htmlmixed/htmlmixed.js'
                         ];
-        var  that = this;
+        let  that = this;
         $.getMultiScripts2(scripts, path)
         .then(function() {  //OK! widget script js has been loaded
             that.showEditor();
@@ -83,13 +85,13 @@ class EditorCodeMirror {
             return;
       }
 
-      var that = this;
+      let that = this;
       
       if(this.editorContainer==null){
           let iwidth = $(this.input).width();
           if(iwidth<300) iwidth = 300;
           
-          var editor_id = $(this.input).attr('id')+'_codemirror';
+          let editor_id = $(this.input).attr('id')+'_codemirror';
           this.editorContainer = $( "<div>")
           .attr("id", editor_id)
           .css({'overflow':'auto',resize:'both',width:iwidth})
@@ -133,7 +135,7 @@ class EditorCodeMirror {
       //autoformat
       setTimeout(function(){
           if(typeof that.codeEditor.autoFormatRange === 'function'){
-                var totalLines = that.codeEditor.lineCount();  
+                let totalLines = that.codeEditor.lineCount();  
                 that.codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
           }
           that.codeEditor.scrollTo(0,0);
@@ -145,7 +147,7 @@ class EditorCodeMirror {
 
       this.input.hide();
 
-      var btn_switcher = this.inputdiv.find('.editor_switcher')
+      let btn_switcher = this.inputdiv.find('.editor_switcher')
       if(btn_switcher.length>0){
           btn_switcher.find('span').css('text-decoration', '');
           btn_switcher.find('span:contains("codeeditor")').css('text-decoration', 'underline');

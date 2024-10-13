@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * record manipulation - add, save, delete
     *
     * @package     Heurist academic knowledge management system
@@ -20,12 +20,12 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
     $response = array();
-    
-    $system = new System();
+
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
 
         //get error and response
@@ -36,12 +36,12 @@
         $mysqli = $system->get_mysqli();
 
         if ( $system->get_user_id()<1 && !(@$_REQUEST['a']=='s' && @$_REQUEST['Captcha']) ) {
-            
+
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
         }else{
-            
-            $action = @$_REQUEST['a'];// || @$_REQUEST['action'];
+
+            $action = @$_REQUEST['a'];
 
             // call function from db_record library
             // these function returns standard response: status and data
@@ -61,18 +61,18 @@
 
                 $response = recordAdd($system, $record);
 
-            } else if ($action=="s" || $action=="save") {
+            } elseif($action=="s" || $action=="save") {
 
                 $response = recordSave($system, $_REQUEST);
 
-            } else if ($action=='batch_save') {
+            } elseif($action=='batch_save') {
 
                 $rec_ids = array();
 
                 if(array_key_exists('records', $_REQUEST)){
 
                     foreach ($_REQUEST['records'] as $key => $record) {
-                        
+
                         $response = recordSave($system, $record);
 
                         if(!$response || $response['status'] != HEURIST_OK){
@@ -91,51 +91,44 @@
                     $response = array('status'=>HEURIST_ERROR, 'msg'=>'No records provided');
                 }
 
-            } else if (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
+            } elseif (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
 
                 $response = recordDelete($system, $_REQUEST['ids'], true, @$_REQUEST['check_links'], @$_REQUEST['rec_RecTypeID'], @$_REQUEST['session']);
 
-            } else if ($action=="access"){
+            } elseif($action=="access"){
 
                 $response = recordUpdateOwnerAccess($system, $_REQUEST);
 
-            } else if ($action=="increment"){
+            } elseif($action=="increment"){
 
                 $response = recordGetIncrementedValue($system, $_REQUEST);
-                
-            } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
-                
+            } elseif($action=="duplicate" && @$_REQUEST['id']) {
+
+
                 $mysqli = $system->get_mysqli();
-                $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-                if($keep_autocommit===true) $mysqli->autocommit(FALSE);
-                if (strnatcmp(phpversion(), '5.5') >= 0) {
-                    $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
-                }
+                $keep_autocommit = mysql__begin_transaction($mysqli);
 
                 $response = recordDuplicate($system, $_REQUEST['id']);
 
-                if( $response && @$response['status']==HEURIST_OK ){
-                    $mysqli->commit();
-                }else{
-                    $mysqli->rollback();
-                }
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);                
+                $isOK = $response && @$response['status']==HEURIST_OK;
+
+                mysql__end_transaction($mysqli, $isOK, $keep_autocommit);
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);
             }
         }
-        
+
         $system->dbclose();
     }
-    
+
 if($response==false){
     $response = $system->getError();
-}    
+}
 
 // Return the response object as JSON
-//header('Content-type: application/json;charset=UTF-8');
+// header(CTYPE_JSON)
 $system->setResponseHeader();
 print json_encode($response);
 ?>

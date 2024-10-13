@@ -26,16 +26,19 @@
 * @subpackage  Export/xml
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
-require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     die("Cannot connect to database");
 }
+
+define('KML_CLOSE','</Document></kml>');
 
 $islist = array_key_exists("q", $_REQUEST);
 
@@ -44,8 +47,7 @@ header("Cache-Control: public");
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"export.kml\"");
 }
-header("Content-Type: text/kml");
-
+header("Content-Type: text/xml; charset=utf-8");
 
 $dtFile = ($system->defineConstant('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 $dtKMLfile = ($system->defineConstant('DT_KML_FILE')?DT_KML_FILE:0);
@@ -66,44 +68,55 @@ if(!$islist){
     if(array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")
     {
         //kml is stored in uploaded file
-        $kml_file = mysql__select_value($mysqli, 
-            'select concat(ulf_FilePath,ulf_FileName) as fullPath from recDetails '
-            .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = ' 
+        $kml_file = mysql__select_row($mysqli,
+            'select ulf_FilePath,ulf_FileName from recDetails '
+            .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = '
             . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = "
             .$dtFile." OR dtl_DetailTypeID = ".$dtKMLfile.")");
 
-        if ($kml_file!=null) {
-
-            $kml_file = resolveFilePath($kml_file);
-            if(file_exists($kml_file)){
-                print file_get_contents($kml_file);
-            }   
-                
+        if ($kml_file[0] && $kml_file[1]) {
+            $path =  USanitize::sanitizePath(resolveFilePath($kml_file[0]));
+            $kml_file = basename($kml_file[1]);
+            $kml_file = $path.$kml_file;
         }else{
+
+            $kml_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "kml");
+            //$tmp_destination = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
+            $kml_file_stream = fopen($kml_file, 'w');
+
             //kml snippet
-            $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = " 
+            $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = "
                             . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".$dtKML);
 
-            print "<?xml version='1.0' encoding='UTF-8'?>\n";
-            print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
-            print '<Document>';
+            //write to temp file (to avoid Cross-site Scripting warning)
+            fwrite($kml_file_stream, XML_HEADER."\n");
+            fwrite($kml_file_stream, '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom"><Document>');
 
             if($kml!=null){
-                print $kml;
+                fwrite($kml_file_stream, $kml);
             }
 
-            print '</Document>';
-            print '</kml>';
+            fwrite($kml_file_stream, KML_CLOSE);
+            fclose($kml_file_stream);
         }
+
+        if(file_exists($kml_file)){
+            //todo: use readfile_by_chunks
+            print file_get_contents($kml_file);
+        }
+
 
     }
     exit;
 }
 
-print "<?xml version='1.0' encoding='UTF-8'?>\n";
-print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
-print '<Document>';
-print '<name>Exported from Heurist</name>';
+$kml_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "kml");
+$kml_file_stream = fopen($kml_file, 'w');
+
+fwrite($kml_file_stream, XML_HEADER."\n");
+fwrite($kml_file_stream, '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">');
+fwrite($kml_file_stream, '<Document>');
+fwrite($kml_file_stream, '<name>Exported from Heurist</name>');
 
 /*
 2. create new KML output that contains placemarks created from WKT and links to heurist's uploaded kml files
@@ -123,40 +136,43 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     //for kml
     $squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
-    
+
     $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".intval($dtKMLfile)
             .($dtFile>0?" or (dtl_DetailTypeID = ".intval($dtFile)." AND ulf_MimeExt='kml'))":")");
-            
+
     $detTable2 = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
     $isSearchKml = ($dtKMLfile>0 || $dtFile>0);
 
     if($islist){
 
-            $_REQUEST['detail'] = 'ids'; // return ids only
+            $_REQUEST['detail'] = 'ids';// return ids only
 
-            $result = recordSearch($system, $_REQUEST); //see recordSearch.php
-        
+            $result = recordSearch($system, $_REQUEST);//see recordSearch.php
+
             if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
                 $error_msg = $system->getError();
                 $error_msg = $error_msg[0]['message'];
-                print $error_msg;
-                print '</Document></kml>';
+                fwrite($kml_file_stream, $error_msg);
+                fwrite($kml_file_stream, KML_CLOSE);
+                fclose($kml_file_stream);
+                print file_get_contents($kml_file);
                 return;
             }
             $result = $result['data'];
             $rec_ids = $result['records'];
             $limit = intval(@$_REQUEST['limit']);
             if($limit>0){
-                $rec_ids = array_slice($rec_ids,0,$limit);    
+                $rec_ids = array_slice($rec_ids,0,$limit);
             }
 
-            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere;
-            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere2;
+            $squery = _composeQuery($squery, $detTable, $rec_ids, $ourwhere);
+            $squery2 = _composeQuery($squery2, $detTable2, $rec_ids, $ourwhere2);
 
     }else{
-        $squery = $squery." from Records ".$detTable." where rec_ID=".intval($_REQUEST["id"]).$ourwhere;
-        $squery2 = $squery2." from Records ".$detTable2." where rec_ID=".intval($_REQUEST["id"]).$ourwhere2;
+
+        $squery = _composeQuery($squery, $detTable, $_REQUEST["id"], $ourwhere);
+        $squery2 = _composeQuery($squery2, $detTable2, $_REQUEST["id"], $ourwhere2);
     }
 
     $wkt_reccount=0;
@@ -166,7 +182,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
         $res = $mysqli->query($squery);
         if($res===false){
-            print '</Document></kml>';
+            fwrite($kml_file_stream, KML_CLOSE);
             return;
         }
         $wkt_reccount = $res->num_rows;
@@ -174,8 +190,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         $kml_reccount = 0;
         if($isSearchKml){
             $res2 = $mysqli->query($squery2);
-            if($res2!==false)
+            if($res2!==false){
                 $kml_reccount = $res2->num_rows;
+            }
         }
 
     }
@@ -186,50 +203,42 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($wkt_reccount>0){
             while ($row = $res->fetch_row()) {
                 $kml = null;
-                
-                if($row[5]){
+
+                if($row[5]){ //dtl_Geo
                     $wkt = $row[5];
                     $geom = geoPHP::load($wkt,'wkt');
                     $kml = $geom->out('kml');
                     if($kml){
-                        print '<Placemark>';
+                        fwrite($kml_file_stream, '<Placemark>');
 
                         //timestap or timespan
                         if($row[6] || $row[7] || $row[8]){
-                            
+
                             if($row[7] || $row[8]){
-                                
-                                if(!$row[7]) $row[7] = $row[8];
-                                
+
+                                if(!$row[7]) {$row[7] = $row[8];}
+
                                 //create timespan from two temporal objects
                                 $dt = Temporal::mergeTemporals($row[7], $row[8]);
-                                
-                            }else if($row[6]){
+
+                            }elseif($row[6]){
                                 $dt = new Temporal($row[6]);
                             }
                             if($dt && $dt->isValid()){
-                                print $dt->toKML();
+                                fwrite($kml_file_stream, $dt->toKML());
                             }
                         }
 
-                        print '<id>'.htmlspecialchars($row[0]).'</id>';
-                        print '<name>'.htmlspecialchars ($row[2]).'</name>';
+                        fwrite($kml_file_stream, '<id>'.htmlspecialchars($row[0]).'</id>');
+                        fwrite($kml_file_stream, '<name>'.htmlspecialchars ($row[2]).'</name>');
                         if($row[1]){ //  FILTER_SANITIZE_SPECIAL_CHARS
-                            print '<description><![CDATA[ <a href="'.filter_var($row[1],FILTER_SANITIZE_URL).'">link</a>]]></description>'; 										}
-                        print $kml;
-                        print '</Placemark>';
+                            $url = htmlentities($row[1]);
+                            fwrite($kml_file_stream, '<description><![CDATA[ <a href="'.$url.'">link</a>]]></description>');
+                        }
+                        fwrite($kml_file_stream, $kml);
+                        fwrite($kml_file_stream, '</Placemark>');
                     }
-                }else{
-                    // TODO: Remove, enable or explain: /* @todo - tomorrow
-                    /* @todo - tomorrow (!!!)
-                    $kml = $row[1];
-                    if(strpos($kml, "<?xml")>=0){
-                    $start = strpos($kml, "<Placemark>");
-                    $len = strpos($kml, strrchr($kml, "</Placemark>"))+strlen("</Placemark>")-$start;
-                    $kml = substr($kml, $start, $len);
-                    }
-                    print $kml;
-                    */
+
                 }
             }//while wkt records
         }
@@ -237,15 +246,15 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($kml_reccount>0){
             while ($file_data = $res2->fetch_row()) {
                 if ($file_data[3]) {
-                    
+
                     $file_id = intval($file_data[0]);
 
-                    print '<NetworkLink>';
-                    print '<name>'.htmlspecialchars($file_data[2]).'</name>';
-                    print '<Link id="'.$file_id.'">';
-                    print '<href>'.HEURIST_BASE_URL.'export/xml/kml.php?id='.$file_id.'</href>';
-                    print '</Link>';
-                    print '</NetworkLink>';
+                    fwrite($kml_file_stream, '<NetworkLink>');
+                    fwrite($kml_file_stream, '<name>'.htmlspecialchars($file_data[2]).'</name>');
+                    fwrite($kml_file_stream, '<Link id="'.$file_id.'">');
+                    fwrite($kml_file_stream, '<href>'.HEURIST_BASE_URL.'export/xml/kml.php?id='.$file_id.'</href>');
+                    fwrite($kml_file_stream, '</Link>');
+                    fwrite($kml_file_stream, '</NetworkLink>');
                 }
             }//while kml records
         }
@@ -253,7 +262,24 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     }
 }
-print '</Document>';
-print '</kml>';
+fwrite($kml_file_stream, KML_CLOSE);
+fclose($kml_file_stream);
+print file_get_contents($kml_file);
 
+
+//
+//
+//
+function _composeQuery($select,$from,$rec_ids,$where){
+
+   if(is_array($rec_ids)){
+        $where_ids = 'in ('.implode(',', prepareIds($rec_ids)).')';
+   }else{
+        $where_ids = '='.intval($rec_ids);
+   }
+
+   $squery = "$select from Records $from WHERE rec_ID $where_ids $where";
+
+   return $squery;
+}
 ?>

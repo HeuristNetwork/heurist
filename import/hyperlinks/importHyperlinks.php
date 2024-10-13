@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -31,13 +31,16 @@
 */
 
 define('LOGIN_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
+
+use hserv\entity\DbUsrTags;
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
-require_once dirname(__FILE__).'/../../hserv/entity/dbUsrTags.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 
+
+global $linkno, $disambiguate_rec_ids, $notes, $mysqli;
 
 $nextmode = 'inputselect';
 $mysqli = $system->get_mysqli();
@@ -59,18 +62,18 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	if (@$_REQUEST['source'] == 'file') {
 		$src = file_get_contents($_FILES['file']['tmp_name']);
 		$srcname = $_FILES['file']['name'];
-	} else if (@$_REQUEST['source'] == 'url') {
+	} elseif (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
         $url = filter_input($_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'url', FILTER_VALIDATE_URL);
-        
+
         if(empty($url) || $url===false){
 
             $src = null;
             $error = 'URL is not valid.';
-            
+
         }else{
-            $src = loadRemoteURLContentWithRange($url, null, false, 120); //load external webpage to extract links
+            $src = loadRemoteURLContentWithRange($url, null, false, 120);//load external webpage to extract links
             if(!$src){
                 $error = 'URL could not be retrieved. Verify your proxy setting in configuration file.';
             }
@@ -84,11 +87,12 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 	if (@$src) {
 		$base_url = @$_REQUEST['url'];
-		if (preg_match('!<base[^>]*href=["\']?([^"\'>\s]+)["\']?!is', $src, $url_match))
+		if (preg_match('!<base[^>]*href=["\']?([^"\'>\s]+)["\']?!is', $src, $url_match)){
 			$base_url = $url_match[1];
+        }
 		$base_url_root = preg_replace('!([^:/])/.*!', '$1', $base_url);
 		$base_url_base = preg_replace('!([^:/]/.*/)[^/]*$!', '$1', $base_url);
-		if (substr($base_url_base, -1, 1) != '/') $base_url_base = $base_url_base . '/';
+		if (substr($base_url_base, -1, 1) != '/') {$base_url_base = $base_url_base . '/';}
 
 		// clean up the page a little
 		$src = preg_replace('/<!-.*?->/s', '', $src);
@@ -97,10 +101,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 		// find the page title
 		preg_match('!<title>([^><]*)</title>!is', $src, $title_matches);
-		if (@$title_matches[1])
+		if (@$title_matches[1]){
 			$notes_src_str = " [source: '".$title_matches[1]."' (".$srcname.")]";
-		else
+        }else{
 			$notes_src_str = " [source: ".$srcname."]";
+        }
 
 
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
@@ -108,7 +113,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		/* get a list of the link-texts that we are going to ignore */
 		$ignored = mysql__select_assoc2($mysqli, 'SELECT lcase(hyf_String), -1 usrHyperlinkFilters '
                         .' WHERE hyf_UGrpID is null or hyf_UGrpID='.$system->get_user_id());
-                                       
+
 		$wildcard_ignored = array();
 		if($ignored){
 			foreach ($ignored as $key => $val) {
@@ -120,24 +125,25 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 				}
 			}
 		}
-        
+
         // minimum number of words that must appear in the link
 		$word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
 
 		$urls = array();
 		$notes = array();
 		$last_url = '';
-		for ($i=0; $i < count($matches[1]); ++$i) {
+		for ($i=0; $i < count($matches[1]);++$i) {
 			// ignore javascript links, mozilla 'about' links
 			if (preg_match('!^(javascript|about):!i', @$matches[2][$i])) {
 				continue;
             }
 
 			if (! preg_match('!^[-+.a-z]+:!i', @$matches[2][$i])) {	/* doesn't start with protocol -- a relative URL */
-				if (substr($matches[2][$i], 0, 1) == '/')	/* starts with a slash -- relative to root */
+				if (substr($matches[2][$i], 0, 1) == '/'){	/* starts with a slash -- relative to root */
 					$matches[2][$i] = $base_url_root . $matches[2][$i];
-				else
+				}else{
 					$matches[2][$i] = $base_url_base . $matches[2][$i];
+                }
 
 				//while (preg_match('!/\\.\\.(?:/|$)!', $matches[2][$i]))	/* remove ..s */
 					//$matches[2][$i] = preg_replace('!(http://.+)(?:/[^/]*)/\\.\\.(/|$)!', '\\1\\2', $matches[2][$i]);
@@ -152,10 +158,10 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			if (@$ignored[$lcase]){
                     $forbidden = 1;            // ignore forbidden links
             }
-			else {                
+			else {
 				foreach ($wildcard_ignored as $wc => $len) {
-					if (substr($lcase, 0, $len) == $wc) { 
-                            $forbidden = 1; break; 
+					if (substr($lcase, 0, $len) == $wc) {
+                            $forbidden = 1; break;
                     }
 				}
 			}
@@ -194,7 +200,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$nextmode = 'printurls';
 	}
 
-} else if (@$_REQUEST['link']) {
+} elseif (@$_REQUEST['link']) {
 	$urls = array();
 	$max_no = max(array_keys($_REQUEST['link']));
 
@@ -220,24 +226,24 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	$record_tobebookmarked = array();
 
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
-		if (! @$checked) continue;
+		if (! @$checked) {continue;}
 
-		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], 
-                                (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), 
+		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno],
+                                (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL),
                                  @$_REQUEST['rec_ID'][$linkno]);
-                                
+
 		if ($rec_id && is_array($rec_id)) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_rec_ids[$_REQUEST['link'][$linkno]] = $rec_id;
 			continue;
 		}
 
-		if (! @$rec_id) continue;	/* malformed URL */
+		if (! @$rec_id) {continue;}	/* malformed URL */
 
 		array_push($record_tobebookmarked, $rec_id);
 	}
 
-	if(count($record_tobebookmarked)>0){
+	if(!empty($record_tobebookmarked)){
 
 		if (@$_REQUEST['adding_tags'] == 1) {
 			$kwd = @$_REQUEST['wgTags'];
@@ -248,17 +254,17 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		//method to add bookmarks and tags
 		$data = array();
 		$data['rec_ids'] = $record_tobebookmarked;
-        
+
         $params = array(
            'entity'=>'usrTags',
            'mode'  =>'assign',
            'tagIDs'=> $kwd,
            'recIDs'=> $record_tobebookmarked
         );
-        
+
         $entity = new DbUsrTags($system, $params);
         $res = $entity->batch_action();
-        
+
         if( is_bool($res) && !$res ){
             $error = $system->getError();
             $error = $error['message'];
@@ -278,7 +284,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	}
 	if (@$bkmk_insert_count == 1){
 		$success = 'Added one bookmark';
-	}else if (@$bkmk_insert_count > 1){
+	}elseif (@$bkmk_insert_count > 1){
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
 	}
 	*/
@@ -289,10 +295,10 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 if (@$urls) {
     $bkmk_urls = mysql__select_assoc2($mysqli, 'SELECT rec_URL, 1 FROM usrBookmarks '
         .'left join Records on rec_ID = bkm_recID WHERE bkm_UGrpID='.$system->get_user_id());
-    
+
 	$ignore = array();
 	foreach ($urls as $url => $title){
-		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
+		if (@$bkmk_urls[$url]) {$ignore[$url] = 1;}
 	}
 }
 
@@ -306,42 +312,42 @@ if (@$urls) {
             font-family: Helvetica,Arial,sans-serif;
             line-height: 2ex;
         }
-    
+
         .input-row {
             border-bottom: 1px solid RGBA(255,255,255,0.5);
             padding: 3px 0;
-        }    
+        }
         .input-row input:not([type="submit"]) {
             font-size: 11px;
             background: none repeat scroll 0 0 #FFF;
             border: 1px solid rgba(0, 0, 0, 0.2);
             margin: 2px 0;
             padding: 3px;
-        }        
-        
+        }
+
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
 		.words {color: #6A7C99;}
 		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
-        
+
         H2 {
             color: #6A7C99;
             font-size: 14px;
             line-height: 25px;
             margin: 0;
-        }        
+        }
         A:link {
             color: #2080C0;
             text-decoration: none;
-        }        
+        }
         P {
             color: #333333;
             font-size: 11px;
             line-height: 21px;
-        }   
-        
+        }
+
         .button, input[type="button"], input[type="submit"] {
             text-transform: uppercase !important;
             display: inline-block !important;
@@ -362,25 +368,25 @@ if (@$urls) {
             color: #000 !important;
         }
 	</style>
-    
+
     <script type="text/javascript">
-        function onPageInit(success){ 
+        function onPageInit(success){
                     $('input[type="button"]').button().css({'background-color':'#ddd','text-transform':'uppercase'});
-/* adjust size in case of dialog                    
+/* adjust size in case of dialog
                     var body = document.body,
                         html = document.documentElement;
 
-                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
-                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
-                    var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth, 
-                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
-                                                              
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight,
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight );
+                    var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth,
+                                           html.clientWidth, html.scrollWidth, html.offsetWidth );
+
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
-                        doDialogResize(desiredWidth, desiredHeight);              
+                        doDialogResize(desiredWidth, desiredHeight);
                     }
-*/                    
+*/
         }
-    
+
     </script>
 </head>
 
@@ -390,7 +396,7 @@ if (@$urls) {
 <script src="importHyperlinks.js"></script>
 
 <?php //this frame is needed for title lookup ?>
-<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post" 
+<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post"
         enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
@@ -435,7 +441,7 @@ hyperlinks of interest).</p>
  </div>
 
 <?php
-	} else if ($nextmode == 'printurls') {
+	} elseif($nextmode == 'printurls') {
 
 /* removed by saw 2010/11/12 doesn't seemed to be used anymore
 		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.$system->get_user_id().' order by tag_Text');
@@ -443,7 +449,7 @@ hyperlinks of interest).</p>
 		foreach ($tags as $kwd)
 			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
 */
-		
+
         $word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
         $word_limit = intval($word_limit);
 ?>
@@ -460,16 +466,16 @@ Note: the list only shows links which you have not already bookmarked.<br>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
   <input type="button"
-    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>', 
+    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>',
   { title:'Bookmark import settings',
     width:700,
     height:400,
-    callback: function( context ) { 
+    callback: function( context ) {
         if(context){
             document.forms[0].style.display = 'none';
             document.location.reload();
         }
-    } });}" 
+    } });}"
     value="Change settings">
 <br>
 We recommend bookmarking a few links at a time.<br>The list is reloaded after each addition and after change of settings.
@@ -494,7 +500,7 @@ We recommend bookmarking a few links at a time.<br>The list is reloaded after ea
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;" 
+   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;"
         onClick="{doBookmark();}">
  </div>
 
@@ -506,7 +512,7 @@ We recommend bookmarking a few links at a time.<br>The list is reloaded after ea
 			$linkno = 0;
 			foreach (@$urls as $url => $title) {
 				++$linkno;
-				if (! @$disambiguate_rec_ids[$url]) continue;
+				if (! @$disambiguate_rec_ids[$url]) {continue;}
 
 				print_link($url, $title);
 				$ignore[$url] = 1;
@@ -562,10 +568,10 @@ function records_check($url, $title, $notes, $user_rec_id) {
             return $res;
         }
 
-	} else if (! $user_rec_id) {
+	} elseif (! $user_rec_id) {
 
-		$rec_ids = similar_urls($mysqli, $url); //see testSimilarURls
-		if ($rec_ids) return $rec_ids;
+		$rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
+		if ($rec_ids) {return $rec_ids;}
 /*
 		$par_url = preg_replace('/[?].*'.'/', '', $url);
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it
@@ -580,7 +586,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 		}
 */
 	}
-    
+
     $system->defineConstants();
 
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
@@ -597,17 +603,17 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $record['details']["t:".DT_NAME] = array("0"=>$title);
     $record['details']["t:".DT_EXTENDED_DESCRIPTION] = array("0"=>$notes);
 
-    
-    $out = recordSave($system, $record);  //see recordModify.php    
-    
+
+    $out = recordSave($system, $record);//see recordModify.php
+
     if ( @$out['status'] != HEURIST_OK ) {
-        //print "<div style='color:red'> Error: ".$out["message"]."</div>";
+        //print "<div style='color:red'> Error: ".$out["message"].DIV_E;
         return 0;
     }else{
-        
+
         return intval($out['data']);
     }
-    
+
 }
 
 
@@ -619,13 +625,13 @@ function print_link($url, $title) {
 	global $linkno;
 	global $disambiguate_rec_ids;
 	global $notes;
-    
+
     $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
-    $title_esc = htmlspecialchars($title);    
+    $title_esc = htmlspecialchars($title);
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
-		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?> 
+		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?>
             onChange="var t=document.getElementById('t<?php echo $linkno ?>').value; var n=document.getElementById('n<?php echo $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?php echo $linkno ?>'); if(e) e.checked = this.checked; }">
 		&nbsp;<input type="text" name="title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?php echo $linkno ?>">
 		<input type="hidden" name="alt_title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" id="at<?php echo $linkno ?>">
@@ -643,22 +649,23 @@ function print_link($url, $title) {
 <div class="input-row" style="padding-left: 60px;">
 	<div style="display:inline-block;width:30px;vertical-align: middle;">
 		<input style="margin: 0px;" type="checkbox" name="use_notes[<?php echo  $linkno ?>]" value="1" id="un<?php echo $linkno ?>" class="use_notes_checkbox" title="Use Notes">
-      	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>" 
-            value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url])); ?>">
+      	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>"
+            value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url]));?>">
 	  </div>
       <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;">
             <?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? $_REQUEST['notes'][$linkno] : wordwrap($notes[$url], 50, "\n", true)) ?>
       </div>
       <small class="words">
 <?php
-	if (@$_REQUEST['notes'][$linkno])
+	if (@$_REQUEST['notes'][$linkno]){
 		$word_count = intval(str_word_count($_REQUEST['notes'][$linkno]));
-	else
+	}else{
 		$word_count = str_word_count($notes[$url]);
-        
+    }
+
 	if ($word_count == 1) {
 		print '1 word';
-	} else if ($word_count > 1) {
+	} elseif($word_count > 1) {
 		print "$word_count words";
 	}
 ?></small>
@@ -670,7 +677,7 @@ function print_link($url, $title) {
 <div class="input-row">
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="-1" checked="checked" onClick="selectExistingLink(<?php echo  $linkno ?>);">
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="-1" checked="checked" onchange="selectExistingLink(<?php echo  $linkno ?>);">
 			<b>New (add this URL to the database)</b>
 		</span>
 	</div>
@@ -684,14 +691,15 @@ function print_link($url, $title) {
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id); ?>" onClick="selectExistingLink(<?php echo  $linkno ?>);">
-			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id);?>" onchange="selectExistingLink(<?php echo  $linkno ?>);">
+			<?php echo htmlspecialchars($row[0]);//'rec_Title' ?>
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?php echo  htmlspecialchars($row[1]) ?>"><?php
-				if (strlen($row[1]) < 100) //'rec_URL'
+				if (strlen($row[1]) < 100){ //'rec_URL'
 					print htmlspecialchars(common_substring($row[1], $url));
-				else
+				}else{
 					print htmlspecialchars(common_substring(substr($row[1], 0, 90) . '...', $url));
+                }
 		?></a><br>
 	</div>
 
@@ -708,8 +716,8 @@ function print_link($url, $title) {
 
 
 function common_substring($url, $base_url) {
-	for ($i=0; $i < strlen($url) && $i < strlen($base_url); ++$i) {
-		if ($url[$i] != $base_url[$i]) break;
+	for ($i=0; $i < strlen($url) && $i < strlen($base_url);++$i) {
+		if ($url[$i] != $base_url[$i]) {break;}
 	}
 
 	return '<span style="color: black;">'.htmlspecialchars(substr($url, 0, $i)).'</span>'.htmlspecialchars(substr($url, $i));

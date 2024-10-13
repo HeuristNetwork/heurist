@@ -17,10 +17,10 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     $response = $system->getError();
 }else{
@@ -30,16 +30,16 @@ if( !$system->init(@$_REQUEST['db']) ){
 
     if(@$_REQUEST['a'] == 'minmax' ){
 
-            $response = recordSearchMinMax( $system, $params ); //recordSearch.php
+            $response = recordSearchMinMax( $system, $params );//recordSearch.php
 
-    }else if(@$_REQUEST['a'] == 'pointers' ){
+    }elseif(@$_REQUEST['a'] == 'pointers' ){
 
             $response = recordSearchDistinctPointers( $params );
 
-    }else if(@$_REQUEST['a'] == 'crosstab' ){
+    }elseif(@$_REQUEST['a'] == 'crosstab' ){
 
 ini_set('max_execution_time', '0');
-        
+
             $response = getCrossTab( $params );
 
     }else{
@@ -47,7 +47,7 @@ ini_set('max_execution_time', '0');
     }
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 exit;
 
@@ -61,9 +61,9 @@ exit;
 /*
 function recordSearchMinMax( $params){
     global $system;
-    
+
     $mysqli = $system->get_mysqli();
-    
+
     if(@$params['dt']){
 
 // no more rectype filter
@@ -101,17 +101,17 @@ function recordSearchMinMax( $params){
 function getWhereRecordIds($params){
 
     $recIDs = null;
-    
+
     if(@$params['recordset']){
         if(is_array($params['recordset'])){
-            $recids = $params['recordset'];  
+            $recids = $params['recordset'];
         }else{
-            $recids = json_decode($params['recordset'], true);    
+            $recids = json_decode($params['recordset'], true);
         }
         //$recIDs = explode(',',$recids['recIDs']);
         $recIDs = prepareIds($recids['recIDs']);
-        
-        
+
+
     }
     return $recIDs;
 }
@@ -125,18 +125,18 @@ function getWhereRecordIds($params){
 */
 function recordSearchDistinctPointers( $params ){
     global $system, $mysqli;
-    
+
     if(@$params['dt']){
 
     $where = getWhereRecordIds($params);
-        
+
     if($where==null){
-        
+
         $currentUser = $system->getCurrentUser();
-        
+
         $query = get_sql_query_clauses($mysqli, $params, $currentUser);
         $where_clause = $query["where"];
-        
+
         /*remove order by
         $pos = strrpos($where, " order by ");
         if($pos){
@@ -144,13 +144,13 @@ function recordSearchDistinctPointers( $params ){
         }*/
         $where = '(select rec_ID '.$where_clause.' )';
     }else{
-        
+
         $where = '('.implode(',',$where).')';
     }
-    
+
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
                         .intval($params['dt'])." and dtl_RecID in ".$where;
-        
+
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
@@ -174,21 +174,21 @@ function recordSearchDistinctPointers( $params ){
 
 /**
 * main request to find crosstab data
-* 
+*
 * @param mixed $mysqli
 * @param mixed $params
 *               dt_page - detail type for page/groups
 *               dt_col - detail type for columns
 *               dt_row - detail type for rows
-*               agg_mode - aggreagation mode: sum, avg, count   
+*               agg_mode - aggreagation mode: sum, avg, count
 *               agg_field - field for avg or sum mode
 *               q - current Heurist query
 */
 function getCrossTab( $params){
-    
+
     global $system;
-    
-    $mysqli = $system->get_mysqli();    
+
+    $mysqli = $system->get_mysqli();
 
     $dt_page = @$params['dt_page'];
     if($dt_page){
@@ -207,7 +207,7 @@ function getCrossTab( $params){
     $issum = (($mode=="avg" || $mode=="sum") && intval(@$params['agg_field'])>0);
 
     if ($issum){
-        $mode = ($mode=='avg'?'avg':'sum').'(cast(d3.dtl_Value as decimal(20,2)))';  //.$params['agg_field'].")";
+        $mode = ($mode=='avg'?'avg':'sum').'(cast(d3.dtl_Value as decimal(20,2)))';//.$params['agg_field'].")";
     }else{
         $mode = "count(*)";
     }
@@ -216,19 +216,19 @@ function getCrossTab( $params){
     if($recIDs!=null){
         $params['q'] = 'ids:'.implode(',',$recIDs);
     }
-        
+
     $currentUser = $system->getCurrentUser();
-        
+
     $query = get_sql_query_clauses($mysqli, $params, $currentUser);
     $where = $query["where"];
     $from = $query["from"];
-        
+
 
     /*remove order by
     $pos = strrpos($where, " order by ");
     if($pos){
         $where = substr($where,0,$pos);
-    }*/ 
+    }*/
 
 $query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$from;
 
@@ -244,12 +244,12 @@ if($issum){
      ." ,recDetails d3 "
     //20130517 ." where rec_RectypeID=".$params['rt']
     ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".intval($params['agg_field'])
-    ." and ".$where;
+    .SQL_AND.$where;
 
 }else{
-    $query = $query." where ".$where; //20130517 rec_RectypeID=".$params['rt'];
+    $query = $query.SQL_WHERE.$where; //20130517 rec_RectypeID=".$params['rt'];
 }
-//20130517 $query = $query." and ".$where_2;
+//20130517 $query = $query.SQL_AND.$where_2;
 
 $query = $query." group by d2.dtl_Value ";
 

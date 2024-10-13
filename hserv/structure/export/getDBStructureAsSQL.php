@@ -25,12 +25,15 @@
 */
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 
+
+global $mysqli, $isHTML, $startToken, $endToken;
+
 // Normally jsut outputs definitions, this will include users/groups
 $includeUgrps=@$_REQUEST["includeUgrps"];	// returns null if not set
 
 $approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];	// returns null if not set
 
-$isHTML = (@$_REQUEST["plain"]!=1); //no html
+$isHTML = (@$_REQUEST["plain"]!=1);//no html
 // TO DO: filter for reserved and approved definitions only if this is set
 
 
@@ -38,6 +41,7 @@ $sysinfo = $system->get_system();
 $db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
 
 define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+define('EOL',"<br>\n");
 
 $mysqli = $system->get_mysqli();
 
@@ -49,8 +53,6 @@ $mysqli = $system->get_mysqli();
 //      Version info in common/config/initialise.php
 //      admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_Heurist_Core_Definitions database
 //         and insert where indicated in file
-//      admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql and delete
-//         non-definitional tables for temp db creation speed
 //      admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface listing in SQL exchange format)
@@ -63,12 +65,12 @@ print "<html><head>";
 print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
 print "</head><body>\n";
 }
-print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
-print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
-print "-- Database = " . HEURIST_DBNAME . "<br>\n";
-print "-- Program Version: ".HEURIST_VERSION."<br>\n";
+print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i").EOL;
+print "-- Installation = " . HEURIST_BASE_URL. EOL;
+print "-- Database = " . HEURIST_DBNAME . EOL;
+print "-- Program Version: ".HEURIST_VERSION.EOL;
 print "-- Database Version: ".$db_version; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
-if($isHTML) print "<br><br>\n";
+if($isHTML) {print "<br><br>\n";}
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers
 // This could perhaps be done more elegantly as JSON structures, but SQL inserts help to point up errors in fields
@@ -213,67 +215,67 @@ if($isHTML){
 function do_print_table($desc, $tname, $where=null)
 {
     global $mysqli, $isHTML, $startToken, $endToken;
-    
+
     print "\n\n\n-- $desc \n";
-    if($isHTML) print "<p>";
+    if($isHTML) {print "<p>";}
 
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     if($tname=='defTermsLinks'){
-        array_shift($flds_list); //remove primary key field
+        array_shift($flds_list);//remove primary key field
     }
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
     print "-- $flds \n";
     $query = "select $flds from $tname";
-    
+
     if($where!=null){
         $query = $query.$where;
     }
-    
+
     $res = $mysqli->query($query);
     if($res){
 
-        if($isHTML) print "<p>";
+        if($isHTML) {print "<p>";}
         print "\n$startToken\n";
 
-        //get table prefix             
+        //get table prefix
         $id_field = $flds_names[0];
         $prefix = substr($id_field,0,3);
-        while ($row = $res->fetch_assoc()) { 
-            
+        while ($row = $res->fetch_assoc()) {
+
             $vals = array();
             foreach($flds_list as $fld => $type){
 
-                if($prefix=='rty' && !($row[$id_field]>0)) continue;
+                if($prefix=='rty' && !($row[$id_field]>0)) {continue;}
 
                 $val = $row[$fld];
                 if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                     $val = htmlspecialchars($mysqli->real_escape_string($val));
-                }else if(strpos($fld,'OriginatingDBID')!==false){
+                }elseif(strpos($fld,'OriginatingDBID')!==false){
                     if(!($val>0)){
                         $val = HEURIST_DBID; //if local - show this db reg id
                     }
-                }else if(strpos($fld,'IDInOriginatingDB')!==false){
+                }elseif(strpos($fld,'IDInOriginatingDB')!==false){
                     if(HEURIST_DBID>0 && !($val>0)){
                         $val = $row[$id_field];
                     }
                 }
-                $vals[] = $val;   
-            }   
-            print "('".implode("','",$vals)."'),"; 
+                $vals[] = $val;
+            }
+            print "('".implode("','",$vals)."'),";
 
             if ($_REQUEST['pretty']) {
                 print"<br>";
             }
-                    //print_row($row, $tname); 
+                    //print_row($row, $tname);
         }//while
         $res->close();
         print "$endToken\n";
     }else{
         print '-- '.$mysqli->error;
     }
-   
 
-    if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+    if($isHTML) {print "<p>&nbsp;<p>&nbsp;<p>";}
 }
 ?>

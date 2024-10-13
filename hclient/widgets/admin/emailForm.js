@@ -74,7 +74,7 @@ $.widget( "heurist.emailForm", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -105,17 +105,15 @@ $.widget( "heurist.emailForm", {
             
             this._element_form.hide()
             this._initDialog();
-        }else{
-            //this.element.addClass('ui-heurist-bg-light');
         }
         
         //init layout
-        var that = this;
+        let that = this;
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
             
-            var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
+            let url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
                     ?this.options.htmlContent
                     :window.hWin.HAPI4.baseURL+'hclient/widgets/admin/'+this.options.htmlContent
                             +'?t='+window.hWin.HEURIST4.util.random();
@@ -124,10 +122,14 @@ $.widget( "heurist.emailForm", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }else{
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -136,7 +138,7 @@ $.widget( "heurist.emailForm", {
             return;
         }else{
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }
@@ -157,17 +159,19 @@ $.widget( "heurist.emailForm", {
     //
     _initControls:function(){
         
-        var that = this;
-        
         //verify that form has all required elements
-        var missed = [];
+        let missed = [];
         if(!this._element_form.find('#letter_name')) missed.push('letter_name');
         if(!this._element_form.find('#letter_email')) missed.push('letter_email');
         if(!this._element_form.find('#letter_content')) missed.push('letter_content');
         if(!this._element_form.find('#captcha')) missed.push('captcha');
         
         if(missed.length>0){
-            window.hWin.HEURIST4.msg.showMsgErr('Email form must have the following html elements: '+missed.join(','));            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Email form must have the following html elements: ${missed.join(',')}`,
+                error_title: 'Missing required fields',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
         }
         
         window.hWin.HRA(this._element_form);//this.element
@@ -198,7 +202,7 @@ $.widget( "heurist.emailForm", {
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        let that = this;        
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
@@ -222,9 +226,9 @@ $.widget( "heurist.emailForm", {
     //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
-        var btn = $('<button>').button(btn_opts)
+        let btn = $('<button>').button(btn_opts)
                     .click(options.click)
                     .appendTo(container);
         if(options.id){
@@ -245,28 +249,25 @@ $.widget( "heurist.emailForm", {
     //
     _initDialog: function(){
         
-            var options = this.options,
-                btn_array = this._getActionButtons(), 
-                that = this;
+            let options = this.options,
+                btn_array = this._getActionButtons();
+            const that = this;
         
             if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning on close
-                        //that.saveUiPreferences();
                         return true;
                     };
             }
             
             if(options.position==null) options.position = { my: "center", at: "center", of: window };
             
-            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
-            var that = this;
-            
-            var $dlg = this._element_form.dialog({
+            let $dlg = this._element_form.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -279,7 +280,7 @@ $.widget( "heurist.emailForm", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
-                    if($.isFunction(that.options.onClose)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose( that._context_on_close );
                     } 
@@ -301,7 +302,7 @@ $.widget( "heurist.emailForm", {
             
             window.hWin.HRA(this._element_form);//this.element
 
-            var $dlg = this._as_dialog.dialog("open");
+            let $dlg = this._as_dialog.dialog("open");
             
             
             if(this._as_dialog.attr('data-palette')){
@@ -320,7 +321,7 @@ $.widget( "heurist.emailForm", {
             
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -347,12 +348,12 @@ $.widget( "heurist.emailForm", {
             this._as_dialog.dialog("close");
         }else{
             
-            var canClose = true;
-            if($.isFunction(this.options.beforeClose)){
+            let canClose = true;
+            if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
             if(canClose){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose( this._context_on_close );
                 }
             }
@@ -364,15 +365,15 @@ $.widget( "heurist.emailForm", {
     //
     doAction: function(){
         
-        var that = this;
+        let that = this;
         
         //all fields are mandatory
-        var allFields = this._element_form.find('[required="required"]');
-        var err_text = '';
+        let allFields = this._element_form.find('[required="required"]');
+        let err_text = '';
 
         // validate mandatory fields
         allFields.each(function(){
-            var input = $(this);
+            let input = $(this);
             if(input.attr('required')=='required' && input.val()=='' ){
                 input.addClass( "ui-state-error" );
                 err_text = err_text + ', '+that._element_form.find('label[for="' + input.attr('id') + '"]').html();
@@ -381,10 +382,10 @@ $.widget( "heurist.emailForm", {
         
         //verify captcha
         //remove/trim spaces
-        var ele = this._element_form.find("#captcha");
-        var val = ele.val().trim().replace(/\s+/g,'');
+        let ele = this._element_form.find("#captcha");
+        let val = ele.val().trim().replace(/\s+/g,'');
 
-        var ss = window.hWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
+        let ss = window.hWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
         if(ss!=''){
             err_text = err_text + ', '+window.hWin.HR('Prove you are human');
         }else{
@@ -395,8 +396,8 @@ $.widget( "heurist.emailForm", {
             //
             // validate email
             // 
-            var email = this._element_form.find("#letter_email");
-            var bValid = window.hWin.HEURIST4.util.checkEmail(email);
+            let email = this._element_form.find("#letter_email");
+            let bValid = window.hWin.HEURIST4.util.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }
@@ -410,7 +411,7 @@ $.widget( "heurist.emailForm", {
         }
         
         if(err_text==''){
-            var fields = {
+            let fields = {
                 website_id: this.options.website_record_id,
                 person: this._element_form.find('#letter_name').val(),
                 email: this._element_form.find('#letter_email').val(),
@@ -419,7 +420,7 @@ $.widget( "heurist.emailForm", {
                 //,captchaid: this._element_form.find("#captchaid").val()
             }
 
-            var request = {
+            let request = {
                 'a'          : 'save',
                 'entity'     : 'sysBugreport',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -445,7 +446,11 @@ $.widget( "heurist.emailForm", {
 
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Invalid field values',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
         }
     },
     
@@ -455,15 +460,14 @@ $.widget( "heurist.emailForm", {
     _refreshCaptcha: function(){
 
         this._element_form.find('#captcha').val('');
-        var $dd = this._element_form.find('#captcha_img');
-        var id = window.hWin.HEURIST4.util.random();
-        if(true){  //simple captcha
-            var that = this;
+        let $dd = this._element_form.find('#captcha_img');
+        let id = window.hWin.HEURIST4.util.random();
+        const is_simle_captcha = true;
+        if(is_simle_captcha){  //simple captcha
+            let that = this;
             
-            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
+            const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
             
-            //var request = {json:1,id:id};
-            //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
             $.getJSON(url,
                 function(captcha){
                         that._element_form.find('#captcha_img').text(captcha.value)
@@ -471,9 +475,9 @@ $.widget( "heurist.emailForm", {
                     });
 
         
-        }else if(false){
-            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
-            $dd.load(url);
+        // }else if(false){
+       
+       
         }else{ //image captcha
             $dd.empty();
             $('<img alt src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);

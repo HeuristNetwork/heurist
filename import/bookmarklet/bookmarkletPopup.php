@@ -20,16 +20,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-header('Content-type: text/javascript');
-require_once dirname(__FILE__).'/../../hserv/System.php';
-$system = new System();
+header(CTYPE_JS);
+require_once dirname(__FILE__).'/../../autoload.php';
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
-}    
+}
 
-//@todo move code from js to php 
-//@todo get rectype names and groups here 
-//@todo find possible bookmark id 
+//@todo move code from js to php
+//@todo get rectype names and groups here
+//@todo find possible bookmark id
 ?>
 var Heurist = {
 
@@ -196,7 +196,7 @@ render: function() {
 		button = document.createElement("input");
 		button.type = "button";
 		button.value = "Bookmark as web page";
-		button.onclick = function() { Heurist.doBookmark(); };
+		button.onclick = function() { Heurist.doBookmark();};
 		td.appendChild(button);
 
         tr = t.appendChild(document.createElement("tr"));
@@ -332,7 +332,7 @@ getCoords: function(e) {
 	return pos;
 },
 
-urlcleaner: function(x) { return x.replace(/.C2.A0/gi,'\032'); },
+urlcleaner: function(x) { return x.replace(/.C2.A0/gi,'\032');},
 
 findFavicon: function() {
 	try {
@@ -356,7 +356,7 @@ findFavicon: function() {
 },
 
 //
-//  main method - add new record with extracted from page values 
+//  main method - add new record with extracted from page values
 //
 doBookmark: function(rectype) {
 	Heurist.close();
@@ -374,20 +374,20 @@ doBookmark: function(rectype) {
 	if (! sel  &&  frames) {
 		for (i=0; i < frames.length; ++i) {
 			sel = findSelection(frames[i]);
-			if (sel) break;
+			if (sel) {break;}
 		}
 	}
 	var favicon = Heurist.findFavicon();
 
     //see index.php  window.hWin.HEURIST4.ui.openRecordEdit
 	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
-                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
-				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
+                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl))
+				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url))
 				+ (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '')
-				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '') 
-                + (rectype ? '&rec_rectype=' + rectype : '') 
+				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '')
+                + (rectype ? '&rec_rectype=' + rectype : '')
 				+ '&version=' + version);
-                
+
 	void(window.setTimeout('window.focus()',200));
 },
 
@@ -410,7 +410,7 @@ renderrectypeSelect: function(sel) {
 	    var grp = document.createElement("optgroup");
 		    grp.label = HEURIST_rectypes.groups[grpID].name;
 	    sel.appendChild(grp);
-        
+
 		for (i in HEURIST_rectypes.groups[grpID].showTypes) {
             if(i>=0){
                 var recID = HEURIST_rectypes.groups[grpID].showTypes[i];
@@ -418,7 +418,7 @@ renderrectypeSelect: function(sel) {
                 var opt = new Option(name, recID);
                 opt.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;'+name;
 			    sel.appendChild( opt );
-                
+
             }
 	    }
 	}

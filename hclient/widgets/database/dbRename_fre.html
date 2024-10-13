@@ -1,56 +1,51 @@
 <div id="div_header" class="ent_wrapper" style="margin-left:40px;width:630px;font-size:0.95em">
     <div class="heurist-helper1" style="margin-top:50px">       
-        This will perform the clone and delete functions back to back in order to rename the current database, 
-        so please ensure all edits/changes have been saved before proceeding.
+        Cela exécutera les fonctions de clonage et de suppression dos à dos afin de renommer la base de données actuelle.
+        Veuillez donc vous assurer que toutes les modifications/changements ont été enregistrés avant de continuer.
         <br><br>
-        After successful completion you will be required to login into the newly cloned database.    
+        Une fois l'opération terminée avec succès, vous devrez vous connecter à la base de données nouvellement clonée.
         <br><br>
-        <label><input type='checkbox' checked id="db-archive"> Archive files for database to be renamed</label>
+        <label><input type='checkbox' verified id="db-archive"> Fichiers d'archive pour la base de données à renommer</label>
     </div>
 
     <div class="entry-box">
-        <h3>Enter a new name for your database</h3>
+        <h3>Entrez un nouveau nom pour votre base de données</h3>
         
         <div>
             hdb_<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
                     maxlength="64" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
 
-            <button class="ui-button-action" id="btnCreateDb">Rename <span class="dbname"></span></button>
+            <button class="ui-button-action" id="btnCreateDb">Renommer <span class="dbname"></span></button>
         </div>
         
     </div>
     
     <div class="heurist-helper1">                
-        Do not use punctuation except underscore. Names are case sensitive.
+        N'utilisez pas de ponctuation, à l'exception du trait de soulignement. Les noms sont sensibles à la casse.
     </div>
 </div>
 
 <div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
-    <h3 style="margin:0">Database <span class="dbname"></span> has been renamed</h3>
-    <p class="archive">Database with previous name has been archived and moved to "DELETED_DATABASES" folder.</p>
-    <p>You will be redirected to renamed database <b><span id="newdbname"></span></b></p>
+    <h3 style="margin:0">La base de données <span class="dbname"></span> a été renommée</h3>
+    <p class="archive">La base de données avec le nom précédent a été archivée et déplacée vers le dossier "DELETED_DATABASES".</p>
+    <p>Vous serez redirigé vers la base de données renommée <b><span id="newdbname"></span></b></p>
 
     <p class="warning" style="color:red"></p>
 </div>
 
-<!--
-<p style="padding-left:20px;"><h2 style="color:red">Your database has not been renamed.</h2>
-<p>Please run Verify &gt; Verify database integrity. If this does not find and fix the error, please send a bug report (Help &gt; Bug report) and we will investigate the problem.</p>
--->
-
 <div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
         <div class="loading" style="display:none;height:100%">
             <ol type="1" style="margin-top:40px">
-                <li>Database name and template validation</li>
-                <li>Database folders creation and copy</li>
-                <li>Database creation</li>
-                <li>Copying data</li>
-                <li>Addition of Referential Constraints And Triggers</li>
-                <li>Update paths for uploaded files</li>
-                <li class="archive">Create SQL dump</li>
-                <li class="archive">Archive database dump and folders</li>
-                <li class="archive">Drop renamed database</li>
-                <li class="archive">Delete database folder</li>
+<li>Validation du nom et du modèle de la base de données</li>
+<li>Création et copie des dossiers de la base de données</li>
+<li>Création de la base de données</li>
+<li>Copie des données</li>
+<li>Ajout de contraintes référentielles et de déclencheurs</li>
+<li>Mise à jour des chemins pour les fichiers téléchargés</li>
+<li class="archive">Créer un vidage SQL</li>
+<li class="archive">Archiver le vidage de la base de données et les dossiers</li>
+<li class="archive">Supprimer la base de données renommée</li>
+<li class="archive">Supprimer le dossier de la base de données</li>
             </ol>
         </div>
 </div>

@@ -1,53 +1,53 @@
 <?php
 
 /**
- *  CMS website template 
- * 
+ *  CMS website template
+ *
  *  You may use several templates per server (for specific websites).
  *  We encourage the following of naming convention cmsTemplate_OrganisationName.php
- *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922) 
+ *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922)
  *  in the Advanced tab of the CMS home page record.
- * 
+ *
  *  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
  *  should ONLY be used for development as it uses a path which might change and local changes could
  *  get overwritten by code updates.
- * 
+ *
  *  The template must contain at least two html elements main-header with main-menu and
  *  main-content
- * 
+ *
                 <div id="main-header" style="width:100%;min-height:40px;">
-                    <div id="main-menu" class="mceNonEditable header-element" 
-                        style="width:100%;min-height:40px;color:black;font-size:1.1em;" 
+                    <div id="main-menu" class="mceNonEditable header-element"
+                        style="width:100%;min-height:40px;color:black;font-size:1.1em;"
                         data-heurist-app-id="heurist_Navigation" data-generated="1">
                         <?php print $page_header_menu; ?>
                     </div>
                 </div>
-                <div id="main-content" 
-                    data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+                <div id="main-content"
+                    data-homepageid="<?php print $home_page_record_id;?>"
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
- *  
+ *
  * besides main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle divs
  * These divs will be filled with images and text defined in website home record.
- * 
- * main-content - is the target div for content of particular page to be loaded  
- * 
+ *
+ * main-content - is the target div for content of particular page to be loaded
+ *
  * There are following variables (their values are defined in website home record) that can be used in html header
- * $website_title 
+ * $website_title
  * $meta_keywords
- * $meta_description 
+ * $meta_description
  * $image_icon
- * 
- * Other variables are 
- * $home_page_record_id  - record id of website home page 
+ *
+ * Other variables are
+ * $home_page_record_id  - record id of website home page
  * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
- * 
- * $image_banner - header background banner image 
+ *
+ * $image_banner - header background banner image
  * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
- * $page_header - custom content for main-header defined in website home page record 
- * $page_footer - custom content for footer  
- * 
+ * $page_header - custom content for main-header defined in website home page record
+ * $page_footer - custom content for footer
+ *
  * $show_pagetitle - true|false to show curent page title in #main-pagetitle
  *
  * @package     Heurist academic knowledge management system
@@ -70,7 +70,7 @@
 <html lang="en">
 
 <head>
-    <title><?php print htmlspecialchars(strip_tags($website_title_translated)); ?></title>
+    <title><?php print htmlspecialchars(strip_tags($website_title_translated));?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords; ?>">
     <meta name="description" content="<?php echo $meta_description; ?>">
@@ -151,13 +151,13 @@
 <body>
     <?php
     /*
-default content consists of 
+default content consists of
     #main-header - header width logo, banner, hostinfo and main menu
         #main-logo, #main-logo-alt, #main-host, #main-menu, #main-pagetitle
-        
-    #main-content-container > #main-content - target the content of particular page will be loaded  
+
+    #main-content-container > #main-content - target the content of particular page will be loaded
 */
-    if ($isWebPage) { //set in websiteRecord.php 
+    if ($isWebPage) { //set in websiteRecord.php
         //WEB PAGE - EMBED
     ?>
         <div class="ent_wrapper heurist-website selectmenu-parent">
@@ -171,11 +171,11 @@ default content consists of
                     . 'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
                     . '<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
                     . 'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
-                }else if($system->get_user_id() == 0 && $show_login_button){
-                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+                }elseif($system->get_user_id() == 0 && $show_login_button){
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
                 }
             }
-            
+
             ?>
             <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic) ? 20 : 0; ?>px" id="main-content-container">
                 <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>">
@@ -184,7 +184,7 @@ default content consists of
         </div>
     <?php
 
-        //WEB SITE      
+        //WEB SITE
     } else {
     ?>
 
@@ -220,12 +220,12 @@ default content consists of
                         . 'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
                 }
                 if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
                 }
                 ?>
                 <div id="main-pagetitle" class="ui-heurist-bg-light"></div>
             </div>
-            <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container" style="top:152px;<?php echo $is_page_footer_fixed ? 'bottom:' . $page_footer_height . 'px;' : ''; ?>padding: 5px;">
+            <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container" style="top:152px;<?php echo $is_page_footer_fixed ? 'bottom:' . $page_footer_height . 'px;' : '';?>padding: 5px;">
                 <div id="sidebar">
                     <h3>Simple Search</h3>
                     <input></input>
@@ -239,14 +239,14 @@ default content consists of
                     <a href="5935">Sarcophagii</a>
                     <a href="5936">Texts</a>
                 </div>
-                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : ''; ?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo !$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : ''; ?>">
+                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : '';?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo !$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : '';?>">
                 </div>
                 <?php
-                if (!$is_page_footer_fixed) print $page_footer;
+                if (!$is_page_footer_fixed) {print $page_footer;}
                 ?>
             </div>
             <?php
-            if ($is_page_footer_fixed && $page_footer) print $page_footer;
+            if ($is_page_footer_fixed && $page_footer) {print $page_footer;}
             ?>
         </div>
     <?php

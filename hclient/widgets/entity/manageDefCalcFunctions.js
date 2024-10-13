@@ -42,6 +42,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             this.options.width = 790;
             if(!(this.options.height>0)) this.options.height = 600;
             this.options.beforeClose = function(){}; //to supress default warning
+
         }else{
             this.options.edit_mode = 'popup'; 
             this.options.list_header = true; //show header for resultList
@@ -49,6 +50,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 this.options.width = 790;
                 this.options.height = 600;
             }
+            this.options.title = "Select formula for calculated field";
         }
         
         this.options.edit_height =640;
@@ -70,19 +72,19 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             //load calculation record for given record id
             if(this.options.cfn_ID>0){
-                    var request = {};
+                    let request = {};
                     request['cfn_ID']  = this.options.cfn_ID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    var that = this;                                                
+                    let that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
+                                let recset = new HRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -102,16 +104,15 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             }
         }else{
             this.searchForm.searchDefCalcFunctions(this.options);
-            
-            
-            var iheight = 6;
+
+            let iheight = 6;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
             this.recordList.resultList('option','rendererHeader','');
             this.recordList.resultList('option','show_toolbar',false);
             this.recordList.resultList('option','view_mode','list');
-            //this.recordList.resultList('option','recordview_onselect','none');
+           
 
             
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});
@@ -150,7 +151,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         //assign record id    
         if(this.options.edit_mode=='editonly' && this.options.cfn_ID>0){
-            var ele2 = this._editing.getFieldByName('cfn_ID');
+            let ele2 = this._editing.getFieldByName('cfn_ID');
             ele2.editing_input('setValue', this.options.cfn_ID );
         }
   
@@ -176,7 +177,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this field calculation?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -192,13 +193,13 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     .css({'overflow-x': 'none !important', height:'400px', width:'100% !important'})
                     .appendTo( this.editForm );
            
-        var that = this;            
-        var surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
+        let that = this;            
+        let surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
         
         this.dosframe.on('load', function(){
             
-           var showReps = that.dosframe[0].contentWindow.showReps; 
-            
+           let showReps = that.dosframe[0].contentWindow.showReps; 
+
            showReps.initSnippetEditor( that._editing.getValue('cfn_FunctionSpecification')[0], null, 
             function(instance){
                 that._editing.setFieldValueByName2('cfn_FunctionSpecification', instance.getValue());
@@ -206,14 +207,18 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         });
         
         this.dosframe.attr('src', surl).show();
-    
+
+        let $dlg = this._getEditDialog(true);
+        if($dlg && $dlg.length > 0 && $dlg.parent().find('.ui-dialog-title').length > 0){
+            $dlg.parent().find('.ui-dialog-title').text('Add and apply formulae');
+        }
     },
 
     //
     // header for resultList
     //     
     _recordListHeaderRenderer:function(){
-        return '';
+        return '<span style="height:10px;background:none;"></span>'; // add space above result list
         /*
         function __cell(colname, width){
           //return '<div style="display:table-cell;width:'+width+'ex">'+colname+'</div>';            
@@ -235,22 +240,20 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
-            return '<div class="truncate" style="display:inline-block;'+swidth+'">'
-                    +fld(fldname)+'</div>';
+            return '<div class="truncate" style="display:inline-block;'+swidth+'">'+fld(fldname)+'</div>';
         }
         
-        var recID   = fld('cfn_ID');
+        let recID   = fld('cfn_ID');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2('cfn_Name','50ex');
         
         // add edit/remove action buttons
-        if(true){  //|| (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
-            html = html 
+        html = html 
                 + '<div class="logged-in-only" style="width:90px;display: inline-block">'
                 + '<div title="Click to edit calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
@@ -263,8 +266,6 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 +'<div title="Click to delete calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px;padding-left:20px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div></div>';
-        }
-        //<div style="float:right"></div>' + '<div style="float:right"></div>
         
         html = html 
             + fld2('cfn_FunctionSpecification','50%')

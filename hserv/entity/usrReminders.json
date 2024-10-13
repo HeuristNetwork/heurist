@@ -4,7 +4,7 @@
         "tableName": "usrReminders",
         "tablePrefix": "rem",
         
-        "helpContent": "usrReminders.html",
+        "helpContent": "usrReminders.htm",
         
         "searchFormContent": "searchUsrReminders.html",
         

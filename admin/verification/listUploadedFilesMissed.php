@@ -1,7 +1,7 @@
 <?php
 
 /**
-* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php: 
+* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php:
 * Lists missed files that are listed in recUploadedFiles
 *
 * @package     Heurist academic knowledge management system
@@ -23,35 +23,40 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\USanitize;
+
 $is_included = (defined('PDIR'));
 $has_broken_url = false;
 
 if($is_included){
 
     print '<div style="padding:10px"><h3 id="recordfiles_missed_msg">Check missed registered files</h3><br>';
-    
+
 }else{
+
     define('PDIR','../../');
-    
-    require_once dirname(__FILE__).'/../../hserv/System.php';
-    
-    $system = new System();
+
+    require_once dirname(__FILE__).'/../../autoload.php';
+
+    $sysadmin_pwd = USanitize::getAdminPwd();
+
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
-        print $system->getError()['message'];
+        print $system->getErrorMsg();
         return;
     }
-    
+
     if( @$_REQUEST['all']==1 ){
-        if($system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions)){
+        if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
         ?>
-        
+
         <form action="listUploadedFilesMissed.php" method="POST">
             <div style="padding:20px 0px">
                 Only an administrator (server manager) can carry out this action.<br>
                 This action requires a special system administrator password (not a normal login password)
             </div>
-        
+
             <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
             <input type="password" name="pwd" autocomplete="off" />
             <input type="hidden" name="db" value="<?php  echo htmlspecialchars($_REQUEST['db']);?>"/>
@@ -63,11 +68,11 @@ if($is_included){
         <?php
         exit;
         }
-    }else if(!$system->is_admin()){ //  $system->is_dbowner()
+    }elseif(!$system->is_admin()){ //  $system->is_dbowner()
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
         exit;
     }
-?>    
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -80,7 +85,7 @@ if($is_included){
             <h3>Missed registered files</h3>
         </div>
         <div id="page-inner">
-<?php    
+<?php
 }
 
 $mysqli = $system->get_mysqli();
@@ -89,8 +94,8 @@ $is_all_databases = false;
 if(@$_REQUEST['all']==1){
     //scan all databases
     $is_all_databases = true;
-    $databases = mysql__getdatabases4($mysqli, true);   
-}else if(@$_REQUEST['db']){
+    $databases = mysql__getdatabases4($mysqli, true);
+}elseif(@$_REQUEST['db']){
     list($db_full, $db) = mysql__get_names($_REQUEST['db']);
     $databases = array($db_full);
 }
@@ -101,17 +106,17 @@ $missed_folders = array();
 
 foreach ($databases as $idx=>$db_name){
 
-    //mysql__usedatabase($mysqli, $db_name);
-    list($db_full_name, $db_name) = mysql__get_names($db_name); // full name used for query, short hand used for filestore
 
-    $db_full_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_full_name);  //for snyk
-    $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
+    list($db_full_name, $db_name) = mysql__get_names($db_name);// full name used for query, short hand used for filestore
+
+    $db_full_name = preg_replace(REGEX_ALPHANUM, "", $db_full_name);//for snyk
+    $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
     $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_full_name.'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';
-                    
+
     $res2 = $mysqli->query($query2);
-    
+
     if($res2){
 
         while ($row = $res2->fetch_assoc()) {
@@ -128,25 +133,25 @@ foreach ($databases as $idx=>$db_name){
                     if(!@$missed_folders[$key]){
                         $missed_folders[$key] = 0;
                     }
-                    $missed_folders[$key]++;                  
+                    $missed_folders[$key]++;
                 }
                 $total_count++;
             }
-            
+
         }//while
-        
+
         $res2->close();
-        
+
     }else{
         print htmlspecialchars($db_name).' Cannot execute query. Error: '.$mysqli->error;
     }
 
 }//for databases
 
-if(!(is_array($missed) && count($missed)>0)){        
-    echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';        
+if(isEmptyArray($missed)){
+    echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
 }else{
-    
+
     print 'Summary:<br>';
     foreach($missed_folders as $key=>$cnt){
         print $key.",".intval($cnt).'<br>';
@@ -157,20 +162,20 @@ if(!(is_array($missed) && count($missed)>0)){
     foreach($missed as $data){
         print htmlspecialchars(implode(',',$data)).'<br>';
     }
-    
+
     print '<div style="padding-top:20px;color:red">There are <b>'.count($missed).' of '.$total_count
          .'</b> registered files are missed</div>';
-    //print '<div><a href="#">Download report as CSV</a></div>';
+
 }
 
-if(!$is_included){    
+if(!$is_included){
     print '</div></body></html>';
 }else{
-    
+
     if($has_broken_url){
         echo '<script>$(".recordfiles_missed").css("background-color", "#E60000");</script>';
     }else{
-        echo '<script>$(".recordfiles_missed").css("background-color", "#6AA84F");</script>';        
+        echo '<script>$(".recordfiles_missed").css("background-color", "#6AA84F");</script>';
     }
     print '<br></div>';
 }

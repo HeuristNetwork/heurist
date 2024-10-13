@@ -17,7 +17,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
 
     $src_maj = intval( $row['sys_dbVersion'] );
     $src_min = intval( $row['sys_dbSubVersion'] );
-    
+
     $upgrade_success = true;
 
     if($src_min>=$trg_min){
@@ -30,17 +30,17 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
         $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
 
         if($trg_maj==1 && $src_min==2){
-            $filename = $filename.'.php';    
+            $filename = $filename.'.php';
         }else{
-            $filename = $filename.'.sql';    
+            $filename = $filename.'.sql';
         }
 
         if( file_exists($dir.$filename) ){
 
             if($trg_maj==1 && $src_min==2){
-                include_once($filename);
-                $rep = updateDatabseTo_v3($system, $dbname);    //PHP
-            }else if(!db_script($dbname, $dir.$filename)){ //SQL
+                include_once $filename;
+                $rep = updateDatabseTo_v3($system, $dbname);//PHP
+            }elseif(!db_script($dbname, $dir.$filename)){ //SQL
                 $system->addError(HEURIST_DB_ERROR, 'Error: Unable to execute '.$filename.' for database '.$dbname
                     .'Please check whether this file is valid');
                 $rep = false;
@@ -61,9 +61,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
             }else{
                 $error = $system->getError();
                 if($verbose && $error){
-                    print '<p style="color:red">'
-                    .$error['message']
-                    .'<br>'.@$error['sysmsg'].'</p>';
+                    print error_Div($error['message'].BR.@$error['sysmsg']);
                 }
 
                 $upgrade_success = false;
@@ -73,7 +71,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
         }else{
             $sMsg = "<p style='font-weight:bold'>Cannot find the database upgrade script '$filename'</p>";
             if($verbose){
-                print $sMsg.' Please '.CONTACT_HEURIST_TEAM;
+                print $sMsg.CONTACT_HEURIST_TEAM_PLEASE;
             }else{
                 $system->addError(HEURIST_SYSTEM_CONFIG, $sMsg);
             }
@@ -84,13 +82,8 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
     }//while
 
 
-    if( $upgrade_success ){
-        $mysqli->commit();
-    }else{
-        $mysqli->rollback();
-    }
-    if($keep_autocommit===true) $mysqli->autocommit(TRUE);                
+    mysql__end_transaction($mysqli, $upgrade_success, $keep_autocommit);
 
-    return $upgrade_success; 
-}  
+    return $upgrade_success;
+}
 ?>

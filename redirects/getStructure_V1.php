@@ -22,10 +22,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-//to avoid "Open Redirect" security warning    
+//to avoid "Open Redirect" security warning
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 
-header('Location: ../hserv/structure/export/getDBStructureAsSQL.php?'.$query_string);
+redirectURL('../hserv/structure/export/getDBStructureAsSQL.php?'.$query_string);
 exit;
 ?>

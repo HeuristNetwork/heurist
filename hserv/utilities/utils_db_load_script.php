@@ -61,11 +61,15 @@
 // *** New way to determine the upload directory
 // *** Set UTF8 as default connection charset
 
-define ('DATA_CHUNK_LENGTH',16384);  // How many chars are read per time
-define ('TESTMODE', false);           // Set to true to process the file without actually accessing the database
+define ('DATA_CHUNK_LENGTH',16384);// How many chars are read per time
+define ('TESTMODE', false);// Set to true to process the file without actually accessing the database
 //define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
+define('CLOSE_P', "</p>\n");
+
+
+global $errorScriptExecution;
 $error = false;
 $errorScriptExecution = null;
 
@@ -77,24 +81,28 @@ $errorScriptExecution = null;
 //
 function execute_db_script($system, $database_name_full, $script_file, $message){
     global $errorScriptExecution;
-    
+
     if( db_script($database_name_full, $script_file, false) ){
         return true;
     }else{
         $system->addError(HEURIST_ERROR, $message, $errorScriptExecution);
         return false;
     }
-    
+
 }
 
 // Database configuration
 function db_script($db_name, $filename, $verbose = false){
-    
+
 global $error, $errorScriptExecution;
-    
+
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
+$db_port = HEURIST_DB_PORT;
+
+$err_msg1 = '<p>Query: ';
+$err_msg2 = '<p>MySQL: ';
 
 // Connection charset should be the same as the dump file charset (utf8, latin1, cp1251, koi8r etc.)
 // See http://dev.mysql.com/doc/refman/5.0/en/charset-charsets.html for the full list
@@ -104,7 +112,7 @@ $db_connection_charset = 'utf8mb4';
 
 // OPTIONAL SETTINGS
 
-//$filename           = '';     // Specify the dump filename to suppress the file selection dialog
+//$filename           = '';// Specify the dump filename to suppress the file selection dialog
 $ajax               = true;   // AJAX mode: import will be done without refreshing the website
 $linespersession    = 3000000;   // Lines to be executed per one import session
 $delaypersession    = 0;      // You can specify a sleep time in milliseconds after each session
@@ -112,20 +120,20 @@ $delaypersession    = 0;      // You can specify a sleep time in milliseconds af
 
 // CSV related settings (only if you use a CSV dump)
 
-$csv_insert_table   = '';     // Destination table for CSV files
+$csv_insert_table   = '';// Destination table for CSV files
 $csv_preempty_table = false;  // true: delete all entries from table specified in $csv_insert_table before processing
-$csv_delimiter      = ',';    // Field delimiter in CSV file
+$csv_delimiter      = ',';// Field delimiter in CSV file
 $csv_add_quotes     = true;   // If your CSV data already have quotes around each field set it to false
 $csv_add_slashes    = true;   // If your CSV data already have slashes in front of ' and " set it to false
 
 // Allowed comment markers: lines starting with these strings will be ignored by BigDump
 
-$comment[]='#';                       // Standard comment lines are dropped by default
+$comment[]='#'; // Standard comment lines are dropped by default
 $comment[]='-- ';
-$comment[]='DELIMITER';               // Ignore DELIMITER switch as it's not a valid SQL statement
-// $comment[]='---';                  // Uncomment this line if using proprietary dump created by outdated mysqldump
-// $comment[]='CREATE DATABASE';      // Uncomment this line if your dump contains create database queries in order to ignore them
-// $comment[]='/*!';                     // Or add your own string to leave out other proprietary things
+$comment[]='DELIMITER'; // Ignore DELIMITER switch as it's not a valid SQL statement
+// $comment[]='---';// Uncomment this line if using proprietary dump created by outdated mysqldump
+// $comment[]='CREATE DATABASE';// Uncomment this line if your dump contains create database queries in order to ignore them
+// $comment[]='/*!';// Or add your own string to leave out other proprietary things
 
 // Pre-queries: SQL queries to be executed at the beginning of each import session
 
@@ -139,7 +147,7 @@ $delimiter = ';';
 
 // String quotes character
 
-$string_quotes = '\'';                  // Change to '"' if your dump file uses double qoutes for strings
+$string_quotes = '\'';// Change to '"' if your dump file uses double qoutes for strings
 
 // How many lines may be considered to be one query (except text lines)
 
@@ -154,14 +162,16 @@ $upload_dir = dirname(__FILE__);
 // *******************************************************************************************
 
 if (!$verbose || $ajax){
-  ob_start();  
+  ob_start();
 }
 
 @ini_set('auto_detect_line_endings', 'true');
 @set_time_limit(0);
 
-if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get"))
+if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get")){
   @date_default_timezone_set(@date_default_timezone_get());
+}
+
 
 // Clean and strip anything we don't want from user's input [0.27b]
 
@@ -173,7 +183,7 @@ $file  = false;
 // Check PHP version
 
 if (!$error && !function_exists('version_compare'))
-{ 
+{
     error_echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
 
 }
@@ -181,7 +191,7 @@ if (!$error && !function_exists('version_compare'))
 // Check if mysql extension is available
 
 if (!$error && !function_exists('mysqli_connect_error'))
-{ 
+{
     error_echo ("<p class=\"error\">There is no mySQL extension available in your PHP installation. Sorry!</p>\n");
 }
 
@@ -191,21 +201,21 @@ do_action ('script_runs');
 // Connect to the database, set charset and execute pre-queries
 
 if (!$error && !TESTMODE)
-{ 
-    $mysqli = new mysqli($db_server,$db_username,$db_password);
+{
+    $mysqli = new mysqli($db_server,$db_username,$db_password,null,$db_port);
     if (!$mysqli){
 
-        error_echo (  
-            "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
-            ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
+        error_echo (
+            "<p class=\"error\">Database connection failed due to ".mysqli_connect_error().P_END
+            ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.P_END);
 
     }else{
         $success = $mysqli->select_db($db_name);
 
         if (!$success)
-        { 
+        {
             error_echo(
-                "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
+                "<p class=\"error\">Database connection failed due to ".$mysqli->error.P_END
                 ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
 
         }
@@ -214,24 +224,24 @@ if (!$error && !TESTMODE)
     if (!$error && $db_connection_charset!==''){
         $mysqli->query("SET NAMES $db_connection_charset");
     }
-        
+
 
     if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
     { reset($pre_query);
         foreach ($pre_query as $pre_query_value)
         {	if (!$mysqli->query($pre_query_value))
-            { 
+            {
                 error_echo(
                     "<p class=\"error\">Error with pre-query.</p>\n"
-                    ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
-                    ."<p>MySQL: ".$mysqli->error."</p>\n");
+                    .$err_msg1.trim(nl2br(htmlentities($pre_query_value))).P_END
+                    .$err_msg2.$mysqli->error.P_END);
                 break;
             }
         }
     }
 }
 else
-{ 
+{
     $mysqli = false;
 }
 
@@ -245,9 +255,9 @@ $param_foffset = 0;
 $param_totalqueries = 0;
 
 /* DISABLED snyk SSRF
-if (!$error && isset($_REQUEST["fn"])) 
+if (!$error && isset($_REQUEST["fn"]))
 {
-    //    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
+    //    echo "<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n";
     $param_start = $_REQUEST["start"];
     $param_fn = $_REQUEST["fn"];
     $param_foffset = $_REQUEST["foffset"];
@@ -262,18 +272,18 @@ if (!$error && isset($param_start))
 
     // Set current filename ($filename overrides $param_fn if set)
 
-    if ($filename!="")
+    if ($filename!=""){
         $curfilename=$filename;
-    else if (isset($param_fn))
+    }elseif (isset($param_fn)){
         $curfilename=urldecode($param_fn);
-    else
+    }else{
         $curfilename="";
-
+    }
     // Recognize GZip filename
     $gzipmode=false;
 
     if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
-    {    
+    {
         error_echo(
             "<p class=\"error\">Can't open sql script file ".$curfilename."</p>");
             /*
@@ -284,19 +294,19 @@ if (!$error && isset($param_start))
     }
     // Get the file size (can't do it fast on gzipped files, no idea how)
 
-    else if ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
-    { if (!$gzipmode) $filesize = ftell($file);
-        else $filesize = gztell($file);                   // Always zero, ignore
+    elseif ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
+    { if (!$gzipmode) {$filesize = ftell($file);}
+        else {$filesize = gztell($file);} // Always zero, ignore
     }
     else
-    { 
+    {
         error_echo ("<p class=\"error\">Can't open sql script file $curfilename</p>\n");
     }
 
     // Stop if csv file is used, but $csv_insert_table is not set
 
     if (!$error && ($csv_insert_table == "") && (preg_match("/(\.csv)$/i",$curfilename)))
-    { 
+    {
         error_echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
     }
 }
@@ -322,19 +332,19 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
 // Set the current delimiter if defined
 
-  if (isset($_REQUEST["delimiter"]))
+  if (isset($_REQUEST["delimiter"])){
     $delimiter = $_REQUEST["delimiter"];
-
+  }
 // Empty CSV table if requested
 
   if (!$error && $param_start==1 && $csv_insert_table != "" && $csv_preempty_table)
   {
     $query = "DELETE FROM `$csv_insert_table`";
     if (!TESTMODE && !$mysqli->query(trim($query)))
-    { 
+    {
         error_echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n"
-            ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
-            ."<p>MySQL: ".$mysqli->error."</p>\n");
+            .$err_msg1.trim(nl2br(htmlentities($query))).P_END
+            .$err_msg2.$mysqli->error.P_END);
     }
   }
 
@@ -345,7 +355,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
     skin_open();
     echo "<p class=\"centr\">TEST MODE ENABLED</p>\n";
     echo "<p class=\"centr\">Processing file: <b>".$curfilename."</b></p>\n";
-    echo "<p class=\"smlcentr\">Starting from line: ".$param_start."</p>\n";
+    echo "<p class=\"smlcentr\">Starting from line: ".$param_start.P_END;
     skin_close();
   }
 
@@ -358,7 +368,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Set file pointer to $param_foffset
 
   if (!$error && ((!$gzipmode && fseek($file, $param_foffset)!=0) || ($gzipmode && gzseek($file, $param_foffset)!=0)))
-  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$param_foffset."</p>\n");
+  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$param_foffset.P_END);
   }
 
 // Start processing queries from $file
@@ -380,29 +390,34 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
       $dumpline = "";
       while (!feof($file) && substr ($dumpline, -1) != "\n" && substr ($dumpline, -1) != "\r")
-      { if (!$gzipmode)
+      {
+        if (!$gzipmode){
           $dumpline .= fgets($file, DATA_CHUNK_LENGTH);
-        else
+        }else{
           $dumpline .= gzgets($file, DATA_CHUNK_LENGTH);
+        }
       }
-      if ($dumpline==="") break;
+      if ($dumpline==="") {break;}
 
 // Remove UTF8 Byte Order Mark at the file beginning if any
 
-      if ($param_foffset==0)
+      if ($param_foffset==0){
         $dumpline=preg_replace('|^\xEF\xBB\xBF|','',$dumpline);
+      }
 
 // Create an SQL query from CSV line
 
       if (($csv_insert_table != "") && (preg_match("/(\.csv)$/i",$curfilename)))
       {
-        if ($csv_add_slashes)
+        if ($csv_add_slashes){
           $dumpline = addslashes($dumpline);
+        }
         $dumpline = explode($csv_delimiter,$dumpline);
-        if ($csv_add_quotes)
+        if ($csv_add_quotes){
           $dumpline = "'".implode("','",$dumpline)."'";
-        else
+        }else{
           $dumpline = implode(",",$dumpline);
+        }
         $dumpline = 'INSERT INTO '.$csv_insert_table.' VALUES ('.$dumpline.');';
       }
 
@@ -412,12 +427,13 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
       $dumpline=str_replace("\r", "\n", $dumpline);
 
 // DIAGNOSTIC
-// echo ("<p>Line $linenumber: $dumpline</p>\n");
+// echo "<p>Line $linenumber: $dumpline</p>\n";
 
 // Recognize delimiter statement
 
-      if (!$inparents && strpos ($dumpline, "DELIMITER ") === 0)
+      if (!$inparents && strpos ($dumpline, "DELIMITER ") === 0){
         $delimiter = str_replace ("DELIMITER ","",trim($dumpline));
+      }
 
 // Skip comments and blank lines only if NOT in parents
 
@@ -428,7 +444,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         {
 
 // DIAGNOSTIC
-//          echo ($comment_value);
+//          echo $comment_value;
           if (trim($dumpline)=="" || strpos (trim($dumpline), $comment_value) === 0)
           { $skipline=true;
             break;
@@ -438,7 +454,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         { $linenumber++;
 
 // DIAGNOSTIC
-// echo ("<p>Comment line skipped</p>\n");
+// echo "<p>Comment line skipped</p>\n";
 
           continue;
         }
@@ -451,8 +467,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Count ' and \' (or " and \") in the dumpline to avoid query break within a text field ending by $delimiter
 
       $parents=substr_count ($dumpline_deslashed, $string_quotes)-substr_count ($dumpline_deslashed, "\\$string_quotes");
-      if ($parents % 2 != 0)
+      if ($parents % 2 != 0){
         $inparents=!$inparents;
+      }
 
 // Add the line to query
 
@@ -460,8 +477,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
 // Don't count the line if in parents (text fields may include unlimited linebreaks)
 
-      if (!$inparents)
+      if (!$inparents){
         $querylines++;
+      }
 
 // Stop if query contains more lines as defined by $max_query_lines
 
@@ -477,9 +495,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Execute query if end of query detected ($delimiter as last character) AND NOT in parents
 
 // DIAGNOSTIC
-// echo ("<p>Regex: ".'/'.preg_quote($delimiter).'$/'."</p>\n");
-// echo ("<p>In Parents: ".($inparents?"true":"false")."</p>\n");
-// echo ("<p>Line: $dumpline</p>\n");
+// echo "<p>Regex: ".'/'.preg_quote($delimiter).'$/'.P_END;
+// echo "<p>In Parents: ".($inparents?"true":"false").P_END;
+// echo "<p>Line: $dumpline</p>\n";
 
       if ((preg_match('/'.preg_quote($delimiter,'/').'$/',trim($dumpline)) || $delimiter=='') && !$inparents)
       {
@@ -489,16 +507,16 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         $len = intval(-1*strlen($delimiter));
         $query = substr(trim($query),0,$len);
 
-        if (!$mysqli->query($query)) //!TESTMODE && 
-        { 
+        if (!$mysqli->query($query)) //!TESTMODE &&
+        {
             $errorMsg = $mysqli->error;
-            
+
             if(strpos($errorMsg,'Cannot get geometry object')!==false){
-                error_log( $linenumber.'   '. trim($dumpline) );                
+                error_log( $linenumber.'   '. trim($dumpline) );
             }else{
-                error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
-                ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
-                ."<p>MySQL: ".$errorMsg."</p>\n");
+                error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline).P_END
+                .$err_msg1.trim(nl2br(htmlentities($query))).P_END
+                .$err_msg2.$errorMsg.P_END);
                 //ART:why it was reset? $error = false;
                 if(strpos($errorMsg,'Duplicate column')===false){
                     $error = true;
@@ -518,12 +536,15 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Get the current file position
 
   if (!$error)
-  { if (!$gzipmode)
+  {
+    if (!$gzipmode){
       $foffset = ftell($file);
-    else
+    }else{
       $foffset = gztell($file);
+    }
     if (!$foffset)
-    { error_echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
+    {
+        error_echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
     }
   }
 
@@ -532,7 +553,7 @@ if (TESTMODE){
 
 skin_open();
 
-// echo ("<p class=\"centr\"><b>Statistics</b></p>\n");
+// echo "<p class=\"centr\"><b>Statistics</b></p>\n";
 
   if (!$error)
   {
@@ -552,7 +573,7 @@ skin_open();
     $kbytes_done  = round($bytes_done/1024,2);
     $mbytes_this  = round($kbytes_this/1024,2);
     $mbytes_done  = round($kbytes_done/1024,2);
-    
+
     $filesize = intval($filesize);
 
     if (!$gzipmode)
@@ -594,7 +615,7 @@ skin_open();
       $pct_bar     = str_replace(' ','&nbsp;','<tt>[         Not available for gzipped files          ]</tt>');
     }
 
-    echo ("
+    echo "
     <center>
     <table width=\"520\" border=\"0\" cellpadding=\"3\" cellspacing=\"1\">
     <tr><th class=\"bg4\"> </th><th class=\"bg4\">Session</th><th class=\"bg4\">Done</th><th class=\"bg4\">To go</th><th class=\"bg4\">Total</th></tr>
@@ -607,32 +628,35 @@ skin_open();
     <tr><th class=\"bg4\">% bar</th><td class=\"bgpctbar\" colspan=\"4\">$pct_bar</td></tr>
     </table>
     </center>
-    \n");
+    \n";
 
-// Finish message and restart the script
-$script_name = urlencode($_SERVER["PHP_SELF"]);
+    // Finish message and restart the script
+    $script_name = urlencode($_SERVER["PHP_SELF"]);
 
     if ($linenumber<$param_start+$linespersession)
-    { echo ("<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n");
+    { echo "<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n";
 
       do_action('script_finished');
       $error=true; // This is a semi-error telling the script is finished
     }
     else
-    { if ($delaypersession!=0)
-        echo ("<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n");
-      if (!$ajax)
-        echo ("<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$script_name."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n");
+    {
+      if ($delaypersession!=0){
+        echo "<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n";
+      }
+      if (!$ajax){
+        echo "<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$script_name."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n";
+      }
 
-      echo ("<noscript>\n");
-      echo ("<p class=\"centr\"><a href=\"".$script_name."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n");
-      echo ("</noscript>\n");
+      echo "<noscript>\n";
+      echo "<p class=\"centr\"><a href=\"".$script_name."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n";
+      echo "</noscript>\n";
 
-      echo ("<p class=\"centr\">Press <b><a href=\"".$script_name."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n");
+      echo "<p class=\"centr\">Press <b><a href=\"".$script_name."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n";
     }
   }
   else
-    echo ("<p class=\"error\">Stopped on error</p>\n");
+    {echo "<p class=\"error\">Stopped on error</p>\n";}
 
 skin_close();
 
@@ -641,16 +665,16 @@ skin_close();
 }
 
 
-if ($error && TESTMODE)
-  echo ("<p class=\"centr\"><a href=\"".$script_name."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n");
-
-if ($mysqli) $mysqli->close();
-if ($file && !$gzipmode) fclose($file);
-else if ($file && $gzipmode) gzclose($file);
+if ($error && TESTMODE){
+  echo "<p class=\"centr\"><a href=\"".$script_name."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n";
+}
+if ($mysqli) {$mysqli->close();}
+if ($file && !$gzipmode) {fclose($file);}
+elseif($file && $gzipmode) {gzclose($file);}
 
 // If error or finished put out the whole output from above and stop
 
-if ($verbose) //ART $error && 
+if ($verbose) //ART $error &&
 {
   $out1 = ob_get_contents();
   ob_end_clean();
@@ -673,12 +697,15 @@ if ($verbose) //ART $error &&
 // *******************************************************************************************
 
 function do_action($tag)
-{ global $plugin_actions;
+{
+   global $plugin_actions;
 
   if (isset($plugin_actions[$tag]))
-  { reset ($plugin_actions[$tag]);
-    foreach ($plugin_actions[$tag] as $action)
+  {
+    reset ($plugin_actions[$tag]);
+    foreach ($plugin_actions[$tag] as $action){
       call_user_func_array($action, array());
+    }
   }
 }
 
@@ -690,21 +717,21 @@ function add_action($tag, $function)
 
 function skin_open()
 {
-  echo ('<div class="skin1">');
+  echo '<div class="skin1">';
 }
 
 function skin_close()
 {
-  echo ('</div>');
+  echo DIV_E;
 }
 
 function error_echo($msg){
     global $error, $errorScriptExecution;
-    
+
     error_log($msg);
-    
+
     $error = true;
-    
+
     $errorScriptExecution = $msg;
     //echo ($msg);
 }

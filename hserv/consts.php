@@ -1,9 +1,10 @@
 <?php
+use \hserv\utilities\USystem;
 
 /**
 * List of system constants
 *
-* Many of them are defined with values set in congigIni.php 
+* Many of them are defined with values set in congigIni.php
 * (and respectively in ../heuristConfigIni.php)
 *
 * @package     Heurist academic knowledge management system
@@ -24,31 +25,32 @@
 
 // TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
-require_once dirname(__FILE__).'/utilities/uSystem.php';
 
-define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current version of code
+define('HEURIST_VERSION', $version);//code version is defined congigIni.php
+define('HEURIST_MIN_DBVERSION', "1.3.16");//minimal version of db for current version of code
 
-// The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database, 
+// The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database,
 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'https://heuristref.net';  //default value
+    $heuristReferenceServer = 'https://heuristref.net';//default value
     //$heuristReferenceServer = 'https://HeuristRef.Net';
 }
 
+define('HEURIST_DEF_DIR', '/heurist/'); //default Heurist folder
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
-define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index and template databases url
-define('HEURIST_INDEX_DBREC', '1-22'); //concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
+define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.HEURIST_DEF_DIR);//central index and template databases url
+define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
-define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index'); 
-define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
+define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
+define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
+define('HEURIST_HELP', $heuristReferenceServer.HEURIST_DEF_DIR.'help');
 
 if (@$httpProxy != '') {
-    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true)); //always use proxy for CURL
-    define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));//always use proxy for CURL
+    define('HEURIST_HTTP_PROXY', $httpProxy);//http address:port for proxy request
     if (@$httpProxyAuth != '') {
-        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth);// "username:password" for proxy authorization
     }
 }
 
@@ -63,76 +65,71 @@ if (!@$mailDomain) {
 }
 
 define('HEURIST_SERVER_URL', $host_params['server_url']);
-define('HEURIST_SERVER_NAME', @$host_params['server_name']); // server host name for the configured name, eg. myheurist.net
+define('HEURIST_SERVER_NAME', @$host_params['server_name']);// server host name for the configured name, eg. myheurist.net
 
-if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]); //NOT USED
+if(@$_SERVER["REQUEST_URI"]) {define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]);}//NOT USED
 if(!defined('HEURIST_DIR')){
-  define('HEURIST_DIR', 
-    (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"]) 
-    . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)  
-} 
+  define('HEURIST_DIR',
+    (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"])
+    . $host_params['install_dir']);//  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
+}
 
-define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  ); // eg. https://myheurist.net/heurist/
+define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  );// eg. https://myheurist.net/heurist/
 
-define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] ); // production url eg. https://myheurist.net/heurist/
+define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] );// production url eg. https://myheurist.net/heurist/
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 
 if ($dbHost) {
     define('HEURIST_DBSERVER_NAME', $dbHost);
 } else {
-    define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heurist codebase
+    define('HEURIST_DBSERVER_NAME', "localhost");//configure to access mysql on the same machine as the Heurist codebase
 }
 //to use native mysqldump you have to specify file with mysql credentials
 //mysql_config_editor set --login-path=local --host=localhost --user={usename} --password
 
 //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-define('HEURIST_DB_MYSQL_SCRIPT_MODE', isset($dbScriptMode)?$dbScriptMode:2);
-define('HEURIST_DB_MYSQL_DUMP_MODE', isset($dbDumpMode)?$dbDumpMode:2);
 
 //path to mysqldump - it is required if $dbDumpMode==2
-if(isset($dbMySQLDump)){
-    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);  
+if(isset($dbMySQLDump) && file_exists($dbMySQLDump)){
+    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);
+    $dbDumpMode = isset($dbDumpMode)?$dbDumpMode:2;
+}else{
+    $dbDumpMode = 0;
 }
-if(isset($dbMySQLpath)){
-    define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);  
+define('HEURIST_DB_MYSQL_DUMP_MODE', $dbDumpMode);
+
+if(isset($dbMySQLpath) && file_exists($dbMySQLpath)){
+    define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);
+    $dbScriptMode = isset($dbScriptMode)?$dbScriptMode:2;
+}else{
+    $dbScriptMode = 0;
 }
+define('HEURIST_DB_MYSQL_SCRIPT_MODE', $dbScriptMode);
 
-
-
-/*  @todo - redirect to system config error page
-
-if (!($dbAdminUsername && $dbAdminPassword)) { //if these are not specified then we can't do anything
-returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
-}
-if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
-//die("MySql user password contains non valid charactes. Only alphanumeric allowed. Set in configIni.php");
-returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
-}
-*/
-define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
+define('ADMIN_DBUSERNAME', $dbAdminUsername);//user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('HEURIST_DB_PREFIX', $dbPrefix);
 define('HEURIST_DB_PORT', $dbPort);
 
 //---------------------------------
 $date = new DateTime();
-//define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2023 The University of Sydney.');
-define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION); //.' '.$date->format('d M Y @ H:i') );
+
+define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js
 */
-define("HEURIST_INVALID_REQUEST", "invalid");    // 400 The Request provided was invalid.
-define("HEURIST_NOT_FOUND", "notfound");         // 404 The requested object not found.
-define("HEURIST_ERROR", "error");                // 500 General error: wrong data, file i/o
-define("HEURIST_OK", "ok");                      // 200 The response contains a valid Result.
-define("HEURIST_REQUEST_DENIED", "denied");      // 403 Not enough rights (logout/in to refresh) or action
-define("HEURIST_ACTION_BLOCKED", "blocked");     // 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
-define("HEURIST_UNKNOWN_ERROR", "unknown");      // 500 A request could not be processed due to a server error. The request may succeed if you try again.
-define("HEURIST_DB_ERROR", "database");          // 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-define("HEURIST_SYSTEM_CONFIG", "syscfg");       // 500 System not-fatal configuration error. Contact system admin
-define("HEURIST_SYSTEM_FATAL", "system");        // 500 System fatal configuration error. Contact system admin
+define("HEURIST_INVALID_REQUEST", "invalid");// 400 The Request provided was invalid.
+define("HEURIST_NOT_FOUND", "notfound");// 404 The requested object not found.
+define("HEURIST_ERROR", "error");// 500 General error: wrong data, file i/o
+define("HEURIST_OK", "ok");// 200 The response contains a valid Result.
+define("HEURIST_REQUEST_DENIED", "denied");// 403 Not enough rights (logout/in to refresh) or action
+define("HEURIST_ACTION_BLOCKED", "blocked");// 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
+define("HEURIST_UNKNOWN_ERROR", "unknown");// 500 A request could not be processed due to a server error. The request may succeed if you try again.
+define("HEURIST_DB_ERROR", "database");// 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
+define("HEURIST_SYSTEM_CONFIG", "syscfg");// 500 System not-fatal configuration error. Contact system admin
+define("HEURIST_SYSTEM_FATAL", "system");// 500 System fatal configuration error. Contact system admin
 /*
 $usrTags = array(
 "rty_ID"=>"i",
@@ -169,7 +166,17 @@ define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
 define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
+define('CONTACT_HEURIST_TEAM_PLEASE', ' Please '.CONTACT_HEURIST_TEAM);
 define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
+
+define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
+    'It is also possible that drive space has been exhausted. '
+            .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
+            .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
+            .'<br><br>We apologise for any inconvenience');
+
+define('CONTACT_SYSADMIN_ABOUT_PERMISSIONS',
+        'Please ask your system administrator to correct the path and/or permissions for this directory');
 
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
@@ -178,19 +185,83 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 define("HEURIST_UNITED_TERMS", true);
 
 
+//common constants
+define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
+define('DATE_8601', 'Y-m-d H:i:s');
+define('REGEX_YEARONLY', '/^-?\d+$/');
+define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
+define('REGEX_EOL', '/[\r\n]/');
+
+define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
+define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
+define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');
+define('CTYPE_JS', 'Content-type: text/javascript');
+define('CONTENT_LENGTH', 'Content-Length: ');
+define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
+
+//common separators
+define('TABLE_S','<table>');
+define('TR_S','<tr><td>');
+define('TD','</td><td>');
+define('TD_E','</td>');
+define('TR_E','</td></tr>');
+define('TABLE_E','</table>');
+define('DIV_S','<div>');
+define('DIV_E','</div>');
+define('BR','<br>');
+define('BR2','<br><br>');
+
+//common sql reserved words
+define('SQL_AND',' AND ');
+define('SQL_NOT',' NOT ');
+define('SQL_WHERE',' WHERE ');
+define('SQL_NULL', 'NULL');
+define('SQL_DELETE', 'DELETE FROM ');
+define('SQL_IN',' IN (');
+define('SQL_FALSE','(1=0)');
+define('SQL_BETWEEN',' BETWEEN ');
+
+define('MT_VIMEO','video/vimeo');
+define('MT_YOUTUBE','video/youtube');
+define('MT_SOUNDCLOUD','audio/soundcloud');
+
+//
+define('HTTP_SCHEMA','http://');
+define('HTTPS_SCHEMA','https://');
+define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
+define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');
+
+global $glb_lang_codes;
 $glb_lang_codes = null;
 
 //common languages for translation database definitions (ISO639-2 codes)
 if(!isset($common_languages_for_translation)){
-    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');    
+    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');
 }
 
 //---------------------------------
 // used in Uploadhandler.php
-define('HEURIST_ALLOWED_EXT', 
+define('HEURIST_ALLOWED_EXT',
 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,'
 .'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,'
 .'ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,mtl,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim');
+
+//special media types
+define('ULF_REMOTE','_remote');
+define('ULF_IIIF','_iiif');
+define('ULF_IIIF_IMAGE','_iiif_image');
+define('ULF_TILED_IMAGE','_tiled');
+
+//default system folders
+define('DIR_IMAGE','image/');
+define('DIR_SCRATCH','scratch/');
+define('DIR_BACKUP','backup/');
+define('DIR_THUMBS','thumbs/');
+define('DIR_ENTITY','entity/');
+
+
+define('ICON_PLACEHOLDER', HEURIST_BASE_URL.'hclient/assets/16x16.gif');
+define('ICON_EXTLINK', HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif');
 
 /** RECORD TYPE DEFINITIONS */
 $rtDefines = array(
@@ -238,18 +309,18 @@ $rtDefines = array(
     'RT_PHOTOGRAPH' => array(3, 129),
     'RT_ARCHIVAL_RECORD' => array(3, 1000),
     'RT_ARCHIVAL_SERIES' => array(3, 1001),
-    
+
     // Spatial data
-    'RT_PLACE' => array(3, 1009), 
+    'RT_PLACE' => array(3, 1009),
     'RT_MAP_ANNOTATION' => array(2, 101),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
-    'RT_MAP_LAYER' => array(3, 1020),     
+    'RT_MAP_LAYER' => array(3, 1020),
 
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
-    'RT_TLCMAP_DATASET' => array(1271, 54),     
+    'RT_TLCMAP_DATASET' => array(1271, 54),
 
     'RT_IMAGE_SOURCE' => array(3, 1018),
     'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
@@ -257,8 +328,8 @@ $rtDefines = array(
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),
-    
-    'RT_CMS_HOME' => array(99, 51),  
+
+    'RT_CMS_HOME' => array(99, 51),
     'RT_CMS_MENU' => array(99, 52)
 );
 
@@ -289,19 +360,19 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //in basemap zoom levels (0-20)
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
     // zoom in km used for map documents (map zoom ranges) and layers (visibility range)
-    //note that minimum in km turns to maximum in native zoom  
-    'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
+    //note that minimum in km turns to maximum in native zoom
+    'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km
     'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
     'DT_LEGEND_OUT_ZOOM' => array(3, 1087), //hide or disable layer in legend if layer is out of zoom range
     'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
-    
+
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
-    
+
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
     'DT_FILE_TYPE' => array(2, 41),
@@ -311,8 +382,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_END_WORD' => array(2, 45),
     'DT_START_ELEMENT' => array(2, 46),
     'DT_END_ELEMENT' => array(2, 47),
-    'DT_LAYOUT_STRING' => array(2, 48),    
-    'DT_TRANSFORM_RESOURCE' => array(2, 50), 
+    'DT_LAYOUT_STRING' => array(2, 48),
+    'DT_TRANSFORM_RESOURCE' => array(2, 50),
     'DT_PROPERTY_VALUE' => array(2, 51),
     'DT_TOOL_TYPE' => array(2, 52),
     'DT_RECORD_TYPE' => array(2, 53),
@@ -342,7 +413,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_JOURNAL_REFERENCE' => array(3, 1034),
     'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
     'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
-    
+
     'DT_EXTERNAL_ID' => array(2, 581), //external non heurist record id
     // Spatial & mapping
     'DT_KML_FILE' => array(3, 1044),
@@ -368,12 +439,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SHAPE_FILE' => array(3, 1069),
     'DT_DBF_FILE' => array(3, 1070),
     'DT_SHX_FILE' => array(3, 1071),
-    
+
     'DT_CRS' => array(2, 1092), // Coordinate Reference System
     'DT_WORLD_BASEMAP' => array(2, 1093),  // Need to use trm_Label for terms to get basemap name
 
     'DT_EXTRACTED_TEXT' => array(2, 652),  //for pdf parser
-    
+
     'DT_CMS_TOP_MENU' => array(99, 742),  //pointer  to top level menues in home page
     'DT_CMS_MENU' => array(99, 761),  //pointer to sub menu
     'DT_CMS_KEYWORDS' => array(99, 948),
@@ -384,8 +455,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_PAGETITLE' => array(99, 952),   //show page title above content
     'DT_CMS_TOPMENUSELECTABLE' => array(2, 938), // allow top menu to be selectable, if a submenu is present
     //'DT_CMS_BANNER' => array(99, 951),
-    //'DT_CMS_ALTLOGO' => array(2, 926),  
-    //'DT_CMS_ALTLOGO_URL' => array(2, 943),  
+    //'DT_CMS_ALTLOGO' => array(2, 926),
+    //'DT_CMS_ALTLOGO_URL' => array(2, 943),
     //'DT_CMS_ALT_TITLE' => array(3, 1009),
     'DT_CMS_SCRIPT' => array(2, 927),
     'DT_CMS_PAGETYPE' => array(2, 928), //menu (2-6253) or standalone (2-6254)
@@ -394,10 +465,10 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGES' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
-    
+
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 
-); //TODO: add email magic numbers
+);//TODO: add email magic numbers
 
 
 $trmDefines = array(
@@ -413,7 +484,7 @@ $trmDefines = array(
     'TRM_NAME_ONLY' => array(2, 9634),
     'TRM_ICON_ONLY' => array(2, 9635),
     'TRM_NAME_AND_ICON' => array(2, 9636),
-    
+
     'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081),
     'TRM_LEGEND_OUT_ZOOM_DISABLED' => array(3, 5082)
 );
@@ -422,12 +493,9 @@ $trmDefines = array(
 //---------------------------------
 
 function boot_error_handler($errno, $errstr, $errfile, $errline){
-    switch($errno){
-        case E_WARNING:
-        //case E_PARSE:
-        //case E_NOTICE:
+    if($errno==E_WARNING){ //E_PARSE E_NOTICE
             if(strpos($errstr,'Input variables')>0){
-        
+
                 $message = "$errstr $errfile:$errline";
                 error_log('Large INPUT: '.htmlspecialchars($message));
                 error_log(print_r(array_slice($_REQUEST, 0, 100),true));
@@ -441,7 +509,84 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             }
             */
             }
-            break;
     }
 }
+
+//
+// Common functions
+//
+function error_WrongParam($param){
+    return $param.' parameter is not defined or wrong';
+}
+
+function error_Div($text){
+    return '<div class="error" style="color:red">'.$text.DIV_E;
+}
+
+
+function redirectURL($url){
+    header('Location: '.$url);
+}
+
+function isEmptyStr($val){
+    // !empty is analogous to isset($foo) && $foo
+    return empty($val) || $val=='';
+}
+
+function isEmptyArray($val){
+    return !is_array($val) || empty($val);
+}
+
+/**
+ * Searches for a value in a two-dimensional array by a specific key.
+ *
+ * @param array $arr The array to search in (2D array).
+ * @param string $key The key to search for within the nested arrays.
+ * @param mixed $keyvalue The value to match against.
+ * @return int|null Returns the index of the found item, or null if not found.
+ */
+function findInArray(array $arr, string $key, $keyvalue): ?int {
+    foreach ($arr as $idx => $item) {
+        if (is_array($item) && array_key_exists($key, $item) && $item[$key] === $keyvalue) {
+            return $idx;
+        }
+    }
+    return null;
+}
+
+function isPositiveInt($val){
+    //return isset($val) && is_numeric($val) && $val>0;
+    return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0;
+}
+
+function isLocalHost(){
+    return $_SERVER["SERVER_NAME"]=='localhost' || $_SERVER["SERVER_NAME"]=='127.0.0.1';
+}
+
+
+function dataOutput($data, $filename=null, $mimeType=null)
+{
+    $len = strlen($data);
+    
+    if($mimeType==null){
+        $mimeType = 'application/json';
+    }
+
+    header('Content-type: '.$mimeType.';charset=UTF-8');
+    
+    if($filename){
+        header('Content-Disposition: attachment; filename="' . $filename . '";');
+        header("Pragma: no-cache;");
+        header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+    }
+    
+    if($len>0){header('Content-Length: '. $len);}
+    if($mimeType!='gzip'){
+        header('X-Content-Type-Options: nosniff');
+        header('X-XSS-Protection: 1; mode=block');
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
+    }
+    echo $data;
+}
+
 ?>

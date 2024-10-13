@@ -18,22 +18,24 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global google */
+
 /**
 *  Represents the layer on map
 */
-function hMapLayer( _options ) {
-    var _className = "MapLayer",
+function HMapLayer( _options ) {
+    const _className = "MapLayer",
     _version   = "0.4";
 
-    var options = {
+    let options = {
       //gmap:              //google map
       //recordset:  
       //record
       preserveViewport: true  
     };
     
-    var _record, _recordset; //record from recordset
-    var _map_overlay;
+    let _record, _recordset; //record from recordset
+    let _map_overlay;
     
     //
     //
@@ -50,15 +52,15 @@ function hMapLayer( _options ) {
         }
         
         //detect layer type
-        var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
+        let rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
 
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
             
             _map_overlay = _addTiledImage( null );
             
-        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+        //}else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-            _map_overlay = _addImage();
+        //    _map_overlay = _addImage();
             
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
             
@@ -73,11 +75,11 @@ function hMapLayer( _options ) {
     
         if(window.hWin.HEURIST4.util.isempty(layer_url)){
             //obfuscated file id
-            var file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+            let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
 
-            if($.isArray(file_info)){
+            if(Array.isArray(file_info)){
 
-                var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
+                let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&mode=url&file='+
                 file_info[0];
                 window.hWin.HEURIST4.util.sendRequest(url, {}, null, 
                     function (response) {
@@ -93,25 +95,25 @@ function hMapLayer( _options ) {
             }
         }
         
-        var imageLayer = null;
+        let imageLayer = null;
         
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
         if(!window.hWin.HEURIST4.util.isempty(layer_url)){
 
-            var tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
-            var mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
+            let tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
+            let mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
             
-            var tileUrlFunc = null; 
+            let tileUrlFunc = null; 
 
-            var ccode1 = $Db.getConceptID('trm', tilingSchema);
-            var ccode2 = $Db.getConceptID('trm', mimeType);
+            let ccode1 = $Db.getConceptID('trm', tilingSchema);
+            let ccode2 = $Db.getConceptID('trm', mimeType);
             
             if(ccode1=='2-549'){ //virtual earth
 
                 tileUrlFunc = function (a,b) {
 
                     function __tileToQuadKey(x, y, zoom) {
-                        var i, mask, cell, quad = "";
+                        let i, mask, cell, quad = "";
                         for (i = zoom; i > 0; i--) {
                             mask = 1 << (i - 1);
                             cell = 0;
@@ -123,7 +125,7 @@ function hMapLayer( _options ) {
                     }
 
 
-                    var res = layer_url + __tileToQuadKey(a.x,a.y,b) 
+                    let res = layer_url + __tileToQuadKey(a.x,a.y,b) 
                     + (ccode2=='2-540'? ".png" : ".gif");
                     return res;
                 };
@@ -132,8 +134,8 @@ function hMapLayer( _options ) {
 
                 tileUrlFunc = function(coord, zoom) {
 
-                    var bound = Math.pow(2, zoom);
-                    var tile_url = layer_url + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                    let bound = Math.pow(2, zoom);
+                    let tile_url = layer_url + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (ccode2=='2-540'? ".png" : ".gif");
                     return tile_url;
                 };
@@ -142,7 +144,7 @@ function hMapLayer( _options ) {
 
 
             // Tile type
-            var tileType = new google.maps.ImageMapType({
+            let tileType = new google.maps.ImageMapType({
                 getTileUrl: tileUrlFunc,
                 tileSize: new google.maps.Size(256, 256),
                 minZoom: 1,
@@ -157,7 +159,7 @@ function hMapLayer( _options ) {
         removeOverlay
         zoomToOverlay
 */
-            var overlay_index = options.gmap.overlayMapTypes.push( tileType )-1;
+            let overlay_index = options.gmap.overlayMapTypes.push( tileType )-1;
 
             imageLayer = {
                 
@@ -187,29 +189,22 @@ function hMapLayer( _options ) {
     }
     
     //
-    // add image
-    //
-    function _addImage(){
-        
-        
-    }
-    
-    //
     // add kml
     // files
     // kmlSnippet
     //
     function _addKML() {
         
-        var kmlLayer = null;
+        let kmlLayer = null;
         
-        var fileID = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
-        var kmlSnippet = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_KML']);
+        let fileID = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+        let kmlSnippet = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_KML']);
+        let fileURL = null;
 
         // KML file
         if(!window.hWin.HEURIST4.util.isnull(fileID)) {
 
-            var fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
+            fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
             
             // note google refuses kml from localhost
             // Display on Google Maps
@@ -265,7 +260,7 @@ function hMapLayer( _options ) {
 
 
     //public members
-    var that = {
+    let that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},

@@ -23,14 +23,12 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     //
     _initControls: function() {
 
-        var that = this;
-        
         this.input_search_type = this.element.find('#input_search_type');   //field type
-        var vals = []; 
-        var filter_types = [];
+        let vals = []; 
+        let filter_types = [];
         if(this.options.filters && this.options.filters.types){
             filter_types = this.options.filters.types;
-            if($.isArray(filter_types) && filter_types.length>0){
+            if(Array.isArray(filter_types) && filter_types.length>0){
                 this.input_search_type.val(filter_types[0]);
             }else{
                 filter_types = [];
@@ -39,7 +37,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             vals = [{key:'any',title:'any type'}];
         }
         
-        for (var key in $Db.baseFieldType)
+        for (let key in $Db.baseFieldType)
         if(!window.hWin.HEURIST4.util.isempty($Db.baseFieldType[key])){
             if( key!='calculated' &&  (filter_types.length==0 || filter_types.indexOf(key)>=0))
                 vals.push({key:key,title:$Db.baseFieldType[key]});
@@ -54,7 +52,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this._super();
 
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
@@ -128,7 +126,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         this._on(this.element.find('#chb_show_all_groups'),  { change:function(){
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
-                                            ?'any':this.options.dtg_ID).change();
+                                            ?'any':this.options.dtg_ID).trigger('change');
         }});
 
         this.input_filter_rectype = this.element.find('#input_filter_rectype');
@@ -150,7 +148,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.element.find('#input_field_type_div').hide();
             this.element.find('#input_sort_type_div').hide();
         }
-        if($.isFunction(this.options.onInitCompleted)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
             this.startSearch();              
@@ -164,7 +162,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this._super( key, value );
         if(key == 'dtg_ID'){
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
-                this.element.find('#input_search_group').val(value).change();
+                this.element.find('#input_search_group').val(value).trigger('change');
         }
     },
 
@@ -173,13 +171,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
         
             if(this.input_search.val()!=''){
 
-                var s = this.input_search.val();
+                let s = this.input_search.val();
                 this.element.find('#chb_show_all_groups').prop('checked', true);
 
                 if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
@@ -187,7 +183,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                      s = '';
                 }else if (s.indexOf('-')>0){
                     
-                    var codes = s.split('-');
+                    let codes = s.split('-');
                     if(codes.length==2 
                         && window.hWin.HEURIST4.util.isNumber(codes[0])
                         && window.hWin.HEURIST4.util.isNumber(codes[1])
@@ -206,7 +202,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             }   
             
             
-            var sGroupTitle = '';
+            let sGroupTitle = '';
             if(this.options.import_structure){
                 if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
                     request['dty_ID_local'] = '=0';
@@ -218,7 +214,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
                 sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
                 if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
-                    var dtg_id = this.options.dtg_ID; //this.input_search_group.val();
+                    let dtg_id = this.options.dtg_ID;
                     request['dty_DetailTypeGroupID'] = dtg_id;
                     sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
                                         +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
@@ -247,28 +243,8 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 this._trigger( "onfilter", null, request);            
                 
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'id'; //'id';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                //we may search users in any database
-                request['db']     = this.options.database;
-
-                var that = this;                                                
-           
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
+                this._search_request = request;
+                this._super();                
             }            
             
     },

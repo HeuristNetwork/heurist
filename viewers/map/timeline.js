@@ -26,6 +26,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global vis */
 
 $.widget( "heurist.timeline", {
 
@@ -56,7 +57,7 @@ $.widget( "heurist.timeline", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.element
         // prevent double click to select text
@@ -77,7 +78,7 @@ $.widget( "heurist.timeline", {
         
             this.timeline_ele = document.getElementById( this.options.element_timeline );
             // Configuration for the Timeline
-            var options = {dataAttributes: ['id'],
+            let options = {dataAttributes: ['id'],
                            orientation:'both', //scale on top and bottom
                            selectable:true, multiselect:true,
                            zoomMax:31536000000*500000,
@@ -93,7 +94,7 @@ $.widget( "heurist.timeline", {
             this.vis_timeline = new vis.Timeline(this.timeline_ele, null, options);
         
         
-            var that = this;
+            let that = this;
         
             this.vis_timeline.on('rangechanged', function(params){
                     that._timelineApplyRangeOnMap(params);  
@@ -101,11 +102,11 @@ $.widget( "heurist.timeline", {
             //on select listener
             this.vis_timeline.on('select', function(params){
                 
-                var selection = params.items;
+                let selection = params.items;
                 that.selected_rec_ids = [];
                 if(selection && selection.length>0){
 
-                    var e = params.event;
+                    let e = params.event;
                                                 //div.vis-item.vis-dot.vis-selected.vis-readonly
                     e.cancelBubble = true;
                     if (e.stopPropagation) e.stopPropagation();
@@ -114,7 +115,7 @@ $.widget( "heurist.timeline", {
 
                     //remove dataset prefixes - extract record ID
                     $.each(selection, function(idx, itemid){
-                        var k = itemid.indexOf('-');
+                        let k = itemid.indexOf('-');
                         if(k>0){
                             itemid = itemid.substring(k+1);
                             k = itemid.indexOf('-');
@@ -125,13 +126,10 @@ $.widget( "heurist.timeline", {
                         that.selected_rec_ids.push( itemid ); //record id
                     });
                     
-                    if($.isFunction(that.options.onselect)){ //trigger global event
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
                         that.options.onselect.call(that, that.selected_rec_ids);    
                     }
     
-                    //$( document ).bubble( "option", "content", "" );
-                    //_showSelection(true, true, null); //show selection on map
-                    //if(_onSelectEventListener)_onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
         
@@ -163,7 +161,7 @@ $.widget( "heurist.timeline", {
     //
     setSelection: function(selected){
         this.selected_rec_ids = selected;
-        var selection_vis = [];
+        let selection_vis = [];
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.selected_rec_ids) && this.vis_timeline.itemsData){
             
             this.vis_timeline.itemsData.forEach(function (itemData) {
@@ -177,10 +175,10 @@ $.widget( "heurist.timeline", {
        
         //scroll to first selected
         if(selection_vis.length>0){
-            var tele = $(this.timeline_ele);
-            var rdiv = tele.find('.vis-item.vis-selected:first'); 
+            let tele = $(this.timeline_ele);
+            let rdiv = tele.find('.vis-item.vis-selected:first'); 
             if(rdiv.length>0){
-                var spos2 = rdiv.position().top; //relative position of record div
+                let spos2 = rdiv.position().top; //relative position of record div
                 tele.scrollTop( spos2 );
             }
         }
@@ -195,9 +193,9 @@ $.widget( "heurist.timeline", {
             this.setSelection(selected);
         }
         
-        var sels = this.vis_timeline.getSelection();
+        let sels = this.vis_timeline.getSelection();
         if(sels && sels['length']>0){
-               var range = this.vis_timeline.getDataRangeHeurist(new vis.DataSet(this.vis_timeline.itemsData.get(sels)));
+               let range = this.vis_timeline.getDataRangeHeurist(new vis.DataSet(this.vis_timeline.itemsData.get(sels)));
                this._timelineZoomToRange(range);
         }
     },
@@ -207,7 +205,7 @@ $.widget( "heurist.timeline", {
     //    
     timelineUpdateGroupLabel: function(timeline_group){
       
-        var grp = this.vis_timeline.itemSet.groups[timeline_group.id];
+        let grp = this.vis_timeline.itemSet.groups[timeline_group.id];
         grp.setData(timeline_group);
         //grp.dom.inner
         
@@ -219,12 +217,12 @@ $.widget( "heurist.timeline", {
     timelineRefresh: function(timeline_data, timeline_groups){
 
         /*
-        var timeline_data = [],
+        let timeline_data = [],
             timeline_groups = [];
 
         $.each(all_mapdata, function(dataset_id, mapdata){
 
-            var cnt = mapdata.timeline.items.length;
+            let cnt = mapdata.timeline.items.length;
             if(mapdata.visible && cnt>0){
 
                 timeline_data = timeline_data.concat( mapdata.timeline.items );
@@ -241,11 +239,11 @@ $.widget( "heurist.timeline", {
             
             this._off($(this.timeline_ele).find('input[type="checkbox"][data-dty_id]'),'click');
             
-            var tdata = [];
+            let tdata = [];
             if($.isPlainObject(timeline_data)){
 
-                for(var idx in timeline_data) {
-                    if(timeline_data.hasOwnProperty(idx)){
+                for(let idx in timeline_data) {
+                    if(Object.hasOwn(timeline_data, idx)){
                         tdata = tdata.concat(timeline_data[idx]);
                     }
                 }
@@ -254,21 +252,21 @@ $.widget( "heurist.timeline", {
                 tdata = timeline_data;
             }
 
-            var groups = new vis.DataSet( timeline_groups );
-            var items = new vis.DataSet( tdata ); //options.items );
+            let groups = new vis.DataSet( timeline_groups );
+            let items = new vis.DataSet( tdata ); //options.items );
             
             this.vis_timeline_range = null; //reset
             
-            var timeline_content = $(this.timeline_ele).find('.vis-itemset');
+            let timeline_content = $(this.timeline_ele).find('.vis-itemset');
             timeline_content.hide();
             window.hWin.HEURIST4.msg.bringCoverallToFront($(this.timeline_ele), {'background-color': "#000", opacity: '0.6', color: 'white', 'font-size': '16px'}, 'loading dates ...');
             
-            var that = this;
+            let that = this;
             
             this.vis_timeline.itemSet.setOptions({
                     onDisplay: function(item, callback){
                         //returns true if visible
-                        var res = true;
+                        let res = true;
                         if(that.visible_fields 
                             && that.visible_fields[item.data.group] 
                             && that.visible_fields[item.data.group].length>0)
@@ -278,8 +276,8 @@ $.widget( "heurist.timeline", {
                         return res;
                     },
                     groupOrder:function (a, b) {
-                    var av = a['content'];
-                    var bv = b['content'];
+                    let av = a['content'];
+                    let bv = b['content'];
                     if(av.indexOf('Current query')==0) return -1;
                     if(bv.indexOf('Current query')==0) return 1;
                     return av > bv ? 1 : av < bv ? -1 : 0;
@@ -305,11 +303,11 @@ $.widget( "heurist.timeline", {
             
             //add listener
             this._on($(this.timeline_ele).find('input[type="checkbox"][data-dty_id]'),{click:function(event){
-                var group_id = $(event.target).attr('data-layer_id');
+                let group_id = $(event.target).attr('data-layer_id');
                 if(!this.visible_fields) this.visible_fields = {};
                 if(!this.visible_fields[group_id]) this.visible_fields[group_id] = [];
                 this.visible_fields[group_id] = [];
-                var that = this;
+                let that = this;
                 $(this.timeline_ele).find('input[type="checkbox"][data-layer_id="'+group_id+'"]').each(function(i,item){
                     if($(item).prop('checked')){
                         that.visible_fields[group_id].push(parseInt($(item).attr('data-dty_id')));
@@ -331,7 +329,7 @@ $.widget( "heurist.timeline", {
             if(this.vis_timeline_range==null){
                 this.vis_timeline_range = this.vis_timeline.getDataRangeHeurist();
             }
-            //var range = vis_timeline.getItemRange(); //@todo calculate once
+            //let range = vis_timeline.getItemRange(); //@todo calculate once
             this._timelineZoomToRange( this.vis_timeline_range );
         
     },
@@ -343,21 +341,21 @@ $.widget( "heurist.timeline", {
         
             if(!(range && range.min  && range.max && this.vis_timeline)) return;
         
-            var min = this.vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
+            let min = this.vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
                 max = this.vis_timeline.getDate(range.max); //new Date(range.max).getTime();
-            var delta = 0;
+            let delta = 0;
 
             if(isNaN(min) || isNaN(max) ) return;
             
             
             if(range['nofit']==undefined){
-            var interval = max-min;
-            var YEAR = 31536000000;
-            var DAY = 86400000;
+            let interval = max-min;
+            let YEAR = 31536000000;
+            let DAY = 86400000;
 
-            var yearmax = (new Date(range.max)).getFullYear();
-            var dt = range['omax'];
-            var dta = [];
+            let yearmax = (new Date(range.max)).getFullYear();
+            let dt = range['omax'];
+            let dta = [];
             if(typeof dt==='string'){
                 dta = dt.split('-');
                 if(dta.length>0)
@@ -392,7 +390,7 @@ $.widget( "heurist.timeline", {
             }else if(interval < YEAR*50){
 
                 //zoom depend on epoch
-                //var yearmax = (new Date(range.max)).getFullYear();
+                //let yearmax = (new Date(range.max)).getFullYear();
                 if(yearmax<0){
                     delta = interval*1.5;
                 }else if(yearmax<1500){
@@ -423,7 +421,7 @@ $.widget( "heurist.timeline", {
     // item - record id or timelime item, field - start|end
     _getUnixTs: function(item, field, ds){
 
-        var item_id = 0;
+        let item_id = 0;
         if(item && item['id']){
             item_id = item['id'];
         }else{
@@ -433,9 +431,9 @@ $.widget( "heurist.timeline", {
 
             if(!ds) ds = this.vis_timeline.itemsData;
 
-            var type = {};
+            let type = {};
             type[field] = 'Moment';
-            var val = ds.get(item_id,{fields: [field], type: type });
+            let val = ds.get(item_id,{fields: [field], type: type });
 
             if(val!=null && val[field] && val[field]._isAMomentObject){
                 //return val[field].toDate().getTime(); //unix
@@ -448,15 +446,15 @@ $.widget( "heurist.timeline", {
     /*
     _getItemField(item, field){
       
-        var val = null;
-        var item_id = 0;
+        let val = null;
+        let item_id = 0;
         if(item && item['id']){
             item_id = item['id'];
         }else{
             item_id = item;
         }
         if(item_id){
-            var ds = this.vis_timeline.itemsData;
+            let ds = this.vis_timeline.itemsData;
             val = ds.get(item_id,{fields: [field], type: type });
         }  
         return val;     
@@ -467,7 +465,7 @@ $.widget( "heurist.timeline", {
     //
     _timelineApplyRangeOnMap: function(params)
     {
-        var that = this;
+        let that = this;
         
         if(params==null){
             params = this._keepLastTimeLineRange;
@@ -476,26 +474,26 @@ $.widget( "heurist.timeline", {
         }
         
         
-        if($.isFunction(this.options.onfilter)){ //trigger global event
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onfilter)){ //trigger global event
         
             if (!this.isApplyTimelineFilter || !this.vis_timeline.itemsData || !params) return;
             
             //loop by timeline datasets
             
             //if fit range
-            var items_visible = [], items_hidden=[], that = this;
+            let items_visible = [], items_hidden=[];
             
             this.vis_timeline.itemsData.forEach(function (itemData) {
                         
-                var start = that._getUnixTs(itemData, 'start');
-                var end = 'end' in itemData ? that._getUnixTs(itemData, 'end') :start;
-                //var start = itemData.start.valueOf();
-                //var end = 'end' in itemData ? itemData.end.valueOf() : itemData.start.valueOf();            
+                let start = that._getUnixTs(itemData, 'start');
+                let end = 'end' in itemData ? that._getUnixTs(itemData, 'end') :start;
+                //let start = itemData.start.valueOf();
+                //let end = 'end' in itemData ? itemData.end.valueOf() : itemData.start.valueOf();            
                 //start = (new Date(start)).getTime();
                 //end = (new Date(end)).getTime();
                 
                 //intersection
-                var res = false;
+                let res = false;
                 if(start == end){
                     res = (start>=params.start_stamp && start<=params.end_stamp);
                 }else{
@@ -524,14 +522,14 @@ $.widget( "heurist.timeline", {
     //
     _timelineInitToolbar: function(){
         
-        var that = this;
+        let that = this;
         /**
          * Zoom the timeline a given percentage in or out
          * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
          */
         function __timelineZoom (percentage) {
-            var range = that.vis_timeline.getWindow();
-            var interval = range.end - range.start;
+            let range = that.vis_timeline.getWindow();
+            let interval = range.end - range.start;
 
             that.vis_timeline.setWindow({
                 start: range.start.valueOf() - interval * percentage,
@@ -541,17 +539,17 @@ $.widget( "heurist.timeline", {
 
         function __timelineZoomToSelection(){
 
-                var sels = that.vis_timeline.getSelection();
+                let sels = that.vis_timeline.getSelection();
                 if(sels && sels['length']>0){
-                       var range = that.vis_timeline.getDataRangeHeurist(new vis.DataSet(that.vis_timeline.itemsData.get(sels)));
+                       let range = that.vis_timeline.getDataRangeHeurist(new vis.DataSet(that.vis_timeline.itemsData.get(sels)));
                        that._timelineZoomToRange(range);
                 }
         }
 
         function __timelineMoveToLeft(){
 
-            var range2 = that.vis_timeline.getWindow();
-            var interval = range2.end - range2.start;
+            let range2 = that.vis_timeline.getWindow();
+            let interval = range2.end - range2.start;
 
             if(that.vis_timeline_range==null){
                     that.vis_timeline_range = that.vis_timeline.getDataRangeHeurist();
@@ -563,9 +561,9 @@ $.widget( "heurist.timeline", {
 
         function __timelineMoveToRight(){
 
-            var range2 = that.vis_timeline.getWindow();
-            var interval = range2.end - range2.start;
-            var delta = interval*0.1;
+            let range2 = that.vis_timeline.getWindow();
+            let interval = range2.end - range2.start;
+            let delta = interval*0.1;
             if(that.vis_timeline_range==null){
                     that.vis_timeline_range = that.vis_timeline.getDataRangeHeurist();
             }
@@ -585,7 +583,7 @@ $.widget( "heurist.timeline", {
         
         function __timelineEditProperties(){
             
-            var $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
+            let $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
                 width: 450,
                 modal: true,
                 resizable: false,
@@ -593,17 +591,17 @@ $.widget( "heurist.timeline", {
                 buttons: [
                     {text:window.hWin.HR('Apply'), click: function(){
                         
-                        var mode = $( this ).find('input[type="radio"][name="time-label"]:checked').val();
+                        let mode = $( this ).find('input[type="radio"][name="time-label"]:checked').val();
                         
                         that.vis_timeline_label_mode = mode;
-                        var spinner = $(that.element).find("#timeline_spinner");
+                        let spinner = $(that.element).find("#timeline_spinner");
                         if(mode==2){
                             spinner.show();
                         }else{
                             spinner.hide();
                         }
                         
-                        var labelpos = $( this ).find('input[type="radio"][name="time-label-pos"]:checked').val();
+                        let labelpos = $( this ).find('input[type="radio"][name="time-label-pos"]:checked').val();
 
                         that.stack_setting = ($( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1);
 
@@ -611,7 +609,7 @@ $.widget( "heurist.timeline", {
                         that.vis_timeline.redraw();    
                         
                         /*
-                        var stack_mode = $( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1;
+                        let stack_mode = $( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1;
                         if(that.stack_setting != (stack_mode==1)){
                             that.stack_setting = (stack_mode==1);
                             that.vis_timeline.setOptions({'stack':that.stack_setting});
@@ -619,13 +617,13 @@ $.widget( "heurist.timeline", {
                             that.vis_timeline.redraw();    
                         }*/
                         
-                        var newval = $( this ).find('input[type="checkbox"][name="time-filter-map"]').is(':checked');
+                        let newval = $( this ).find('input[type="checkbox"][name="time-filter-map"]').is(':checked');
                         
                         if(that.isApplyTimelineFilter !== newval){
                             that.isApplyTimelineFilter = newval;
                             if(newval){
                                 that._timelineApplyRangeOnMap( null );    
-                            }else if($.isFunction(that.options.onfilter)){
+                            }else if(window.hWin.HEURIST4.util.isFunction(that.options.onfilter)){
                                 //set map elements visible
                                 that.options.onfilter.call(this, true);
                             }
@@ -644,47 +642,47 @@ $.widget( "heurist.timeline", {
             
         }
         
-        var toolbar = $(this.element).find("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
+        let toolbar = $(this.element).find("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
             },text:false, label:window.hWin.HR("Zoom In")})
-            .click(function(){ __timelineZoom(-0.25); })
+            .on('click', function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
             },text:false, label:window.hWin.HR("Zoom Out")})
-            .click(function(){ __timelineZoom(0.5); })
+            .on('click', function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:window.hWin.HR("Zoom to All")})
-            .click(function(){ that._timelineZoomToAll(); })
+            .on('click', function(){ that._timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:window.hWin.HR("Zoom to selection")})
-            .click(function(){ __timelineZoomToSelection(); })
+            .on('click', function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:window.hWin.HR("Move to Start")})
-            .click(function(){ __timelineMoveToLeft(); })
+            .on('click', function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:window.hWin.HR("Move to End")})
-            .click(function(){ __timelineMoveToRight(); })
+            .on('click', function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-gear"
             },text:false, label:window.hWin.HR("Timeline options")})
-            .click(function(){ __timelineEditProperties(); })
+            .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
         $("<label>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);
             
-        var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
+        let spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
         spinner.spinner({
               value: 10,
               spin: function( event, ui ) {
@@ -717,8 +715,8 @@ $.widget( "heurist.timeline", {
     //
     _timelineApplyLabelSettings: function(mode, labelpos){
         
-                var contents = $(this.timeline_ele).find(".vis-item-content");
-                var spinner = $(this.element).find("#timeline_spinner");
+                let contents = $(this.timeline_ele).find(".vis-item-content");
+                let spinner = $(this.element).find("#timeline_spinner");
 
                 if(mode==1){ //truncate
                     $(this.timeline_ele).find('div .vis-item-overflow').css('overflow','hidden');

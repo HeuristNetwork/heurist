@@ -1,0 +1,59 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <h3>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h3>        
+        
+        <div style="display: flex;">
+        <div>
+            <label><input type="checkbox" data-mark-actions="all" checked>Mark all</label>
+            <ul id="actions">
+            </ul>            
+        </div>
+        <div>
+            <span style="padding-left:25px">Slow</span><br>
+            
+            <ul id="actions_slow">
+            </ul>           
+
+            <div style="max-width:400px;padding:5px 5px 5px 25px;" class="heurist-helper2">
+              Note: checks marked as SLOW are indicative. The pattern of usage of different functions will determine which checks are slowest.
+            </div>
+            <div style="max-width:400px;padding:5px 5px 5px 25px;display:none;" class="heurist-helper2" id="notice_for_large_database">
+             Please note, owing to the size of the database and the version of MySQL in use on this server, functions indicated as SLOW may timeout. We suggest regular checks of those which are not marked as SLOW, and occasional checks of the remainder.
+             <br> <br>
+             Please submit a bug report if you are having a problem with timeouts.
+            </div>
+        </div>
+        </div>
+        
+        <div>Select desired actions and: 
+            <button class="ui-button-action" id="btnVerifyDb">Verify Integrity</button>
+        </div>
+
+        <div class="slow-checks-in-popup" style="margin-top:20px">
+            <hr style="color:lightgray;width:60%;float:left"><br>
+            <h3>Slow checks (will be opened in separate popup)</h3>
+            <button style="margin-right: 25px;" data-type="files">
+                Check files for consistency
+            </button>
+            <span class="heurist-helper2">Finds missing, duplicate and unused uploaded files</span>
+            <br>
+            <br>
+            <button style="margin-right: 86px;" data-type="urls">
+                Check URLs
+            </button>
+            <span class="heurist-helper2">Checks record URLs and URLs referenced within text fields</span>
+        </div>
+        
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-top:75px;display: none;">
+
+
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+            </ol>
+        </div>
+</div>

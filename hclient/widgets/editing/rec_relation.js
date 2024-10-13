@@ -40,7 +40,7 @@ $.widget( "heurist.rec_relation", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.wcontainer = $("<div>");
 
@@ -95,8 +95,6 @@ $.widget( "heurist.rec_relation", {
         .appendTo( this.wcontainer )
         .button({icons:{primary: "ui-icon-link"},text:false});
 
-        var that = this;
-
         function __show_select_dialog(event){
             event.preventDefault();
 
@@ -106,7 +104,7 @@ $.widget( "heurist.rec_relation", {
                 onselect: function(event, recordset){
 
                     if(recordset && recordset.length()>0){
-                        var record = recordset.getFirstRecord();
+                        let record = recordset.getFirstRecord();
                         that.w_recpointer.val(recordset.fld(record,'rec_Title'));
                         that.options.target_recid = recordset.fld(record,'rec_ID');
                     }
@@ -153,8 +151,8 @@ $.widget( "heurist.rec_relation", {
 
         this.w_reltype.empty();
 
-        var allTerms = this.options.reltype_set;
-        var headerTerms = this.options.reltype_headers;
+        let allTerms = this.options.reltype_set;
+        let headerTerms = this.options.reltype_headers;
 
         window.hWin.HEURIST4.ui.createTermSelect(this.w_reltype.get(0),
             {vocab_id:allTerms, defaultTermID:this.options.reltype_value, topOptions:false});
@@ -176,7 +174,7 @@ $.widget( "heurist.rec_relation", {
 
 
         this.options.reltype_value = this.w_reltype.val();
-        var that = this;
+        let that = this;
 
         //hapi save record call
 

@@ -23,7 +23,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         this.element.find('#inner_title').text( this.options.entity.entityTitlePlural );
         
@@ -49,7 +49,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         });
         
         this.input_search_rectype = this.element.find('#input_search_rectype');
-        var rty_selector = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.input_search_rectype.get(0), 
+        let rty_selector = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.input_search_rectype.get(0), 
                 {rectypeList:  null, 
                  showAllRectypes: true}); //topOptions:'select record type'
         this._on(rty_selector,  { change:this.startSearch });
@@ -57,14 +57,13 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         if(!window.hWin.HEURIST4.allUsersCache || !window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersCache)){
 
             //get all users
-            var request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
-            var that = this;
-        
+            let request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
+            //Note: it searches for all users - including disabled
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    var recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     window.hWin.HEURIST4.allUsersCache = [];                    
                     recordset.each2(function(id,rec){
                         window.hWin.HEURIST4.allUsersCache.push({id: id, name: rec['ugr_FullName']});
@@ -87,17 +86,15 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {};
+            let request = {};
         
             if(this.input_search_rectype.val() && this.input_search_rectype.val()!='any'){
                 request['swf_RecTypeID'] = this.input_search_rectype.val();        
                 request['sort:swf_Order'] = 1;
             }else{
                 
-                var recset = $Db.swf();
-                var id;
+                let recset = $Db.swf();
+                let id;
                 if(recset.length()>0){
                     id = recset.fld(recset.getFirstRecord(),'swf_RecTypeID');
                 }else{
@@ -151,11 +148,11 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
     refreshRectypeList: function(){
 
         // List rectypes that have swf assigned
-        var rectype_names = [];
+        let rectype_names = [];
 
         $Db.swf().each2(function(id, record){
 
-            var rty_name = $Db.rty(record['swf_RecTypeID'], 'rty_Name');
+            let rty_name = $Db.rty(record['swf_RecTypeID'], 'rty_Name');
 
             if(!rectype_names.includes(rty_name)){ 
                 rectype_names.push(rty_name); 

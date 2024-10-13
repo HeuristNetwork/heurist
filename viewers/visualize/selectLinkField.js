@@ -25,18 +25,12 @@
 function SelectLinkField() 
 {
 
-        var rty_ID, target_ID;
+        let rty_ID, target_ID;
 
         window.hWin.HEURIST4.ui.initHelper( { button:$('#hint_more_info1'), 
                             title:'Link types', 
-                            url:window.hWin.HAPI4.baseURL+'context_help/link_types.html #content_body',
+                            url: window.hWin.HRes('link_types #content_body'),
                             position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
-/*                            
-        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
-                            'Field data type: Relationship marker', 
-                            window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
-                            { my: "left+200 top+100", at: "center center", of:$(document.body)}, true);
-*/                            
 	    
         $('#btnSelect').button().addClass('ui-button-action').click( _editDetailType );
 
@@ -47,8 +41,10 @@ function SelectLinkField()
 
         
         if(!$Db.rty(rty_ID)){
-            window.hWin.HEURIST4.msg.showMsgErr('Parameter for record type "rty_ID" ( '
-                +rty_ID+' ) is not defined or invalid');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Parameter for record type "rty_ID" (${rty_ID}) is not defined or invalid`,
+                error_title: 'Missing record type'
+            });
             window.close(false);
         }
         
@@ -65,12 +61,12 @@ function SelectLinkField()
         $('#t_use_existing_field').change(_updateUI);
         
         
-        var rt_selector = $('#sel_target_rectype_id');
-        var rt_selector2 = window.hWin.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
+        let rt_selector = $('#sel_target_rectype_id');
+        let rt_selector2 = window.hWin.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
         rt_selector2.change(
 
                 function(){
-                    var sDialogTitle = 'Creating link from '+ $Db.rty(rty_ID,'rty_Name');
+                    let sDialogTitle = 'Creating link from '+ $Db.rty(rty_ID,'rty_Name');
                     target_ID = $(this).val();
                     if(target_ID>0){
                         
@@ -126,29 +122,29 @@ function SelectLinkField()
     //    
     function _getLinkFields(){    
         //find existing field types that already refer target_ID
-        var dty_ID;
+        let dty_ID;
 
-        var aPointers = [], 
+        let aPointers = [], 
             aRelMarkers = [], 
             cnt_ptrs = 0, cnt_relmarkers = 0;
             
-        var all_structs = $Db.rst_idx2();
+        let all_structs = $Db.rst_idx2();
 
         $Db.dty().each2(function(dty_ID, detailType){
 
             
-                var dty_Type = detailType['dty_Type'];
+                let dty_Type = detailType['dty_Type'];
                 if(dty_Type==='resource' || dty_Type==='relmarker'){
 
-                    var rts = detailType['dty_PtrTargetRectypeIDs'].split(',');
+                    let rts = detailType['dty_PtrTargetRectypeIDs'].split(',');
                     if(window.hWin.HEURIST4.util.findArrayIndex(target_ID, rts)>=0){
 
                         //if this field type already in rectype
-                        var already_inuse = all_structs[rty_ID].getById(dty_ID);
+                        let already_inuse = all_structs[rty_ID].getById(dty_ID);
                         
-                        var option_item  = {key:dty_ID, title:detailType['dty_Name'], disabled:already_inuse};
+                        let option_item  = {key:dty_ID, title:detailType['dty_Name'], disabled:already_inuse};
                         if(already_inuse){
-                            var rst_Name = $Db.rst(rty_ID,dty_ID,'rst_DisplayName');
+                            let rst_Name = $Db.rst(rty_ID,dty_ID,'rst_DisplayName');
                             if (detailType['dty_Name'] == rst_Name)
                             { // field name and base field name are the same
                                 option_item.title = option_item.title +' (already connected)';
@@ -190,8 +186,8 @@ function SelectLinkField()
     //
     function _editDetailType(){
 
-        var dt_type = $('input[name="ft_type"]:checked').val();
-        var dty_ID = 0;
+        let dt_type = $('input[name="ft_type"]:checked').val();
+        let dty_ID = 0;
         
         if(!$('#t_add_new_field').is(':checked')){
             if(dt_type=='resource'){
@@ -212,7 +208,7 @@ function SelectLinkField()
 
         }else{ //create new field type
         
-            var popup_options = {
+            let popup_options = {
                 select_mode: 'manager',
                 edit_mode: 'editonly', //only edit form is visible, list is hidden
                 rec_ID: -1,
@@ -223,7 +219,7 @@ function SelectLinkField()
                 selectOnSave: true,
                 onselect: function(event, res){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
-                        var dty_ID = res.selection[0];
+                        let dty_ID = res.selection[0];
                         _addDetailToRtyStructure(dty_ID, 0);
                     }                    
                 }
@@ -242,7 +238,7 @@ function SelectLinkField()
         //rty_ID  source rectype id
         
         
-        var fields = {
+        let fields = {
             rst_ID: dty_ID,
             rst_RecTypeID: rty_ID,  
             rst_DisplayOrder: insert_index,
@@ -274,7 +270,7 @@ function SelectLinkField()
             */
         };
         
-        var request = {
+        let request = {
                 'a'          : 'save',
                 'entity'     : 'defRecStructure',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -285,12 +281,12 @@ function SelectLinkField()
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 
-                var _structureWasUpdated = false;
+                let _structureWasUpdated = false;
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     //update local structure
-                    var recID = response.data[0];
+                    let recID = response.data[0];
                     if(recID>0){
                         fields[ 'rst_ID' ] = (''+recID);
                         $Db.rst(rty_ID).addRecord(recID, fields); // update cached record
@@ -313,8 +309,8 @@ function SelectLinkField()
     //
     function _updateUI(){
      
-            var is_resource_selected = $('#t_resourse').is(':checked');
-            var is_fields_available = false;
+            let is_resource_selected = $('#t_resourse').is(':checked');
+            let is_fields_available = false;
         
             if(is_resource_selected){
                     $('#sel_resource_fields').show();
@@ -334,8 +330,8 @@ function SelectLinkField()
                     
             }
             
-            var f_new = $('#t_add_new_field');
-            var f_exs = $('#t_use_existing_field');
+            let f_new = $('#t_add_new_field');
+            let f_exs = $('#t_use_existing_field');
             if(is_fields_available){
                   f_exs.removeProp('disabled');
                   f_exs.removeClass('ui-state-disabled ui-button-disabled');
@@ -345,8 +341,8 @@ function SelectLinkField()
                   f_exs.addClass('ui-state-disabled');
             }
             
-            var is_add_new = f_new.is(':checked');
-            var clr = (is_add_new)?'lightgray':'none';   
+            let is_add_new = f_new.is(':checked');
+            let clr = (is_add_new)?'lightgray':'none';   
             $('#sel_resource_fields').css('background', clr);
             $('#sel_relmarker_fields').css('background', clr);
             

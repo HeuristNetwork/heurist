@@ -22,10 +22,10 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
         
         this.input_search_group = this.element.find('#input_search_group');   //user group
-        var topOptions = [{key:'any',title:'any group'},{key:window.hWin.HAPI4.user_id(),title:'My Filters'}];
+        let topOptions = [{key:'any',title:'any group'},{key:window.hWin.HAPI4.user_id(),title:'My Filters'}];
         
         if(window.hWin.HAPI4.is_admin()){
             window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], 'all_my_first' , 
@@ -38,7 +38,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         this._super();
 
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
@@ -49,7 +49,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New Filter"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onadd" );
                 }); 
 
@@ -83,9 +83,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
-            var request = {}
+            let request = {}
             
             if(this.options.initial_filter!=null){
                 request = this.options.initial_filter;
@@ -110,40 +108,8 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
             }else{
                 request['sort:svs_Name'] = '1';   
             }
-                 
             
-/*
-            if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = window.hWin.HAPI4.get_prefs('recent_Users');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                var d = new Date(); 
-                //d = d.setDate(d.getDate()-7);
-                d.setTime(d.getTime()-7*24*60*60*1000);
-                request['ugr_Modified'] = '>'+d.toISOString();
-            }
-*/            
-            
-            this._trigger( "onstart" );
-    
-            request['a']          = 'search'; //action
-            request['entity']     = this.options.entity.entityName;
-            request['details']    = 'id'; //'id';
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            //we may search users in any database
-            request['db']     = this.options.database;
-
-            var that = this;                                                
-       
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
+            this._search_request = request;
+            this._super();
     }
 });

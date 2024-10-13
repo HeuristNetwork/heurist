@@ -1,58 +1,58 @@
 <?php
 
     /**
-    *  CMS website template 
-    * 
+    *  CMS website template
+    *
     *  You may use several templates per server (for specific websites).
     *  We encourage the following of naming convention cmsTemplate_OrganisationName.php
-    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922) 
+    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922)
     *  in the Advanced tab of the CMS home page record.
-    * 
+    *
     *  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
     *  should ONLY be used for development as it uses a path which might change and local changes could
     *  get overwritten by code updates.
-    * 
+    *
     *  The template must contain at least two html elements main-header with main-menu and
     *  main-content
-    * 
+    *
                 <div id="main-header" style="width:100%;min-height:40px;">
-                    <div id="main-menu" class="mceNonEditable header-element" 
-                        style="width:100%;min-height:40px;color:black;font-size:1.1em;" 
+                    <div id="main-menu" class="mceNonEditable header-element"
+                        style="width:100%;min-height:40px;color:black;font-size:1.1em;"
                         data-heurist-app-id="heurist_Navigation" data-generated="1">
                         <?php print $page_header_menu; ?>
                     </div>
                 </div>
-                <div id="main-content" 
-                    data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+                <div id="main-content"
+                    data-homepageid="<?php print $home_page_record_id;?>"
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
-    *  
+    *
     * besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
     * These divs will be filled with images and text defined in website home record.
-    * 
-    * main-content - is the target div for content of particular page to be loaded  
-    * 
+    *
+    * main-content - is the target div for content of particular page to be loaded
+    *
     * main-recordview - is the target div for record view. It will be filled with link if target is _recordview
     *                   if this div is not found in the template, content will be opened in popup
-    * 
+    *
     * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
-    * 
+    *
     * There are following variables (their values are defined in website home record) that can be used in html header
-    * $website_title 
+    * $website_title
     * $meta_keywords
-    * $meta_description 
+    * $meta_description
     * $image_icon
-    * 
-    * Other variables are 
-    * $home_page_record_id  - record id of website home page 
+    *
+    * Other variables are
+    * $home_page_record_id  - record id of website home page
     * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
-    * 
-    * $image_banner - header background banner image 
+    *
+    * $image_banner - header background banner image
     * $page_header_menu - code to define main menu widget, leave it unchanged as content of main-menu div
-    * $page_header - custom content for main-header defined in website home page record 
-    * $page_footer - custom content for footer  
-    * 
+    * $page_header - custom content for main-header defined in website home page record
+    * $page_footer - custom content for footer
+    *
     * $show_pagetitle - true|false to show curent page title in #main-pagetitle
     *
     * @package     Heurist academic knowledge management system
@@ -84,7 +84,7 @@
     <?php
         include_once $websiteScriptAndStyles_php;  //include heurist scripts and styles
     ?>
-    
+
 <style>
 /* page (menu) title it is added to main-pagetitle */
 .webpageheading {
@@ -103,7 +103,7 @@
 }
 #main-header{
     /*background:rgb(112,146,190);*/
-    height:144px; 
+    height:144px;
     padding: 0.5em;
     padding-bottom:0;
 }
@@ -112,10 +112,10 @@
     margin-top:4px;
     padding:0 10px;
     max-height:80px;
-    overflow: hidden;    
+    overflow: hidden;
 }
 #main-menu .horizontalmenu > li.ui-menu-item > a{
-   font-weight:bold !important; 
+   font-weight:bold !important;
    font-size:1.3em !important;
 }
 #main-pagetitle{
@@ -160,19 +160,19 @@
 <body>
 <?php
 /*
-default content consists of 
+default content consists of
     #main-header - header width logo, banner, hostinfo and main menu
         #main-logo, #main-logo-alt, #main-host, #main-menu, #main-pagetitle
-        
-    #main-content-container > #main-content - target the content of particular page will be loaded  
+
+    #main-content-container > #main-content - target the content of particular page will be loaded
 */
-if($isWebPage){ //set in websiteRecord.php 
+if($isWebPage){ //set in websiteRecord.php
 //WEB PAGE - EMBED
 ?>
 <div class="ent_wrapper heurist-website selectmenu-parent">
 <?php
     if($showWarnAboutPublic){
-        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
+        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
     }
     if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
@@ -181,47 +181,47 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
     }
 ?>
-    <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
+    <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px"
                     id="main-content-container">
-        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
+        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
                                data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
     </div>
-</div>    
+</div>
 <?php
-        
-//WEB SITE      
+
+//WEB SITE
 }else{
 ?>
 
     <div class="ent_wrapper heurist-website selectmenu-parent">
     <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-repeat: repeat-x !important;background-size:auto 170px !important;background: none !important;"':'' ?>>
-    
+
 <?php
     if($showWarnAboutPublic){
-      print '<div style="position: absolute;text-align: center;width: 100%;color: red;">Web site record is not public. It will not be visible to the public</div>';  
+      print '<div style="position: absolute;text-align: center;width: 100%;color: red;">Web site record is not public. It will not be visible to the public</div>';
     }
 
     if($page_header!=null && $page_header!=''){ //custom header content
-        print $page_header;        
+        print $page_header;
     } else {
-?>                        
+?>
         <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:20px;left:10px;max-height:90px;max-width:270px;border:2px none red;"></div>
-        
+
         <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20px;right:30px;height:70px;width:270px;border:2px none red;"></div>
-        
+
         <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:20px;left:280px;right:280px;max-height:90px;"></div>
 
         <div id="main-languages" class="mceNonEditable header-element" style="position:absolute;top:10px;right:40px;max-height:90px;"></div>
-        
-        <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110px;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+
+        <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;bottom:0px;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <?php print $page_header_menu; ?>
         </div>
 
-<?php        
+<?php
     }//header
 
     if(!$edit_OldEditor && $system->is_member(1)){
@@ -231,16 +231,16 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>';// login link
     }
-    ?>  
-        <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
+    ?>
+        <div id="main-pagetitle" class="ui-heurist-bg-light"></div>
     </div>
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
-            style="top:152px;<?php echo $is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''; ?>padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
-            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
-            data-viewonly="<?php print ($hasAccess)?0:1;?>" 
+            style="top:152px;<?php echo $is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':'';?>padding: 5px;">
+        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
+            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':'';?>
+            data-viewonly="<?php print ($hasAccess)?0:1;?>"
             style="<?php echo !$is_page_footer_fixed && $page_footer?'position:static;':'';?>">
         </div>
         <div id="main-recordview" style="height:100%;<?php echo !$is_page_footer_fixed && $page_footer?'position:static;':'';?>">
@@ -248,18 +248,18 @@ if($isWebPage){ //set in websiteRecord.php
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
-        if(!$is_page_footer_fixed && $page_footer) print $page_footer;
-?>        
+        if(!$is_page_footer_fixed && $page_footer) {print $page_footer;}
+?>
     </div>
 <?php
-        if($is_page_footer_fixed && $page_footer) print $page_footer;
-?>        
+        if($is_page_footer_fixed && $page_footer) {print $page_footer;}
+?>
     </div>
 <?php
 }
 //#main-content-container {margin-bottom:0px;}
 //#main-content {position:absolute !important;}
-?>    
+?>
 
 </body>
 </html>

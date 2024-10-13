@@ -4,7 +4,7 @@
         "tableName": "defTerms",
         "tablePrefix": "trm",
         
-        "helpContent": "defTerms.html",
+        "helpContent": "defTerms.htm",
         
         "searchFormContent": "searchDefTerms.html",
         
@@ -42,7 +42,7 @@
                     }
                 },
                 {
-                    "dtID": "trm_InverseTermId",
+                    "dtID": "trm_InverseTermID",
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName":"Inverse term:",
