@@ -674,7 +674,7 @@ function loadRecordContent(url_or_record_id, target){
         is_smarty = ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            (url.indexOf('template=')>0)
+            (url.indexOf('template=')>0) || (url.indexOf('showReps.php')>0)
            );
 
     }
@@ -1089,7 +1089,7 @@ function initLinksAndImages($container, search_data){
         if( ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            (href && href.indexOf('template=')>0))
+            ((href?.indexOf('template=')>0) || (href?.indexOf('showReps.php')>0))
             &&
             ($(link).attr('target')!='_blank' || record_view_target!='')
            )

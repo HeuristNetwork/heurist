@@ -1,9 +1,4 @@
 <?php
-namespace hserv\report;
-
-use hserv\structure\ConceptCode;
-use hserv\utilities\USanitize;
-
 /*
 * ReportTemplateMgr.php
 *
@@ -23,6 +18,11 @@ use hserv\utilities\USanitize;
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+namespace hserv\report;
+
+use hserv\structure\ConceptCode;
+use hserv\utilities\USanitize;
 
 /**
  * Class ReportTemplateMgr
@@ -51,7 +51,7 @@ class ReportTemplateMgr
      * @param mixed $_system The system object.
      * @param string $_dir The directory where templates are stored.
      */
-    public function __construct($_system, $_dir=null)
+    public function __construct($_system, $_dir = null)
     {
         global $system;
 
@@ -110,32 +110,31 @@ class ReportTemplateMgr
     /**
      * Returns the content of a specified template file.
      *
-     * @param string $filename The name of the template file to retrieve.
+     * @param string $template_file The name of the template file to retrieve.
      * @return void Outputs the content of the template file or throws error message if not found.
      */
     public function downloadTemplate($template_file)
     {
-        try{
-            
-            if($template_file==null || $template_file==''){
-                $template_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'template.tpl';            
-                if(!file_exists($template_file)){
+        try {
+            if ($template_file == null || $template_file == '') {
+                $template_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template.tpl';            
+                if (!file_exists($template_file)) {
                     throw new \Exception("Template example file not found");
                 }
-            }else{
+            } else {
                 $template_file = $this->checkTemplate($template_file);
             }
+
             header(CTYPE_HTML);
             $res = readfile($template_file);
         
-            if(!$res){
-                throw new \Exception("Can not read template file ".basename($template_file));
+            if (!$res) {
+                throw new \Exception("Cannot read template file " . basename($template_file));
             }
         
         } catch (\Exception $e) {
             print $e->getMessage();
         }
-        
     }
 
     /**
@@ -143,7 +142,7 @@ class ReportTemplateMgr
      *
      * @param string $template_body The body/content of the template to save.
      * @param string $template_file The name of the template file to save.
-     * @return file name if  if successful, or throws 'error' otherwise.
+     * @return string The file name if successful, throws error otherwise.
      */
     public function saveTemplate($template_body, $template_file)
     {
@@ -152,15 +151,21 @@ class ReportTemplateMgr
         $template_file_fullpath = $this->dir . $template_file;
         
         $res = folderExists($this->dir, true);
-        if($res>0){
+        if ($res > 0) {
             $res = fileSave($template_body, $template_file_fullpath);    
         }
-        if($res<=0){
-            throw new \Exception('Can\'t write file. Check permission for Smarty template directory');
+        if ($res <= 0) {
+            throw new \Exception('Cannot write file. Check permissions for the Smarty template directory');
         }
         return $template_file;
     }
-    
+
+    /**
+     * Deletes the specified template file.
+     *
+     * @param string $template_file The name of the template file to delete.
+     * @return string 'deleted' if the file is successfully deleted.
+     */
     public function deleteTemplate($template_file)
     {
         $template_file = $this->checkTemplate($template_file);
@@ -168,7 +173,15 @@ class ReportTemplateMgr
         return 'deleted';
     }
 
-    public function checkTemplate($template_file){
+    /**
+     * Validates and returns the full path of the template file.
+     *
+     * @param string $template_file The name of the template file to check.
+     * @return string The full path to the template file.
+     * @throws \Exception If the file is not found.
+     */
+    public function checkTemplate($template_file)
+    {
         $safeFileName = basename($template_file);
         $template_file = $this->dir . $safeFileName;
         if (file_exists($template_file)) {
@@ -177,7 +190,6 @@ class ReportTemplateMgr
             throw new \Exception("Template file $safeFileName not found");
         }
     }
-    
 
     /**
      * Converts a template by replacing local IDs with concept IDs or vice versa.
@@ -310,48 +322,47 @@ class ReportTemplateMgr
      * Converts local IDs in a template file to global concept IDs and outputs the result.
      *
      * @param string $filename The name of the template file.
-     * @param string|null $template The template content. If null, the template is loaded from the file.
+     * @param bool $is_check_only Whether to only check or export the file.
+     * @param string|null $template_body The template content, if null, it is loaded from the file.
      * @return void Outputs the converted template or an error in JSON format.
      */
     public function exportTemplate($filename, $is_check_only, $template_body = null)
     {
-            $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if (!$dbID) {
-                throw new \Exception('Database must be registered to allow translation of local template to global template');
-            }
+        $dbID = $this->system->get_system('sys_dbRegisteredID');
+        if (!$dbID) {
+            throw new \Exception('Database must be registered to allow translation of local template to global template');
+        }
 
-            if ($filename) {
-                $template_file = $this->checkTemplate($filename);
-                $template_body = file_get_contents($template_file);  //content
-            }else{
-                $filename = 'Export.gpl';
-            }
+        if ($filename) {
+            $template_file = $this->checkTemplate($filename);
+            $template_body = file_get_contents($template_file);
+        } else {
+            $filename = 'Export.gpl';
+        }
 
-            if ($template_body && strlen($template_body) > 0) {
-                $filename = str_replace(".tpl",".gpl",basename($filename));
-                
-                if($is_check_only){
-                    return 'ok';                    
-                }else{
-                    $content = $this->convertTemplate($template_body, 0);
-                    header('Content-type: html/text');
-                    header('Content-Disposition: attachment; filename=' . $filename);
-                    print $content;
-                }
-                
+        if ($template_body && strlen($template_body) > 0) {
+            $filename = str_replace(".tpl", ".gpl", basename($filename));
+            
+            if ($is_check_only) {
+                return 'ok';                    
             } else {
-                throw new \Exception('Template is not defined or empty');
+                $content = $this->convertTemplate($template_body, 0);
+                header('Content-type: html/text');
+                header('Content-Disposition: attachment; filename=' . $filename);
+                print $content;
             }
-            return null;
+        } else {
+            throw new \Exception('Template is not defined or empty');
+        }
+        return null;
     }
 
     /**
      * Imports a template from the provided data.
      *
      * @param array $params The uploaded file parameters.
-     * @param string|null $for_cms If provided, indicates a CMS template upload.
-     *  it takes template that comes along with cms page (blog page for example)
-     * @return array with name of template and list of unrecognized details
+     * @param string|null $for_cms Indicates a CMS template upload if provided.
+     * @return array with the name of the template and a list of unrecognized details.
      */
     public function importTemplate($params, $for_cms = null)
     {
@@ -364,17 +375,17 @@ class ReportTemplateMgr
 
         if ($for_cms) {
             $path = realpath(dirname(__FILE__) . '/../../hclient/widgets/cms/templates/snippets/');
-            if ($path) { //folder exists
+            if ($path) {
                 $filename = $path . DIRECTORY_SEPARATOR . basename($for_cms);
             }
         } elseif (isset($params['tmp_name']) && is_uploaded_file($params['tmp_name'])) {
             $filename = USanitize::sanitizePath($params['tmp_name']);
         }
 
-        if (!$filename ||!file_exists($filename)) {
+        if (!$filename || !file_exists($filename)) {
             throw new \Exception('Error occurred during upload - file does not exist');
-        }    
-            
+        }
+
         $template = file_get_contents($filename);
         $res = $this->convertTemplate($template, 1);
 
@@ -385,7 +396,6 @@ class ReportTemplateMgr
         $origfilename = getUniqueFileName($this->dir, $origfilename, 'tpl');
         
         $save_res = [];
-        
         $save_res['filename'] = $this->saveTemplate($res['template'], $origfilename);
         
         if (!empty($res['details_not_found'])) {
@@ -397,8 +407,6 @@ class ReportTemplateMgr
 
     /**
      * Safely replaces an array of search strings in the subject with the corresponding replacement strings.
-     *
-     * This function handles an array of search terms correctly by avoiding overlapping replacements.
      *
      * @param array $search Array of search strings.
      * @param array $replace Array of replacement strings.
@@ -450,5 +458,4 @@ class ReportTemplateMgr
 
         return [$match_idx, $match_offset];
     }
-    
 }

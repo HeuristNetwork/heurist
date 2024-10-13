@@ -1,4 +1,24 @@
 <?php
+/*
+* ReportExecute.php
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2024 University of Sydney
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6.6
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 namespace hserv\report;
 
 use hserv\report\ReportRecord;
@@ -11,11 +31,13 @@ require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPu
 
 define('HEAD_E','</head>');
 
-/*
-An array of the form array($object, $method) with $object being a reference to an object and $method being a string containing the method-name
-
-*/
-
+/**
+ * Class ReportExecute
+ *
+ * This class manages the execution of Smarty templates for reports, handling the 
+ * output of reports in various formats (HTML, JS, etc.) and dealing with records
+ * fetched from the system.
+ */
 class ReportExecute
 {
     private $smarty;
@@ -58,12 +80,13 @@ class ReportExecute
 * 'template' or 'template_body' - template file name or template value as a text
 * 'replevel'  - 1 notices, 2 all, 3 debug mode
 *
-* 'output' -  full file path to be saved
-* 'mode' -    output format if publish>0: js or html (default)
-* 'publish' - 0 vsn 3 UI (smarty tab),
-*             1,2,3 - different behaviour when output is defined
-*             if output is null if html and js - output to browser, otherwise download
-*             4 - for calculation fields
+* 'output' -  name of file to be saved in generated-reports folder
+* 'mode' -    output format if publish>0: js, xml, txt, json or html (default)
+* 'publish' - 0 for user interface only (including editor)
+*             1 if output defined, saves into generated-reports and produces info page (user report)
+*             2 downloads ONLY it under given output name (no file save, no browser output)
+*             3 if output defined it saves into generated-reports and outputs report into browser (without UI limits)
+*             4 calculation field
 *
 * other parameters are hquery's
 */    
@@ -73,13 +96,13 @@ class ReportExecute
      * Constructor
      *
      * @param mixed $system The system object used for database and other interactions.
-     * @param array $params The parameters array typically passed from $_REQUEST.
+     * @param array|null $params The parameters array typically passed from $_REQUEST.
      */
     public function __construct($system, $params=null)
     {
         $this->system = $system;
         
-        if($params!=null){
+        if ($params!=null) {
             // Initialize properties from parameters or set defaults
             $this->setParameters($params);
         }
@@ -117,22 +140,24 @@ class ReportExecute
             return false;
         }
         
-        // Fetch record IDs
+        // Fetch record IDs based on search query
         $query_result = $this->fetchRecordIDs();
 
-        // Handle empty result set
+        // Handle empty result set and output message if no records found
         if (!$this->handleEmptyResultSet($query_result)) {
             return true;
         }
 
-        // Assign variables and execute the template
+        // Process the fetched records and execute the template with Smarty
         return $this->executeTemplate($query_result, $content);
     }
 
     /**
-    *  Initialize properties from parameters or set defaults
-     * Handle the output mode and set appropriate flags.
-     * Set the search limit based on publishing mode or user preferences.
+     * Initializes properties from parameters or sets defaults.
+     * Handles the output mode and sets appropriate flags.
+     * Sets the search limit based on publishing mode or user preferences.
+     *
+     * @param array|null $params The parameters array to set.
      */
     public function setParameters($params=null)
     {
@@ -177,9 +202,11 @@ class ReportExecute
         }
     }
     
-    //
-    //
-    //
+    /**
+     * Prepares and sanitizes the output file name.
+     *
+     * @return string The sanitized output file name.
+     */
     private function _prepareOutputFile(){
         $this->outputfile = isset($this->params["output"]) ? $this->params["output"] : ($template_file?$template_file:'heurist_output');    
         $path_parts = pathinfo($this->outputfile);
@@ -258,7 +285,7 @@ class ReportExecute
     }
 
     /**
-     * Handle empty result sets, output appropriate error or message.
+     * Handles empty result sets and outputs an appropriate error message or info.
      *
      * @param array $qresult The query result containing records and record count.
      * @return bool Returns false if result is empty, true otherwise.
@@ -285,9 +312,9 @@ class ReportExecute
     }
 
     /**
-     * Process the template file or the template body.
+     * Loads the template content from a file or from a provided template body.
      *
-     * @return string The content of the template to be processed.
+     * @return string|false Returns the template content or false if the file or content is invalid.
      */
     private function loadTemplateContent()
     {
@@ -332,9 +359,12 @@ class ReportExecute
     }
 
     /**
-     * Initialize the Smarty engine if it is not already initialized.
+     * Initializes the Smarty engine if it is not already initialized.
+     *
+     * @param bool $force_init Force reinitialization of the Smarty engine if set to true.
+     * @return bool Returns true on successful initialization, false otherwise.
      */
-    public function initSmarty($force_init=false)
+     public function initSmarty($force_init=false)
     {
         if (!$force_init && isset($this->smarty)) {
             return true; //already inited
@@ -362,7 +392,7 @@ class ReportExecute
     }
 
     /**
-     * Execute the template using Smarty.
+     * Executes the Smarty template with the provided records and template content.
      *
      * @param array $qresult The result set containing records.
      * @param string $content The content of the template.
@@ -409,7 +439,7 @@ class ReportExecute
     }
 
     /**
-     * Handle template output and filtering based on the content and results.
+     * Continues the template execution by processing output and handling filters.
      *
      * @param string $content The template content.
      * @param array $results The result records.
@@ -1135,15 +1165,12 @@ class ReportExecute
     }
     
 
-    //
-    // save smarty report output as a file (if there is parameter "output" -> $outputfile)
-    //
-    // if param "output" ($outputfile) is defined it saves smarty report into file
-    // and
-    // $publishmode - 1 saving into file and produces info page (user report) only
-    //                2 downloads ONLY it under given output name (no file save, no browser output)
-    //                3 saving into file and outputs smarty report into browser
-    //
+    /**
+     * Handles the output from the Smarty template, saving or outputting it as required.
+     *
+     * @param string $smarty_output The rendered Smarty output.
+     * @param bool $need_sanitize Whether or not to sanitize the output.
+     */    
     private function handleTemplateOutput($smarty_output, $need_sanitize=true){ // ,  \Smarty\Template $template=null
 
         $errors = null;
@@ -1164,6 +1191,11 @@ class ReportExecute
             $this->setOutputHeaders();    
         }
         
+        // if param "output" ($outputfile) is defined it saves smarty report into file
+        // and
+        // $publishmode - 1 saving into file and produces info page (user report) only
+        //                2 downloads ONLY it under given output name (no file save, no browser output)
+        //                3 saving into file and outputs smarty report into browser
        
         switch ($this->publishmode) {
             case 2: //download
@@ -1198,14 +1230,10 @@ class ReportExecute
     }
     
 
-    //
-    //
-    //
+    /**
+     * Outputs appropriate headers for the content type based on the output mode.
+     */
     private function setOutputHeaders(){
-    
-            //if ($this->outputfile != null || $this->is_included) {
-            //    return;
-            //}
 
             if($this->publishmode!=1){
                 switch ($this->outputmode) {

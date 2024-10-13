@@ -1,16 +1,4 @@
 <?php
-/**
-* helper class - to obtain access to heurist data from smarty report
-
-The reason is our last changes in access to records. From now the query for smarty returns only list of record IDs. Consequently all relations and pointer fields contain record ID only. As a result the performance has been increased significantly.
-Thus, we need to obtain all records data in code of report template. To achieve this goal we provide $heurist object. This object has 3 public methods
-
-getRecord - returns a record by recID or reload record if record array is given as parameter
-getRelatedRecords - returns an array of related record for given recID or record array
-getLinkedRecords - returns array of linkedto and linkedfrom record IDs
-getWootText  - returns text related with given record ID
-*/
-
 namespace hserv\report;
 
 use hserv\structure\ConceptCode;
@@ -24,421 +12,349 @@ require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
-/*
-public methods
-   constant - returns value of heurist constants
-   rty_id, dty_id, trm_id - returns local code for given concept code
-   getRecord - returns full info for given record ID in heurist smarty format (including visibility for current user)
-   getRelatedRecords
-   getLinkedRecords
+/**
+ * Class ReportRecord
+ *
+ * A helper class to access Heurist data from Smarty reports. Provides methods to get record details,
+ * related records, file field info, and to access Heurist constants.
+ */
+class ReportRecord
+{
+    protected $loaded_recs;  // Cache for loaded records
+    protected $rty_Names;    // Record type names
+    protected $dty_Types;    // Detail types
+    protected $dtTerms = null;    // Detail terms
+    protected $dbsTerms;     // Database terms object
+    protected $system;       // System object
+    protected $translations; // Cache for translated db definitions (terms,...)
 
-   recordIsVisible - returns true if record is visible for current user
-
-   getRecords - returns records ids for given query
-   getRecordsAggr - returns aggregation values
-
-   getFileField - returns the specific field for uploaded media (record's file) info
-
-   baseURL - returns HEURIST_BASE_URL
-   getSysInfo
-
-   getTranslation - returns translation for given entity + id
-
-*/
-class ReportRecord {
-
-       protected $loaded_recs; //cache
-
-       protected $rty_Names;
-       protected $dty_Types;
-       protected $dtTerms = null;
-       protected $dbsTerms;
-       protected $system;
-
-       protected $translations; //cache for translated db definitions (terms,...)
-
-    public function __construct( $system ) {
-
-       $this->system = $system;
-       $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
-       //load array dty_ID => dty_Type
-       $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
-       /* loads on first request
-       $this->dtTerms = dbs_GetTerms($system);
-       $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
-       */
-       $this->loaded_recs = array();//cache
-
-        $this->translations = array(
-            'trm' => array()
-        );
+    /**
+     * ReportRecord constructor.
+     *
+     * Initializes system, loads record type names and detail types, and sets up cache structures.
+     *
+     * @param mixed $system The system object used for database and other interactions.
+     */
+    public function __construct($system)
+    {
+        $this->system = $system;
+        $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
+        $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
+        $this->loaded_recs = array(); // Cache for loaded records
+        $this->translations = array('trm' => array());
     }
 
-    //
-    // returns value of heurist constants for Record and Detail types
-    //
-    public function constant($name, $smarty_obj=null) {
-        if(defined($name)){
+    /**
+     * Returns the value of Heurist constants for Record and Detail types.
+     *
+     * @param string $name The name of the constant.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return mixed|null The constant value or null if not defined.
+     */
+    public function constant($name, $smarty_obj = null)
+    {
+        if (defined($name)) {
             return constant($name);
-        }else{
-            if(strpos($name,'RT_')===0 || strpos($name,'DT_')===0){
-                if($this->system->defineConstant($name)) {return constant($name);}
+        } else {
+            if (strpos($name, 'RT_') === 0 || strpos($name, 'DT_') === 0) {
+                if ($this->system->defineConstant($name)) {
+                    return constant($name);
+                }
             }
-
             return null;
         }
     }
 
-    public function baseURL(){
+    /**
+     * Returns the base URL of the system.
+     *
+     * @return string The base URL of the system (HEURIST_BASE_URL).
+     */
+    public function baseURL()
+    {
         return HEURIST_BASE_URL;
     }
 
-    //
-    //
-    //
-    public function getSysInfo($param){
-
+    /**
+     * Returns various system information like database record counts or language settings.
+     *
+     * @param string $param The system information parameter to retrieve.
+     * @return mixed|null The requested system information.
+     */
+    public function getSysInfo($param)
+    {
         $res = null;
         $mysqli = $this->system->get_mysqli();
 
-        if($param=='db_total_records'){
-
+        if ($param == 'db_total_records') {
             $res = mysql__select_value($mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
-
-        }elseif($param=='db_rty_counts'){
-
+        } elseif ($param == 'db_rty_counts') {
             $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
-
-        }elseif($param=='lang'){
-
-            $res = $_REQUEST['lang'];
-            if (!$res) {
-                $res = $this->system->user_GetPreference('layout_language', '');
-            }
-
+        } elseif ($param == 'lang') {
+            $res = $_REQUEST['lang'] ?? $this->system->user_GetPreference('layout_language', '');
             $res = getLangCode3($res);
-        }elseif($param=='user'){
-
-            $usr=$this->system->getCurrentUser();
+        } elseif ($param == 'user') {
+            $usr = $this->system->getCurrentUser();
             unset($usr['ugr_Preferences']);
             return $usr;
         }
 
-
         return $res;
     }
 
-    //
-    //
-    //
-    public function rty_Name($rty_ID){
-        return  $this->rty_Names[$rty_ID];
+    /**
+     * Returns the name of a record type by its ID.
+     *
+     * @param int $rty_ID The record type ID.
+     * @return string The name of the record type.
+     */
+    public function rty_Name($rty_ID)
+    {
+        return $this->rty_Names[$rty_ID];
     }
 
-
-    //
-    // Returns local code for given concept code
-    //
-    public function rty_id($conceptCode, $smarty_obj=null) {
+    /**
+     * Returns the local record type ID for a given concept code.
+     *
+     * @param string $conceptCode The concept code.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return int The local record type ID.
+     */
+    public function rty_id($conceptCode, $smarty_obj = null)
+    {
         return ConceptCode::getRecTypeLocalID($conceptCode);
     }
 
-    public function dty_id($conceptCode, $smarty_obj=null) {
+    /**
+     * Returns the local detail type ID for a given concept code.
+     *
+     * @param string $conceptCode The concept code.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return int The local detail type ID.
+     */
+    public function dty_id($conceptCode, $smarty_obj = null)
+    {
         return ConceptCode::getDetailTypeLocalID($conceptCode);
     }
 
-    public function trm_id($conceptCode, $smarty_obj=null) {
+    /**
+     * Returns the local term ID for a given concept code.
+     *
+     * @param string $conceptCode The concept code.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return int The local term ID.
+     */
+    public function trm_id($conceptCode, $smarty_obj = null)
+    {
         return ConceptCode::getTermLocalID($conceptCode);
     }
 
-    //
-    // this method is used in smarty template in main loop to access record info by record ID
-    //
-    public function getRecord($rec, $smarty_obj=null) {
+    /**
+     * Retrieves record information by record ID, formatted for Smarty reports.
+     *
+     * @param mixed $rec The record ID or record array.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return array|null The record information formatted for Smarty.
+     */
+    public function getRecord($rec, $smarty_obj = null)
+    {
+        $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
 
-        if(is_array($rec) && $rec['recID']){
-            $rec_ID = $rec['recID'];
-        }else{
-            $rec_ID = $rec;
-        }
-
-
-        if(@$this->loaded_recs[$rec_ID]){ //already loaded
+        if (@$this->loaded_recs[$rec_ID]) {
             return $this->loaded_recs[$rec_ID];
         }
 
-        $rec = recordSearchByID($this->system, $rec_ID);//from recordSearch.php
-
-        if($rec){
-            $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);//for current user only
-            if(is_array($rec['rec_Tags'])) {$rec['rec_Tags'] = implode(',',$rec['rec_Tags']);}
-
-            $rec['rec_IsVisible'] = $this->recordIsVisible($rec);//for current user only
+        $rec = recordSearchByID($this->system, $rec_ID);
+        if ($rec) {
+            $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);
+            if (is_array($rec['rec_Tags'])) {
+                $rec['rec_Tags'] = implode(',', $rec['rec_Tags']);
+            }
+            $rec['rec_IsVisible'] = $this->recordIsVisible($rec);
         }
 
-        $res1 = $this->getRecordForSmarty($rec);
-
-        return $res1;
+        return $this->getRecordForSmarty($rec);
     }
 
-    //
-    // returns true if record is visible for current user
-    //
+    /**
+     * Returns whether a record is visible to the current user.
+     *
+     * @param array $rec The record array.
+     * @return bool True if the record is visible, false otherwise.
+     */
     public function recordIsVisible($rec)
     {
-
-        if(@$rec['rec_FlagTemporary']==1) {return false;}
+        if (@$rec['rec_FlagTemporary'] == 1) {
+            return false;
+        }
 
         $currentUser = $this->system->getCurrentUser();
-
         $res = true;
 
-        if($currentUser['ugr_ID']!=2) //db owner
-        {
-            if($rec['rec_NonOwnerVisibility']=='hidden'){
+        if ($currentUser['ugr_ID'] != 2) { // db owner
+            if ($rec['rec_NonOwnerVisibility'] == 'hidden') {
                 $res = false;
-            }elseif($currentUser['ugr_ID']>0 && $rec['rec_NonOwnerVisibility']=='viewable'){
+            } elseif ($currentUser['ugr_ID'] > 0 && $rec['rec_NonOwnerVisibility'] == 'viewable') {
+                $wg_ids = @$currentUser['ugr_Groups'] ? array_keys($currentUser['ugr_Groups']) : $this->system->get_user_group_ids();
+                array_push($wg_ids, 0); // Include generic everybody workgroup
 
-                $wg_ids = array();
-                if(@$currentUser['ugr_Groups']){
-                        $wg_ids = array_keys($currentUser['ugr_Groups']);
-                        array_push($wg_ids, $currentUser['ugr_ID']);
-                }else{
-                        $wg_ids = $this->system->get_user_group_ids();
-                }
-                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
-
-                if(!isEmptyArray($wg_ids)){
-                    if(!in_array($rec['rec_OwnerUGrpID'],$wg_ids)){
-
-                        $query = 'select rcp_UGrpID from usrRecPermissions where rcp_RecID='.$rec['rec_ID'];
-                        $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);
-                        if(empty($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids))){
-                            $res = false;
-                        }
+                if (!isEmptyArray($wg_ids) && !in_array($rec['rec_OwnerUGrpID'], $wg_ids)) {
+                    $allowed_groups = mysql__select_list2($this->system->get_mysqli(), 'SELECT rcp_UGrpID FROM usrRecPermissions WHERE rcp_RecID=' . $rec['rec_ID']);
+                    if (empty($allowed_groups) && count(array_intersect($allowed_groups, $wg_ids)) > 0) {
+                        $res = false;
                     }
                 }
-
             }
         }
 
         return $res;
-
     }
 
-    //
-    // retuns array of related record with additional header values
-    //                            recRelationID
-    //                            recRelationType
-    //                            recRelationNotes
-    //                            recRelationStartDate
-    //                            recRelationEndDate
-    //
-    public function getRelatedRecords($rec, $smarty_obj=null){
+    /**
+     * Returns an array of related records with additional relation details.
+     *
+     * @param mixed $rec The record ID or record array.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return array The array of related records with relationship details.
+     */
+    public function getRelatedRecords($rec, $smarty_obj = null)
+    {
+        $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
 
+        $relRT = $this->system->defineConstant('RT_RELATION') ? RT_RELATION : 0;
+        $relSrcDT = $this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0;
+        $relTrgDT = $this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0;
 
-            if(is_array($rec) && $rec['recID']){
-                $rec_ID = $rec['recID'];
-            }else{
-                $rec_ID = $rec;
-            }
+        $res = array();
+        $rel_records = array();
 
+        if ($rec_ID > 0 && $relRT > 0 && $relSrcDT > 0 && $relTrgDT > 0) {
+            $mysqli = $this->system->get_mysqli();
+            $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=' . $rec_ID);
+            $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=' . $rec_ID);
 
-            $relRT = ($this->system->defineConstant('RT_RELATION')?RT_RELATION:0);
-            $relSrcDT = ($this->system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-            $relTrgDT = ($this->system->defineConstant('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
-
-            $res = array();
-            $rel_records = array();
-
-            /* find related records */
-            if($rec_ID>0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
-
-                $mysqli = $this->system->get_mysqli();
-                // get rel records where current record is source
-                $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID='.$rec_ID);
-
-                // get rel records where current record is target
-                $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$rec_ID);
-                if($from_res && $to_res){
-                    if ($from_res->num_rows > 0  ||  $to_res->num_rows > 0) {
-
-                        //load relationship record details
-                        while ($reln = $from_res->fetch_assoc()) {
-                            $bd = fetch_relation_details($reln['dtl_RecID'], true);
-                            array_push($rel_records, $bd);
-                        }
-                        while ($reln = $to_res->fetch_assoc()) {
-                            $bd = fetch_relation_details($reln['dtl_RecID'], false);
-                            array_push($rel_records, $bd);
-                        }
-
-                        foreach ($rel_records as $key => $value){
-                            if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
-
-
-                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']);//related record
-
-
-                                //add specific variables from relationship record (rty_ID=1)
-                                $record["recRelationID"] = $value['recID'];
-
-                                $record["recRelationType"] = $value['RelTerm'];
-
-                                if(array_key_exists('Notes', $value)){
-                                    $record["recRelationNotes"] = $value['Notes'];
-                                }
-                                if(array_key_exists('StartDate', $value)){
-                                    $record["recRelationStartDate"] = \Temporal::toHumanReadable($value['StartDate']);
-                                }
-                                if(array_key_exists('EndDate', $value)){
-                                    $record["recRelationEndDate"] = \Temporal::toHumanReadable($value['EndDate']);
-                                }
-
-                                array_push($res, $record);
-                            }
-                        }
-
+            if ($from_res && $to_res) {
+                if ($from_res->num_rows > 0 || $to_res->num_rows > 0) {
+                    while ($reln = $from_res->fetch_assoc()) {
+                        $bd = fetch_relation_details($reln['dtl_RecID'], true);
+                        array_push($rel_records, $bd);
+                    }
+                    while ($reln = $to_res->fetch_assoc()) {
+                        $bd = fetch_relation_details($reln['dtl_RecID'], false);
+                        array_push($rel_records, $bd);
                     }
 
-                    $from_res->close();
-                    $to_res->close();
+                    foreach ($rel_records as $value) {
+                        if (array_key_exists('RelatedRecID', $value) && array_key_exists('RelTerm', $value)) {
+                            $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
+
+                            $record["recRelationID"] = $value['recID'];
+                            $record["recRelationType"] = $value['RelTerm'];
+                            $record["recRelationNotes"] = $value['Notes'] ?? null;
+                            $record["recRelationStartDate"] = \Temporal::toHumanReadable($value['StartDate']) ?? null;
+                            $record["recRelationEndDate"] = \Temporal::toHumanReadable($value['EndDate']) ?? null;
+
+                            array_push($res, $record);
+                        }
+                    }
                 }
+
+                $from_res->close();
+                $to_res->close();
             }
-            return $res;
+        }
+        return $res;
     }
 
-    //
-    // $rec - record id or record array - record to find records linked to or from this record
-    // $rty_ID - record type or array of record type to filter output
-    // $direction - linkedfrom or linkedto or null to return  both directions
-    // returns array of record IDs devided to 2 arrays linkedto and linkedfrom
-    //
-    public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
+    /**
+     * Returns an array of linked records for a given record.
+     *
+     * @param mixed $rec The record ID or record array.
+     * @param int|null $rty_ID The record type ID to filter linked records (optional).
+     * @param string|null $direction The direction of the link ('linkedto', 'linkedfrom', or null for both directions).
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return array An array with keys 'linkedto' and 'linkedfrom' containing linked record IDs.
+     */
+    public function getLinkedRecords($rec, $rty_ID = null, $direction = null, $smarty_obj = null)
+    {
+        $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
+        $where = SQL_WHERE;
+        $predicateRty = predicateId('rec_RecTypeID', $rty_ID, SQL_AND);
 
-            if(is_array($rec) && $rec['recID']){
-                $rec_ID = $rec['recID'];
-            }else{
-                $rec_ID = $rec;
-            }
+        if ($predicateRty != '') {
+            $where = ', Records WHERE linkID=rec_ID ' . $predicateRty . SQL_AND;
+        }
 
-            $where = SQL_WHERE;
+        $mysqli = $this->system->get_mysqli();
+        $to_records = array();
+        $from_records = array();
 
-            $predicateRty = predicateId('rec_RecTypeID',$rty_ID,SQL_AND);
+        if ($direction == null || $direction == 'linkedto') {
+            $from_query = 'SELECT rl_TargetID as linkID FROM recLinks ' . str_replace('linkID', 'rl_TargetID', $where) . ' rl_RelationID IS NULL AND rl_SourceID=' . $rec_ID;
+            $to_records = mysql__select_list2($mysqli, $from_query);
+        }
 
-            if($predicateRty!=''){
-                $where = ', Records WHERE linkID=rec_ID '.$predicateRty.SQL_AND;
-            }
+        if ($direction == null || $direction == 'linkedfrom') {
+            $to_query = 'SELECT rl_SourceID as linkID FROM recLinks ' . str_replace('linkID', 'rl_SourceID', $where) . ' rl_RelationID IS NULL AND rl_TargetID=' . $rec_ID;
+            $from_records = mysql__select_list2($mysqli, $to_query);
+        }
 
-            $mysqli = $this->system->get_mysqli();
-
-            $to_records = array();
-            $from_records = array();
-
-            if($direction==null || $direction=='linkedto'){
-                // get linked records where current record is source
-                $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
-                    .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
-
-               $to_records = mysql__select_list2($mysqli, $from_query);
-            }
-
-            if($direction==null || $direction=='linkedfrom'){
-                // get linked records where current record is target
-                $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
-                    .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
-
-
-                $from_records = mysql__select_list2($mysqli, $to_query);
-            }
-
-            $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
-
-            return $res;
+        return array('linkedto' => $to_records, 'linkedfrom' => $from_records);
     }
 
-    //
-    // convert record array to array to be assigned to smarty variable
-    //
-    private function getRecordForSmarty($rec){
-        
-
-        if(!$rec){
+    /**
+     * Converts a record array into an array that can be assigned to a Smarty variable.
+     *
+     * @param array $rec The record array to convert.
+     * @return array|null The converted record array or null if the record is invalid.
+     */
+    private function getRecordForSmarty($rec)
+    {
+        if (!$rec) {
             return null;
         }
-            
-            if($rec['rec_ID']==206997){
-//error_log('11');                
-            }
-            
-            $recordID = $rec['rec_ID'];
 
-            if(@$this->loaded_recs[$recordID]){
-                return $this->loaded_recs[$recordID];
-            }
+        $recordID = $rec['rec_ID'];
 
+        if (@$this->loaded_recs[$recordID]) {
+            return $this->loaded_recs[$recordID];
+        }
 
-            $record = array();
-            $recTypeID = null;
+        $record = array();
+        $recTypeID = null;
+        $lang = $this->getSysInfo('lang');
 
-            $lang = $this->getSysInfo('lang');
+        foreach ($rec as $key => $value) {
+            if (strpos($key, "rec_") === 0) {
+                $record['rec' . substr($key, 4)] = $value;
 
-            //$record["recOrder"] = $order;
-
-            //loop for all record properties
-            foreach ($rec as $key => $value){
-
-
-                $pos = strpos($key,"rec_");
-                if(is_numeric($pos) && $pos==0){
-                    //array_push($record, array(substr($key,4) => $value));
-                    $record['rec'.substr($key,4)] = $value;
-
-                    if($key=='rec_RecTypeID'){ //additional field
-                        $recTypeID = $value;
-                        $record['recTypeID'] = $recTypeID;
-                        $record['recTypeName'] = $this->rty_Names[$recTypeID];
-                    }elseif($key=='rec_Tags'){
-
-                        $record['rec_Tags'] = $value;
-
-                    }elseif($key=='rec_ID'){ //load tags and woottext once per record
-
-                        $record['recWootText'] = $this->getWootText($value);//htmlspecialchars(, ENT_QUOTES, 'UTF-8');//@todo load dynamically
-
-                    }elseif($key == 'rec_ScratchPad'){
-
-                        //$record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
-                    }
-
+                if ($key == 'rec_RecTypeID') {
+                    $recTypeID = $value;
+                    $record['recTypeID'] = $recTypeID;
+                    $record['recTypeName'] = $this->rty_Names[$recTypeID];
+                } elseif ($key == 'rec_Tags') {
+                    $record['rec_Tags'] = $value;
+                } elseif ($key == 'rec_ID') {
+                    $record['recWootText'] = $this->getWootText($value);
                 }
-                else  if ($key == "details")
-                {
-
-                    $details = array();
-                    foreach ($value as $dtKey => $dtValue){
-                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);//$record['recID']);
-                        if($dt!=null){
-                            $record = array_merge($record, $dt);
-                        }
+            } elseif ($key == "details") {
+                foreach ($value as $dtKey => $dtValue) {
+                    $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);
+                    if ($dt != null) {
+                        $record = array_merge($record, $dt);
                     }
-
                 }
             }
+        }
 
-            if(count($this->loaded_recs)>2500){
-                unset($this->loaded_recs);
-                $this->loaded_recs = array();//reset to avoid memory overflow
-            }
+        if (count($this->loaded_recs) > 2500) {
+            $this->loaded_recs = array(); // Reset cache if too many records are loaded
+        }
 
-            $this->loaded_recs[$recordID] = $record;
-
-            return $record;
-        
+        $this->loaded_recs[$recordID] = $record;
+        return $record;
     }
-
-
-
+    
     /**
     *
     */
@@ -451,10 +367,10 @@ class ReportRecord {
         return $res;
     }
 
-    //
-    // convert details to array to be assigned to smarty variable
-    // $dtKey - detailtype ID, if <1 this dummy relationship detail
-    //
+    /**
+    * convert details to array to be assigned to smarty variable
+    * $dtKey - detailtype ID, if <1 this dummy relationship detail
+    */
     private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
         $issingle = false;
@@ -709,15 +625,18 @@ class ReportRecord {
         }
 
     }
-
-
-
-    //
-    // Returns the united woot text
-    //
-    public function getWootText($recID){
-
-        $res = "";
+    
+    
+    /**
+     * Retrieves Woot text associated with a record.
+     *
+     * @param int $recID The record ID.
+     * @return string The Woot text.
+     */
+    public function getWootText($recID)
+    {
+        $res = ""; // Woot is disabled in this version.
+        return $res;
 
 /* woot is disabled in this version
         $woot = loadWoot(array("title"=>"record:".$recID));
@@ -738,323 +657,227 @@ class ReportRecord {
         }elseif (@$woot["errorType"]) {
             $res = "WootText: ".$woot["errorType"];
         }
-*/
-
-        return $res;
+*/        
     }
 
-    //
-    // returns record ids for given query
-    //
-    public function getRecords($query, $current_rec=null){
+    /**
+     * Returns the record IDs for a given query.
+     *
+     * @param string|array $query The Heurist query or JSON object.
+     * @param mixed|null $current_rec The current record ID or array (optional).
+     * @return array|null An array of record IDs or null if none are found.
+     */
+    public function getRecords($query, $current_rec = null)
+    {
+        $rec_ID = is_array($current_rec) && $current_rec['recID'] ? $current_rec['recID'] : $current_rec;
 
-        $rec_ID = 0;
-        if(is_array($current_rec) && $current_rec['recID']){
-            $rec_ID = $current_rec['recID'];
-        }else{
-            $rec_ID = $current_rec;
+        if(is_array($query)){
+            $query = json_encode($query);
         }
-
-        if($rec_ID>0){
-            //replace placeholder [ID] in query to current query id
-            if(is_array($query)){
-                $query = json_encode($query);
-            }
-            if(strpos($query,'[ID]')!==false){
-                $query = str_replace('[ID]', strval($rec_ID), $query);
-            }
-        }else{
-            if(strpos($query,'[ID]')!==false){
-                return null;
-            }
-        }
-
-        $params = array('detail'=>'ids', 'q'=>$query, 'needall'=>1);
-
-        $response = recordSearch($this->system, $params);
-
-        if(@$response['status']==HEURIST_OK){
-            return $response['data']['records'];
-        }else{
+        
+        
+        if ($rec_ID > 0 && strpos($query, '[ID]') !== false) {
+            $query = str_replace('[ID]', strval($rec_ID), $query);
+        } elseif (strpos($query, '[ID]') !== false) {
             return null;
         }
 
+        $params = array('detail' => 'ids', 'q' => $query, 'needall' => 1);
+        $response = recordSearch($this->system, $params);
+
+        if (@$response['status'] == HEURIST_OK) {
+            return $response['data']['records'];
+        } else {
+            return null;
+        }
     }
 
-    //
-    // returns aggregation values
-    // $query_or_ids - heurist query or ids list
-    // $functions - array of pairs (field_id, avg|count|sum)
-    //
-    public function getRecordsAggr($functions, $query_or_ids, $current_rec=null){
-
+    /**
+     * Returns aggregation values for a set of records or query.
+     *
+     * @param array $functions An array of pairs (field_id, avg|count|sum) specifying the aggregation functions.
+     * @param string|array $query_or_ids Heurist query or record IDs.
+     * @param mixed|null $current_rec The current record ID or array (optional).
+     * @return array|mixed|null Aggregation result, or null if none are found.
+     */
+    public function getRecordsAggr($functions, $query_or_ids, $current_rec = null)
+    {
         $ids = prepareIds($query_or_ids);
-        if(count($ids)<1){
-            $ids = $this->getRecords( $query_or_ids, $current_rec );
+        if (count($ids) < 1) {
+            $ids = $this->getRecords($query_or_ids, $current_rec);
         }
 
         //calculate aggregation values
         $select = array();
-        $from = array('Records ');
+        $from = array('Records');
         $result = array();
         $idx = 0;
 
         if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
-        }
+        }        
+        
+        foreach ($functions as $func) {
+            $dty_ID = $func[0];
+            $func_type = $func[1];
 
-        foreach($functions as $idx2 =>$func){
-
-            $dty_ID = @$func[0];
-            $func = @$func[1];
-
-            if($func=='avg' || $func=='sum' || $func=='count'){
-                if($dty_ID>0){
-                    array_push($select, $func.'(d'.$idx.'.dtl_Value)' );
-                    array_push($from, ' JOIN recDetails d'.$idx.' ON rec_ID=d'.$idx.'.dtl_RecID AND d'.$idx.'.dtl_DetailTypeID='.$dty_ID );
-                }else{
-                    $func = 'count';
-                    $dty_ID = '*';
-                    array_push($select, 'count(rec_ID)' );
+            if (in_array($func_type, ['avg', 'sum', 'count'])) {
+                if ($dty_ID > 0) {
+                    array_push($select, $func_type . '(d' . $idx . '.dtl_Value)');
+                    array_push($from, 'JOIN recDetails d' . $idx . ' ON rec_ID=d' . $idx . '.dtl_RecID AND d' . $idx . '.dtl_DetailTypeID=' . $dty_ID);
+                } else {
+                    array_push($select, 'count(rec_ID)');
                 }
-                array_push($result, array($dty_ID, $func, 0));
+                array_push($result, array($dty_ID, $func_type, 0));
                 $idx++;
             }
         }
 
-        if(!empty($select)){
-
-            if(!$ids || count($ids)<1){
-                $ids = array(0);
-            }
-
-            //@todo make chunks if count($ids)>10000?
-            $query = 'SELECT '.implode(',',$select)
-                        .' FROM '.implode(' ',$from)
-                        .' WHERE rec_ID IN ('.implode(',',$ids).')';
-
-            $res = mysql__select_row($this->system->get_mysqli(), $query);
-
-            if($res!=null){
-
-                if(count($res)==1){
-                    return $res[0];
-                }else{
-                    //returns
-                    foreach($res as $idx =>$val){
-                       $result[$idx][2] = $val;
-                    }
-                    return $result;
-                }
-            }
-
+        if (empty($select) || empty($ids)) {
+            return null;
         }
-        return null;
+        
+        $query = 'SELECT ' . implode(',', $select) . ' FROM ' . implode(' ', $from) . ' WHERE rec_ID IN (' . implode(',', $ids) . ')';
+        $res = mysql__select_row($this->system->get_mysqli(), $query);
 
+        if ($res != null) {
+            if (count($res) == 1) {
+                return $res[0];
+            } else {
+                foreach ($res as $idx => $val) {
+                    $result[$idx][2] = $val;
+                }
+                return $result;
+            }
+        }
+
+        return null;
     }
 
     /**
-    * returns translation for given entity + id
-    *
-    * @param mixed $entity - trm, rty, dty
-    * @param mixed $ids -
-    * @param mixed $field - name of field
-    * @param null $language_code
-    */
-    public function getTranslation($entity, $ids, $field=null, $language_code=null){
-
-        if($language_code==null){
+     * Returns a translated value for a given entity and field.
+     *
+     * @param string $entity The entity type ('trm', 'rty', 'dty').
+     * @param mixed $ids The entity IDs.
+     * @param string|null $field The field to translate (default is 'Label').
+     * @param string|null $language_code The language code for the translation (optional).
+     * @return array|string The translated value(s).
+     */
+    public function getTranslation($entity, $ids, $field = null, $language_code = null)
+    {
+        if ($language_code == null) {
             $language_code = $this->getSysInfo('lang');
         }
-
         $language_code = getLangCode3($language_code);
-
-
         $rtn = array();
         $def_values = array();
-
         $id_clause = '';
 
-        if(!is_array($ids)){
+        if (!is_array($ids)) {
             $ids = explode(',', $ids);
         }
 
-        if(!array_key_exists($language_code, $this->translations[$entity])){
+        if (!array_key_exists($language_code, $this->translations[$entity])) {
             $this->translations[$entity][$language_code] = array();
         }
 
         $cache = $this->translations[$entity][$language_code];
 
-
-        if($entity == 'trm'){
-            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description';// grab label by default
-        }else{
-            $field = $entity.'_Name';
+        if ($entity == 'trm') {
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description';
+        } else {
+            $field = $entity . '_Name';
         }
 
-        if(count($cache) > 0){ // check cache first
-            foreach ($ids as $idx => $id) {
-                if(array_key_exists($id, $cache) && @$cache[$id][$field]){
-                    $rtn[$id] = $cache[$id][$field];
-                    unset($ids[$idx]);
-                }
+        foreach ($ids as $idx => $id) {
+            if (array_key_exists($id, $cache) && @$cache[$id][$field]) {
+                $rtn[$id] = $cache[$id][$field];
+                unset($ids[$idx]);
             }
         }
 
-        if(count($ids) == 0){
+        if (count($ids) == 0) {
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
-        }else {
-
+        } else {
             $ids = prepareIds($ids);
-
-            if(count($ids) == 1){
-                $id_clause = ' ='.intval($ids[0]);
-            }else{
-                $id_clause = ' IN (' .implode(',', $ids). ')';
-            }
+            $id_clause = count($ids) == 1 ? ' =' . intval($ids[0]) : ' IN (' . implode(',', $ids) . ')';
         }
 
-        if($entity == 'trm'){
-
-            if($this->dtTerms==null){
+        if ($entity == 'trm') {
+            if ($this->dtTerms == null) {
                 $this->dtTerms = dbs_GetTerms($this->system);
             }
-            if($this->dbsTerms==null){
+            if ($this->dbsTerms == null) {
                 $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
             }
 
-            // retrieve original term
-            $idx = $this->dtTerms['fieldNamesToIndex'];
-            $term = null;
-
             foreach ($ids as $trm_id) {
                 $term = $this->dbsTerms->getTerm($trm_id);
-                $def_values[$trm_id] = !empty($term[$idx[$field]]) ? $term[$idx[$field]] : '';
+                $def_values[$trm_id] = $term ? $term[$this->dtTerms['fieldNamesToIndex'][$field]] : '';
             }
         }
 
-        if($id_clause != ''){
-
+        if ($id_clause != '') {
             $mysqli = $this->system->get_mysqli();
-
-            $field = $mysqli->real_escape_string($field);
-            $language_code = $mysqli->real_escape_string($language_code);
-
             $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
-
             $res = mysql__select_assoc2($mysqli, $query);
 
             foreach ($ids as $id) {
-
-                if(array_key_exists($id, $res) && !empty($res[$id])){
-                    $rtn[$id] = $res[$id];
-                }elseif(array_key_exists($id, $def_values) && !empty($def_values[$id])){
-                    $rtn[$id] = $def_values[$id];
-                }else{
-                    $rtn[$id] = '';
-                }
-
+                $rtn[$id] = $res[$id] ?? $def_values[$id] ?? '';
                 $cache[$id] = array($field => $rtn[$id]);
             }
         }
 
-        $this->translations[$entity][$language_code] = $cache; //array_replace($this->translations[$entity][$language_code], $cache)
-
+        $this->translations[$entity][$language_code] = $cache;
         return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
 
     /**
-    * returns the specific field for uploaded media (record's file) info
-    *
-    * @param mixed $file_details
-    * @param mixed $field
-    * @return null[]
-    */
-    public function getFileField($file_details, $field = 'name'){
-
+     * Returns the specific field for uploaded media information.
+     *
+     * @param mixed $file_details The file details array.
+     * @param string $field The field to retrieve ('name', 'desc', 'cap', etc.).
+     * @return string|array The value(s) for the requested field.
+     */
+    public function getFileField($file_details, $field = 'name')
+    {
         $mysqli = $this->system->get_mysqli();
+        $fields_map = [
+            'desc' => 'ulf_Description',
+            'description' => 'ulf_Description',
+            'cap' => 'ulf_Caption',
+            'caption' => 'ulf_Caption',
+            'rights' => 'ulf_Copyright',
+            'copyright' => 'ulf_Copyright',
+            'owner' => 'ulf_Copyowner',
+            'copyowner' => 'ulf_Copyowner',
+            'type' => 'ulf_MimeExt',
+            'ext' => 'ulf_MimeExt',
+            'extension' => 'ulf_MimeExt',
+            'filename' => 'ulf_OrigFileName',
+            'name' => 'ulf_OrigFileName'
+        ];
+        $field = $fields_map[$field] ?? '';
 
-        switch ($field) {
-            case 'desc':
-            case 'description':
-                $field = 'ulf_Description';
-                break;
-
-            case 'cap':
-            case 'caption':
-                $field = 'ulf_Caption';
-                break;
-
-            case 'rights':
-            case 'copyright':
-                $field = 'ulf_Copyright';
-                break;
-
-            case 'owner':
-            case 'copyowner':
-                $field = 'ulf_Copyowner';
-                break;
-
-            case 'type':
-            case 'ext':
-            case 'extension':
-                $field = 'ulf_MimeExt';
-                break;
-
-            case 'name':
-            case 'filename';
-                $field = 'ulf_OrigFileName';// ulf_FileName
-                break;
-
-            default:
-                $field = '';
-                break;
+        if (empty($field)) {
+            return $file_details;
         }
 
-        if(empty($field)){
-            return $file_details; // Provided field is not handled
-        }
-
-        $results = array();
-
-        if(!is_array($file_details) && is_string($file_details)){
-
+        $results = [];
+        if (!is_array($file_details) && is_string($file_details)) {
             $files = explode(',', $file_details);
-
             foreach ($files as $f_url) {
-
-                $f_url = trim($f_url);
-
-                if(!filter_var($f_url, FILTER_VALIDATE_URL)){
-                    $results[] = 'Not a Heurist file';
-                    continue;
+                $url_params = [];
+                parse_str(parse_url(trim($f_url), PHP_URL_QUERY), $url_params);
+                $ulf_ObfuscatedFileID = $url_params['file'] ?? null;
+                if ($ulf_ObfuscatedFileID && preg_match('/^[a-z0-9]+$/', $ulf_ObfuscatedFileID)) {
+                    $result = mysql__select_value($mysqli, "SELECT $field FROM recUploadedFiles WHERE ulf_ObfuscatedFileID = '$ulf_ObfuscatedFileID'");
+                    $results[] = $result ?: '';
                 }
-
-                $url = parse_url($f_url);
-                parse_str($url['query'], $url_params);
-
-                if(!array_key_exists('file', $url_params) || !preg_match('/^[a-z0-9]+$/', $url_params['file'])){
-                    $results[] = 'Not a Heurist file';
-                    continue;
-                }
-
-                $ulf_ObfuscatedFileID = $mysqli->real_escape_string($url_params['file']);
-
-                $query = "SELECT $field FROM recUploadedFiles WHERE ulf_ObfuscatedFileID = '$ulf_ObfuscatedFileID'";
-                $result = mysql__select_value($mysqli, $query);
-
-                if(empty($result)){
-                    $result = '';
-                }
-
-                $results[] = $result;
             }
-        }else{
-
+        } else {
             foreach ($file_details as $file_dtls) {
-
-                $value = array_key_exists($field, $file_dtls) ? $file_dtls[$field] : '';
-                array_push($results, $value);
+                $results[] = $file_dtls[$field] ?? '';
             }
         }
 
@@ -1062,4 +885,3 @@ class ReportRecord {
     }
 
 }
-?>
