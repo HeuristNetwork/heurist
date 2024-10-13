@@ -218,13 +218,6 @@ class ReportTemplateMgr
             return $template;    // nothing to do -- no substitutions
         }
 
-        // in php v8 use str_ends_with
-        function __endsWith($haystack, $needle) {
-            // search forward starting from end minus needle length characters
-            return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
-        }
-
-        
         $not_found_details = array();
         $replacements_exp = array();
 
@@ -458,4 +451,10 @@ class ReportTemplateMgr
 
         return [$match_idx, $match_offset];
     }
+}
+
+// in php v8 use str_ends_with
+function __endsWith($haystack, $needle) {
+    // search forward starting from end minus needle length characters
+    return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }
