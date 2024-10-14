@@ -187,7 +187,6 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
         );
 
-        this._$('#div_def_user, #div_def_acc').hide();
         if(this.options.show_modes){
             this._$('#div_operation_mode').show();
 

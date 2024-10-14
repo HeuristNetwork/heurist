@@ -390,6 +390,20 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             $(elements[0]).trigger('change'); //trigger
         }
 
+        let element = this._editing.getFieldByName('dsh_ParameterAddRecord');
+        if(element.length > 0 && element.find('input.text').length > 0){
+
+            let $input = element.find('input.text');
+            this._on($input, {
+                change: function(){
+                    let value = window.hWin.HEURIST4.util.isJSON($input.val());
+                    if(value && Object.hasOwn(value, 'RecAddLink')){ // remove record link
+                        delete value.RecAddLink;
+                        this._editing.getFieldByName('dsh_ParameterAddRecord').editing_input('setValue', value, false);
+                    }
+                }
+            });
+        }
     },
     //
     // force refresh after save (note: in case cached entity it auto happens in parent - manageEntity)
@@ -402,6 +416,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         //refresh count of active dashboards
         window.hWin.HAPI4.SystemMgr.sys_info_count();
+
+        let cur_prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', false);
+        if(cur_prefs?.show_on_startup === 1){ // trigger refresh of shortcut bar
+            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+        }
     },
     
     _afterDeleteEvenHandler: function( recID ){

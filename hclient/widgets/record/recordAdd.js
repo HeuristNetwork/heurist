@@ -33,10 +33,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         currentRecType: 0,
         currentRecTags: null,
         scope_types: 'none',
-
-        // default account to use when adding a record
-        def_user: '',
-        def_pwd: '',
         
         isExpanded: false,  //false - show list, true - show preferences dialog
         
@@ -512,15 +508,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 //encodeuricomponent
                 url = url + '&tag='+this.options.currentRecTags;    
             }
-
-            /* ARTEM disabled
-            if(!window.hWin.HEURIST4.util.isempty(this.options.def_user) &&
-                !window.hWin.HEURIST4.util.isempty(this.options.def_pwd)){
-
-                url += `&user=${this.options.def_user}&pwd=${this.options.def_pwd}`;
-            }
-            */
-            
         }
         $('#txt_add_link').val(url);
         
