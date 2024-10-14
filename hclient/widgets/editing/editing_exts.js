@@ -59,7 +59,8 @@ function editSymbology(current_value, mode_edit, callback){
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    let _editing_symbology = new HEditing({container:editForm, 
+    let _editing_symbology;
+    _editing_symbology = new HEditing({container:editForm, 
         onchange:
         function(){
             let isChanged = _editing_symbology.isModified();
