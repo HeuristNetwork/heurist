@@ -4837,12 +4837,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         if(that.editFormSummary && that.editFormSummary.length>0){
             
                 that.editFormSummary.find('.summary-accordion').each(function(idx,item){
-                let active = $(item).accordion('option','active');
-                if(active!==false){
+                    let active = $(item).accordion('option','active');
+                    if(active!==false){
                         activeTabs.push(String(idx));
-                }
-                            
-            });
+                    }
+                });
 
                 let myLayout = that.editFormPopup.layout();                
                 
@@ -5766,11 +5765,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let trm_details = cur_term[1];
         if(!window.hWin.HEURIST4.util.isObject(trm_details)){
             trm_details = {
-                'label': cur_term[1],
-                'desc': '',
-                'code': '',
-                'uri': '',
-                'translations': []
+                label: cur_term[1],
+                desc: '',
+                code: '',
+                uri: '',
+                translations: []
             };
         }
 
@@ -5788,20 +5787,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let $dlg;
 
         // Term Dlg - Content
-        let msg = 'You can create a new term for the <strong>' + field_name + '</strong> field below.<br><br>';
+        let msg = 'Use an existing term: <select id="existing_term"></select><br>'
+                + '<div style="margin: 10px 25px;">OR</div>'
+                + `Create a new term for field: ${field_name} (vocab: ${$Db.trm(vocab_id, 'trm_Label')})<br><br>`;
 
-        msg += 'New term details: <fieldset>'
+        msg += '<fieldset>'
             + '<div>'
-                + '<div class="header"><label>Label: </label></div> <input type="text" id="new_term_label" value="'+ org_label +'">'
+                + `<div class="header"><label>Label: </label></div> <input type="text" id="new_term_label" value="${org_label}">`
             + '</div><br>'
             + '<div>'
-                + '<div class="header" style="vertical-align: top;"><label>Description: </label></div> <textarea cols="50" rows="2" id="new_term_desc">'+ trm_details['desc'] +'</textarea>'
+                + `<div class="header" style="vertical-align: top;"><label>Description: </label></div> <textarea cols="50" rows="2" id="new_term_desc">${trm_details['desc']}</textarea>`
             + '</div><br>'
             + '<div>'
-                + '<div class="header"><label>Code: </label></div> <input type="text" id="new_term_code" value="'+ trm_details['code'] +'">'
+                + `<div class="header"><label>Code: </label></div> <input type="text" id="new_term_code" value="${trm_details['code']}">`
             + '</div><br>'
             + '<div>'
-                + '<div class="header"><label>Scemantic URI: </label></div> <input type="text" id="new_term_uri" value="'+ trm_details['uri'] +'">'
+                + `<div class="header"><label>Semantic URI: </label></div> <input type="text" id="new_term_uri" value="${trm_details['uri']}">`
             + '</div>'
         + '</fieldset>';
 
@@ -5809,12 +5810,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             msg += '<br><label>Import label translations from source? <input type="checkbox" id="import_translations" checked="checked"></label><br>';
         }
 
-        msg += '<br>Please correct the above details, as required, before clicking Insert term, or <br><br>'
-            + 'Select an existing term: <select id="existing_term"></select>';
+        msg += '<br>Please correct the above details, as required, before clicking Insert new term';
 
         // Term Dlg - Button
         let btn = {};
-        btn['Insert term'] = function(){
+        btn['Insert new term'] = function(){
 
             let new_label = $dlg.find('input#new_term_label').val();
             let trm_ID = $Db.getTermByLabel(vocab_id, new_label);
@@ -5830,8 +5830,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             let new_record = {
-                'trm_ID': -1,
-                'trm_ParentTermID': vocab_id
+                trm_ID: -1,
+                trm_ParentTermID: vocab_id
             };
             let labels = new_label;
 
@@ -5846,11 +5846,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             new_record['trm_URI'] =  $dlg.find('#new_term_uri').val();
 
             let request = {
-                'a': 'save',
-                'entity': 'defTerms',
-                'request_id': window.hWin.HEURIST4.util.random(),
-                'fields': new_record,
-                'isfull': 0
+                a: 'save',
+                entity: 'defTerms',
+                request_id: window.hWin.HEURIST4.util.random(),
+                fields: new_record,
+                isfull: 0
             };
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
@@ -5874,7 +5874,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         // Create dlg
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design', dialogId: 'handle-terms'});
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Unknown term', yes: 'Insert new term', no: 'Skip'}, {default_palette_class: 'ui-heurist-design', dialogId: 'handle-terms'});
 
         $dlg.find('.header').css({
             width: '85px', 
@@ -5889,7 +5889,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     let trm_label = $Db.trm($sel.val(), 'trm_Label');
 
-                    window.hWin.HEURIST4.msg.showMsgDlg('Are you sure you wish to use '+ trm_label +' in place of '+ org_label +'?', function(){
+                    window.hWin.HEURIST4.msg.showMsgDlg(`Are you sure you wish to use ${trm_label} in place of ${org_label}?`, function(){
                         new_terms[cur_term[0]].push($sel.val());
                         $dlg.dialog('close');
                         that.processTermFields(completed_fields, new_terms);
