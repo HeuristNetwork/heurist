@@ -33,10 +33,10 @@
 
 /* load some very basic HEURIST objects into top.HEURIST */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 
-$system = new System();
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
 }
@@ -47,7 +47,7 @@ ini_set("zlib.output_compression_level", '5');
 
 $mysqli = $system->get_mysqli();
 
-header("Content-type: text/javascript");
+header(CTYPE_JSON);
 
 $lastModified = mysql__select_value($mysqli, "select max(rty_Modified) from defRecTypes");
 $lastModified = strtotime($lastModified[0]);
@@ -59,20 +59,22 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 
 ob_start();
 
-print "HEURIST_rectypes = {};\n\n";
+$eol = ";\n\n";
+
+print "HEURIST_rectypes = {}$eol";
 
 $names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from defRecTypes order by rty_Name');
 
-print "top.HEURIST_rectypes.names = " . json_encode($names) . ";\n\n";
+print "top.HEURIST_rectypes.names = " . json_encode($names) . $eol;
 
 $names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Plural from defRecTypes');
 
-print "top.HEURIST_rectypes.pluralNames = " . json_encode($names) . ";\n\n";
+print "top.HEURIST_rectypes.pluralNames = " . json_encode($names) . $eol;
 
-//print "top.HEURIST_rectypes.groupNamesInDisplayOrder = " . json_format(getRectypeGroups()) . ";\n\n";
-print "top.HEURIST_rectypes.groups = " . json_encode(dbs_GetRectypeGroups($mysqli, true)) . ";\n\n";
+//print "top.HEURIST_rectypes.groupNamesInDisplayOrder = " . json_format(getRectypeGroups()) . $eol;
+print "top.HEURIST_rectypes.groups = " . json_encode(dbs_GetRectypeGroups($mysqli, true)) . $eol;
 
-print "if (window.HEURIST_rectypesOnload) HEURIST_rectypesOnload();\n\n";
+print "if (window.HEURIST_rectypesOnload) HEURIST_rectypesOnload()$eol";
 
 ob_end_flush();
 ?>

@@ -23,9 +23,6 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        let that = this;
-
-        
         this.input_search_group = this.element.find('#input_search_group');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
             [{key:'any', title:window.hWin.HR('Any')},
@@ -64,8 +61,6 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             /* we don't filter by group - just hide acccordion

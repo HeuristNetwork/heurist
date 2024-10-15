@@ -36,12 +36,13 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\utilities\USanitize;
+    use hserv\utilities\UArchive;
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
-    require_once dirname(__FILE__).'/../utilities/uArchive.php';
     //require_once dirname(__FILE__).'/../../vendor/autoload.php';//for ShapeFile
 
 // Register autoloader
@@ -53,9 +54,11 @@ use Shapefile\Shapefile;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileReader;
 
+global $is_api;
+
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     $params = $_REQUEST;
     $is_api = (@$_REQUEST['api']!=0);
@@ -64,7 +67,7 @@ use Shapefile\ShapefileReader;
         //get error and response
         $system->error_exit_api(null, null, $is_api);//exit from script
     }
-    if(!(@$params['recID']>0)){
+    if(!isPositiveInt(@$params['recID'])){
         $system->error_exit_api('recID parameter value is missing or invalid', null, $is_api);//exit from script
     }
 
@@ -224,7 +227,7 @@ use Shapefile\ShapefileReader;
 
 
                         $geo = @$feature['geometry'];
-                        if(is_array(@$geo['coordinates']) && count(@$geo['coordinates'])>0){
+                        if(!isEmptyArray(@$geo['coordinates'])){
 
                             if($geo['type']=='LineString'){
 
@@ -355,7 +358,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
     if(file_exists($filepath)){
 
         if($isArchive){ //$need_ext!==null){
-            $destination = HEURIST_SCRATCH_DIR;//.$system->get_user_id().'/';
+            $destination = HEURIST_SCRATCH_DIR;
 
             $files = UArchive::unzipFlat($filepath, $destination);
 

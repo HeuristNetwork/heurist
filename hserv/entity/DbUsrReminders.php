@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrReminders table
@@ -19,11 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/../utilities/uMail.php';
 
 class DbUsrReminders extends DbEntityBase
 {
@@ -61,116 +58,35 @@ class DbUsrReminders extends DbEntityBase
               return false;
         }
 
-        $needCheck = false;
-        $needRecords = false;
+        $sup_tables = null;
+        $sup_where = null;
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
+        $this->searchMgr->addPredicate('rem_ID');
+        $this->searchMgr->addPredicate('rem_OwnerUGrpID');
+        $this->searchMgr->addPredicate('rem_RecID');
+        $this->searchMgr->addPredicate('rem_Message');
+        $this->searchMgr->addPredicate('rem_ToWorkgroupID');
+        $this->searchMgr->addPredicate('rem_ToUserID');
+        $this->searchMgr->addPredicate('rem_ToEmail');
 
-        $pred = $this->searchMgr->getPredicate('rem_ID');
-        if($pred!=null) {array_push($where, $pred);}
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('rem_ID'); break;
+            case 'list':
+            case 'name':
+                $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName,rec_Title as rem_RecTitle');
 
-        $pred = $this->searchMgr->getPredicate('rem_OwnerUGrpID');
-        if($pred!=null) {array_push($where, $pred);}
+                $sup_tables = ' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
+                             .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID, Records ';
+                $sup_where = '(rec_ID=rem_RecID)';
 
-        $pred = $this->searchMgr->getPredicate('rem_RecID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_Message');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToWorkgroupID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToUserID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('rem_ToEmail');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'rem_ID';
-
-        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list'){
-
-            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
-
-            $needRecords = true;//($this->data['details']=='list');
-
-            $from_table[0] = $from_table[0]
-                    .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
-                    .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID ';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
-
-        }else{
-            $needCheck = true;
+                break;
+            default: //case 'full':
+                $this->searchMgr->setSelFields('rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq');
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:rem_Modified'];
-        if($value!=null){
-            array_push($order, 'rem_Modified '.($value==1?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:rem_RecTitle'];
-            if($value!=null){
-                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
-                $needRecords = true;
-            }else{
-                $value = @$this->data['sort:rem_StartDate'];
-                if($value!=null){
-                    array_push($order, 'rem_StartDate '.($value==1?'ASC':'DESC'));
-                }
-            }
-        }
-
-
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        if($needRecords){
-              array_push($this->data['details'], 'rec_Title as rem_RecTitle');
-              array_push($from_table,'Records');
-              array_push($where, 'rec_ID=rem_RecID');
-        }
-
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
     //
@@ -179,7 +95,7 @@ class DbUsrReminders extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -243,11 +159,11 @@ class DbUsrReminders extends DbEntityBase
     public function batch_action(){
 
         $rec_IDs = prepareIds(@$this->data['rec_IDs']);
-        $is_notification = (count($rec_IDs)>0);//sends emails for given set of records
+        $is_notification = (!empty($rec_IDs));//sends emails for given set of records
         $query = null;
         $record = null;
 
-        if( (count($rec_IDs)>0) || (@$this->data['fields']['rem_RecID']>0) )
+        if( (!empty($rec_IDs)) || (@$this->data['fields']['rem_RecID']>0) )
         {
             //sends emails for given set of records
             $ugrID = $this->system->get_user_id();
@@ -259,7 +175,7 @@ class DbUsrReminders extends DbEntityBase
             }
             $is_notification = true;
 
-            if(count($rec_IDs)==0){
+            if(empty($rec_IDs)){
                 $rec_IDs = array($this->data['fields']['rem_RecID']);
             }
             $record = $this->data['fields'];
@@ -369,7 +285,7 @@ exit;
             //
             //
             //
-            if(count($recipients)>0){
+            if(!empty($recipients)){
 
                 if(!@$report[$record['rem_Freq']]) {$report[$record['rem_Freq']] = 0;}
                 $report[$record['rem_Freq']] = $report[$record['rem_Freq']] + count($recipients);
@@ -523,7 +439,7 @@ exit;
                     $query = 'INSERT INTO usrRemindersBlockList VALUES ('.$rem_ID.','.$this->data['u'].')';
                 }else{
                     //remove reminder
-                    $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID'];
+                    $query = SQL_DELETE.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID'];
                 }
                 $res = $mysqli->query($query);
             }

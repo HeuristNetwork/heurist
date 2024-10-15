@@ -23,10 +23,10 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
-$system = new System();
+$system = new hserv\System();
 
 if(!defined('ERROR_INCLUDE')){
     define('ERROR_INCLUDE', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
@@ -102,7 +102,7 @@ $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db=
         .$hideImages;
 
 if(!@$_REQUEST['popup']){
-    header('Location: '.$record_renderer_url);
+    redirectURL($record_renderer_url);
     exit;
 }
 

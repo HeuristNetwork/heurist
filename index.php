@@ -18,14 +18,19 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
+use hserv\controller\FrontController;
 
-$isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
+require_once dirname(__FILE__).'/autoload.php';
+
+$isLocalHost = isLocalHost();
 
 //validate that instance is ok and database is accessible
 if( @$_REQUEST['isalive']==1){
 
-    require_once dirname(__FILE__).'/hserv/System.php';
-    $system = new System();
+    //require_once dirname(__FILE__).'/hserv/System.php';
+    $system = new hserv\System();
     $is_inited = $system->init(@$_REQUEST['db'], true, false);
     if($is_inited){
         $mysqli = $system->get_mysqli();
@@ -70,7 +75,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            require_once dirname(__FILE__).'/hserv/System.php';
+            //require_once dirname(__FILE__).'/hserv/System.php';
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
             if(!defined('PDIR')) {define('PDIR','');}
@@ -89,7 +94,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = 'xml';
     }
 
-    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
+    redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
             .(@$_REQUEST['noheader']?'&noheader=1':''));
     return;
 
@@ -99,7 +104,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
 
-    header('Location: hserv/controller/api.php?'.$query_string);
+    redirectURL('hserv/controller/api.php?'.$query_string);
     return;
 
 }else
@@ -110,20 +115,24 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
             elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
-                header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
+                redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
+    
+}elseif (@$_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)){
+
+    //execute smarty template
+    $controller = new FrontController();
+    $controller->run();
+    exit;
+    
 }elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
-          array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
+          array_key_exists('icon',$_REQUEST)){
 
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
         $script_name = 'hserv/controller/fileGet.php';
-    }elseif(array_key_exists('template',$_REQUEST))
-    {
-        //execute smarty template
-        $script_name = 'viewers/smarty/showReps.php';
     }else {
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';
@@ -132,49 +141,55 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
 
 }elseif (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
-    $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
+    $params = USanitize::sanitizeInputArray();
+
+    $name = $params['asset'];
+    $part = strstr($name,'#');
+    if($part){
+         $name = strstr($name,'#');
+    }
+    
     //default ext is html
     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     if(!$extension){
-        $name = $name . '.html';
+        $name = $name . '.htm';
     }
 
-    $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING);//locale
+    $help_folder = 'context_help/';
+    
+    $locale = $params['lang'];//locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
-        $locale = urlencode(strtolower($locale));
+        $locale = strtolower($locale);
         $locale = ($locale=='eng')?'' :($locale.'/');
     }else{
         $locale = '';
     }
 
-    $asset = 'context_help/'.$locale.urlencode($name);
-    if(!file_exists('context_help/'.$locale.$name)){
+    $asset = $help_folder.$locale.basename($name);
+    if(!file_exists($asset)){
         //without locale - default is English
-        $asset = 'context_help/'.urlencode($name);
+        $locale = '';
+        $asset = $help_folder.basename($name);
     }
 
-    if(file_exists('context_help/'.$name)){
+    if(file_exists($help_folder.$name)){
         //download
-        header( 'Location: '.$asset );
+        header( 'Location: '.$asset.' '.$part );
         return;
     }else{
         exit('Asset not found: '.htmlspecialchars($name));
     }
 
 }elseif (@$_REQUEST['logo']){
-    $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
-    $mime_type = 'jpg';
-    if(!$host_logo || !file_exists($host_logo)){
-        $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.png");
-        $mime_type = 'png';
-    }
-    if($host_logo!==false && file_exists($host_logo)){
+
+    list($host_logo, $host_url, $mime_type) = USystem::getHostLogoAndUrl(false);
+
+    if($host_logo!=null && file_exists($host_logo)){
         header('Content-type: image/'.$mime_type);
         readfile($host_logo);
         return;
@@ -215,6 +230,9 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
 
+<script type="text/javascript" src="hclient/widgets/report/reportViewer.js"></script>
+<script type="text/javascript" src="hclient/widgets/report/reportEditor.js"></script>
+
 <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/search_faceted_wiz.js"></script>
@@ -225,8 +243,12 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="hclient/widgets/search/searchBuilderItem.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/searchBuilderSort.js"></script>
 
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu6.js"></script>
+<script type="text/javascript" src="hclient/core/ActionHandler.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/controlPanel.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/buttonsMenu.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/slidersMenu.js"></script>
+<script type="text/javascript" src="hclient/widgets/cpanel/navigation.js"></script>
+
 <script type="text/javascript" src="hclient/widgets/search/svs_edit.js"></script>
 <script type="text/javascript" src="hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
@@ -235,10 +257,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="hclient/widgets/viewers/resultListDataTable.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
-<script type="text/javascript" src="hclient/widgets/dropdownmenus/navigation.js"></script>
-
 <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
-
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
 
 <!-- edit entity -->
@@ -249,12 +268,14 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_Manager.js"></script>
+<<ript type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_Manager.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefGroups.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
@@ -262,18 +283,20 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDashboard.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDashboard.js"></script>
+
+<!-- autoload
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDashboard.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDashboard.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypeGroups.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefVocabularyGroups.js"></script>
-
+-->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
@@ -460,7 +483,6 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                         }
                     }
 
-
                     //add new record
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
 
@@ -468,7 +490,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                     /*
                     var _supress_dashboard = (window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search)>0);
                     if(_supress_dashboard!==true){
-                    //show dashboard (another place - _performInitialSearch in mainMenu)
+                    //show dashboard (another place - _performInitialSearch in controlPanel)
                     var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
                     if(prefs.show_on_startup==1 && prefs.show_as_ribbon!=1)
                     {
@@ -491,13 +513,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         }
 
 
-        //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
-
-
-        //if database is empty show welcome screen
-        //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-        //    showTipOfTheDay(false);
-        //}
+        //perform search in the case that parameter "q" is defined - see controlPanel.js function _performInitialSearch
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='WebSearch'){

@@ -41,22 +41,19 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once dirname(__FILE__).'/../System.php';
+
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $db = @$req_params['db'];
 
-$error = System::dbname_check($db);
+if(mysql__check_dbname($db)==null){
 
-if(!$error){
-
-    $system = new System();//without connection
+    $system = new hserv\System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
     if($fileid!=null){
 
@@ -72,8 +69,7 @@ if(!$error){
 
                     if(defined('HEURIST_THUMB_URL')){
                         //rawurlencode - required for security reports only
-                        $turl = HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png');
-                        header('Location: '.$turl);
+                        redirectURL( HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png') );
                     }else{
                         downloadFile('image/png', $thumbfile);
                     }
@@ -102,7 +98,9 @@ if(!$error){
             exit;
         }
 
-        if(!$system->init($db, true, false)){
+        $need_session = (@$req_params['mode']==null && @$req_params['metadata']==null);
+
+        if(!$system->init($db, true, $need_session)){
             exit;
         }
 
@@ -110,7 +108,7 @@ if(!$error){
 
         //find
         $listpaths = fileGetFullInfo($system, $fileid);
-        if(is_array($listpaths) && count($listpaths)>0){
+        if(!isEmptyArray($listpaths)){
 
             $fileinfo = $listpaths[0];//
             $filepath = USanitize::sanitizePath($fileinfo['fullPath']);//concat(ulf_FilePath,ulf_FileName as fullPath
@@ -121,6 +119,7 @@ if(!$error){
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
             $fileParams = $fileinfo['ulf_Parameters'];// external repository service id
+            $all_can_view = empty($fileinfo['ulf_WhoCanView']) || $fileinfo['ulf_WhoCanView'] == 'viewable';
             if($fileParams!=null && !empty($fileParams)){
                 $fileParams = json_decode($fileParams, true);
             }
@@ -134,8 +133,7 @@ if(!$error){
 
                 if($mode_3d_viewer!=''){
 
-                    $url = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid;
-                    header('Location: '.$url);
+                    redirectURL(HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid);
 
                 }else{
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.basename($db).'&file='.$fileid.'&size='.$size;
@@ -156,8 +154,7 @@ if(!$error){
                     <?php
                 }
 
-            }else
-            if( @$req_params['mode']=='tag'){
+            }elseif( @$req_params['mode']=='tag'){
 
                 //request may have special parameters for audio/video players
                 if(@$req_params['fancybox']){
@@ -182,8 +179,7 @@ if(!$error){
 
                     downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
 
-                }else
-                if(file_exists($filepath) && !is_dir($filepath)){
+                }elseif(is_string($filepath) && file_exists($filepath) && !is_dir($filepath)){
 
                     //fix issue if original name does not have ext
                     if(@$req_params['embedplayer']!=1){
@@ -202,32 +198,41 @@ if(!$error){
 
                     $is_download = (@$req_params['download']==1);
 
-                    if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
-                                        && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+                    $is_image = (strpos($mimeType, DIR_IMAGE)===0);
+                    $get_blurred_image = $is_image && !$all_can_view && !$system->has_access();
+
+                    if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles)
+                    { //&& strpos($fileinfo['fullPath'],'file_uploads/')===0
 
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
 
-                        if(@$req_params['fullres'] === '0'){ // get web cached version
+                        if($get_blurred_image){ //!$all_can_view
 
-                            $cache_url = getWebImageCache($system, $fileinfo);
+                            $blurred_url = getBlurredImage($system, $fileinfo);
+                            $direct_url = !$blurred_url ? HEURIST_BASE_URL . 'hclient/assets/100x100-login-required.png' : $blurred_url;
+
+                        }elseif(@$req_params['fullres'] === '0'){ //$get_cached_image get web cached version
+
+                            $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
                             if($cache_url){
                                 $direct_url = $cache_url;
                             }
                         }
 
-                        header('Location: '.$direct_url);
+                        redirectURL($direct_url);
 
                     }elseif(!$is_download
                         && ($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'))
                     {
 
                         //for 3D viewer - direct url to file
-                        $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
-
-                        header('Location: '.$direct_url);
+                        redirectURL(HEURIST_FILESTORE_URL.$fileinfo['fullPath']);
 
                     }else {
+                        if($get_blurred_image){
+                            $filepath = getBlurredImage($system, $fileinfo, false);
+                        }
                         //see recordFile.php
                         downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
                     }
@@ -236,7 +241,7 @@ if(!$error){
                     if(@$req_params['mode']=='url'){
 
                         //if it does not start with http - this is relative path
-                        if(strpos($originalFileName,'_tiled')===0 ||
+                        if(strpos($originalFileName,ULF_TILED_IMAGE)===0 ||
                           !(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
 
                             $path = USanitize::sanitizePath( $external_url );
@@ -261,8 +266,8 @@ if(!$error){
                         $response = array('status'=>HEURIST_OK, 'data'=>$external_url);
                         print json_encode($response);
 
-                    }else
-                    if(strpos($originalFileName,'_tiled')===0){
+                    }
+                    elseif(strpos($originalFileName,ULF_TILED_IMAGE)===0){
 
                         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
 
@@ -274,32 +279,18 @@ if(!$error){
 
 
                     }else{
-                        //modify $external_url or perform authorization to external repository here
-                        // @todo
-                        //if(is_array($fileParams) && @$fileParams['repository']){
-                        //    $service_id = $fileParams['repository'];
-                        //    $credentials = user_getRepositoryCredentials2($system, $service_id);
-                        //    if($credentials!=null){
-                        //           @$credentials[$service_id]['params']['writeApiKey']
-                        //           @$credentials[$service_id]['params']['readApiKey']
-                        //    }
-                        //}
-
-
-                        header('Location: '.$external_url);//redirect to URL (external)
+                        redirectURL($external_url);//redirect to URL (external)
                     }
 
 
                 }else{
                     //File not found
-                    $placeholder = '../../hclient/assets/200x200-missed2.png';
-                    header('Location: '.$placeholder);
+                    redirectURL('../../hclient/assets/200x200-missed2.png');
                 }
             }
         }else{
             //Filedata not found
-            $placeholder = '../../hclient/assets/200x200-missed.png';
-            header('Location: '.$placeholder);
+            redirectURL('../../hclient/assets/200x200-missed.png');
         }
 
         $system->dbclose();

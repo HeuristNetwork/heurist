@@ -1,4 +1,9 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\utilities\UArchive;
+use hserv\utilities\USanitize;
+use hserv\utilities\DbUtils;
 
     /**
     * db access to recUploadedFiles table
@@ -20,13 +25,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php';
-require_once dirname(__FILE__).'/../utilities/uArchive.php';
 
 /**
 * some public methods
@@ -70,10 +71,6 @@ class DbRecUploadedFiles extends DbEntityBase
               return false;
         }
 
-        if(@$this->data['details']=='related_records'){
-            return $this->_getRelatedRecords($this->data['ulf_ID'], true);
-        }
-
         //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);//'recUploadedFiles'
@@ -106,6 +103,16 @@ class DbRecUploadedFiles extends DbEntityBase
         if($pred!=null) {array_push($where, $pred);}
 
 
+        if(@$this->data['ulf_Referenced']=='yes' || @$this->data['ulf_Referenced']=='no'){
+            array_push($from_table, ' left join recDetails ON  (dtl_UploadedFileID=ulf_ID OR dtl_Value LIKE CONCAT("%",ulf_ObfuscatedFileID,"%"))');
+            if($this->data['ulf_Referenced']=='no'){
+                array_push($where,'(dtl_ID IS NULL)');
+            }else{
+                array_push($where,'(dtl_ID IS NOT NULL)');
+            }
+        }
+
+
         $value = @$this->data['fxm_MimeType'];
         $needMimeType = !($value==null || $value=='any');
         if($needMimeType){
@@ -113,15 +120,14 @@ class DbRecUploadedFiles extends DbEntityBase
         }
         if($needMimeType || @$this->data['details']=='full' || @$this->data['details']=='list'){
             array_push($where, "(fxm_Extension=ulf_MimeExt)");
-            array_push($from_table, 'defFileExtToMimetype');
+            array_push($from_table, ',defFileExtToMimetype');
         }
+
         //----- order by ------------
 
         //compose ORDER BY
         $order = array();
 
-        //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:ulf_Added'];
         if($value!=null){
             array_push($order, 'ulf_Added '.($value>0?'ASC':'DESC'));
@@ -143,21 +149,21 @@ class DbRecUploadedFiles extends DbEntityBase
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
 
-            $this->data['details'] = 'ulf_ID';
+            $this->data['details'] = 'DISTINCT ulf_ID';
 
         }elseif(@$this->data['details']=='name'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName';
 
         }elseif(@$this->data['details']=='list'){
 
             //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB,ulf_WhoCanView';
             $needCalcFields = true;
 
         }elseif(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource,ulf_WhoCanView';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
             $needCalcFields = true;
@@ -207,12 +213,12 @@ class DbRecUploadedFiles extends DbEntityBase
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
+        .' FROM '.implode('', $from_table);
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
+         if(!empty($order)){
             $query = $query.' ORDER BY '.implode(',',$order);
          }
 
@@ -222,9 +228,9 @@ class DbRecUploadedFiles extends DbEntityBase
          $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
 
         //find related records
-        if($needRelations && !(is_bool($result) && $result==false) && count($result['order'])>0 ){
+        if($needRelations && !(is_bool($result) && $result==false) && !empty($result['order']) ){
 
-            $result['relations'] = $this->_getRelatedRecords($result['order'], false);
+            $result['relations'] = $this->getMediaRecords($result['order'], 'both', 'rec_full');
             if(!$result['relations']){
                 return false;
             }
@@ -239,68 +245,9 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     //
     //
-    private function _getRelatedRecords($ulf_IDs, $ids_only){
-
-            $ulf_IDs = prepareIds($ulf_IDs);
-
-            if(count($ulf_IDs)==0){
-                $res = false;
-                $query = ': file ids are not defined';
-            }else{
-
-                if(count($ulf_IDs)>1){
-                    $s = ' in ('.implode(',',$ulf_IDs).')';
-                }else{
-                    $s = '='.intval($ulf_IDs[0]);
-                }
-
-                $mysqli = $this->system->get_mysqli();
-
-                //find all related records (that refer to this file)
-                if($ids_only){
-                    $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID '.$s;
-
-                    $res = mysql__select_list2($mysqli, $query);
-
-                }else{
-                    $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID '
-                            .'FROM recDetails, Records WHERE dtl_UploadedFileID '.$s.' and dtl_RecID=rec_ID';
-                    $direct = array();
-                    $headers = array();
-
-                    $res = $mysqli->query($query);
-                    if ($res){
-                            while ($row = $res->fetch_row()) {
-                                $relation = new stdClass();
-                                $relation->recID = intval($row[0]);//file id
-                                $relation->targetID = intval($row[1]);//record id
-                                $relation->dtID  = intval($row[2]);
-                                array_push($direct, $relation);
-                                $headers[$row[1]] = array($row[3], $row[4]);
-                            }
-                            $res->close();
-
-                            $res = array("direct"=>$direct, "headers"=>$headers);
-                    }
-                }
-            }
-
-            if($res===null || $res===false){
-                    $this->system->addError(HEURIST_DB_ERROR,
-                        'Search query error for records that use files. Query '.$query,
-                        $mysqli->error);
-                    return false;
-            }else{
-                    return $res;
-            }
-    }
-
-    //
-    //
-    //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){
 
             $ugr_ID = $this->system->get_user_id();
 
@@ -384,8 +331,8 @@ class DbRecUploadedFiles extends DbEntityBase
 
             if(@$record['ulf_ExternalFileReference']){
 
-                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0 &&
-                   strpos(@$this->records[$idx]['ulf_OrigFileName'],'_iiif')!==0 &&
+                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_TILED_IMAGE)!==0 &&
+                   strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_IIIF)!==0 &&
                    strpos(@$this->records[$idx]['ulf_PreferredSource'],'iiif')!==0 &&
                    strpos(@$this->records[$idx]['ulf_PreferredSource'],'tiled')!==0)
                 {
@@ -464,9 +411,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                                 }
 
-                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';
-                                //}
+                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF;
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -485,9 +430,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;
 
-                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';
-                                //}
+                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF_IMAGE;
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -498,7 +441,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if(!$this->records[$idx]['ulf_OrigFileName']){
-                        $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+                        $this->records[$idx]['ulf_OrigFileName'] = ULF_REMOTE;
                     }
                     if(!@$this->records[$idx]['ulf_PreferredSource']){
                         $this->records[$idx]['ulf_PreferredSource'] = 'external';
@@ -554,8 +497,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 if($fileExtension==null &&
                     $this->records[$idx]['ulf_PreferredSource']=='local')
-                    //$this->records[$idx]['ulf_OrigFileName'] != '_remote' &&
-                    //strpos($this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0)
+                    //$this->records[$idx]['ulf_OrigFileName'] != ULF_REMOTE &&
+                    //strpos($this->records[$idx]['ulf_OrigFileName'],ULF_TILED_IMAGE)!==0)
                 {
                     //mimetype not found - try to get extension from name
                     $extension = strtolower(pathinfo($this->records[$idx]['ulf_OrigFileName'], PATHINFO_EXTENSION));
@@ -642,21 +585,34 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     public function save(){
 
         $ret = parent::save();
-/*
-        if($ret!==false){
-            //treat thumbnail image
-            foreach($this->records as $record){
-                if(in_array(@$record['trm_ID'], $ret)){
-                    $thumb_file_name = @$record['trm_Thumb'];
 
-                    //rename it to recID.png
-                    if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
-                    }
-                }
+        $thumb_dir = HEURIST_THUMB_DIR;
+        $scratch_dir = HEURIST_SCRATCH_DIR;
+        $tilestacks_dir = HEURIST_TILESTACKS_DIR;
+        $files_dir = HEURIST_FILES_DIR;
+        $current_db = $this->system->dbname();
+
+        if(strpos(HEURIST_FILESTORE_DIR, $current_db) === false){
+
+            $parts = explode("/", $thumb_dir);
+            $idx = array_search("HEURIST_FILESTORE", $parts);
+
+            if($idx <= 0){
+                $this->system->addError(HEURIST_UNKNOWN_ERROR, "Heurist was unable to copy the newly registered image into the correct filestore");
+                $this->setData(['ulf_ID' => $this->records[0]['ulf_ID']]);
+                $this->delete();
+                return false;
             }
+
+            $idx ++;
+            $original_db = $parts[$idx];
+
+            $thumb_dir = str_replace($original_db, $current_db, $thumb_dir);
+            $scratch_dir = str_replace($original_db, $current_db, $scratch_dir);
+            $tilestacks_dir = str_replace($original_db, $current_db, $tilestacks_dir);
+            $files_dir = str_replace($original_db, $current_db, $files_dir);
         }
-*/
+
         if($ret!==false){
         foreach($this->records as $rec_idx => $record){
 
@@ -671,7 +627,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $file2['ulf_ID'] = $ulf_ID;
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
 
-                    if(strpos($record['ulf_OrigFileName'],'_tiled')===0 || $record['ulf_PreferredSource']=='tiled')
+                    if(strpos($record['ulf_OrigFileName'],ULF_TILED_IMAGE)===0 || $record['ulf_PreferredSource']=='iiif_image')
                     {
                         if(!@$record['ulf_ExternalFileReference']){
                             if($record['ulf_MimeExt']=='mbtiles'){
@@ -693,16 +649,15 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     if($res>0){
                         $this->records[$rec_idx]['ulf_ObfuscatedFileID'] = $nonce;
-    //                    $this->records[$rec_idx]['ulf_ID'] = $res;
                     }
                 }
             }
 
-            if( (strpos($record['ulf_OrigFileName'],'_iiif')===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
+            if( (strpos($record['ulf_OrigFileName'],ULF_IIIF)===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
                 && @$record['ulf_TempThumbUrl']){
 
-                    $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
-                    $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
+                    $thumb_name = $thumb_dir.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
+                    $temp_path = tempnam($scratch_dir, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
                         UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
                         unlink($temp_path);
@@ -717,19 +672,19 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //copy temp file from scratch to fileupload folder
                 $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
 
-                if(strpos($record['ulf_OrigFileName'],'_tiled')===0  || $record['ulf_PreferredSource']=='tiled')
+                if(strpos($record['ulf_OrigFileName'],ULF_TILED_IMAGE)===0  || $record['ulf_PreferredSource']=='tiled')
                 {
                     if($record['ulf_MimeExt']=='mbtiles'){
 
                         $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles';
 
-                        if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) )
+                        if( copy($tmp_name, $tilestacks_dir.$new_name) )
                         {
                             //remove temp file
                             unlink($tmp_name);
 
                             //create thumbnail
-                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            $thumb_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                             //UImage::createScaledImageFile($filename, $thumb_name);
                             $img = UImage::createFromString('tileserver tiled images');
                             imagepng($img, $thumb_name);//save into file
@@ -739,21 +694,21 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         }else{
                             $this->system->addError(HEURIST_INVALID_REQUEST,
                                     "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                                . $this->system->dbname().' ('.HEURIST_TILESTACKS_DIR
-                                .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                                . $this->system->dbname().' ('.$tilestacks_dir
+                                .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                         }
 
                     }else{
 
                         //create destination folder
-                        $dest = HEURIST_TILESTACKS_DIR.$ulf_ID.'/';
+                        $dest = $tilestacks_dir.$ulf_ID.'/';
                         $warn = folderCreate2($dest, '');
 
                         //unzip archive to HEURIST_TILESTACKS_DIR
                         $unzip_error = null;
                         try{
                             UArchive::unzip($this->system, $tmp_name, $dest);
-                        } catch (Exception  $e) {
+                        } catch (\Exception  $e) {
                             $unzip_error = $e->getMessage();
                         }
 
@@ -769,7 +724,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             //get first file from first folder - use it as thumbnail
                             $filename = folderFirstFile($dest);
 
-                            $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                            $thumb_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
 
                             $mimeExt = UImage::getImageType($filename);
 
@@ -790,7 +745,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $this->system->addError(HEURIST_ERROR,
                                     'Can\'t extract tiled images stack. It couldn\'t be saved to upload path definied for db = '
                                 . $this->system->dbname().' ('.$dest
-                                .'). Please ask your system administrator to correct the path and/or permissions for this directory', $unzip_error);
+                                .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS, $unzip_error);
                             return false;
                         }
 
@@ -800,16 +755,16 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $new_name = $this->records[$rec_idx]['ulf_FileName'];
 
-                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) )
+                    if( copy($tmp_name, $files_dir.$new_name) )
                     {
                         //remove temp file
                         unlink($tmp_name);
 
                         //copy thumbnail
                         if(@$record['ulf_TempFileThumb']){
-                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
+                            $thumb_name = $scratch_dir.DIR_THUMBS.$record['ulf_TempFileThumb'];
                             if(file_exists($thumb_name)){
-                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                $new_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                                 copy($thumb_name, $new_name);
                                 //remove temp file
                                 unlink($thumb_name);
@@ -819,8 +774,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else{
                         $this->system->addError(HEURIST_INVALID_REQUEST,
                                 "Upload file: $new_name couldn't be saved to upload path definied for db = "
-                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
-                            .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                            . $this->system->dbname().' ('.$files_dir
+                            .'). '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS);
                     }
                 }
             }
@@ -834,8 +789,13 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //   optionally: download URL and register locally
     //
     //    csv_import (with optional is_download)
-    //    delete_unused
+    //    delete_selected
     //    regExternalFiles (with optional is_download)
+    //    merge_duplicates
+    //    get_media_records
+    //    create_media_records
+    //    bulk_reg_filestore
+    //    import_data
     public function batch_action(){
 
         $mysqli = $this->system->get_mysqli();
@@ -862,7 +822,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+            if(!isEmptyArray($this->data['fields'])){
 
                 set_time_limit(0);
 
@@ -937,53 +897,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'No import data has been provided. Ensure that you have enter the necessary CSV rows.<br>Please contact the Heurist team if this problem persists.');
             }
         }
-        elseif(@$this->data['delete_unused']){ // delete file records not in use
+        elseif(@$this->data['delete_selected']){ // delete file records not in use
 
-            $ids = prepareIds($this->data['delete_unused']);
-            $operate = $this->data['operate'];
+            $ret = $this->deleteSelected();
 
-            $where_clause = 'WHERE dtl_ID IS NULL';
-            if(is_array($ids) && count($ids) > 0){ // multiple
-                $where_clause .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
-            }elseif(is_int($ids) && $ids > 0){ // single
-                $where_clause .= ' AND ulf_ID = ' . $ids;
-            }// else use all
-
-            $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as url FROM ' . $this->config['tableName'] . ' LEFT JOIN recDetails ON ulf_ID = dtl_UploadedFileID ' . $where_clause;
-            $to_delete = mysql__select_assoc($mysqli, $query);
-
-            if(count($to_delete) > 0){
-
-                // Check if Obfuscated ID is referenced in values
-                foreach ($to_delete as $ulf_ID => $details) {
-
-                    $ulf_ObfuscatedFileID = mysql__select_value($mysqli, 'SELECT ulf_ObfuscatedFileID FROM ' . $this->config['tableName'] . ' WHERE ulf_ID = ' . $ulf_ID);
-                    if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
-                        unset($to_delete[$ulf_ID]);
-                        continue;
-                    }
-
-                    $is_used = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'");
-                    if($is_used){
-                        unset($to_delete[$ulf_ID]);
-                        continue;
-                    }
-                }
-
-                if($operate == 'delete' && count($to_delete) > 0){ // delete files
-
-                    $to_delete = array_keys($to_delete);
-
-                    $this->data[$this->primaryField] = $to_delete;
-                    $res = $this->delete();
-
-                    if($res === true){
-                        $ret = count($to_delete);
-                    }
-                }else{ // return file details
-                    $ret = $to_delete;
-                }
-            }
         }
         elseif(@$this->data['regExternalFiles']){ // attempt to register multiple URLs at once, and return necessary information for record editor
 
@@ -993,7 +910,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $rec_fields = json_decode($rec_fields, TRUE);
             }
 
-            if(is_array($rec_fields) && count($rec_fields) > 0){
+            if(!empty($rec_fields)){
 
                 $results = array();
 
@@ -1027,7 +944,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                             'ulf_ExternalFileReference' => $url,
                                             'ulf_ObfuscatedFileID' => $file_dtls[0],
                                             'ulf_MimeExt' => $file_dtls[1],
-                                            'ulf_OrigFileName' => '_remote'
+                                            'ulf_OrigFileName' => ULF_REMOTE
                                         );
                                     }
                                 }else{
@@ -1058,7 +975,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     'ulf_ExternalFileReference' => $urls,
                                     'ulf_ObfuscatedFileID' => $file_dtls[0],
                                     'ulf_MimeExt' => $file_dtls[1],
-                                    'ulf_OrigFileName' => '_remote'
+                                    'ulf_OrigFileName' => ULF_REMOTE
                                 );
                             }
                         }else{
@@ -1073,401 +990,17 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
         }
         elseif(@$this->data['merge_duplicates']){ // merge duplicate local + remote files
-
-            $ids = prepareIds($this->data['merge_duplicates']);
-            $where_ids = '';
-
-            $local_fixes = 0;
-            $remote_fixes = 0;
-            $dif_local_fixes = 0;
-            $to_delete = array();// array(new_ulf_id => array(dup_ulf_ids))
-
-            if(is_array($ids) && count($ids) > 0){ // multiple
-                $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
-            }elseif(is_int($ids) && $ids > 0){ // single
-                $where_ids .= ' AND ulf_ID = ' . intval($ids);
-            }// else use all
-
-            //search for duplicated local files
-            $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
-            $local_dups = $mysqli->query($query);
-
-            if($local_dups && $local_dups->num_rows > 0){
-
-                //find id with duplicated path+name
-                while($local_file = $local_dups->fetch_row()){
-
-                    $path = ' IS NULL';
-                    $fname = ' IS NULL';
-                    $params = array('');
-                    if(@$local_file[0]!=null){
-                        $path = '=?';
-                        $params[0] = 's';
-                        $params[] = $local_file[0];
-                    }
-                    if(@$local_file[1]!=null){
-                        $fname = '=?';
-                        $params[0] = $params[0].'s';
-                        $params[] = $local_file[1];
-                    }
-
-                    //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
-                    //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
-
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath'
-                        .  $path
-                        .' AND ulf_FileName '.$fname
-                        . $where_ids;
-
-                    $res = mysql__select_param_query($mysqli, $query, $params);
-
-                    //$res = $mysqli->query($query);
-
-                    $dups_ids = array();
-                    if($res){
-                        while ($local_id = $res->fetch_row()) {
-                            array_push($dups_ids, intval($local_id[0]));
-                        }
-                        $res->close();
-                    }
-
-                    $new_ulf_id = array_shift($dups_ids);
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($new_ulf_id)
-                        .' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $mysqli->query($upd_query);
-
-                    if($mysqli->error !== ''){
-                        $ret = false;
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        break;
-                    }elseif($mysqli->affected_rows == 0){
-                        continue;
-                    }
-
-                    $to_delete[$new_ulf_id] = $dups_ids;
-
-                    $local_fixes = $local_fixes + count($dups_ids);
-                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-                    //$mysqli->query($del_query);
-                }
-                $local_dups->close();
-            }
-
-            //search for duplicated remote files
-            $query = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles WHERE ulf_ExternalFileReference IS NOT NULL'. $where_ids .' GROUP BY ulf_ExternalFileReference HAVING cnt > 1';
-            $remote_dups = $mysqli->query($query);
-
-            if ($remote_dups && $remote_dups->num_rows > 0) {
-
-                //find id with duplicated url
-                while ($res = $remote_dups->fetch_row()) {
-
-                    if(@$res[0]==null || $res[0]=='') {
-                        continue;
-                    }
-
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
-                             .$where_ids;
-                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
-
-                    $dups_ids = array();
-                    while ($remote_id = $res->fetch_row()) {
-                        array_push($dups_ids, intval($remote_id[0]));
-                    }
-                    $res->close();
-
-                    $new_ulf_id = array_shift($dups_ids);
-
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $mysqli->query($upd_query);
-
-                    if($mysqli->error !== ''){
-                        $ret = false;
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        break;
-                    }elseif($mysqli->affected_rows == 0){
-                        continue;
-                    }
-
-                    $to_delete[$new_ulf_id] = $dups_ids;
-
-                    $remote_fixes = $remote_fixes + count($dups_ids);
-                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-                    //$mysqli->query($del_query);
-                }
-
-                $remote_dups->close();
-            }
-
-            // Check dup local file's size and checksum against each other
-            $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
-            . 'FROM recUploadedFiles '
-            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
-            . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
-            $local_dups = $mysqli->query($query);
-
-            if($local_dups && $local_dups->num_rows > 0){
-
-                while($local_file = $local_dups->fetch_row()){
-
-                    $fname = (@$local_file[0]!=null)?$local_file[0]:'';
-
-                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName=?';
-
-                    $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
-
-                    $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
-
-                    while ($file_dtls = $dup_local_files->fetch_assoc()) {
-
-                        //compare files
-                        if(@$file_dtls['ulf_FilePath']==null){
-                            $res_fullpath = $file_dtls['ulf_FileName'];
-                        }else{
-                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] );//see recordFile.php
-                        }
-
-                        if(file_exists($res_fullpath)){
-                            $f_size = filesize($res_fullpath);
-                            $f_md5 = md5_file($res_fullpath);
-
-                            $file_id = intval($file_dtls['ulf_ID']);
-
-                            $is_unique = true;
-                            foreach ($dups_files as $ulf_ID => $file_arr){
-                                if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
-                                    $is_unique = false;
-                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
-                                    break;
-                                }
-                            }
-                            if($is_unique){
-                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath,
-                            }
-                        }
-                    }
-                    $dup_local_files->close();
-
-                    foreach ($dups_files as $ulf_ID => $file_arr) {
-                        if(count($file_arr['dups']) > 0){
-
-                            $dup_ids = implode(',', $file_arr['dups']);
-                            $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.$ulf_ID.' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
-                            $affected_rows = $mysqli->query($upd_query);
-
-                            if($mysqli->error !== ''){
-                                $ret = false;
-                                $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                                break;
-                            }elseif($mysqli->affected_rows == 0){
-                                continue;
-                            }
-
-                            $to_delete[$ulf_ID] = $file_arr['dups'];
-                            $dif_local_fixes = $dif_local_fixes + count($file_arr['dups']);
-                        }
-                    }
-                }
-            }
-
-            // Add existing descriptions in dup records to new main record, then delete
-            if($ret && count($to_delete) > 0){
-                foreach ($to_delete as $ulf_ID => $d_ids) {
-
-                    $dup_ids = $d_ids;
-                    if(is_array($dup_ids)){
-                        $dup_ids = implode(',', $dup_ids);
-                        $to_delete[$ulf_ID] = $dup_ids;
-                    }
-
-                    // Concat descriptions
-                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID IN (' . $dup_ids . ') AND ulf_Description != ""';
-                    $res = $mysqli->query($query);
-                    $extra_desc = "";
-
-                    if($mysqli->error != ''){
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        $ret = false;
-                        break;
-                    }elseif(!$res){
-                        $this->system->addError(HEURIST_DB_ERROR, 'An unknown error occurred');
-                        $ret = false;
-                        break;
-                    }
-
-                    while($file_desc = $res->fetch_row()){
-                        $extra_desc .= $file_desc[0] . "\n";
-                    }
-
-                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID = ' . $ulf_ID;
-                    $res = $mysqli->query($query);
-
-                    if($mysqli->error == ''){
-                        $desc = $res->fetch_row()[0];
-                        if(!empty($desc)){
-                            $extra_desc = $desc . "\n" . $extra_desc;
-                        }
-                    }
-
-                    if(!empty($extra_desc)){
-                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description=? '
-                                    .' WHERE ulf_ID=' . intval($ulf_ID);
-                        mysql__exec_param_query($mysqli, $upd_query, array('s', $extra_desc));
-                    }
-                }
-
-                // Delete files
-                $this->data[$this->primaryField] = $to_delete;
-                $ret = $this->delete();
-            }
-
-            if($ret){
-                $ret = array('local' => $local_fixes, 'remote' => $remote_fixes, 'location_local' => $dif_local_fixes);
-            }
+            $ret = $this->mergeDuplicates();
         }
         elseif(@$this->data['create_media_records']){ // create Multi Media records for files without one
 
-            $ids = $this->data['create_media_records'];
-            if(is_int($ids) && $ids > 0){ // multiple
-                $ids = array($ids);
-            }elseif(!is_array($ids) && count($ids) > 0){ // single
-                $ids = explode(',', $ids);
-            }
+            $ret = $this->createMediaRecords();
 
-            $cnt_skipped = 0;
-            $cnt_error = array();
-            $cnt_new = array();
+        }
+        elseif(@$this->data['get_media_records']){ // retruns ids of referencing Multi Media records for given files
 
-            // ----- Reqruied
-            $rty_id = 0;
-            $dty_file = 0;
-            $dty_title = 0;
-            // ----- Recommended
-            $dty_desc = defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0;
-            $dty_name = defined('DT_FILE_NAME') ? DT_FILE_NAME : 0;
-            // ----- Optional
-            $dty_path = defined('DT_FILE_FOLDER') ? DT_FILE_FOLDER : 0;
-            $dty_ext = defined('DT_FILE_EXT') ? DT_FILE_EXT : 0;
-            $dty_size = defined('DT_FILE_SIZE') ? DT_FILE_SIZE : 0;
-            // ulf_ExternalFileReference goes into rec_URL
+            $ret = $this->getMediaRecords($this->data['get_media_records'], @$this->data['mode'], @$this->data['return']);
 
-            if(defined('RT_MEDIA_RECORD') || ($this->system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0)){
-                $rty_id = RT_MEDIA_RECORD;
-            }
-            if(defined('DT_FILE_RESOURCE') || ($this->system->defineConstant('DT_FILE_RESOURCE') && DT_FILE_RESOURCE > 0)){
-                $dty_file = DT_FILE_RESOURCE;
-            }
-            if(defined('DT_NAME') || ($this->system->defineConstant('DT_NAME') && DT_NAME > 0)){
-                $dty_title = DT_NAME;
-            }
-
-            if(defined('DT_SHORT_SUMMARY') || ($this->system->defineConstant('DT_SHORT_SUMMARY') && DT_SHORT_SUMMARY > 0)){
-                $dty_desc = DT_SHORT_SUMMARY;
-            }
-            if(defined('DT_FILE_NAME') || ($this->system->defineConstant('DT_FILE_NAME') && DT_FILE_NAME > 0)){
-                $dty_name = DT_FILE_NAME;
-            }
-
-            if(defined('DT_FILE_FOLDER') || ($this->system->defineConstant('DT_FILE_FOLDER') && DT_FILE_FOLDER > 0)){
-                $dty_path = DT_FILE_FOLDER;
-            }
-            if(defined('DT_FILE_EXT') || ($this->system->defineConstant('DT_FILE_EXT') && DT_FILE_EXT > 0)){
-                $dty_ext = DT_FILE_EXT;
-            }
-            if(defined('DT_FILE_SIZE') || ($this->system->defineConstant('DT_FILE_SIZE') && DT_FILE_SIZE > 0)){
-                $dty_size = DT_FILE_SIZE;
-            }
-
-            if($rty_id > 0 && $dty_file > 0 && $dty_title > 0){
-
-                $rec_search = 'SELECT count(rec_ID) AS cnt '
-                            . 'FROM Records INNER JOIN recDetails ON rec_ID = dtl_RecID '
-                            . 'WHERE rec_FlagTemporary!=1 AND rec_RecTypeID='.$rty_id
-                            . ' AND dtl_DetailTypeID='.$dty_file.' AND dtl_UploadedFileID=';
-
-                $file_search = 'SELECT ulf_OrigFileName, ulf_Caption, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
-                            .  'FROM recUploadedFiles '
-                            .  'WHERE ulf_ID=';
-
-                $record = array(
-                    'ID' => 0,
-                    'RecTypeID' => $rty_id,
-                    'no_validation' => true,
-                    'URL' => '',
-                    'ScratchPad' => null,
-                    'AddedByUGrpID' => $this->system->get_user_id(), //ulf_UploaderUGrpID
-                    'details' => array()
-                );
-                foreach ($ids as $ulf_id) {
-
-                    $record['URL'] = '';
-                    $record['details'] = array();
-
-                    $rec_res = mysql__select_value($mysqli, $rec_search . $ulf_id);
-                    if($rec_res > 0){ // already have a record
-                        $cnt_skipped ++;
-                        continue;
-                    }
-
-                    $file_details = mysql__select_row_assoc($mysqli, $file_search . $ulf_id);
-                    if($file_details == null || $file_details == false){ // unable to retrieve file data
-                        $cnt_error[] = $ulf_id;
-                        continue;
-                    }
-
-                    $details = array(
-                        $dty_file => $ulf_id,
-                        $dty_title => $file_details['ulf_Caption']
-                            ?$file_details['ulf_Caption']:$file_details['ulf_OrigFileName']
-                    );
-
-                    if($file_details['ulf_OrigFileName'] == '_remote'){
-                        $record['URL'] = $file_details['ulf_ExternalFileReference'];
-                    }
-
-                    if($dty_desc > 0 && !empty($file_details['ulf_Description'])){
-                        $details[$dty_desc] = $file_details['ulf_Description'];
-                    }
-                    if($dty_name > 0 && !empty($file_details['ulf_FileName'])){
-                        $details[$dty_name] = $file_details['ulf_FileName'];
-                    }
-                    if($dty_path > 0 && !empty($file_details['ulf_FilePath'])){
-                        $details[$dty_path] = $file_details['ulf_FilePath'];
-                    }
-                    if($dty_ext > 0 && !empty($file_details['ulf_MimeExt'])){
-                        $details[$dty_ext] = $file_details['ulf_MimeExt'];
-                    }
-                    if($dty_size > 0 && !empty($file_details['ulf_FileSizeKB'])){
-                        $details[$dty_size] = $file_details['ulf_FileSizeKB'];
-                    }
-
-                    $record['details'] = $details;
-
-                    $res = recordSave($this->system, $record);//see recordModify.php
-                    if(@$res['status'] != HEURIST_OK){
-                        $cnt_error[] = $ulf_id;
-                        continue;
-                    }
-
-                    $cnt_new[] = $res['data'];
-                }
-
-                $ret = array('new' => $cnt_new, 'error' => $cnt_error, 'skipped' => $cnt_skipped);
-            }else{
-
-                $extra = '';
-                if($rty_id <= 0){
-                    $extra = 'missing the Digital media record type (2-5)';
-                }
-                if($dty_file <= 0){
-                    $extra .= (($extra == '' && $dty_title > 0) ? ', ': ($extra == '' ? ' and ' : '')) . 'missing the required file field (2-38)';
-                }
-                if($dty_title <= 0){
-                    $extra .= (($extra == '') ? ' and ': '') . 'missing the required title field (2-1)';
-                }
-
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
-            }
         }
         elseif(@$this->data['bulk_reg_filestore']){ // create new file entires
 
@@ -1516,7 +1049,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $file = urldecode($file);
                 $provided_file = $file;
-                if(strpos($file, HEURIST_FILESTORE_DIR) === false){
+                if(strpos($file, HEURIST_FILESTORE_URL) === 0){
+                    $file = str_replace(HEURIST_FILESTORE_URL, HEURIST_FILESTORE_DIR, $file);
+                }else if(strpos($file, HEURIST_FILESTORE_DIR) === false){
                     $file = HEURIST_FILESTORE_DIR . $file;
                 }
 
@@ -1554,9 +1089,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     continue;
                 }
 
-                $ulf_ID = fileRegister($this->system, $file);
+                $ulf_ID = fileRegister($this->system, $file); //@todo convert this function to method of this class
                 if($ulf_ID > 0){
-                    $created[] = $name . ' => Registered file as #' . $ulf_ID;
+                    $created[] = $name . ' => Indexed file as #' . $ulf_ID;
                 }else{
                     $msg = $this->system->getError();
                     $error[] = $name . ' => Unable to register file' . (is_array($msg) && array_key_exists('message', $msg) ? ', <br>' . $msg['message'] : '');
@@ -1565,16 +1100,16 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             $ret = array();
 
-            if(count($created) > 0){
+            if(!empty($created)){
                 $ret[] = 'Created:<br>' . implode('<br>', $created);
             }
             if($exists > 0){
                 $ret[] = 'Already registered: ' . $exists;
             }
-            if(count($skipped) > 0){
+            if(!empty($skipped)){
                 $ret[] = 'Skipped:<br>' . implode('<br>', $skipped);
             }
-            if(count($error) > 0){
+            if(!empty($error)){
                 $ret[] = 'Errors:<br>' . implode('<br>', $error);
             }
 
@@ -1599,21 +1134,21 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            if(is_array($this->data['fields']) && count($this->data['fields'])>0){
+            if(!isEmptyArray($this->data['fields'])){
 
                 $ret = array();
 
                 foreach($this->data['fields'] as $file_details){
 
                     if(!is_array($file_details) || count($file_details) < 2){ // invalid row | no details
-                        array_push($ret, (!is_array($file_details) ? 'Data is in invalid format' : 'No details provided'));
+                        $ret[] = (!is_array($file_details) ? 'Data is in invalid format' : 'No details provided');
                         continue;
                     }
 
                     $id = array_shift($file_details);
 
                     if(empty($file_details)){ // nothing to process
-                        array_push($ret, 'No details to import');
+                        $ret[] = 'No details to import';
                         continue;
                     }
 
@@ -1621,10 +1156,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     if($id_type == 'ulf_ID' || $id_type == 'ulf_ObfuscatedFileID'){
 
                         if($id_type == 'ulf_ID' && (!is_numeric($id) || intval($id) <= 0)){
-                            array_push($ret, "Invalid File ID provided");
+                            $ret[] = 'Invalid File ID provided';
                             continue;
                         }elseif($id_type == 'ulf_ObfuscatedFileID' && !preg_match('/^[a-z0-9]+$/', $id)){
-                            array_push($ret, "Invalid Obfuscated ID provided");
+                            $ret[] = 'Invalid Obfuscated ID provided';
                             continue;
                         }
 
@@ -1633,7 +1168,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }elseif($id_type == 'ulf_FullPath'){
 
                         if(is_numeric($id)){
-                            array_push($ret, "Invalid path provided " . htmlspecialchars($id));
+                            $ret[] = "Invalid path provided " . htmlspecialchars($id);
                             continue;
                         }
 
@@ -1649,11 +1184,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         break;
                     }
 
-                    $file_query = "SELECT ulf_ID, ulf_Description, ulf_Caption, ulf_Copyright, ulf_Copyowner FROM recUploadedFiles WHERE $where_clause";
+                    $file_query = "SELECT ulf_ID, ulf_Description, ulf_Caption, ulf_Copyright, ulf_Copyowner, ulf_WhoCanSee FROM recUploadedFiles WHERE $where_clause";
                     $ulf_row = mysql__select_row_assoc($mysqli, $file_query);
 
                     if(!$ulf_row){
-                        array_push($ret, 'An error occurred while trying to retrieve the existing file');
+                        $ret[] = 'An error occurred while trying to retrieve the existing file';
                         continue;
                     }
 
@@ -1669,26 +1204,48 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     continue;
                                 }else{ // 2 - append value
 
-                                    $file_details[$field] = $ulf_row[$field] . " ;" . $value;
+                                    $file_details[$field] = $field == 'ulf_WhoCanSee' ? $value : $ulf_row[$field] . " ;" . $value;
                                 }
                             }
                         }
                     } //else 3 - replace all values
 
                     if(empty($file_details)){
-                        array_push($ret, 'No new details to import');
+                        $ret[] = 'No new details to import';
                         continue;
+                    }
+
+                    // Validate WhoCanSee value
+                    if(array_key_exists('ulf_WhoCanSee', $file_details)){
+
+                        $file_details['ulf_WhoCanSee'] = $file_details['ulf_WhoCanSee'] ?? 'public';
+
+                        switch($file_details['ulf_WhoCanSee']){
+                            case 'public':
+                            case 'anyone':
+                            case 'visible':
+                            case 'viewable':
+                                $file_details['ulf_WhoCanSee'] = 'viewable';
+                                break;
+                            case 'hidden':
+                            case 'private':
+                            case 'loginonly':
+                            case 'loginrequired':
+                                $file_details['ulf_WhoCanSee'] = 'loginrequired';
+                                break;
+                            default:
+                                $ret[] = 'Invalid visibility setting, please use either public or private';
+                                break;
+                        }
                     }
 
                     $file_details['ulf_ID'] = $ulf_row['ulf_ID'];
 
                     $res = mysql__insertupdate($this->system->get_mysqli(), 'recUploadedFiles', 'ulf', $file_details);
 
-                    if($res != $ulf_row['ulf_ID']){
-                        array_push($ret, 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID']));
-                    }else{
-                        array_push($ret, 'File details updated');
-                    }
+                    $res = $res != $ulf_row['ulf_ID'] ? 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID'])
+                                                      : 'File details updated';
+                    $ret[] = $res;
                 }
             }else{
                 $this->system->addError(HEURIST_ERROR, 'Data is in invalid format, ' . json_last_error_msg());
@@ -1696,13 +1253,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
         }
 
-        if($ret===false){
-            $mysqli->rollback();
-        }else{
-            $mysqli->commit();
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         if($ret && $is_csv_import){
             $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';
@@ -1717,45 +1268,34 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //
     //
-    public function delete($disable_foreign_checks = false){
+    public function delete($keep_uploaded_files=false, $check_referencing=true){ //$disable_foreign_checks = false
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
+        $this->recordIDs = null;
 
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
-            return false;
-        }
-
-        if(!$this->_validatePermission()){
+        if(!$this->deletePrepare()){
             return false;
         }
 
         $mysqli = $this->system->get_mysqli();
 
+        if($check_referencing){
 
-        $cnt = mysql__select_value($mysqli, 'SELECT count(dtl_ID) '
-            .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
+            $cnt = $this->getMediaRecords($this->recordIDs, 'both', 'rec_cnt');
 
-        /*
-        $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT dtl_RecID '
-                    .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
-        $cnt = count($recIDs_inuse);
-        */
-
-        if($cnt>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED,
-            (($cnt==1 && count($this->records)==1)
-                ? 'There is a reference'
-                : 'There are '.$cnt.' references')
-                .' from record(s) to this File.<br>You must delete the records'
-                .' or the File field values in order to be able to delete the file.');
-            return false;
+            if($cnt>0){
+                $this->system->addError(HEURIST_ACTION_BLOCKED,
+                (($cnt==1)
+                    ? 'There is a reference'
+                    : 'There are '.$cnt.' references')
+                    .' from record(s) to this File.<br>You must delete the records'
+                    .' or the File field values in order to be able to delete the file.');
+                return false;
+            }
         }
 
-
-        //gather data to remove files
+        //collect data to remove files
         $query = 'SELECT ulf_ObfuscatedFileID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID in ('
-                .implode(',',$this->recordIDs).')';
+                .implode(',', $this->recordIDs).')';
 
         $res = $mysqli->query($query);
         if ($res){
@@ -1782,10 +1322,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
 
 
-        $mysqli->query('SET foreign_key_checks = 0');
-        $ret = $mysqli->query('DELETE FROM '.$this->config['tableName']
-                               .' WHERE '.$this->primaryField.' in ('.implode(',',$this->recordIDs).')');
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, false);
+        $ret = $mysqli->query(SQL_DELETE.$this->config['tableName']
+                               .SQL_WHERE.predicateId($this->primaryField,$this->recordIDs));
+        mysql__foreign_check($mysqli, true);
 
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR,
@@ -1793,9 +1333,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }else{
 
-            //remove files from webimagecache
+            //remove files and webimagecache
             foreach ($file_data as $file_id=>$file){
-                if($file['path']!=null){
+                //remove main uploaded file
+                if(!$keep_uploaded_files && $file['path']!=null){
                     unlink($file['path']);
                 }
                 //remove thumbnail
@@ -1807,6 +1348,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $webcache_file = HEURIST_FILESTORE_DIR . 'webimagecache/'.$webimage_name['filename'];
                 fileDelete($webcache_file.'.jpg');
                 fileDelete($webcache_file.'.png');
+
+                // remove blurred cached image
+                $blurimage_name = pathinfo($file['name']);
+                $blurcache_file = HEURIST_FILESTORE_DIR . "blurredimagescache/{$blurimage_name['filename']}.png";
+                fileDelete($blurcache_file);
             }
         }
 
@@ -1847,7 +1393,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //name with ext
                 $file->original_name = $newname?$newname:$fileinfo['basename'];//was filename
                 $file->name = $file->original_name;
-                $file->size = filesize($tmp_name);//fix_integer_overflow
+                $file->size = getFileSize($tmp_name);//UFile
                 $file->type = @$fileinfo['extension'];
 
                 $file->thumbnailName = $tmp_thumb;
@@ -1892,16 +1438,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         }else{
 
-            /*if(is_a($file,'stdClass')){
-                $errorMsg = 'Cant find temporary uploaded file: '.$file->name
-                            .' for db = ' . $this->system->dbname().' ('.HEURIST_SCRATCH_DIR
-                            .')';
-            }else{ */
             $errorMsg = 'Cant find file to be registred : '.$tmp_name
                            .' for db = ' . $this->system->dbname();
 
-            $errorMsg = $errorMsg
-                    .'. Please ask your system administrator to correct the path and/or permissions for this directory';
+            $errorMsg = $errorMsg.'. '.CONTACT_SYSADMIN_ABOUT_PERMISSIONS;
 
             $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
 
@@ -1966,6 +1506,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
        $this->records = null; //reset
 
+       $newname = empty($newname) && !empty(@$_fields['ulf_NewName']) ? $_fields['ulf_NewName'] : $newname;
        $fields = $this->getFileInfoForReg($file, $newname);
 
        if($fields!==false){
@@ -1973,7 +1514,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 if($tiledImageStack){
                     //special case for tiled images stack
                     $path_parts = pathinfo($fields['ulf_OrigFileName']);
-                    $fields['ulf_OrigFileName'] = '_tiled@'.$path_parts['filename'];
+                    $fields['ulf_OrigFileName'] = ULF_TILED_IMAGE.'@'.$path_parts['filename'];
                     $fields['ulf_PreferredSource'] = 'tiled';
                 }else{
                     $fields['ulf_PreferredSource'] = 'local';
@@ -2082,7 +1623,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
        if($fields==null) {$fields = array();}
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
-       $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';//or _iiif
+       $fields['ulf_OrigFileName']    = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
 
        if(!@$fields['ulf_MimeExt']){
@@ -2104,7 +1645,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $this->setData($fileinfo);
        $this->setRecords(null);//reset
        $ulf_ID = $this->save();
-       if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
+       if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
 
        if( $ulf_ID>0 && $dtl_ID>0 ){ //register in recDetails
 
@@ -2115,16 +1656,854 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                $this->system->get_mysqli()->query($query2);
 
                //get full file info
-               $fileinfo = fileGetFullInfo($this->system, $ulf_ID);
-               if(is_array($fileinfo) && count($fileinfo)>0){
-                    return $fileinfo[0];
-               }
-
+               $ulf_ID = fileGetFullInfo($this->system, $ulf_ID);
        }
+
+       if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
        return $ulf_ID;
 
     }
 
+    //
+    // $is_concatente - true, concatenate all unique values, otherwise takes first non empty
+    //
+    private function mergeDuplicatesFields($fieldName, $ulf_ID, $dup_IDs, $is_concatenate=false){
 
+        $mysqli = $this->system->get_mysqli();
+
+        $ulf_ID = intval($ulf_ID);
+
+        $query = "SELECT $fieldName FROM recUploadedFiles WHERE ulf_ID=$ulf_ID AND $fieldName != ''";
+        $main_value = mysql__select_value($mysqli, $query);
+
+        if(!$is_concatenate && $main_value){
+            return; //value is already set
+        }
+
+        $query = "SELECT DISTINCT $fieldName FROM recUploadedFiles WHERE ulf_ID IN ($dup_IDs) AND $fieldName != ''";
+        $values = mysql__select_list2($mysqli, $query);
+
+        if(empty($values)){
+            return; //nothing found
+        }
+
+        $new_value = $main_value;
+
+        foreach($values as $val){
+            if($main_value!=$val){
+                $new_value = ($new_value?($new_value."\n"):'').$val;
+                if(!$is_concatenate){
+                    break; //one non empty value is enough
+                }
+            }
+        }
+
+        if($new_value){
+            $upd_query = "UPDATE recUploadedFiles SET $fieldName=? WHERE ulf_ID=$ulf_ID";
+            mysql__exec_param_query($mysqli, $upd_query, array('s', $new_value));
+        }
+
+    }
+
+    //
+    // actions on set of files (called from butch_action)
+    //
+    private function mergeDuplicates(){
+
+            set_time_limit(0);
+
+            define('SPECIAL_FOR_LIMC_FRANCE', true); //remove unlinked ref records and files from upload_files/...thumbnail
+            define('TERMINATED_BY_USER', 'Merging Duplications has been terminated by user');
+
+            $ret = true;
+
+            $mysqli = $this->system->get_mysqli();
+
+            $session_id = intval(@$this->data['session']);
+            if($session_id>0){
+                DbUtils::initialize();
+                DbUtils::setSessionId($session_id);//start progress session
+            }
+
+
+            $ids = prepareIds($this->data['merge_duplicates']);
+            $where_ids = '';
+
+            $cnt_local_fixes_by_path = 0;
+            $cnt_local_fixes_by_checksum  = 0;
+            $cnt_remote_fixes = 0;
+            $cnt_thumbnails = 0;
+
+            $to_delete_ids_with_files = array();//for files with different upload names and same md5 and original name
+            $to_delete_ids = array();
+
+            $to_delete = array();
+
+            if(is_array($ids) && count($ids) > 1){ // multiple
+                $where_ids .= SQL_AND.predicateId('ulf_ID',$ids);
+                //elseif(is_int($ids) && $ids > 0){
+                // single
+                //$where_ids .= ' AND ulf_ID = ' . intval($ids);
+            }
+            // else use all
+
+ /*
+            if(SPECIAL_FOR_LIMC_FRANCE){
+                //remove files from thumbnail
+$query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_files/%" AND ulf_FilePath LIKE "%/thumbnail/"';
+                $to_delete_thumbs = mysql__select_list2($mysqli, $query);
+
+if($is_verbose) {
+        $msg = 'found  thumbs '.count($to_delete_thumbs);
+        error_log($msg);
+        echo $msg.'<br>';
+}
+
+                if(!empty($to_delete_thumbs)){
+
+                    mysql__foreign_check($mysqli, false);
+
+                    $total_cnt = count($to_delete_thumbs);
+                    $offset = 0;
+                    while ($offset<$total_cnt){
+
+                        $to_delete_thumbs_chunk = array_slice($to_delete_thumbs, $offset, 250);
+
+                        $records_without_links = mysql__select_list2($mysqli,
+        'SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)'
+        .' WHERE dtl_UploadedFileID IN ('.implode(',',$to_delete_thumbs_chunk).') GROUP BY dtl_RecID HAVING cnt=0');
+
+if($is_verbose) {
+        $msg = 'found  records '.count($records_without_links);
+        error_log($msg);
+        echo $msg.'<br>';
+}
+
+                        if(!empty($records_without_links)){
+                            //recordDelete($this->system, $records_without_links);
+                            $records_without_links = '('.implode(',',$records_without_links).')';
+
+                            $mysqli->query('delete from recDetails where dtl_RecID IN ' . $records_without_links);
+                            if ($mysqli->error) {
+                                    $ret = false;
+                                    $this->system->addError(HEURIST_DB_ERROR, 'error delete rec details' ,$mysqli->error);
+                                    break;
+                            }
+                            //
+                            $mysqli->query('delete from Records where rec_ID IN ' . $records_without_links);
+                            if ($mysqli->error) {
+                                    $ret = false;
+                                    $this->system->addError(HEURIST_DB_ERROR, 'error delete records', $mysqli->error);
+                                    break;
+                            }
+                        }
+
+                        //exclud thumbnails that still have references
+                        $list = mysql__select_assoc2($mysqli, 'SELECT dtl_UploadedFileID, dtl_RecID '
+                            .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $to_delete_thumbs_chunk).')');
+                        if(!empty($list)){
+                            if($is_verbose) {
+                                    $msg = 'found ref records '.count($list);
+                                    error_log($msg);
+                                    echo $msg.'<br>'.implode(',',$list).'<br>';
+                            }
+                            //remove
+                            foreach($list as $ulf_ID=>$rec_ID){
+                                $idx = array_search($ulf_ID, $to_delete_thumbs_chunk);
+                                if($idx!==false){
+                                    unset($to_delete_thumbs_chunk[$idx]);
+                                }
+                            }
+
+                            if($is_verbose) {
+                                echo 'Removed '.count($to_delete_thumbs_chunk).'<br>';
+                            }
+                        }
+                        //remove ulf entries
+                        $this->data[$this->primaryField] = $to_delete_thumbs_chunk;
+                        $ret = $this->delete();
+
+                        if(!$ret) { break; }
+
+                        $offset = $offset + 250;
+
+                        $mysqli->commit();
+                        mysql__begin_transaction($mysqli);
+
+                        //break; //remove first 250 only
+                    }//while
+
+                    mysql__foreign_check($mysqli, true);
+
+                    if($ret===false){
+                        $mysqli->rollback();
+                    }
+
+                    $cnt_thumbnails = $cnt_thumbnails + $total_cnt;
+                }
+if($is_verbose) {echo 'Thumnails DONE<br>';}
+
+                //return $ret;
+            }
+*/
+
+
+            //1. ---------------------------------------------------------------
+            //search for duplicated local files - with the same name and path
+            $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+
+            $cnt = 0;
+            $tot_cnt = $local_dups->num_rows;
+
+            if($local_dups &&  $tot_cnt > 0){
+
+                //find id with duplicated path+name
+                while($local_file = $local_dups->fetch_row()){
+
+                    $path = ' IS NULL';
+                    $fname = ' IS NULL';
+                    $params = array('');
+                    if(@$local_file[0]!=null){
+                        $path = '=?';
+                        $params[0] = 's';
+                        $params[] = $local_file[0];
+                    }
+                    if(@$local_file[1]!=null){
+                        $fname = '=?';
+                        $params[0] = $params[0].'s';
+                        $params[] = $local_file[1];
+                    }
+
+                    //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
+                    //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
+
+                    //find IDS with the same name and path
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath'
+                        .  $path
+                        .' AND ulf_FileName '.$fname
+                        . $where_ids;
+
+                    $res = mysql__select_param_query($mysqli, $query, $params);
+
+                    //$res = $mysqli->query($query);
+
+                    $dups_ids = array();
+                    if($res){
+                        while ($local_id = $res->fetch_row()) {
+                            array_push($dups_ids, intval($local_id[0]));
+                        }
+                        $res->close();
+                    }
+
+                    //update references in recDetails
+                    $new_ulf_id = intval(array_shift($dups_ids)); //get first
+                    $to_delete[$new_ulf_id] = $dups_ids;
+                    $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
+
+                    if(DbUtils::setSessionVal('0,'.$cnt.','.$tot_cnt)){
+                            //terminated by user
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    $cnt++;
+
+                    $cnt_local_fixes_by_path = $cnt_local_fixes_by_path + count($dups_ids);
+
+                }//while
+                $local_dups->close();
+            }
+
+
+            if($ret){
+            //2. ---------------------------------------------------------------
+            // Check dup local file's size and checksum against each other
+            $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
+            . 'FROM recUploadedFiles '
+            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "'.ULF_IIIF.'%"'. $where_ids . ' '
+            . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+            $cnt = 0;
+            $tot_cnt = $local_dups->num_rows;
+
+            if($local_dups && $tot_cnt > 0){
+
+                while($local_file = $local_dups->fetch_row()){
+
+                    $fname = (@$local_file[0]!=null)?$local_file[0]:'';
+
+                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName=?';
+
+                    $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
+
+                    $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
+
+                    while ($file_dtls = $dup_local_files->fetch_assoc()) {
+
+                        $file_id = intval($file_dtls['ulf_ID']);
+
+                        if(array_key_exists($file_id, $to_delete) || in_array($file_id, $to_delete_ids))
+                        {
+                            continue; //already detected as duplicated in previous step
+                        }
+
+                        //compare files
+                        if(@$file_dtls['ulf_FilePath']==null){
+                            $res_fullpath = $file_dtls['ulf_FileName'];
+                        }else{
+                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] );//see recordFile.php
+                        }
+
+                        if(file_exists($res_fullpath)){
+                            $f_size = getFileSize($res_fullpath);//UFile
+                            $f_md5 = md5_file($res_fullpath);
+
+
+                            $is_unique = true;
+                            foreach ($dups_files as $ulf_ID => $file_arr){
+                                if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
+                                    $is_unique = false;
+                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
+                                    break;
+                                }
+                            }
+                            if($is_unique){
+                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath,
+                            }
+                        }
+                    }//while
+                    $dup_local_files->close();
+
+
+                    foreach ($dups_files as $ulf_ID => $file_arr) {
+                        if(!empty($file_arr['dups'])){
+
+                            $to_delete[$ulf_ID] = $file_arr['dups'];
+                            $to_delete_ids_with_files = array_merge($to_delete_ids_with_files, $file_arr['dups']);
+
+                            $cnt_local_fixes_by_checksum = $cnt_local_fixes_by_checksum + count($file_arr['dups']);
+                        }
+                    }//foreach
+
+                    if($cnt%10==0){
+                    if(DbUtils::setSessionVal('1,'.$cnt.','.$tot_cnt)){
+                            //terminated by user
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    }
+                    $cnt++;
+
+                }//while main
+            }
+
+            }
+
+            if($ret){
+
+            //3. ---------------------------------------------------------------
+            //search for duplicated remote files
+            $query = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles WHERE ulf_ExternalFileReference IS NOT NULL'. $where_ids .' GROUP BY ulf_ExternalFileReference HAVING cnt > 1';
+            $remote_dups = $mysqli->query($query);
+            $cnt = 0;
+            $tot_cnt = $remote_dups->num_rows;
+
+            if ($remote_dups && $tot_cnt > 0) {
+
+                //find id with duplicated url
+                while ($res = $remote_dups->fetch_row()) {
+
+                    if(@$res[0]==null || $res[0]=='') {
+                        continue;
+                    }
+
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
+                             .$where_ids;
+                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
+
+                    $dups_ids = array();
+                    while ($remote_id = $res->fetch_row()) {
+                        array_push($dups_ids, intval($remote_id[0]));
+                    }
+                    $res->close();
+
+                    $new_ulf_id = intval(array_shift($dups_ids));
+                    $to_delete[$new_ulf_id] = $dups_ids;
+
+                    $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
+
+
+                    if(DbUtils::setSessionVal('2,'.$cnt.','.$tot_cnt)){
+                            //terminated by user
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    $cnt++;
+
+                    $cnt_remote_fixes = $cnt_remote_fixes + count($dups_ids);
+                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+                    //$mysqli->query($del_query);
+                }//while
+
+                $remote_dups->close();
+            }
+            }
+
+            //4. ------------------------------------------------------------------
+            // Merge description fields to new main record, remove references in recDetails, then delete
+            $cnt = 0;
+            $tot_cnt = count($to_delete);
+
+            if($ret &&  $tot_cnt > 0){
+
+                DbUtils::setSessionVal('3');
+
+                foreach ($to_delete as $ulf_ID => $d_ids) {
+
+                    $dup_ids = $d_ids;
+                    if(is_array($dup_ids)){
+                        $dup_ids = implode(',', $dup_ids);
+                        //$to_delete[$ulf_ID] = $dup_ids;
+                    }else{
+                        $d_ids = array($d_ids);
+                    }
+
+                    //merge other fields ulf_Caption, ulf_Description, ulf_Copyright, ulf_Copyowner
+                    $this->mergeDuplicatesFields('ulf_Description', $ulf_ID, $dup_ids, true);
+                    $this->mergeDuplicatesFields('ulf_Caption', $ulf_ID, $dup_ids);
+                    $this->mergeDuplicatesFields('ulf_Copyright', $ulf_ID, $dup_ids);
+                    $this->mergeDuplicatesFields('ulf_Copyowner', $ulf_ID, $dup_ids);
+
+/*
+                    if(SPECIAL_FOR_LIMC_FRANCE){
+                    //remove referencing records if they are not linked anywhere
+                    $records_without_links = mysql__select_list2($mysqli,
+"SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)"
+." WHERE dtl_UploadedFileID IN ($dup_ids) GROUP BY dtl_RecID HAVING cnt=0");
+                    recordDelete($this->system, $records_without_links);
+                    }
+*/
+                    //remove references in recDetails
+                    $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.intval($ulf_ID)
+                                    .' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
+                    $mysqli->query($upd_query);
+
+                    if($mysqli->error !== ''){
+                        $ret = false;
+                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                        break;
+                    }
+
+                    if($cnt%10==0){
+                    if(DbUtils::setSessionVal('3,'.$cnt.','.$tot_cnt)){
+                            //terminated by user
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    }
+                    $cnt++;
+
+                }//for
+
+                if($ret){
+
+                    if(!empty($to_delete_ids)){
+                        // Delete files - except local by path - remove only table entry and thumbnail!!!!!
+                        $this->data[$this->primaryField] = $to_delete_ids;
+                        $ret = $this->delete(true, false); //keep uploaded files
+
+                        foreach($to_delete_ids as $id){
+                            $key = array_search($id, $to_delete_ids_with_files);
+                            if($key!==false){
+                                unset($to_delete_ids_with_files[$key]);
+                            }
+                        }
+                    }
+                    if(!empty($to_delete_ids_with_files)){
+                        $this->data[$this->primaryField] = $to_delete_ids_with_files;
+                        $ret = $this->delete(false, false);
+                    }
+                }
+            }
+
+            if($ret){
+                $ret = array('local' => $cnt_local_fixes_by_path,
+                            'local_checksum' => $cnt_local_fixes_by_checksum,
+                            'remote' => $cnt_remote_fixes,
+                            'tumbnails'=>$cnt_thumbnails);
+            }
+
+            DbUtils::setSessionVal('REMOVE');
+
+            return $ret;
+
+    }
+
+    //
+    //
+    //
+    private function createMediaRecords()
+    {
+            $ret = false;
+
+            $ids = prepareIds(@$this->data['create_media_records']);
+
+            $cnt_skipped = 0;
+            $cnt_error = array();
+            $cnt_new = array();
+
+            // ----- Reqruied
+            $rty_id = 0;
+            $dty_file = 0;
+            $dty_title = 0;
+            // ----- Recommended
+            $dty_desc = defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0;
+            $dty_name = defined('DT_FILE_NAME') ? DT_FILE_NAME : 0;
+            // ----- Optional
+            $dty_path = defined('DT_FILE_FOLDER') ? DT_FILE_FOLDER : 0;
+            $dty_ext = defined('DT_FILE_EXT') ? DT_FILE_EXT : 0;
+            $dty_size = defined('DT_FILE_SIZE') ? DT_FILE_SIZE : 0;
+            // ulf_ExternalFileReference goes into rec_URL
+
+            if(defined('RT_MEDIA_RECORD') || ($this->system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0)){
+                $rty_id = RT_MEDIA_RECORD;
+            }
+            if(defined('DT_FILE_RESOURCE') || ($this->system->defineConstant('DT_FILE_RESOURCE') && DT_FILE_RESOURCE > 0)){
+                $dty_file = DT_FILE_RESOURCE;
+            }
+            if(defined('DT_NAME') || ($this->system->defineConstant('DT_NAME') && DT_NAME > 0)){
+                $dty_title = DT_NAME;
+            }
+
+            if(defined('DT_SHORT_SUMMARY') || ($this->system->defineConstant('DT_SHORT_SUMMARY') && DT_SHORT_SUMMARY > 0)){
+                $dty_desc = DT_SHORT_SUMMARY;
+            }
+            if(defined('DT_FILE_NAME') || ($this->system->defineConstant('DT_FILE_NAME') && DT_FILE_NAME > 0)){
+                $dty_name = DT_FILE_NAME;
+            }
+
+            if(defined('DT_FILE_FOLDER') || ($this->system->defineConstant('DT_FILE_FOLDER') && DT_FILE_FOLDER > 0)){
+                $dty_path = DT_FILE_FOLDER;
+            }
+            if(defined('DT_FILE_EXT') || ($this->system->defineConstant('DT_FILE_EXT') && DT_FILE_EXT > 0)){
+                $dty_ext = DT_FILE_EXT;
+            }
+            if(defined('DT_FILE_SIZE') || ($this->system->defineConstant('DT_FILE_SIZE') && DT_FILE_SIZE > 0)){
+                $dty_size = DT_FILE_SIZE;
+            }
+
+            if($rty_id > 0 && $dty_file > 0 && $dty_title > 0){
+
+                $mysqli = $this->system->get_mysqli();
+
+                $rec_search = 'SELECT count(DISTINCT rec_ID) AS cnt '
+                            . 'FROM Records, recDetails '
+                            . 'WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 ' //AND rec_RecTypeID='.$rty_id
+                            . ' AND dtl_UploadedFileID=';  // AND dtl_DetailTypeID='.$dty_file.'
+
+                $file_search = 'SELECT ulf_OrigFileName, ulf_Caption, ulf_Description, ulf_FileName, ulf_FilePath, ulf_MimeExt, ulf_FileSizeKB, ulf_ExternalFileReference '
+                            .  'FROM recUploadedFiles '
+                            .  'WHERE ulf_ID=';
+
+                $record = array(
+                    'ID' => 0,
+                    'RecTypeID' => $rty_id,
+                    'no_validation' => true,
+                    'URL' => '',
+                    'ScratchPad' => null,
+                    'AddedByUGrpID' => $this->system->get_user_id(), //ulf_UploaderUGrpID
+                    'details' => array()
+                );
+                foreach ($ids as $ulf_id) {
+
+                    $record['URL'] = '';
+                    $record['details'] = array();
+
+                    $rec_res = mysql__select_value($mysqli, $rec_search . $ulf_id);
+                    if($rec_res > 0){ // already have a record
+                        $cnt_skipped ++;
+                        continue;
+                    }
+
+                    $file_details = mysql__select_row_assoc($mysqli, $file_search . $ulf_id);
+                    if($file_details == null || $file_details == false){ // unable to retrieve file data
+                        $cnt_error[] = $ulf_id;
+                        continue;
+                    }
+
+                    $details = array(
+                        $dty_file => $ulf_id,
+                        $dty_title => $file_details['ulf_Caption']
+                            ?$file_details['ulf_Caption']:$file_details['ulf_OrigFileName']
+                    );
+
+                    if($file_details['ulf_OrigFileName'] == ULF_REMOTE){
+                        $record['URL'] = $file_details['ulf_ExternalFileReference'];
+                    }
+
+                    if($dty_desc > 0 && !empty($file_details['ulf_Description'])){
+                        $details[$dty_desc] = $file_details['ulf_Description'];
+                    }
+                    if($dty_name > 0 && !empty($file_details['ulf_FileName'])){
+                        $details[$dty_name] = $file_details['ulf_FileName'];
+                    }
+                    if($dty_path > 0 && !empty($file_details['ulf_FilePath'])){
+                        $details[$dty_path] = $file_details['ulf_FilePath'];
+                    }
+                    if($dty_ext > 0 && !empty($file_details['ulf_MimeExt'])){
+                        $details[$dty_ext] = $file_details['ulf_MimeExt'];
+                    }
+                    if($dty_size > 0 && !empty($file_details['ulf_FileSizeKB'])){
+                        $details[$dty_size] = $file_details['ulf_FileSizeKB'];
+                    }
+
+                    $record['details'] = $details;
+
+                    $res = recordSave($this->system, $record);//see recordModify.php
+                    if(@$res['status'] != HEURIST_OK){
+                        $cnt_error[] = $ulf_id;
+                        continue;
+                    }
+
+                    $cnt_new[] = $res['data'];
+                }
+
+                $ret = array('new' => $cnt_new, 'error' => $cnt_error, 'skipped' => $cnt_skipped);
+            }else{
+
+                $extra = '';
+                if($rty_id <= 0){
+                    $extra = 'missing the Digital media record type (2-5)';
+                }
+                if($dty_file <= 0){
+                    $extra .= (($extra == '' && $dty_title > 0) ? ', ': ($extra == '' ? ' and' : '')) . ' missing the required file field (2-38)';
+                }
+                if($dty_title <= 0){
+                    $extra .= (($extra == '') ? ' and': '') . ' missing the required title field (2-1)';
+                }
+
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to proceed with Media record creations, due to ' . $extra);
+            }
+
+            return $ret;
+    }
+
+    //
+    // Returns either IDs of referencing records OR file ulf_ID with referencing records
+    // $search_mode -   both
+    //                  file_fields - referenced by field "file" (dtl_UploadedFileID)
+    //                  text_fields - referenced in value (dtl_Value)
+    // $return_mode rec_ids - record ids
+    //              rec_full - record ids, title
+    //              rec_cnt   - count of recrds
+    //              file_ids   - file ids
+    //
+    private function getMediaRecords($ids, $search_mode, $return_mode)
+    {
+        $ids = prepareIds($ids);
+
+        if($search_mode==null){
+            $search_mode = 'both';
+        }
+        if($return_mode==null){
+            $return_mode = 'rec_ids';
+        }
+
+        if($return_mode=='rec_cnt'){
+            $ret = 0;
+        }else{
+            $ret = array();
+        }
+
+        $where_clause = '';
+        $mysqli = $this->system->get_mysqli();
+
+        if($search_mode!='text_fields'){
+
+            if($return_mode=='file_ids'){
+                $fieldName = 'DISTINCT dtl_UploadedFileID';
+            }elseif($return_mode=='rec_cnt'){
+                $fieldName = 'count(DISTINCT rec_ID)';
+            }elseif($return_mode=='rec_full'){
+                $fieldName = 'dtl_UploadedFileID as recID, dtl_RecID as targetID, dtl_ID as dtID';
+            }else{
+                $fieldName = 'DISTINCT rec_ID';
+            }
+
+            $query = 'SELECT '.$fieldName
+                            . ' FROM Records, recDetails '
+                            . ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 '
+                            . SQL_AND . predicateId('dtl_UploadedFileID', $ids);
+
+            if($return_mode=='rec_full'){
+                $ret = mysql__select_assoc($mysqli, $query, 0);
+            }elseif($return_mode=='rec_cnt'){
+                $ret = intval(mysql__select_value($mysqli, $query));
+            }else{
+                $ret = mysql__select_list2($mysqli, $query);
+            }
+        }
+        if($search_mode!='file_fields'){
+
+            $query = 'SELECT DISTINCT ulf_ID, ulf_ObfuscatedFileID  FROM '
+                        . $this->config['tableName']
+                        . SQL_WHERE
+                        . predicateId('ulf_ID', $ids);
+
+            $to_check = mysql__select_assoc2($mysqli, $query);
+
+            if(count($to_check) > 0){
+
+                if($return_mode=='rec_cnt'){
+                    $fieldName = 'count(DISTINCT dtl_RecID)';
+                }else{
+                    $fieldName = 'DISTINCT dtl_RecID';
+                }
+
+                // Check if Obfuscated ID is referenced in values
+                foreach ($to_check as $ulf_ID => $ulf_ObfuscatedFileID) {
+
+                    if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
+                        continue;
+                    }
+                    if($return_mode=='rec_full'){
+                        $fieldName = $ulf_ID.' as recID, dtl_RecID as targetID, dtl_ID as dtID';
+                    }
+
+                    $query = "SELECT $fieldName FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'";
+
+                    if($return_mode=='rec_full'){
+                        $res = mysql__select_assoc($mysqli, $query, 0);
+                        if(!empty($res)){
+                            $ret = array_merge($ret, $res);
+                        }
+                    }elseif($return_mode=='rec_ids'){
+                        //record ids
+                        $res = mysql__select_list2($mysqli, $query);
+                        if(!empty($res)){
+                            $ret = array_merge($ret, $res);
+                        }
+                    }else{
+
+                        $cnt = intval(mysql__select_value($mysqli, $query));
+                        if($cnt>0){
+                            if($return_mode=='file_ids'){
+                                if(!in_array($ulf_ID,$ret)){
+                                    array_push($ret, $ulf_ID);
+                                }
+                            }else{
+                                $ret = $ret + $cnt;
+                            }
+                        }
+                    }
+                }//foreach
+            }
+        }
+
+        if($return_mode=='rec_full')
+        {
+            $direct = $ret;
+            $headers = array();
+
+            if(!empty($ret)){
+                $rec_ids = array();
+                foreach($direct as $links){
+                    if(!in_array($links['targetID'], $rec_ids)){
+                        array_push($rec_ids, $links['targetID']);
+                    }
+                }
+
+                $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID FROM Records WHERE rec_ID IN ('.implode(',',$rec_ids).')';
+
+                $headers = mysql__select_all($mysqli, $query, 1);
+            }
+
+            $ret = array("direct"=>$direct, "headers"=>$headers);
+        }
+
+        return $ret;
+    }
+
+    //
+    //
+    //
+    private function deleteSelected()
+    {
+
+            $ids = prepareIds($this->data['delete_selected']);
+            $mode = $this->data['mode'];
+
+            //find files with referencing records
+            $ulf_IDs_in_use = $this->getMediaRecords($ids, 'both', 'file_ids'); //returns file ids referenced in records
+            $cnt_in_use = count($ulf_IDs_in_use);
+            $cnt_ref_recs = $this->getMediaRecords($ids, 'both', 'rec_cnt');
+
+            $to_delete = array();
+            $cnt_deleted = 0;
+
+            //exclude files in use from list of selected
+            $ids = array_diff($ids, $ulf_IDs_in_use);
+
+            if(!empty($ids)){
+
+                $mysqli = $this->system->get_mysqli();
+
+                //, ulf_ObfuscatedFileID
+                $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM '
+                            . $this->config['tableName']
+                            . SQL_WHERE
+                            . predicateId('ulf_ID',$ids);
+
+                $to_delete = mysql__select_assoc($mysqli, $query);
+
+                if(!empty($to_delete)){
+
+                    /* Check if Obfuscated ID is referenced in values
+                    foreach ($to_delete as $ulf_ID => $details) {
+
+                        $ulf_ObfuscatedFileID = $details['ulf_ObfuscatedFileID'];
+
+                        if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
+                            unset($to_delete[$ulf_ID]);
+                            continue;
+                        }
+
+                        $cnt_used = intval(mysql__select_value($mysqli, "SELECT count(dtl_ID) FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'"));
+                        if($cnt_used>0){
+                            $cnt_in_use++;
+                            $cnt_ref_values = $cnt_ref_values+$cnt_used;
+                            unset($to_delete[$ulf_ID]);
+                            continue;
+                        }
+                    }*/
+
+                    if($mode == 'delete' && !empty($to_delete)){ // delete files
+
+                        $to_delete = array_keys($to_delete);
+
+                        $this->data[$this->primaryField] = $to_delete;
+                        if($this->delete(false, false)){
+                            $cnt_deleted = count($to_delete);
+                        }else{
+                            $cnt_deleted = false;
+                        }
+                    }
+                }
+            }
+
+            if($mode == 'delete'){
+                $ret = $cnt_deleted;
+            }else{
+                $ret = array('files'=>$to_delete, 'cnt_in_use'=>$cnt_in_use,
+                                                        'cnt_ref_recs'=>$cnt_ref_recs);
+            }
+
+            return $ret;
+
+    }
 }
 ?>

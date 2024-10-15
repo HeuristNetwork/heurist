@@ -73,9 +73,6 @@
     *
     */
 
-
-    require_once dirname(__FILE__).'/../utilities/uMail.php';
-
     /**
     * Get user/group by field value
     *
@@ -123,7 +120,7 @@
     function user_getNamesByIds($system, $ugr_IDs){
 
         $ugr_IDs = prepareIds($ugr_IDs);
-        if(count($ugr_IDs)>0){
+        if(!empty($ugr_IDs)){
             $mysqli = $system->get_mysqli();
             $query = 'SELECT ugr_ID, IF(ugr_Type=\'workgroup\',ugr_Name, concat(ugr_FirstName, \' \', ugr_LastName)) '
             .' FROM sysUGrps WHERE ugr_ID in ('.implode(',',$ugr_IDs).')';
@@ -191,7 +188,7 @@
                 "Your username is: ".$user['ugr_Name']."\n".
                 "Your new password is: ".$new_passwd."\n\n".
                 "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.\n\n"
-                ."Database Owner: ".$dbowner_Email;
+                ."Database Owner: $dbowner_Email";
 
 
                 $rv = sendEmail($user['ugr_eMail'], $email_title, $email_text);
@@ -241,6 +238,10 @@
         if(session_status() == PHP_SESSION_ACTIVE){  // all information is stored within the current session
 
             $db = $system->dbname_full();//dbname()
+
+            if(!@$_SESSION[$db]){
+                $_SESSION[$db] = array();
+            }
 
             // Check for user
             $user = user_getByField($mysqli, 'ugr_Name', $username);
@@ -355,7 +356,7 @@
             "Your username is: ".$user['ugr_Name']."\n".
             "Your reset pin is: ".$new_pin."\n\n".
             "This pin will expire in 5 minutes. Please enter it in the popup to reset your password.\n\n"
-            ."Database Owner: ".$dbowner_Email;
+                ."Database Owner: $dbowner_Email";
 
             $res = sendEmail($user['ugr_eMail'], $email_title, $email_body);
             if($res){
@@ -372,7 +373,7 @@
                 return $response;
             }else{
                 $msg = $system->getError();
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'We were unable to send you a reset pin', $msg?@$msg['message']:null);
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'We were unable to email you a reset pin', $msg?@$msg['message']:null);
                 return false;
             }
 
@@ -402,54 +403,52 @@
             return false;
         }
 
-        if(session_status() == PHP_SESSION_ACTIVE){ // all information is stored within the current session
-
-            $db = $system->dbname_full();
-
-            // Check for user
-            $user = user_getByField($mysqli, 'ugr_Name', $username);
-            if($user == null) {
-                $user = user_getByField($mysqli, 'ugr_eMail', $username);
-            }
-            if($user == null) {
-                $system->addError(HEURIST_NOT_FOUND,  'Cannot set new password. Unable to find specified username / email.');
-                return false;
-            }
-
-            $user_id = $user['ugr_ID'];
-
-            // Check reset pin
-            if(!array_key_exists('reset_pins', $_SESSION[$db]) || !array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){ // check that a pin has been requested for this user
-                $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
-                return false;
-            }
-            if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){ // check the pins match
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
-                return false;
-            }
-            if($_SESSION[$db]['reset_pins'][$user_id]['redeemed'] !== true){ // has been handled by user_HandleResetPin
-                $system->addError(HEURIST_ERROR, 'We were unable to verify the reset pin');
-                return false;
-            }
-
-            // Update password
-            $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($password));// prepare record
-            $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
-
-            if(is_numeric($res) > 0){
-
-                unset($_SESSION[$db]['reset_pins'][$user_id]);// remove from session
-
-                return true;
-            }else{
-                $system->addError(HEURIST_ERROR, 'We were unable to reset your password, an error occurred while updating your user account details');
-                return false;
-            }
-        }else{
-
+        if(session_status() != PHP_SESSION_ACTIVE){ // all information is stored within the current session
             $system->addError(HEURIST_ERROR, 'We were unable to reset your password via the pin system, as an error occurred with retrieving your current session');
             return false;
         }
+
+        $db = $system->dbname_full();
+
+        // Check for user
+        $user = user_getByField($mysqli, 'ugr_Name', $username);
+        if($user == null) {
+            $user = user_getByField($mysqli, 'ugr_eMail', $username);
+        }
+        if($user == null) {
+            $system->addError(HEURIST_NOT_FOUND,  'Cannot set new password. Unable to find specified username / email.');
+            return false;
+        }
+
+        $user_id = $user['ugr_ID'];
+
+        // Check reset pin
+        if(!array_key_exists('reset_pins', $_SESSION[$db]) || !array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){ // check that a pin has been requested for this user
+            $system->addError(HEURIST_ERROR, 'An error has occurred with changing your password using a reset pin.<br>Please contact the Heurist team');
+            return false;
+        }
+        if(!hash_equals(crypt($pin, $_SESSION[$db]['reset_pins'][$user_id]['pin']), $_SESSION[$db]['reset_pins'][$user_id]['pin'])){ // check the pins match
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Invalid reset pin');
+            return false;
+        }
+        if($_SESSION[$db]['reset_pins'][$user_id]['redeemed'] !== true){ // has been handled by user_HandleResetPin
+            $system->addError(HEURIST_ERROR, 'We were unable to verify the reset pin');
+            return false;
+        }
+
+        // Update password
+        $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($password));// prepare record
+        $res = mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
+
+        if(is_numeric($res) > 0){
+
+            unset($_SESSION[$db]['reset_pins'][$user_id]);// remove from session
+
+            return true;
+        }
+
+        $system->addError(HEURIST_ERROR, 'We were unable to reset your password, an error occurred while updating your user account details');
+        return false;
     }
 
     /**
@@ -459,7 +458,7 @@
     * @param mixed $ugr_ID - user ID
     */
     function user_updateLoginTime($mysqli, $ugr_ID){
-        $query = 'update sysUGrps set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1 where ugr_ID='.$ugr_ID;
+        $query = 'update sysUGrps set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1 where ugr_ID='.intval($ugr_ID);
         $mysqli->query($query);
 
         $cnt = $mysqli->affected_rows;
@@ -477,8 +476,10 @@
 
         $result = array();
 
-        if($mysqli && intval($ugr_ID))
+        if(!$mysqli || intval($ugr_ID)==0)
         {
+            return $result;
+        }
 
             $dbprefix = '';
             if($database!=null){
@@ -495,7 +496,9 @@
             .' and grp.ugr_Type != "user" order by ugl_GroupID';
 
             $res = $mysqli->query($query);
-            if($res){
+            if(!$res){
+                return $result;
+            }
                 while ($row = $res->fetch_row()) {
                     if($isfull){
                         $id = array_shift($row);
@@ -505,9 +508,8 @@
                     }
                 }
                 $res->close();
-            }
-        }
-        return $result;
+
+            return $result;
     }
 
     //@todo verify why it returns db onwer
@@ -613,7 +615,7 @@
             if(@$prefs['externalRepositories']==null){
                 //get current from database
                 $repositories = user_getRepositoryCredentials($system, false, $ugr_ID);
-                if($repositories!=null && count($repositories)>0){
+                if($repositories!=null && !empty($repositories)){
                     $prefs['externalRepositories'] = $repositories;
                 }
             }
@@ -641,7 +643,7 @@
             $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
             if($res!=null && $res!=''){
                 $res = json_decode($res, true);
-                if($res && count($res)>0){
+                if($res && !empty($res)){
                     return $res;
                 }
             }
@@ -694,7 +696,7 @@
 
                 $recids = @$params['ids'];
                 $recids = prepareIds($recids);
-                if(is_array($recids) && count($recids)>0){
+                if(!isEmptyArray($recids)){
 
                     $filename = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
 
@@ -916,7 +918,7 @@
             }
         }
 
-        if(count($missed)>0){
+        if(!empty($missed)){
             $system->addError(HEURIST_INVALID_REQUEST, "Some required fields are not defined: ".implode(",",$missed));
         }else{
             $res = true;
@@ -1086,7 +1088,8 @@
 
             $email_text = $email_text."\n\nWe recommend visiting https://HeuristNetwork.org and the online documentation ".
             "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.\n\n".
-            "Database Owner: ".$dbowner_Email;
+                            "Database Owner: $dbowner_Email";
+
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
@@ -1219,8 +1222,7 @@
             $new_prefs = json_decode($new_prefs, true);
         }
 
-        if(!(is_array($new_prefs) && count($new_prefs)>0 ||
-             is_array($to_remove) && count($to_remove)>0)) {
+        if(isEmptyArray($new_prefs) && isEmptyArray($to_remove)) {
 
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
@@ -1276,7 +1278,7 @@
         }
 
         //save into database
-        if(!(count($prepared)>0)){
+        if(empty($prepared)){
             $system->addError(HEURIST_INVALID_REQUEST, 'Data to update repository configuration are not defined');
             return false;
         }
@@ -1302,7 +1304,7 @@
                     continue; //do not take password from the existing one - it was removed
                 }
                 /*
-                if(is_array($curr_services) && count($curr_services)>0){
+                if(!isEmptyArray($curr_services)){
                     if(@$curr_services[$service_id]['params']['writePwd']){ //old passsword exists
                         if(!@$service['params']['writePwd']){ //new password not defined
                             $services[$service_id]['params']['writePwd'] = $curr_services[$service_id]['params']['writePwd'];
@@ -1316,7 +1318,7 @@
                 }*/
             }
 
-            if(count($services)==0){
+            if(empty($services)){
                 if(@$prefs['externalRepositories']){
                     unset($prefs['externalRepositories']);
                 }
@@ -1330,7 +1332,7 @@
 
             $res = mysql__exec_param_query($mysqli,
                     'UPDATE `sysUGrps` set ugr_Preferences=? WHERE ugr_ID='.$usr_ID,
-                    array('s', (count($prefs)==0?'':json_encode($prefs))));
+                    array('s', (empty($prefs)?'':json_encode($prefs))));
 
             if(!$res){
                 break;
@@ -1402,10 +1404,13 @@
 
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);//ugr_Type
-        $result = array();
+        
+        if(!$res){
+            return array();    
+        }
 
         //2. loop and parse preferences
-        if($res){
+        $result = array();
             while ($row = $res->fetch_row()) { //loop for user/groups
                 //get preferences
                 $usr_ID = intval($row[0]);
@@ -1413,9 +1418,9 @@
 
                 if($prefs!=null && $prefs!=''){
                     $prefs = json_decode($prefs, true);
-                    if(is_array($prefs) && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                    if(!isEmptyArray($prefs) && array_key_exists('externalRepositories',$prefs)){
                         $prefs = $prefs['externalRepositories'];
-                        if(is_array($prefs) && count($prefs)>0){
+                        if(!isEmptyArray($prefs)){
                             if($serviceName==null || $serviceName=='all'){
                                 //all services
                                 $result = array_merge($result, $prefs);
@@ -1434,7 +1439,6 @@
 
             }
             $res->close();
-        }
 
         return $result;
     }
@@ -1468,7 +1472,7 @@
                     $prefs = $row[2];
                     if($prefs!=null && $prefs!=''){
                         $prefs = json_decode($prefs, true);
-                        if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
+                        if(!isEmptyArray($prefs) && array_key_exists('externalRepositories',$prefs)){
                                 $prefs = $prefs['externalRepositories'];
                                 if(is_array($prefs)){
                                     foreach($prefs as $service_id=>$service){
@@ -1490,6 +1494,137 @@
 
         return $result;
     }
+
+
+
+/**
+* It checks whether a user has access to a certain system level.
+*
+* @param mixed $system
+* @param mixed $level
+*/
+function userCheckAccess($system, $level=0){
+
+    // Base login warning message
+    $login_warning = 'To perform this action you must be logged in';
+    $message = ''; // Initialize empty message
+
+    // Check access based on the user level
+    if ($level == 2 && !$system->is_dbowner()) {
+        // Level 2: Only Database Owners allowed
+        $message = $login_warning . ' as Database Owner';
+    } elseif ($level == 1 && !$system->is_admin()) {
+        // Level 1: Only Administrators allowed
+        $message = $login_warning . ' as Administrator of group \'Database Managers\'';
+    } elseif ($level > 2 && !$system->has_access($level)) {
+        // Levels greater than 2: Check specific access level
+        $message = $login_warning . ' as Administrator of group #' . $level;
+    } elseif ($level == 0 && !$system->has_access()) {
+        // Default check for access without specific level (just logged in)
+        $message = $login_warning;
+    } else {
+        // If all checks pass, return true
+        return true;
+    }
+
+    // If access is denied, log the error and return false
+    $system->addError(HEURIST_REQUEST_DENIED, $message);
+    return false;
+}
+
+/**
+ * Checks if a user has the necessary permissions to perform a specified Record action on the system.
+ *
+ * This function first verifies the user's access level through `userCheckAccess`. Then, it retrieves
+ * the user's permissions from the database and determines whether the user can perform the specified
+ * action (e.g., 'add', 'edit', or 'delete'). Guest users are subject to additional checks such as
+ * daily limits for adding records.
+ *
+ * @param object $system - The system object that provides access to the current session, user, and
+ *                         database interaction methods.
+ * @param string $action - The action the user is attempting to perform. Accepted values include
+ *                         'add', 'edit', 'delete', or other valid actions.
+ * @param int $level - (Optional) The access level required for the action. Defaults to 0, meaning no
+ *                     special access level is required.
+ *
+ * @return bool - Returns true if the user has the appropriate permissions and is allowed to
+ *                perform the Record action, otherwise false adds HEURIST_ACTION_BLOCKED error to $system
+ */
+function userCheckPermissions($system, $action, $level=0){
+
+    if(!userCheckAccess($system, $level)){
+        return false;
+    }
+
+    $mysqli = $system->get_mysqli();
+
+    $user_query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=' . intval($system->get_user_id());
+
+    //'y','n','y_no_add','y_no_delete','y_no_add_delete'
+    $permissions = mysql__select_value($mysqli, $user_query);
+
+    if($permissions==null){
+        $system->addError(HEURIST_DB_ERROR,
+                'Cannot obtain User Permissions.<br>Please contact the Heurist team, if this persists.',
+                $mysqli->error);
+        return false;
+    }
+
+    // Define action message for error
+    // PHP8
+    /*
+    $action_msg = match ($action) {
+        'add' => 'create',
+        'edit' => 'modify',
+        'add delete' => 'create or delete',
+        default => $action,
+    };
+    */
+
+    $action_msg = $action;
+
+    if($action=='add'){
+        $action_msg = 'create';
+    }elseif($action=='edit'){
+        $action_msg = 'modify';
+    }elseif($action=='add delete'){
+        $action_msg = 'create or delete';
+    }
+
+    $block_msg = 'Your account does not have permission to ' . $action_msg
+                .' records,<br>please contact the database owner for more details.';
+
+    $result = true; // Default result
+
+    // If user permissions are disabled (n)
+    if($permissions == 'n'){
+
+        // Guest users are allowed to add records, but have a daily limit
+        if(!($action == 'add' && $system->is_guest_user())){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Only enabled accounts can ' . $action_msg . ' records.');
+            return false;
+        }
+
+        // Guest user: Check daily limit
+        $cnt_added_by_guests = mysql__select_value($mysqli,
+        'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
+
+        if($cnt_added_by_guests>199){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'The number of records added by guest users for the current database exceeds the allowed daily limit.');
+            $result = false;
+        }
+
+    }elseif(  ($permissions == 'y_no_add')  // Read-only
+            || ($action == 'add' && strpos($permissions, 'add') !== false)
+            || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+
+        // User doesn't have permission to add or delete
+        $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
+        $result = false;
+    }
+
+    return $result;
+}
 
 
 ?>

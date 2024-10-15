@@ -1,4 +1,9 @@
 <?php
+namespace hserv;
+use hserv\structure\ConceptCode;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
+
 /**
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -18,17 +23,7 @@
 
 //declare(strict_types=1);
 
-require_once dirname(__FILE__).'/../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/consts.php';
-
-
-require_once dirname(__FILE__).'/dbaccess/utils_db.php';
-require_once dirname(__FILE__).'/utilities/uFile.php';
-require_once dirname(__FILE__).'/utilities/uSanitize.php';
-require_once dirname(__FILE__).'/utilities/uMail.php';
-require_once dirname(__FILE__).'/utilities/uLocale.php';
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/structure/conceptCode.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
 
 set_error_handler('boot_error_handler');
@@ -69,21 +64,28 @@ class System {
 
     private $database_settings = array('TinyMCE formats' => 'text_styles.json', 'Webfonts' => 'webfonts.json');
 
+    //do not check session folder, loads only basic user info
+    private $need_full_session_check = false;
+
     /*
 
     init
         set_dbname_full
         init_db_connection - connect to server and select database (move to db_utils?)
         initPathConstants  - set path constants
-        login_verify  - load user info from session or reloads from database
+        loginVerify  - load user info from session or reloads from database
 
     login
-        login_verify
+        loginVerify
 
 
 
     */
 
+    public function __construct( $full_check=false ) {
+
+        $this->need_full_session_check = $full_check;
+    }
 
     /**
     * Read configuration parameters from config file
@@ -104,9 +106,9 @@ class System {
         //dbutils?
         $connection_ok = $this->init_db_connection();
         if(!$connection_ok){
-           return false; 
+           return false;
         }
-        
+
         //connection OK
 
         if($this->dbname_full && !defined('HEURIST_DBNAME')){
@@ -120,7 +122,7 @@ class System {
             return true;
         }
 
-        if(!$this->start_my_session()){
+        if(!$this->start_my_session( $this->need_full_session_check )){
             return false;
         }
 
@@ -133,9 +135,12 @@ class System {
             // attempt to get release version
             $this->version_release = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? "alpha" : "stable";
 
-            $this->_executeScriptOncePerDay();
+            if($this->need_full_session_check){
+                $this->_executeScriptOncePerDay();
+            }
 
-            $this->login_verify( false );//load user info from session on system init
+
+            $this->loginVerify( false );//load user info from session on system init
             if($this->get_user_id()>0){
                 //set current user for stored procedures (log purposes)
                 $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
@@ -144,7 +149,7 @@ class System {
             //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
             $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
         }
-                
+
 
         $this->is_inited = true;
         return true;
@@ -233,7 +238,15 @@ class System {
             define($const_name, $value);
         }
     }
-    
+
+    //
+    //  returns constant value, init constant if not defined, if it fails returns default value
+    //
+    public function getConstant($const_name, $def=null) {
+
+        return $this->defineConstant($const_name) ?constant($const_name) :$def;
+    }
+
     //
     // init the only constant
     //
@@ -265,25 +278,21 @@ class System {
         $config_file = dirname(__FILE__).'/controller/record_lookup_config.json';
 
         if(!file_exists($config_file)){
-            return null;   
+            return null;
         }
 
         $json = file_get_contents($config_file);
 
         $config = json_decode($json, true);
         if(!is_array($config)){
-            return null;   
+            return null;
         }
 
         $config_res = array();
 
         foreach($config as $idx=>$cfg){
 
-            //$allowed_dbs = @$cfg['database'];
-            //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
-
             $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-            //if($rty_ID>0){
 
             $cfg['rty_ID'] = $rty_ID;
 
@@ -382,9 +391,6 @@ class System {
     private function rectypeLocalIDLookup($rtID, $dbID = 2, $reset=false) {
         static $RTIDs;
 
-        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
-            return $rtID;
-        }else*/
         if (!$RTIDs || $reset) {
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -448,9 +454,6 @@ class System {
     private function detailtypeLocalIDLookup($dtID, $dbID = 2, $reset=false) {
         static $DTIDs;
 
-        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
-            return $dtID;
-        }else*/
         if (!$DTIDs || $reset) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {
@@ -507,7 +510,7 @@ class System {
 
         global $defaultRootFileUploadPath;
 
-        if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+        if (!isEmptyStr($defaultRootFileUploadPath)) {
 
             if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                 $defaultRootFileUploadPath.= "/";// append trailing /
@@ -522,7 +525,7 @@ class System {
 
         }else{
 
-            $install_path = 'HEURIST/';//$this->getInstallPath();
+            $install_path = 'HEURIST/';
             $dir_Filestore = "HEURIST_FILESTORE/";
 
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
@@ -541,29 +544,37 @@ class System {
     *  2 - allow webaccess (.htaccess_via_url will be copied to this folder)
     *  3 - must be backuped
     */
-    public function getArrayOfSystemFolders(){
+    public function getArrayOfSystemFolders($is_for_backup=false){
 
         global $allowWebAccessThumbnails, $allowWebAccessUploadedFiles, $allowWebAccessEntityFiles;
 
         //const name, description, allow webaccess, for backup
         $folders = array();
+
         $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowWebAccessThumbnails, true);
-        $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
-        //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
-        $folders['scratch']      = array('SCRATCH','used to store temporary files', false);
         $folders['hml-output']   = array('HML','used to write published records as hml files', true);
         $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
-        $folders['generated-reports'] = array(null,'used to write generated reports');
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
-        $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
-        $folders['backup']        = array(null,'used to write files for user data dump');
         $folders['settings']      = array('SETTING','', false, true);
-        $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
-
         // do not create constant (if name is empty)
         $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
-        //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
-        $folders['faims']    = array('','');
+
+
+        if(!$is_for_backup)
+        {
+            $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
+            //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
+            $folders['scratch']      = array('SCRATCH','used to store temporary files', false);
+
+            $folders['generated-reports'] = array(null,'used to write generated reports');
+            $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
+            $folders['backup']        = array(null,'used to write files for user data dump');
+            $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
+            //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
+            $folders['faims']    = array('','');
+        }
+
+
 
         return $folders;
     }
@@ -571,49 +582,24 @@ class System {
     //
     // $is_for_backup - 0 no, 1 - archive backup, 2 - delete backup
     //
-    public function getSystemFolders($is_for_backup=false, $database_name=null){
+    public function getSystemFolders($database_name=null){
 
         $folders = $this->getArrayOfSystemFolders();
 
         $system_folders = array();
 
-        if($database_name==null){
-            $dbfolder = HEURIST_FILESTORE_DIR;
-        }else{
-            $dbfolder = HEURIST_FILESTORE_ROOT.$database_name.'/';
+        $dbfolder = HEURIST_FILESTORE_ROOT;
+
+        if($database_name!=null){
+            $dbfolder = $dbfolder.$database_name.'/';
         }
 
         foreach ($folders as $folder_name=>$folder){
-
-            if(($is_for_backup && !@$folder[3])
-                ||
-               ($is_for_backup==2 && $folder_name=='documentation_and_templates')) { continue; }
-
-              
-            if($is_for_backup==2){
-                $folder_name = realpath($dbfolder.$folder_name);
-            }else{
-                $folder_name = $dbfolder.$folder_name;
-            }
-
-            if($folder_name!==false){
-                $folder_name = str_replace('\\', '/', $folder_name);
-                array_push($system_folders, $folder_name.'/');
-            }
+            $folder_name = $dbfolder.$folder_name;
+            $folder_name = str_replace('\\', '/', $folder_name);
+            array_push($system_folders, $folder_name.'/');
         }//for
 
-        if($is_for_backup==2){ //delete backup
-            $folder_name = realpath($dbfolder.'file_uploads');
-            if($folder_name!==false){
-                array_push($system_folders, str_replace('\\', '/', $folder_name).'/');
-            }
-        }
-
-        //special case - these folders can be defined in sysIdentification and be outisde database folder
-        if($is_for_backup){
-            return $system_folders;
-        }
-        
         if(defined('HEURIST_XSL_TEMPLATES_DIR')) {array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);}
         if(defined('HEURIST_HTML_DIR')) {array_push($system_folders, HEURIST_HTML_DIR);}
         if(defined('HEURIST_HML_DIR')) {array_push($system_folders, HEURIST_HML_DIR);}
@@ -645,7 +631,7 @@ class System {
         return $dbfolder;
     }
 
-    
+
     //
     // $dbname - shortname (without prefix)
     //
@@ -658,15 +644,14 @@ class System {
         }
 
         list($database_name_full, $dbname) = mysql__get_names($dbname);
-        $error = System::dbname_check($dbname);
-        if($error!=null || !$dbname) {return false;}
+        if(mysql__check_dbname($dbname)!=null) {return false;}
 
         $upload_root = $this->getFileStoreRootFolder();
 
-        if (!(isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="")) {
+        if (isEmptyStr($defaultRootFileUploadPath)) {
 
             //path is not configured in ini - set dafault values
-            $install_path = 'HEURIST/';//$this->getInstallPath();
+            $install_path = 'HEURIST/';
             $dir_Filestore = "HEURIST_FILESTORE/";
 
             $defaultRootFileUploadURL = HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore;
@@ -675,24 +660,9 @@ class System {
         $this->defineConstant2('HEURIST_FILESTORE_ROOT', $upload_root);
         $this->defineConstant2('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
 
-        
+
         $check = folderExists(HEURIST_FILESTORE_DIR, true);
         if($check<0){
-
-            /* mail will be sent from log
-            $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
-
-            $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
-                    "<br>The directory (" . HEURIST_FILESTORE_DIR . ")"
-                    .(($check==-1)
-                    ?"does not exist (check setting in heuristConfigIni.php file)"
-                    :"is not writeable by PHP (check permissions)")
-                    ."<br><br>On a multi-tier service, the file server may not have restarted correctly or "
-                    ."may not have been mounted on the web server.";
-
-            // Error needs extra attention, send an email now to Heurist team/Bug report
-            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
-            */
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
                        "</b><br>The directory "
@@ -713,8 +683,8 @@ class System {
         $warnings = array();
 
         foreach ($folders as $folder_name=>$folder){
-            
-            if($folder[0]=='' || $folder[0]==null) { continue; }
+
+            if(isEmptyStr($folder[0])) { continue; }
 
             $allowWebAccess = (@$folder[2]===true);
 
@@ -725,15 +695,15 @@ class System {
                 $warnings[] = $warn;
                 continue;
             }
-            
+
             //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
             define('HEURIST_'.$folder[0].'_DIR', $dir);
             if($allowWebAccess){
                 define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
             }
         }//for
-        
-        if(count($warnings)>0){
+
+        if(!empty($warnings)){
             $this->addError(HEURIST_SYSTEM_FATAL, implode('',$warnings));
             return false;
         }
@@ -838,38 +808,22 @@ class System {
     }
 
     /**
-    * returns error message if $db is not valid
-    *
-    * @param mixed $db
-    */
-    public static function dbname_check($db){
-
-        $error = mysql__check_dbname( $db );
-
-        if(is_array($error)){
-            return $error[1];
-        }else{
-            return null;
-        }
-    }
-
-    /**
     * set dbname and dbname_full properties
     *
     * @param mixed $db
     */
     public function set_dbname_full($db, $dbrequired=true){
 
-        $db_check_result = mysql__check_dbname($db);
+        $error = mysql__check_dbname($db);
 
-        if($db_check_result===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
+        if($error==null && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
             list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }else{
             $this->dbname = null;
             $this->dbname_full = null;
 
             if($dbrequired){
-                $this->addErrorArr($db_check_result);
+                $this->addErrorArr($error);
                 $this->mysqli = null;
                 return false;
             }
@@ -979,18 +933,18 @@ class System {
             return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
         }
     }
-    
+
     //
     //
     //
     private function _treatSeriousError($status, $message, $sysmsg, $title) {
-        
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+
+            $now = $this->getNow();
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
             //3. write error into current error log
-            $Title = 'db: '.preg_replace("/[\r\n]/", ' ', $this->dbname())
-                    ."\nerr-type: ".preg_replace("/[\r\n]/", ' ', $status)
+            $Title = 'db: '.preg_replace(REGEX_EOL, ' ', $this->dbname())
+                    ."\nerr-type: ".preg_replace(REGEX_EOL, ' ', $status)
                     ."\nuser: ".$this->get_user_id()
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
@@ -1003,7 +957,7 @@ class System {
                 }
             });
 
-            $sMsg = "\nMessage: ".preg_replace("/[\r\n]/", ' ', $message)."\n"
+            $sMsg = "\nMessage: ".preg_replace(REGEX_EOL, ' ', $message)."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
                     .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n\n"
@@ -1026,10 +980,10 @@ class System {
             if(!$mysql_gone_away_error){
                 $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
             }
-            
-            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);    
+
+            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
     }
-    
+
 
     /**
     * keep error message (for further use with getError)
@@ -1044,9 +998,9 @@ class System {
            $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
             $this->_treatSeriousError($status, $message, $sysmsg, $title);
         }else{
-            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);    
+            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
         }
-        
+
         return $this->errors;
     }
 
@@ -1058,7 +1012,7 @@ class System {
     }
 
     public function getErrorMsg(){
-        $ret = ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+        $ret = $this->errors['message'] ?? '';
         return $ret;
     }
 
@@ -1116,7 +1070,8 @@ class System {
                $needEncodeRecordDetails,
                $common_languages_for_translation, $glb_lang_codes, $glb_lang_codes_index,
                $saml_service_provides, $hideStandardLogin,
-               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink;
+               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
+               $allowCMSCreation;
 
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
@@ -1135,35 +1090,12 @@ class System {
                 $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
             }
         }
-        /* ordered as in language-codes-active-list.json
-        foreach($glb_lang_codes as $codes){
-            $lang = strtoupper($codes['a3']);
-            if(in_array($lang, $common_languages_for_translation)){
-                $common_languages[$lang] = $codes;
-            }
-        }
-        */
+
 
         try{
 
-            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
-            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-            if(!$host_logo || !file_exists($host_logo)){
-                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
-            }
-            $host_url = null;
-            if($host_logo!==false &&  file_exists($host_logo)){
-                $host_logo = HEURIST_BASE_URL.'?logo=host';
-                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-                if($host_url!==false && file_exists($host_url)){
-                    $host_url = file_get_contents($host_url);
-                }else{
-                    $host_url = null;
-                }
-            }else{
-                $host_logo = null;
-            }
-            
+            list($host_logo, $host_url) = USystem::getHostLogoAndUrl();
+
             if(!$this->mysqli){
                 return array(
                     "currentUser"=>null,
@@ -1183,24 +1115,12 @@ class System {
             }
 
             //current user reset - reload actual info from database
-            $this->login_verify( true, $is_guest_allowed );
+            $this->loginVerify( true, $is_guest_allowed );
 
             $dbowner = user_getDbOwner($this->mysqli);//info about user #2
 
             //list of databases recently logged in
-            $dbrecent = array();
-            if($this->current_User && @$this->current_User['ugr_ID']>0){
-                foreach ($_SESSION as $db=>$session){
-
-                    $user_id = @$_SESSION[$db]['ugr_ID'];// ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
-                    if($user_id == $this->current_User['ugr_ID']){
-                        if(strpos($db, HEURIST_DB_PREFIX)===0){
-                            $db = substr($db,strlen(HEURIST_DB_PREFIX));
-                        }
-                        array_push($dbrecent, $db);
-                    }
-                }
-            }
+            $dbrecent = USystem::sessionRecentDatabases($this->current_User);
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version($this->version_release == "alpha" ? true : false);
@@ -1235,6 +1155,8 @@ class System {
                     "service_config"=>$this->get_system('sys_ExternalReferenceLookups'), //get 3d part web service mappings
                     "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
+                    "cms_allowed"=> $allowCMSCreation??1,
+                    
                     'max_post_size'=>USystem::getConfigBytes('post_max_size'),
                     'max_file_size'=>USystem::getConfigBytes('upload_max_filesize'),
                     'is_file_multipart_upload'=>($this->getDiskQuota()>0)?1:0,
@@ -1273,7 +1195,7 @@ class System {
 
             recreateRecLinks( $this, false );//see utils_db
 
-        }catch( Exception $e ){
+        }catch( \Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
             $res = false;
         }
@@ -1314,7 +1236,7 @@ class System {
 
     /**
     * Returns array of ID of all groups for current user plus current user ID
-    * $level - admin/emeber
+    * $level - admin/memeber
     */
     public function get_user_group_ids($level=null, $refresh=false){
 
@@ -1354,7 +1276,7 @@ class System {
     */
     public function is_member($ugs){
 
-        if($ugs==0 || $ugs==null || (is_array($ugs) && count($ugs)==0)){
+        if($ugs==0 || isEmptyArray($ugs)){
             return true;
         }
 
@@ -1443,90 +1365,35 @@ class System {
     */
     private function start_my_session($check_session_folder=true){
 
-        global $defaultRootFileUploadPath;
-
         if(headers_sent()) {return true;}
 
         //verify that session folder is writable
-        if($check_session_folder && ini_get('session.save_handler')=='files'){
-            $folder = session_save_path();
-            if(file_exists($folder) && !is_writeable($folder)){
-                    $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
-
-                    $needSend = true;
-                    $fname = $defaultRootFileUploadPath."lastWarningSent.ini";
-                    if (file_exists($fname)){//check if warning is already sent
-                        $datetime1 = date_create(file_get_contents($fname));
-                        $datetime2 = date_create('now');
-                        $interval = date_diff($datetime1, $datetime2);
-                        $needSend = ($interval->format('%h')>4);//in hours
-                    }
-                    if($needSend){
-
-                        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access',
-                                            'The sessions folder has become inaccessible');
-                        if($rv){
-                            if (file_exists($fname)) {unlink($fname);}
-                            file_put_contents($fname, date_create('now')->format(DATE_8601));
-                        }
-                    }
-
-                return false;
-            }
+        if($this->need_full_session_check && $check_session_folder && !USystem::sessionCheckFolder()){
+            $this->addError(HEURIST_SYSTEM_FATAL, "The sessions folder has become inaccessible. This is a minor, but annoying, problem for which we apologise. An email has been sent to your system administrator asking them to fix it - this may take up to a day, depending on time differences. Please try again later.");
+            return false;
         }
 
-        $cookie_session_id = @$_COOKIE['heurist-sessionid'];
-        if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
-
-        //if(session_id() == '' || !isset($_SESSION)) {
         if (session_status() != PHP_SESSION_ACTIVE) {
 
-            $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
             session_name('heurist-sessionid');//set session name
-            //update cookie - to keep it alive for next 30 days
-            session_set_cookie_params(time() + 30*24*60*60);
             session_cache_limiter('none');
 
-            if ($cookie_session_id) { //get session id from cookes
-                session_id($cookie_session_id);
-                @session_start();
-
-            } else {   //session does not exist - create new one and save on cookies
-                @session_start();
-                //$session_id = session_id();
-                //setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https );//create new session - REM
+            /*
+            if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
+                session_id($_COOKIE['heurist-sessionid']);
             }
+            */
+
+            @session_start();
         }
 
-        if (session_status() == PHP_SESSION_ACTIVE) {
-
-            if (@$_SESSION[$this->dbname_full]['keepalive']) {
-                //update cookie - to keep it alive for next 30 days
-                $lifetime = time() + 30*24*60*60;
-                $session_id = $cookie_session_id;
-                if (strnatcmp(phpversion(), '7.3') >= 0) {
-                    $cres = setcookie('heurist-sessionid', $session_id, [
-                        'expires' => $lifetime,
-                        'path' => '/',
-                        'domain' => '',
-                        'secure' => $is_https,
-                        'httponly' => true,
-                        'samesite' => 'Lax'
-                    ]);
-                }else{
-                    //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax");
-                    $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
-                }
-
-
-
-                if($cres==false){
-                    USanitize::errorLog('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);
-                }
-            }
-
-        }else{
+        if (session_status() != PHP_SESSION_ACTIVE) {
             return false;
+        }
+
+        if (@$_SESSION[$this->dbname_full]['keepalive'] && !USystem::sessionUpdateCookies())
+        {
+            USanitize::errorLog('CANNOT UPDATE COOKIE '.session_id().'   '.$this->dbname_full);
         }
 
         return true;
@@ -1556,8 +1423,9 @@ class System {
     *
     * ugr_Preferences are always loaded from database
     *
+    * @todo - load all user info if it is required only
     */
-    private function login_verify( $user, $is_guest_allowed=false ){
+    private function loginVerify( $user, $is_guest_allowed=false ){
 
         $reload_user_from_db = false;
 
@@ -1584,7 +1452,9 @@ class System {
 
         $islogged = ($userID != null);
 
-        if($islogged){
+        if(!$islogged){
+            return false;
+        }
 
             if(@$_SESSION[$this->dbname_full]['need_refresh']) {
                 unset($_SESSION[$this->dbname_full]['need_refresh']);
@@ -1608,6 +1478,9 @@ class System {
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
                 }
+
+                //always restore from db
+                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }//$reload_user_from_db from db
 
             $this->current_User = array('ugr_ID'=>intval($userID),
@@ -1616,9 +1489,7 @@ class System {
                             'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
                             'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
-            if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
-            }
+
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
 
             //remove credentials for remote repositories
@@ -1627,7 +1498,7 @@ class System {
                 unset($this->current_User['ugr_Preferences']['externalRepositories']);
             }
 
-        }
+
         return $islogged;
     }
 
@@ -1746,7 +1617,7 @@ class System {
 
         if(!$user){
             $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
-            
+
         }elseif (!$is_guest && $user['ugr_Enabled'] == 'n'){
 
             $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
@@ -1761,7 +1632,7 @@ class System {
         }
 
         return false;
-    
+
     }
 
     //
@@ -1779,35 +1650,12 @@ class System {
             $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
         }
 
-        //$time = time() + 30;
-
-        //update cookie expire time
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        $session_id = session_id();//session_regenerate_id()
-
-        if (strnatcmp(phpversion(), '7.3') >= 0) {
-            $cres = setcookie('heurist-sessionid', $session_id, [
-                'expires' => $lifetime,
-                'path' => '/',
-                'domain' => '',
-                'secure' => $is_https,
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
-
-        }else{
-            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );//login
-        }
-
-        if(!$cres){
-
-        }
+        USystem::sessionUpdateCookies($lifetime);
 
         $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
 
         //update login time in database
         user_updateLoginTime($this->mysqli, $userID);
-
     }
 
 
@@ -1823,7 +1671,6 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) {unset($_SESSION[$this->dbname_full]['ugr_Groups']);}
         if(@$_SESSION[$this->dbname_full]['ugr_Permissions']) {unset($_SESSION[$this->dbname_full]['ugr_Permissions']);}
-        //if(@$_SESSION[$this->dbname_full]['ugr_Enabled']) {unset($_SESSION[$this->dbname_full]['ugr_Enabled']);}
         if(@$_SESSION[$this->dbname_full]['ugr_GuestUser']!=null) {unset($_SESSION[$this->dbname_full]['ugr_GuestUser']);}
 
         // clear
@@ -1864,11 +1711,11 @@ class System {
     public function user_LogActivity($action, $suplementary = '', $user_id=null){
 
         if($user_id==null){
-            $this->login_verify( false );
+            $this->loginVerify( false );
             $user_id = $this->get_user_id();
         }
 
-        $now = new DateTime();
+        $now = new \DateTime();
 
         $user_agent = USystem::getUserAgent();
 
@@ -1906,7 +1753,7 @@ class System {
             }
 
             if($check_updates){
-                updateDatabaseToLatest($this);
+                //updateDatabaseToLatest($this);
             }
 
             // it is required for main page only - so call this request on index.php
@@ -1968,7 +1815,7 @@ class System {
             */
         }
 
-        if(!($quota>0)){
+        if(!isPositiveInt($quota)){
             $quota = 0;
             //$quota = 1073741824; //1GB
         }
@@ -1976,7 +1823,7 @@ class System {
     }
 
     //
-    //
+    //  Retuns link for given record id
     //
     public function recordLink($rec_id){
 
@@ -1993,33 +1840,29 @@ class System {
             if(empty($template) || !file_exists($this->getSysDir('smarty-templates') . $template)){
                 $template = '';// use standard record viewer
             }else{
-                $template = urlencode($template);
+                $template = urlencode($template); //use smarty
             }
         }
 
         $use_rewrite = isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink;
 
-        $base_url = HEURIST_BASE_URL;
-        if($use_rewrite && strpos($base_url, "/HEURIST/") !== false){
+        $base_url = HEURIST_BASE_URL_PRO;
+
+        if(!$use_rewrite){
+            $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
+                        : $base_url . '?db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
+            return $url;
+        }
+
+        if(strpos($base_url, "/HEURIST/") !== false){
             $parts = explode('/', $base_url);
             $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
         }
 
-        if($use_rewrite){
-            $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
-                        : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
+        $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
+                    : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
 
-            return $url;
-        }else{
-            $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
-                        : $base_url . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
-
-            return $url;
-            /* it will be redirected
-                HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-                    .$this->dbname.'&recID='.$rec_id;
-            */
-        }
+        return $url;
     }
 
 
@@ -2089,10 +1932,14 @@ class System {
             if($rawdata){
                 $current_version = explode("|", $rawdata);
 
-                if (count($current_version)>0)
+                if (!empty($current_version))
                 {
                     $curver = explode(".", $current_version[0]);
-                    if( count($curver)>=2 && intval($curver[0])>0 && is_numeric($curver[1]) && intval($curver[1])>=0 ){
+                    if( count($curver)>=2 
+                        && intval($curver[0]) > 0 
+                        && is_numeric($curver[1]) 
+                        && intval($curver[1])>=0 )
+                    {
                         $version_last_check = $current_version[0];
                     }
                 }
@@ -2106,19 +1953,6 @@ class System {
     }
 
     //
-    //
-    //
-    public static function getAdminPwd($name='pwd'){
-        if(@$_REQUEST[$name]){
-            $sysadmin_pwd  = $_REQUEST[$name];
-            unset($_REQUEST[$name]);
-        }else{
-            $sysadmin_pwd = null;
-        }
-        return $sysadmin_pwd;
-    }
-
-    //
     // returns true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)
@@ -2126,7 +1960,7 @@ class System {
 
         $is_NOT_allowed = true;
 
-        if(isset($password_entered) && $password_entered!=null && $password_entered!='') {
+        if(!isEmptyStr($password_entered)) {
             $pw = $password_entered;
 
             // Password in configIni.php must be at least $min_length characters
@@ -2136,7 +1970,7 @@ class System {
                     $is_NOT_allowed = false;
                 }else{
                     // Invalid password
-                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');//'Invalid password');
+                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
                 }
             }else{
                 $this->addError(HEURIST_ACTION_BLOCKED,
@@ -2144,7 +1978,7 @@ class System {
             }
         }else{
             //password not defined
-            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');//'Password not specified');
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');
         }
 
         return $is_NOT_allowed;
@@ -2179,7 +2013,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     //
     private function _executeScriptOncePerDay(){
 
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $now = $this->getNow();
             $flag_file = HEURIST_FILESTORE_ROOT.'flag_'.$now->format('Y-m-d');
 
             if(file_exists($flag_file)){
@@ -2189,8 +2023,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
                 //remove flag files for previous days
                 for($i=1;$i<10;$i++){
-                    $d = new DateTime('now', new DateTimeZone('UTC'));
-                    $yesterday = $d->sub(new DateInterval('P'.sprintf('%02d', $i).'D'));
+                    $d = $this->getNow();
+                    $yesterday = $d->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
                     $arc_flagfile = HEURIST_FILESTORE_ROOT.'flag_'.$yesterday->format('Y-m-d');
                     //if yesterday log file exists
                     if(file_exists($arc_flagfile)){
@@ -2205,13 +2039,17 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             }
     }
 
+    public function getNow(){
+        return new \DateTime('now', new \DateTimeZone('UTC'));
+    }
+
     //
     //
     //
     private function _sendDailyErrorReport(){
 
-            $now = new DateTime('now', new DateTimeZone('UTC'));
-            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
+            $now = $this->getNow();
+            $root_folder = HEURIST_FILESTORE_ROOT;
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
             $archiveFolder = $root_folder."AAA_LOGS/";
             $logs_to_be_emailed = array();
@@ -2220,8 +2058,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
             //1. check if log files for previous 30 days exist
             for($i=1;$i<31;$i++){
-                $now = new DateTime('now', new DateTimeZone('UTC'));
-                $yesterday = $now->sub(new DateInterval('P'.sprintf('%02d', $i).'D'));
+                $now = $this->getNow();
+                $yesterday = $now->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
                 $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
                 //if yesterday log file exists
                 if(file_exists($root_folder.$arc_logfile)){
@@ -2236,7 +2074,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 }
             }
 
-            if($this->send_email_on_error==1 && count($logs_to_be_emailed)>0){
+            if($this->send_email_on_error==1 && !empty($logs_to_be_emailed)){
 
                 $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
                 $msg = $msgTitle;
@@ -2434,25 +2272,24 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         $existing_settings = '';
 
         if(file_exists($setting_file) && $replace_settings != 0){
-
             $existing_settings = file_get_contents($setting_file);
-
-            if(!empty($existing_settings)){
-
-                $existing_settings = json_decode($existing_settings, TRUE);
-                if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
-                    return $this->addError(HEURIST_ERROR, "An error occurred with retrieving the existing database settings for $setting_name");
-                }
-
-                if($replace_settings == 1){
-                    $existing_settings = array_replace_recursive($existing_settings, $settings);
-                }else{
-                    $existing_settings = array_replace_recursive($settings, $existing_settings);
-                }
-            }
         }
 
-        $existing_settings = empty($existing_settings) ? $settings : $existing_settings;
+        if(!isEmptyStr($existing_settings)){
+
+            $existing_settings = json_decode($existing_settings, true);
+            if(json_last_error() !== JSON_ERROR_NONE || !is_array($existing_settings)){
+                return $this->addError(HEURIST_ERROR, "An error occurred with retrieving the existing database settings for $setting_name");
+            }
+
+            if($replace_settings == 1){
+                $existing_settings = array_replace_recursive($existing_settings, $settings);
+            }else{
+                $existing_settings = array_replace_recursive($settings, $existing_settings);
+            }
+        }else{
+            $existing_settings = $settings;
+        }
 
         $final_settings = json_encode($existing_settings);
         if(json_last_error() !== JSON_ERROR_NONE){
@@ -2461,7 +2298,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
         $res = fileSave($final_settings, $setting_file);
 
-        if(!$res || $res == 0){
+        if($res == 0){
             return $this->addError(HEURIST_ERROR, "An error occurred while attempting to save database settings for $setting_name");
         }
 

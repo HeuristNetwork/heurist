@@ -17,10 +17,10 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     $response = $system->getError();
 }else{
@@ -47,7 +47,7 @@ ini_set('max_execution_time', '0');
     }
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 exit;
 
@@ -244,12 +244,12 @@ if($issum){
      ." ,recDetails d3 "
     //20130517 ." where rec_RectypeID=".$params['rt']
     ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".intval($params['agg_field'])
-    ." and ".$where;
+    .SQL_AND.$where;
 
 }else{
-    $query = $query." where ".$where; //20130517 rec_RectypeID=".$params['rt'];
+    $query = $query.SQL_WHERE.$where; //20130517 rec_RectypeID=".$params['rt'];
 }
-//20130517 $query = $query." and ".$where_2;
+//20130517 $query = $query.SQL_AND.$where_2;
 
 $query = $query." group by d2.dtl_Value ";
 

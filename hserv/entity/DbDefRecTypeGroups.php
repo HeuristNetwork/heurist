@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to sysUGrpps table
@@ -20,149 +22,42 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
-
 class DbDefRecTypeGroups extends DbEntityBase
 {
+
+    public function init(){
+        $this->duplicationCheck = array('rtg_Name'=>'Record type group cannot be saved. The provided name already exists');
+
+        $this->foreignChecks = array(
+                    array('select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID`',
+                          'Cannot delete non empty group')
+                );
+
+    }
+
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
+    *  search rectype groups
     */
     public function search(){
 
-        if(parent::search()===false){
+        if(parent::search()===false){ //init search mgr
               return false;
         }
 
-        //compose WHERE
-        $where = array();
+        $this->searchMgr->addPredicate('rtg_ID');
+        $this->searchMgr->addPredicate('rtg_Name');
 
-        $pred = $this->searchMgr->getPredicate('rtg_ID');
-        if($pred!=null) {array_push($where, $pred);}
+        define('CNT_RTG',', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ');
 
-        $pred = $this->searchMgr->getPredicate('rtg_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
-
-        //compose SELECT it depends on param 'details' ------------------------
-        //@todo - take it form fiels using some property
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'rtg_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'rtg_ID,rtg_Name';
-
-        }elseif(@$this->data['details']=='list'){
-
-            $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order'
-            .',(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = implode(',', $this->fieldNames )
-             .', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('rtg_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('rtg_ID,rtg_Name'); break;
+            case 'list': $this->searchMgr->setSelFields('rtg_ID,rtg_Name,rtg_Description,rtg_Order'.CNT_RTG); break;
+            default: $this->searchMgr->setSelFields(implode(',', $this->fieldNames).CNT_RTG);
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        /*validate names of fields
-        foreach($this->data['details'] as $fieldname){
-            if(!@$this->fields[$fieldname]){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
-                return false;
-            }
-        }*/
-
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('rtg_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'],'rtg_ID');
-        }
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.$this->config['tableName'];
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         $query = $query.' ORDER BY rtg_Order '.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-
-        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
-        return $res;
+        return $this->searchMgr->composeAndExecute('rtg_Order');
     }
-
-    //
-    //
-    //
-    public function delete($disable_foreign_checks = false){
-
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
-            return false;
-        }
-
-        $query = 'select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID` in ('.implode(',', $this->recordIDs).')';
-        $ret = mysql__select_value($this->system->get_mysqli(), $query);
-
-        if($ret>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
-            return false;
-        }
-
-        return parent::delete();
-    }
-
-    //
-    // validate permission
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit record type groups. Insufficient rights (logout/in to refresh) for this operation');
-                return false;
-        }
-
-        return true;
-    }
-
 
     //
     //
@@ -173,18 +68,6 @@ class DbDefRecTypeGroups extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
-
-            //validate duplication
-            if(@$this->records[$idx]['rtg_Name']){
-                $mysqli = $this->system->get_mysqli();
-                $res = mysql__select_value($mysqli,
-                        "SELECT rtg_ID FROM ".$this->config['tableName']."  WHERE rtg_Name='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['rtg_Name'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['rtg_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type group cannot be saved. The provided name already exists');
-                    return false;
-                }
-            }
 
             $this->records[$idx]['rtg_Modified'] = date(DATE_8601);//reset
 

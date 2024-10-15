@@ -108,9 +108,9 @@ update `recThreadedComments` set `cmt_ParentCmtID`= NULL where `cmt_ParentCmtID`
 
 -- Now there are 15 with invalid parent comment poitners, set these to null
 -- can't be done directly by a query, rejects modification to the select-from table
-CREATE TEMPORARY TABLE NoParent select * from recThreadedComments
-    where not cmt_ParentCmtID in (select cmt_ID from recThreadedComments);
-Update NoParent Set cmt_ParentCmtID=Null WHERE 1=1;
+-- CREATE TEMPORARY TABLE NoParent select * from recThreadedComments
+--     where not cmt_ParentCmtID in (select cmt_ID from recThreadedComments);
+-- Update NoParent Set cmt_ParentCmtID=Null WHERE 1=1;
 
 -- If this fails due to constraint failure you may need to use this first
 -- delete from recThreadedComments where NOT cmt_ParentCmtId in (select cmt_ID from recThreadedComments);

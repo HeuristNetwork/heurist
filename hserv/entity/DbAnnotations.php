@@ -1,4 +1,8 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\entity\DbRecUploadedFiles;
+use hserv\utilities\USanitize;
 
     /**
     * dbAnnotations
@@ -20,8 +24,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 class DbAnnotations extends DbEntityBase
@@ -70,12 +72,13 @@ class DbAnnotations extends DbEntityBase
         if($this->data['recID']=='pages'){
             $sjson['items'] = array();
 
-            if($this->data['uri']){
-                $this->data['uri'] = substr($_SERVER['QUERY_STRING'],4);
+            if(!@$this->data['uri']){
+                $params = USanitize::sanitizeInputArray();
+                $this->data['uri'] = $params['uri']; //filter_var(substr($_SERVER['QUERY_STRING'],4), FILTER_SANITIZE_URL);  //remove "uri="
             }
-            $uri = $this->data['uri'];//.(@$this->data['file']?'&file='.$this->data['file']:'');
+            $uri = $this->data['uri'];
             $items = $this->findItems_by_Canvas($uri);
-            if(is_array($items) && count($items)>0){
+            if(!isEmptyArray($items)){
 
                 foreach($items as $item){
                     $sjson['items'][] = json_decode($item, true);
@@ -91,7 +94,7 @@ class DbAnnotations extends DbEntityBase
 
             $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
 
-            header('Location: '.$redirect);
+            redirectURL($redirect);
             exit;
 
         }else{
@@ -213,7 +216,7 @@ class DbAnnotations extends DbEntityBase
         if(!defined('RT_MAP_ANNOTATION')){
 
             $isOK = false;
-            $importDef = new DbsImport( $this->system );
+            $importDef = new \DbsImport( $this->system );
             if($importDef->doPrepare(  array(
             'defType'=>'rectype',
             'databaseID'=>2,
@@ -270,7 +273,6 @@ class DbAnnotations extends DbEntityBase
                         }else{
                             $value = $row[2];
                         }
-                        //if(!@$details[$field_type]) {$details[$field_type] = array();}
                         $details[$field_type][] = $value; //"t:"
                     }
                 }

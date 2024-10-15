@@ -31,7 +31,6 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         currentAccessGroups: null,
         
         htmlContent: 'recordTemplate.html',
-        helpContent: 'recordTemplate.html', //in context_help folder
         
         recordType: 0
     },
@@ -93,14 +92,14 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     
                     selectedFields[rtid].push(dtid);    
                     
-                    //add resource field for parent recordtype
+                    //add resource (record pointer) field for parent recordtype
                     __addSelectedField(ids, lvl+2, rtid);
                 }
             }
             
             //get selected fields from treeview
             let selectedFields = {};
-            let tree = this.element.find('.rtt-tree').fancytree("getTree");
+            let tree = this._$('.rtt-tree').fancytree("getTree");
             let fieldIds = tree.getSelectedNodes(false);
             const len = fieldIds.length;
             
@@ -143,41 +142,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
             
-            this.element.find('#postdata').val( JSON.stringify(request) );
-            this.element.find('#postform').attr('action', url);
-            this.element.find('#postform').submit();
-                
-            //if(mode==1){ //open in new window
-            //}else{ //download
-            //}     
-            
-            /*
-                var that = this;                                                
-                
-                window.hWin.HAPI4.RecordMgr.access(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            that._context_on_close = (response.data.updated>0);
-                            
-                            that.closeDialog();
-                            
-                            var msg = 'Processed : '+response.data.processed + ' record'
-                                + (response.data.processed>1?'s':'') +'. Updated: '
-                                + response.data.updated  + ' record'
-                                + (response.data.updated>1?'s':'');
-                           if(response.data.noaccess>0){
-                               msg += ('<br><br>Not enough rights (logout/in to refresh) for '+response.data.noaccess+
-                                        ' record' + (response.data.noaccess>1?'s':''));
-                           }     
-                            
-                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-      */  
+            this._$('#postdata').val( JSON.stringify(request) );
+            this._$('#postform').attr('action', url);
+            this._$('#postform').submit();
     },
     
     _initControls: function(){
@@ -192,7 +159,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         let that = this;
 
-        this.element.find('#selectAll').on("click", function(e){
+        this._$('#selectAll').on("click", function(e){
             let treediv = that.element.find('.rtt-tree');
 
             let check_status = $(e.target).is(":checked");
@@ -208,6 +175,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 });
             }
         });
+        
+        return true;
     },
     
     //
@@ -226,7 +195,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             treedata[0].expanded = true; //first expanded
             
             //load treeview
-            let treediv = this.element.find('.rtt-tree');
+            let treediv = this._$('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }

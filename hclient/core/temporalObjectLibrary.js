@@ -31,6 +31,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+/* global TDate */
 
 function Temporal (strInitTemporal) {
     const g_version = 1;
@@ -397,7 +398,6 @@ function Temporal (strInitTemporal) {
         },
 
         getTDate: function (code) {
-            let a = _dates;
             if ( _dates[code] ) {
                 return _dates[code];
             } else {
@@ -726,7 +726,7 @@ Temporal.cloneObj = function(obj) {
         return Object.prototype.toString.apply(a) === '[object Array]';
     }
 
-    //return eval($.toJSON(o));
+   
     if(typeof(obj) !== "object") return obj;
 
     if(obj === null) return obj;
@@ -802,7 +802,7 @@ Temporal.isValidFormat = function ( str ) {
 //  2 - optional fields
 //  3 - error message
 Temporal.checkValidity = function ( temporal ) {
-    if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>g_version) {
+    if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>1) { //g_version=1
         return false;
     }
     let type = temporal.getType();
@@ -951,7 +951,7 @@ Temporal.getFieldsForString = function (type,str) {
 }
 
 // Temporal Date object extend by date.js
-var TDate = function (strDate) {
+window.TDate = function (strDate) {
     //private members
     const _className = "TemporalDate";
     let _origString = strDate && strDate.toString ? strDate.toString() : "";
@@ -1255,7 +1255,7 @@ var TDate = function (strDate) {
             let h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
             if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
                 _tzOffset = '00:00';
-                //throw " TDate exception - invalid string supplied to setTimezone() - " + str;
+               
             } else {
                 _tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
                 if(_tzOffset && _tzOffset.length>0 && _tzOffset.indexOf(":")<0){
@@ -1318,7 +1318,6 @@ var TDate = function (strDate) {
 
 
 // static function  parse() - parses a string assuming ISO format precision and set Date
-//called like myTDate  = TDate.parse("1952/04/16 14:05"); or myTDate = new TDate(); .... TDate.parse(myTDate,"1952/04/16 14:05");
 TDate.parse = function () {
     // if there are no arguments nothing to do
     if (!arguments.length) {
@@ -1387,7 +1386,7 @@ TDate.parse = function () {
 
     let t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
     while (t && t[0] && t[0] !== "T") { // possible word for month
-        let word = temp.match(/^\s*(?:\-?\d+(?:d|m)?[\.\-:,\s\+\/]\s*)*([^\.\-\d:,\s\+\/]{1,20}\.?)\s*(?:\-?\d+(?:d|m)?\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
+        let word = temp.match(/^\s*(?:\-?\d+(?:d|m)?[\.\-:,\s\+\/]\s*)*([^\.\-\d:,\s\+\/]{1,20}\.?)\s*(?:\-?\d+(?:d|m)?\s)*/);
         
         if (word) {
             word = word[1];
@@ -1410,8 +1409,11 @@ TDate.parse = function () {
         t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
     }
     temp = temp.replace(/,\s*/g,' ');   // take care of any comma separation and turn them into a single space
-    //		temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?|(?:jan|febr?)(?:uary)?|(?:(?:(?:sept?|nov|dec)(?:em)?)|octo?)(?:ber)?|marc?h?|apri?l?|may|june?|july?|aug(?:ust)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
-    temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+                                
+    //parses date iso8601
+    //parses date iso8601
+    temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?)[\/\-\s]?){1,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+        
     if (periodDesignator){ // period format doesn't have time or timezone  TODO:check this is correct
         temp[2] = temp[3] = null;
     }
@@ -2083,7 +2085,7 @@ function formatGregJulian(val, isneed){
             
             return  res.trim();
             //toString('d MMM yyyy') - misses space!
-            //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
+           
 
         }else{
             return val;
@@ -2125,8 +2127,6 @@ function temporalToHumanReadableString(inputStr) {
             }
             
             if (str.match(/DAT=([^\|]+)/)) {
-                //if (str.search(/COM=[^\|]+/) == -1) {
-                //}
                 str = formatGregJulian(str.match(/DAT=([^\|]+)/)[1], isgj);
             }else if (str.search(/COM=[^\|]+/) != -1) {
                 str = str.match(/COM=([^\|]+)/)[1];
@@ -2160,10 +2160,12 @@ function temporalToHumanReadableString(inputStr) {
             tpq = tpq ? tpq[1]: null;
             let taq = str.match(/TAQ=([^\|]+)/);
             taq = taq ? taq[1]: null;
+            /*
             let pdb = str.match(/PDB=([^\|]+)/);
             pdb = pdb ? pdb[1]: (tpq ? tpq:"");
             let pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
+            */
             str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             let dat = str.match(/DAT=([^\|]+)/);

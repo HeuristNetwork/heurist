@@ -18,15 +18,16 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+use hserv\utilities\USanitize;
+
 define('PDIR','../../');//need for proper path to js and css
 define('MANAGER_REQUIRED', 1);
 
 require_once 'initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 
 // POST request
 if(isset($_POST['data'])) {
-    $params = filter_input_array(INPUT_POST);
+    $params = USanitize::sanitizeInputArray();
 
     $data = json_decode($params['data']);
     $response = "";
@@ -242,7 +243,7 @@ if(isset($_POST['data'])) {
             $("#selected-records").html("# of records selected: " + ids.length);
 
             // Determine record type of first record
-            //this.record = records.getFirstRecord();// Reference to first record;
+
             var rectype = recordset.fld(first_record, 'rec_RecTypeID');// Record type of first record
             definitions = $Db.rst(rectype);
 
@@ -403,6 +404,7 @@ if(isset($_POST['data'])) {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "Define email field. It is mandatory",
+                            error_title: 'Missing email',
                             status: window.hWin.ResponseStatus.ACTION_BLOCKED
                         });
                         return;

@@ -33,7 +33,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="width:40em;"/>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em;"/>
                 <select id="inpt_any_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -52,7 +52,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_title" class="text ui-widget-content ui-corner-all" style="width:40em"/>
+                <input id="inpt_title" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em"/>
                 <select id="inpt_title_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -71,7 +71,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_author" class="text ui-widget-content ui-corner-all" style="width:40em"/>
+                <input id="inpt_author" class="text ui-widget-content ui-corner-all search_on_enter" style="width:40em"/>
                 <select id="inpt_author_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -90,22 +90,11 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:40em"/>
-            <!-- There is no field after record id
-                <select id="inpt_recordid_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
-            -->
+                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:40em"/>
 
             </div>
 
-                <!--<div id="rec_filter_fields" style="margin-top: 10px;">
-                    <div class="header optional" style="display: inline-block;">
-                        <label for="inpt_doctype">Searching for </label>
-
-
-
+    <!--
     Recherche par type de document (a : texte imprimé / c : musique notée / e : document cartographique / g : enregistrement sonore / h : image animée / i : image fixe 
     / o : objet monétiforme / p : objet / r : multimédia multisupport / s : document électronique / t : document d'archive et manuscrit) 
     et récupération des notices de spectacles (v : spectacle)
@@ -114,20 +103,7 @@
     a: printed text / c: notated music / e: cartographic document / g: sound recording / h: moving image / i: still image / 
     o: monetary object / p: object / r: multi-support multimedia / s: electronic document / t: archive document and manuscript)
     and recovery of show notes (v: show)
-
-
-                        <select id="inpt_doctype">
-                            <option value="a" selected>texte imprimé</option>
-                            <option value="c">musique notée</option>
-                            <option value="g">enregistrement sonore</option>
-                            <option value="h">image animée</option>
-                            <option value="i">image fixe</option>
-                            <option value="s">document électronique</option>
-                        </select>
-
-                        <label for="inpt_doctype"> records</label>
-                    </div>
-                </div>-->
+    -->
 
         </fieldset>
 
@@ -154,7 +130,7 @@
 
     <!-- Result List Container -->
     <div id="frm-results" style="display: none;">
-        <div class="div_result ent_content_full" style="height: 570px;"></div>
+        <div id="div_result" class="ent_content_full" style="height: 570px;"></div>
     </div>
 
     <!-- Additional settings for role code fields -->
@@ -188,28 +164,17 @@
 
             <div style="display: table; margin: 10px 0px;">
                 <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
-                    <label for="author-codes">Author codes: </label> 
+                    <label for="author_codes">Author codes: </label> 
                 </div>
 
                 <div class="input-cell" style="margin-left: 15px;">
-                    <textarea id="author-codes" rows="2" cols="50" class="input-div"></textarea>
+                    <textarea id="author_codes" rows="2" cols="50" class="input-div"></textarea>
                     <span class="heurist-helper1" style="display: block;">
                         List role codes to identify which type of people/companies/other entities are to be placed within the author field, the remaining will be placed within the contributor field (if mapped).<br>
                         Leave the field blank to place all involved within the Author field.
                     </span>
                 </div>
             </div>
-
-            <!--<div style="display: table; margin: 10px 0px;">
-                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
-                    <label>Contributor codes: </label>
-                </div>
-
-                <div class="input-cell" style="margin-left: 15px;">
-                    <textarea id="contributor-codes" rows="2" cols="50" class="input-div"></textarea>
-                    <span class="heurist-helper1" style="display: block;">These will be mapped to the contributor field</span>
-                </div>
-            </div>-->
 
             <button id="save-settings" class="ui-button-action">Save options</button>
         </div>

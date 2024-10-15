@@ -2,7 +2,7 @@
 
 /**
 *
-* loadReports.php : load the particular report or list of reports
+* loadReports.php : load the particular smarty report or list of reports
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -21,10 +21,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     $system->error_exit;
 }
@@ -34,6 +34,8 @@ if(!$system->has_access()){
 }
 
 header(CTYPE_JSON);
+
+global $sys_usrReportSchedule_ColumnNames;
 
 $sys_usrReportSchedule_ColumnNames = array(
     "rps_ID"=>"i",
@@ -112,7 +114,7 @@ $mysqli = $system->get_mysqli();
     }elseif($metod=="savereport"){ //-----------------
 
         $data  = @$_REQUEST['data'];
-        //$recID  = @$_REQUEST['recID'];
+
 
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
@@ -224,7 +226,7 @@ exit;
 
         $ret = null;
 
-        if (is_array($colNames) && is_array($values) && count($colNames)>0 && count($values)>0){
+        if (!isEmptyArray($colNames) && is_array($values)){
 
             $isInsert = ($recID<0);
 
@@ -289,7 +291,7 @@ exit;
 
                     if ($rows==0 || is_string($rows) ) {
                         $oper = (($isInsert)?"inserting":"updating");
-                        $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
+                        $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query;
                     } else {
                         if($isInsert){
                             $ret = -$mysqli->insert_id;

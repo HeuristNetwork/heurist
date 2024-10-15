@@ -28,11 +28,7 @@
 /*
 * Global variables
 */
-var crosstabsAnalysis;
-var intervalsNumeric;
-var intervalsValues;
-var minMax = [];
-var originalOutliers = [];
+window.crosstabsAnalysis = null;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -47,6 +43,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     const _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
 
     const MAX_FOR_AUTO_RETRIEVE = 6000;
+    
+    let intervalsNumeric;
+    let minMax = [];
+    let originalOutliers = [];
 
     let fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }
@@ -98,7 +98,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //hide left panel(saved searches) and maximize analysis
         //let _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
-        //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+        
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
 
       configEntityWidget = $('#divLoadSettings').configEntity({
@@ -1516,7 +1516,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $($newInterval.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
 
 
-            //window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
+            
     }
 
     function __addeditInterval( name, idx, notSaved){
@@ -2258,7 +2258,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             for (idx=0; idx<rlen; idx++) {
                 if(idx){
 
-                    //if(typeof curpage_val==="undefined" ||
                     if(curpage_val!=records_resp[idx][3])
                     {
 

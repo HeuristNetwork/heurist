@@ -80,7 +80,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 
                 that._cachedRecordset = response;
                 
-                //that.filterRecordList(null, {});
+               
                 that.recordList.resultList('updateResultSet', response);
             };
             
@@ -116,7 +116,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 that._cachedRecordset = response;
                 
                 that.filterRecordList(null, {});
-                //that.recordList.resultList('updateResultSet', response);
+               
             });
         */    
             
@@ -142,7 +142,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            let val = window.hWin.HEURIST4.util.htmlEscape(value);
+            //value = window.hWin.HEURIST4.util.htmlEscape(value);
             return '<div class="item" '+swidth+'>'+value+'</div>';  //title="'+val+'"
         }
         
@@ -151,20 +151,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         let dbName = fld('sys_dbName');
         if(dbName=='Please enter a DB name ...') dbName = '';
-        let regID = fld('sys_dbRegisteredID');
-        regID = (regID>0?regID:'');
         
         let recTitle = frm(recID.substr(4),'40em'); //remove prefix hdb_
-        /*
-        var recTitle = frm(recID.substr(4),'14em')
-                      //+frm(fld('sys_Version'),'4em')
-                      +frm(regID, '4em')
-                      +frm(dbName, '23em')
-                      +frm(fld('sus_Role'), '6em')
-                      +frm(fld('sus_Count'), '5em');
-        */              
-        let recTitleHint = ''//fld('sys_dbDescription');
-        
+       
         let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
         
@@ -188,7 +177,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     },
 
     updateRecordList: function( event, data ){
-        //this._super(event, data);
+       
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;

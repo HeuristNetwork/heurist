@@ -19,21 +19,23 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
 if (session_status() != PHP_SESSION_ACTIVE) {
 
-    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+    require_once 'USystem.php';
+
     session_name('heurist-sessionid');
     session_cache_limiter('none');
 
-    if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes
-        session_id($_COOKIE['heurist-sessionid']);
-        @session_start();
+    /*
+    //get session id from cookes
+    if (@$_COOKIE['heurist-sessionid']) {
+            session_id($_COOKIE['heurist-sessionid']);
+    }
+    }*/
 
-    } else {   //session does not exist - create new one and save on cookies
-        @session_start();
-        //$session_id = session_id();
-        setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https, true );//create new session - REM
+    @session_start();
+    if (!@$_COOKIE['heurist-sessionid']) {
+        hserv\utilities\USystem::sessionUpdateCookies(0);
     }
 }
 
@@ -57,12 +59,12 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     // $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $captcha_code = ($ran1+$ran2) + 1;
     $_SESSION["captcha_code"] = $captcha_code;
-    // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
+    // print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of $ran1 and $ran2";
     $value = $ran1." + ".$ran2." + 1 = ";
 
     if(array_key_exists('json',$_REQUEST)){ //returns both session id and value
         $value = array('id'=>session_id(),'value'=>$value);
-        header(CTYPE_JSON);
+        header('Content-type: application/json;charset=UTF-8');
         print json_encode($value);
     }else{
         print $value;

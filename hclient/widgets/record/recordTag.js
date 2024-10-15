@@ -27,7 +27,8 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
-        helpContent: 'recordTags.html',
+        helpContent: 'recordTags',
+        scope_types: ['selected', 'collected', 'current'],
         groups: 'all',
         modes: ['assign','remove']       //bookmark=assign bookmark_url - just selection of tags - no real action
     },
@@ -37,21 +38,21 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
     _initControls:function(){
         
-        this.options.helpContent = 'recordTags.html';
+        this.options.helpContent = 'recordTags';
         
         let sMsg;
         if(this.options.modes=='bookmark_url'){
-            this.element.find('#div_fieldset').hide();
+            this._$('#div_fieldset').hide();
             sMsg = window.hWin.HR('recordTag_hint0');
         }else if (this.options.modes=='bookmark') { 
             sMsg = window.hWin.HR('recordTag_hint1');
-            this.options.helpContent = 'recordBookmark.html';
+            this.options.helpContent = 'recordBookmark';
         }else{
             sMsg = window.hWin.HR('recordTag_hint2');;
         }   
         sMsg = sMsg + window.hWin.HR('recordTag_hint3');
         
-        this.element.find('#div_header')
+        this._$('#div_header')
             //.css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html(sMsg);
@@ -82,7 +83,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         let res = this._super();
         
         //'width':106,'min-width':96,
-        this.element.find('fieldset > div > .header').css({'padding':'0 16 0 0'});
+        this._$('fieldset > div > .header').css({'padding':'0 16 0 0'});
         
         return res;
     },
@@ -148,7 +149,11 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
             
             if(window.hWin.HEURIST4.util.isempty(this._tags_selection)){
-                window.hWin.HEURIST4.msg.showMsgErr('Need to select tags to '+mode);
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `Need to select tags to ${mode}`,
+                    error_title: 'Missing tags',
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST
+                });
                 return;
             }
             
@@ -157,7 +162,9 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             
             if(scope_val == 'selected'){
                 scope = this._currentRecordsetSelIds;
-            }else { //(scope_val == 'current'
+            }else if(scope_val == 'collected'){
+                scope = this._currentRecordsetColIds;
+            }else{ //(scope_val == 'current'
                 scope = this._currentRecordset.getIds();
                 if(scope_val  >0 ){
                     rec_RecTypeID = scope_val;

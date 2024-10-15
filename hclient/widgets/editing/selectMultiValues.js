@@ -63,26 +63,6 @@ $.widget( "heurist.selectMultiValues", {
         
         this.recordList = this.element.find('.recordList');
 
-        /*        
-            this._on( this.recordList, {        
-                        "resultlistonselect": function(event, selected_recs){
-                            
-                                    //var recordset = that.recordList.resultList('getRecordSet');
-                                    //recordset = recordset.getSubSetByIds(selected_recs);
-                                    var recordset = selected_recs;
-                                    var record = recordset.getFirstRecord();
-                                    var filename = recordset.fld(record, 'file_name')
-                                    var res = {url:recordset.fld(record, 'file_url')+filename,
-                                               path:recordset.fld(record, 'file_dir')+filename};
-
-                                    that.options.onselect.call(that, res);           
-                                    if(that._as_dialog){
-                                        that._as_dialog.dialog('close');
-                                    }
-                                }
-                        });        
-         */
-
         $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
             'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
@@ -90,27 +70,7 @@ $.widget( "heurist.selectMultiValues", {
         
         
         this._initList();
-
-/*         
-            //search for folders
-            var that = this;                            
-            var opts = {};
-            if(this.options.root_dir){
-                opts.root_dir = this.options.root_dir;
-            }
-       
-            window.hWin.HAPI4.SystemMgr.get_sysfolders(opts, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.options.allValues = response.data;
-                        that._initList();
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-*/     
-         
-         
+      
     }, //end _create
     
     //
@@ -213,7 +173,7 @@ $.widget( "heurist.selectMultiValues", {
                     if(node.data.files_count>0)
                         $span.html(node.title+' <span style="font-weight:normal">('+node.data.files_count+')</span>');
                     if(node.data.issystem){
-                        $span.addClass('graytext');//.css({color:'red !important'});
+                        $span.addClass('graytext');
                     }
             },            
             extensions: ['edit'], //'filter'],
@@ -250,6 +210,7 @@ $.widget( "heurist.selectMultiValues", {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             data.node.setTitle(newname);       
                             data.node.origTitle = newname;
+                            data.node.key = newname;
                             data.node.folder = true;
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

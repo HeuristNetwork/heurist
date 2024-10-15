@@ -22,38 +22,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-    require_once dirname(__FILE__).'/../System.php';
-
-    require_once dirname(__FILE__).'/../entity/dbUsrTags.php';
-    require_once dirname(__FILE__).'/../entity/dbSysDatabases.php';
-    require_once dirname(__FILE__).'/../entity/dbSysIdentification.php';
-    require_once dirname(__FILE__).'/../entity/dbSysGroups.php';
-    require_once dirname(__FILE__).'/../entity/dbSysUsers.php';
-    require_once dirname(__FILE__).'/../entity/dbDefDetailTypeGroups.php';
-    require_once dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php';
-    require_once dirname(__FILE__).'/../entity/dbDefTerms.php';
-    require_once dirname(__FILE__).'/../entity/dbDefVocabularyGroups.php';
-    require_once dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php';
-    require_once dirname(__FILE__).'/../entity/dbDefDetailTypes.php';
-    require_once dirname(__FILE__).'/../entity/dbDefRecTypes.php';
-    require_once dirname(__FILE__).'/../entity/dbDefRecStructure.php';
-    require_once dirname(__FILE__).'/../entity/dbDefCalcFunctions.php';
-    require_once dirname(__FILE__).'/../entity/dbSysArchive.php';
-    require_once dirname(__FILE__).'/../entity/dbSysBugreport.php';
-    require_once dirname(__FILE__).'/../entity/dbSysDashboard.php';
-    require_once dirname(__FILE__).'/../entity/dbSysImportFiles.php';
-    require_once dirname(__FILE__).'/../entity/dbSysWorkflowRules.php';
-    require_once dirname(__FILE__).'/../entity/dbRecThreadedComments.php';
-    require_once dirname(__FILE__).'/../entity/dbRecUploadedFiles.php';
-    require_once dirname(__FILE__).'/../entity/dbUsrBookmarks.php';
-    require_once dirname(__FILE__).'/../entity/dbUsrReminders.php';
-    require_once dirname(__FILE__).'/../entity/dbUsrSavedSearches.php';
-    require_once dirname(__FILE__).'/../entity/dbAnnotations.php';
-
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
-
-
     //
     // $params
     //  entity
@@ -67,7 +35,8 @@
         $entity_name = entityResolveName(@$params['entity']);
 
         if($entity_name!=null){
-            $classname = 'Db'.ucfirst($entity_name);
+            $classname = 'hserv\entity\Db'.ucfirst($entity_name);
+            $params['entity'] = $entity_name;
             $entity = new $classname($system, $params);
         }
 
@@ -145,7 +114,7 @@
                 $params = array_merge($params, $search_criteria[$entity_name]);
             }
 
-            $classname = 'Db'.ucfirst($entity_name);
+            $classname = 'hserv\entity\Db'.ucfirst($entity_name);
             $entity = new $classname($system, $params);
 
             $res[$entity_name] = $entity->search();
@@ -231,7 +200,7 @@
         $content_type = null;
         $url = null;
 
-        if(intval($rec_id)>0 && !System::dbname_check($db_name)){
+        if(intval($rec_id)>0 && mysql__check_dbname($db_name)==null){
 
             $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.intval($rec_id);
 

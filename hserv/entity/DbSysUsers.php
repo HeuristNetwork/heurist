@@ -1,4 +1,7 @@
 <?php
+namespace hserv\entity;
+use hserv\System;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrUGrps table for users
@@ -20,27 +23,20 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';//for recordDelete
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
 
 class DbSysUsers extends DbEntityBase
 {
+    private $keep_autocommit = false;
+    private $transaction = false;
 
-    /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
-    */
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
+
     public function search(){
 
         $not_in_group = @$this->data['not:ugl_GroupID'];
@@ -150,28 +146,7 @@ class DbSysUsers extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:ugr_Modified'];
-        if($value!=null){
-            array_push($order, 'ugr_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:ugr_LastName'];
-            if($value!=null){
-                array_push($order, 'ugr_LastName '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:ugr_ID'];
-                if($value!=null){
-                    array_push($order, 'ugr_ID '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:ugr_Name'];
-                    if($value!=null){
-                        array_push($order, 'ugr_Name ASC');
-                    }
-                }
-            }
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
         if($needCount){ //find count of groups where given user is a memmber
             array_push($this->data['details'],
@@ -184,11 +159,11 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+         if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
@@ -210,8 +185,8 @@ class DbSysUsers extends DbEntityBase
         $ugrID = $this->system->get_user_id();
 
         if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
+            ( !isEmptyArray($this->recordIDs)
+            || !isEmptyArray($this->records))){ //there are records to update/delete
 
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
 
@@ -297,24 +272,17 @@ class DbSysUsers extends DbEntityBase
             }
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided name already exists');
-                return false;
+            //validate duplication
+            if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'User cannot be saved. The provided name already exists')){
+                    return false;
             }
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_eMail='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_eMail'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'User cannot be saved. The provided email already exists');
-                return false;
+            if(!$this->doDuplicationCheck($idx, 'ugr_eMail', 'User cannot be saved. The provided email already exists')){
+                    return false;
             }
 
             //find records to be approved and new ones
             if($this->system->is_admin() && "y"==@$this->records[$idx]['ugr_Enabled'] && @$this->records[$idx]['ugr_ID']>0){
+                $mysqli = $this->system->get_mysqli();
                 $res = mysql__select_value($mysqli,
                          'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_LoginCount=0 AND ugr_Type="user" AND ugr_ID='
                                 .$this->records[$idx]['ugr_ID']);
@@ -335,20 +303,20 @@ class DbSysUsers extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             foreach($this->records as $idx=>$record){
                 $ugr_ID = @$record['ugr_ID'];
-                if($ugr_ID>0 && in_array($ugr_ID, $ret)){
+                if($ugr_ID>0 && in_array($ugr_ID, $savedRecIds)){
 
                     //treat user image
                     $thumb_file_name = @$record['ugr_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
-                        $this->renameEntityImage($thumb_file_name, $ugr_ID);
+                        parent::renameEntityImage($thumb_file_name, $ugr_ID);
                     }
 
                     //add user to specified group
@@ -383,7 +351,7 @@ class DbSysUsers extends DbEntityBase
                 }
             }
         }
-        return $ret;
+        return $savedRecIds;
     }
 
     //
@@ -391,9 +359,16 @@ class DbSysUsers extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-        if(in_array(2, $this->recordIDs)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owner" user');
+
+        $this->recordIDs = null; //reset to obtain ids from $data
+
+        $this->foreignChecks = array(
+                    array('SELECT FIND_IN_SET(2, "#IDS#")','Cannot remove "Database Owner" user'),
+                    array('SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary=0 AND rec_OwnerUGrpID IN (#IDS#) LIMIT 1',
+                          'Deleting User with existing Records not allowed')
+                );
+
+        if(!$this->deletePrepare()){
             return false;
         }
 
@@ -413,16 +388,6 @@ class DbSysUsers extends DbEntityBase
                     'It is not possible to remove  user #'.$usrID.'. This user is the only admin of the workgroup #'.$res[0]);
                 return false;
             }
-
-        }
-
-        //check for existing records
-        $query = 'SELECT count(rec_ID) FROM Records WHERE rec_OwnerUGrpID in ('
-                        . implode(',', $this->recordIDs) . ') AND rec_FlagTemporary=0 limit 1';
-        $res = mysql__select_value($mysqli, $query);
-        if($res>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Deleting user with existing Records not allowed');
-            return false;
         }
 
         //---------------------------------------------------
@@ -433,7 +398,7 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in ('
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
+        if(!isEmptyArray($rec_ids_to_delete)){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) {return false;}
         }
@@ -453,153 +418,141 @@ class DbSysUsers extends DbEntityBase
         }
 
         $query = 'DELETE FROM usrHyperlinkFilters  WHERE hyf_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrRemindersBlockList  WHERE rbl_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrSavedSearches  WHERE svs_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrTags  WHERE tag_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
 
         if($ret){
             $ret = parent::delete();
-            if($ret){
-                //remove assosiated images
-                foreach($this->recordIDs as $usrID)
-                {
-                    $this->renameEntityImage('delete', intval($usrID));
-                }
-            }
         }
-        
-        if($ret){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+
+        //@todo - remove assosiated images
+
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
 
-	/*
-     * Transfer User ID 2 (DB Owner) to the selected User ID, provide the new DB Owner administrator rights to all workgroups
+	/**
+     * Transfer User ID 2 (DB Owner) to the selected User ID,
+     * and provide the new DB Owner administrator rights to all workgroups.
+     *
+     * @param bool $disable_foreign_checks If true, disables foreign key checks during transfer.
+     * @return bool Returns true if ownership transfer was successful, false on failure.
      */
-    private function transferOwner($disable_foreign_checks = false){
-
-        /* General Variables */
-        $mysqli = $this->system->get_mysqli();// MySQL connection
+    private function transferOwner($disable_foreign_checks = false)
+    {
+        $mysqli = $this->system->get_mysqli(); // MySQL connection
         $return = true; // Control variable
-        $recID = $this->data['ugr_ID'];// Selected User ID
+        $recID = $this->data['ugr_ID']; // Selected User ID
 
         $current_userid = $this->system->get_user_id();
-        if($current_userid != 2){
+        if ($current_userid != 2) {
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only the current database owner can transfer database ownership.');
             return false;
         }
 
-        if(!is_numeric($recID)){    /* Check if ID is a number */
+        if (!is_numeric($recID)) {    /* Check if ID is a number */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Provided ID is Invalid');
             return false;
         }
         $recID = intval($recID);
-        if($recID == 2){   /* Check if selected ID is alreay the Owner */
+        if ($recID == 2) {   /* Check if selected ID is already the Owner */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot transfer Database Ownership to the current Database Owner');
             return false;
         }
 
         /* Check if selected user's account is enabled before proceeding */
-        $query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = ' . $recID;
-        $res = $mysqli->query($query);
-        $row = $res->fetch_row();
+        $usrEnabled = mysql__select_value($mysqli, 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = ' . $recID);
 
-        if($row == null){
+        if ($usrEnabled == null) {
             $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve user account status');
             return false;
-        }elseif($row[0] != 'y'){
+        }
 
-            $msg = $row[0] == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
-                                    'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';
+        if ($usrEnabled != 'y') {
+            $msg = $usrEnabled == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
+                'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';
 
             $this->system->addError(HEURIST_INVALID_REQUEST, $msg);
             return false;
         }
 
-        /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
-        $query = 'SELECT max(ugr_ID)+1 FROM sysUGrps';
-        $res = $mysqli->query($query);
-        $row = $res->fetch_row();
-        if($row == null){
-            $this->system->addError(HEURIST_DB_ERROR, 'Unable to set MAXINT for sysUGrps.ugr_ID');
-            return false;
-        }
-        $MAXINT = intval($row[0]);
-
-        /* Start Transaction, allow for rollback incase of errors */
-        $keep_autocommit = mysql__begin_transaction($mysqli);
-
-        /* Remove all groups associated with the selected User's ID */
-        $query = "DELETE FROM sysUsrGrpLinks WHERE ugl_UserID = " . $recID;
-        $mysqli->query($query);
-        if ($mysqli->affected_rows < 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot remove old workgroups from ID: ' . $recID);
-            $return = false;
-        }
-
-        /* Swapping IDs between DB Owner and Selected User */
-        $query = "UPDATE sysUGrps SET ugr_ID = " . $MAXINT . " WHERE ugr_ID = 2";
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set current Owner\'s ID to MAXINT');
-            $return = false;
-        }
-        $query = "UPDATE sysUGrps SET ugr_ID = 2 WHERE ugr_ID = " . $recID;
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set new Owner\'s ID to 2');
-            $return = false;
-        }
-        $query = "UPDATE sysUGrps SET ugr_ID = " . $recID . " WHERE ugr_ID = " . $MAXINT;
-        $mysqli->query($query);
-        if($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set original Owner\'s ID to ' . $recID);
-            $return = false;
-        }
-
-
         /* Retrieve List of Workgroup IDs */
         $query = "SELECT ugr_ID FROM sysUGrps WHERE ugr_Type = 'workgroup'";
-        $res = $mysqli->query($query);
+        $groupIds = mysql__select_list2($mysqli, $query);
+        if (isEmptyArray($groupIds)) {
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids', $mysqli->error);
+            return false;
+        }
+
+        /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
+        $maxUsrID = mysql__select_value($mysqli, 'SELECT max(ugr_ID)+1 FROM sysUGrps');
+        $maxUsrID = intval($maxUsrID);
+
+        /* Start Transaction, allow for rollback in case of errors */
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
+        $this->transaction = true;
+
+        /* Remove all groups associated with the selected User's ID */
+        $this->_updateDbTable('DELETE FROM sysUsrGrpLinks WHERE ugl_UserID = ' . $recID, 'Cannot remove old workgroups from ID: ' . $recID);
+
+        /* Perform ID Swapping */
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = $maxUsrID WHERE ugr_ID = 2", 'Cannot set current Owner\'s ID to MAXINT');
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = 2 WHERE ugr_ID = $recID", 'Cannot set new Owner\'s ID to 2');
+        $this->_updateDbTable("UPDATE sysUGrps SET ugr_ID = $recID WHERE ugr_ID =  $maxUsrID", 'Cannot set original Owner\'s ID to ' . $recID);
 
         /* Add new DB Owner as admin to retrieved list of IDs */
         $query = "INSERT INTO sysUsrGrpLinks (ugl_UserID, ugl_Role, ugl_GroupID) VALUES ";
-        if($res->num_rows > 0){
-            while($row = $res->fetch_assoc()){
-                if($row['ugr_ID'] == 0) {continue;}
-                $query = $query . "(2, 'admin', " . intval($row['ugr_ID']) . "), ";
+
+        foreach ($groupIds as $groupId) {
+            if ($groupId == 0) {
+                continue;
             }
-        }else{
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids');
-            $return = false;
-        }
-        $query = substr($query, 0, -2);/* Remove last characters, space and comma */
-        $mysqli->query($query);
-        if ($mysqli->affected_rows <= 0){
-            $this->system->addError(HEURIST_DB_ERROR, 'Cannot assign new owner\'s administrator privilege for each group');
-            $return = false;
+            $query = $query . "(2, 'admin', $groupId), ";
         }
 
-        /* Check if everything has been successful */
-        if($return){
-            $mysqli->commit();
-        }else{
-            $mysqli->rollback();
+        $query = substr($query, 0, -2); /* Remove last characters, space, and comma */
+        $this->_updateDbTable($query, 'Cannot assign new owner\'s administrator privilege for each group');
+
+        // Commit
+        if ($this->transaction) {
+            mysql__end_transaction($mysqli, true, $keep_autocommit);
+            return true;
         }
 
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
-
-        return $return;
+        return false;
     }
+
+    /**
+     * Helper function to execute a query and handle transaction errors.
+     *
+     * @param string $query The SQL query to execute.
+     * @param string $errorMsg The error message to display if the query fails.
+     * @return bool Returns true if the query succeeds, false on failure.
+     */
+    private function _updateDbTable($query, $errorMsg)
+    {
+        if ($this->transaction) {
+            $mysqli = $this->system->get_mysqli();
+            $mysqli->query($query);
+
+            if ($mysqli->error || $mysqli->affected_rows < 0) {
+                $this->system->addError(HEURIST_DB_ERROR, $errorMsg, $mysqli->error);
+                mysql__end_transaction($mysqli, false, $this->keep_autocommit);
+                $this->transaction = false;
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
 
     //
     // special and batch action for users
@@ -639,13 +592,13 @@ class DbSysUsers extends DbEntityBase
 
         //user ids
         $userIDs = prepareIds(@$this->data['userIDs']);
-        if(count($userIDs)==0){
+        if(empty($userIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid user identificators');
             return false;
         }
         //group roles
         $roles = @$this->data['roles'];
-        if(!$import_from_login && (!is_array($roles) || count($roles)==0)){
+        if(!$import_from_login && (isEmptyArray($roles))){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
             return false;
         }
@@ -672,7 +625,7 @@ class DbSysUsers extends DbEntityBase
                 'It appears that all users selected to import exist in current database.');
             return false;
         }
-        if(count($userIDs_already_exists)>0){
+        if(!empty($userIDs_already_exists)){
             $userIDs = array_diff($userIDs, array_keys($userIDs_already_exists));
         }
 
@@ -758,14 +711,14 @@ class DbSysUsers extends DbEntityBase
                 foreach ($newUserIDs as $usrID){
                     array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
                 }
-                if(count($userIDs_already_exists)>0){ //apply for user that already exists
+                if(!empty($userIDs_already_exists)){ //apply for user that already exists
                     $remove = array_values($userIDs_already_exists);
                     foreach ($userIDs_already_exists as $srcID=>$usrID){
                         array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
                     }
                 }
 
-                if(is_array($remove) && count($remove)>0){
+                if(!isEmptyArray($remove)){
                     $query = 'DELETE FROM sysUsrGrpLinks WHERE ugl_GroupID='.$groupID.' AND ugl_UserID in ('
                             .implode(',',$remove).')';
                     $res = $mysqli->query($query);
@@ -791,20 +744,18 @@ class DbSysUsers extends DbEntityBase
         }
 
         if($ret){
-            $mysqli->commit();
-
             $ret = 'Users imported: '.count($newUserIDs);
-            if (count($userIDs_already_exists)>0){
+            if (!empty($userIDs_already_exists)){
                 $ret = $ret.'. Users already exists: '.count($userIDs_already_exists);
             }
 
             if(count($newUserIDs) == 1 && $import_from_login){ // email DB Owner
                 user_EmailAboutNewUser($this->system, $newUserIDs[0], true);
             }
-        }else{
-            $mysqli->rollback();
         }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
+
 
         return $ret;
     }

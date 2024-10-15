@@ -21,13 +21,19 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global svg, data, settings, force, currentMode, circleSize, iconSize, _editRecStructure, 
+drag_link_source_id, drag_link_target_id, drag_link_line, selectionColor, determineColour, closeRectypeSelector,
+getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick */
+
+let currentNode = null;
+
 /**
 * Appends nodes to the visualisation
 */
 function addNodes() {
     
-    // Append nodes
-    var nodes = d3.select("#container")
+   // Append nodes
+   let nodes = window.d3.select("#container")
                   .selectAll(".node")
                   .data(data.nodes)
                   .enter()
@@ -39,21 +45,21 @@ function addNodes() {
                         _editRecStructure(d.id);
                     }
                   });
-                  
-    // Dragging
-    var drag = d3.behavior.drag()
+                 
+   // Dragging
+   let drag = window.d3.behavior.drag()
                  .on("dragstart", dragstart)
                  .on("drag", dragmove)
                  .on("dragend", dragend);
      
-   var entitycolor = getSetting(setting_entitycolor);
+   let entitycolor = getSetting('setting_entitycolor');
       
    // Details for each node            
    nodes.each(function(d, i) {
         // Restore location data
-        var record = getSetting(d.id);
+        let record = getSetting(d.id);
         if(record) {
-            var obj = JSON.parse(record);
+            const obj = JSON.parse(record);
             if("x" in obj) {
                 d.x = obj.x;
             }
@@ -68,9 +74,9 @@ function addNodes() {
             }
         }
 
-        var  node = d3.select(this);
+        let node = window.d3.select(this);
         
-        var icon_display = currentMode=='icons' ? 'initial' : 'none';
+        let icon_display = currentMode=='icons' ? 'initial' : 'none';
         
         //add infobox
         createOverlay(0, 0, "record", "id"+d.id, d, node);
@@ -113,24 +119,24 @@ function addNodes() {
             .attr("width", iconSize)
             .on("mouseover", function(d) {
                 if(drag_link_source_id!=null){
-                    drag_link_target_id = d.id;
-                    drag_link_line.attr("stroke","#00ff00");  //green
+                    window.drag_link_target_id = d.id;
+                    window.drag_link_line.attr("stroke","#00ff00");  //green
                 }
             })
             .on("mouseout", function(d) {
                 if(drag_link_source_id!=null){
                 setTimeout(function(){
-                    drag_link_target_id = null;
-                    if(drag_link_line) drag_link_line.attr("stroke","#ff0000");  //red
+                    window.drag_link_target_id = null;
+                    if(window.drag_link_line) window.drag_link_line.attr("stroke","#ff0000");  //red
                 },200);
                 }
             })
             .style('display', icon_display);
                            
-        var gravity = getSetting(setting_gravity);
+        let gravity = getSetting('setting_gravity');
         
         // Attributes
-        node  //d3.select(this)
+        node  //window.d3.select(this)
           .attr("class", "node id"+d.id)
           .attr("transform", "translate(10, 10)")
           .attr("x", d.x) 
@@ -148,7 +154,7 @@ function addNodes() {
              
             closeRectypeSelector();
             // Check if it's not a click after dragging
-            if(!d3.event.defaultPrevented) {
+            if(!window.d3.event.defaultPrevented) {
                 // Load record details
                 showNodeInformation(d);//Added by ISH
             }
@@ -168,8 +174,8 @@ function showNodeInformation(d){
         return;
     }
 
-    var iframeDiv = d3.select("#iframeDiv");//select the parent div
-    var infoBox = d3.select("#iframeInfo");//select the iframe
+    let iframeDiv = window.d3.select("#iframeDiv");//select the parent div
+    let infoBox = window.d3.select("#iframeInfo");//select the iframe
 
     if(iframeDiv.length == 0 || infoBox.length == 0){
         return;
@@ -184,7 +190,7 @@ function showNodeInformation(d){
     window.hWin.HEURIST4.msg.bringCoverallToFront(iframeDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
         'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
 
-    var srcURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID=' + d.id + '&db=' + window.hWin.HAPI4.database;//URL for source of information iframe
+    const srcURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID=' + d.id + '&db=' + window.hWin.HAPI4.database;//URL for source of information iframe
     infoBox.attr("src", srcURL)
            .attr("recid", d.id)
            .attr("data-recid", d.id)
@@ -206,11 +212,11 @@ function showNodeInformation(d){
 function handleNodeAction(action = 'close'){
 
     if(action == 'close'){
-        d3.select('#iframeDiv').style('display', 'none');//close the box when clicked 
+        window.d3.select('#iframeDiv').style('display', 'none');//close the box when clicked 
         return;
     }
 
-    let rec_ID = d3.select('#iframeInfo').attr('data-recid');
+    let rec_ID = window.d3.select('#iframeInfo').attr('data-recid');
     let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
 
     action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
@@ -220,32 +226,30 @@ function handleNodeAction(action = 'close'){
 * Updates the locations of all nodes
 */
 function updateNodes() {
-    d3.selectAll(".node").attr("transform", function(d) { 
+    window.d3.selectAll(".node").attr("transform", function(d) { 
         // Store new position
         if(d.x==null || d.y==null || isNaN(d.x) || isNaN(d.y)){
             d.x=0;
             d.y=0;
         }
-        var obj = {px: d.px, py: d.py, x: d.x, y: d.y};
+        const obj = {px: d.px, py: d.py, x: d.x, y: d.y};
         putSetting(d.id, JSON.stringify(obj));
         return "translate(" + d.x + "," + d.y + ")"; 
     });
 }
-
-var currentNode = null;
 
 // Functions to make dragging, moving and zooming possible
 
 /** Called when a dragging event starts */
 function dragstart(d, i) {
     
-    d3.event.sourceEvent.stopPropagation();
-    d3.event.sourceEvent.preventDefault();
+    window.d3.event.sourceEvent.stopPropagation();
+    window.d3.event.sourceEvent.preventDefault();
 
     force.stop();
 
     // Fixed node positions?
-    var gravity = getSetting(setting_gravity);
+    const gravity = getSetting('setting_gravity');
     svg.selectAll(".node")
        .attr("fixed", function(d, i) {
             d.fixed = (gravity == "off");
@@ -262,13 +266,13 @@ function dragmove(d, i) {
     
     // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
     svg.selectAll(".node").each(function(d, i) {
-        //var color = d3.select(this).select(".foreground").style("fill");
+        //const color = window.d3.select(this).select(".foreground").style("fill");
         if(d.id == currentNode) {
             // Update locations
-            d.px += d3.event.dx;
-            d.py += d3.event.dy;
-            d.x += d3.event.dx;
-            d.y += d3.event.dy;
+            d.px += window.d3.event.dx;
+            d.py += window.d3.event.dy;
+            d.x += window.d3.event.dx;
+            d.y += window.d3.event.dy;
         }   
     });
 
@@ -281,25 +285,25 @@ function dragmove(d, i) {
 function dragend(d, i) {
     
     // Update nodes & lines
-    var gravity = getSetting(setting_gravity);
+    const gravity = getSetting('setting_gravity');
     d.fixed = ( gravity !== "aggressive");
     
-            // Update the location in localstorage
-            var record = getSetting(d.id); 
+    // Update the location in localstorage
+    const record = getSetting(d.id); 
 
-            var obj;
-            if(record === null) {
-                obj = {}; 
-            }else{
-                obj = JSON.parse(record);
-            }  
-            
-            // Set attributes 'x' and 'y' and store object
-            obj.px = d.px;
-            obj.py = d.py;
-            obj.x = d.x;
-            obj.y = d.y;
-            putSetting(d.id, JSON.stringify(obj));
+    let obj;
+    if(record === null) {
+        obj = {}; 
+    }else{
+        obj = JSON.parse(record);
+    }  
+    
+    // Set attributes 'x' and 'y' and store object
+    obj.px = d.px;
+    obj.py = d.py;
+    obj.x = d.x;
+    obj.y = d.y;
+    putSetting(d.id, JSON.stringify(obj));
     
     // Check if force may resume
     if(gravity !== "off") {
@@ -310,6 +314,6 @@ function dragend(d, i) {
         currentNode = null;
     }
 /*    setTimeout(function(){    //tick();
-        d3.select("#container").attr("transform","scale(1)");
+        window.d3.select("#container").attr("transform","scale(1)");
     },500); */
 }

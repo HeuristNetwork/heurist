@@ -2,7 +2,7 @@
 * editng_exts.js - additional functions for editing_input
 *  1) editSymbology - edit map symbol properties 
 *  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
-*  3) browseRecords - browse records for resource fields 
+*  3) browseRecords - browse records for record type fields 
 *     browseTerms
 *       3a) openSearchMenu
 *  4) translationSupport - opens popup dialog with ability to define translations for field values
@@ -59,7 +59,9 @@ function editSymbology(current_value, mode_edit, callback){
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    let _editing_symbology = new HEditing({container:editForm, 
+    let _editing_symbology;
+    
+    _editing_symbology = new HEditing({container:editForm, 
         onchange:
         function(){
             let isChanged = _editing_symbology.isModified();
@@ -575,30 +577,15 @@ function editSymbology(current_value, mode_edit, callback){
         modal:  true,
         title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
         resizeStop: function( event, ui ) {//fix bug
-            //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+           
         },
         beforeClose: function(){
             //show warning in case of modification
             if(_editing_symbology.isModified()){
-                let $dlg, buttons = {};
-                buttons['Save'] = function(){ 
-                    //that._saveEditAndClose(null, 'close'); 
-                    edit_symb_dialog.parent().find('#btnRecSave').trigger('click');
-                    $dlg.dialog('close'); 
-                }; 
-                buttons['Ignore and close'] = function(){ 
-                    _editing_symbology.setModified(false);
-                    edit_symb_dialog.dialog('close'); 
-                    $dlg.dialog('close'); 
-                };
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    window.hWin.HR('Warn_Lost_Data'),
-                    buttons,
-                    {title: window.hWin.HR('Confirm'),
-                       yes: window.hWin.HR('Save'),
-                        no: window.hWin.HR('Ignore and close')},
-                    {default_palette_class:'ui-heurist-design'});
+                
+                window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
+                    ()=>{edit_symb_dialog.parent().find('#btnRecSave').trigger('click');}, //save
+                    ()=>{_editing_symbology.setModified(false); edit_symb_dialog.dialog('close'); }); //ignore and close
                 return false;   
             }
             return true;
@@ -703,7 +690,7 @@ function editSymbology(current_value, mode_edit, callback){
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             click: function(e, data){
@@ -747,8 +734,8 @@ function editSymbology(current_value, mode_edit, callback){
                                     titles.push(harchy.harchy.join(''));
                                 }
                             }                            
-                            //geofield_input.val(selectedFields.join(','));
-                            //_editing_symbology.setModified(true);
+                           
+                           
                             _editing_symbology.setFieldValueByName2('geofield',selectedFields.join(','),true);
                             geofield_lbls.html(titles.join('<br>'));
                             $dlg2.dialog('close');
@@ -849,8 +836,11 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
         let dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
         ele = _editing.getFieldByName( dtId_Geo );
         if(!ele){
-            window.hWin.HEURIST4.msg.showMsgErr('Image map source record must have Bounding Box field! '
-                +'Please correct record type structure.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Image map source record must have Bounding Box field! '
+                        +'Please correct record type structure.',
+                error_title: 'Missing bounding box'
+            });
         }else{
 
             window.hWin.HEURIST4.msg.showMsgDlg(
@@ -871,11 +861,16 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
                                     if(extentWKT){
                                         _editing.setFieldValueByName(dtId_Geo, 'pl '+extentWKT);
                                     }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr( 'Cannot calculate image extent. Verify your worldfile parameters' );
+                                        window.hWin.HEURIST4.msg.showMsgErr({
+                                            message: 'Cannot calculate image extent. Verify your worldfile parameters',
+                                            error_title: 'Invalid image extent'
+                                        });
                                     }
 
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr( response.data.error ? response.data.error : response.data );
+                                    let error = response.data.error ? response.data.error : response.data;
+                                    error = $.isPlainObject(error) ? error : {message: error, error_title: 'Data error'};
+                                    window.hWin.HEURIST4.msg.showMsgErr( error );
                                 }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr( response );
@@ -924,7 +919,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         function(event){
             let $mnu = $select.hSelect('menuWidget');
             if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')!='progress'){
-                let foo = $select.hSelect('option','change');//.trigger('change');
+                let foo = $select.hSelect('option','change');
                 foo.call(this, null, 'select'); //call __onSelectMenu
             }
         }});
@@ -1284,7 +1279,7 @@ function browseRecords(_editing_input, $input){
     let pointerMode = that.f('rst_PointerMode');
     
     if(isparententity && pointerMode!='addonly'){
-        pointerMode = 'dropdown_add'; //was 'addorbrowse';
+        pointerMode = 'dropdown_add';
     }
     
     let is_dropdown = (pointerMode && pointerMode.indexOf('dropdown')===0);
@@ -1330,7 +1325,7 @@ function browseRecords(_editing_input, $input){
                                     let inputs = edit_ele.editing_input('getInputs');
                                     for (let idx in inputs) {
                                         //$(edit_ele.editing_input('getInputs')[idx])
-                                        if($(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
+                                        if($(inputs[idx]) && $(inputs[idx]).parent().find('.child_rec_fld:visible').length>0){
                                             $inputdiv = $(inputs[idx]).parent();
                                             $input = inputs[idx];
                                             break;
@@ -1625,7 +1620,7 @@ function browseRecords(_editing_input, $input){
                         $(that.selObj).remove();
                     }
                     
-                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);//, [{key:'select', title:'Search/Add'}]);
+                    that.selObj = window.hWin.HEURIST4.ui.createSelector(null);
 
                     $(that.selObj).attr('rectype-select', 1);
                     $(that.selObj).appendTo($inputdiv);
@@ -1648,7 +1643,7 @@ function browseRecords(_editing_input, $input){
                     + '</span><div class="not-found" style="padding:10px;color:darkgreen;display:none;">'
                     +window.hWin.HR('No records match the filter')+'</div></div>');
                     
-                    //$(opt).attr('icon-url', search_icon);
+                   
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
@@ -1709,7 +1704,7 @@ function browseRecords(_editing_input, $input){
                                  rec_RecTypeID: rec_RecType,
                                  rec_IsChildRecord:false
                                 }, __show_select_dropdown);
-                            //ele.appendTo($inputdiv);
+                           
                             that.onChange();
                             
                             if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
@@ -1734,7 +1729,7 @@ function browseRecords(_editing_input, $input){
                 
                 let $inpt_ele = $inputdiv.find('.sel_link2'); //button
                 let _ref_id = $input.attr('id');
-                //$input.addClass('selectmenu-parent');
+               
                 
                 if($inpt_ele.is(':hidden') && $inputdiv.find('.link-div').length == 1){
                     $inpt_ele = $inputdiv.find('.link-div');
@@ -1787,7 +1782,7 @@ function browseTerms(_editing_input, $input, value){
                 __recreateTrmLabel($input, trm_ID);
             });
             lang_code = '';
-            //return;
+           
         }
 
         $input.empty();
@@ -1964,8 +1959,6 @@ function browseTerms(_editing_input, $input, value){
             let ref_id = $(that.selObj).attr('ref-id');
 
             let $input = $('#'+ref_id);
-            //var $inputdiv = $('#'+ref_id).parent();
-            //var opt = $(that.selObj).find('option:selected');
             that.newvalues[$input.attr('id')] = trm_ID;
             $input.attr('data-value', trm_ID); //that's more reliable
 
@@ -2099,7 +2092,11 @@ function translationSupport(_input_or_values, is_text_area, callback){
                 if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Widget editTranslations not loaded. Verify your configuration',
+                        error_title: 'Translation widget loading failed',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }
         });
     }else{
@@ -2313,14 +2310,8 @@ function selectRecord(options, callback)
             parententity: 0,
             default_palette_class: 'ui-heurist-populate',
             onselect:function(event, data){
-                //if( window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                //    callback(data.selection[0]);
-                //}
-                
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                     let recordset = data.selection;
-                    //var record = recordset.getFirstRecord();
-                    //var record_id = recordset.fld(record,'rec_ID');
                     callback(data.selection);
                 }
             }

@@ -27,9 +27,11 @@
 
 define('PDIR','../../');//need for proper path to js and css
 
+use hserv\utilities\USanitize;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-$sysadmin_pwd = System::getAdminPwd();
+$sysadmin_pwd = USanitize::getAdminPwd();
 
 if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     ?>
@@ -77,9 +79,9 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     }
 
     $type_2 = 'external';
-    $type_ = '_remote';
+    $type_ = ULF_REMOTE;
     if($orig_db_id==2 && $orig_id==34){
-        $type_ = '_tiled@';
+        $type_ = ULF_TILED_IMAGE.'@';
         $type_2 = 'tiled';
     }
 
@@ -91,24 +93,18 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
         }
     }
 
-    print '<div>';
+    print DIV_S;
     $k = 1;
 
-    //$entity = new DbRecUploadedFiles($system);
+
 
     foreach ($databases as $idx=>$db_name){
-
-        //get local id
-        //$query = 'select rty_ID from '.$db_name.'.defRecTypes where rty_OriginatingDBID=2 and rty_IDInOriginatingDB=11';
-        //$rty_ID = mysql__select_value($mysqli, $query);
-
 
         $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
@@ -120,9 +116,6 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
 
         if($dty_ID>0)
         {
-            //switch database
-            //mysql__usedatabase($mysqli, $db_name);
-
             //change
             $query = "update `$db_name`.defDetailTypes set dty_Type='file' where dty_ID=".$dty_ID;
             $mysqli->query($query);
@@ -136,10 +129,10 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
                 $dtl_ID = intval($row[0]);
                 $url = $row[1];
 
-                //$ulf_ID = $entity->registerURL($url, $type_!=='_remote');
+
 
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
-                $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source
+                $ext = ($type_==ULF_REMOTE) ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source
 
                 $insert_query = "insert into `$db_name`.recUploadedFiles "
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '

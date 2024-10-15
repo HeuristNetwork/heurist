@@ -26,10 +26,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../consts.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
-header('Content-type: text/javascript');
+header(CTYPE_JS);
 
 $db = @$_REQUEST['db'];
 if(!$db) {exit;}

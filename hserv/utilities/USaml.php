@@ -68,7 +68,7 @@ function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
 
         $attr = $as->getAttributes();
 
-        if(!is_array($attr) || count($attr)==0){
+        if(isEmptyArray($attr)){
             $errMessage = 'External authentication returns empty attributes. Please contact Service provider admin';
         }
     }
@@ -77,7 +77,7 @@ function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
     //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
 
     //find user in sysUGrps by email and/or uid
-    if(is_array($attr) && count($attr)>0 && ($system->is_inited() || $system->init( $dbname )) ){
+    if(!isEmptyArray($attr) && ($system->is_inited() || $system->init( $dbname )) ){
 
             $mysqli = $system->get_mysqli();
 
@@ -190,7 +190,7 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
             //perform authorization
             $system->doLogin($user_id, null, 'remember', true, false);//skip pwd check
             //reload page
-            header('Location: ' . HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME);
+            redirectURL(HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME);
             //DEBUG $params = '&usr='.$attr_uid.'&usrid='.$user_id;
         }else{
             $try_login = true;

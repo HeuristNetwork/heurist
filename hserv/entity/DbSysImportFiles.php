@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to sysImportFiles table
@@ -20,17 +22,14 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
-
 class DbSysImportFiles extends DbEntityBase
 {
     private $is_table_exists = true;
 
 
     public function init(){
+
+        $this->requireAdminRights = false;
 
         $mysqli = $this->system->get_mysqli();
 
@@ -141,8 +140,8 @@ class DbSysImportFiles extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM '.$from_table;
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
@@ -230,17 +229,20 @@ class DbSysImportFiles extends DbEntityBase
                 $this->system->addError(HEURIST_DB_ERROR,
                         'Cannot delete data from list of imported files', $mysqli->error);
                 return false;
-        }else{
-                if($delete_all_import_tables){
-
-                    $tables = mysql__select_list2($mysqli, "SHOW TABLES LIKE 'import20%'");
-                    foreach($tables as $table_name){
-                        $query = "drop table IF EXISTS `$table_name`";
-                        $mysqli->query($query);
-                    }
-                }
-                return true;
         }
+
+        if(!$delete_all_import_tables){
+            return true;
+        }
+
+        $tables = mysql__select_list2($mysqli, "SHOW TABLES LIKE 'import20%'");
+        foreach($tables as $table_name){
+            $query = "drop table IF EXISTS `$table_name`";
+            $mysqli->query($query);
+        }
+
+        return true;
+
     }
 
 

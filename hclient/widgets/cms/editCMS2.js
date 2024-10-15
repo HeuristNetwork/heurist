@@ -97,7 +97,7 @@ function editCMS2(website_document){
        script.id = 'tiny-mce-script';
        script.onload = function(){  //() => 
          // tinymce is loaded at this point
-         //this.setState({tinymceLoaded: true});
+        
          callback.call(this);
        };
        script.src = tinyMCEPath;
@@ -144,7 +144,7 @@ function editCMS2(website_document){
             window.onbeforeunload = _onbeforeunload;
                 
             
-                let new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
+                let new_ele = $('<div class="ui-layout-center"></div>');
                                              
                 _ws_body.children().appendTo(new_ele);
                 
@@ -277,7 +277,7 @@ function editCMS2(website_document){
                     }
                     
             _initEditControls(false);
-            //if use iframe return;
+           
         }//editor frame already inited
         
         
@@ -420,7 +420,7 @@ function editCMS2(website_document){
             {selectOnSave:true, 
                 edit_obstacle: false, 
                 onClose: function(){ 
-                    //parent_span.find('.svs-contextmenu4').hide();
+                   
                 },
                 onselect:function(event, data){
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -466,7 +466,7 @@ function editCMS2(website_document){
                 {text:window.hWin.HR('Save'), 
                     click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
-                {text:window.hWin.HR('Discard'), 
+                {text:window.hWin.HR('Leave unchanged'), 
                     click: function(){
                         _toolbar_Page.hide();
                         page_was_modified = false; 
@@ -480,7 +480,8 @@ function editCMS2(website_document){
             ];            
             
             let sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, {appendTo: 'body'});
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
+                            {appendTo: 'body', default_palette_class:default_palette_class});
 
             return true;     
         }else{
@@ -498,7 +499,7 @@ function editCMS2(website_document){
         if(_warningOnExit( _closeCMS )) return;
         
         // 1. close control panel
-        _ws_body.layout().hide(options.editor_pos); // .show(options.editor_pos, false );
+        _ws_body.layout().hide(options.editor_pos);
         
         //2. reload content
         window.hWin.layoutMgr.setEditMode(false);
@@ -532,20 +533,22 @@ function editCMS2(website_document){
         } 
         opts.rec_ID = home_page_record_id;
         
+        let was_converted_to_new_format = false;
+        
         if(supress_conversion!==true && typeof _layout_content === 'string' &&
             _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
 
                             const res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
-                                page_was_modified = true;
+                                was_converted_to_new_format = true;
                                 _layout_content = res;
+ 
+const sMsg = '<p>The internal storage format of web pages has changed for greater efficiency and stability.</p>'
++'<p>The page has been converted to the new format and you can modify it. In order to save the converted page, hit <b>Save</b> on page exit.</p>'
++'<p>For backward compatibility we can display, <u>but not edit</u>, the old format. You may therefore leave the page in the old format by hitting <b>Leave unchanged</b>.</p>'
++'<p>We recommend saving in the new format</p>';
                                 
-const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
-+'<p>If this page uses complex formatting we cannot be sure of converting correctly through this automatic process.</p>'
-+'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
-+'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
-                                
-                                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+                                window.hWin.HEURIST4.msg.showMsg(sMsg,{title:'New format', default_palette_class: default_palette_class});
                             }
              
         }
@@ -566,6 +569,10 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                 .text( options.record_id==home_page_record_id ? window.hWin.HR('Home Page') :opts.page_name );
         
         if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
+        
+        if(was_converted_to_new_format){
+            page_was_modified = was_converted_to_new_format;
+        }
     }
 
     //
@@ -676,7 +683,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                         }else{
                             page_was_modified = false;
                         }
-                        //_panel_treePage.find('.fancytree-hover').removeClass('fancytree-hover');
+                       
                     }
                 });
 
@@ -846,7 +853,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                     },500);    
                 }
             },
-            default_palette_class: 'ui-heurist-publish'                                        
+            default_palette_class: default_palette_class                                        
             }
         );    
 
@@ -977,7 +984,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                 dragDrop: function(node, data) {
                     // data.otherNode - dragging node
                     // node - target
-                    //let is_root = node.getParent().isRootNode();
+                   
                     let is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
                     let hitMode = (is_cardinal)?'child' :data.hitMode;                    
@@ -1012,7 +1019,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
 
         }
         
-        _switchMode(current_edit_mode);//, false);
+        _switchMode(current_edit_mode);
         
     }
 
@@ -1050,7 +1057,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
             
             _onPageChange();
             
-            _panel_treePage[0].style.removeProperty('height'); //show();
+            _panel_treePage[0].style.removeProperty('height');
         }
         
         _panel_propertyView.hide();
@@ -1088,15 +1095,15 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
             
             _toolbar_WebSite.hide();
         
-            //_layout_container.find('div.editable').addClass('tinymce-body');
-            //tinymce.init({inline:true});
+           
+           
             if(init_tinymce!==false){
                 _panel_treePage.fancytree('getTree').visit(function(node){
                     node.setSelected(false); //reset
                     node.setExpanded(true);
                 });            
                 _updateActionIcons(500);//it inits tinyMCE also
-            } //_initTinyMCE();
+            } //_initTinyMCE
             
         }else{
 
@@ -1120,8 +1127,8 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
             if(!_editCMS_SiteMenu)
             _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
             
-            //tinymce.init({inline:false});
-            //_layout_container.find('div.editable').removeClass('tinymce-body');
+           
+           
         }
         
     }
@@ -1146,7 +1153,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
             // find all dragable elements - text and widgets
             _layout_container.find('div.brick').each(function(i, item){   //
                 let ele_ID = $(item).attr('data-hid');
-                 //left:2px;top:2px;
+                
                 _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
             });
             
@@ -1381,12 +1388,12 @@ function(value){
                         if(node) node = $(node[0]);
                     }
                     if(node){
-                        //_hideMenuInTree();
+                       
                         
-                        let ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
+                        let ele = node.find('.lid-actionmenu');
                         ele.find('span[data-action]').hide();
                         ele.find('span.ui-icon-menu').show();
-                        ele.hide();//css('visibility','hidden');
+                        ele.hide();
                         
                        
                        $(node).removeClass('fancytree-hover');
@@ -1434,7 +1441,7 @@ function(value){
                             return;   
                         }
 
-                        //node =  $(event.target);
+                       
                         let ele_id = node.attr('data-hid');
                         _layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
                         let ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
@@ -1471,7 +1478,7 @@ function(value){
                             $(node).addClass('fancytree-hover');
                             
                             node = $(node).find('.lid-actionmenu');
-                            node.css('display','inline-block');//.css('visibility','visible');
+                            node.css('display','inline-block');
                         }
                         ele_ID = $(node).attr('data-lid');
                     }
@@ -1710,12 +1717,12 @@ function(value){
         let h = _panel_treePage.find('ul.fancytree-container').height() + 10;
 
         h = (h<175)?h:175; 
-        _panel_treePage.css('height',h+'px');//_panel_treePage.hide();
+        _panel_treePage.css('height',h+'px');
         _panel_propertyView.css('top',(h+20)+'px');
         _editor_panel.find('.page_tree').hide();
         _toolbar_Page.hide();
         
-        _panel_propertyView.fadeIn(500);//show();
+        _panel_propertyView.fadeIn(500);
         if(_ws_body.layout().state['west']['outerWidth']<450){
             _keep_EditPanelWidth = _ws_body.layout().state['west']['outerWidth'];
             _ws_body.layout().sizePane('west', 450);    
@@ -1758,7 +1765,7 @@ function(value){
         _showOverlayForElement( ele_id );
         
         _initTinyMCE( ele_id );
-        
+
         //
         // mode - 0       take values from _edit_Element without saving in db
         //        'save'  save entire page in db
@@ -1767,8 +1774,6 @@ function(value){
 
                     //save
                     if(new_cfg){
-                        
-                        //new_cfg.content = element_cfg.content;
                         
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
@@ -1798,7 +1803,7 @@ function(value){
                     // find all dragable elements - text and widgets
                     _layout_container.find('div.brick').each(function(i, item){   //
                         let ele_ID = $(item).attr('data-hid');
-                         //left:2px;top:2px;
+                        
                         _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
                     });
 
@@ -1817,7 +1822,7 @@ function(value){
     // @todo - store templates as json text 
     function _layoutInsertElement(ele_id, widget_type, widget_name){
         
-        //border: 1px dotted gray; border-radius: 4px;margin: 4px;
+       
         
         let new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
         
@@ -2003,12 +2008,12 @@ function(value){
         //update tree
         if(parentnode.folder){
             parentnode.addChildren(new_element_json);    
-            //parentnode.addNode(new_element_json);
+           
         }else{
             let beforenode = parentnode.getNextSibling();
             parentnode = parentnode.getParent();
             parentnode.addChildren(new_element_json, beforenode);    
-            //parentnode.addNode(new_element_json, 'after');
+           
         }
 
         setTimeout(function(){
@@ -2082,10 +2087,6 @@ function(value){
                 items[i].title = null;
                 delete items[i].title;
                 
-                //if(items[i].content && items[i].dom_id){
-                //    contents.push({id:items[i].dom_id,lang:'',content:items[i].content});        
-                //}
-                
                 if(items[i].children){
                     __cleanLayout(items[i].children);    
                 }
@@ -2134,7 +2135,7 @@ function(value){
                         page_was_modified = false;
                         page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
                         
-                        //window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                        
 
                         /* 2022-01-04 IJ does not want direct name of web page title
                         if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {

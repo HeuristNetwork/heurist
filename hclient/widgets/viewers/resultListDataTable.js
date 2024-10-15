@@ -62,7 +62,7 @@ $.widget( "heurist.resultListDataTable", {
 
         let that = this;
 
-        //this.element.css({'overflow':'hidden'});
+       
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
         this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);
@@ -131,7 +131,7 @@ $.widget( "heurist.resultListDataTable", {
                         that.options.selection = sel;
                         that._refresh();
                 }
-                //that._refresh();
+               
             });
         
         }
@@ -184,12 +184,11 @@ that._dout('myOnShowEvent');
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
-        //this._refresh();
     },
     
     _dout: function(msg){
         //if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
-        //    console.log(msg);
+       
         //}
     },
     
@@ -223,9 +222,8 @@ that._dout('myOnShowEvent');
 
                 if(recIds_list.length>0){
 
-                    let queryURL = window.hWin.HAPI4.baseURL
-                    +'hserv/controller/record_output.php?format=json'
-                    +'&db=' + window.hWin.HAPI4.database;
+                    let queryURL = window.hWin.HAPI4.baseURL+'hserv/controller/record_output.php';
+
                     let queryStr = '';
                     let rec_total_count = recIds_list.length;
                     
@@ -259,7 +257,32 @@ that._dout('myOnShowEvent');
                         
                         if(this.options.show_export_buttons){
                             dom = dom + 'B'; 
-                            this.options.dataTableParams['buttons'] = ['copy', 'excel', 'pdf'];    
+                            this.options.dataTableParams['buttons'] = ['copy', 'excel', {
+                                extend: 'pdfHtml5',
+                                orientation: 'portrait',
+                                pageSize: 'A4',
+                                customize: (doc) => {
+                                    // Change to landscape for larger tables
+                                    let setting = window.hWin.HAPI4.get_prefs('columns_datatable');
+                                    let col_count = 0;
+
+                                    if(setting && setting.columns.length > 0){
+
+                                        setting.columns.forEach(field => {
+                                            if(field.visible){
+                                                col_count += $Db.dty(field.data, 'dty_Type') == 'blocktext' ? 3 : 1;
+                                            }
+                                        });
+                                    }else{
+                                        let tableNode = doc.content[1];// [0] => Title
+                                        col_count = tableNode && tableNode.table ? tableNode.table.body[0].length : 10;
+                                    }
+
+                                    if(col_count > 5){
+                                        doc.pageOrientation = 'landscape';
+                                    }
+                                }
+                            }];    
                         }
 
                         this.options.dataTableParams['dom'] = dom;//'<"selectors">frtip'; //l - for page length
@@ -321,14 +344,19 @@ this._dout('reload datatable '+this.options.serverSide);
                         //to avoid passs thousands of recids for each page request 
                         //pass and save query on server side 
                         window.hWin.HEURIST4.util.sendRequest(queryURL,
-                            {q:queryStr, datatable:datatable_id}, null, 
+                            {q:queryStr, datatable:datatable_id, format:'json', db:window.hWin.HAPI4.database}, null, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     that.options.dataTableParams['ajax'] = {
                                             "type": "POST",
-                                            "url": queryURL 
-                                            + '&recordsTotal='+rec_total_count
-                                            + '&datatable='+datatable_id};
+                                            "url": queryURL,
+                                            "data":{
+                                                "db": window.hWin.HAPI4.database,
+                                                "format": 'json',
+                                                "recordsTotal":rec_total_count,
+                                                "datatable": datatable_id
+                                            }
+                                    };
 
                                     that._dataTable = that.div_datatable.DataTable( that.options.dataTableParams );
                                 }else{
@@ -343,7 +371,14 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['serverSide'] = false;                    
                         this.options.dataTableParams['ajax'] = {
                                             "type": "POST",
-                                            "url": queryURL + '&datatable=1&q=' + queryStr};
+                                            "url": queryURL,  
+                                            "data":{
+                                                "db": window.hWin.HAPI4.database,
+                                                "format": 'json',
+                                                "q":queryStr,
+                                                "datatable": 1
+                                            }
+                                            };
                         this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );
                     }
 
@@ -373,17 +408,20 @@ this._dout('reload datatable '+this.options.serverSide);
         //adjust position for datatable controls    
         this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
         let lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
-        this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
-        //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
+        
+        this.div_content.find('.dt-info').css({float:'left','padding-top':'11px','padding-left':'10px','padding-right':'10px'}); //was dataTables_info
+       
         this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
         this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
         this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});
         
-        this.div_content.find('.dataTables_info').css('padding-top','11px');
-        this.div_content.find('.dataTables_paginate').css('padding-top','7px');
+        this.div_content.find('.dt-paging').css({float:'right','padding-top':'7px'}); //was dataTables_paginate
+        
         this.div_content.find('.paginate_button').css('padding','2px');
+        
         this.div_content.find('.dt-buttons').css('padding-top','7px');
         this.div_content.find('.dt-button').css('padding','2px');
+        
         this.selConfigs = null;
 
         const that = this;
@@ -440,9 +478,6 @@ this._dout('reload datatable '+this.options.serverSide);
             
             if(this.options.show_column_config){
 
-                //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
-                //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
-                
                 if(window.hWin.HEURIST4.util.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
                     this.selConfigs = $('<div>').appendTo(sel_container);
                     
@@ -565,21 +600,22 @@ this._dout('reload datatable '+this.options.serverSide);
     _highlightSelected: function(){
 
         const that = this;
+        let $rows = this.div_content.find('table.dataTable tbody tr');
 
         // No rows
-        if(this.div_content.find('tr[role="row"]').length == 0){
+        if($rows.length == 0){
             return;
         }
 
         // Remove previous highlighting
-        this.div_content.find('tr[role="row"].ui-highlight').removeClass('ui-highlight');
+        $rows.removeClass('ui-highlight');
 
         if(!this.options.selection || this.options.selection.length == 0){
             return;
         }
 
         // Highlight selected
-        $.each(this.div_content.find('tr[role="row"]'), (idx, row) => {
+        $.each($rows, (idx, row) => {
 
             let row_data = that._dataTable.row(row).data();
 

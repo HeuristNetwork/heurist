@@ -1,0 +1,252 @@
+<!--
+/**
+* reportViewer.html: 
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<div class="editSmarty ent_wrapper editor">
+    <div class="ui-layout-west">
+        <div class="insertForm">
+                <div class="ent_header" style="height:130px;">
+                    <span title="Close patterns panel" class="closeInsertForm ui-icon ui-icon-carat-2-w" 
+                        style="height: 32px; width: 32px; position: absolute; top: 13px; right: 0px; font-size: 32px; cursor: pointer; z-index: 1000;"></span>            
+
+                    <div style="height:44px; border-bottom:1px lightgray solid" class="hide-for-snippet">
+                        <a href="../context_help/smarty_reports.html" class="heurist-helper3" style="float:left;padding:4px 10px"
+                        onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
+                        title="Read full documentation on the Smarty templating language">
+                        <b>Help on using this function</b></a>
+                        <br><br>
+                        <div class="heurist-helper3" style="padding-left:10px">Position cursor in text on right <br>
+                        before selecting actions below</div>
+                    </div>
+                    
+                    
+                    <div style="margin-top: 10px;height:30px; border-bottom:1px lightgray solid" class="hide-for-snippet">
+
+                        <select id="selInsertPattern" style="min-width:150px">
+                            <option value="1">Heading for record type</option>
+                            <option value="2">Simple table</option>
+                            <option value="3">Information on first element of a loop</option>
+                            <option value="4">Information on last element of a loop</option>
+                            <option value="99">Outer records loop</option>
+                            <option value="98">Add Record Link</option>
+                        </select>
+                        <button id="btnInsertPattern">
+                            Insert pattern
+                        </button>
+                    </div>
+                    
+                    <div style="margin:14px 0px;">
+                        <span style="font-weight:bold;width:auto;">Select Type</span>
+                        <select id="rectype_selector"></select>
+                    </div>
+                </div>
+
+                <div style="background-color: #FFFFFF;top:130px;" class="ent_content_full rtt-tree">
+                    Please select a record type from the pulldown above
+                </div>        
+        </div>
+    </div>
+    <div class="ui-layout-center">  
+    
+        <div class="show-for-snippet ent_header" style="height:90px;display:none;font-size: 12px">
+            <span id="lblFormula" style="font-weight:bold">Formula (Smarty code)</span>
+            <div id="lblHelp" class="heurist-helper3" style="padding:10px 0px">
+                <a href="https://heuristref.net/heurist/?db=Heurist_Help_System&website&id=39&pageid=758#h_14642843621941655708110650" target="_blank" rel="noopener">
+                    View help here
+                </a> 
+                or search for Calculate in the online documentation
+            </div>
+            <div class="heurist-helper3">
+                Enclose formula in { } and use $r.fnnnn for a field in the current record type.<br>
+                For example: {$r.f1179 + $r.f1267} will generate the sum of these fields
+            </div>
+        </div>
+        <div class="editForm ent_content_full" style="background-color: #FFFFFF;top:0px;overflow:hidden;padding:0px">
+             ...
+        </div>
+    </div>
+    <div class="ui-layout-east">
+        <div class="testForm">
+            <div class="ent_header" style="height:90px">
+                <span title="Close test panel" class="closeTestForm ui-icon ui-icon-carat-2-e" 
+                        style="height: 32px; width: 32px; position: absolute; top: 13px; left: 0px; font-size: 32px; cursor: pointer; z-index: 1000;"></span>            
+
+                <div class="show-for-snippet" style="display:none;padding:10px 0px 0px 36px;">
+                        Record to test
+                        <select id="listRecords"></select>
+                </div>
+
+                <div style="display:inline-block;padding:10px 0px 10px 36px;">
+                    <span class="hide-for-snippet">
+                    truncate output at
+                    <select id="cbDebugReportLimit" title="If some record types are only represented later in the data, use a tighter filter or Collected  > Add, then Collected > Show as search to create a smaller resultset.">
+                        <option value="50" selected="selected">50 records</option>
+                        <option value="250">250 records</option>
+                        <option value="-1">As set in preferences</option>
+                    </select>
+                    </span>
+                    <select id="cbErrorReportLevel">
+                        <option value="0" selected="selected">Ignore errors</option>
+                        <option value="1">Show warnings</option>
+                        <option value="2">Show errors</option>
+                        <option value="3">Debug info</option>
+                    </select>
+                </div>
+                <div style="text-align:center"><button class="btnStartTest ui-button-action" title="Test your template">TEST</button></div>
+            </div>
+        
+            <div class="ent_content_full" style="background-color: #FFFFFF;top:90px;overflow:hidden">
+                <iframe title="report" name="test_container_frame" id="test_container_frame" style="border:none"></iframe>
+            </div>
+        
+        </div>
+    </div>
+</div>
+
+<div id="insert-popup" style="display:none;overflow:hidden;">
+    <div style="position:absolute;left:0;right:0;top:0px;bottom:0;padding:15px;overflow:hidden;">
+
+        <div class="insert-field-grid">
+            <div class="language_row">
+                <span>Language</span>
+
+                <select id="selLanguage" style="width:110px;height:18px;"
+                    title="Retrieve the translated version of the provided term\'s label">
+                    <option value="">Default language</option>
+                </select>
+
+                <span class='heurist-helper2'>
+                    If language is not chosen,<br> the current system language is used<br>
+                    As another option use "translate" modifier
+                </span>
+            </div>
+
+            <div class="file_row">
+                <span>File metadata</span>
+
+                <select id="selFileData" style="width:110px;height:18px;"
+                    title="Retrieve metadata related to the provided file">
+                    <option value="">None</option>
+                    <option value="name">Name</option>
+                    <option value="desc">Description</option>
+                    <option value="cap">Caption</option>
+                    <option value="rights">Copyright</option>
+                    <option value="copyowner">Copy Owner</option>
+                    <option value="type">Type</option>
+                </select>
+
+                <span class='heurist-helper2'>
+                    Retrieve metadata regarding the file(s)
+                </span>
+            </div>
+
+            <div>
+                <span class="empty_ele"></span>
+
+                <select id="selInsertMode" style="width:110px"
+                    title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
+                    <option value="0">Field only</option>
+                    <option value="2">Field + function wrapper</option>
+                </select>
+
+                <select id="selInsertModifiers" style="width:110px"
+                    title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)">
+                    <option>Value as-is</option>
+                    <option>capitalize</option>
+                    <option>cat</option>
+                    <option>count_characters</option>
+                    <option>count_paragraphs</option>
+                    <option>count_sentences</option>
+                    <option>count_words</option>
+                    <option>date_format</option>
+                    <option>default</option>
+                    <option>escape</option>
+                    <option>indent</option>
+                    <option>lower</option>
+                    <option>nl2br</option>
+                    <option>regex_replace</option>
+                    <option>replace</option>
+                    <option>spacify</option>
+                    <option>string_format</option>
+                    <option>strip</option>
+                    <option>strip_tags</option>
+                    <option>truncate</option>
+                    <option>translate:ENG:term</option>
+                    <option>upper</option>
+                    <option>wordwrap</option>
+                </select>
+            </div>
+
+            <div class="header">
+                <span class="empty_ele"></span>
+                <strong>Normal</strong>
+            </div>
+
+            <div>
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_if"
+                    title="Inserts a test of whether the field is blank (or a specific value).">
+                    Test value (If ...)</button>
+
+                <button id="btn_insert_var"
+                    title="Inserts the value of the field in the output. Customise using the dropdowns.">
+                    <strong>Insert field value</strong>
+                </button>
+            </div>
+
+            <div class="header ins_isloop">
+                <span class="empty_ele"></span>
+
+                <strong>Within repeat loop</strong>
+                <span class="heurist-helper2">
+                    Use these buttons to insert field or test within a repeat loop
+                </span>
+            </div>
+
+            <div class="ins_isloop">
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_loop">
+                    Insert repeat</button>
+            </div>
+
+            <div class="ins_isloop">
+                <span class="empty_ele"></span>
+
+                <button id="btn_insert_loop_if">
+                    Test value (If ...)</button>
+
+                <button id="btn_insert_loop_var">
+                    <strong>Insert field value</strong>
+                </button>
+            </div>
+        </div>
+
+        <br>
+        <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
+        by clicking "repeat" next to the name of the field, then place further field specifications
+        inside the {foreach}...{/foreach} loop that is inserted.
+        <span class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</span>
+        
+    </div>
+</div>
+
+

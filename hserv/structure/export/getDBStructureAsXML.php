@@ -21,6 +21,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 
 header("Content-Type: application/xml");
@@ -54,7 +56,6 @@ $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
 // Version info in common/config/initialise.php
 // admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_HeuristCoreDefinitions database and insert where indicated in file
-// admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql, delete non-definition tables for temp db creation speed
 // admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
 // admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface lsiting in exchange format)
 // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)

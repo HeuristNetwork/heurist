@@ -1,4 +1,8 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
     /**
     * db access to defTerms table
@@ -19,11 +23,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 
 class DbDefTerms extends DbEntityBase
 {
@@ -80,7 +79,7 @@ class DbDefTerms extends DbEntityBase
                     array_push($files, $id);
                 }
              }
-             if(count($files)==0){
+             if(empty($files)){
                 $this->data['trm_ID'] = 999999999;
              }else{
                 $this->data['trm_ID'] = $files;
@@ -178,8 +177,8 @@ class DbDefTerms extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
@@ -231,12 +230,14 @@ class DbDefTerms extends DbEntityBase
     private function _importTerms(){
 
         //extract records from $_REQUEST data
-        if(!$this->prepareRecords()){
-                return false;
+        if(!$this->prepareRecords(true)){
+            return false;
         }
 
         //create tree array $record['trm_ParentTermID']
-        if(count($this->records)>0){
+        if(isEmptyArray($this->records)){
+            return array();
+        }
 
             if(@$this->records[0]['trm_VocabularyGroupID']>0){
                 return $this->save();
@@ -246,12 +247,14 @@ class DbDefTerms extends DbEntityBase
             //group by parent term ID
             $records_by_prent_id = array();
             foreach($this->records as $idx => $record){
-                if($record['trm_ParentTermID']>0){
+                if(!($record['trm_ParentTermID']>0)){
+                    continue;
+                }
                     if(!@$records_by_prent_id[$record['trm_ParentTermID']]){
                         $records_by_prent_id[$record['trm_ParentTermID']] = array();
                     }
                     $records_by_prent_id[$record['trm_ParentTermID']][] = $record;
-                }
+
             }
 
             $terms_added = array();
@@ -280,7 +283,7 @@ class DbDefTerms extends DbEntityBase
                     $terms_added = array_merge($terms_added, $ret);
                 }
             }
-        }
+
         return $terms_added;
     }
 
@@ -290,16 +293,22 @@ class DbDefTerms extends DbEntityBase
     private function _parseHierarchy($input) {
         $result = array();
 
-        $trm_sep = (!array_key_exists('term_separator', $this->data))
-                        ? '.'
-                        : ((empty($this->data['term_separator'])) ? false : $this->data['term_separator']);
+        $trm_sep = @$this->data['term_separator'];
 
-        foreach ($input AS $path) {
+        if($trm_sep==null){
+             $trm_sep = '.';
+        }
+
+        //(!array_key_exists('term_separator', $this->data))
+        //                ? '.'
+        //                : ((empty($this->data['term_separator'])) ? false : $this->data['term_separator']);
+
+        foreach ($input as $path) {
             $path = $path['trm_Label'];
 
             $prev = &$result;
 
-            if($trm_sep){
+            if($trm_sep!=''){
                 $s = strtok($path, $trm_sep);
 
                 //iterate path
@@ -369,7 +378,7 @@ class DbDefTerms extends DbEntityBase
 
         $terms_added = array();
 
-        if(count($this->records)>0){
+        if(!empty($this->records)){
             $ret = $this->save();
             if($ret!==false) {
                 $terms_added = $ret;
@@ -388,7 +397,7 @@ class DbDefTerms extends DbEntityBase
             //go to next level
             foreach($tree as $label => $children)
             {
-                if(is_array($children) && count($children)>0){
+                if(!isEmptyArray($children)){
                     $record_idx = @$this->labels_to_idx[$parentLabel.$label];
                     $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
                     if($ret===false){
@@ -409,9 +418,11 @@ class DbDefTerms extends DbEntityBase
     //
     // Validates values before save and sets default values
     //
-    protected function prepareRecords(){
+    protected function prepareRecords($ignore_duplications=false){
 
         $ret = parent::prepareRecords();
+
+        $duplications = [];
 
         //add specific field values
         foreach($this->records as $idx=>$record){
@@ -431,7 +442,7 @@ class DbDefTerms extends DbEntityBase
                     if(isset($this->data['trm_parentID'])){
 						$parent_id = $this->data['trm_parentID'];// Replace with alternative parent, if supplied
                     }else{
-                        $parent_id = $this->records[$idx]['trm_ParentTermID'];//getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);
+                        $parent_id = $this->records[$idx]['trm_ParentTermID'];
                     }
 
                     if(@$this->records[$idx]['trm_Label'] || @$this->records[$idx]['trm_Code']){
@@ -448,12 +459,19 @@ class DbDefTerms extends DbEntityBase
                                     if(@$this->records[$idx]['trm_Label'] &&
                                         strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
                                         $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                                        break;
                                     }elseif (@$this->records[$idx]['trm_Code'] &&
                                         strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
                                     {
                                         $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
-                                        break;
+                                    }
+
+                                    if($s2!==null){ //duplication
+                                         if($ignore_duplications){
+                                            $duplications[] = $idx;
+                                            $s2 = null;
+                                         }else{
+                                             break;
+                                         }
                                     }
                                 }
                             }
@@ -513,6 +531,12 @@ class DbDefTerms extends DbEntityBase
             if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) {$this->records[$idx]['trm_OrderInBranch'] = null;}
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
+        }//foreach
+
+        if(!empty($duplications)){
+            foreach($duplications as $idx){
+                unset($this->records[$idx]);
+            }
         }
 
         return $ret;
@@ -648,7 +672,7 @@ class DbDefTerms extends DbEntityBase
                 //add or remove term to vocabuary by reference
                 $trm_IDs = prepareIds($this->data['trm_ID']);
 
-                if(count($trm_IDs)==0){
+                if(empty($trm_IDs)){
 
                     $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
                     $ret = false;
@@ -685,7 +709,7 @@ class DbDefTerms extends DbEntityBase
                         if($new_parent>0){
                             //get labels and codes for vocabulary
                             $labels = $this->getLabelsAndCodes($new_vocab);
-                            if(!is_array($labels) || count($labels)==0) {$labels = null;}
+                            if(isEmptyArray($labels)) {$labels = null;}
                         }
                         if($new_vocab>0 && $new_vocab!=$old_vocab){
                             $all_children = $this->getChildren($new_vocab);
@@ -744,7 +768,7 @@ class DbDefTerms extends DbEntityBase
                                 }
                             }
                             //4. term is removed from vocabulary - check its usage in recDetails
-                            if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+                            if(!isEmptyArray($check_dty_IDs)){
 
                                $ret = $this->findRecordWhereTermInUse($trm_ID, $check_dty_IDs);
 
@@ -810,11 +834,6 @@ class DbDefTerms extends DbEntityBase
                             'Cannot merge '.$merge_id.'. This term has references', $ret);
                     $ret = false;
                 }
-                /*if($ret===false){ //sql error
-                    $ret = false;
-                }else{
-                    $ret = true;
-                }*/
 
                 if($ret){
                     //1. change parent id for all children terms
@@ -827,7 +846,7 @@ class DbDefTerms extends DbEntityBase
                     }
                 }
                 if($ret){
-                    $mysqli->query('set @suppress_update_trigger=1');
+                    mysql__supress_trigger($mysqli, true );
 
                     //2. update entries in recDetails for all detail type enum or reltype
                     $query = "update recDetails, defDetailTypes set dtl_Value=".intval($retain_id)
@@ -841,7 +860,8 @@ class DbDefTerms extends DbEntityBase
                             'SQL error in mergeTerms updating record details', $mysqli->error);
                         $ret = false;
                     }
-                    $mysqli->query('set @suppress_update_trigger=NULL');
+                    mysql__supress_trigger($mysqli, false);
+
                 }
                 if($ret){
                     //3. delete term $merge_id
@@ -905,14 +925,7 @@ class DbDefTerms extends DbEntityBase
                 $ret = $this->_importTerms();
             }
 
-            if($ret===false){
-                $mysqli->rollback();
-            }else{
-                $mysqli->commit();
-            }
-
-            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
-
+            mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
             return $ret;
     }
@@ -941,7 +954,7 @@ class DbDefTerms extends DbEntityBase
                 $code_clause = 'trn_Code = ' . intval($trm_ids);
             }
 
-            $where_clause .= empty($code_clause) ? '' : ' AND ' . $code_clause;
+            $where_clause .= empty($code_clause) ? '' : SQL_AND . $code_clause;
         }
 
         $query = 'SELECT trn_ID, trn_Code, trn_Source, trn_LanguageCode, trn_Translation '
@@ -1161,14 +1174,14 @@ class DbDefTerms extends DbEntityBase
         }
 
         // is this used in records (find usage in recDetails)
-        if($indetails && (!is_array($ret['detailtypes']) || count($ret['detailtypes'])==0)){
+        if($indetails && (isEmptyArray($ret['detailtypes']))){
 
            $ret = $this->findRecordWhereTermInUse($trm_ID, null);
 
         }
 
         //$ret['children']>0 ||
-        if((is_array(@$ret['detailtypes']) && count($ret['detailtypes'])>0 )|| $ret['reccount']>0){
+        if((is_array(@$ret['detailtypes']) && !empty($ret['detailtypes']) )|| $ret['reccount']>0){
             return $ret;
         }else{
             return true;
@@ -1185,23 +1198,17 @@ class DbDefTerms extends DbEntityBase
     }
 
     //
-    // get flat array of trm_ID=>trm_Label fro given parent
+    // get flat array of trm_ID=>trm_Label for given parent
     //
     private function getLabelsAndCodes($parent_id, $all_levels=true){
 
         //get first level children
         $children = $this->getChildren($parent_id, $all_levels);
-        if(is_array($children) && count($children)>0){
+        if(is_array($children) && !empty($children)){
 
             $query = 'SELECT trm_ID, trm_Label, trm_Code FROM '
-                .$this->config['tableName'].' WHERE trm_ID';//defTerms
+                .$this->config['tableName'].SQL_WHERE.predicateId('trm_ID', $children);
             //finds labels and codes
-            if(count($children)>1)
-            {
-                $query = $query .' IN ('.implode(',',$children).')';
-            }else{
-                $query = $query . ' = '.$children[0];
-            }
             return mysql__select_assoc($this->system->get_mysqli(), $query);
         }
         return null;
@@ -1216,68 +1223,57 @@ class DbDefTerms extends DbEntityBase
 
         //find all children terms (including by reference)
         $children = $this->getChildren($trm_ID);
+        $children[] = $trm_ID;  //itself
 
-        if(is_array($children) && count($children)>0){
-                $children[] = $trm_ID;  //itself
-                $children = prepareIds($children);
-                $s = 'in ('.implode(',',$children).')';
-        }else{
-                $s = '= '.intval($trm_ID);
-        }
+        $s = predicateId('dtl_Value', $children, SQL_AND);
 
         $mysqli = $this->system->get_mysqli();
 
-
-
-        if(!is_array($check_dty_IDs) || count($check_dty_IDs)==0){
+        if(isEmptyArray($check_dty_IDs)){
             $real_vocab_id = getTermTopMostParent($mysqli, $trm_ID);
             $check_dty_IDs = $this->getFieldsThatUseVocabulary($real_vocab_id);
         }
 
-        if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+        if(!isEmptyArray($check_dty_IDs)){
             $check_dty_IDs = prepareIds($check_dty_IDs);//for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
             $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
-                .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) AND '
-                .'(dtl_Value '.$s.')';
+                .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) '.$s;
+
         }else{
             $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
                 ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
-                ."(dty_Type='enum' or dty_Type='relationtype') AND "
-                .'(dtl_Value '.$s.')';
+                ."(dty_Type='enum' or dty_Type='relationtype') $s";
         }
 
         $total_count_rows = 0;
         $records = array();
         $res = $mysqli->query($query);
         if ($res){
-            $fres = $mysqli->query('select found_rows()');
-            if ($fres)     {
-                $total_count_rows = $fres->fetch_row();
-                $total_count_rows = $total_count_rows[0];
-                $fres->close();
+            $total_count_rows = mysql__found_rows($mysqli);
 
-                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
+            if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
 
-                    $records = array();
-                    while ($row = $res->fetch_row())  {
-                        array_push($records, (int)$row[0]);
-                    }
+                $records = array();
+                while ($row = $res->fetch_row())  {
+                    array_push($records, (int)$row[0]);
                 }
             }
+
             $res->close();
         }
+
         if($mysqli->error){
             $this->system->addError(HEURIST_DB_ERROR,
                 'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
-        }else{
-            $ret['recID'] = $trm_ID;
-            $ret['fields'] = $check_dty_IDs;
-            $ret['reccount'] = $total_count_rows;
-            $ret['records'] = $records;
-            $ret['children'] = count($children);
         }
+
+        $ret['recID'] = $trm_ID;
+        $ret['fields'] = $check_dty_IDs;
+        $ret['reccount'] = $total_count_rows;
+        $ret['records'] = $records;
+        $ret['children'] = count($children);
 
         return $ret;
 

@@ -1,4 +1,8 @@
 <?php
+namespace hserv\entity;
+use hserv\utilities\USanitize;
+use hserv\entity\DbEntitySearch;
+
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
@@ -8,8 +12,11 @@
 */
 
 /**
+* Base class for all database entities.
+* 
+* This abstract class handles core functionalities such as reading configurations, handling
+* field data, and providing save, delete, and search operations for database entities.
 * Base class for all db entities
-*
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -20,82 +27,85 @@
 */
 abstract class DbEntityBase
 {
+    /** @var mixed $system System handler for operations */
     protected $system;
 
-    // set transaction in save,delete action - otherwise transaction is set on action above (batch action)
+    /** @var bool $need_transaction Set to true if the action requires a transaction */
     protected $need_transaction = true;
 
-    //reset all primary fields to zero - to force addition (POST request via API)
+    /** @var bool $is_addition Flag to reset all primary fields to zero to force addition (POST request) */
     protected $is_addition = false;
 
-    /*
-        request from client side - contains field values for search and update
-
-        data[fields] - values for particular record
-                 initiated in prepareRecords
-    */
+    /** 
+     * @var array|null $data Field values used for search and update.
+     * Contains `data[fields]` for particular records, initiated in prepareRecords().
+     * usually this is $_REQUEST
+     */
     protected $data = null;
 
-    /*
-        configuration form json file
-    */
+    /** @var array|null $config Configuration loaded from a JSON file */
     protected $config;
 
-    //name of primary key field from $config  by dty_Role="primary"
+    /** @var string $primaryField Name of the primary key field from $config marked with dty_Role="primary" */
     protected $primaryField;
 
-
-    //names of multilang fields from $config by rst_MultiLang=1
+    /** @var array $multilangFields Names of multi-language fields from $config with rst_MultiLang=1 */
     protected $multilangFields = array();
 
-    /*
-        fields structure description from json (used in validataion and access)
-    */
+    /** @var array $fields Fields structure description from JSON, used for validation and access */
     protected $fields;
 
-    protected $fieldsNames; //non virtual field names
+    /** @var array $fieldsNames Non-virtual field names */
+    protected $fieldsNames;
 
     /**
-    * keeps several records for delete,update actions
-    * it is extracted from $data in prepareRecords
-    *
-    * @var array
-    */
+     * @var array $records Holds several records for delete/update actions.
+     * Extracted from $data in prepareRecords().
+     */
     protected $records = array();
 
-
     /**
-    * keeps translated values for fields that are extracted from request in prepareRecords
-    *
-    * @var array
-    */
+     * @var array $translation Translated values for fields extracted from the request in prepareRecords().
+     */
     protected $translation = array();
 
-
     /**
-    * IDs of records to update,delete
-    * it is extracted from $data in prepareRecords
-    * need for permissions validation
-    *
-    * @var array
-    */
+     * @var array $recordIDs IDs of records to update/delete, extracted from $data in prepareRecords().
+     * Necessary for permission validation.
+     */
     protected $recordIDs = array();
 
-    //
-    // Name of table
-    //
+    /** @var string $entityName The name of the table or entity */
     private $entityName;
 
-    //
-    // constructor - loads configuration from json file
-    //
+    /** @var array|null $foreignChecks Array of queries to validate references before deletion */
+    protected $foreignChecks = null;
+
+    /** @var bool $isDeleteReady Flag indicating if the entity is ready for deletion */
+    protected $isDeleteReady = false;
+
+    /** @var bool $requireAdminRights Set to true if admin rights are required for the operation */
+    protected $requireAdminRights = true;
+
+    /** @var array|null $duplicationCheck Check for duplication */
+    protected $duplicationCheck = null;    
+
+     /**
+     * Constructor - Loads configuration from JSON file.
+     * 
+     * @param mixed $system The system instance.
+     * @param array|null $data The data to be initialized.
+     */
     public function __construct( $system, $data=null ) {
        $this->system = $system;
 
-       $this->init();//recreate table is it does not exist
+       if(method_exists($this,'init')){
+            $this->init();
+       }
 
-       $this->entityName = lcfirst(substr(get_class($this),2));
+       $reflect = new \ReflectionClass($this);
 
+       $this->entityName = lcfirst(substr($reflect->getShortName(),2));
        if($data){
            $this->setData($data);
        }else{
@@ -104,34 +114,27 @@ abstract class DbEntityBase
     }
 
 
-    //
-    // verifies that entity is valid
-    // configuration is loaded
-    // fields is not empty array
-    //
+    /**
+     * Verify if the entity is valid (configuration loaded and fields not empty).
+     * 
+     * @return bool True if valid, otherwise false.
+     */
     public function isvalid(){
-        return is_array($this->config) && is_array($this->fields) && count($this->fields)>0;
+        return is_array($this->config) && !isEmptyArray($this->fields);
     }
 
-    //
-    //
-    //
+    /**
+     * Read configuration from the JSON file.
+     * 
+     * @return void
+     */
     private function _readConfig(){
-
-        /*
-        if(is_array($this->config)){ //config may be predefined as part of code
-            $this->fields = array();
-            $this->_readFields($this->config['fields']);
-            return;
-        }*/
 
         if(@$this->data['entity']){
             $this->entityName = lcfirst(@$this->data['entity']);
         }
 
-
-        //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hserv/entity/'.basename($this->entityName.'.json');
+        $entity_file = dirname(__FILE__).'/'.basename($this->entityName.'.json'); //HEURIST_DIR.'hserv/entity
 
         if(file_exists($entity_file)){
 
@@ -152,19 +155,24 @@ abstract class DbEntityBase
            }
 
         }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '
+                        .$this->entityName.' in '.dirname(__FILE__));
         }
     }
 
-
-    //
-    // config getter
-    //
+    /**
+     * Initialize the entity (abstract method to be implemented in subclasses).
+     * 
+     * @return void
+     */
     public function init(){}
 
-    //
-    // assign parameters on server side
-    //
+    /**
+     * Set data for the entity from the client request.
+     * 
+     * @param array $data Data to be set.
+     * @return void
+     */
     public function setData($data){
         $this->data = $data;
         $this->records = null;
@@ -182,36 +190,52 @@ abstract class DbEntityBase
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Get the current data of the entity.
+     * 
+     * @return array|null Returns the current data.
+     */
     public function getData(){
         return $this->data;
     }
 
-    //
-    //
-    //
+    /**
+     * Set records for deletion or update actions.
+     * 
+     * @param array $records Records to be set.
+     * @return void
+     */
     public function setRecords($records){
         $this->records = $records;
     }
 
-    //
-    //
-    //
+
+    /**
+     * Get the current records.
+     * 
+     * @return array Returns the current records.
+     */
     public function records(){
         return $this->records;
     }
 
 
-
+     /**
+     * Set whether a transaction is required.
+     * 
+     * @param bool $value True if transaction is required, false otherwise.
+     * @return void
+     */
     public function setNeedTransaction($value){
         $this->need_transaction = $value;
     }
 
-    //
-    // config getter
-    //
+     /**
+     * Get the configuration.
+     * 
+     * @param string $locale Locale for configuration.
+     * @return array|null Configuration data.
+     */
     public function config( $locale='en' ){
 
         if(!@$this->config['locale']){
@@ -253,7 +277,7 @@ abstract class DbEntityBase
             $res = false;
         }else{
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':'');
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':'');
 
         if($operation=='list'){
 
@@ -262,7 +286,7 @@ abstract class DbEntityBase
                 if(file_exists($path)){
 
                     $dirs = array();
-                    $dir = new DirectoryIterator($path);
+                    $dir = new \DirectoryIterator($path);
                     foreach ($dir as $node) {
                         if ($node->isDir() && !$node->isDot()) {
                             $folder_name = $node->getFilename();
@@ -284,7 +308,7 @@ abstract class DbEntityBase
             $sMsg = 'Cannot get content of settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
@@ -304,13 +328,13 @@ abstract class DbEntityBase
             $sMsg = 'Cannot save content the settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif($ext!='cfg'){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
                 $res = false;
             }elseif($content==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Content'));
                 $res = false;
             }else{
 
@@ -349,7 +373,7 @@ abstract class DbEntityBase
 
 
                 if($filename==null){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'New filename parameter is not defined');
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('New filename'));
                     $res = false;
                 }elseif($ext!='cfg'){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
@@ -372,7 +396,7 @@ abstract class DbEntityBase
             $sMsg = 'Cannot remove the settings file. ';
 
             if($filename==null){
-                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.error_WrongParam('Filename'));
                 $res = false;
             }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
@@ -389,41 +413,56 @@ abstract class DbEntityBase
     }
 
 
-    //
-    //
-    //
+    /**
+     * Perform actions based on the current data request.
+     * 
+     * @return mixed Result of the action.
+     */
     public function run(){
+
+        if(!$this->isvalid()){
+            return false;
+        }
 
         $res = false;
 
-        if($this->isvalid()){
-            if(@$this->data['a'] == 'search'){
+        $action =@$this->data['a'];
+
+        switch ($action) {
+           case 'search':
                 $res = $this->search();
-            }else  if(@$this->data['a'] == 'title'){ //search for entity title by id
+                break;
+           case 'title':
                 $res = $this->search_title();
-            }elseif(@$this->data['a'] == 'add'){
+                break;
+           case 'add':
                 $this->is_addition = true;
                 $this->data['a'] = 'save';
                 $res = $this->save();
                 $this->is_addition = false;
-            }elseif(@$this->data['a'] == 'save'){
+                break;
+           case 'save':
                 $res = $this->save();
-            }elseif(@$this->data['a'] == 'delete'){
+                break;
+           case 'delete':
                 $res = $this->delete();
-
-            }elseif(@$this->data['a'] == 'config'){ // return configuration
+                break;
+           case 'config':
                 $res = $this->config( @$this->data['locale'] );
-            }elseif(@$this->data['a'] == 'files'){ // working with settings/config files
-
+                break;
+           case 'files':
+                // working with settings/config files
                 // get list of files by extension
                 // put data into file
                 // load date from file
-                $res = $this->files( $this->data );
-
-            }elseif(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
+                $res = $this->files($this->data);
+                break;
+           case 'counts':
+                //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
-            }elseif(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){
-                //special and batch action. see details of operaion for method of particular class
+                break;
+           case 'action':
+           case 'batch':
                 $res = $this->batch_action();
                 if($res &&
                     !(@$this->data['get_translations'] ||
@@ -431,11 +470,10 @@ abstract class DbEntityBase
                 {
                         $this->_cleanDbDefCache();
                 }
-            }else {
+                break;
+           default:
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
-            }
         }
-
         return $res;
     }
 
@@ -451,17 +489,16 @@ abstract class DbEntityBase
         }
     }
 
-    //
-    // save one or several records
-    // returns false or array of record IDs
-    //
+    /**
+     * Save the records to the database.
+     * 
+     * @return array|false An array of saved record IDs or false on failure.
+     */
     public function save(){
 
         //extract records from $_REQUEST data
-        if($this->records==null){ //records can be pepared beforehand
-            if(!$this->prepareRecords()){
-                    return false;
-            }
+        if($this->records==null && !$this->prepareRecords()){ //records can be pepared beforehand
+            return false;
         }
 
         //validate permission for current user and set of records see $this->recordIDs
@@ -497,18 +534,12 @@ abstract class DbEntityBase
 
         foreach($this->records as $rec_idx => $record){
 
-            //$primary_field_type = 'integer';
-
             //exclude virtual fields
             $fieldvalues = $record;
             $values = array();
             foreach($this->fields as $fieldname=>$field_config){
                 if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) {continue;}
                 $values[$fieldname] = $record[$fieldname];
-
-                /*if(@$field_config['dty_Role']=='primary'){
-                    $primary_field_type = $field_config['dty_Type'];
-                }*/
             }
 
             $isinsert = (intval(@$record[$this->primaryField])<1);
@@ -540,7 +571,7 @@ abstract class DbEntityBase
             }
 
             //update translations
-            if(is_array(@$this->translation[$rec_idx]) && count($this->translation[$rec_idx])>0)
+            if(!isEmptyArray(@$this->translation[$rec_idx]))
             {
                 foreach($this->multilangFields as $fieldname){
                     //delete previous translations for this record
@@ -566,7 +597,7 @@ abstract class DbEntityBase
                     }
                 }
 
-            }elseif(!$isinsert && count($this->multilangFields)>0){
+            }elseif(!$isinsert && !empty($this->multilangFields)){
                 //remove all translation for this record
 
                 $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
@@ -586,20 +617,20 @@ abstract class DbEntityBase
             $this->_cleanDbDefCache();
         }
         return $results;
-    }
+    }//save
 
-    //
-    // @todo multirecords and transaction
-    //
-    // returns - deleted:[], no_rights:[], in_use:[]
-    //
-    public function delete($disable_foreign_checks=false){
+    /**
+     * Prepare records for deletion by checking their IDs and permissions.
+     * 
+     * @return bool True if the records are ready for deletion, false otherwise.
+     */
+     protected function deletePrepare(){
 
         if(!@$this->recordIDs){
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         }
 
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
         }
@@ -608,18 +639,55 @@ abstract class DbEntityBase
             return false;
         }
 
-        $mysqli = $this->system->get_mysqli();
+        $this->isDeleteReady = true;
 
-        if(count($this->recordIDs)>1){
-            $recids_compare = ' in ('.implode(',', $this->recordIDs).')';
-        }else{
-            $recids_compare = ' = '.$this->recordIDs[0];
+        if(empty($this->foreignChecks)){
+            $this->isDeleteReady = true;
+            return true;
         }
 
+        $compare = (count($this->recordIDs)==1?'='.$this->recordIDs[0] :SQL_IN.implode(',', $this->recordIDs).')');
 
-        $mysqli->query('SET foreign_key_checks = 0');
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField
-                .$recids_compare;
+        foreach($this->foreignChecks as $check){
+
+            $query = $check[0];
+
+            if(strpos($query,'#IDS#')>0){
+                $query = str_replace('#IDS#',implode(',', $this->recordIDs),$query);
+            }else{
+                $query .= $compare;
+            }
+
+            $ret = mysql__select_value($this->system->get_mysqli(), $query);
+
+            if($ret>0){
+                $msg = @$check[1]?$check[1]:'Cannot delete '.$this->config['entityTitle'];
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                return false;
+            }
+        }
+
+        $this->isDeleteReady = true;
+        return true;
+    }
+
+    /**
+     * Delete records from the database.
+     * 
+     * @param bool $disable_foreign_checks Disable foreign key checks.
+     * @return bool True on successful deletion, false otherwise.
+     */
+    public function delete($disable_foreign_checks=false){
+
+        if(!$this->isDeleteReady && !$this->deletePrepare()){
+            return false;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+
+        mysql__foreign_check($mysqli, false);
+        $query = SQL_DELETE.$this->config['tableName'].SQL_WHERE.predicateId($this->primaryField, $this->recordIDs);
+
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;
 
@@ -627,14 +695,15 @@ abstract class DbEntityBase
         // delete from translation table all fields that starts with current table prefix and with given record ids
         // array('rty','dty','ont','vcb','trm','rst','rtg')
         //
-        if($ret && count($this->multilangFields)>0)
+        if(!empty($this->multilangFields))
         {
-            $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
-                                .$this->config['tablePrefix'].'%" AND trn_Code '
-                                .$recids_compare);
+            $mysqli->query(SQL_DELETE.'defTranslations where trn_Source LIKE "'
+                                .$this->config['tablePrefix'].'%" AND '
+                                .predicateId('trn_Code', $this->recordIDs));
+
         }
 
-        $mysqli->query('SET foreign_key_checks = 1');
+        mysql__foreign_check($mysqli, true);
 
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR,
@@ -650,18 +719,20 @@ abstract class DbEntityBase
         return true;
     }
 
+    /**
+     * Batch action handler (to be implemented in subclasses).
+     * 
+     * @return mixed Result of the batch action.
+     */
+    public function batch_action(){
+        return false;
+    }
+
     //
     // various counts(aggregations) request - implementation depends on entity
     //
     public function counts(){
         return 0;
-    }
-
-    //
-    // see specific implemenation for every class
-    //
-    public function batch_action(){
-        return false;
     }
 
     //
@@ -690,9 +761,25 @@ abstract class DbEntityBase
 
 
     //
-    //@todo validate permission per record
+    // Validates permission for delete and update operations
     //
     protected function _validatePermission(){
+
+
+        if($this->requireAdminRights &&
+            !$this->system->is_admin() &&
+            ((!isEmptyArray($this->recordIDs))
+            || (!isEmptyArray($this->records)))){ //there are records to update/delete
+
+            $ent_name = @$this->config['entityTitlePlural']?$this->config['entityTitlePlural']:'this entity';
+
+            $this->system->addError(HEURIST_REQUEST_DENIED,
+                    'You are not admin and can\'t edit '.$ent_name
+                    .'. Insufficient rights (logout/in to refresh) for this operation '
+                    .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
+            // You have to be Administrator of group \'Database Managers\' for this operation
+            return false;
+        }
 
         if(!$this->system->has_access()){
              $this->system->addError(HEURIST_REQUEST_DENIED,
@@ -702,8 +789,9 @@ abstract class DbEntityBase
 
         return true;
     }
+
     //
-    // @todo
+    // 
     //
     protected function _validateValues(){
 
@@ -730,33 +818,28 @@ abstract class DbEntityBase
 
         $fieldvalues = $this->data['fields'];
 
-        $table_prefix = @$this->config['tablePrefix'];
-        if($table_prefix==null){
-            $table_prefix = '';
-        }elseif (substr($table_prefix, -1) !== '_') {
-            $table_prefix = $table_prefix.'_';
-        }
-        $rec_ID = intval(@$fieldvalues[$this->primaryField]);// $table_prefix.'ID'
+        $rec_ID = intval(@$fieldvalues[$this->primaryField]);
         $isinsert = ($rec_ID<1);
 
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') {continue;}
-
-            if(array_key_exists($fieldname, $fieldvalues)){
-                $value = $fieldvalues[$fieldname];
-            }else{
-                if(!$isinsert) {continue;}
-                $value = null;
+            if (@$field_config['dty_Role']=='virtual' ||
+                @$field_config['dty_Role']=='primary' ||
+                @$field_config['rst_RequirementType'] != 'required')
+            {
+                continue;
             }
+
+            if(!(array_key_exists($fieldname, $fieldvalues) || $isinsert)){
+                continue;
+            }
+
+            $value = @$fieldvalues[$fieldname];
 
             if(@$field_config['rst_MultiLang'] && is_array($value)){
-                $value = count($value)>0?$value[0]:'';
+                $value = !empty($value)?$value[0]:'';
             }
 
-            if( ( $value===null  || trim($value)=='' ) &&
-                (@$field_config['dty_Role']!='primary') &&
-                (@$field_config['rst_RequirementType'] == 'required')){
-
+            if( isEmptyStr($value) ){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Field $fieldname is mandatory.");
                 return false;
             }
@@ -769,7 +852,7 @@ abstract class DbEntityBase
     //
     private function _readConfigLocale( $locale='en' ){
 
-        $entity_file = HEURIST_DIR.'hserv/entity/'.lcfirst(@$this->data['entity'])
+        $entity_file = dirname(__FILE__).'/'.lcfirst(@$this->data['entity']) //HEURIST_DIR.'hserv/entity/'
             .($locale=='en'?'':('_'.$locale)).'.json';
 
         if(file_exists($entity_file)){
@@ -793,7 +876,7 @@ abstract class DbEntityBase
 
             if(@$field['dtID']==$id){
                 return $field;
-            }elseif(is_array(@$field['children']) && count($field['children'])>0){
+            }elseif(!isEmptyArray(@$field['children'])){
                 $res = $this->_getFieldByID($id, $field['children']);
                 if($res){
                     return $res;
@@ -810,7 +893,7 @@ abstract class DbEntityBase
 
         foreach($fields as $idx=>$field){
 
-            if(is_array(@$field['children']) && count($field['children'])>0){
+            if(!isEmptyArray(@$field['children'])){
 
                 $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
                 if($fld_loc && @$fld_loc['groupHeader']){
@@ -846,7 +929,7 @@ abstract class DbEntityBase
 
         foreach($fields as $field){
 
-            if(is_array(@$field['children']) && count($field['children'])>0){
+            if(!isEmptyArray(@$field['children'])){
                 $this->_readFields($field['children']);
 
             }else{
@@ -869,9 +952,7 @@ abstract class DbEntityBase
     // need to rename temporary enity files to permanent  "entity/[entity name]/recID.png"
     // $tempfile - file to be either
     // 1) renamed to recID (if it is temp file started with ~)
-    // 2) copied 
-    //
-    // if $tempfile == 'delete' it removes entity images
+    // 2) copied
     protected function renameEntityImage($tempfile, $recID, $version=null){
 
         $isSuccess = false;
@@ -879,12 +960,10 @@ abstract class DbEntityBase
         $entity_name = $this->config['entityName'];
         if($version==null){  //if version is defined we copy only it (icon or thumbnail)
             $version = '';
-        }else if($version=='thumb'){
-            $version = 'thumbnail';
         }
         $lv = strlen($version);
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';//destination
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/';//destination
 
         if(strpos($tempfile,'~')===0){
             //temp file is in the same folder as destination
@@ -913,16 +992,7 @@ abstract class DbEntityBase
                   }
             }
 
-        }else if($tempfile=='delete'){
-            
-            fileDelete( $this->getEntityImagePath($recID, 'thumbnail') );
-            if($entity_name=='defRecTypes'){
-                fileDelete( $this->getEntityImagePath($recID, 'icon') );
-            }else{
-                fileDelete( $this->getEntityImagePath($recID, 'full') );
-            }
-            
-        }else if(file_exists($tempfile)){
+        }elseif(file_exists($tempfile)){
             $path_parts = pathinfo($tempfile);
             $ext = strtolower($path_parts['extension']);
 
@@ -934,7 +1004,7 @@ abstract class DbEntityBase
                 $isSuccess = fileCopy($tempfile, $new_name);
 
                 fileDelete($path.$version.'/'.$recID.'.'.$ext2);
-            }else{ //by default
+            }else{
                 $new_name = $path.$recID.'.'.$ext;
                 $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
                 $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
@@ -942,6 +1012,9 @@ abstract class DbEntityBase
                 fileDelete($path.$recID.'.'.$ext2);
                 fileDelete($path.'thumbnail/'.$recID.'.'.$ext2);
             }
+
+
+
         }
 
         if(!$isSuccess){
@@ -953,7 +1026,7 @@ abstract class DbEntityBase
     protected function getTempEntityFile($tempfile){
         $entity_name = $this->config['entityName'];
 
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+        $path = HEURIST_FILESTORE_DIR.DIR_ENTITY.$entity_name.'/';
 
         $directory = new \DirectoryIterator($path);//RecursiveDirectoryIterator
         $iterator = new \IteratorIterator($directory);//Recursive
@@ -982,49 +1055,30 @@ abstract class DbEntityBase
             list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $version, $db_name, $extension);
 
             return $filename;
-/*
-            if($entity_name=='sysDatabases'){
+    }
 
-                $db_name = $recID;
-                if(strpos($recID,'hdb_')===0){
-                    $db_name = substr($recID,4);
-                }
-                $rec_id = 1;
-                $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';
-            }else{
-                if($db_name==null) {$db_name = HEURIST_DBNAME;}
+    //
+    // validate duplication
+    //
+    protected function doDuplicationCheck($idx, $field, $message){
 
-                $path = HEURIST_FILESTORE_ROOT.$db_name.'/entity/'.$entity_name.'/';
-                //$path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
-            }
+            if(@$this->records[$idx][$field]){
+                $mysqli = $this->system->get_mysqli();
+                $res = mysql__select_value($mysqli,
+                        "SELECT {$this->primaryField} FROM ".$this->config['tableName']."  WHERE $field='"
+                        .$mysqli->real_escape_string( $this->records[$idx][$field] )."'");
+                if($res>0 && $res!=@$this->records[$idx][$this->primaryField]){
 
-            if($recID>0){
-
-                if($version=='thumb' || $version=='thumbnail'){
-                    $filename = $path.'thumbnail/'.$recID.'.png';
-                }elseif($version=='icon'){
-                    $filename = $path.'icon/'.$recID.'.png';
-                }else{
-                    $filename = null;
-                    $exts = $extension?array($extension):array('png','jpg','jpeg','jpe','jfif','gif');
-                    foreach ($exts as $ext){
-                        $filename = $path.$recID.'.'.$ext;
-                        if(file_exists($filename)){
-                            if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
-                                $content_type = 'image/jpeg';
-                            }else{
-                                $content_type = 'image/'.$ext;
-                            }
-                            break;
-                        }
+                    $sup_info = null;
+                    if($this->config['tableName']=='defDetailTypes'){ //special case
+                        $sup_info = array($this->primaryField=>$res);
                     }
-                }
 
-                return $filename;
-            }else{
-                return null;
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $message, $sup_info);
+                    return false;
+                }
             }
-*/
+            return true;
     }
 
     //
@@ -1097,7 +1151,15 @@ abstract class DbEntityBase
                     }
                 }
             }
-        }
+
+            if(!empty($this->duplicationCheck)){
+                foreach($this->duplicationCheck as $field=>$msg){
+                    if(!$this->doDuplicationCheck($idx, $field, $msg)){
+                         return false;
+                    }
+                }
+            }
+        }//foreach
 
         return true;
     }
@@ -1123,13 +1185,15 @@ abstract class DbEntityBase
 
     }
 
-    //
-    //
-    //
+    /**
+     * Perform search on the database records.
+     * 
+     * @return mixed Result of the search.
+     */
     public function search(){
 
         if($this->isvalid()){
-            $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
+            $this->searchMgr = new DbEntitySearch( $this->system, $this->config, $this->fields);
 
             $res = $this->searchMgr->validateParams( $this->data );
             if(!is_bool($res)){

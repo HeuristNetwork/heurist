@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 /**
 *
@@ -42,7 +43,6 @@ protected function _outputPrepare($data, $params){
 
     $res = parent::_outputPrepare($data, $params);
     if($res){
-
         $this->iiif_version = (@$params['version']==2 || @$params['v']==2)?2:3;
     }
     return $res;
@@ -67,8 +67,8 @@ protected function _outputHeader(){
 
     if($this->iiif_version==2){
 
-        $manifest_uri = self::gen_uuid();
-        $sequence_uri = self::gen_uuid();
+        $manifest_uri = self::genUUID();
+        $sequence_uri = self::genUUID();
 
     $iiif_header = <<<IIIF
 {
@@ -175,7 +175,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         //find file info by obfuscation id
         $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
 
-        if(count($info)>0){
+        if(!empty($info)){
             $label = trim(htmlspecialchars(strip_tags($info[0]['ulf_Description'])));
 
             if($label==''){
@@ -220,7 +220,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
     $label = preg_replace('/\r|\n/','\n',trim($label));
 
     //2. get file info
-    if(count($info)>0){
+    if(!empty($info)){
         //$info = fileGetFullInfo($system, $file_ids);
 
         foreach($info as $fileinfo){
@@ -238,7 +238,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
-        }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+        }elseif(strpos($mimeType, DIR_IMAGE)===0 || $fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){
             $resource_type = 'Image';
         }
 
@@ -257,7 +257,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
 
         $height = 800;
         $width = 1000;
-        if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!='_iiif_image'){
+        if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!=ULF_IIIF_IMAGE){
             $img_size = getimagesize($resource_url);
             if(is_array($img_size)){
                 $width = $img_size[0];
@@ -278,7 +278,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         $resource_id = '';
 
         //get iiif image parameters
-        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
+        if($fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){ //this is image info - it gets all required info from json
 
                 $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);//retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
@@ -294,7 +294,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                     $mimeType = null;
                     if(is_array($profile)){
                         $mimeType = @$profile[1]['formats'][0];
-                        if($mimeType) {$mimeType = 'image/'.$mimeType;}
+                        if($mimeType) {$mimeType = DIR_IMAGE.$mimeType;}
                         $profile = @$profile[0];
                     }elseif($profile==null){
                         $profile = 'level1';
@@ -337,7 +337,7 @@ SERVICE3;
         }
 
 
-        $canvas_uri = self::gen_uuid();//uniqid('',true);
+        $canvas_uri = self::genUUID();
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;
@@ -376,7 +376,7 @@ CANVAS2;
 //                    "width": $width
       }else{
 
-//$annotation_uri = self::gen_uuid();
+//$annotation_uri = self::genUUID();
 //  "duration": 5,
 //        "height": $height,
 //        "width": $width
@@ -401,7 +401,7 @@ if($resource_id){ //this is iiif image
     $canvas_uri = $root_uri.'canvas/'.$fileid;
     $annopage_uri = $root_uri.'page/'.$fileid;
     $annotation_uri = $root_uri.'annotation/'.$fileid;
-    $image_uri = $root_uri.'image/'.$fileid.'/info.json';
+    $image_uri = $root_uri.DIR_IMAGE.$fileid.'/info.json';
 }
 
 
@@ -475,7 +475,7 @@ CANVAS3;
 
         }//for info in fileinfo
 
-    }//count($file_ids)>0
+    }//!empty($file_ids)
 
 
     return $canvas;
@@ -484,14 +484,14 @@ CANVAS3;
 //
 // not used
 //
-private static function gen_uuid2() {
+private static function genUUID2() {
     return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4) );
 }
 
 //
 //
 //
-private static function gen_uuid() {
+private static function genUUID() {
     return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
         // 32 bits for "time_low"
         random_int( 0, 0xffff ), random_int( 0, 0xffff ),

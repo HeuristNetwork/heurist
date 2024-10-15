@@ -21,12 +21,12 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
+
 
 /**
 *
-*  setSession - switch current datbase
-*  output - main method
 *
 */
 class ExportRecordsJSON extends ExportRecords {
@@ -66,6 +66,7 @@ protected function _outputPrepare($data, $params){
 
         $this->records_cnt = intval(@$params['recordsTotal']);
         $this->records_cnt_filtered = intval(@$params['recordsFiltered']);
+
     }
     return $res;
 }
@@ -131,7 +132,7 @@ protected function _outputPrepareFields($params){
             }
         }
 
-        if(!is_array($this->retrieve_detail_fields) || count($this->retrieve_detail_fields)==0){
+        if(isEmptyArray($this->retrieve_detail_fields)){
             $this->retrieve_detail_fields = false;
         }
 
@@ -198,11 +199,16 @@ protected function _outputHeader(){
 
     }elseif($this->is_restapi==1){
 
-        if(count($this->records)==1){
-            //fwrite($this->fd, '');
+        fwrite($this->fd, '{"records":[');
+
+        /*
+        if(count($records)==1 && @$params['recID']>0){
+            //fwrite($fd, '');
         }else{
-            fwrite($this->fd, '{"records":[');
+            fwrite($fd, '{"records":[');
         }
+        */
+
 
     }else {
 
@@ -280,11 +286,7 @@ protected function _outputFooter(){
 
     }elseif($this->is_restapi==1){
 
-        if(count($this->records)==1){
-            //fwrite($this->fd, '');
-        }else{
-            fwrite($this->fd, ']}');
-        }
+        fwrite($this->fd, ']}'); //close records
 
     }else {
 
@@ -330,7 +332,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 
     if(!array_key_exists($rt_id, $columns)) {return null;}
@@ -391,7 +393,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
             if(!in_array($dty_ID, $columns[$rt_id])) {continue;}
 
-            $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
+            $col_name = $dty_ID;
 
             $res[$col_name] = array();
 
@@ -455,13 +457,13 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
                     $field_value = @$field_value['geo']['wkt'];
 
-                }elseif (($field_type=='enum' || $field_type=='relationtype')){
+                }elseif ($field_type=='enum' || $field_type=='relationtype'){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
 
                 }elseif($this->datatable_session_id > 0 && $field_type=='date'){
 
-                    $temporal = new Temporal($field_value);
+                    $temporal = new \Temporal($field_value);
                     $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
 
                 }
@@ -508,7 +510,7 @@ private function _getJsonFeature($record, $extended_mode){
         }
         if(self::$defTerms==null) {
             self::$defTerms = dbs_GetTerms($this->system);
-            self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+            self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
         }
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
@@ -586,11 +588,11 @@ private static function _getMediaViewerData($record){
     }
 
     //2. get file info
-    if(count($info)>0){
+    if(!empty($info)){
 
         foreach($info as $fileinfo){
 
-            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) {continue;}
+            if(strpos($fileinfo['ulf_OrigFileName'],ULF_TILED_IMAGE)===0) {continue;}
 
             $mimeType = $fileinfo['fxm_MimeType'];
 
@@ -601,7 +603,7 @@ private static function _getMediaViewerData($record){
             }elseif(strpos($mimeType,"audio/")===0){
                 if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
-            }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            }elseif(strpos($mimeType,DIR_IMAGE)===0 || $fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){
                 $resource_type = 'Image';
             }
 
@@ -627,7 +629,7 @@ private static function _getMediaViewerData($record){
             }
         }//for
 
-    }//count($file_ids)>0
+    }//!empty($file_ids)
 
 
     return $res;
@@ -665,7 +667,7 @@ private function _calculateSummaryExtent($is_return_rec){
         }
         if(count($mbox)==4){
 
-            $gPoint = new GpointConverter();
+            $gPoint = new \GpointConverter();
             $gPoint->setLongLat($mbox['minx'], $mbox['miny']);
             $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['minx'])/100000,0);
 
@@ -709,7 +711,7 @@ private function _calculateSummaryExtent($is_return_rec){
 private static function _getExtentFromWkt($wkt)
 {
         $bbox = null;
-        $geom = geoPHP::load($wkt, 'wkt');
+        $geom = \geoPHP::load($wkt, 'wkt');
         if(!$geom->isEmpty()){
             $bbox = $geom->getBBox();
         }

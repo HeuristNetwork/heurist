@@ -14,7 +14,7 @@
     */
 
     /**
-    * Order resource fields by rec_Title
+    * Order record pointer fields by rec_Title
     *
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
@@ -25,12 +25,12 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 $rv = array();
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     $response = $system->getError();
@@ -77,7 +77,7 @@ if($res){
         }
         $ids[]  = intval($row[0]);
         $vals[] = intval($row[2]);
-        //$titles[] = $row[0].'  '.$row[2].'  '.$row[3];
+
     }
     $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);
 }
@@ -91,9 +91,8 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
         sort($ids);
         $k = 0;
         foreach ($ids as $dt) { //sorted dtl_ID
-//print $ids[$k].'  dtl_Value='.$vals[$k].'  title='.$titles[$k].'<br>';
             $query = "update recDetails set dtl_Value=".$vals[$k].' where dtl_ID='.$ids[$k];
-            //print $query.'<br>';
+
             $res = $mysqli->query($query);
             if ($mysqli->error) {
                     print 'Error for query '.htmlspecialchars($query).' '.htmlspecialchars($mysqli->error);

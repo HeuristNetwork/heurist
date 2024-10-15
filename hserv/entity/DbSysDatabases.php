@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to Heurist_DBs_index.sysIdentifications and sysUsers tables
@@ -19,11 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 
 class DbSysDatabases extends DbEntityBase
 {
@@ -99,9 +96,11 @@ class DbSysDatabases extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
         //virtual method
+        return false;
     }
     public function save(){
         //virtual method
+        return false;
     }
 
 }

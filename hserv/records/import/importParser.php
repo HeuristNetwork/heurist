@@ -27,6 +27,11 @@
 * parseAndValidate - read file, remove spaces, convert dates, validate identifies/integers, find memo and multivalues
 *
 */
+use hserv\utilities\USanitize;
+use hserv\utilities\UArchive;
+
+define('ERR_MSG_NOT_READABLE',' is not readable');
+
 class ImportParser {
 
     private static $system = null;
@@ -87,112 +92,145 @@ public static function saveToTempFile($content, $extension='csv'){
 
 //--------------------------------------
 // STEP 1
-//
-// check encoding, save file in new encoding and parse first x lines for preview
-//
-// $params
-//     csv_encoding
-public static function encodeAndGetPreview($upload_file_name, $params){
-
+/**
+ * Encodes the uploaded file to UTF-8 if necessary and generates a preview by parsing the first X lines.
+ *
+ * @param string $upload_file_name The name of the uploaded file.
+ * @param array $params Parameters that include the CSV encoding information.
+ * @return bool|string Returns the preview data or false if an error occurs.
+ */
+public static function encodeAndGetPreview($upload_file_name, $params)
+{
     self::initialize();
 
-    $original_filename =  basename($upload_file_name);
-    $upload_file_name = HEURIST_SCRATCH_DIR.$upload_file_name;
+    $original_filename = basename($upload_file_name);
+    $upload_file_name = HEURIST_SCRATCH_DIR . $upload_file_name;
+    $contact_team = ' If the problem persists, please ' . CONTACT_HEURIST_TEAM . ' immediately';
 
-    $s = null;
-    if($upload_file_name==null){
-        $s = 'File parameter is not defined<br><br>'
-        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    }elseif (! file_exists($upload_file_name)) {
-        $s = ' does not exist.<br><br>'
-        .'Please clear your browser cache and try again. '
-        .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    }elseif (! is_readable($upload_file_name)) {$s = ' is not readable';}
-
-    if($s){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);
+    // Validate the uploaded file
+    if (!self::validateUploadedFile($upload_file_name, $contact_team)) {
         return false;
     }
 
+    // Handle KML and KMZ files directly
     $extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
-    if($extension=='kml' || $extension=='kmz'){
+    if ($extension == 'kml' || $extension == 'kmz') {
         return self::parseAndValidate($upload_file_name, $original_filename, 3, $params);
     }
 
-    $handle = @fopen($upload_file_name, "r");
-    if (!$handle) {
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);
+    // Read and validate file header
+    $line = self::readFileHeader($upload_file_name);
+    if (!$line) {
         return false;
     }
 
-    //fgetcsv и str_getcsv depends on server locale
-    // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
-    setlocale(LC_ALL, 'en_US.utf8');
+    // Detect and convert encoding if necessary
+    $encoded_file_name = self::convertEncodingIfNeeded($upload_file_name, $original_filename, $params, $line);
+    if (!$encoded_file_name) {
+        return false;
+    }
 
-    // read header
+    // Parse and validate the file content
+    return self::parseAndValidate($encoded_file_name, $original_filename, 1000, $params);
+}
+
+/**
+ * Validates the uploaded file existence, readability, and checks for errors.
+ *
+ * @param string $upload_file_name The name of the uploaded file.
+ * @param string $contact_team The contact message for error reporting.
+ * @return bool Returns true if the file is valid, false if an error occurs.
+ */
+private static function validateUploadedFile($upload_file_name, $contact_team)
+{
+    if (!$upload_file_name) {
+        $error = error_WrongParam('File') . '<br><br>' . $contact_team;
+    } elseif (!file_exists($upload_file_name)) {
+        $error = ' does not exist.<br><br>Please clear your browser cache and try again. ' . $contact_team;
+    } elseif (!is_readable($upload_file_name)) {
+        $error = ERR_MSG_NOT_READABLE;
+    }
+
+    if (isset($error)) {
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) ' . $upload_file_name . $error);
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Reads the first line of the uploaded file as the header for further processing.
+ *
+ * @param string $upload_file_name The name of the uploaded file.
+ * @return string|bool Returns the first line of the file or false if an error occurs.
+ */
+private static function readFileHeader($upload_file_name)
+{
+    $handle = @fopen($upload_file_name, "r");
+    if (!$handle) {
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) ' . $upload_file_name);
+        return false;
+    }
+
+    setlocale(LC_ALL, 'en_US.utf8'); // Set locale to handle encoding
     $line = fgets($handle, 1000000);
     fclose($handle);
-    if(!$line){
+
+    if (!$line) {
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Empty header line');
         return false;
     }
 
-    //encoding that is set by user
-    $csv_encoding = @$params['csv_encoding'];
+    return $line;
+}
 
-    //mb_detect_encoding($line, ['UTF-8','ISO-8859-1','WINDOWS-1252']);
+/**
+ * Detects and converts file encoding to UTF-8 if necessary.
+ *
+ * @param string $upload_file_name The name of the uploaded file.
+ * @param string $original_filename The original filename of the uploaded file.
+ * @param array $params Parameters that include the CSV encoding information.
+ * @param string $line The first line of the file (header).
+ * @return string|bool Returns the name of the encoded file or false if an error occurs.
+ */
+private static function convertEncodingIfNeeded($upload_file_name, $original_filename, $params, $line)
+{
+    $csv_encoding = $params['csv_encoding'] ?? null;
 
-    //detect encoding and convert entire file to UTF8
-    // WARNING: it checks header (first line) only. It may happen that file has non UTF characters in body
-    if( $csv_encoding!='UTF-8'){ //07-12 || !mb_check_encoding( $line, 'UTF-8' ) ){
-
+    if ($csv_encoding != 'UTF-8') {
         $content = file_get_contents($upload_file_name);
 
-        if($csv_encoding==null || $csv_encoding==''){
-            //detect encoding automatically - IT DOES NOT WORK
-            $csv_encoding = mb_detect_encoding($content);//,['ISO-8859-1','ISO-8859-15','CP1251','CP1252','BIG-5','UTF-8']);
+        if (!$csv_encoding) {
+            $csv_encoding = mb_detect_encoding($content); // Automatically detect encoding
         }
 
-        /* try to convert ONE line only - to check is it possible
-        if($csv_encoding!='UTF-8'){
-             $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
-        }else{
-             $line = mb_convert_encoding( $line, 'UTF-8');
+        // Convert file content to UTF-8
+        if ($csv_encoding && $csv_encoding != 'UTF-8') {
+            $content = mb_convert_encoding($content, 'UTF-8', $csv_encoding);
+        } else {
+            $content = mb_convert_encoding($content, 'UTF-8');
         }
-        if(!$line){
-            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Your file can\'t be converted to UTF-8. '
-                .'Please open it in any advanced editor and save with UTF-8 text encoding');
-            return false;
-        }
-        */
 
-        //convert entire file
-        if($csv_encoding!='UTF-8'){
-            $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
-        }else{
-            $content = mb_convert_encoding( $content, 'UTF-8');
-        }
-        if(!$content){
+        if (!$content) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Your file can\'t be converted to UTF-8. '
-                .'Either select the appropriate encoding from the list or open it in any advanced editor and save with UTF-8 text encoding');
+                . 'Please select the appropriate encoding or save it with UTF-8 encoding.');
             return false;
         }
 
+        // Save the converted content to a temporary file
         $encoded_file_name = tempnam(HEURIST_SCRATCH_DIR, $original_filename);
-        $res = file_put_contents($encoded_file_name, $content);
-        unset($content);
-        if(!$res){
-            self::$system->addError(HEURIST_ACTION_BLOCKED,
-                'Cant save temporary file (with UTF-8 encoded csv data) '.$encoded_file_name);
+        if (!file_put_contents($encoded_file_name, $content)) {
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot save temporary file (with UTF-8 encoded CSV data) ' . $encoded_file_name);
             return false;
         }
-    }else{
-        $encoded_file_name = $upload_file_name;
-    }
-    unset($line);
 
-    return self::parseAndValidate($encoded_file_name, $original_filename, 1000, $params);
+        return $encoded_file_name;
+    }
+
+    return $upload_file_name; // No encoding change needed
 }
+
 
 ///--------------------------------------
 // STEP 2
@@ -231,7 +269,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $encoded_filename = '';
             $s = ' not defined';
         }elseif (! file_exists($encoded_filename)) {$s = ' does not exist';}
-        elseif (! is_readable($encoded_filename)) {$s = ' is not readable';}
+        elseif (! is_readable($encoded_filename)) {$s = ERR_MSG_NOT_READABLE;}
         if($s){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename. $s);
             return false;
@@ -269,8 +307,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     $csv_dateformat = @$params["csv_dateformat"];
 
-    $check_datefield = (is_array($datefields) && count($datefields)>0);
-    $check_keyfield = (is_array($keyfields) && count($keyfields)>0);
+    $check_datefield = (!isEmptyArray($datefields));
+    $check_keyfield = (!isEmptyArray($keyfields));
 
     $len = 0;
     $header = null;
@@ -528,7 +566,6 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8');//to send back to client
                     array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
                 }
-                //if(count($err_encoding)>100) {break;}
             }
 
             $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
@@ -689,7 +726,9 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 'fields'=>$header, 'values'=>$parsed_values );
     }else{
 
-        if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
+        if( !empty($err_colnums) 
+            || !empty($err_encoding) 
+            || !empty($err_keyfields)){
             //we have errors - delete temporary prepared file
             if(file_exists($prepared_filename)) {unlink($prepared_filename);}
 
@@ -738,60 +777,61 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
 }
 
-//
-// Keep encoded file name during import csv session
-//
-private static function _saveEncodedFilename($encoded_filename){
-
-    if($encoded_filename!=null && file_exists($encoded_filename)){
-
-        $mysqli = self::$system->get_mysqli();
-        $is_exist = hasTable($mysqli, 'import_tmp_file');
-
-        if(!$is_exist){
-            $query = "CREATE TABLE `import_tmp_file` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, "
-            ."`imp_Date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
-            ."`imp_filename` VARCHAR(500) NOT NULL, "
-            ." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";
-            if (!$mysqli->query($query)) {
-                self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);
-                return false;
-            }
-        }else{
-            $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY');
-            if(is_array($filenames) && count($filenames)>0){
-                //cleanup
-                foreach ($filenames as $fname){
-                    $fname = HEURIST_SCRATCH_DIR.basename($fname);
-                    if(file_exists($fname)){
-                        unlink($fname);
-                    }
-                    /*
-                    $fname = USanitize::sanitizePath($fname);
-                    if(strpos($fname, HEURIST_SCRATCH_DIR)===0 && file_exists($fname)){
-                        unlink($fname);
-                    }
-                    */
-                }
-                $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
-                $mysqli->query($query);
-            }
-        }
-
-        $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>basename($encoded_filename)));
-        //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
-        //$res = $mysqli->query($query);
-        if(is_numeric($res) && intval($res)>0){
-                return $res; //$mysqli->insert_id;
-        }else{
-                self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);
-                return false;
-        }
-
-    }else{
+/**
+ * Saves the encoded filename during the CSV import session.
+ * Creates a session table if it doesn't exist and cleans up old entries.
+ *
+ * @param string $encoded_filename The name of the encoded file to be saved.
+ * @return int|bool Returns the ID of the saved record on success, false on failure.
+ */
+private static function _saveEncodedFilename($encoded_filename)
+{
+    // Validate the file
+    if ($encoded_filename == null || !file_exists($encoded_filename)) {
         return false;
     }
 
+    $mysqli = self::$system->get_mysqli();
+
+    // Check if the session table exists
+    $is_exist = hasTable($mysqli, 'import_tmp_file');
+    if (!$is_exist) {
+        // Create the session table if it doesn't exist
+        $query = "CREATE TABLE `import_tmp_file` (
+            `imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `imp_Date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `imp_filename` VARCHAR(500) NOT NULL,
+            PRIMARY KEY (`imp_ID`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        if (!$mysqli->query($query)) {
+            self::$system->addError(HEURIST_DB_ERROR, "Cannot create import session table", $mysqli->error);
+            return false;
+        }
+    } else {
+        // Retrieve filenames older than 2 days for cleanup
+        $filenames = mysql__select_list2($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_Date < NOW() - INTERVAL 2 DAY');
+
+        // Cleanup old files
+        foreach ($filenames as $fname) {
+            $fname = HEURIST_SCRATCH_DIR . basename($fname);
+            fileDelete($fname);
+        }
+
+        // Delete old entries from the session table
+        $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date < NOW() - INTERVAL 2 DAY';
+        $mysqli->query($query);
+    }
+
+    // Insert the new encoded filename into the session table
+    $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename' => basename($encoded_filename)));
+
+    if (isPositiveInt($res)) {
+        return $res;
+    }
+
+    self::$system->addError(HEURIST_DB_ERROR, "Cannot add into import session table", $res);
+    return false;
 }
 
 private static function _getEncodedFilename($encoded_filename_id){
@@ -838,9 +878,18 @@ private static function prepareDateField($field, $csv_dateformat){
     return $field;
 }
 
-//
-// $field - value
-//
+/**
+ * Prepares and validates integer field values by checking for non-integer values,
+ * negative values, or values that exceed MySQL's maximum integer size.
+ * Updates the error key fields and integer fields arrays accordingly.
+ *
+ * @param string $field The field value to be processed.
+ * @param mixed $k The key used to identify the field.
+ * @param bool $check_keyfield_K A flag to determine if key field checks should be performed.
+ * @param array &$err_keyfields An array to store error details for invalid key fields.
+ * @param array &$int_fields An array of fields that are valid integers.
+ * @return void
+ */
 private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err_keyfields, &$int_fields){
 
     if($field==''){
@@ -849,34 +898,29 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 
     $values = explode('|', $field);
     foreach($values as $value){
-        if($value=='') {continue;}
+        if($value=='' || $value==0) {continue;}
 
-        if(!ctype_digit(strval($value))){ //is_integer
-            //not integer
-            if($check_keyfield_K){
-
-                if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][1]) <= 20){
-                    $err_keyfields[$k][1][] = $value;
-                }elseif(!is_array(@$err_keyfields[$k])){
-                    $err_keyfields[$k] = array(array(), array($value));
-                }
-            }
-            //exclude from array of fields with integer values
-            if(@$int_fields[$k]) {$int_fields[$k]=null;}
-
+        if(!isPositiveInt($value)){ //noy integer
+            $idx = 1;
         }elseif(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
-
-            if($check_keyfield_K){
-                if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][0]) <= 20){  //out of range
-                    $err_keyfields[$k][0][] = $value;
-                }elseif(!is_array(@$err_keyfields[$k])){
-                    $err_keyfields[$k] = array(array($value), array());
-                }
-            }
-            //exclude from array of fields with integer values
-            if(@$int_fields[$k]) {$int_fields[$k]=null;}
+            $idx = 0;
+        }else{
+            continue;
         }
-    }
+
+        if($check_keyfield_K){
+
+            if(!is_array(@$err_keyfields[$k])){
+                $err_keyfields[$k] = array(array(), array());
+            }
+            if(count($err_keyfields[$k][$idx]) <= 20){
+                $err_keyfields[$k][$idx][] = $value;
+            }
+        }
+
+        //exclude from array of fields with integer values
+        if(@$int_fields[$k]) {$int_fields[$k]=null;}
+    }//foreach
 }
 
 //
@@ -884,9 +928,12 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 //
 private static function parseKMLPlacemark($placemark, &$geom_types){
 
+        $nodeText = '#text';
+        $regex_space = '/\n\s+/';
+
         $wkt = new WKT();
         $properties = array();
-        $textnodes = array('#text', 'lookat', 'style', 'styleurl');
+        $textnodes = array($nodeText, 'lookat', 'style', 'styleurl');
 
         foreach ($placemark->childNodes as $child) {
           // Node names are all the same, except for MultiGeometry, which maps to GeometryCollection
@@ -903,12 +950,12 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
           {
 
             foreach ($child->childNodes as $data) {
-              if ($data->nodeName != '#text') {
+              if ($data->nodeName != $nodeText) {
                 if ($data->nodeName == 'data') {
                   $items = $data->getElementsByTagName('value');//DOMNodeList
                   if($items->length>0){
                         //$items->item(0);
-                        $value = preg_replace('/\n\s+/',' ',trim($items[0]->textContent));
+                        $value = preg_replace($regex_space,' ',trim($items[0]->textContent));
                   }else{
                         $value = '';
                   }
@@ -917,8 +964,8 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
                 elseif ($data->nodeName == 'schemadata')
                 {
                   foreach ($data->childNodes as $schemadata) {
-                    if ($schemadata->nodeName != '#text') {
-                      $properties[$schemadata->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($schemadata->textContent));
+                    if ($schemadata->nodeName != $nodeText) {
+                      $properties[$schemadata->getAttribute('name')] = preg_replace($regex_space,' ',trim($schemadata->textContent));
                     }
                   }
                 }
@@ -929,15 +976,15 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
           elseif ($node_name == 'timespan'){
             foreach ($child->childNodes as $timedata) {
                 if ($timedata->nodeName == 'begin') {
-                    $properties['timespan_begin'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                    $properties['timespan_begin'] = preg_replace($regex_space,' ',trim($timedata->textContent));
                 }elseif($timedata->nodeName == 'end') {
-                    $properties['timespan_end'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                    $properties['timespan_end'] = preg_replace($regex_space,' ',trim($timedata->textContent));
                 }
             }
           }
           elseif (!in_array($node_name, $textnodes))
           {
-            $properties[$child->nodeName] = preg_replace('/\n\s+/',' ',trim($child->textContent));
+            $properties[$child->nodeName] = preg_replace($regex_space,' ',trim($child->textContent));
           }
 
         }
@@ -956,7 +1003,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
     $s = null;
     if (! file_exists($filename)) {$s = ' does not exist';}
-    elseif (! is_readable($filename)) {$s = ' is not readable';}
+    elseif (! is_readable($filename)) {$s = ERR_MSG_NOT_READABLE;}
 
     if($s){
         self::$system->addError(HEURIST_UNKNOWN_ERROR, 'Source file '.$filename. $s);
@@ -1092,9 +1139,6 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
                 array_push($warnings, $e->message);//$e->errno.": ".
             } while ($e->next());
         }
-        /*if(strpos("$info", "Warnings: 0")===false){
-        $mysqli->query("SHOW WARNINGS");
-        }*/
     }
 
     //calculate unique values
@@ -1129,7 +1173,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
         return false;
     }
 
-    if(count($warnings)>0){
+    if(!empty($warnings)){
         $session['load_warnings'] = $warnings;
     }
     return $session;
@@ -1154,7 +1198,7 @@ public static function simpleCsvParser($params){
 
     $csv_enclosure = ($csv_enclosure==1)?"'":'"';
 
-    $response = array();
+
 
     if(intval($csv_linebreak)>0){  //no breaks - group by
             $group_by = $csv_linebreak;
@@ -1166,9 +1210,10 @@ public static function simpleCsvParser($params){
                 $temp[] = array_slice($response, $i, $csv_linebreak);
                 $i = $i + $csv_linebreak;
             }
-            $response = $temp;
+            return $temp;
+    }
 
-    }else{
+    $response = array();
 
         if($csv_linebreak=="auto"){
             //ini_set('auto_detect_line_endings', true);
@@ -1190,7 +1235,6 @@ public static function simpleCsvParser($params){
              $row = str_getcsv($Row, $csv_delimiter , $csv_enclosure);//parse the items in rows
              array_push($response, $row);
         }
-    }
 
     return $response;
 
@@ -1206,7 +1250,7 @@ public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=
     $fields = $parsed['fields'];
     $values = $parsed['values'];
     if($rec_RecTypeID==null){
-      $rec_RecTypeID = 12;//RT_PLACE;
+      $rec_RecTypeID = 12; //RT_PLACE
     }
     $records = array();
 

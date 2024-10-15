@@ -19,18 +19,18 @@
 */
 if (!defined('PDIR')){
     define('PDIR','../');
-    require_once dirname(__FILE__).'/../hserv/System.php';
+    require_once dirname(__FILE__).'/../autoload.php';
 }
 
 // init main system class
-//$system = new System();
+//$system = new hserv\System();
 //$system->defineConstants();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
-<title>Heurist Academic Collaborative Database (C) 2005 - 2020, University of Sydney</title>
+<title>Heurist Academic Collaborative Database (C) 2005 - 2024, University of Sydney</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
@@ -54,12 +54,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
-<script>
-    window.hWin = window;
-     //stub
-    window.hWin.HR = function(res){ return regional['ENG'][res]?regional['ENG'][res]:res; }
-</script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
@@ -315,7 +309,10 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             _showStep(3);
             $("#dbname").trigger('focus');        
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Missing required user details'
+            });
         }
     }
 
@@ -374,12 +371,12 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                             _showStep(3);//back to db form
                         }
 
-                        window.hWin.HEURIST4.msg.showMsgErr(response.message, false);
+                        window.hWin.HEURIST4.msg.showMsgErr(response, false);
                     }
                 });
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({message: err_text, error_title: 'Invalid database name'});
         }
 
     }
@@ -456,7 +453,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //
     function _initControls(){
 
-        if(!window.hWin.HR){
+        if(window.hWin.HAPI4){
             window.hWin.HR = window.hWin.HAPI4.setLocale('ENG');
         }
 

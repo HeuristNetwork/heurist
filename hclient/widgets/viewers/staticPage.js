@@ -58,7 +58,7 @@ $.widget( "heurist.staticPage", {
         if(this.options.init_at_once){
             that._refresh();  
         }        
-        //$(this.document).on(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
+       
 
     }, //end _create
 
@@ -94,7 +94,6 @@ $.widget( "heurist.staticPage", {
         //refesh if element is visible only - otherwise it costs much resources
         if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)) return;
 
-        //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
 
             let url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
@@ -117,11 +116,9 @@ $.widget( "heurist.staticPage", {
                 this.loadanimation(true);
                 this.dosframe.attr('src', this.options.url);
             }else{
-                //var that=this;
-                $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
+                $(this.div_content).load(this.options.url);
             }
             this._loaded_url = this.options.url;
-            //
         }
 
     },
@@ -131,10 +128,8 @@ $.widget( "heurist.staticPage", {
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        //$(this.document).off(window.hWin.HAPI4.Event.ON_SYSTEM_INITED);
 
         // remove generated elements
-        //this.dosframe.remove();
         this.div_content.remove();
     },
 

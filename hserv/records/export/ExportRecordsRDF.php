@@ -21,7 +21,10 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
+
+define('DC_TITLE', 'dc:title');
 
 /**
 *
@@ -79,6 +82,7 @@ protected function _outputPrepare($data, $params)
         $this->include_resource_term_label = ($ext_info[1]==1);
         $this->include_resource_rec_title = ($ext_info[2]==1);
         $this->include_resource_file_info = ($ext_info[3]==1);
+
     }
 
     return $res;
@@ -90,10 +94,10 @@ protected function _outputPrepare($data, $params)
 protected function _outputHeader(){
      $this->graph = new \EasyRdf\Graph();
 
-     EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
-     //EasyRdf\RdfNamespace::set('base', HEURIST_REF);
-     EasyRdf\RdfNamespace::set('db', HEURIST_REF.'db/');
-     EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
+     \EasyRdf\RdfNamespace::set('xsd', 'http://www.w3.org/2001/XMLSchema#');
+     \EasyRdf\RdfNamespace::set('base', HEURIST_REF);
+     \EasyRdf\RdfNamespace::set('db', HEURIST_REF.'db/');
+     \EasyRdf\RdfNamespace::set('dc', 'http://purl.org/dc/elements/1.1/');
 
     if(self::$defRecTypes==null) {
         self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
@@ -123,7 +127,7 @@ protected function _outputHeader(){
 private function initializeTerms(){
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 }
 
@@ -137,6 +141,7 @@ private function initializeTerms(){
 private function _prepareURI($surl, $original_dbid=null){
 
     $ns = null;
+    $heurist_schema = HEURIST_REF.'schema/';
 
     if($surl){
 
@@ -159,7 +164,7 @@ private function _prepareURI($surl, $original_dbid=null){
             //familyName
             $type = $surl;
             if(strpos($type,'rty-')===0 || strpos($type,'dty-')===0 || strpos($type,'trm-')===0){
-                $uri = HEURIST_REF.'schema/';
+                $uri = $heurist_schema;
             }elseif($original_dbid!=null){
 
                 if(is_string($original_dbid) && strpos($original_dbid,'-')>0){
@@ -169,7 +174,7 @@ private function _prepareURI($surl, $original_dbid=null){
                 }
 
                 if(intval($dbid)>0){
-                    $uri = HEURIST_REF.'schema/';
+                    $uri = $heurist_schema;
                     $uri .= $original_dbid.'/';
                 }
 
@@ -181,7 +186,7 @@ private function _prepareURI($surl, $original_dbid=null){
             $ns = @$this->namespaces[$uri];
             if($ns==null){
                 //https://www.ica.org/standards/RiC/
-                if(strpos($uri, HEURIST_REF.'schema/')===0){
+                if(strpos($uri, $heurist_schema)===0){
 
                     $ns = 'heurist';
 
@@ -334,7 +339,7 @@ private function _setResourceProps($record, &$resource){
 
     // label or name attribute
     //$field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name');//or label ?
-    $resource->set('dc:title', $rec_Title);
+    $resource->set(DC_TITLE, $rec_Title);
 
     //convert details to attributes
     foreach ($record['details'] as $dty_ID=>$field_details) {
@@ -358,11 +363,11 @@ private function _setResourceProps($record, &$resource){
                     $value = $this->graph->resource($file_resource_uri);//create new or find resource
                     if($this->include_resource_file_info){
                         if(@$fileinfo['ulf_OrigFileName']){
-                            $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
-                                         strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 ||
-                                         strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
+                            $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], ULF_REMOTE) === 0 || // skip if not local file
+                                         strpos(@$fileinfo['ulf_OrigFileName'], ULF_IIIF) === 0 ||
+                                         strpos(@$fileinfo['ulf_OrigFileName'], ULF_TILED_IMAGE) === 0;
                             if(!$skip_file){
-                                $value->set('dc:title', $fileinfo['ulf_OrigFileName']);
+                                $value->set(DC_TITLE, $fileinfo['ulf_OrigFileName']);
                             }
                         }
                         if(@$fileinfo['ulf_Description']){
@@ -417,7 +422,7 @@ private function _setResourceProps($record, &$resource){
                     if($term_resource_uri!=null){
                         $value = $this->graph->resource($term_resource_uri);//create new or find resource
                         if($this->include_resource_term_label){
-                            $value->set('dc:title', $trm_Label);
+                            $value->set(DC_TITLE, $trm_Label);
                         }
 
                         //works: $value->addLiteral('rdfs:name', $label);
@@ -451,7 +456,7 @@ private function _setResourceProps($record, &$resource){
                     list($lang, $value) = extractLangPrefix($value);
                     $dtype = 'xsd:string';
                     if($lang!=null) {
-                        $lang = 'fr';//strtolower($lang);
+                        $lang = 'fr';
                     }
                     */
                 }
@@ -585,7 +590,7 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
 
             $rec_resource = $this->graph->resource($uri);
             if($this->include_resource_rec_title && @$headers[$related_rec_ID][0]){
-                $rec_resource->set('dc:title', $headers[$related_rec_ID][0]);
+                $rec_resource->set(DC_TITLE, $headers[$related_rec_ID][0]);
             }
 
             //$resource->add($field_surl, $this->graph->resource($uri));

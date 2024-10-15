@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrReminders table
@@ -19,11 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/../utilities/uMail.php';
 
 class DbSysWorkflowRules extends DbEntityBase
 {
@@ -101,10 +98,10 @@ class DbSysWorkflowRules extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-        if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+        if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
         }
-        if(count($order)>0){
+        if(!empty($order)){
             $query = $query.' ORDER BY '.implode(',',$order);
         }
 
@@ -114,22 +111,6 @@ class DbSysWorkflowRules extends DbEntityBase
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
 
         return $result;
-    }
-
-    //
-    // validate permission for edit tag
-    // for delete and assign see appropriate methods
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
-            return false;
-        }
-
-        return true;
     }
 
     //

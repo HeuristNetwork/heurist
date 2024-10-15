@@ -120,7 +120,6 @@ title: "Overview"
                 selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
                 renderNode: function(event, data) {
                     
-                        //if(data.has_access){}
                         let item = data.node;
                         _defineActionIcons( item );
                     
@@ -136,7 +135,7 @@ title: "Overview"
                     dragEnter: function(node, data) {
                         //data.otherNode - dragging node
                         //node - target node
-                        return true; //node.folder ?['over'] :["before", "after"];
+                        return true;
                     },
                     dragDrop: function(node, data) {
                         //data.otherNode - dragging node
@@ -162,7 +161,7 @@ title: "Overview"
                                     sVal:data.otherNode.data.page_id}); 
 
                         }
-                        //return;
+                       
                         //change order in target
                         
                         //at first - remove all current children
@@ -185,7 +184,7 @@ title: "Overview"
 
                         //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                 //reload main menu
@@ -437,7 +436,7 @@ title: "Overview"
                             }
                             if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
                                 let ele = $(node).find('.svs-contextmenu3');
-                                ele.css({'display':'inline-block'});//.css('visibility','visible');
+                                ele.css({'display':'inline-block'});
                             }
                         }
                     }
@@ -512,7 +511,7 @@ title: "Overview"
     // Create new cms menu record 
     //
     function _createMenuRecord(parent_id, page_name, template_name, callback, $dlg_element){
-
+        
         let details = {};
         details['t:'+DT_NAME] = [ page_name ];
         details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];

@@ -22,7 +22,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     
     options: {
         is_iconlist_mode: true,  //show in compact mode
-        isViewMode: true
+        isViewMode: true   // true - production mode, false - edit mode 
     },
 
     _entityName:'sysDashboard',
@@ -38,7 +38,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 600;
         this.options.width = 1200;
@@ -47,7 +47,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this.options.title = 'Shortcuts';
         
-        //this.options.isViewMode = true;
+       
         
         this.options.no_bottom_button_bar = true;
     
@@ -80,8 +80,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         //init viewer 
         let that = this;
         
-        let prefs = this.getUiPreferences();
-
         this._on( this.searchForm, {
                 "searchsysdashboardonresult": this.updateRecordList,
                 "searchsysdashboardviewmode": function() { this._setMode( true );  }, //back to view mode
@@ -91,19 +89,19 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 "searchsysdashboardoninit": function(){
 
         /* this feature is disabled
-        //this.show_longer_description = this.searchForm.find('#show_longer_description');
+       
         this.show_on_startup = this.searchForm.find('#show_on_startup');
         this.show_as_ribbon = this.searchForm.find('#show_as_ribbon');
-        //this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
+       
         this._on(this.show_on_startup, {change:this.saveUiPreferences});
         this._on(this.show_as_ribbon, {change:this.saveUiPreferences});
-        //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
+       
         */
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
             .on('change', function(){
                 that.recordList.resultList('option','view_mode', 'thumbs');
-                    //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
+                   
                 that.saveUiPreferences();
         });*/
         
@@ -118,7 +116,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 });
                 
         //this.recordList.resultList('setHeaderText','<h3>Dashboard</h3><span class="heurist-helper1">A shortcuts to commonly used functions for this particuar database (al functions are available at any time via the menues and filter fields)</span>',
-        //    {height:'4em'});
+       
         this.recordList.resultList('option','multiselect', false);
         this.recordList.resultList('option','select_mode', 'select_single');
         
@@ -231,13 +229,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         if(newmode){
              // view mode
-             //this.searchForm.hide();
-             //this.recordList.css({'top': 0});
+            
+            
             this.searchForm.css({'height': '7.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
-            //this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
+           
             
             this.recordList.resultList('option', 'sortable', false);
             
@@ -264,7 +262,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
                     this._on(this.div_openconfig, {
                         click:function(){
-                            let that = this;
                             window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',   //edit mode
                                 {isViewMode:false, is_iconlist_mode:false,
                                 onClose:function(){
@@ -284,13 +281,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }else{
             // edit mode
             
-            //this.searchForm.show();
+           
             this.searchForm.css({'height': '2.4em'});
             this.recordList.css({'top': '2.8em'});
 
             this.searchForm.find('#view_mode').hide();
             this.searchForm.find('#edit_mode').show();
-            //this._as_dialog.parent().find('.ui-dialog-titlebar').show();
+           
             
             this.recordList.resultList('option','view_mode','list');
             
@@ -298,13 +295,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             this.recordList.resultList('option', 'sortable', true);
             this.recordList.resultList('option', 'onSortStop', function(){
                 that.saveNewOrder(); //auto save order
-                //that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
+               
             });
             
             /* this feature is disabled
             this.show_on_startup.prop('checked', (this.usrPreferences.show_on_startup==1));// || this.usrPreferences.show_as_ribbon==1
             this.show_as_ribbon.prop('checked', this.usrPreferences.show_as_ribbon==1);
-            //window.hWin.HEURIST4.util.setDisabled(this.show_on_startup, (this.usrPreferences.show_as_ribbon==1));
+            
             */
 
         }
@@ -392,6 +389,20 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             $(elements[0]).trigger('change'); //trigger
         }
 
+        let element = this._editing.getFieldByName('dsh_ParameterAddRecord');
+        if(element.length > 0 && element.find('input.text').length > 0){
+
+            let $input = element.find('input.text');
+            this._on($input, {
+                change: function(){
+                    let value = window.hWin.HEURIST4.util.isJSON($input.val());
+                    if(value && Object.hasOwn(value, 'RecAddLink')){ // remove record link
+                        delete value.RecAddLink;
+                        this._editing.getFieldByName('dsh_ParameterAddRecord').editing_input('setValue', value, false);
+                    }
+                }
+            });
+        }
     },
     //
     // force refresh after save (note: in case cached entity it auto happens in parent - manageEntity)
@@ -404,6 +415,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         //refresh count of active dashboards
         window.hWin.HAPI4.SystemMgr.sys_info_count();
+
+        let cur_prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', false);
+        if(cur_prefs?.show_on_startup === 1){ // trigger refresh of shortcut bar
+            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+        }
     },
     
     _afterDeleteEvenHandler: function( recID ){
@@ -450,13 +466,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         let recID   = fld('dsh_ID');
         
-        let rectype = fld('ulf_ExternalFileReference')?'external':'local';
-        
         let recTitle = fld2('dsh_Label','auto');//,'20em'
         let recTitleHint = fld('dsh_Description');
         let recOpacity = (fld('dsh_Enabled')=='y')?1:0.3;
         
-        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
         
         let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
@@ -522,7 +535,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             let record = this._selection.getFirstRecord();
             if(this.options.isViewMode){
                 let command = this._selection.fld(record, 'dsh_CommandToRun');
-                let params = this._selection.fld(record, 'dsh_Parameters');
                 const dsh_ID = this._selection.fld(record, 'dsh_ID');
                 
                 if(command.indexOf('menu-')==0){ //main menu action
@@ -532,21 +544,15 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         command = 'menu-import-csv';
                     }else if(command=='menu-import-add-record'){
                         
-                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                         if(widget){
                              let ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
-                             widget.mainMenu6('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
+                             widget.slidersMenu('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
                              return;
                         }
                     }
 
-                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', command);
-                    /*
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                    if(widget){
-                        widget.mainMenu('menuActionById', command);
-                    }
-                    */
+                    window.hWin.HAPI4.actionHandler.executeActionById(command);
 
                 }else if(command=='action-AddRecord'){ //add new record
                     let params = window.hWin.HEURIST4.util.isJSON( this._selection.fld(record, 'dsh_Parameters') );
@@ -581,10 +587,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 
                     this.closeDialog();
 
-                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                     if(widget){
                          let ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
-                         widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:0, left:ele.offset().left });
+                         widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:0, left:ele.offset().left });
                     }else{
                         widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
                         if(widget){
@@ -631,8 +637,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     'fields'     : fields                     
                 };
 
-                let that = this;                                                
-                //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

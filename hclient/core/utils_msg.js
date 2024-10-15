@@ -65,8 +65,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             msg = response;
         }else{
             let request_code = null;
-            if(window.hWin.HEURIST4.util.isnull(response) || 
-               window.hWin.HEURIST4.util.isempty(response.message) || response.message.trim().toLowerCase() == 'error'){
+            
+            if($.isPlainObject(response.message)){
+                    response = response.message;
+            }
+            
+            if(window.hWin.HEURIST4.util.isempty(response.message) || response.message.trim().toLowerCase() == 'error'){
 
                 msg = 'Error_Empty_Message';
                 if(response){
@@ -395,16 +399,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(!(options.height>0)){
             let height = $(content).height()+90;
-            //options.height = $(content).height();//90;
+           
             $dlg.dialog({height:height});
         }
            
         
         content.position({ my: "center center", at: "center center", of: $dlg });
-        
-        //var hh = hideTitle?0:$dlg.parent().find('.ui-dialog-titlebar').height() + $dlg.height() + 20; 
-        
-        //$dlg.dialog("option", "buttons", null);      
         
         if(hideTitle){
             $dlg.parent().find('.ui-dialog-titlebar').hide();
@@ -482,9 +482,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(max>0 && min>1){
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR("length must be between ") +
                 min + " "+window.hWin.HR("and")+" " + max + ". ";
-                if(len<min){
-                    //message_text = message_text + (min-len) + window.hWin.HR(" characters left");
-                }else{
+                if(len>=min){
                     message_text = message_text + (len-max) + window.hWin.HR(" characters over");
                 }
 
@@ -579,9 +577,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
                 //close dialog from inside of frame - need redifine each time
                 content.close = function() {
-                    
-                    let did = $dlg.attr('id');
-
                     let rval = true;
                     let closeCallback = options['callback'];
                     if(window.hWin.HEURIST4.util.isFunction(closeCallback)){
@@ -611,7 +606,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         }else{
 
-            //create new div for dialogue with $(this).uniqueId();
+           
             $dlg = $('<div>')
             .addClass('loading')
             .appendTo( $(opener.document).find('body') );
@@ -635,16 +630,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $dosframe.attr('webkitallowfullscreen',true);
                 $dosframe.attr('mozallowfullscreen',true);
                 
-                //$dosframe.css({position:'fixed', top:'0px', left:'0px'});
+               
             }
 
             $dosframe.hide();
             //callback function to resize dialog from internal frame functions
             $dosframe[0].doDialogResize = function(width, height) {
-                //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
+                
                 /*
-                var body = $(this.document).find('body');
-                var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
+                let body = $(this.document).find('body');
+                let dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
 
                 if(width>0)
                 $dlg.dialog('option','width', Math.min(dim.w, width));
@@ -703,15 +698,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     return resConfirm;
                     }*/
 
-                    //content.document.reference_to_parent_dialog = $dlg.attr('id');
-                    //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
+                   
+                   
                     //functions in internal document
                     //content.close = $dosframe[0].close;    // make window.close() do what we expect
 
                     //close dialog from inside of frame
                     content.close = function() {
-                        let did = $dlg.attr('id');
-
                         let rval = true;
                         let closeCallback = options['callback'];
                         if(window.hWin.HEURIST4.util.isFunction(closeCallback)){
@@ -724,7 +717,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         return true;
                     };
 
-                    //content.popupOpener = opener;
+                   
                     content.doDialogResize = $dosframe[0].doDialogResize;
 
                 }
@@ -818,7 +811,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         function __maximizeOneResize(){
                             let dialog_height = window.innerHeight;
                             $dlg.dialog( 'option', 'height', dialog_height);
-                            let dialog_width = window.innerWidth;
                             $dlg.dialog( 'option', 'width', '100%'); //dialog_width
                         }
                         //$(window).resize(__maximizeOneResize)
@@ -847,9 +839,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 function __adjustOneResize(e){
                     let ele = e ?$(e.target) :options.container;
 
-                    let dialog_height = ele.height(); //window.innerHeight - $dlg.parent().position().top - 5;
+                    let dialog_height = ele.height(); 
                     $dlg.dialog( 'option', 'height', dialog_height);
-                    let dialog_width = ele.width(); //window.innerWidth - $dlg.parent().position().left - 5;
+                    let dialog_width = ele.width(); 
                     $dlg.dialog( 'option', 'width', dialog_width);
                 }
                 //$(window).on('onresize',__adjustOneResize)
@@ -982,7 +974,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     
                     window.hWin.HEURIST4.ui.initHelper({
                             button:$info_button, 
-                            url:options['context_help'],
+                            url: window.hWin.HRes(options['context_help']),
                             position:{my:'right top', at:'right top', of:$container},
                             container: $container,
                             is_open_at_once: options['show_help_on_init']===false ? false : true
@@ -1000,7 +992,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             frame_container.addClass('loading');
             
             //callback function to resize dialog from internal iframe functions
-            //$dosframe[0].doDialogResize = function(width, height) {};
+           
 
             $dosframe.off('load');
             //on load content event listener
@@ -1053,7 +1045,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             //start content loading
             $dosframe.attr('src', url);
                         
-            //return $dosframe;
+           
     },   
     
     //
@@ -1116,10 +1108,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             $(element).show().appendTo($dlg);
 
-            let body = $(this.document).find('body');
-            //var dim = { h: Math.min((options.height>0?options.height:400), body.innerHeight()-10), 
-            //            w: Math.min((options.width>0?options.width:690), body.innerWidth()-10) };
-            
             let dimW = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
             let dimH = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
             
@@ -1225,7 +1213,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     sendCoverallToBack: function(force_close) {
         if(force_close===true) window.hWin.HEURIST4.msg.coverallKeep = false;
         if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
-        $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
+        $(window.hWin.HEURIST4.msg.coverall).hide();
     },
   
 
@@ -1256,9 +1244,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(ext_options['buttons']){
             buttons = ext_options['buttons'];
+            delete ext_options['buttons'];
         }
         if(ext_options['labels']){
             labels = ext_options['labels'];
+            delete ext_options['labels'];
         }
         
         let isPopupDlg = (ext_options.isPopupDlg || ext_options.container);
@@ -1417,46 +1407,113 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         return $dlg;
-        //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
+       
+       
+       
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },  
     
+    // for progress message
     _progressInterval: 0,
     _progressDiv: null,
-                        
-    showProgress: function( $progress_div, session_id, t_interval, need_content ){
+    _progressPopup: null,
+    
+    //
+    // returns session_id
+    // container - container element. if not defined it shows in popup
+    // content - 1)html code 2)false - use given content 3) otherwise fill container with default content
+    // steps - array of labels
+    //
+    // session_id - unique id of progress session
+    // t_interval - checkout interval
+    //
+    showProgress: function( options ){
+        if(window.hWin.HEURIST4.msg._progressInterval>0){
+            console.log('previous progress is not completed');            
+            return;
+        }
         
-        let progressCounter = 0;        
-        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-        if(!(session_id>0)) session_id = Math.round((new Date()).getTime()/1000);
+        let $progress_div;
+        let content = options?.content;
+        let is_popup = true;
+        
+        if(!options){
+            options = {};
+        }        
+
+        if(options?.container){ //container element
+            is_popup = false;
+            $progress_div = options.container;
+        }        
+        
+        if (window.hWin.HEURIST4.util.isempty(content)) {
+            //default content
+            content = '';
+            
+            if(Array.isArray(options?.steps)){
+                
+                content = '<ol type="1" style="font-size:12px;height:80%;padding-top:20px;" class="progress-steps">';
+                
+                options.steps.forEach((item)=>{
+                    content += `<li style="color:gray">${item}</li>`;
+                });
+                
+                content += '</ol>';
+            }else{
+                content = '<div class="loading" style="height:80%"></div>';
+            }
+            
+            content += '<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:10px">'
+                +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
+                +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
+            +'</div>';
+            
+        }else if(typeof content !== 'string'){
+            content = false;
+        }
+        
+        if(is_popup){
+            options['buttons'] = {}; //no buttons
+            options['width'] = 500;
+            options['hideTitle'] = true;
+   
+            window.hWin.HEURIST4.msg._progressPopup = window.hWin.HEURIST4.msg.showMsg( 
+                    '<div class="progressbar_div" style="margin:10px"></div>', options );
+        
+            $progress_div = window.hWin.HEURIST4.msg._progressPopup.find('div.progressbar_div');
+        }
+        
+        
+        let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
+        
+        let session_id = options.session;
+        if(!(session_id>0)) session_id = window.hWin.HEURIST4.util.random();
+
+        let t_interval = options.interval;
+        if(!(t_interval>0)) t_interval = 900;
         
         window.hWin.HEURIST4.msg._progressDiv = $progress_div;
         $progress_div.show(); 
         document.body.style.cursor = 'progress';
         
         //add progress bar content
-        if(need_content!=false){
-            $progress_div.html('<div class="loading" style="display:none;height:80%"></div>'
-            +'<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">'
-                +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
-                +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
-            +'</div>');
+        if(content){
+            $progress_div.html(content);
         }
         
-        
+
+        //elements        
         let btn_stop = $progress_div.find('.progress_stop').button();
         
-        //this._on(,{click: function() {
-        
-        btn_stop.on('click',function(){
+        // termination
+        btn_stop.on({click:function(){
                 let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    _hideProgress();
+                    window.hWin.HEURIST4.msg.hideProgress();
                 });
-            });
+            }});
     
+        let progressSteps = $progress_div.find('.progress-steps');
         let div_loading = $progress_div.find('.loading').show();
         let pbar = $progress_div.find('#progressbar');
         let progressLabel = pbar.find('.progress-label').text('');
@@ -1470,23 +1527,72 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    _hideProgress();
-                }else{
+//response=='' || 
+                if(response?.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    window.hWin.HEURIST4.msg.hideProgress();
+                }else if(response){
                     //it may return terminate,done,
-                    let resp = response?response.split(','):[];
+                    
+                    let resp = response.split(',');
+                    
                     if(response=='terminate' || !(resp.length>=2)){
+                        //first or last response
                         if(response=='terminate'){
-                            _hideProgress();
+                            window.hWin.HEURIST4.msg.hideProgress();
                         }else{
                             div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
                         }
                     }else{
                         div_loading.hide();
-                        if(resp[0]>0 && resp[1]>0){
-                            let val = resp[0]*100/resp[1];
+                        
+                        if(resp.length==3 || resp.length==1){
+                            let newStep = resp.shift();
+                            let percentage = 0;
+                            progressSteps.show();
+
+                            if(window.hWin.HEURIST4.util.isNumber(newStep)){
+                                newStep = parseInt(newStep);
+                                let all_li = progressSteps.find('li');
+                                if(newStep>0){
+                                    let arr = all_li.slice(0,newStep);
+                                    arr.css('color','black');
+                                    arr.find('span.processing').remove(); //remove rotation icon
+                                }
+                                if(newStep<all_li.length){
+                                        if(percentage>0){
+                                            if(percentage>100) percentage = 100;
+                                            percentage = percentage+'%'; 
+                                        }else{
+                                            percentage = 'processing...'
+                                        }
+                                        let ele = $(all_li[newStep]).find('span.percentage');
+                                        if(ele.length==0){
+                                            percentage = '<span class="percentage">'+percentage+'</span>';
+                                            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span> '
+                                                +percentage+'</span>')
+                                                .appendTo( $(all_li[newStep]) );
+                                            $(all_li[newStep]).css('color','black');
+                                        }else{
+                                            ele.text(percentage);
+                                        }
+                                }
+                            }else{
+                                let container = progressSteps.find('ol');
+                                let li_ele = container.find('li:contains("'+newStep+'")');
+                                if(li_ele.length==0){ //not added yet
+                                    $('<li>'+newStep+'</li>').appendTo(container);    
+                                }
+                            }
+                        }
+
+                        let cnt=0, total=0;
+                        if(resp.length>1){
+                            cnt = resp[0];
+                            total = resp[1];
+                        }
+                        
+                        if(cnt>0 && total>0){
+                            const val = cnt*100/total;
                             pbar.progressbar( "value", val );
 
                             elapsed += t_interval;
@@ -1507,8 +1613,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         }
                     }
                     
-                    progressCounter++;
-                    
                 }
             },'text');
           
@@ -1519,9 +1623,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     hideProgress: function(){
-        
         $('body').css('cursor','auto');
-        
+
         if(window.hWin.HEURIST4.msg._progressInterval!=null){
             
             clearInterval(window.hWin.HEURIST4.msg._progressInterval);
@@ -1531,6 +1634,73 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             window.hWin.HEURIST4.msg._progressDiv.hide();    
             window.hWin.HEURIST4.msg._progressDiv = null;
         }
+        if(window.hWin.HEURIST4.msg._progressPopup){
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            $dlg.dialog( "close" );
+            window.hWin.HEURIST4.msg._progressPopup = null;
+        }
+        
+    },
+    
+    
+    //
+    // Warning on exit
+    //             
+    showMsgOnExit: function(sMessage, onSave, onIgnore){
+        let $dlg, buttons = {};
+        buttons['Save'] = function(){ 
+            //that._saveEditAndClose(null, 'close'); 
+            onSave();
+            $dlg.dialog('close'); 
+        }; 
+        buttons['Ignore and close'] = function(){ 
+            onIgnore();
+            $dlg.dialog('close'); 
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            window.hWin.HR('Warn_Lost_Data'),
+            buttons,
+            {title: window.hWin.HR('Confirm'),
+               yes: window.hWin.HR('Save'),
+                no: window.hWin.HR('Ignore and close')},
+            {default_palette_class:'ui-heurist-design'});
+        
+    },
+    
+    //
+    // for smarty reports
+    //
+    showWarningAboutDisabledFunction: function(txt){
+      
+            if(txt.indexOf('Exception on execution: Syntax error in template')==0 
+            && txt.indexOf('not allowed by security setting')>0){
+                
+                    let buttons = null
+                    if(window.hWin.HAPI4.actionHandler){
+                        buttons = 
+                        {   'Send Bug Report': function() {
+                                window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
+                                $dlgm.dialog( 'close' );
+                                },
+                            'Cancel':function() {
+                                $dlgm.dialog( 'close' );
+                            }
+                        };
+                    }
+
+                    let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+    '<p>Sorry, native php functions in custom reports are disabled by default<br>'
+    +'as a security precaution. </p>'
+    +'<p>Please use the bug report function to ask that this function be enabled. </p>',
+                        buttons,
+                        'Warning');
+                        
+                        return true;
+                
+            }
+            
+            return false;
         
     },
     

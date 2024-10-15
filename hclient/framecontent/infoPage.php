@@ -17,12 +17,14 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
+
 $is_inlcuded = false;
 
 if(!defined('PDIR')) {
     $is_inlcuded = true;
     define('PDIR','../../');
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 }
 
 //variable is_error can be defined as global
@@ -70,7 +72,7 @@ if(!isset($message)){
     }
 }
 
-    $dbname = $_REQUEST['db'];
+    $dbname = @$_REQUEST['db'];
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
 <!DOCTYPE html>
@@ -107,9 +109,9 @@ if(!isset($message)){
 
         <script>window.hWin = window;</script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>

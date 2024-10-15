@@ -31,7 +31,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Viewers/Map
 */
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
     require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
@@ -43,11 +43,11 @@
 
     define('USE_GOOGLE', false);
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         //$response = $system->getError();
-        header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
+        redirectURL(HEURIST_BASE_URL.'hclient/assets/notfound.png');
         exit;
     }
 
@@ -127,7 +127,7 @@
 
                                             ///$json = $geom->out('json');
                                             // $geom->numGeometries()
-                                            if(count($json['coordinates'])>0){
+                                            if(!empty($json['coordinates'])){
                                                 if($json['type']=='Polygon'){
                                                     foreach($json['coordinates'] as $points){
                                                         array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
@@ -158,7 +158,7 @@
         }
 	}
 
-	if(is_array($mapobjects) && count($mapobjects)>0){
+	if(!isEmptyArray($mapobjects)){
 
         if(USE_GOOGLE){
 
@@ -281,8 +281,6 @@
                 }
                 $verties_cnt++;
             }else
-			//if($geoObject['type']=="polyline" || $geoObject['type']=="l")
-            //if($geoObject['type']=="polygon" || $geoObject['type']=="pl")
             if(USE_GOOGLE){
 
                     $points = array();
@@ -326,12 +324,12 @@
                         $encodedPoints = dpEncode($points_to_encode);
 
                         if($geoObject['type']=="polygon" || $geoObject['type']=="pl"){
-                            $poly_all = $poly_all."&path=".$style_poly."|enc:".$encodedPoints[0];
+                            $poly_all = "$poly_all&path=$style_poly|enc:".$encodedPoints[0];
                             if(strlen($poly_all)>1900){
                                 break; //total length of url is too long
                             }
                         }else{
-                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];
+                            $path_all = "$path_all&path=$style_path|enc:".$encodedPoints[0];
                             if(strlen($path_all)>1900){
                                 break; //total length of url is too long
                             }
@@ -371,7 +369,7 @@
                         }
                     }else{
                         $shapes_cnt++;
-                        if(is_array($points2) && count($points2)>0){
+                        if(!isEmptyArray($points2)){
                             $verties_cnt = $verties_cnt + count($points2);
                             foreach ($points2 as $point) {
                                 $points_to_encode[] = $point[0];
@@ -423,8 +421,8 @@
             }
         }
 
-		header('Location: '.$url);
+		redirectURL($url);
 	}else{
-		header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
+		redirectURL(HEURIST_BASE_URL.'hclient/assets/notfound.png');
 	}
 ?>

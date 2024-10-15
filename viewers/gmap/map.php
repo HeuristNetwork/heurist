@@ -242,9 +242,6 @@ $system->defineConstants();
                             // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                             var recset = new HRecordSet(response.data);
 
-                            //var mapdataset = recset.toTimemap();
-                            //mapping.load([mapdataset]);
-
                             mapping.load( null, //mapdataset,
                                 null,  //array of record ids
                                 mapdocument,    //map document on load
@@ -315,7 +312,7 @@ $system->defineConstants();
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load(window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content');
+        $( "#helper" ).load(window.hWin.HRes('mapping_overview. #content'));
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
             autoOpen: false, //(window.hWin.HAPI4.get_prefs('help_on')=='1'),
@@ -375,12 +372,14 @@ $system->defineConstants();
             }
 
 
+            $pref_li = '<li rtid="';
+
             $items = '';
-            $items = $items.'<li rtid="'.checkRt('RT_KML_SOURCE').'"><a href="#">KML</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_SHP_SOURCE').'"><a href="#">SHP</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
-            $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
+            $items = $items.$pref_li.checkRt('RT_KML_SOURCE').'"><a href="#">KML</a></li>';
+            $items = $items.$pref_li.checkRt('RT_SHP_SOURCE').'"><a href="#">SHP</a></li>';
+            $items = $items.$pref_li.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
+            $items = $items.$pref_li.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
+            $items = $items.$pref_li.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
         ?>
             $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
             .on('click', refreshMapDocument );
@@ -433,7 +432,6 @@ $system->defineConstants();
 
             var nt = parseInt(legend.css('bottom'), 10);
             nt = 30; //bottom
-            //var mh = $('#map').height();
             var mh = $("#mapping").find('.ui-layout-center').height();
 
             var is_collapsed = (legend.find('#collapse').text() == "+");

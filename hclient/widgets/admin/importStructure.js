@@ -75,7 +75,7 @@ $.widget( "heurist.importStructure", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
 
     //
@@ -279,7 +279,7 @@ $.widget( "heurist.importStructure", {
             groupByField: 'rec_RecTypeID',
             rendererGroupHeader: function(grp_val){
                 if(grp_val==0){
-                    //width:100%;
+                   
                     return '<div style="border-bottom:1px solid lightgray">'
                     +'<div style="padding:24px 0 4px 40px;"><h2 style="margin:0">Curated templates</h2>'
                     +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div></div>';
@@ -297,7 +297,7 @@ $.widget( "heurist.importStructure", {
                 let sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
                 +'<div style="width:2em">&nbsp;</div>'
                 +'<div style="width:52em">Description</div>';
-                //+'<div style="width:3em">URL</div>';
+               
                 return sHeader;
             },
             renderer:
@@ -343,10 +343,10 @@ $.widget( "heurist.importStructure", {
                 that.input_search = that.searchForm_dbs.find('.input_search');
 
                 that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
-                //that._on( this.input_search,  { keyup:this.startSearch_dbs });
+               
                 that._on( that.btn_search_start, { click: that.startSearch_dbs });            
 
-                //that.searchForm_dbs.find('#input_search_type_div2').show();
+               
                 that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
                 that._on(that.input_search_type,  { change:that.startSearch_dbs });
 
@@ -488,7 +488,7 @@ $.widget( "heurist.importStructure", {
         const that = this;
         let panel_dbs = this.element.find('#panel_dbs');
 
-        let record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
+        let record = db_ids.getFirstRecord();
 
         let sDB_ID = db_ids.fld(record, 'rec_ID');
         let sURL  = db_ids.fld(record, 'rec_URL');
@@ -756,9 +756,6 @@ $.widget( "heurist.importStructure", {
         // remove generated elements
         if(this.searchForm_dbs) this.searchForm_dbs.remove();
         if(this.recordList_dbs) this.recordList_dbs.remove();
-
-        //if(this.searchForm_rty) this.searchForm_rty.remove();
-        //if(this.recordList_rty) this.recordList_rty.remove();
     },
 
     //----------------------
@@ -767,7 +764,7 @@ $.widget( "heurist.importStructure", {
     //
     _onActionListener:function(event, action){
         if(action=='select-and-close'){
-            //this._selectAndClose();
+           
             return true;
         } else {
             let recID = 0;
@@ -888,7 +885,7 @@ $.widget( "heurist.importStructure", {
         let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
 
-        //this.options.window = window.hWin;
+       
         this.element.addClass('ui-heurist-bg-light');
 
         let $dlg = this.element.dialog({

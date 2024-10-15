@@ -22,9 +22,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/entityScrudSrv.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+require_once 'entityScrudSrv.php';
 
 /*
 
@@ -35,39 +36,42 @@ version - thumb or thumbnail|icon|full (thumb is default)
 
 */
 
+$req_params = USanitize::sanitizeInputArray();
 
 //main purpose - download entity images
-$db = @$_REQUEST['db'];
-$filename = basename(@$_REQUEST['file']);
-$entity_name = htmlspecialchars(@$_REQUEST['entity']);
+$db = @$req_params['db'];
+$filename = basename(@$req_params['file']);
+$entity_name = htmlspecialchars(@$req_params['entity']);
 
-$error = System::dbname_check($db);
+$error = mysql__check_dbname($db);
 
-if(!$error){
+if($error==null){
 
         list($db_full, $db) = mysql__get_names( $db );
 
-        $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
-
-        $system = new System();//without db connection and session - just paths
+        $system = new hserv\System();//without db connection and session - just paths
         $system->initPathConstants($db);
 
 if($filename){ //download from scratch (for csv import)
 
+        $msgTempFile = 'Temporary file (uploaded csv data) ';
+
         //remove slashes - prevents Local file disclosure
         $filename = USanitize::sanitizeFileName($filename, false);
 
-        $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
+        $file_read = HEURIST_FILESTORE_DIR.DIR_SCRATCH.$filename;
 
-        if(!isPathInHeuristUploadFolder( $file_read ) || is_dir($file_read))
+        $file_read = isPathInHeuristUploadFolder( $file_read );
+
+        if(!$file_read || is_dir($file_read))
         {
-            print 'Temporary file (uploaded csv data) '.htmlspecialchars($filename). ' not found';
+            print $msgTempFile.htmlspecialchars($filename). ' not found';
             exit;
         }
 
-        $content_type = null;//'image/'.$file_ext;
+        $content_type = null;
 
-        $csv_encoding = @$_REQUEST['encoding'];
+        $csv_encoding = @$req_params['encoding'];
 
         if($csv_encoding && $csv_encoding!='UTF-8'){ //force convert to utf8
 
@@ -85,7 +89,7 @@ if($filename){ //download from scratch (for csv import)
                 }
 
                 if($s){
-                    print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read). $s;
+                    print $msgTempFile.htmlspecialchars($file_read). $s;
                     exit;
                 }
             }
@@ -100,7 +104,7 @@ if($filename){ //download from scratch (for csv import)
                $line = mb_convert_encoding( $line, 'UTF-8');
             }
             if(!$line){
-                print 'Temporary file (uploaded csv data) '.$file_read
+                print $msgTempFile.$file_read
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
                 exit;
             }
@@ -108,12 +112,12 @@ if($filename){ //download from scratch (for csv import)
             $content = file_get_contents($file_read);
             $content = mb_convert_encoding( $content, 'UTF-8', $csv_encoding);
             if(!$content){
-                print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read)
+                print $msgTempFile.htmlspecialchars($file_read)
                 .' can\'t be converted to UTF-8. Please open it in any advanced editor and save with UTF-8 text encoding';
                 exit;
             }
 
-            //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);
+            //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.DIR_SCRATCH, $original_filename);
             $res = file_put_contents($file_read, $content);
             unset($content);
             if(!$res){
@@ -129,11 +133,11 @@ if($filename){ //download from scratch (for csv import)
 
         $content_type = 'image/png';
 
-        $rec_id = @$_REQUEST['icon'];
-        if($rec_id==null) {$rec_id = @$_REQUEST['id'];}
+        $rec_id = @$req_params['icon'];
+        if($rec_id==null) {$rec_id = @$req_params['id'];}
 
         //icon, thumb, full
-        $viewmode = rawurlencode(@$_REQUEST['version']);
+        $viewmode = rawurlencode(@$req_params['version']);
 
         if($rec_id && substr($rec_id,0,4)=='term'){
             //backward support - icons for Digital Harlem
@@ -172,7 +176,7 @@ if($filename){ //download from scratch (for csv import)
         // 2 - entity default icon or thumb
         // 1 - returns image with invitation "add image"
         // otherwise it returns empty image placeholder (100x100 or 16x16 for icons)
-        $default_mode = @$_REQUEST['def'];
+        $default_mode = @$req_params['def'];
         if($default_mode=='check') {$default_mode = 3;}
         elseif($default_mode==null) {$default_mode = 2;}
 
@@ -187,8 +191,8 @@ if($filename){ //download from scratch (for csv import)
             }else{
 
                 //color, bg, circle
-                if(@$_REQUEST['color'] && $ext!='svg'){
-                    UImage::changeImageColor($filename, null, @$_REQUEST['color'], @$_REQUEST['circle'], @$_REQUEST['bg']);
+                if(@$req_params['color'] && $ext!='svg'){
+                    UImage::changeImageColor($filename, null, @$req_params['color'], @$req_params['circle'], @$req_params['bg']);
                 }else{
                     if($file_url!=null && isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles){
                         header('Location:'.$file_url);

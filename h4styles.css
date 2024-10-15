@@ -1003,7 +1003,7 @@ div.div-result-list-content.icons_list{
 }
 
 .icons .rt-icon{
-    display: none;
+    vertical-align: middle;
 }
 
 .rt-icon{
@@ -1463,6 +1463,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     float: left;
     width: auto;
     margin: 0px 2px;
+}
+
+.horizontalmenu  a.ui-state-active{
+    margin:0px;
 }
 
 /* List view - Datatable */

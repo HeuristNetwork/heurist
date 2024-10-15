@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrTags table
@@ -20,11 +22,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-
 
 class DbUsrTags extends DbEntityBase
 {
@@ -54,113 +52,35 @@ class DbUsrTags extends DbEntityBase
               return false;
         }
 
-        $needCount = false;
-        $needCheck = false;
+        $sup_tables = null;
+        $sup_where = null;
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
+        $this->searchMgr->addPredicate('tag_ID');
+        $this->searchMgr->addPredicate('tag_Text');
+        $this->searchMgr->addPredicate('tag_Modified');
+        $this->searchMgr->addPredicate('tag_UGrpID');
 
-        $pred = $this->searchMgr->getPredicate('tag_ID');
-        if($pred!=null) {array_push($where, $pred);}
+        if(@$this->data['rtl_RecID']){
 
-        $pred = $this->searchMgr->getPredicate('tag_Text');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('tag_Modified');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('tag_UGrpID', true);
-        if($pred!=null) {
-            array_push($where, $pred);
-        }
-
-
-        $value = @$this->data['rtl_RecID'];
-        if($value>0){
-            array_push($where, '(rtl_TagID=tag_ID and rtl_RecID='.$value.')');
-            array_push($from_table, 'usrRecTagLinks');
-        }
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'tag_ID';
-
-        }elseif(@$this->data['details']=='label'){
-
-            $this->data['details'] = 'tag_ID,tag_Text';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'tag_ID,tag_Text,tag_UGrpID';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID';
-            $needCount = true;
-
-        }else{
-            $needCheck = true;
-        }
-
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) {array_push($order, $pred);}
-        $value = @$this->data['sort:tag_Modified'];
-        if($value!=null){
-            array_push($order, 'tag_Modified '.($value>1?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:tag_Usage'];
-            if($value!=null){
-                array_push($order, 'tag_Usage '.($value>1?'ASC':'DESC'));
-                $needCount = true;
-            }else{
-                $value = @$this->data['sort:tag_Text'];
-                if($value!=null){
-                    array_push($order, 'tag_Text '.($value>1?'ASC':'DESC'));
-                }
+            $where = predicateId('rtl_RecID',$this->data['rtl_RecID'],SQL_AND);
+            if($where!=''){
+                $sup_tables = ',usrRecTagLinks';
+                $sup_where  = '(rtl_TagID=tag_ID)'.$where;
             }
         }
 
-        if($needCount){
-            array_push($this->data['details'],'(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
-            //array_push($where, "(tag_ID=rtl_TagID)");
-            //array_push($from_table, 'usrRecTagLinks');
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('tag_ID'); break;
+            case 'label': $this->searchMgr->setSelFields('tag_ID,tag_Text'); break;
+            case 'name':  $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_UGrpID'); break;
+            default: //case 'full':
+                $this->searchMgr->setSelFields('tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID'
+                    .',(select count(*) from usrRecTagLinks where (tag_ID=rtl_TagID)) as tag_Usage');
         }
 
-        $is_ids_only = (count($this->data['details'])==1);
+        $orderby = $this->searchMgr->setOrderBy();
 
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
 
@@ -170,7 +90,7 @@ class DbUsrTags extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are tags to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are tags to update/delete
 
             $ugrs = $this->system->get_user_group_ids();
 
@@ -221,23 +141,23 @@ class DbUsrTags extends DbEntityBase
     * 2. find wrong permission
     * 3. find in use
     *
-    * @returns  array of 'deleted', 'no enough right' and 'in use' ids
+    * @returns  array of 'deleted', 'no enough right'  and  'in use' ids
     */
     public function delete($disable_foreign_checks = false){
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
-        if(count($this->recordIDs)>0){
+        if(!empty($this->recordIDs)){
 
             $mysqli = $this->system->get_mysqli();
 
             $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT rtl_RecID '
-                        .'FROM usrRecTagLinks WHERE rtl_TagID in ('.implode(',', $this->recordIDs).')');
+                        .'FROM usrRecTagLinks WHERE rtl_TagID='.intval($this->recordIDs[0]));
             $cnt = count($recIDs_inuse);
 
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED,
-                (($cnt==1 && count($this->records)==1)
+                (($cnt==1)
                 ? 'There is a record'
                 : 'There are '.$cnt.' records')
                 .' with this tag.<br>You must delete the record(s)'
@@ -257,9 +177,13 @@ class DbUsrTags extends DbEntityBase
     //
     private function replaceTags(){
 
-        $ret = false;
 
-        if(count($this->recordIDs)>0 && count($this->newTagID)>0){
+        if(isEmptyArray($this->recordIDs) || isEmptyArray($this->newTagID)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
+            return false;
+        }
+
+        $ret = false;
 
             $newTagID = $this->newTagID[0];
 
@@ -287,10 +211,6 @@ class DbUsrTags extends DbEntityBase
                 }
             }
 
-        }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
-        }
-
         return $ret;
     }
 
@@ -309,14 +229,14 @@ class DbUsrTags extends DbEntityBase
 
         //tags ids
         $this->recordIDs = prepareIds($this->data['tagIDs']);
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
             return false;
         }
 
         // MODE D  replace several old tags (tagIDs) to new ONE
         $this->newTagID = prepareIds(@$this->data['newTagID']);
-        if(count($this->newTagID)>0){
+        if(!empty($this->newTagID)){
             return $this->replaceTags();
         }
 
@@ -326,7 +246,7 @@ class DbUsrTags extends DbEntityBase
 
         //record ids
         $assignIDs = prepareIds($this->data['recIDs']);
-        if(count($assignIDs)==0){
+        if(empty($assignIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
             return false;
         }
@@ -343,7 +263,7 @@ class DbUsrTags extends DbEntityBase
             $assignIDs = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID, 'intval');
             $assignIDs = prepareIds($assignIDs);
-            if($assignIDs==null || count($assignIDs)==0){
+            if($assignIDs==null || empty($assignIDs)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                 return false;
             }

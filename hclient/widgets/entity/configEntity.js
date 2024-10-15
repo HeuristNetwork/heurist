@@ -528,7 +528,7 @@ $.widget( "heurist.configEntity", {
                                 }
                             }
                         });
-                        //ele[0].selectedIndex = sel_idx;
+                       
                         
                         that.element.show();    
                     }

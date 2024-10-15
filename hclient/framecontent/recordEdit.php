@@ -27,8 +27,10 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    require_once 'initPage.php';
-    require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
+use hserv\structure\ConceptCode;
+
+require_once 'initPage.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
 
     $params = array();
 
@@ -47,7 +49,7 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
         $params = array('recID'=>intval($res[0]));
     }else{
         //annotation not found
-        //exit;
+
     }
 
 
@@ -73,7 +75,7 @@ if(@$_REQUEST['u']){
 
     if ($res && $res[1] > 0) { //already bookmarked
         $params = array('recID'=>$res[1]);
-        //print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
+
     }elseif (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
 //----- 2. find similar url - show disambiguation dialog -----------------------------------------
 
@@ -104,7 +106,7 @@ if(@$_REQUEST['u']){
             $params['u'] = $url;
         }
         if(@$_REQUEST['f']){ //favicon
-            //$params['rec_title'] = $_REQUEST['f'];
+
         }
 
         // preprocess any description
@@ -119,8 +121,10 @@ if(@$_REQUEST['u']){
             $description = preg_replace('/ +/', ' ', $description);
 
         // trim() each line
-            $description = preg_replace('/^[ \t\v\f]+|[ \t\v\f]+$/m', '', $description);
-            $description = preg_replace('/^\s+|\s+$/s', '', $description);
+            $regex_trim_all_spaces_except_eol = '/(?:^[ \t\v\f]+)|(?:[ \t\v\f]+$)/m';  //except \r\n
+            $description = preg_replace($regex_trim_all_spaces_except_eol, '', $description);
+            //single line - remove \r\n at the begin and end
+            $description = preg_replace('/(?:^\s+)|(?:\s+$)/s', '', $description);
 
         // reduce anything more than two newlines in a row
             $description = preg_replace("/\n\n\n+/s", "\n\n", $description);
@@ -208,6 +212,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
 
@@ -260,7 +265,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                         new_record_params['title'] = __param('d');
                         new_record_params['title'] = __param('f');//favicon
 
-                        if(count($details)>0)
+                        if(!empty($details))
                             new_record_params['details'] = $details;
                         */
 
@@ -300,14 +305,14 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                                                 needall: 1, //it means return all recors - no limits
                                                 detail: 'ids'},
                                 function( response ){
-                                    //that.loadanimation(false);
+
                                     if(response.status == window.hWin.ResponseStatus.OK){
 
                                         var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
                                             $container.manageRecords('addEditRecord', recset.getOrder()[0]);
-                                            //since recID may be resolved via recForwarding  (recID>0)?recID:recset.getOrder()[0]);
+
                                         }else{ // if(isPopup){
 
                                             var sMsg = ' does not exist in database or has status "hidden" for non owners';

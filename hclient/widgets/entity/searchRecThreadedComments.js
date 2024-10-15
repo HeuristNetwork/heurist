@@ -23,15 +23,13 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        let that = this;
-        
         this.btn_search_start.css('float','right');   
         
         this.input_sort_rectitle = this.element.find('#input_sort_rectitle');
         this.input_sort_sdate = this.element.find('#input_sort_sdate');
         this._on(this.input_sort_rectitle,  { change:this.startSearch });
         this._on(this.input_sort_sdate,  { change:this.startSearch });
-        //this._on( this.input_search, { keyup: this.startSearch });
+       
         
         this.startSearch();            
     },  
@@ -41,8 +39,6 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             request['cmt_Text'] = this.input_search.val();    
@@ -57,25 +53,9 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
             if($.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new HRecordSet()} );
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'list';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                let that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new HRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
+                request['details']   = 'list';
+                this._search_request = request;
+                this._super();
             }  
                      
     },

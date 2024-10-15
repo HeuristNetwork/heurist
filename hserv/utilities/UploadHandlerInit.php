@@ -21,27 +21,27 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    //@todo move to controller
 
 error_reporting(E_ALL | E_STRICT);
 
-require_once dirname(__FILE__).'/../System.php';
+use hserv\utilities\USanitize;
+use hserv\utilities\UploadHandler;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 
 $options = array();
 
 $system = null;
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $params = filter_input_array(INPUT_POST);
-}else{
-    $params = filter_input_array(INPUT_GET);
-}
+$params = USanitize::sanitizeInputArray();
 
 
 if(@$params['db']){
-    $system = new System();//to init folder const without actual coonection to db
+    $system = new hserv\System();//to init folder const without actual coonection to db
 
-    $error = System::dbname_check(@$params['db']);
-    if($error){
+    $error = mysql__check_dbname(@$params['db']);
+    if($error!=null){
         //database name is wrong
         header('HTTP/1.1 400 Bad Request');
         exit;
@@ -68,12 +68,11 @@ if(@$params['max_file_size']>0){
 }
 if(@$params['upload_subfolder']){
     $options['upload_subfolder'] = $params['upload_subfolder'];
+    $options['image_versions'] = array('' => array('auto_orient' => true)); //disable thumbnails
 }
 
 //if(@$_REQUEST['upload_folder']){
 //    $options['upload_dir'] = $_REQUEST['upload_folder'];
 //}
-
-require_once 'UploadHandler.php';
 $upload_handler = new UploadHandler($options);
 

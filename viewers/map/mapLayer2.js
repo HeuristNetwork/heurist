@@ -313,29 +313,34 @@ function HMapLayer2( _options ) {
     //
     function _addImage(){
 
-         //obfuscated file id
-         let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
-         
-         let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
-                    file_info[0];
-                    
-         let worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
-         
-         let image_extent = null; //window.hWin.HEURIST4.geo.parseWorldFile( worldFileData, image_width, image_height);
-         
-         if(image_extent==null){
+        //obfuscated file id
+        let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+        
+        if(!file_info){
+            let error = {message: 'Cant add image layer. File resource is missed or invalid'};
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+            return;
+        }
+
+        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
+                file_info[0];
+
+        let worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
+
+        let image_extent = null; 
+
+        if(image_extent==null){
             image_extent = _getBoundingBox();  //get wkt bbox from DT_GEO_OBJECT 
-         } 
-         
-         
-         if(image_extent==null){
-             //error
+        }
+
+        if(image_extent==null){
+            //error
             _triggerLayerStatus( 'error' );
-            
-            const msg = 'Cant add image layer. Extent of image is not defined.';
-            window.hWin.HEURIST4.msg.showMsgErr(msg);
-         }else{
-             
+
+            let error = {message: 'Cant add image layer. Extent of image is not defined.', error_title: 'Unable to add image layer'};
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+        }else{
+
             let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
 
             if(layer_style){
@@ -351,13 +356,11 @@ function HMapLayer2( _options ) {
                                                         image_extent, 
                                                         _recordset.fld(_record, 'rec_Title'),
                                                         options.className );
-          
+
             if(options.imageFilter){
-                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
-             }
-             
-         }
-          
+                options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+            }
+        }
     }
 
     //
@@ -457,7 +460,8 @@ function HMapLayer2( _options ) {
                                                              
                             is_outof_range = null;                        
                             _setVisibilityForZoomRange();   
-                        }else {
+                        }else{
+                            response = $.isPlainObject(response) ? response : {message: response, error_title: 'Unable to add file source'};
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                             _triggerLayerStatus( 'error' );
                         }
@@ -517,7 +521,7 @@ function HMapLayer2( _options ) {
                     if(item.geofield){
                         //geo field can be 2 types
                         //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
-                        //2. dty_ID - pointer/resource field 
+                        //2. dty_ID - record pointer/resource field 
                         let geofields = item.geofield.split(',');
                         for(let k=0; k<geofields.length; k++){
                             let geofield = geofields[k];
@@ -667,16 +671,16 @@ function HMapLayer2( _options ) {
                         is_outof_range = null;                        
                         _setVisibilityForZoomRange();   
                         
-                   }else {
-                        _triggerLayerStatus( 'error' );
+                    }else {
+                        response = $.isPlainObject(response) ? response : {message: response, error_title: 'Unable to add query layer'};
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                   }
+                        _triggerLayerStatus( 'error' );
+                    }
                     
-                   //check if there are layers and tlcmapdatasets among result set
-                   if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
+                    //check if there are layers and tlcmapdatasets among result set
+                    if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
                         options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
-                   } 
-                    
+                    } 
 
                 }
             );          
@@ -726,9 +730,11 @@ function HMapLayer2( _options ) {
             _setVisibilityForZoomRange();   
         }else {
             _triggerLayerStatus( 'error' );
-            window.hWin.HEURIST4.msg.showMsgErr('Can not add recordset layer. Spatial and time data are empty');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Can not add recordset layer. Spatial and time data are empty',
+                error_title: 'Unable to add recordset layer'
+            });
         }
-        
     }
 
 

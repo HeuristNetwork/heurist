@@ -27,7 +27,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Set Record Rating',
-        helpContent: 'recordBookmark.html'
+        helpContent: 'recordBookmark'
     },
 
     _initControls:function(){
@@ -40,7 +40,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 +'<tr><td><input type="radio" value="3" name="r" id="r3"></td><td><label for="r3" class="yellow_star" style="width:38px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="4" name="r" id="r4"></td><td><label for="r4" class="yellow_star" style="width:50px;"></label></td></tr>'
                 +'<tr><td><input type="radio" value="5" name="r" id="r5"></td><td><label for="r5" class="yellow_star" style="width:64px;"></label></td></tr>'
-        +'</tbody></table>').appendTo( this.element.find('#div_fieldset'));
+        +'</tbody></table>').appendTo( this._$('#div_fieldset'));
         
         return this._super();
     },
@@ -59,10 +59,14 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
             let scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
-            let rating = this.element.find('input[type=radio]:checked').val();
+            let rating = this._$('input[type=radio]:checked').val();
             
             if(!(rating>=0 && rating<6)){
-                window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please specify rating value',
+                    error_title: 'Missing rating',
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST
+                });
                 return;
             }
             

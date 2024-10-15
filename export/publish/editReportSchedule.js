@@ -110,20 +110,26 @@ function ReportScheduleEditor() {
             document.getElementById('rps_FileName').value = window.hWin.HEURIST4.ui.cleanFilename(event.target.value);
         }
 
-        _reload_templates();
+        _updateTemplatesList();
 
+        //fills input with values from _entity array
+        _fromArrayToUI();
     }
 
     /**
     *  show the list of available reports
     *  #todo - filter based on record types in result set
     */
-    function _updateTemplatesList(context) {
+    function _updateTemplatesList() {
 
-            let sel = document.getElementById('rps_Template'),
-                option,
-                keepSelIndex = sel.selectedIndex;
+            let sel = $('#rps_Template');
+            const keepSelValue = sel.val();
 
+            sel.empty();
+            
+            window.hWin.HEURIST4.ui.createTemplateSelector(sel, null, keepSelValue, null);
+            
+            /*
             //celear selection list
             while (sel.length>0){
                     sel.remove(0);
@@ -137,22 +143,9 @@ function ReportScheduleEditor() {
                 } // for
 
                 sel.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
-            }
+            }*/
 
-            //fills input with values from _entity array
-            _fromArrayToUI();
     }
-    /**
-    * loads list of templates
-    */
-    function _reload_templates(){
-                let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-                let callback = _updateTemplatesList;
-                let request = {mode:'list'};
-                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
-    }
-
-
 
     /**
     * Fills inputs with values from _entity array
@@ -220,7 +213,10 @@ function ReportScheduleEditor() {
         for(let i = 0, l = fnames.length; i < l; i++){
             let fname = fnames[i];
             let el = document.getElementById(fname);
-            if( !window.hWin.HEURIST4.util.isnull(el) && fname!='rps_ID' ){
+            if( window.hWin.HEURIST4.util.isnull(el) || fname=='rps_ID' ){
+                continue;
+            }
+            
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
                     _updatedFields.push(fname);
@@ -236,7 +232,7 @@ function ReportScheduleEditor() {
                     _updatedFields = [];
                     return "mandatory";
                 }
-            }
+            
         }
 
         return "ok";
@@ -279,7 +275,7 @@ function ReportScheduleEditor() {
         if(!error){
             let ss = (_recID < 0)?"added":"updated";
 
-            // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
+           
             window.close(response); //send back new HEURIST strcuture
         }
         

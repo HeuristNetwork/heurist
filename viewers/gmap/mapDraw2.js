@@ -65,7 +65,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             sPrompt = (type==google.maps.drawing.OverlayType.POLYGON?'Polygon':'Polyline')
                 +': enter coordinates as sequence of lat long separated by space';
         }
-        //if(sPrompt) sPrompt += '(for UTM first easting then northing)';
         $('#coords_hint').html(sPrompt);
     }
 
@@ -1159,7 +1158,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     // and add to selector
                     $sel_viepoints.empty();
                     window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
-                    //window.hWin.HEURIST4.ui.addoption( $sel_viepoints.get(0), gmap.getBounds().toUrlValue(), location_name);
+                    
 
                 }
             }, {title:'Save map extent',yes:'Save',no:"Cancel"});

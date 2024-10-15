@@ -24,7 +24,6 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 
 $is_csv = (@$_REQUEST['csv']==1);
 
@@ -38,15 +37,6 @@ $mysqli = $system->get_mysqli();
 $dbs = mysql__getdatabases4($mysqli, true, $starts_with);
 
 $sysadmin = $system->is_system_admin();
-
-// Force system admin rights
-/*
-if($sysadmin){
-    startMySession();
-    $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
-    session_write_close();
-}
-*/
 
 /**
 * Selects the value after a query
@@ -67,7 +57,7 @@ function mysql__select_val($query) {
 * Calculates the directory size
 * @param mixed $dir Directory to check
 *
-* @todo move to utilities/uFile.php
+* @todo move to utilities/UFile.php
 */
 function dirsize($dir)
 {
@@ -95,7 +85,7 @@ function dirsize($dir)
 }
 
 if($is_csv){
-    $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+    $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     if (false === $fd) {
         die('Failed to create temporary file');
     }
@@ -167,28 +157,14 @@ foreach ($dbs as $db){
             $record_row[] = $record_row[0];//add dbname to the end
 
             $record_row = array_map($aitem_quote, $record_row);
-            $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
+            $arr_databases[] = implode(',',$record_row);
         }
 
         $i++;
     }
-    //if($i>10) {break;}
 }//foreach
 
 if($is_csv){
-
-        /*
-        $filename = 'ServerUsageStatistics.csv';
-
-        rewind($fd);
-        $out = stream_get_contents($fd);
-        fclose($fd);
-
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.$filename);
-        header(CONTENT_LENGTH . strlen($out));
-        exit($out);
-        */
 
         $zipname = 'ServerUsageStatistics.zip';
         $destination = tempnam("tmp", "zip");
@@ -223,7 +199,8 @@ if($is_csv){
 
 }else{
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Database statistics for this server</title>
@@ -232,12 +209,14 @@ if($is_csv){
         <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- jQuery UI -->
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+<!--
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
-        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js" charset="utf8"></script>
+-->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.css"/>
+        <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.js"></script>
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
@@ -257,11 +236,11 @@ if($is_csv){
             <?php if($is_delete_allowed) { /*&& $sysadmin*/?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
 
 
-            <table style="width:98%" class="div_datatable display">
+            <table style="width:98%" class="div_datatable display" role="presentation">
             </table>
             <div style="padding-top:20px;">
             <?php
-                if(is_array($broken_dbs) && count($broken_dbs)>0){
+                if(!isEmptyArray($broken_dbs)){
                     echo '<h4>Broken databases (missed sysIdentification or Records tables)</h4>';
                     echo implode('<br>',$broken_dbs);
                 }
@@ -360,7 +339,7 @@ if($is_csv){
                 { title: "Owner", searchable:false, width:200,  //data: "owner",
                     render: function(data, type) {
                         if (type === 'display') {
-                            return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+"</div>";
+                            return "<div style='max-width:100px' class='three-lines' title='"+data+"'>"+data+'</div>';
                         }else{
                             return data;
                         }
@@ -454,9 +433,9 @@ if($is_csv){
                     })
                     .dialog("open");
 
-                    //$dlg.parent('.ui-dialog').css({top:150,left:150});
 
-                    //$(document.body).scrollTop(0);
+
+
 
                 }
 
@@ -476,7 +455,7 @@ if($is_csv){
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                //submit.parentNode.removeChild(submit);
+
                                 $("#div-pw").hide();
                                 var ele = $("#authorized");
                                 ele.css({'background-image': 'url(../../hclient/assets/loading-animation-white.gif)',
@@ -529,7 +508,7 @@ if($is_csv){
                                             {position: { my: "left top", at: "left+150 top+150", of: window }});
 
                                         $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
-                                                    +databases[current_index]+' '+msg +"</div>");
+                                                    +databases[current_index]+' '+msg +'</div>');
 
                                     }
                                 }

@@ -23,12 +23,20 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+use hserv\entity\DbDefTerms;
+use hserv\utilities\USanitize;
+use hserv\entity\DbRecUploadedFiles;
+
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
+define('ERR_VALIDATION_QUERY','SQL error: Cannot perform validation query: ');
+define('MSG_VALIDATION_1','validation of numeric fields');
+define('MSG_VALIDATION_2','validation of record pointer fields');
 
 /**
 * 3 public methods
@@ -70,12 +78,16 @@ private static function initialize($fields_correspondence=null)
 
 private static function findDisambResolution($keyvalue, $disamb_resolv){
 
-    foreach($disamb_resolv as $idx => $disamb_pair){
-        if($keyvalue==$disamb_pair['key']){
-            return $disamb_pair['recid'];
-        }
+    $idx = findInArray($disamb_resolv, 'key', $keyvalue);
+    if($idx!=null){
+        return @$disamb_resolv[$idx]['recid'];
     }
+
     return null;
+}
+
+private static function composeQuery($fields, $import_table){
+    return "SELECT imp_id, `".implode("`,`",$fields)."` FROM `$import_table` ";
 }
 
 /**
@@ -155,7 +167,7 @@ private static function findRecordIds($imp_session, $params){
         }
     }
 
-    if(count($mapped_fields)==0){
+    if(empty($mapped_fields)){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import CSV. Matching step failed. No mapping defined');
         return false;
     }
@@ -184,7 +196,7 @@ private static function findRecordIds($imp_session, $params){
     if($step>100) {$step = 100;}
     elseif($step<10) {$step=10;}
 
-    $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
+    $select_query = self::composeQuery($sel_fields, $import_table);
 
     $res = $mysqli->query($select_query);
     if($res){
@@ -240,7 +252,7 @@ private static function findRecordIds($imp_session, $params){
                         }elseif(is_numeric($field_type)){
 
                             $from = '';
-                            $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
+                            $where = "d".$index.".dtl_DetailTypeID=".$field_type.SQL_AND;
                             $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
 
                             if( $dt_type == "enum" ||  $dt_type == "relationtype") {
@@ -298,7 +310,7 @@ private static function findRecordIds($imp_session, $params){
                 //split multivalue field
                 if($multivalue_field_name!=null && $multivalue_field_value!=null && $multivalue_field_name!=='' && $multivalue_field_value!==''){
                     $values = self::getMultiValues($multivalue_field_value, $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
-                    if(!is_array($values) || count($values)==0){
+                    if(isEmptyArray($values)){
                         $values = array('');//at least one value
                     }
                 }
@@ -359,7 +371,6 @@ private static function findRecordIds($imp_session, $params){
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
 
                             $is_update = true;
-//return 'termination';
                         }
                         array_push($ids, $pairs[$keyvalue]);
 
@@ -368,7 +379,7 @@ private static function findRecordIds($imp_session, $params){
                         //query to search record ids
                         $search_query = "SELECT rec_ID, rec_Title "
                         ." FROM ".implode(",",$a_from)
-                        ." WHERE ".implode(" and ",$a_where);
+                        .SQL_WHERE.implode(SQL_AND,$a_where);
 
                         $search_stmt = $mysqli->prepare($search_query);
                         //$search_stmt->bind_param('s', $field_value);
@@ -392,7 +403,7 @@ private static function findRecordIds($imp_session, $params){
                             $resolved_recid = null;
                         }
 
-                        if(count($disamb)==0  || $resolved_recid<0){ //nothing found - insert
+                        if(empty($disamb)  || $resolved_recid<0){ //nothing found - insert
 
                             if($ignore_rectype == 1){ // never create new records when ignoring record type
                                 continue;
@@ -447,7 +458,7 @@ private static function findRecordIds($imp_session, $params){
                 }//for multivalues
 
                 if($imp_session['csv_mvsep']=='none'){
-                    $records[$imp_id] = count($ids)>0?$ids[0]:'';
+                    $records[$imp_id] = !empty($ids)?$ids[0]:'';
                 }else{
                     $records[$imp_id] = implode($imp_session['csv_mvsep'], $ids);//IDS to be added to import table
                 }
@@ -542,9 +553,9 @@ public static function assignRecordIds($params){
             $imp_session['sequence'][$currentSeqIndex]['counts'] = array();
         }
 
-        if(count($disambiguation)>0){
+        if(!empty($disambiguation)){
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-            return $imp_session; //"It is not possible to proceed because of disambiguation";
+            return $imp_session; //It is not possible to proceed because of disambiguation
         }
 
 
@@ -552,7 +563,7 @@ public static function assignRecordIds($params){
 
     $import_table = $imp_session['import_table'];
 
-    $mysqli = self::$mysqli; //$system->get_mysqli();
+    $mysqli = self::$mysqli;
 
     $id_fieldname = @$params['idfield'];
     $id_field = null;
@@ -566,7 +577,7 @@ public static function assignRecordIds($params){
     $index = array_search($id_fieldname, $imp_session['columns']);//find it among existing columns
     if($index!==false){ //this is existing field
         $id_field  = "field_".$index;
-        $imp_session['uniqcnt'][$index] = (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'];
+        $imp_session['uniqcnt'][$index] = (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'];
     }
 
     //add new field into import table
@@ -603,7 +614,7 @@ public static function assignRecordIds($params){
         }*/
 
         array_push($imp_session['columns'], $id_fieldname );
-        array_push($imp_session['uniqcnt'], (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'] );
+        array_push($imp_session['uniqcnt'], (!isEmptyArray(@$pairs))?count($pairs):$imp_session['reccount'] );
 
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count );//!!!!
@@ -633,7 +644,7 @@ public static function assignRecordIds($params){
             'disambiguation'=>array()
         );
     }
-    elseif(is_array($records) && count($records)>0)
+    elseif(!isEmptyArray($records))
     {
         //reset index field to '' (means no matching - record will be ignored on update/insert)
         $updquery = "update $import_table set $id_field='' where imp_id>0";
@@ -659,8 +670,7 @@ public static function assignRecordIds($params){
                 }
 
                 //update
-                $updquery = "update ".$import_table." set ".$id_field."='".$ids
-                ."' where imp_id = ".$imp_id;
+                $updquery = "UPDATE `$import_table` SET `$id_field`='$ids' where imp_id=$imp_id";
                 if(!$mysqli->query($updquery)){
                     $is_error = $updquery;
                     break;
@@ -691,7 +701,7 @@ public static function assignRecordIds($params){
 
         // find records to be ignored
         /* they already found in findRecordsIds
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
+        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field."=''";
         $cnt_ignored = mysql__select_value($mysqli, $select_query);
         $imp_session['validation']['count_ignore_rows'] = $cnt_ignored;
         */
@@ -700,36 +710,29 @@ public static function assignRecordIds($params){
     }elseif($match_mode==1){
         //find records to insert and update if matching is skipped AND WE USE current key field
 
+        $cnt_query = "SELECT count(DISTINCT `$id_field`) FROM `$import_table`";
+
         // find records to update
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
+        $select_query = $cnt_query." left join Records on rec_ID=`$id_field` WHERE rec_ID is not null and `$id_field`>0";
         $cnt_update = mysql__select_value($mysqli, $select_query);
-        /*if( $cnt_insert>0 ){
-
-                $imp_session['validation']['count_update'] = $cnt;
-                $imp_session['validation']['count_update_rows'] = $cnt;
-
-                $imp_session['validation']['recs_update'] = array();//do not send all records to client side
-        } */
 
         // find records to insert
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0";
+        $select_query = $cnt_query." WHERE `$id_field`<0";
         $cnt = mysql__select_value($mysqli, $select_query);
 
         // id field not defined -  it records to insert as well
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL";
+        $select_query = "SELECT count(*) FROM `$import_table` WHERE `$id_field` IS NULL";
         $cnt2 = mysql__select_value($mysqli, $select_query);
 
         // record ids for none existing records
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is null and ".$id_field.">0";
+        $select_query = $cnt_query." left join Records on rec_ID=`$id_field` WHERE rec_ID is null and `$id_field`>0";
         $cnt3 = mysql__select_value($mysqli, $select_query);
 
         // insert count
         $cnt_insert = (($cnt>0) ? intval($cnt) : 0) + (($cnt2>0) ? intval($cnt2) : 0) + (($cnt3>0) ? intval($cnt3) : 0);
 
         // find records to be ignored
-        $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
+        $select_query = "SELECT count(*) FROM ".$import_table.SQL_WHERE.$id_field."=''";
         $cnt_ignore = mysql__select_value($mysqli, $select_query);
 
         $imp_session['validation'] = array(
@@ -863,7 +866,7 @@ public static function validateImport($params) {
         $mapping = array();// fieldtype => fieldname in import table
         $sel_query = array();
 
-        if(is_array($mapping_params) && count($mapping_params)>0){
+        if(!isEmptyArray($mapping_params)){
             foreach ($mapping_params as $index => $field_type) {
 
                 $field_name = "field_".$index;
@@ -924,7 +927,7 @@ public static function validateImport($params) {
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];//all rows will be imported as new records
-            $select_query = "SELECT imp_id, `".implode("`,`",$sel_query)."` FROM ".$import_table." LIMIT 5000";//for peview only
+            $select_query = self::composeQuery($sel_fields, $import_table)." LIMIT 5000";//for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -940,16 +943,17 @@ public static function validateImport($params) {
         if(!@$imp_session['indexes'][$id_field]){
 
             //find recid with different rectype
-            $query = "select imp_id, `".implode("`,`",$sel_query)."`, `$id_field`"
-            ." from `$import_table` "
-            ." left join Records on rec_ID=`$id_field`"
-            ." where rec_RecTypeID<>".$recordType;
+            $fields = implode("`,`",$sel_query);
+            $query = "SELECT imp_id, `$fields`, `$id_field` FROM `$import_table` "
+            ." LEFT JOIN Records on rec_ID=`$id_field`"
+            ." WHERE rec_RecTypeID<>".$recordType;
+
             // TPDO: I'm not sure whether message below has been correctly interpreted
             $wrong_records = self::getWrongRecords($query, $imp_session,
                 "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".
                 "The import cannot proceed until this is corrected.","Incorrect record types", $id_field);
 
-            if(is_array($wrong_records) && count($wrong_records)>0) {
+            if(!isEmptyArray($wrong_records)) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
                 $imp_session = $wrong_records;
             }elseif($wrong_records) { //error
@@ -1010,7 +1014,7 @@ public static function validateImport($params) {
                     $imp_session['validation']['count_insert_rows'] = $cnt;
 
                     //find first 5000 records to preview display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM `$import_table` "
+                    $select_query = self::composeQuery($sel_query, $import_table)
                             ." WHERE `$id_field`<0 or `$id_field` IS NULL LIMIT 5000";//for preview only
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
             }
@@ -1022,12 +1026,11 @@ public static function validateImport($params) {
             $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
             $imp_session['validation']['count_insert_rows'] = $imp_session['validation']['count_insert'];
 
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)
-            ." FROM `$import_table` "
+            $select_query = self::composeQuery($sel_query, $import_table)
             ." LEFT JOIN Records on rec_ID=`$id_field` "
             ." WHERE `$id_field`>0 and rec_ID is null LIMIT 5000";//for preview only
             $res = mysql__select_all($mysqli, $select_query);
-            if($res && count($res)>0){
+            if(!isEmptyArray($res)){
                 if(@$imp_session['validation']['recs_insert']){
                     $imp_session['validation']['recs_insert'] = array_merge($imp_session['validation']['recs_insert'], $res);
                 }else{
@@ -1067,7 +1070,7 @@ public static function validateImport($params) {
     $query_date_nam = array();
     $query_date_where = array();
 
-    $numeric_regex = "'^([+-]?[0-9]+\.*)+'";// "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
+    $numeric_regex = "'^([+-]?[0-9]+\.*)+'";
 
     if($sequence){
         $mapping_prev_session = @$sequence['mapping_keys'];//OR mapping_flds???
@@ -1077,11 +1080,7 @@ public static function validateImport($params) {
 
 
     $geo_fields = null;
-    /*
-    if($mapping['latitude'] && $mapping['longitude']){ //not used
-        // northing, easting
-        $geo_fields = array($mapping['latitude'],$mapping['longitude']);
-    }*/
+
 
     //loop for all fields in record type structure
     foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
@@ -1108,10 +1107,10 @@ public static function validateImport($params) {
                 $field_name2 = array_search($recordType.".".$ft_id."_long", $mapping_prev_session, true);
             }
 
-            if(is_array($field_name1) && count($field_name1)>0){
+            if(!isEmptyArray($field_name1)){
                 $field_name1 = $field_name1[0];
             }
-            if(is_array($field_name2) && count($field_name2)>0){
+            if(!isEmptyArray($field_name2)){
                 $field_name2 = $field_name2[0];
             }
             /*
@@ -1158,7 +1157,7 @@ public static function validateImport($params) {
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){ //required field is not mapped - error
                 //$ft_vals[$idx_fieldtype] == "file" ||
-                if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource
+                if(!($ft_vals[$idx_fieldtype] == "resource")){ //except file and resource (record pointer)
                     array_push($missed, $ft_vals[0]);
                 }
 
@@ -1191,7 +1190,7 @@ public static function validateImport($params) {
         if($field_name){  //mapping exists
 
             foreach($field_name as $f_name){
-                $dt_mapping[$f_name] = $ft_id; //$ft_vals[$idx_fieldtype];
+                $dt_mapping[$f_name] = $ft_id;
             }
 
             if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
@@ -1254,7 +1253,7 @@ public static function validateImport($params) {
     //ignore_required
 
     //1. Verify that all required field are mapped  =====================================================
-    if(count($missed)>0  &&
+    if(!empty($missed)  &&
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
@@ -1274,7 +1273,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             if($ignore_update){
                 $only_for_specified_id = " (NOT(`$id_field` > 0 OR `$id_field`='')) AND ";
             }else{
-                $only_for_specified_id = " (`$id_field`!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+                $only_for_specified_id = " (`$id_field`!='') AND "; //otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND "
             }
         }
     }else{
@@ -1286,18 +1285,17 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
     $k=0;
     foreach ($query_reqs as $field){
-        $query = "select imp_id, ".implode(",",$sel_query)
-        ." from $import_table "
-        ." where ".$only_for_specified_id;
+        $query = self::composeQuery($sel_query, $import_table)
+        .SQL_WHERE.$only_for_specified_id;
         if(@$query_reqs_where[$k]){
-            $query = $query . ' ('.$query_reqs_where[$k].')';// implode(" or ",$query_reqs_where);
+            $query = $query . ' ('.$query_reqs_where[$k].')'; // implode(" or ",$query_reqs_where);
         }else{
             $query = $query . ' 1';
         }
 
         $k++;
 
-        $field = preg_replace(REGEX_ALPHANUM, "", $field);//for snyk
+        $field = preg_replace(REGEX_ALPHANUM, "", $field); //for snyk
 
         $wrong_records = self::getWrongRecords($query, $imp_session,
             "This field is required. It is recommended that a value must be supplied for every record. "
@@ -1316,7 +1314,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 $cnt2 = count(@$imp_session['validation']['warning']);//now
                 if($cnt2>$cnt){
                     $wrong_recs_ids = $imp_session['validation']['warning'][$cnt]['recs_error_ids'];
-                    if(count($wrong_recs_ids)>0){
+                    if(!empty($wrong_recs_ids)){
                         $badrecs = array();
                         foreach($imp_session['validation']['recs_insert'] as $idx=>$flds){
                             if(in_array($flds[0], $wrong_recs_ids)){
@@ -1355,8 +1353,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table  where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
@@ -1366,12 +1363,12 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         }else{
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
-            ." where ".$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table)
+                ." left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
+                .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_enum_where[$k]){
-                $query = $query . ' ('.$query_enum_where[$k].')';// implode(" or ",$query_enum_where);
+                $query = $query . ' ('.$query_enum_where[$k].')'; // implode(" or ",$query_enum_where)
             }else{
                 $query = $query . ' 1';
             }
@@ -1383,7 +1380,6 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         $k++;
 
-        //if($wrong_records) {return $wrong_records;}
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }elseif($wrong_records) {
@@ -1391,16 +1387,16 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             return false;
         }
     }
-    //4. In DB: Verify resource fields ==================================================
-    mysql__update_progress(null, $progress_session_id, false, '4,7,validation of resource fields');
+
+    //4. In DB: Verify resource (record pointer) fields ==================================================
+    mysql__update_progress(null, $progress_session_id, false, '4,7,'.MSG_VALIDATION_2);
 
     $k=0;
     foreach ($query_res as $field){
 
          if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
@@ -1408,12 +1404,11 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                                         $field, $dt_mapping[$field], $idx, $recStruc, $recordType, $progress_session_id);
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
-            ." where ".$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table)." left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
+            .SQL_WHERE.$only_for_specified_id;
 
             if(@$query_res_where[$k]){
-                $query = $query . ' ('.$query_res_where[$k].')';// implode(" or ",$query_res_where);
+                $query = $query . ' ('.$query_res_where[$k].')'; // implode(" or ",$query_res_where)
             }else{
                 $query = $query . ' 1';
             }
@@ -1436,24 +1431,21 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //5. Verify numeric fields
-    mysql__update_progress(null, $progress_session_id, false, '5,7,validation of numeric fields');
+    mysql__update_progress(null, $progress_session_id, false, '5,7,'.MSG_VALIDATION_1);
 
     $k=0;
     foreach ($query_num as $field){
 
         if(in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateNumericField($mysqli, $query, $imp_session, $field, $idx, 'warning', $progress_session_id);
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            ." where ".$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id;
 
             if(@$query_num_where[$k]){
                 $query = $query . '('.$query_num_where[$k].')';
@@ -1486,17 +1478,14 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table where ".$only_for_specified_id." 1";
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id." 1";
 
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateDateField($query, $imp_session, $field, $idx, 'warning');
 
         }else{
-            $query = "select imp_id, ".implode(",",$sel_query)
-            ." from $import_table "
-            ." where ".$only_for_specified_id;
+            $query = self::composeQuery($sel_query, $import_table).SQL_WHERE.$only_for_specified_id;
 
             if(@$query_date_where[$k]){
                 $query = $query . '('.$query_date_where[$k].')';
@@ -1521,7 +1510,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //7. Verify geo fields, TODO: Verify geo fields for UTM
-    if(is_array($geo_fields) && count($geo_fields)>0){
+    if(!isEmptyArray($geo_fields)){
 
         foreach($geo_fields as $k=>$fld){ //for snyk
             $geo_fields[$k] = preg_replace(REGEX_ALPHANUM, "", $fld);
@@ -1679,7 +1668,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1718,7 +1707,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of enumeration fields');
         }
 
         $wrong_records = array();
@@ -1727,8 +1716,6 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         $cc = 0;
 
         while ($row = $res->fetch_row()){
-
-            //if(!($row[0]==575)) {continue;}
 
             $is_error = false;
             $newvalue = array();
@@ -1757,7 +1744,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                     if (!$term_id)
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                         if(array_search($r_value, $wrong_values)===false){
                                 array_push($wrong_values, $r_value);
                         }
@@ -1774,7 +1761,8 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_2);
+
             }
         }
         $res->close();
@@ -1795,7 +1783,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1825,7 +1813,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of resource fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.','.MSG_VALIDATION_2);
         }
 
         $wrong_records = array();
@@ -1841,7 +1829,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
                     if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1855,7 +1843,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_2);
             }
         }
         $res->close();
@@ -1875,7 +1863,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1899,7 +1887,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
         $cnt = 0;
         $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
         if($tot_count>4000){
-            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.','.MSG_VALIDATION_1);
         }
 
         $wrong_records = array();
@@ -1909,11 +1897,11 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value2)!='NULL'){
+                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
                     if(!is_numeric($r_value)){
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1927,7 +1915,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 
             $cnt++;
             if($tot_count>4000 && $cnt%2000==0){
-                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of numeric fields');
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.','.MSG_VALIDATION_1);
             }
         }
         $res->close();
@@ -1946,7 +1934,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -1976,7 +1964,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                 if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
 
-                    if( preg_match('/^-?\d+$/', $r_value) ){ //this is year only
+                    if( preg_match(REGEX_YEARONLY, $r_value) ){ //this is year only
                         array_push($newvalue, $r_value);
                     }else{
 
@@ -1991,7 +1979,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                                 array_push($newvalue, $value);
                              } catch (Exception  $e){
                                 $is_error = true;
-                                array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                                array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                              }
                          }
 
@@ -2004,7 +1992,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                             array_push($newvalue, $value);
                         }else{
                             $is_error = true;
-                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                            array_push($newvalue, "<span style=\"color:red\">$r_value</span>");
                         }
                         */
 
@@ -2033,7 +2021,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
         }
 
     }else{
-        return "SQL error: Cannot perform validation query: ".$query;
+        return ERR_VALIDATION_QUERY.$query;
     }
     return null;
 }
@@ -2116,36 +2104,37 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
 /**
 * Split multivalue field
 *
-* @param array $values
+* @param array|string $values
 * @param mixed $csv_enclosure
 */
 private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
     $nv = array();
 
-    $values =  ($csv_mvsep=='none')?array($values) :explode($csv_mvsep, $values);
+    $values =  ($csv_mvsep=='none')?array($values) : explode($csv_mvsep, $values);
 
     if(count($values)==1){
         array_push($nv, super_trim($values[0]));
-    }else{
+        return $nv;
+    }
 
-        if($csv_enclosure==1){
-            $csv_enclosure = "'";
-        }elseif($csv_enclosure=='none'){
-            $csv_enclosure = 'ʰ';//rare character
-        }else {
-            $csv_enclosure = '"';
-        }
+    if($csv_enclosure==1){
+        $csv_enclosure = "'";
+    }elseif($csv_enclosure=='none'){
+        $csv_enclosure = 'ʰ';//rare character
+    }else {
+        $csv_enclosure = '"';
+    }
 
-        foreach($values as $idx=>$value){
-            if($value!=""){
-                if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
-                    $value = substr($value,1,strlen($value)-2);
-                }
-                array_push($nv, super_trim($value));
+    foreach($values as $idx=>$value){
+        if($value!=""){
+            if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
+                $value = substr($value,1,strlen($value)-2);
             }
+            array_push($nv, super_trim($value));
         }
     }
+
     return $nv;
 }
 
@@ -2156,13 +2145,11 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 //
 private static function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
 
-    if(is_array($newids) && count($newids)>0){
+    if(!isEmptyArray($newids)){
 
     $newids = "'".implode($csv_mvsep, $newids)."'";
 
-    $updquery = "UPDATE ".$import_table
-    ." SET ".$id_field."=".$newids
-    ." WHERE imp_id = ". $imp_id;
+    $updquery = "UPDATE `$import_table` SET `$id_field`=$newids WHERE imp_id=$imp_id";
 
     if(!self::$mysqli->query($updquery)){
         print "<div style='color:red'>Cannot update import table (set record id ".$newids.") for line:".$imp_id.".</div>";
@@ -2180,29 +2167,34 @@ private static function findOriginalRecord($recordId){
 
     $query = "SELECT rec_URL, rec_ScratchPad FROM Records WHERE rec_ID=".$recordId;
     $row = mysql__select_row(self::$mysqli, $query);
-    if($row){
-
-        $details['recordURL'] = $row[0];
-        $details['recordNotes'] = $row[1];
-
-        $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
-        $dets = mysql__select_all(self::$mysqli, $query);
-        if($dets){
-            foreach ($dets as $row){
-                $bd_id = $row[0];
-                $field_type = $row[1];
-                if($row[4]){ //dtl_UploadedFileID
-                    $value = $row[4];
-                }elseif($row[3]){
-                    $value = $row[2].' '.$row[3];
-                }else{
-                    $value = $row[2];
-                }
-                if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
-                $details["t:".$field_type]["bd:".$bd_id] = $value;
-            }
-        }
+    if(!$row){
+        return $details;
     }
+
+    $details['recordURL'] = $row[0];
+    $details['recordNotes'] = $row[1];
+
+    $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, ST_asWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
+    $dets = mysql__select_all(self::$mysqli, $query);
+    if(!$dets){
+        return $details;
+    }
+
+
+    foreach ($dets as $row){
+        $bd_id = $row[0];
+        $field_type = $row[1];
+        if($row[4]){ //dtl_UploadedFileID
+            $value = $row[4];
+        }elseif($row[3]){
+            $value = $row[2].' '.$row[3];
+        }else{
+            $value = $row[2];
+        }
+        if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
+        $details["t:".$field_type]["bd:".$bd_id] = $value;
+    }
+
     return $details;
 }
 
@@ -2299,6 +2291,11 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         }
     }
 
+    $increment_update = true;
+    if($updating_record){
+        $increment_update = self::_isRecordUpdating($recordId, $record);
+    }
+
     $out = recordSave(self::$system, $record, false, false, 0, $record_count);//see recordModify.php
 
     $new_recordID = null;
@@ -2326,9 +2323,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 $res = self::getImportValue($imp_id, $import_table);
                 if(is_array($res)){
                     $s = htmlspecialchars(implode(", ", $res));
-                    print "<div style='padding-left:40px'>".$s."</div>";
+                    print "<div style='padding-left:40px'>".$s.DIV_E;
                 }
-                print "</div>";
+                print DIV_E;
             }
         }else{
             if(self::$rep_skipped<100){
@@ -2353,7 +2350,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             //do not count updates if this record was already inserted before
             if($updating_record && !in_array($new_recordID, self::$rep_unique_ids)){
                 self::$rep_unique_ids[] = $new_recordID;
-                self::$rep_updated++;
+                !$increment_update || self::$rep_updated++;
             }elseif(is_numeric($new_recordID) && $new_recordID > 0){
                 self::$rep_added++;
                 self::$rep_unique_ids[] = $new_recordID;
@@ -2370,9 +2367,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
                 if($new_recordID>0){
 
-                    $updquery = "UPDATE ".$import_table
-                    ." SET ".$id_field."=".$new_recordID
-                    ." WHERE imp_id in ($imp_ids)";
+                    $updquery = "UPDATE `$import_table` SET `$id_field`=$new_recordID WHERE imp_id in ($imp_ids)";
 
                     if(!self::$mysqli->query($updquery) && $mode_output!='json'){
                         print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines: $imp_ids</div>";
@@ -2382,8 +2377,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             }else{
 
                 $oldvals = mysql__select_all( self::$mysqli,
-                            'SELECT imp_id, '.$id_field.' FROM '.$import_table
-                                ." WHERE imp_id in ($imp_ids)");
+                            "SELECT `imp_id`, `$id_field` FROM `$import_table` WHERE `imp_id` in ($imp_ids)");
                 if(is_array($oldvals))
                 {
                     foreach($oldvals as $idx=>$row){
@@ -2400,11 +2394,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                             return $v == $old_id_in_idfield ? $new_id : $v;
                         }, $ids);*/
 
-                        $new_ids = implode($csv_mvsep, $new_ids);
+                        $new_ids = "'".implode($csv_mvsep, $new_ids)."'";
 
-                        $updquery = 'UPDATE '.$import_table
-                            .' SET '.$id_field.'="'.$new_ids
-                            .'" WHERE imp_id='.intval($row[0]);
+                        $updquery = "UPDATE `$import_table` SET `$id_field`=$new_ids WHERE imp_id=".intval($row[0]);
 
                         self::$mysqli->query($updquery);
                     }//foreach
@@ -2415,7 +2407,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
         /*
         if (@$out['warning'] && $mode_output!='json') {
-            print "<div style=\"color:#ff8844\">Warning: ".implode(";",$out["warning"])."</div>";
+            print "<div style=\"color:#ff8844\">Warning: ".implode(";",$out["warning"]).DIV_E;
         }
         */
 
@@ -2531,7 +2523,7 @@ public static function performImport($params, $mode_output){
     if(@$params['mapping']){    //new way
         $mapping = @$params['mapping'];// idx => fieldtype ID
 
-        if(is_array($mapping) && count($mapping)>0){
+        if(!isEmptyArray($mapping)){
             foreach ($mapping as $index => $field_type) {
                 $field_name = "field_".$index;
                 array_push($field_types, $field_type);
@@ -2660,7 +2652,7 @@ public static function performImport($params, $mode_output){
         $pairs_id_value = array();//for multivalue rec_id     new_rec_id => value of mapped field
 
 
-        self::$mysqli->query('set @suppress_update_trigger=1');
+        mysql__supress_trigger(self::$mysqli, true);
 
         // start transaction
         $use_transaction = true;
@@ -2707,7 +2699,7 @@ public static function performImport($params, $mode_output){
 
                         //record id is changed - save data
                         //$recordId is already set
-                        if($previos_recordId!=null && count($details)>0){ //perform import action
+                        if($previos_recordId!=null && !empty($details)){ //perform import action
 
                             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
                             if($allow_operation){
@@ -2738,7 +2730,7 @@ public static function performImport($params, $mode_output){
                         if($recordId_in_import>0){ //possible update
                             // find original record in HDB
                             $details_orig = self::findOriginalRecord($recordId_in_import);
-                            if(count($details_orig)==0){
+                            if(empty($details_orig)){
                                 //record not found - this is insert with predefined ID
                                 $recordId = -$recordId_in_import;
 
@@ -2825,7 +2817,7 @@ public static function performImport($params, $mode_output){
                             $value = null;
                             $r_value = super_trim($r_value);
 
-                            if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
+                            if($fieldtype_type == "enum" || $fieldtype_type == "relationtype"){
 
                                 $r_value = trim_lower_accent($r_value);
 
@@ -2886,7 +2878,7 @@ public static function performImport($params, $mode_output){
                                         $geom = geoPHP::load($r_value, 'wkt');
                                         if(!$geom->isEmpty()){
                                             $json = $geojson_adapter->write($geom, true);
-                                            $json = geo_SimplifyAndConvert_JSON($json, false, $gPoint);
+                                            $json = geoSimplifyAndConvertToJSON($json, false, $gPoint);
                                             $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
                                         }
                                     }
@@ -3006,7 +2998,7 @@ public static function performImport($params, $mode_output){
                                             //add to table
                                             $ulf_ID = mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf',
                                                 array("ulf_ID"=>0,
-                                                    'ulf_OrigFileName'=>'_remote',
+                                                    'ulf_OrigFileName'=>ULF_REMOTE,
                                                     'ulf_UploaderUGrpID'=> self::$system->get_user_id(),
                                                     //'ulf_ObfuscatedFileID'=>$nonce,
                                                     'ulf_ExternalFileReference'=>$r_value,
@@ -3154,7 +3146,7 @@ public static function performImport($params, $mode_output){
                 // || $recordId==null
                 //add - update record for 2 cases: idfield not defined, idfield is multivalue
                                             //$recordId==null
-                if(  ($id_field_not_defined || $ismulti_id) && count($details)>0 ){ //id field not defined - insert for each line
+                if(  ($id_field_not_defined || $ismulti_id) && !empty($details) ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
 
@@ -3196,7 +3188,7 @@ public static function performImport($params, $mode_output){
         $res->close();
 
                                         //&& $recordId!=null
-        if($id_field && count($details)>0){ //action for last record
+        if($id_field && !empty($details)){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
             if($allow_operation){
@@ -3217,7 +3209,7 @@ public static function performImport($params, $mode_output){
             if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
         }
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
-        self::$mysqli->query('set @suppress_update_trigger=NULL');
+        mysql__supress_trigger(self::$mysqli, false);
 
         /*
                 if($use_transaction){
@@ -3313,5 +3305,285 @@ public static function performImport($params, $mode_output){
     return $res;
 } //end performImport
 
+//
+// Imports all missing terms
+//
+public static function importTerms($params){
+
+    self::initialize();
+
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+    $import_table = $imp_session['import_table'];
+
+    $fields = @$params['fields'];
+    if(!is_array($fields) || empty($fields)){
+        return [];
+    }
+
+    $trm_Separator = @$params['trm_Separator'];
+    if(empty($trm_Separator) || $trm_Separator !== '.'){
+        $trm_Separator = '';
+    }
+
+    $progress_session_id = @$params['session'];
+
+    $results = [
+        'invalid' => [],
+        'error' => [],
+        'success' => []
+    ];
+
+    $def_terms = new DbDefTerms(self::$system);
+
+    mysql__update_progress(null, $progress_session_id, true, "0,0");
+
+    $total = 0;
+
+    // $fields -  array(field id in import table, $dty_ID, vocabulary ID)
+    foreach($fields as $idx => $field){
+
+        $tab_num = $idx + 1;
+
+        if(!is_array($field) || count($field) != 3){// skip
+            $results['invalid'][$idx] = "Tab $tab_num => Invalid number of items provided";
+            continue;
+        }
+
+        $field_id = $field[0];
+        $dty_ID = intval($field[1]);
+        $parent_ID = intval($field[2]);
+
+        if(strpos($field_id, 'field_') !== 0 || $dty_ID <= 0 || $parent_ID <= 0){
+            $results['invalid'][$idx] = "Tab $tab_num => Invalid parameters provided";
+            continue;
+        }
+
+        $parent_ID = mysql__select_value(self::$mysqli, "SELECT trm_ID FROM defTerms WHERE trm_ID = ?", ['i', $parent_ID]);
+        if(!$parent_ID || $parent_ID < 0){
+            $results['error'][$idx] = "Tab $tab_num => Invalid parent term id provided";
+            continue;
+        }
+
+        //find all not empty terms from import table
+        $query = "SELECT imp_ID, $field_id FROM $import_table WHERE $field_id <> '' GROUP BY $field_id";
+
+        $terms = mysql__select_assoc2(self::$mysqli, $query);
+
+        $results['success'][$idx] = [];
+
+        if(empty($terms)){
+            continue;
+        }
+        $results['error'][$idx] = [];
+
+        $row_total = count($terms);
+        mysql__update_progress(null, $progress_session_id, false, "0,$row_total");
+
+        $new_terms = [];
+
+        $new_term = [
+            'trm_Label' => null,
+            'trm_ParentTermID' => $parent_ID,
+            'trm_Domain' => 'enum'
+        ];
+
+        $row_count = 1;
+        foreach($terms as $row => $term){
+
+            $row_count ++;
+
+            if(mb_strlen($term) > 200){
+                $results['error'][$idx] = "Row $row => Invalid term label (more than 200 characters)";
+                continue;
+            }
+
+            $new_term['trm_Label'] = $term;
+
+            $new_terms[] = $new_term;
+
+            if(!empty($new_terms) && count($new_terms) % 500 === 0){
+
+                $def_terms->setData([
+                    'fields' => $new_terms,
+                    'term_separator' => $trm_Separator
+                ]);
+
+                $res = $def_terms->batch_action();
+                if(!$res){
+                    $results['error'][$idx] = 'batch_action: '.self::$system->getErrorMsg();
+                    continue 2;
+                }
+
+                if(!empty($res)){
+                    $results['success'][$idx] = array_merge($results['success'][$idx], $res);
+                    $total += count($res);
+                }
+
+                $new_terms = [];
+
+                mysql__update_progress(null, $progress_session_id, false, "$row_count,$row_total");
+            }
+        }
+
+        mysql__update_progress(null, $progress_session_id, false, "$row_total,$row_total");
+
+        if(!empty($new_terms)){
+
+            $def_terms->setData([
+                'fields' => $new_terms,
+                'term_separator' => $trm_Separator
+            ]);
+
+            $res = $def_terms->batch_action();
+            if(!$res){
+                $results['error'][$idx] = 'batch_action(2): '.self::$system->getErrorMsg();
+                continue;
+            }
+
+            if(!empty($res)){
+                $results['success'][$idx] = array_merge($results['success'][$idx], $res);
+                $total += count($res);
+            }
+        }
+
+        if(empty($results['error'][$idx])){
+            unset($results['error'][$idx]);
+        }else{
+            $results['error'][$idx] = "Tab $tab_num:<br>" . implode('<br>', $results['error'][$idx]) . "<br>";
+        }
+    }
+
+    $results['added'] = $total;
+
+    mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+
+    return $results;
+}
+
+//
+// Insert a new column into each record row, with pre-filled data
+//
+public static function insertNewColumns($params){
+
+    self::initialize();
+
+    $mysqli = self::$mysqli;
+
+    // Prepare data
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+    $import_table = $imp_session['import_table'];
+
+    $col_name = @$params['column_name'];
+    $col_data = USanitize::cleanupSpaces(@$params['column_data']);
+    if(empty($col_name) || empty($col_data)){
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Both a new column name and data are required');
+        return false;
+    }
+
+    $new_column = count($imp_session['columns']);
+    $new_column = "field_{$new_column}";
+
+    $imp_session['columns'][] = $col_name;
+    $imp_session['uniqcnt'][] = "1";
+
+    $column_size = mb_strlen($col_data) + 5;
+
+    // Update import table
+    $add_column = "ALTER TABLE $import_table ADD $new_column VARCHAR($column_size)";
+    $res = $mysqli->query($add_column);
+    if(!$res){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to add the new column to the desired import table');
+        return false;
+    }
+
+    $update_query = "UPDATE $import_table SET $new_column = ?";
+    $res = mysql__exec_param_query($mysqli, $update_query, ['s', $col_data]);
+    if($res !== true){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to update the column with provided data');
+        return false;
+    }
+
+    // Update import session
+    $res = ImportSession::save($imp_session);
+    if(!$res){
+        self::$system->addError(HEURIST_DB_ERROR, 'Failed to update import session with new column details');
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Checks if the record is actually being updated with new values
+ *
+ * @param integer $rec_ID - record ID
+ * @param array $record - record to be saved, needs to contain the 'details' key
+ * @return bool whether the record can be considered to be updating
+ */
+private static function _isRecordUpdating($rec_ID, $record){
+
+    $existing_record = recordSearchByID(self::$system, $rec_ID, false);
+    $existing_details = recordSearchDetailsRaw(self::$system, $rec_ID);
+
+    // Check if header fields are being updated, or if the record didn't have any values
+    $has_scratchpad = !empty($record['details']['recordNotes']);
+    $has_url = !empty($record['details']['recordURL']);
+    if(empty($existing_details)
+    || ($has_scratchpad && $record['details']['recordNotes'] != $existing_record['rec_ScratchPad'])
+    || ($has_url && $record['details']['recordURL'] != $existing_record['rec_URL'])){
+        return true;
+    }
+
+    $existing_values = [];
+    $rtn = false;
+    foreach($record['details'] as $dty_ID => $values){
+
+        if(strpos($dty_ID, 't:') === false){
+            // skip imp_ID, recordNotes and recordURL
+            continue;
+        }
+        $dty_ID = str_replace('t:', '', $dty_ID);
+
+        // Retrieve necessary values
+        $check_values = null;
+        if(array_key_exists($dty_ID, $existing_values)){
+            $check_values = $existing_values[$dty_ID];
+        }else{
+            $check_values = array_filter($existing_details, function($detail) use ($dty_ID){
+                return $detail['dtl_DetailTypeID'] == $dty_ID;
+            });
+            $existing_values[$dty_ID] = $check_values;
+        }
+
+        // Check whether values have been removed/added
+        if(count($check_values) != count($values)){
+            $rtn = true;
+            break;
+        }
+
+        // Now check whether values have been updated
+        $exists = array_filter($check_values, function($detail) use ($values){
+
+            $value = !empty($detail['dtl_Value']) ? $detail['dtl_Value'] : '';
+            $value = !empty($detail['dtl_Geo']) ? $detail['dtl_Geo'] : $value;
+            $value = !empty($detail['dtl_UploadedFileID']) ? $detail['dtl_UploadedFileID'] : $value;
+
+            return !empty($value) && in_array($value, $values);
+        });
+
+        if(count($exists) < count($values)){
+            $rtn = true;
+            break;
+        }
+    }
+
+    return $rtn;
+}
 } //end class
 ?>

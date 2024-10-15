@@ -141,7 +141,7 @@ $.widget( "heurist.searchInput", {
         // bind click events
         this._on( this.btn_start_search, {
             click:  function(){
-                //that.option("search_domain", "a");
+               
                 that._doSearch();}
         });
    
@@ -251,11 +251,11 @@ $.widget( "heurist.searchInput", {
             
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
             
-            let request = {}; //window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+            let request = {}; 
 
             request.q = qsearch;
             request.w  = this.options.search_domain;
-            request.detail = 'ids'; //'detail';
+            request.detail = 'ids';
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;
             request.search_page = this.options.search_page;
@@ -286,10 +286,10 @@ $.widget( "heurist.searchInput", {
 
         
         if(this.options.is_h6style){
-            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
             if(widget){
                     let pos = this.element.offset();
-                    widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
+                    widget.slidersMenu('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
             }
         }else{
             
@@ -380,7 +380,7 @@ $.widget( "heurist.searchInput", {
                             if(this.options.update_on_external_search == true){
                                 that.input_search.val(qs);
                             }
-                            //that.options.search_domain = data.w;
+                           
                             that.query_request = data;
                             that._refresh();
                         }

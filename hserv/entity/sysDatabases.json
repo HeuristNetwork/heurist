@@ -4,7 +4,7 @@
         "tableName": "sysIdentifications",
         "tablePrefix": "sys",
         
-        "helpContent": "sysDatabases.html",
+        "helpContent": "sysDatabases.htm",
         
         "searchFormContent": "searchSysDatabases.html",
         

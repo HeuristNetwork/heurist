@@ -20,12 +20,12 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
 
         //get error and response
@@ -41,7 +41,7 @@
 
         }else{
 
-            $action = @$_REQUEST['a'];// || @$_REQUEST['action'];
+            $action = @$_REQUEST['a'];
 
             // call function from db_record library
             // these function returns standard response: status and data
@@ -107,20 +107,13 @@
 
 
                 $mysqli = $system->get_mysqli();
-                $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-                if($keep_autocommit===true) {$mysqli->autocommit(FALSE);}
-                if (strnatcmp(phpversion(), '5.5') >= 0) {
-                    $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
-                }
+                $keep_autocommit = mysql__begin_transaction($mysqli);
 
                 $response = recordDuplicate($system, $_REQUEST['id']);
 
-                if( $response && @$response['status']==HEURIST_OK ){
-                    $mysqli->commit();
-                }else{
-                    $mysqli->rollback();
-                }
-                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+                $isOK = $response && @$response['status']==HEURIST_OK;
+
+                mysql__end_transaction($mysqli, $isOK, $keep_autocommit);
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);
@@ -135,7 +128,7 @@ if($response==false){
 }
 
 // Return the response object as JSON
-//header(CTYPE_JSON);
+// header(CTYPE_JSON)
 $system->setResponseHeader();
 print json_encode($response);
 ?>

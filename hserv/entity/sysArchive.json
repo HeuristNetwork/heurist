@@ -4,7 +4,7 @@
         "tableName": "sysArchive",
         "tablePrefix": "arc",
         
-        "helpContent": "sysArchive.html",
+        "helpContent": "sysArchive.htm",
         
         "searchFormContent": "searchSysArchive.html",
         

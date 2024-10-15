@@ -22,15 +22,16 @@
 
 define('PDIR','../../');//need for proper path to js and css
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
-//header(HEADER_CORS_POLICY);
+require_once dirname(__FILE__).'/../../autoload.php';
+
 header(CTYPE_JSON);
 
-$system = new System();
+$system = new hserv\System();
 
-$sysadmin_pwd = System::getAdminPwd('sysadmin_pwd');
+$sysadmin_pwd = USanitize::getAdminPwd('sysadmin_pwd');
 
 $data = null;
 $response = array();
@@ -79,7 +80,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		}
 
 		$response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
-		//$system->addError(HEURIST_ERROR, "Bulk Email Other: Unable to retrieve the local id ". $missing);
+
 		$rtn = json_encode($response);
 
 		print $rtn;
@@ -150,7 +151,11 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 
 		// Ensure that the Heurist db has the required tables, ignore if they don't
-        $query = "SHOW TABLES IN ".$db[0]." WHERE Tables_in_".$db[0]." = 'Records' OR Tables_in_".$db[0]." = 'recDetails' OR Tables_in_".$db[0]." = 'sysUGrps' OR Tables_in_".$db[0]." = 'sysUsrGrpLinks'";
+        $dbname = $db[0];
+        if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //invalid dbname
+            continue;
+        }
+        $query = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'Records' OR Tables_in_$dbname = 'recDetails' OR Tables_in_$dbname = 'sysUGrps' OR Tables_in_$dbname = 'sysUsrGrpLinks'";
 
         $table_listing = $mysqli->query($query);
         if (!$table_listing || mysqli_num_rows($table_listing) != 4) { // Skip, missing required tables
@@ -178,7 +183,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$lastmod_logic = $mysqli->real_escape_string( filter_var($db_request['lastmod_logic'],FILTER_SANITIZE_STRING) );
 		$lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
 		$lastmod_period = intval($db_request['lastmod_period']);
-		//$lastmod_unit = $mysqli->real_escape_string( filter_var($db_request['lastmod_unit'],FILTER_SANITIZE_STRING) );
+
         //to avoid injection
         $lastmod_unit = 'ALL';
         switch (strtoupper(@$db_request['lastmod_unit'])) {
@@ -360,7 +365,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 //
 function getDatabaseDetails($mysqli, $db_list){
 
-	//global $mysqli;
+
 	$details = array();
 
 	// Retrieve record count and last update (record or structure)
@@ -370,42 +375,21 @@ function getDatabaseDetails($mysqli, $db_list){
 
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 		// Get record count
-		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
-		$res = $mysqli->query($cnt_query);
-		if(!$res){
-			$db_data['rec_count'] = 0;
-		}else{
-			while($row = $res->fetch_row()){
-				$db_data['rec_count'] = $row[0];
-			}
-		}
+        $db_data['rec_count'] = mysql__select_value($mysqli, "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1");
 
-		$last_recent = null;
-		$last_struct = null;
+        $last_recent = mysql__select_value($mysqli, "SELECT CONVERT_TZ(MAX(rec_Modified), @@session.time_zone, "+00:00") FROM `$database`.Records WHERE rec_FlagTemporary != 1");
 
-		$last_rec_query = "SELECT MAX(rec_Modified) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
-		$res = $mysqli->query($last_rec_query);
-		if($res){
-			while($row = $res->fetch_row()){
-				$last_recent = date_create($row[0]);
-			}
-		} // else keep $last_rec null
+        if(!$last_recent){
+            $last_recent = date_create($last_recent);
+        }
 
-		$last_struct_query = "SELECT MAX(rst_Modified) FROM `$database`.defRecStructure";
-		$res = $mysqli->query($last_struct_query);
-		if($res){
-			while($row = $res->fetch_row()){
-				$last_struct = date_create($row[0]);
+        $last_struct = getDefinitionsModTime($mysqli, true);
 
-				if(!$last_recent || $last_struct > $last_recent){
-					$last_recent = $last_struct;
-				}
-			}
-		} // else keep $last_struct null
+        if(!$last_recent || $last_struct>$last_recent){
+            $last_recent = $last_struct;
+        }
 
-		if($last_recent){
-			$db_data['last_update'] = $last_recent->format('Y-m-d');
-		}
+		$db_data['last_update'] = $last_recent->format('Y-m-d');
 
 		$details[] = $db_data;
 	}

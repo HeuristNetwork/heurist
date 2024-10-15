@@ -30,10 +30,12 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
 require_once dirname(__FILE__).'/../../records/edit/recordModify.php';//to delete temporary records
-require_once dirname(__FILE__).'/../conceptCode.php';
 
+global $rtyColumnNames, $rstColumnNames, $rcsColumnNames, $dtyColumnNames, $rtgColumnNames, $dtgColumnNames, $trmColumnNames;
 
 $rtyColumnNames = array(
     "rty_ID"=>"i",
@@ -172,6 +174,7 @@ $trmColumnNames = array(
     "trm_SemanticReferenceURL"=>"s",
     "trm_VocabularyGroupID"=>"i"
 );
+
 
 //
 // helper function
@@ -402,7 +405,7 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
 
     $ret = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $colNames = join(",",$commonNames);
 
@@ -516,7 +519,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
 
     $query="";
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $parameters = array("");//list of field date types
         foreach ($commonNames as $colName) {
@@ -704,7 +707,7 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
     }
     $order = 10;
 
-    if(is_array($newfields) && count($newfields)>0){
+    if(!isEmptyArray($newfields)){
 
         //find two separators
         $seps = array();
@@ -775,7 +778,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     $query2 = "";
 
-    if (is_array($dtFieldNames) && count($dtFieldNames)>0 && count($rt['dtFields']))
+    if (!isEmptyArray($dtFieldNames) && !empty($rt['dtFields']))
     {
 
         //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that
@@ -865,7 +868,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     } //if column names
 
-    if (count($ret[$rtyID])==0) {
+    if (empty($ret[$rtyID])) {
         array_push($ret[$rtyID], "no data supplied for updating record structure - $rtyID");
     }
 
@@ -910,7 +913,7 @@ function createRectypeGroups($columnNames, $rt) {
 
     $rtg_Name = null;
     $ret = array();
-    if (is_array($columnNames) && count($columnNames)>0 ) {
+    if (!isEmptyArray($columnNames) ) {
 
         $colNames = join(",",$columnNames);
         foreach ( $rt as $newRT) {
@@ -982,7 +985,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
     $ret = array();
     $query = "";
     $rtg_Name = null;
-    if ( is_array($columnNames) && count($columnNames)>0 ) {
+    if ( !isEmptyArray($columnNames) ) {
 
         $vals = $rt;
         $parameters = array("");//list of field date types
@@ -1092,7 +1095,7 @@ function createDettypeGroups($columnNames, $rt)
 
     $dtg_Name = null;
     $ret = array();
-    if (is_array($columnNames) && count($columnNames)>0) {
+    if (!isEmptyArray($columnNames)) {
 
         $colNames = join(",",$columnNames);
         foreach ( $rt as $newRT) {
@@ -1165,7 +1168,7 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
     $ret = array();
     $dtg_Name = null;
     $query = "";
-    if (is_array($columnNames) && count($columnNames)>0) {
+    if (!isEmptyArray($columnNames)) {
 
         $vals = $rt;
         $parameters = array("");//list of field date types
@@ -1266,7 +1269,7 @@ function createDetailTypes($commonNames, $dt) {
 
     $ret = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
 
         $colNames = join(",",$commonNames);
@@ -1377,7 +1380,7 @@ function updateDetailType($commonNames,$dtyID,$dt) {
     $query = "";
     $dty_Name = null;
 
-    if (is_array($commonNames) && count($commonNames)>0) {
+    if (!isEmptyArray($commonNames)) {
 
         $vals = $dt['common'];
         $parameters = array("");//list of field date types
@@ -1478,7 +1481,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
     $ret = null;
 
-    if (is_array($colNames) && count($colNames)>0 && is_array($values) && count($values)>0)
+    if (!isEmptyArray($colNames) && is_array($values))
     {
         $isInsert = ($trmID==null || (!is_numeric($trmID) && (strrpos($trmID, "-")>0)));
 
@@ -1692,8 +1695,8 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
 
     //4. update term $retain_id
     $res = updateTerms( $colNames, $retain_id, $dt, null );
-    if(!($res>0)){
-        if(!(count($system->getError())>0)){
+    if(!isPositiveInt($res)){
+        if(empty($system->getError())){
             $system->addError(HEURIST_ACTION_BLOCKED, $res);
         }
         $ret = false;
@@ -1771,13 +1774,14 @@ function checkDtPtr($rty_IDs, $dty_ID){
                     array_push($links, $row[0]);
                 }
             }
-            $ret_message = $ret_message.'<br><br>'
-            ."<a href='#' onclick='window.open(\""
-            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
+
+            $recIDs_list = implode(',',$recIDs);
+            $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
+            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
-                $ret_message = $ret_message.' (limited to first 250)';
+                $ret_message = "$ret_message (limited to first 250)";
             }
 
             $system->addError(HEURIST_ACTION_BLOCKED, $ret_message);
@@ -1861,13 +1865,14 @@ function checkTerms($termID){
                                 array_push($rtyIDs, $row[1]);
                             }
                         }
-                        $ret_message = $ret_message.'<br><br>'
-                        ."<a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'&nometadatadisplay=true","_blank")\'>'
+
+                        $recIDs_list = implode(',',$recIDs);
+                        $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
+                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
-                            $ret_message = $ret_message.' (limited to first 250)';
+                            $ret_message = "$ret_message (limited to first 250)";
                         }
 
                         $ret_message = $ret_message.'<br><div style="padding:10px 30px;text-align:left">'
@@ -1875,7 +1880,7 @@ function checkTerms($termID){
                         $labels = dbs_GetRectypeNames( $mysqli, $rtyIDs );
 
                         foreach  ($labels as $rty_ID=>$rty_Name)  {
-                            $ret_message = $ret_message.'<li>'.$rty_Name.'</li>';
+                            $ret_message = $ret_message."<li>$rty_Name</li>";
                         }
 
                         $ret_message = $ret_message."</ul></div>";
@@ -1932,7 +1937,7 @@ function isTermInUse($trmID, $infield, $indetails){
                     $ret['dtyIDs'] = array();
                     while ($row = $res->fetch_row()) {
                         //array_push($ret['dtyIDs'], $row[0]);
-                        $errMessage = $errMessage.("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                        $errMessage = $errMessage.("<li>{$row[0]}&nbsp;{$row[1]}</li>");
                     }
                     $errMessage = $errMessage.'</ul>'
                     .'<br>Please note the field(s) listed below, then '
@@ -1982,11 +1987,12 @@ function isTermInUse($trmID, $infield, $indetails){
                     }
 
                 }
-                $errMessage = $errMessage."<br><br>"
-                ."<a href='#' onclick='window.open(\""
-                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
+                $links = implode(',',$links);
+                $errMessage = "$errMessage<br><br><a href='#' onclick='window.open(\""
+                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                ."&q=ids:$links&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
                 if(count($links)<$recCount){
-                    $errMessage = $errMessage.' (limited to first 250)';
+                    $errMessage = "$errMessage (limited to first 250)";
                 }
 
                 $system->addError(HEURIST_ACTION_BLOCKED, $errMessage);
@@ -2063,7 +2069,7 @@ function updateRelConstraint($srcID, $trgID, $terms){
         $terms[2] = "null";
     }
 
-    $where = " where ";
+    $where = SQL_WHERE;
 
     if(intval($srcID)<1){
         $srcID = "null";
@@ -2141,7 +2147,7 @@ function deleteRelConstraint($srcID, $trgID, $trmID){
     $trmID = prepareIds($trmID);
     if ( count($trmID)>1 ) {
         $query = $query." and rcs_TermID in (".implode(',',$trmID).")";
-    }elseif(count($trmID)==0){
+    }elseif(empty($trmID)){
         $query = $query." and rcs_TermID is null";
     }else{
         $query = $query." and rcs_TermID=".intval($trmID[0]);

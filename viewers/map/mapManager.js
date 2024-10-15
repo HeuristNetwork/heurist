@@ -71,8 +71,6 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
-        //if ( !window.hWin.HEURIST4.util.isFunction($('body').hMapPublish) ) return;
-        
         let container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
@@ -469,7 +467,7 @@ function HMapManager( _options )
         //create treeview data
         let treedata = [];
         
-        if( (typeof resdata.isA == "function") && resdata.isA("HRecordSet") ){
+        if( window.hWin.HEURIST4.util.isRecordSet(resdata) ){
         
             let idx, records = resdata.getRecords();
             for(idx in records){
@@ -683,7 +681,6 @@ function HMapManager( _options )
                         //theme is obtained from resdata.fld(record, DT_SYMBOLOGY); see _getTreeData
 
 
-                        //if(node.parent.isSelected()){
                         let mapdoc_id = node.data.mapdoc_id;
                         let layer_id = node.data.layer_id;
                         let not_visible = true; 
@@ -701,8 +698,6 @@ function HMapManager( _options )
                                             not_visible = false;
                                         }
                                 }
-                                //node.visitSiblings(function(){},true);
-                                
                             }
                             
                             (layer_rec['layer']).applyThematicMap( active_themes );
@@ -1393,7 +1388,7 @@ function HMapManager( _options )
                 }else{
                     val = options.visible_panels[val];
                     is_collapsed = !window.hWin.HEURIST4.util.istrue(val, false);
-                    is_visible = (val!=-1);//window.hWin.HEURIST4.util.istrue(val, false);
+                    is_visible = (val!=-1);
                 }
                 
                 if(is_visible){

@@ -19,12 +19,12 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+use hserv\utilities\USystem;
 
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 
 $post_max_size = USystem::getConfigBytes('post_max_size');
 $file_max_size = USystem::getConfigBytes('upload_max_filesize');
@@ -551,7 +551,7 @@ if(!$format){ $format='csv';}
                 <tbody>
                                     <tr>
                                         <td rowspan="3" width="250">
-                                            <h2 id="mrr_big">Existing: 586  New: 100</h2>
+                                            <h2 id="mrr_big">Existing: 0&nbsp;&nbsp;&nbsp;New: 0</h2>
                                         </td>
                                         <td rowspan="3">
                                             <div id="prepareWarnings"
@@ -564,7 +564,7 @@ if(!$format){ $format='csv';}
                                         <td rowspan="3">
                                             <div id="prepareErrors"
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
-                                                <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Unrecognised terms: 0</h2>
+                                                <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Rows with unrecognised terms: 0</h2>
                                                 <div id="btnShowErrors"></div>
                                             </div>
                                         </td>

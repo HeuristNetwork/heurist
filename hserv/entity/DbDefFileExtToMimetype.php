@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to defFileExtToMimetype table
@@ -19,11 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 
 class DbDefFileExtToMimetype extends DbEntityBase
 {
@@ -123,8 +120,8 @@ class DbDefFileExtToMimetype extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
                 .' FROM defFileExtToMimetype';
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
 
          $query = $query.' ORDER BY fxm_Extension ';
@@ -136,47 +133,39 @@ class DbDefFileExtToMimetype extends DbEntityBase
 
     }
 
-    protected function _validatePermission(){
-        if($this->system->is_admin()){
-            return true;
-        }else{
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'Insufficient rights (logout/in to refresh). You have to be Administrator of group \'Database Managers\' for this operation');
-            return false;
-        }
-    }
-
     //
-    // since in this table primary key is varchar need special treatment
+    // Since in this table primary key is varchar need special treatment
     //
     public function delete($disable_foreign_checks = false){
 
-        if(!$this->_validatePermission()){
-            return false;
-        }
-        $ret = null;
-
-        $rec_ID = $this->data[$this->primaryField];
-        if($rec_ID!=null){
-            $query = "DELETE from ".$this->config['tableName']." WHERE ".$this->primaryField." = '".$rec_ID."'";
-
-            $mysqli = $this->system->get_mysqli();
-            $res = $mysqli->query($query);
-
-            if(!$res){
-                $ret = $mysqli->error;
-                $this->system->addError(HEURIST_INVALID_REQUEST,
-                                 "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
-                return false;
-            }else{
-                $ret = true;
-            }
-        }else{
+        $rec_ID = @$this->data[$this->primaryField];
+        if($rec_ID==null){
             $this->system->addError(HEURIST_INVALID_REQUEST,
                                  "Cannot delete from table ".$this->config['entityName'],
                                  'Record ID provided is an invalid value');
             return false;
         }
+
+        $this->recordIDs = array($rec_ID);
+        if(!$this->_validatePermission()){
+            return false;
+        }
+        $ret = null;
+
+        $query = SQL_DELETE.$this->config['tableName'].SQL_WHERE.$this->primaryField." = '".$rec_ID."'";
+
+        $mysqli = $this->system->get_mysqli();
+        $res = $mysqli->query($query);
+
+        if(!$res){
+            $ret = $mysqli->error;
+            $this->system->addError(HEURIST_INVALID_REQUEST,
+                             "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
+            return false;
+        }else{
+            $ret = true;
+        }
+
         return $ret;
     }
 

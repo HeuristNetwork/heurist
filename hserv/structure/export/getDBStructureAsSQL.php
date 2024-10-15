@@ -25,6 +25,9 @@
 */
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 
+
+global $mysqli, $isHTML, $startToken, $endToken;
+
 // Normally jsut outputs definitions, this will include users/groups
 $includeUgrps=@$_REQUEST["includeUgrps"];	// returns null if not set
 
@@ -38,6 +41,7 @@ $sysinfo = $system->get_system();
 $db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
 
 define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+define('EOL',"<br>\n");
 
 $mysqli = $system->get_mysqli();
 
@@ -49,8 +53,6 @@ $mysqli = $system->get_mysqli();
 //      Version info in common/config/initialise.php
 //      admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_Heurist_Core_Definitions database
 //         and insert where indicated in file
-//      admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql and delete
-//         non-definitional tables for temp db creation speed
 //      admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface listing in SQL exchange format)
@@ -63,10 +65,10 @@ print "<html><head>";
 print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
 print "</head><body>\n";
 }
-print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
-print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
-print "-- Database = " . HEURIST_DBNAME . "<br>\n";
-print "-- Program Version: ".HEURIST_VERSION."<br>\n";
+print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i").EOL;
+print "-- Installation = " . HEURIST_BASE_URL. EOL;
+print "-- Database = " . HEURIST_DBNAME . EOL;
+print "-- Program Version: ".HEURIST_VERSION.EOL;
 print "-- Database Version: ".$db_version; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
 if($isHTML) {print "<br><br>\n";}
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation

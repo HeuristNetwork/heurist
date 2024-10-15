@@ -24,6 +24,7 @@ let _theme_editing_symbology;
 function editTheme(current_value, callback){
 
     let edit_dialog = null; //assigned on popup_dlg.dialog
+    let editFields = null;
     
     let popup_dlg = $('#heurist-dialog-editTheme');
 
@@ -36,24 +37,34 @@ function editTheme(current_value, callback){
 
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
-
-    _theme_editing_symbology = new HEditing({container:editForm, 
-        onchange:
-        function(){
-            if(edit_dialog){
-                let ele = edit_dialog.parent().find('#btnRecSave');
-                if(ele){
-                    let isChanged = _theme_editing_symbology.isModified();
-                    let mode = isChanged?'visible':'hidden';
-                    edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
+    
+    //edit form configuration
+    const url = window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editTheme.json';
+            
+    $.getJSON(url, function(res){
+        
+            editFields = res;
+                    
+            _theme_editing_symbology = new HEditing({container:editForm, 
+                onchange:
+                function(){
+                    if(edit_dialog){
+                        let ele = edit_dialog.parent().find('#btnRecSave');
+                        if(ele){
+                            let isChanged = _theme_editing_symbology.isModified();
+                            let mode = isChanged?'visible':'hidden';
+                            edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
+                        }
+                    }
+                },
+                oninit: function(){
+                    _theme_editing_symbology = this;
+                    __editTheme_continue();
                 }
-            }
-        },
-        oninit: function(){
-            _theme_editing_symbology = this;
-            __editTheme_continue();
-        }
+            });
     });
+    
+
 
 function __editTheme_continue(){
     
@@ -61,260 +72,6 @@ function __editTheme_continue(){
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
         //Object.getOwnPropertyNames(current_value)
-
-                   
-    let editFields = [                
-        {"dtID": "name",
-            "dtFields":{
-                "dty_Type":"freetext",
-                "rst_DisplayName":"Theme name:",
-                "rst_Display":"hidden"
-        }},
-        
-        {
-        "groupHeader": "Default color theme",
-        "groupTitleVisible": true,
-        "groupType": "accordion",
-            "children":[
-            {"dtID": "cd_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Background:",
-                    "rst_DisplayHelpText": "Background color for most of widgets",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#e0dfe0"
-            }},
-            {"dtID": "cl_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Light background:",
-                    "rst_DisplayHelpText": "Background color for lists and popups.",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#ffffff"
-            }},
-            
-            {"dtID": "cd_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Text:",
-                    "rst_DisplayHelpText": "Widgets text color",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#333333"
-            }},
-            {"dtID": "cd_input",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Inputs BG:",
-                    "rst_DisplayHelpText": "Background color for input elements",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#F4F2F4"
-            }},
-            {"dtID": "cd_border",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Header and borders:",
-                    "rst_DisplayHelpText": "Header and border for popup, borders; for menu, accordeon, dividers",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#95A7B7"
-            }},
-            {"dtID": "cd_corner",
-            "dtFields":{
-                "dty_Type":"integer",
-                "rst_DisplayName": "Corner radius:",
-                "rst_DisplayHelpText": "Value from 0 to 16",
-                "rst_DefaultValue": "0"
-            }}
-
-        ]},
-        {
-        "groupHeader": "Alternative color theme (Header panels, Popups)",
-        "groupTitleVisible": true,
-        "groupType": "accordion",
-            "children":[
-            {"dtID": "ca_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Header background:",
-                    "rst_DisplayHelpText": "Background color for header panel (with main and search menues)",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#364050"
-            }},
-            {"dtID": "ca_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Header text:",
-                    "rst_DisplayHelpText": "Header text color",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#ffffff"
-            }},
-            {"dtID": "ca_input",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Header inputs:",
-                    "rst_DisplayHelpText": "Background color for input elements on header panels",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#536077"
-            }}
-        ]},
-        {
-        "groupHeader": "Editor color theme",
-        "groupTitleVisible": true,
-        "groupType": "accordion",
-            "children":[
-            {"dtID": "ce_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Background:",
-                    "rst_DisplayHelpText": "Background color for editor form",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#ECF1FB"
-            }},
-            {"dtID": "ce_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Labels text:",
-                    "rst_DisplayHelpText": "Color for text and labels in editor",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#6A7C99"
-            }},
-            {"dtID": "ce_input",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Input elements:",
-                    "rst_DisplayHelpText": "Background color for input elements",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#ffffff"
-            }},
-            {"dtID": "ce_readonly",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Readonly color:",
-                    "rst_DisplayHelpText": "Readonly elements",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#999999"
-            }},
-            {"dtID": "ce_mandatory",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Required entries:",
-                    "rst_DisplayHelpText": "Color for required input elements and labels",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#CC0000"
-            }},
-            {"dtID": "ce_helper",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Helper and prompts:",
-                    "rst_DisplayHelpText": "Color for helpers and prompts",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#999999"
-            }}
-        ]},
-        {
-        "groupHeader": "Clickable elements (buttons, links, menu items etc)",
-        "groupTitleVisible": true,
-        "groupType": "accordion",
-            "children":[
-
-
-            
-            {"dtID": "sd_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Button BG:",
-                    "rst_DisplayHelpText": "Button default background",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#f2f2f2"
-            }},
-            {"dtID": "sd_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Button text:",
-                    "rst_DisplayHelpText": "Button default text",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#555555"
-            }},
-            
-            
-            {"dtID": "sh_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Hover/focus BG:",
-                    "rst_DisplayHelpText": "Button hover/focus background",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#f2f2f2"
-            }},
-            {"dtID": "sh_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Hover Text:",
-                    "rst_DisplayHelpText": "Button hover/focus text",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#2b2b2b"
-            }},
-            {"dtID": "sh_border",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Hover Borders:",
-                    "rst_DisplayHelpText": "Hover border color",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#999999"
-            }},
-            
-            {"dtID": "sa_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Active BG:",
-                    "rst_DisplayHelpText": "Button active background",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#95A7B7"
-            }},
-            {"dtID": "sa_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Active Text:",
-                    "rst_DisplayHelpText": "Button active text",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#212121"
-            }},
-            {"dtID": "sa_border",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Active Borders:",
-                    "rst_DisplayHelpText": "Active border color",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#aaaaaa"
-            }},
-            
-            {"dtID": "sp_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Pressed BG:",
-                    "rst_DisplayHelpText": "Button pressed background",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#9CC4D9"
-            }},
-            {"dtID": "sp_color",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Pressed Text:",
-                    "rst_DisplayHelpText": "Button pressed text",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#ffffff"
-            }},
-            {"dtID": "sp_border",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Pressed Borders:",
-                    "rst_DisplayHelpText": "Pressed border color",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#003eff"
-            }}
-      
-        
-        ]}
-    ];
-    
     
     _theme_editing_symbology.initEditForm( editFields, recdata, true );
 
@@ -361,30 +118,15 @@ function __editTheme_continue(){
         modal:  true,
         title: window.hWin.HR('Define Heurist Theme'),
         resizeStop: function( event, ui ) {//fix bug
-            //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+           
         },
         beforeClose: function(){
             //show warning in case of modification
             if(_theme_editing_symbology.isModified()){
-                let $dlg, buttons = {};
-                buttons['Save'] = function(){ 
-                    //that._saveEditAndClose(null, 'close'); 
-                    edit_dialog.parent().find('#btnRecSave').trigger('click');
-                    $dlg.dialog('close'); 
-                }; 
-                buttons['Ignore and close'] = function(){ 
-                    _theme_editing_symbology.setModified(false);
-                    edit_dialog.dialog('close'); 
-                    $dlg.dialog('close'); 
-                };
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    window.hWin.HR('Warn_Lost_Data'),
-                    buttons,
-                    {title: window.hWin.HR('Confirm'),
-                       yes: window.hWin.HR('Save'),
-                        no: window.hWin.HR('Ignore and close')},
-                    {default_palette_class: 'ui-heurist-design'});
+                
+                window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
+                    ()=>{edit_symb_dialog.parent().find('#btnRecSave').trigger('click');}, //save
+                    ()=>{_theme_editing_symbology.setModified(false); edit_symb_dialog.dialog('close'); }); //ignore and close
                 return false;   
             }
             return true;

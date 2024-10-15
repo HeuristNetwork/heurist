@@ -51,7 +51,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         /* init helper (see utils.js)
         window.hWin.HEURIST4.ui.initHelper( $('#btn_help'),
                     'Mapping Drawing Overview',
-                    '../../context_help/mapping_drawing.html #content');
+                    window.hWin.HRes('mapping_drawing #content'));
         */
 
         handleApiReady();
@@ -115,8 +115,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     function onMapInit(){
 
         if(!target_database){
-            window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
-                +'It is not possiblle to perform this operation');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Target database not defined. It is not possiblle to perform this operation',
+                error_title: 'Target database missing'
+            });
             window.close();
         }
 
@@ -211,7 +213,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
             if(target_database==window.hWin.HAPI4.database && !window.hWin.HAPI4.has_access()){
                 showLoginDialog(false, function(){_exportMapSpace();});
-                //window.hWin.HAPI4.SystemMgr.verify_credentials(function(){_exportMapSpace();}, 0);
+
                 return;
             }
 
@@ -271,10 +273,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                 var is_sglr = (not_public.length==1);
 
-                var sMsg = '<p>The following '
-                +((cnt_dt>0)?('dataset registration'+(cnt_dt>1?'s':'')):'')
-                + ((cnt_dt>0 && cnt_ds>0)?' and ':'')
-                +((cnt_ds>0)?('data source record'+(cnt_ds>1?'s':'')):'')
+                var sMsg = '<p>The following'
+                +((cnt_dt>0)?(' dataset registration'+(cnt_dt>1?'s':'')):'')
+                + ((cnt_dt>0 && cnt_ds>0)?'and':'')
+                +((cnt_ds>0)?(' data source record'+(cnt_ds>1?'s':'')):'')
                 +(is_sglr?' is ':' are ')
 +' not marked as publicly visible and cannot therefore be included in your saved map. '
 +(is_sglr?'It is':'They are')+' visible to you as either the owner or because the owner has made '
@@ -286,7 +288,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 +'If you do not know the owner, please advise the system administrator ('
 +'<a href="mailto:'+window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>)</p>';
 
-                window.hWin.HEURIST4.msg.showMsgErr( sMsg );
+                window.hWin.HEURIST4.msg.showMsgErr({message: sMsg, error_title: 'Required records not publicly visible'});
                 $('#save-button').show();
                 return;
             }

@@ -1,4 +1,8 @@
 <?php
+namespace hserv\utilities;
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+
 /**
 * Image manipulation library
 *
@@ -105,7 +109,9 @@ class UImage {
     */
     public static function makeURLScreenshot($siteURL){
 
-        if(filter_var($siteURL, FILTER_VALIDATE_URL)){
+        if(!filter_var($siteURL, FILTER_VALIDATE_URL)){
+            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
+        }
 
             //$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
             $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
@@ -154,13 +160,13 @@ class UImage {
 
             if(file_exists($heurist_path)){
 
-                $filesize = filesize($heurist_path);
+                $filesize = getFileSize($heurist_path); //UFile
 
                 $file = new \stdClass();
                 $file->original_name = 'snapshot.jpg';
                 $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME);//name with ext
                 $file->fullpath = $heurist_path;
-                $file->size = $filesize; //fix_integer_overflow
+                $file->size = $filesize; 
                 $file->type = 'jpg';
 
                 return $file;
@@ -169,9 +175,6 @@ class UImage {
                 return array('error'=>'Cannot download image from thumbnail generator service. '.$siteURL.' to '.$heurist_path);
             }
 
-        }else{
-            return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
-        }
     }
 
     /**
@@ -198,7 +201,7 @@ class UImage {
 
             try{
                 $img = imagecreatefromstring($data);
-            }catch(Exception  $e){
+            }catch(\Exception  $e){
                 $img = false;
             }
         }else{
@@ -702,7 +705,7 @@ class UImage {
                 //Imagic
                 try {
 
-                    $im =  new Imagick($filename.'[0]');
+                    $im =  new \Imagick($filename.'[0]');
                     $im->setImageFormat('png');
                     $im->thumbnailImage(200,200);
 
@@ -711,7 +714,7 @@ class UImage {
                     }
                     $im->writeImage($thumbnail_file);
 
-                } catch(ImagickException $e) {
+                } catch(\ImagickException $e) {
                     USanitize::errorLog($e . ', From Database: ' . HEURIST_DBNAME);
                     return false;
                 }
@@ -824,7 +827,7 @@ class UImage {
             echo "<img src=\"img.gif\" width=\"".$barwidth."\"
             height=\"".$h."\" border=\"0\">";
             }
-            echo "</div>";
+            echo DIV_E;
             */
         }else{
             return '#FFFFFF';
@@ -911,12 +914,13 @@ class UImage {
         );
         if ($scale >= 1) {
 
-            //if ($image_oriented) {
-            //  $ret = ($write_func!=null)?$write_func($src_img, $scaled_file, $image_quality):false;
-            //  return $ret;
-            //}
             //save into file
             if(!$scale_type || $scale_type == 'png'){
+
+                // retain transparent backgrounds
+                imagealphablending($src_img, false);
+                imagesavealpha($src_img, true);
+
                 imagepng($src_img, $scaled_file);
             }elseif($scale_type == 'jpg'){
                 imagejpeg($src_img, $scaled_file);

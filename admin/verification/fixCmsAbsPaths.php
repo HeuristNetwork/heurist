@@ -47,7 +47,7 @@ $databases = mysql__getdatabases4($mysqli, false);
 
 //
 $servers = array('https:\/\/heuristref.net', 'https:\/\/heurist.sydney.edu.au', 'https:\/\/heuristplus.sydney.edu.au', 'https:\/\/heurist.huma-num.fr', 'https:\/\/heuristest.fdm.uni-hamburg.de:443');
-if (is_array($absolutePathsToRemoveFromWebPages) && count($absolutePathsToRemoveFromWebPages)>0){
+if (!isEmptyArray($absolutePathsToRemoveFromWebPages)){
     foreach($absolutePathsToRemoveFromWebPages as $srv){
         $srv = str_replace("/","\/",$srv);
         $servers[] = $srv;
@@ -66,9 +66,9 @@ function __correctAbsPaths(){
 
     $dbRecDetails = new RecordsBatch($system, null);
 
-    //$databases = array('amade_testnewsystem');
-    //$databases = array('osmak_9c');
-    //$databases = array('CBAP_Uncovering_Pacific_Pasts');
+
+
+
 
     foreach ($databases as $idx=>$db_name){
 
@@ -97,7 +97,7 @@ function __correctAbsPaths(){
         'dt_extended_description'=>$dty_ID,
         'sVal'=>'https://heurist',
         'rVal'=>'replaceAbsPathinCMS',
-        'subs'=>1, //substring
+        'substr'=>1, //substring
         'debug'=>0,
         'tag'=>0
         );
@@ -109,7 +109,7 @@ function __correctAbsPaths(){
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();
         if(!$res){
-            print 'ERROR: '.$system->getError()['message'];
+            print 'ERROR: '.$system->getErrorMsg();
         }
 
         print '<hr>';
@@ -140,7 +140,7 @@ function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
 
-    //print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
+
 
     $paths0 = array('\/HEURIST', '\/html', '');
     $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
@@ -151,12 +151,12 @@ function replaceAbsPathinCMS($recID, $val){
         foreach ($paths0 as $path0) {
             foreach ($paths as $path) {
                 $absPath = '/'.$srv.$path0.'\/'.$path.'\//i';
-                
+
                 $cnt = $cnt + replaceAbsPath($s, $val);
             }
         }
     }
-    //print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
+
 
     //report if anything has been fixed
     if($cnt > 0){

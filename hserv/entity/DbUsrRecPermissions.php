@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrRecPermissions table
@@ -19,11 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 
 class DbUsrRecPermissions extends DbEntityBase
 {
@@ -129,8 +126,8 @@ class DbUsrRecPermissions extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM '.$from_table;
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
@@ -157,8 +154,11 @@ class DbUsrRecPermissions extends DbEntityBase
             $grp_ids = $this->system->get_user_group_ids();//current user groups ids + itself
 
             //verify that current owner is "everyone" or current user is member of owner group
-            $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE rec_ID in ('.implode(',',$recids)
-                .') AND rec_OwnerUGrpID==0 || rec_OwnerUGrpID in ('.implode(',',$grp_ids).')';
+            $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE '
+                .predicateId('rec_ID',$recids)
+                .SQL_AND
+                .'(rec_OwnerUGrpID=0 OR '
+                .predicateId('rec_OwnerUGrpID',$grp_ids).')';
 
             $cnt = mysql__select_value($this->system->get_mysqli(), $query);
             if($cnt<count($recids)){
@@ -225,7 +225,9 @@ class DbUsrRecPermissions extends DbEntityBase
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         //remove all current permissions
-        $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
+        $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_RecID',$recids);
         $res = $mysqli->query( $query );
         if(!$res){
              $this->system->addError(HEURIST_DB_ERROR,
@@ -244,19 +246,13 @@ class DbUsrRecPermissions extends DbEntityBase
             if(!$res){
                 $this->system->addError(HEURIST_DB_ERROR,
                         'Cannot save data in table '.$this->config['entityName'], $mysqli->error);
+            }else{
+                $res = array($mysqli->insert_id);
             }
-
-
         }
 
-        if(!$res){
-            //rollback
-            $mysqli->rollback();
-        }else{
-            $mysqli->commit();
-            $res = array($mysqli->insert_id);
-        }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysql, $res, $keep_autocommit);
+
         return $res;
 
     }
@@ -283,7 +279,10 @@ class DbUsrRecPermissions extends DbEntityBase
                 return false;
             }
 
-            $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
+            $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_RecID',$recids);
+
             $res = $mysqli->query( $query );
             if(!$res){
                  $this->system->addError(HEURIST_DB_ERROR,
@@ -307,7 +306,10 @@ class DbUsrRecPermissions extends DbEntityBase
                 }
             }
 
-            $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_UGrpID in ('.implode(',', $group_ids_to_delete).')';
+            $query = SQL_DELETE.$this->config['tableName']
+                                .SQL_WHERE
+                                .predicateId('rcp_UGrpID',$group_ids_to_delete);
+
             $res = $mysqli->query( $query );
             if(!$res){
                  $this->system->addError(HEURIST_DB_ERROR,

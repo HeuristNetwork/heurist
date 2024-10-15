@@ -70,6 +70,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         let is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
         let is_addonly = (that.options.pointer_mode == 'addonly');
+        let show_selected = false;
         
         if(that.options.pointer_mode != 'addorbrowse'){
             $('#addrec_helper > .heurist-helper1').css('visibility','hidden');
@@ -86,6 +87,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         if(window.hWin.HEURIST4.util.isempty(this.options.pointer_filter)){
             this.element.find('#cb_initial_filter').text('');
             this.element.find('.i-filter').hide();
+            show_selected = true;
         }else{
             //initial pre-filter (see rst_PointerBrowseFilter)
             this.element.find('#cb_initial_filter').text(this.options.pointer_filter);    
@@ -93,8 +95,13 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
         if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
             this.element.find('.i-counts').show();
+            show_selected = true;
         }else{
             this.element.find('.i-counts').hide();
+        }
+
+        if(!show_selected){
+            this.element.find('.show-filters').hide();
         }
 
         this.btn_add_record
@@ -206,8 +213,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
                     }
-                }else if (is_browse) {
-                    //this.element.find('#addrec_helper').hide();
                 }
             }else if(is_addonly){
                 that.btn_select_rt.trigger('click'); //show dropdown
@@ -261,7 +266,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             change: function(event){
                 this.startSearch();
 
-                if(event.target.id == 'cb_selected'){
+                if(event.target.id == 'rb_selected'){
                     window.hWin.HAPI4.save_pref('rSearch_Recent', event.target.checked);
                 }
             }
@@ -275,9 +280,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         let show_recent = !window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.get_prefs('recent_Records')) 
                             && window.hWin.HAPI4.get_prefs_def('rSearch_Recent', true);
-        if(show_recent){
-            this.element.find('#cb_selected').prop('checked', true);
-        }
+        this.element.find('#rb_selected').prop('checked', show_recent);
 
         if(is_addonly){
             __onSelectRecType(this.selectRectype);
@@ -333,8 +336,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         }
         
-        //if(this.searchForm && this.searchForm.length>0)
-        //this.searchForm.find('#input_search').trigger('focus');
         this.input_search.trigger('focus');
 
         if(!window.hWin.HEURIST4.util.isempty(this.options.fill_data) || !window.hWin.HEURIST4.util.isempty(this.options.init_filter)){
@@ -375,8 +376,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             ele.find('.ui-icon').addClass('ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-e');
             this.element.parent().find('.recordList').show();
         }
-
-        this._super();
 
         let qstr = '', domain = 'a', qobj = [];
         
@@ -421,17 +420,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 }
             }
         
-        }        
-
-        //by ids of recently selected
-        if(this.element.find('#cb_selected').is(':checked')){
-            let previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
-            if (previously_selected_ids && 
-                window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids.split(',')))
-            {
-                qstr = qstr + ' ids:' + previously_selected_ids;
-                qobj.push({"ids":previously_selected_ids});
-            }
         }
 
         //exclude already children
@@ -491,13 +479,13 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 detail: 'ids',
                 links_count: links_count,
                 id: window.hWin.HEURIST4.util.random()}
-            //source: this.element.attr('id') };
+           
 
             let that = this;                                                
-            //that.loadanimation(true);
+           
 
             window.hWin.HAPI4.RecordMgr.search(request, function( response ){
-                //that.loadanimation(false);
+               
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(response.data.links_count){
@@ -510,8 +498,38 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                              links_query: null});
                     }
                     
-                    that._trigger( "onresult", null, 
-                        {recordset:new HRecordSet(response.data), request:request} );
+                    let order_recent = !window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.get_prefs('recent_Records'))
+                                        && that.element.find('#rb_selected').prop('checked');
+
+                    let recset = new HRecordSet(response.data);
+
+                    if(order_recent){
+
+                        let recent = window.hWin.HAPI4.get_prefs('recent_Records').split(',');
+                        let order = recset.getOrder();
+                        let changed_order = false;
+
+                        for(let id of recent){
+
+                            const rec_id = parseInt(id, 10);
+                            const cur_idx = order.indexOf(rec_id);
+
+                            if(cur_idx === -1){
+                                continue;
+                            }
+
+                            order.splice(cur_idx, 1);
+                            order.unshift(rec_id);
+
+                            changed_order = true;
+                        }
+
+                        if(changed_order){
+                            recset.setOrder(order);
+                        }
+                    }
+
+                    that._trigger( "onresult", null, {recordset:recset, request:request} );
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }

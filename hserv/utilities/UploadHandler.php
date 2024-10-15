@@ -1,4 +1,10 @@
 <?php
+namespace hserv\utilities;
+use hserv\System;
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+use hserv\utilities\UImage;
+
 /*
  * jQuery File Upload Plugin PHP Class
  * https://github.com/blueimp/jQuery-File-Upload
@@ -22,6 +28,9 @@
     imagemagick_create_scaled_image - DISABLED DUE SECURITY REASONS
 
 */
+define('HEADER_403','HTTP/1.1 403 Forbidden');
+define('AMP','&amp;');
+
 
 class UploadHandler
 {
@@ -62,24 +71,9 @@ class UploadHandler
 
     public function __construct($options = null, $initialize = true, $error_messages = null) {
 
-        //ARTEM - take upload folder from request
-        //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
-        //$upload_thumb_url = @$_REQUEST['upload_thumb_url'];
+        if($options==null) {$options=array();}
 
-        $heurist_db = @$options['database'];
-
-        $error = System::dbname_check($heurist_db);
-        if($error){
-            //database not defined
-            $this->header('HTTP/1.1 403 Forbidden');
-            return;
-        }
-
-        $system = new System();
-        $res = $system->verify_credentials($heurist_db);
-        if(!($res>0)){
-            //not logged in
-            $this->header('HTTP/1.1 403 Forbidden');
+        if(!$this->checkSystem( @$options['database'] )){
             return;
         }
 
@@ -87,35 +81,13 @@ class UploadHandler
         if(!($replace_edited_file>0 && $replace_edited_file<4)) {$replace_edited_file = false;}
         $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
 
-        if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
-
-            if($options==null) {$options=array();}
-
-            //get upload subfolder from parameters - this is subfolder of database upload folder
-            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form
-            if(!$upload_dir){
-                $upload_dir = 'insitu/';
-            }
-
-            /*
-                    //NOT ALLOWED
-                    // by default into subfolder files next to script
-                    $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
-                    $upload_url = $this->get_full_url().'/files/';//default - next to script
-            */
-
-            //sanitize
-            $upload_dir = USanitize::sanitizePath($upload_dir);
-            //add last slash
-            if(substr($upload_dir, -1) != "/"){
-                $upload_dir = $upload_dir . "/";
-            }
-
-            $options['upload_subfolder'] = $upload_dir;
+        $upload_url = null;
+        $upload_dir = $this->checkUploadFolder($options);
+        if($upload_dir!=null){
             $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
             $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
-
         }
+
 
         $this->response = array();
         $this->options = array(
@@ -273,19 +245,55 @@ class UploadHandler
         if ($error_messages) {
             $this->error_messages = $error_messages + $this->error_messages;
         }
-/*  0519  it is not possible set upload_max_filesize via ini_set. they can be defined in .htaccess or user.ini per folder
-        $max_size = $this->options['max_file_size'];
-        if ($max_size) {
-            $siz = 100*1024*1024;
-            ini_set( 'post_max_size', '12000000' );
-            ini_set( 'upload_max_filesize', '10000000' );
-$siz = USystem::getConfigBytes('upload_max_filesize');
-        }
-*/
+
         if ($initialize) {
             $this->initialize();
         }
     }
+
+    private function checkSystem($heurist_db){
+
+        $error = mysql__check_dbname($heurist_db);
+        if($error!=null){
+            //database not defined
+            $this->header(HEADER_403);
+            return false;
+        }
+
+        $system = new System();
+        $res = $system->verify_credentials($heurist_db);
+        if(!($res>0)){
+            //not logged in
+            $this->header(HEADER_403);
+            return false;
+        }
+        return true;
+    }
+
+    private function checkUploadFolder(&$options){
+
+        $upload_dir = null;
+
+        if(@$options['upload_dir']==null){  //from UploadHandlerInit.php
+
+            //get upload subfolder from parameters - this is subfolder of database upload folder
+            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form
+            if(!$upload_dir){
+                $upload_dir = 'insitu/';
+            }
+
+            //sanitize
+            $upload_dir = USanitize::sanitizePath($upload_dir);
+            //add last slash
+            if(substr($upload_dir, -1) != "/"){
+                $upload_dir = $upload_dir . "/";
+            }
+
+            $options['upload_subfolder'] = $upload_dir;
+        }
+        return $upload_dir;
+    }
+
 
     protected function initialize() {
 
@@ -353,7 +361,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             if ($version_dir) {
                 //$thi->secure_file_name($file_name)
                 $file_name = htmlspecialchars(basename($file_name));
-                $file_name = str_replace('&amp;','&',$file_name);
+                $file_name = str_replace(AMP,'&',$file_name);
 
                 return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name);//realpath
             }
@@ -368,7 +376,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
         //$thi->secure_file_name($filename)
         $file_name = htmlspecialchars(basename($file_name));
-        $file_name = str_replace('&amp;','&',$file_name);
+        $file_name = str_replace(AMP,'&',$file_name);
 
         return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
@@ -539,7 +547,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $filename = basename($to);
         $to = dirname($to);
         $to = USanitize::sanitizePath($to);
-        if(isPathInHeuristUploadFolder($to, true)===false){
+        if(!isPathInHeuristUploadFolder($to, true)){
             //$this->error = $this->get_error_message('only_heurist')
             //    .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
             return false;
@@ -558,8 +566,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
         $filename = basename($upload_path);
         $upload_path = dirname($upload_path);
-        if(isPathInHeuristUploadFolder($upload_path, false)===false)
-        //if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
+        if(!isPathInHeuristUploadFolder($upload_path, false))
         {
             $file->error = $this->get_error_message('only_heurist')
                 .' a)'.realpath($upload_path)
@@ -1409,7 +1416,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $failed_versions[$version ? $version : 'original'] = $res;
             }
         }
-        if (count($failed_versions)>0) {
+        if (!empty($failed_versions)) {
 
             if(@$failed_versions['original']){
                 $file->error = $failed_versions['original'];
@@ -1614,7 +1621,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     //
     private function secure_file_name($filename){
         $filename = htmlspecialchars(basename($filename));//stripslashes()
-        $filename = str_replace('&amp;','&',$filename);
+        $filename = str_replace(AMP,'&',$filename);
         return $filename;
     }
 
@@ -1622,7 +1629,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $name = $this->get_singular_param_name();
         $filename = $this->get_query_param($name);
         $filename = htmlspecialchars(basename($filename));//stripslashes()
-        $filename = str_replace('&amp;','&',$filename);
+        $filename = str_replace(AMP,'&',$filename);
         //$filename = $this->secure_file_name($filename);
         return $filename;
     }
@@ -1640,7 +1647,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $params2 = array();
         foreach ($params as $key => $value) {
             $filename = htmlspecialchars(basename($value));//stripslashes()
-            $filename = str_replace('&amp;','&',$filename);
+            $filename = str_replace(AMP,'&',$filename);
             if($filename){
                 $params2[$key] = $filename; //secure_file_name($value);
             }
@@ -1676,7 +1683,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $redirect_header = 'X-Accel-Redirect';
                 break;
             default:
-                $this->header('HTTP/1.1 403 Forbidden');
+                $this->header(HEADER_403);
                 return;
         }
         $file_name = $this->get_file_name_param();
@@ -1739,7 +1746,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             /* disabled 2024-02-23 to avoid Open Redirect security issue
             $redirect = stripslashes($this->get_post_param('redirect'));
             if ($redirect && preg_match($this->options['redirect_allow_target'], $redirect)) {
-                $this->header('Location: '.sprintf($redirect, rawurlencode($json)));
+                $this->redirectURL(sprintf($redirect, rawurlencode($json)));
                 return;
             }
             */
@@ -1830,10 +1837,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
                     //Artem Osmakov - get subfolder name by replacing Ё to /
                     $file_name = ($file_name ? $file_name : $upload['name'][$index]);
-                    //$file_name = USanitize::sanitizeFileName($file_name ? $file_name : $upload['name'][$index], false);
-                    //if(strpos($file_name,'~')!==0){
-                    //    $file_name = $prefix.$file_name
-                    //}
+
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
@@ -1843,9 +1847,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $file_name = $pathinfo['basename'];
 
                         $origial_filename = $file_name;
-                        //$k = strrpos($file_name, "/");
-                        //$subfolder_name = substr($file_name, 0, $k);
-                        //$file_name =  substr(strrchr($file_name, "/"), 1 );
+
                     }else{
                         $origial_filename = $upload['name'][$index];
                     }
@@ -1902,30 +1904,46 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     public function delete($print_response = true) {
+        // Get file names either from parameters or fallback to a single file param
         $file_names = $this->get_file_names_params();
-        //!!!! get_subfolder_name_param
         if (empty($file_names)) {
             $file_names = array($this->get_file_name_param());
         }
+
+        // Get the subfolder parameter
         $subfolder = $this->get_subfolder_param();
 
         $response = array();
-        foreach($file_names as $file_name) {
+        foreach ($file_names as $file_name) {
+            // Sanitize file name to avoid security risks
+            $file_name = basename($file_name);  // Prevent directory traversal
             $file_path = $this->get_upload_path($file_name, $subfolder);
-            $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
-            if ($success) {
-                foreach($this->options['image_versions'] as $version => $options) {
-                    if (!empty($version)) {
-                        $file = $this->get_upload_path($file_name, $subfolder, $version);
-                        if (is_file($file)) {
-                            unlink($file);
-                        }
-                    }
-                }
+
+            // Check if file exists, is valid, and then delete it
+            if (!(is_file($file_path) && $file_name[0] !== '.' && unlink($file_path))) {
+                // File doesn't exist or is invalid, return failure for this file
+                // Log failure to delete main file (e.g., due to permission issues)
+                $response[$file_name] = false;
+                continue;  // Skip further operations for this file
             }
-            $response[$file_name] = $success;
+
+            // If the main file is deleted, attempt to delete its image versions
+            $this->deleteVersions($file_name, $subfolder);
+            $response[$file_name] = true;
         }
+
+        // Generate response based on the success/failure of deletion
         return $this->generate_response($response, $print_response);
     }
+
+    private function deleteVersions($file_name, $subfolder){
+        foreach ($this->options['image_versions'] as $version => $options) {
+            $versioned_file = $this->get_upload_path($file_name, $subfolder, $version);
+            if (is_file($versioned_file)) {
+                unlink($versioned_file);  // Delete versioned file
+            }
+        }
+    }
+
 
 }

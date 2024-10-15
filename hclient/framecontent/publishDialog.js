@@ -251,7 +251,7 @@ function HPublishDialog( _options )
 
         openPublishDialog: function( new_options ){
             
-            options = new_options; //.mapdocument_id = mapdoc_id;
+            options = new_options;
             
             let sTitle = 'Publish/Embed';
             if(options.mode=='mapspace' || options.mode=='mapquery'){

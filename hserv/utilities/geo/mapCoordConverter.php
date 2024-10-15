@@ -26,6 +26,8 @@
  * @link http://www.phpclasses.org/browse/file/10671.html
  * @link https://gist.github.com/840476#file_gpointconverter.class.php
  */
+define('WGS_84','WGS 84');
+
 class GpointConverter
 {
 
@@ -91,7 +93,7 @@ class GpointConverter
      *
      * @param string $datum
      */
-    public function __construct($datum='WGS 84')            // Default datum is WGS 84
+    public function __construct($datum=WGS_84)            // Default datum is WGS 84
     {
         $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
@@ -103,7 +105,7 @@ class GpointConverter
      *
      * @param string $datum
      */
-    public function setDatum($datum='WGS 84')
+    public function setDatum($datum=WGS_84)
     {
         $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
@@ -302,61 +304,85 @@ class GpointConverter
      *
      * @param float $LongOrigin
      */
-    public function convertLLtoTM($LongOrigin)
+    public function convertLLtoTM($LongOrigin = null)
     {
+        // Constants for UTM conversion
         $k0 = 0.9996;
-        $falseEasting = 0.0;
+        $falseEasting = 500000.0; // Standard UTM false easting value
 
-        //Make sure the longitude is between -180.00 .. 179.9
-        $LongTemp = ($this->long+180)-(integer)(($this->long+180)/360)*360-180; // -180.00 .. 179.9;
+        // Normalize the longitude to be within the range -180 to 179.9
+        $LongTemp = fmod(($this->long + 180), 360) - 180;
         $LatRad = deg2rad($this->lat);
         $LongRad = deg2rad($LongTemp);
 
-        if (!$LongOrigin) { // Do a standard UTM conversion - so findout what zone the point is in
-            $ZoneNumber = (integer)(($LongTemp + 180)/6) + 1;
-            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) {$ZoneNumber = 32;}
-            // Special zones for Svalbard
-            if( $this->lat >= 72.0 && $this->lat < 84.0 )  {
-                if($LongTemp >= 0.0  && $LongTemp <  9.0) {
+        // If no LongOrigin is provided, calculate it based on UTM zone
+        if ($LongOrigin === null) {
+            $ZoneNumber = $this->getZoneNumber($LongTemp);
+
+            // Calculate longitude origin for the UTM zone
+            $LongOrigin = ($ZoneNumber - 1) * 6 - 180 + 3;
+            $this->utmZone = sprintf("%d%s", $ZoneNumber, $this->UTMLetterDesignator());
+        }
+
+        // Convert origin longitude to radians
+        $LongOriginRad = deg2rad($LongOrigin);
+
+        // Ellipsoid constants
+        $eccPrimeSquared = $this->e2 / (1 - $this->e2);
+
+        // Calculate the various terms for the projection
+        $N = $this->a / sqrt(1 - $this->e2 * sin($LatRad) * sin($LatRad)); // Radius of curvature
+        $T = tan($LatRad) * tan($LatRad); // Square of the tangent of latitude
+        $C = $eccPrimeSquared * cos($LatRad) * cos($LatRad); // Second term of the projection formula
+        $A = cos($LatRad) * ($LongRad - $LongOriginRad); // Difference in longitude
+
+        // Calculate the meridional arc length (distance along the central meridian)
+        $M = $this->a * (
+            (1 - $this->e2 / 4 - 3 * $this->e2 * $this->e2 / 64 - 5 * $this->e2 * $this->e2 * $this->e2 / 256) * $LatRad
+            - (3 * $this->e2 / 8 + 3 * $this->e2 * $this->e2 / 32 + 45 * $this->e2 * $this->e2 * $this->e2 / 1024) * sin(2 * $LatRad)
+            + (15 * $this->e2 * $this->e2 / 256 + 45 * $this->e2 * $this->e2 * $this->e2 / 1024) * sin(4 * $LatRad)
+            - (35 * $this->e2 * $this->e2 * $this->e2 / 3072) * sin(6 * $LatRad)
+        );
+
+        // Calculate UTM easting
+        $this->utmEasting = ($k0 * $N * ($A + (1 - $T + $C) * $A * $A * $A / 6
+            + (5 - 18 * $T + $T * $T + 72 * $C - 58 * $eccPrimeSquared) * $A * $A * $A * $A * $A / 120)
+            + $falseEasting);
+
+        // Calculate UTM northing
+        $this->utmNorthing = ($k0 * ($M + $N * tan($LatRad) * ($A * $A / 2
+            + (5 - $T + 9 * $C + 4 * $C * $C) * $A * $A * $A * $A / 24
+            + (61 - 58 * $T + $T * $T + 600 * $C - 330 * $eccPrimeSquared) * $A * $A * $A * $A * $A * $A / 720)));
+
+        // If the latitude is south of the equator, adjust the northing value
+        if ($this->lat < 0) {
+            $this->utmNorthing += 10000000.0; // Southern hemisphere offset
+        }
+    }
+
+    private function getZoneNumber($LongTemp){
+
+            $ZoneNumber = (int)(($LongTemp + 180) / 6) + 1;
+
+            // Special case for Norway and Svalbard regions
+            if ($this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0) {
+                $ZoneNumber = 32;
+            }elseif ($this->lat >= 72.0 && $this->lat < 84.0) {
+
+                if ($LongTemp >= 0.0 && $LongTemp < 9.0) {
                     $ZoneNumber = 31;
-                } elseif($LongTemp >= 9.0  && $LongTemp < 21.0) {
+                } elseif ($LongTemp >= 9.0 && $LongTemp < 21.0) {
                     $ZoneNumber = 33;
-                } elseif($LongTemp >= 21.0 && $LongTemp < 33.0) {
+                } elseif ($LongTemp >= 21.0 && $LongTemp < 33.0) {
                     $ZoneNumber = 35;
-                } elseif($LongTemp >= 33.0 && $LongTemp < 42.0) {
+                } elseif ($LongTemp >= 33.0 && $LongTemp < 42.0) {
                     $ZoneNumber = 37;
                 }
             }
-            $LongOrigin = ($ZoneNumber - 1)*6 - 180 + 3;  //+3 puts origin in middle of zone
-            //compute the UTM Zone from the latitude and longitude
-            $this->utmZone = sprintf("%d%s", $ZoneNumber, $this->UTMLetterDesignator());
-            // We also need to set the false Easting value adjust the UTM easting coordinate
-            $falseEasting = 500000.0;
-        }
 
-        $LongOriginRad = deg2rad($LongOrigin);
-
-        $eccPrimeSquared = ($this->e2)/(1-$this->e2);
-
-        $N = $this->a/sqrt(1-$this->e2*sin($LatRad)*sin($LatRad));
-        $T = tan($LatRad)*tan($LatRad);
-        $C = $eccPrimeSquared*cos($LatRad)*cos($LatRad);
-        $A = cos($LatRad)*($LongRad-$LongOriginRad);
-
-        $M = $this->a*((1    - $this->e2/4        - 3*$this->e2*$this->e2/64    - 5*$this->e2*$this->e2*$this->e2/256)*$LatRad
-                            - (3*$this->e2/8    + 3*$this->e2*$this->e2/32    + 45*$this->e2*$this->e2*$this->e2/1024)*sin(2*$LatRad)
-                                                + (15*$this->e2*$this->e2/256 + 45*$this->e2*$this->e2*$this->e2/1024)*sin(4*$LatRad)
-                                                - (35*$this->e2*$this->e2*$this->e2/3072)*sin(6*$LatRad));
-
-        $this->utmEasting = ($k0*$N*($A+(1-$T+$C)*$A*$A*$A/6
-                        + (5-18*$T+$T*$T+72*$C-58*$eccPrimeSquared)*$A*$A*$A*$A*$A/120)
-                        + $falseEasting);
-
-        $this->utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
-                     + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
-
-        if($this->lat < 0) {$this->utmNorthing += 10000000.0;} //10000000 meter offset for southern hemisphere
+            return $ZoneNumber;
     }
+
 
     /**
      * This routine determines the correct UTM letter designator for the given latitude

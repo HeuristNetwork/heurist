@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2022 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Brandon McKay     <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6
@@ -18,19 +18,20 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
+use hserv\structure\ConceptCode;
 
 if(!array_key_exists('rectype_ids', $_REQUEST)){
     require_once dirname(__FILE__).'/../../hserv/controller/record_output.php';// attempt to export actual records
     exit;
 }
 
+require_once dirname(__FILE__).'/../../autoload.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+
+
 if(!defined('PDIR')){
-    $system = new System();
+    $system = new hserv\System();
     if( !$system->init(filter_var(@$_REQUEST['db'])) ){
         die("Cannot connect to database");
     }
@@ -129,7 +130,6 @@ $import_help = "{"
     . "\n \t}";
 
 // START OUTPUT
-//$fd = fopen('php://output', 'w');
 
 $json = "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[";
 //fwrite($fd, "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[");// starting string
@@ -156,12 +156,16 @@ foreach ($rectype_ids as $rty_id) {
         foreach ($rectype_structure['details'] as $dt => $details) {
 
             foreach ($details as $value) {
-                if(array_key_exists('file', $value)){ // file field
-                    $value = $file_field;
-                }elseif(array_key_exists('geo', $value)){ // geo field
-                    $value = $geo_field;
-                }elseif(array_key_exists('id', $value) && $value['id'] == 'RECORD_REFERENCE'){
-                    $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+                if(is_array($value)){
+                    if(array_key_exists('file', $value)){ // file field
+                        $value = $file_field;
+                    }elseif(array_key_exists('geo', $value)){ // geo field
+                        $value = $geo_field;
+                    }elseif(array_key_exists('id', $value) && strpos($value['id'],'RECORD_REFERENCE')===0){
+                        $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+                    }else{
+                        $value = '"' . json_encode($value) . '"';
+                    }
                 }elseif(strpos($value, 'VALUE') !== false){ //$value == 'VALUE'
                     $value = '"TRM_ID"';
                 }elseif(strpos($value, 'SEE NOTES AT START') !== false){ //$value == 'SEE NOTES AT START'
@@ -202,17 +206,14 @@ $db_details = "\n \t\"database\":{"
     . "\n \t\t\"rectypes\": {". $rectypes ."\n \t\t}"
     . "\n \t}";
 $json .= $db_details;
-//fwrite($fd, $db_details);
 
 // Close off
 $json .= "\n}}";
-//fwrite($fd, "\n}}");
 
 $filename = 'Template_' . $_REQUEST['db'] . '_' . date("YmdHis") . '.json';
 
 header(CTYPE_JSON);
 header('Content-Disposition: attachment; filename="'.$filename.'";');
-//header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
 echo $json;
 

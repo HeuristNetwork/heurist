@@ -35,20 +35,21 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\structure\ConceptCode;
+    use hserv\utilities\USanitize;
+    use hserv\utilities\UArchive;
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
     require_once dirname(__FILE__).'/../records/import/importParser.php';//parse CSV, KML and save into import table
-    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
-    require_once dirname(__FILE__).'/../utilities/uArchive.php';
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     $params = $_REQUEST;
 
@@ -122,7 +123,7 @@
 
                     $filepath = isPathInHeuristUploadFolder($filepath);//snyk SSRF
 
-                    if ($filepath!==false && file_exists($filepath)) {
+                    if ($filepath && file_exists($filepath)) {
 
                         $ext = strtolower(substr($filepath,-4,4));
                     }else{
@@ -219,9 +220,9 @@
                 if($input_format == 'kml'){
                     $parser_parms['kmldata'] = true;
                     $mapping[DT_GEO_OBJECT] = 'geometry';
-                    if(!@$mapping[DT_START_DATE]) {$mapping[DT_START_DATE] = 'timespan_begin';}//'timespan';
-                    if(!@$mapping[DT_END_DATE]) {$mapping[DT_END_DATE] = 'timespan_end';}//'timespan';
-                    if(!@$mapping[DT_DATE]) {$mapping[DT_DATE] = 'timestamp';}//'when';
+                    if(!@$mapping[DT_START_DATE]) {$mapping[DT_START_DATE] = 'timespan_begin';}
+                    if(!@$mapping[DT_END_DATE]) {$mapping[DT_END_DATE] = 'timespan_end';}
+                    if(!@$mapping[DT_DATE]) {$mapping[DT_DATE] = 'timestamp';}
 
                 }else{
                     $parser_parms['csvdata'] = true;
@@ -235,7 +236,7 @@
 
                 }
 
-                if(count($mapping)>0){
+                if(!empty($mapping)){
 
                     if(!@$mapping[DT_NAME]){
                         $mapping[DT_NAME] = 'name';
@@ -247,11 +248,12 @@
 
                     //returns records in PLACE? format recordSearchByID/recordSearchDetails
                     $records = ImportParser::convertParsedToRecords($parsed, $mapping);
+                    $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
 
                     //it outputs geojson and exits
-                    $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
-                    RecordsExport::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
-
+                    $classname = 'hserv\records\export\ExportRecordsGEOJSON';
+                    $outputHandler = new $classname($system);
+                    $res = $outputHandler->output($recdata, array('format'=>'geojson', 'leaflet'=>true, 'depth'=>0, 'simplify'=>true) );
 
                 }else{
                     //entire kml is considered as unified map entry
@@ -266,7 +268,7 @@
                             $geojson_adapter = new GeoJSON();
                             $json = $geojson_adapter->write($geom, true);
 
-                            if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
+                            if(!isEmptyArray(@$json['coordinates'])){
 
                                 if(@$params['simplify']){
 

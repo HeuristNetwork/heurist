@@ -32,8 +32,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         rty_ID: 0, 
         rty_TitleMask: '',
         
-        htmlContent: 'rectypeTitleMask.html',
-        helpContent: 'rectypeTitleMask.html' //in context_help folder
+        htmlContent: 'rectypeTitleMask.html'
     },
 
     action_in_progress: false,
@@ -140,7 +139,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Save Mask');
         res[0].text = window.hWin.HR('Cancel');
         return res;
@@ -234,12 +232,12 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             function (response) {
                 if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-                    //window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), true );
+                    
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     
                 }else{
                     
-                    //window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), false );
+                    
                     
                     if(that.element.find('#listRecords > option').length>1){
                         
@@ -397,8 +395,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
     //
     _loadRecordTypeTreeView: function(rtyID){
         
-        let that = this;
-
         //generate treedata from rectype structure
         let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 3, this.options.rty_ID, ['all','parent_link'] );
 
@@ -472,7 +468,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             },
             loadChildren: function(e, data){
                 setTimeout(function(){
-                    //that._assignSelectedFields();
+                   
                     },500);
             },
             select: function(e, data) {

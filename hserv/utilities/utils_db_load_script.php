@@ -66,6 +66,10 @@ define ('TESTMODE', false);// Set to true to process the file without actually a
 //define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
+define('CLOSE_P', "</p>\n");
+
+
+global $errorScriptExecution;
 $error = false;
 $errorScriptExecution = null;
 
@@ -95,6 +99,10 @@ global $error, $errorScriptExecution;
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
+$db_port = HEURIST_DB_PORT;
+
+$err_msg1 = '<p>Query: ';
+$err_msg2 = '<p>MySQL: ';
 
 // Connection charset should be the same as the dump file charset (utf8, latin1, cp1251, koi8r etc.)
 // See http://dev.mysql.com/doc/refman/5.0/en/charset-charsets.html for the full list
@@ -194,12 +202,12 @@ do_action ('script_runs');
 
 if (!$error && !TESTMODE)
 {
-    $mysqli = new mysqli($db_server,$db_username,$db_password);
+    $mysqli = new mysqli($db_server,$db_username,$db_password,null,$db_port);
     if (!$mysqli){
 
         error_echo (
-            "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
-            ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
+            "<p class=\"error\">Database connection failed due to ".mysqli_connect_error().P_END
+            ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.P_END);
 
     }else{
         $success = $mysqli->select_db($db_name);
@@ -207,7 +215,7 @@ if (!$error && !TESTMODE)
         if (!$success)
         {
             error_echo(
-                "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
+                "<p class=\"error\">Database connection failed due to ".$mysqli->error.P_END
                 ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
 
         }
@@ -225,8 +233,8 @@ if (!$error && !TESTMODE)
             {
                 error_echo(
                     "<p class=\"error\">Error with pre-query.</p>\n"
-                    ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
-                    ."<p>MySQL: ".$mysqli->error."</p>\n");
+                    .$err_msg1.trim(nl2br(htmlentities($pre_query_value))).P_END
+                    .$err_msg2.$mysqli->error.P_END);
                 break;
             }
         }
@@ -335,8 +343,8 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
     if (!TESTMODE && !$mysqli->query(trim($query)))
     {
         error_echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n"
-            ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
-            ."<p>MySQL: ".$mysqli->error."</p>\n");
+            .$err_msg1.trim(nl2br(htmlentities($query))).P_END
+            .$err_msg2.$mysqli->error.P_END);
     }
   }
 
@@ -347,7 +355,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
     skin_open();
     echo "<p class=\"centr\">TEST MODE ENABLED</p>\n";
     echo "<p class=\"centr\">Processing file: <b>".$curfilename."</b></p>\n";
-    echo "<p class=\"smlcentr\">Starting from line: ".$param_start."</p>\n";
+    echo "<p class=\"smlcentr\">Starting from line: ".$param_start.P_END;
     skin_close();
   }
 
@@ -360,7 +368,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Set file pointer to $param_foffset
 
   if (!$error && ((!$gzipmode && fseek($file, $param_foffset)!=0) || ($gzipmode && gzseek($file, $param_foffset)!=0)))
-  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$param_foffset."</p>\n");
+  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$param_foffset.P_END);
   }
 
 // Start processing queries from $file
@@ -487,8 +495,8 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Execute query if end of query detected ($delimiter as last character) AND NOT in parents
 
 // DIAGNOSTIC
-// echo "<p>Regex: ".'/'.preg_quote($delimiter).'$/'."</p>\n";
-// echo "<p>In Parents: ".($inparents?"true":"false")."</p>\n";
+// echo "<p>Regex: ".'/'.preg_quote($delimiter).'$/'.P_END;
+// echo "<p>In Parents: ".($inparents?"true":"false").P_END;
 // echo "<p>Line: $dumpline</p>\n";
 
       if ((preg_match('/'.preg_quote($delimiter,'/').'$/',trim($dumpline)) || $delimiter=='') && !$inparents)
@@ -506,9 +514,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
             if(strpos($errorMsg,'Cannot get geometry object')!==false){
                 error_log( $linenumber.'   '. trim($dumpline) );
             }else{
-                error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
-                ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
-                ."<p>MySQL: ".$errorMsg."</p>\n");
+                error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline).P_END
+                .$err_msg1.trim(nl2br(htmlentities($query))).P_END
+                .$err_msg2.$errorMsg.P_END);
                 //ART:why it was reset? $error = false;
                 if(strpos($errorMsg,'Duplicate column')===false){
                     $error = true;
@@ -714,7 +722,7 @@ function skin_open()
 
 function skin_close()
 {
-  echo '</div>';
+  echo DIV_E;
 }
 
 function error_echo($msg){

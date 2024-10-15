@@ -26,13 +26,12 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
         width:  540,
         modal:  true,
         init_scope: 'selected',
-        title:  'Unbookmark selected records',
-        helpContent: 'recordBookmark.html'
+        title:  'Unbookmark selected records'
     },
-
+    
     _initControls:function(){
         
-        this.element.find('#div_header')
+        this._$('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html(window.hWin.HR('recordUnbookmark_hint'));

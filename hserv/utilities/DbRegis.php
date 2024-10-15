@@ -36,10 +36,12 @@
 * _registrationValidateUser
 *
 */
+namespace hserv\utilities;
+use hserv\System;
+use hserv\utilities\DbUtils;
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../System.php';
-require_once 'uSanitize.php';
-require_once 'dbUtils.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
 class DbRegis {
@@ -152,12 +154,12 @@ class DbRegis {
             $serverURL_lc = strtolower($params["serverURL"]);
 
             //add default scheme
-            if(!(strpos($serverURL_lc,'http://')===0 || strpos($serverURL_lc,'https://')===0)){
-                $serverURL = 'https://'.$serverURL;  //https by default
+            if(!(strpos($serverURL_lc,HTTP_SCHEMA)===0 || strpos($serverURL_lc,HTTPS_SCHEMA)===0)){
+                $serverURL = HTTPS_SCHEMA.$serverURL;  //https by default
                 $serverURL_lc = strtolower($serverURL);
             }
 
-            if(!(strpos(strtolower($serverURL_lc),'https://')===0 || strpos(strtolower($serverURL_lc),'http://')===0)){
+            if(!(strpos(strtolower($serverURL_lc),HTTPS_SCHEMA)===0 || strpos(strtolower($serverURL_lc),HTTP_SCHEMA)===0)){
                 self::addError(HEURIST_ACTION_BLOCKED,
                         'Database url does not have a trusted scheme');
                 return false;
@@ -287,7 +289,7 @@ class DbRegis {
         }
 
         //recordDelete(self:$system,$dbID);
-        $mysqli->query('set @suppress_update_trigger=NULL');
+        mysql__supress_trigger($mysqli, false);
         ConceptCode::setSystem(self::$system);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
@@ -354,29 +356,31 @@ class DbRegis {
         $defRecTitle = '<i>'.$dbName.'</i>';
 
         //update rec_URL and rec_Title
-        if(!empty($serverURL) || !empty($dbTitle)){
-            $record = array(
-                'rec_ID'=>$dbID,
-                'rec_Modified'=>date(DATE_8601)
-            );
+        $record = array(
+            'rec_ID'=>$dbID,
+            'rec_Modified'=>date(DATE_8601)
+        );
 
-            $err_msg = '';
-            if(!empty($serverURL)){
-                $record['rec_URL'] = $mysqli->real_escape_string($serverURL);
-                $err_msg = 'URL (server URL)';
-            }
-            if(!empty($dbTitle)){
-                $record['rec_Title'] = $defRecTitle.' : '.$dbTitle;
-                $err_msg = $err_msg . (!empty($err_msg) ? ' and ' : '') . 'Title (database name)';
-            }
-            $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
-
-            if(!$res && $res != $dbID){
-                self::addError(array(HEURIST_DB_ERROR,
-                        'Failed to update database registration: ' . $err_msg, $mysqli->error));
-                return false;
-            }
+        $err_msg = '';
+        if(!empty($serverURL)){
+            $record['rec_URL'] = $mysqli->real_escape_string($serverURL);
+            $err_msg = 'URL (server URL)';
         }
+        if(!empty($dbTitle)){
+            $record['rec_Title'] = $defRecTitle.' : '.$dbTitle;
+            $err_msg = $err_msg . (!empty($err_msg) ? ' and' : '') . ' Title (database name)';
+        }
+
+        $res = $dbID;
+        if($err_msg!=''){  //!empty($serverURL) || !empty($dbTitle)
+            $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
+        }
+        if($res != $dbID){
+            self::addError(array(HEURIST_DB_ERROR,
+                    'Failed to update database registration: ' . $err_msg, $mysqli->error));
+            return false;
+        }
+
 
         ConceptCode::setSystem($sys);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
@@ -405,19 +409,18 @@ class DbRegis {
 
         if(!self::initialize()) {return false;} //can not connect to index database
 
-        //if(@$params['fields']==null){
-        //    $params['fields'] = 'rec_URL';
-        //}
-
         if(self::$isOutSideRequest){
             $params['action'] = 'info';
             return self::_registrationRemoteCall($params);
         }
 
-        $database_id = intval(@$params['dbID']);
-        $database_url = null;
+        if(!isPositiveInt(@$params['dbID'])){
+            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
+            return false;
+        }
 
-        if($database_id>0){
+            $database_url = null;
+            $database_id = intval(@$params['dbID']);
 
             $sys = self::$system;
             $mysqli = $sys->get_mysqli();
@@ -432,32 +435,24 @@ class DbRegis {
 
             if ($rec!=null){
                 $database_url = @$rec['rec_URL'];
-                if($database_url==null || $database_url==''){
-                    $database_url = null;
+                if(isEmptyStr($database_url)){
                     self::addError(HEURIST_NOT_FOUND,
                         'Database URL is not set in Heurist Reference Index database for database ID#'.$database_id);
+                    return false;
                 }
-
-            }else{
-                $err = $mysqli->error;
-                if($err){
-                    self::addError(HEURIST_DB_ERROR,
-                         'Heurist Reference Index database is not accessible at the moment. Please try later');
-                }else{
-                    self::addError(HEURIST_NOT_FOUND,
-                         'Database with ID#'.$database_id.' is not found in Heurist Reference Index database');
-                }
+                return $database_url;
             }
-        }else{
-            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
-        }
 
-        if($database_url!=null){
-            return $database_url;
-        }else{
+
+            $err = $mysqli->error;
+            if($err){
+                self::addError(HEURIST_DB_ERROR,
+                     'Heurist Reference Index database is not accessible at the moment. Please try later');
+            }else{
+                self::addError(HEURIST_NOT_FOUND,
+                     'Database with ID#'.$database_id.' is not found in Heurist Reference Index database');
+            }
             return false;
-        }
-
     }
 
 

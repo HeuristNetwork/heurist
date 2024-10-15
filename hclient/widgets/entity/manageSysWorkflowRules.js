@@ -153,9 +153,8 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 onSortStop: function(){
                     
                     let recordset = this.getRecordSet();
-                    let that = this;
                     window.hWin.HEURIST4.dbs.applyOrder(recordset, 'swf', function(res){
-                        //that._triggerRefresh('swf');
+                       
                     });
                     
                 }
@@ -492,7 +491,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         
         //return '<div style="display:table;height:2em;width:99%;font-size:0.9em">'
         return __cell('Stage',24)+__cell('Restricted to',24)+__cell('Ownership',24)
-                    +__cell('Visibility',25)+__cell('Notification',25);//+__cell('',12);
+                    +__cell('Visibility',25)+__cell('Notification',25);
                     
     },
     

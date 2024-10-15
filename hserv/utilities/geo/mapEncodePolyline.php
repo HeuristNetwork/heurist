@@ -70,35 +70,41 @@ function dpEncode($points)
     $absMaxDist = 0;
     $dists = array();
 
-    if(count($points) > 2)
+    if(count($points) < 3)
     {
-	$stack[] = array(0, count($points)-1);
-	while(count($stack) > 0)
-	{
-	    $current = array_pop($stack);
-	    $maxDist = 0;
-	    for($i = $current[0]+1; $i < $current[1]; $i++)
-	    {
-	    	$temp = distance($points[$i], $points[$current[0]], $points[$current[1]]);
-		    if($temp > $maxDist)
-		    {
-		        $maxDist = $temp;
-		        $maxLoc = $i;
-		        if($maxDist > $absMaxDist)
-		        {
-		            $absMaxDist = $maxDist;
-		        }
-		    }
-	    }
-	    if($maxDist > $verySmall)
-	    {
-	    	$dists[$maxLoc] = $maxDist;
-		    array_push($stack, array($current[0], $maxLoc));
-		    array_push($stack, array($maxLoc, $current[1]));
-	    }
-	}
+        return encodedPoints($points, $dists, $absMaxDist);
     }
 
+	    $stack[] = array(0, count($points)-1);
+	    while(count($stack) > 0)
+	    {
+	        $current = array_pop($stack);
+	        $maxDist = 0;
+	        for($i = $current[0]+1; $i < $current[1]; $i++)
+	        {
+	    	    $temp = distance($points[$i], $points[$current[0]], $points[$current[1]]);
+		        if($temp > $maxDist)
+		        {
+		            $maxDist = $temp;
+		            $maxLoc = $i;
+		            if($maxDist > $absMaxDist)
+		            {
+		                $absMaxDist = $maxDist;
+		            }
+		        }
+	        }
+	        if($maxDist > $verySmall)
+	        {
+	    	    $dists[$maxLoc] = $maxDist;
+		        array_push($stack, array($current[0], $maxLoc));
+		        array_push($stack, array($maxLoc, $current[1]));
+	        }
+	    }
+
+    return encodedPoints($points, $dists, $absMaxDist);
+}
+
+function encodedPoints($points, $dists, $absMaxDist){
     $encodedPoints = createEncodings($points, $dists);
     $encodedLevels = encodeLevels($points, $dists, $absMaxDist);
     $encodedPointsLiteral = str_replace('\\',"\\\\",$encodedPoints);

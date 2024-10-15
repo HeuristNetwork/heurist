@@ -27,9 +27,9 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         width:  640,
         modal:  true,
         init_scope: 'selected',
+        hide_scope: true,
         title:  'Delete Records',
-        htmlContent: 'recordDelete.html',
-        helpContent: 'recordDelete.html' //in context_help folder
+        htmlContent: 'recordDelete.html'
     },
     
     header_div:null,
@@ -40,36 +40,35 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     _initControls:function(){
         
+        this._super();
+        
         let cnt_selected = this._currentRecordsetSelIds.length;
         
-        this.header_div = this.element.find('#div_header').css({'line-height':'21px'});
+        this.header_div = this._$('#div_header').css({'line-height':'21px'});
 
-        //search for linked counts        
-        //this._onLinkedCount();
-            
         if(cnt_selected > 8){
-            this.element.find('#div_1').show();
+            this._$('#div_1').show();
         }            
         
         if (window.hWin.HAPI4.is_admin()) {
             if(cnt_selected>0){
-                this.element.find('#div_2').show();
-                this.element.find('#div_2 > a').attr('href',
+                this._$('#div_2').show();
+                this._$('#div_2 > a').attr('href',
                              window.hWin.HAPI4.baseURL+'admin/verification/combineDuplicateRecords.php?db='
                              + window.hWin.HAPI4.database
                              +'&bib_ids=' + this._currentRecordsetSelIds.join(','));
             }
         } else {
-            this.element.find('#div_3').show(); //show 
+            this._$('#div_3').show(); //show 
         }
         
         //hide scope selector
         if(this.options.hide_scope || this.options.map_document_id>0){
-            this.element.find('#div_fieldset').hide();    
+            this._$('#div_fieldset').hide();    
         }
         
         
-        this.recordList = this.element.find('.recordList');
+        this.recordList = this._$('.recordList');
         
         //init record list
         this.recordList
@@ -122,7 +121,8 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 that.recordList.css({top: (h-1)});
             }
                               },300);
-        return this._super();
+                              
+        return true;
     },
     
     //
@@ -148,7 +148,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             
             if(RT_TLCMAP_DATASET>0){
-                    //request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id}]};
+                   
                     request['rules'] = [{"query":"t:"+RT_MAP_LAYER+","+RT_TLCMAP_DATASET+" linkedfrom:"+RT_MAP_DOCUMENT+"-"+DT_MAP_LAYER
                                         ,"levels":[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE},
                                                    {"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE}]}];
@@ -189,11 +189,11 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             let cnt_source = 0;
             let merged_ids = this._currentRecordsetSelIds;
             
-        //$merged_ids = array_unique(array_merge($res['reverse']['target'], $res['reverse']['source']), SORT_NUMERIC);
+       
         
         if(cnt_source>0){
 
-            let ele = this.element.find('#div_4').show();
+            let ele = this._$('#div_4').show();
             
             if(cnt_selected==1){
                 msg = 'This record is';
@@ -276,21 +276,21 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             return;
         }   
         
-        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true );
+        //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true );
             
             let scope = [], 
             rec_RecTypeID = 0;
             
             
             if(scope_val == 'selected'){
-                scope = this._currentRecordsetSelIds; //this.recordList.resultList('getRecordSet').getIds();
+                scope = this._currentRecordsetSelIds;
             }else {
                 scope = this._currentRecordset.getIds();
                 if(scope_val  >0 ){ //filter by record type
                     rec_RecTypeID = scope_val;
                 }   
             }
-
+            
             //unique session id    
             let session_id = Math.round((new Date()).getTime()/1000);
         
@@ -373,7 +373,7 @@ function(){
                                         ' record' + (response.data.noaccess>1?'s':''));
                            }     
                             
-                            //window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
+                            
                             window.hWin.HEURIST4.msg.showMsgDlg(msg);
                             
                         }else{

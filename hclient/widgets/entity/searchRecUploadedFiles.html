@@ -48,6 +48,18 @@
     -->                        
                 </select>
         </div>
+        
+        <div style="float:left;padding:0.2em" id="input_search_referenced_div">
+            <div class="header4" style="display: inline-block;width:4em">
+                <label for="input_search_referenced">Referred</label></div>
+            <select id="input_search_referenced" class="text ui-widget-content ui-corner-all" 
+                style="width: 60px; margin-right:0.2em">
+                    <option>both</option>            
+                    <option>yes</option>
+                    <option>no</option>
+                </select>
+        </div>
+        
         <div id="btn_search_start" style="float:left;"></div>      
         
         
@@ -71,35 +83,9 @@
    
      
     <div id="div_add_record" style="padding-left:3.4em">
-        <div id="btn_add_record_loc"></div>
-
-        <div id="btn_add_record_ext" style="margin-left:2em"></div>
+        <div id="btn_menu"></div>
         
-        <div id="btn_add_record_popup" style="display:none;margin-left:2em"></div>
-
         <div id="btn_edit_mimetypes" style="min-width:9em;z-index:2;float:right;"></div>
-
-        <div id="btn_remove_dups" style="min-width:9em;z-index:2;float:right;margin: 0px 10px;" class="admin-only manager-only"
-            title="Removes extra identical copies of a file and connects all references to the remaining copy"></div>
-        
-        <div id="btn_refresh_index" style="min-width:6em;z-index:2;float:right;padding:0.4em 0.2em;margin-right:10px;" class="admin-only manager-only"
-            title="Indexes any files that have been uploaded but not indexed so that they appear in this view"></div>
-
-        <div id="btn_check_files" style="min-width:6em;z-index:2;float:right;" class="admin-only manager-only"
-            title="Find missing, duplicate and unused uploaded files"></div>
-
-        <br style="display: block;content: '';margin:5px 0px;">
-
-        <div id="btn_create_records" style="min-width:9em;z-index:2;float:right;" class="admin-only manager-only"
-            title="Creates a multimedia record for each of the files selected"></div>
-<!--
-        <div id="btn_remove_unused" style="min-width:9em;z-index:2;float:right" class="admin-only manager-only"
-            title="Checks and deletes any files which are not referenced"></div>
--->        
-            
-        <label style="float: right;font-size: 12px;margin:5px 20px 0px 0px;"><input type="checkbox" id="select_all" style="vertical-align: middle;"> select all</label>
-        
-        <!-- div id="btn_add_record_any" style="margin-left:2em"></div -->
     </div>
 
     
@@ -115,12 +101,5 @@
     <div style="position:absolute;font-size:0.8em" class="heurist-helper1" id="group_help">
         <span class="local">Files which have been uploaded and stored in the database file space</span>
         <span class="external">Files which are referenced at an external URL rather than stored in the database</span>
-    </div>
-
-    <div style="position:absolute;right:10px;bottom:3px;font-size:0.8em" class="heurist-helper1">
-        <span class="manager-only" style="display: inline-block;margin-left: 15px;">
-            <a id="dwnld_refs" href="#" style="color: blue;">download CSV of file references</a>
-            <label style="font-size: 10px;padding-left: 10px;"><input type="checkbox" id="selected_only" style="vertical-align: middle;"> selected only</label>
-        </span>
     </div>
 </div>

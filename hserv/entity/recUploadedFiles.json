@@ -4,7 +4,7 @@
         "tableName": "recUploadedFiles",
         "tablePrefix": "ulf",
         
-        "helpContent": "recUploadedFiles.html",
+        "helpContent": "recUploadedFiles.htm",
         
         "searchFormContent": "searchRecUploadedFiles.html",
         
@@ -125,6 +125,19 @@
                         "dty_Size":255,
                         "rst_DisplayWidth":40,
                         "rst_DisplayHelpText": "The owner of the copyright in the file ir image (person or organisation)"
+                    }
+                },
+                {
+                    "dtID": "ulf_WhoCanView",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Visibility:",
+                        "rst_DisplayHelpText": "Sets whether the file's visibility, if set to 'login required' the image will be blurred for public users.",
+                        "rst_DefaultValue":"viewable",
+                        "rst_FieldConfig":[
+                            {"key":"viewable", "title":"Public"},
+                            {"key":"loginrequired", "title":"Login required"}
+                        ]
                     }
                 },
                 {

@@ -64,7 +64,7 @@ $.widget( "heurist.repositoryConfig", {
     // the widget's constructor                            
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -252,7 +252,7 @@ $.widget( "heurist.repositoryConfig", {
         //fill record type selector
         this.selectUserGroups = this.element.find('#sel_usergroup').css({'list-style-type': 'none'});
         
-        //let groups = window.hWin.HAPI4.is_admin() ? 'all_my_first' : null;
+       
         
         window.hWin.HEURIST4.ui.createUserGroupsSelect(this.selectUserGroups.get(0), null, //show groups for current user only
             [{key:-1, title:'select group or user...'},
@@ -453,7 +453,7 @@ console.log( JSON.stringify(that.options.service_config) );
                 this.saveConfigrations();
             }else{
                 if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
-                    this._as_dialog.dialog('close'); // this.closeDialog(true);
+                    this._as_dialog.dialog('close');
                 }else{
                     this.element.empty().hide();
                 }
@@ -542,7 +542,7 @@ console.log( JSON.stringify(that.options.service_config) );
 
             this._current_cfg = cfg0;
             
-            //this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
+           
             
             //fill values
             this.element.find('input[data-field]').val('');
@@ -824,7 +824,7 @@ console.log( JSON.stringify(that.options.service_config) );
             $.each(inputs, function(i, ele){ // get mapped fields
         
                 let field = $(ele).attr('data-field');
-                //let value = $(ele).val();
+               
                 
                 fields[field] = $(ele).val();
                 if(fields[field]!=''){

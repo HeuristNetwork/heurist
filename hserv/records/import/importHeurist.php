@@ -21,13 +21,17 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\DbUtils;
+use hserv\utilities\USanitize;
+use hserv\entity\DbRecUploadedFiles;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../edit/recordsBatch.php';
-require_once dirname(__FILE__).'/../../utilities/dbUtils.php';
 require_once dirname(__FILE__).'/../../structure/import/dbsImport.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
+
+define('ERR_XML_IMPORT','XML import error');
 
 /*
 main methods
@@ -144,11 +148,11 @@ private static function hmlToJson($filename){
 
         libxml_clear_errors();
 
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml is corrupted.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that the xml is corrupted.', null, ERR_XML_IMPORT);
         return null;
     }
     if(!$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'The provided xml file is missing the "database" element,<br>this identifies the Heurist database this export originated from.', null, ERR_XML_IMPORT);
         return null;
     }
 
@@ -300,13 +304,13 @@ private static function hmlToJson($filename){
 
         }//records
     }else{
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be within "records" elements.<br>You might be trying to load a template file without data.', null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot find any records within the provided xml file,<br>records need to be within "records" elements.<br>You might be trying to load a template file without data.', null, ERR_XML_IMPORT);
         return null;
     }
 
     if($hasValidIdCount == 0){
         $extra_details = "<br><br>If this occurs when Heurist says it is doing an automatic update,<br>please advise the Heurist team (Bug Report in the Help menu at the top right) so that we can fix this problem.<br>" . (count($invalidIds) > 0) ? "The list of invalid ids: " . implode(',', $invalidIds) : "";
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may be trying to upload an xml data template rather than actual data.' . $extra_details, null, 'XML import error');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'There are no valid record IDs within the provided xml file.<br>You may be trying to upload an xml data template rather than actual data.' . $extra_details, null, ERR_XML_IMPORT);
         return null;
     }
 
@@ -459,7 +463,7 @@ public static function importDefintions($filename, $session_id){
             }*/
         }else{
             //need to call refresh client side defintions
-            $res = 'ok';//$importDef->getReport(false);
+            $res = 'ok';
         }
     }
 
@@ -475,7 +479,7 @@ public static function importRecordsFromDatabase($params){
 
 //1. saves import file into scratch folder - see record_output
     $remote_path = HEURIST_BASE_URL.'hserv/controller/record_output.php?format=json&depth=0&db='
-            .$params['source_db'];//.'&q='.$query;
+            .$params['source_db'];
 
     $search_params = array();
     if(@$params['recID']>0){
@@ -501,14 +505,18 @@ public static function importRecordsFromDatabase($params){
     }
 
     // save file that produced with record_output.php from source to temp file
-    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");// . $file_id;
+    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
 
     $filesize = saveURLasFile($remote_path, $heurist_path);//save json import from remote db to tempfile in scratch folder
 
 //2. import records
-    if($filesize>0 && file_exists($heurist_path)){
-        //read temp file, import records
+    if($filesize==0 || !file_exists($heurist_path)){
+        self::$system->addError(HEURIST_ERROR,
+                'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
+        return false;
+    }
 
+        //read temp file, import records
         $params2 = array(
             'session' => @$params['session'],
             'is_cms_init' => 0,
@@ -537,12 +545,6 @@ public static function importRecordsFromDatabase($params){
         unlink($heurist_path);//remove temp file
 
         return $res;
-    }else{
-        self::$system->addError(HEURIST_ERROR,
-            'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
-        return false;
-    }
-
 }
 
 //
@@ -608,10 +610,9 @@ public static function importRecords($filename, $params){
     $is_debug = @$params['dbg'] == 1;
     $session_id  = @$params['session'];
     $is_cms_init = (@$params['is_cms_init']===true || @$params['is_cms_init']==1);
-    $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']===0);
+    $make_public = !(@$params['make_public']===false || @$_REQUEST['make_public']==0);
     $owner_id = @$params['onwer_id']>0 ?$params['onwer_id'] :1;
     $mapping_defs = @$params['mapping_defs'];
-//    $allow_import_unregistered = (@$params['allow_unregistered']===true || @$params['allow_unregistered']==1);
 
     $unique_field_id = @$params['unique_field_id'];
     $allow_insert = true;
@@ -654,7 +655,7 @@ public static function importRecords($filename, $params){
 <p>-----</p>
 <p>This is default content generated by the CMS function of the Heurist data management system (<a title="Heurist Academic Knowledge Management System" href="https://heuristnetwork.org/" target="_blank" rel="noopener">HeuristNetwork.org</a>).</p>
 <p>Please edit the content to create an appropriate page, or delete the menu entry and page if not required.</p>
-<p>Please see <a href="../context_help/website_instructions.html">Heurist CMS instructions</a> for further information.</p>
+<p>Please see <a href="../context_help/website_instructions.htm">Heurist CMS instructions</a> for further information.</p>
 <table style="border-collapse: collapse;margin-top:40px" border="1">
 <tbody>
 <tr>
@@ -812,7 +813,7 @@ EOD;
 
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);
-        $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
+        mysql__foreign_check($mysqli, false);
 
         self::$system->defineConstant('DT_PARENT_ENTITY');
 
@@ -910,8 +911,7 @@ EOD;
 
                     if($record_src_original_id){
 
-                        $query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
-                                    .' AND dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$record_src_original_id.'"';
+$query3 = 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID  AND dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$record_src_original_id.'"';
 
                         $target_RecID = mysql__select_value($mysqli, $query3);
 
@@ -940,18 +940,14 @@ EOD;
             }
 
             // prepare records - replace all fields, terms, record types to local ones
-            // keep record IDs in resource fields to replace them later
+            // keep record IDs in resource (record pointer)) fields to replace them later
             $record = array();
             $record['ID'] = $target_RecID; //0 - add new
             $record['RecTypeID'] = $recTypeID;
 
 
-            //if($record['RecTypeID']<1){
-            //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
-            //}
-
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
-                $record_src['rec_ID'] = uniqid();//''.microtime();
+                $record_src['rec_ID'] = uniqid();
             }else {
 
                 //in case source id is not numerics or more than MAX INT
@@ -1016,7 +1012,7 @@ EOD;
                     //@todo - add to report
                     continue;
                 }
-                if($dty_ID==DT_PARENT_ENTITY){ //ignore
+                if($dty_ID==self::$system->getConstant('DT_PARENT_ENTITY',0)){ //ignore
                     continue;
                 }
 
@@ -1250,7 +1246,7 @@ EOD;
                     $new_values = $values;
                 }
 
-                if(is_array($new_values) && count($new_values)>0)
+                if(!isEmptyArray($new_values))
                 {
                     if (isset($record['details'][$ftId])){
                         array_push($record['details'][$ftId], ...$new_values);
@@ -1353,15 +1349,11 @@ EOD;
                             $term_id = @$new_terms[$uid];
 
                             if($term_id>0){
-                                $query = 'UPDATE recDetails SET dtl_Value='.$term_id
-                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value=\''.$uid.'\'';
+$query = "UPDATE recDetails SET dtl_Value=$term_id WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value='$uid'";
 
                             }else{
                                 //new terms was not added
-                                $query = 'DELETE FROM recDetails '
-                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value=\''.$uid.'\'';
+$query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value='$uid'";
                             }
 
                             $ret = mysql__exec_param_query($mysqli, $query, null);
@@ -1382,7 +1374,7 @@ EOD;
                     $resource_notfound[$idx][0] = @$records_corr[$item[1]];
                 }
 
-                //update resource fields with new record ids
+                //update resource (record pointer) fields with new record ids
                 foreach ($resource_fields as $src_recid=>$fields){  //src recid => dty ids
 
                     //get new id in target db
@@ -1394,15 +1386,11 @@ EOD;
                                 $query = null;
                                 $new_value = @$records_corr[$old_value];
                                 if($new_value>0){
-                                    $query = 'UPDATE recDetails SET dtl_Value='.$new_value
-                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                            .' AND dtl_Value='.$old_value;
+$query = "UPDATE recDetails SET dtl_Value=$new_value WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value=$old_value";
 
                                 }elseif($old_value>0){
                                     //target record not found
-                                    $query = 'DELETE FROM recDetails '
-                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                            .' AND dtl_Value='.$old_value;
+$query = "DELETE FROM recDetails WHERE dtl_RecID=$trg_recid AND dtl_DetailTypeID=$fieldtype_id AND dtl_Value=$old_value";
 
                                     $resource_notfound[] = array($trg_recid, $src_recid,
                                             $def_dts[$fieldtype_id]['commonFields'][$idx_name], $old_value);
@@ -1410,7 +1398,7 @@ EOD;
                                 if($query!=null){
                                     $ret = mysql__exec_param_query($mysqli, $query, null);
                                     if($ret!==true){
-                                        self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', 'Query:'.$query.'. '.$ret);
+                                        self::$system->addError(HEURIST_DB_ERROR, 'Cannot update record pointer fields', 'Query:'.$query.'. '.$ret);
                                         $is_rollback = true;
                                         break;
                                     }
@@ -1421,7 +1409,7 @@ EOD;
                 }//for
             }
             //create reverse child to parent links if required
-            if(!$is_rollback && is_array($parent_child_links) && count($parent_child_links)>0){
+            if(!$is_rollback && !isEmptyArray($parent_child_links)){
 
                 foreach($parent_child_links as $idx=>$link){
 
@@ -1479,7 +1467,7 @@ EOD;
                     $res['exists'] = $ids_exist;
                 }
         }
-        $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+        mysql__foreign_check($mysqli, true);
 
     }//$data
 

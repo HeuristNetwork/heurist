@@ -1,4 +1,5 @@
 <?php
+namespace hserv\entity;
 
     /**
     *
@@ -19,22 +20,29 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-
 class DbEntitySearch
 {
     private $system;
 
-    private $data = array();//assigned in validate params
+    private $data = array();//request - assigned in validate params
+
+    //name of primary key field from $config  by dty_Role="primary"
+    private $primaryField;
+
+    private $whereConditions;
 
     //data types: ids, int, float, date, bool, enum
     //structure
-    private $fields = array();
+    private $fields = array(); //fields from configuration
 
-    public function __construct( $system, $fields ) {
+    private $config = array(); //configuration
+
+
+    public function __construct( $system, $config, $fields) {
        $this->system = $system;
        $this->fields = $fields;
+       $this->config = $config;
+       $this->whereConditions = array();
     }
 
     //
@@ -44,13 +52,14 @@ class DbEntitySearch
 
         $values = @$this->data[$fieldname];
 
-        if($values!=null && $data_type!='freetext'){
+        if($values==null || $data_type=='freetext'){
+            return true;
+        }
             //array of integer or integer
             if(!is_array($values)){
                 $values = explode(',', $values);
                 //$values = array($values);
             }
-            //if (preg_match('/^\d+(?:,\d+)+$/', $this->value))
             foreach($values as $val){  //intval()
                 if( !(is_numeric($val) && $val!=null)){
                     $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $val");
@@ -58,42 +67,40 @@ class DbEntitySearch
                 }
             }
             //return $values;
-        }
+
         return true;
     }
 
-    //
-    // @todo inherit
-    //
-    private function _validateEnum($fieldname){
+    /**
+     * Validates that a given field's value is a valid enum.
+     *
+     * If the field is empty, it returns true. Otherwise, it checks whether the value
+     * exists in the corresponding enum array for the field.
+     *
+     * @param string $fieldname The name of the field to validate.
+     * @return bool Returns true if the value is valid, otherwise false.
+     */
+    private function _validateEnum($fieldname, $data_type=null){
 
         $value = @$this->data[$fieldname];
 
-        if($value!=null){
+        if($value==null){
+            return true;
+        }
 
-            $enums = $this->fields[$fieldname]['rst_FieldConfig'];
+        $enums = $this->fields[$fieldname]['rst_FieldConfig'];
+        $values = is_array($value) ? $value : explode(',', $value);
+        $isKeyBased = is_array($enums[0]);
 
-            if(!is_array($value)){
-                $values = explode(',', $value);
-            }else{
-                $values = $value;
-            }
-            $iskeybased = (is_array($enums[0]));
-
-            foreach($values as $val){
-                //search in enums
-
-                if(strpos($val, '-') === 0){ // remove negation
-                    $val = substr($val, 1);
-                }
+            foreach($values as $value){
+                // remove negation
+                if(strpos($value, '-') === 0){ $value = substr($value, 1); }
 
                 $isNotFound = true;
-                if($iskeybased){
-                    foreach($enums as $enum){
-                        if($enum['key']==$val){
-                            $isNotFound = false;
-                            break;
-                        }
+                if($isKeyBased){
+                    if(findInArray($enums, 'key', $value)!==null){
+                                $isNotFound = false;
+                                break;
                     }
                 }elseif(array_search($value, $enums, true)!==false){
                     $isNotFound = false;
@@ -103,81 +110,94 @@ class DbEntitySearch
                     return false;
                 }
             }//for
-        }
+
         return true;
     }
 
     //
     //
     //
-    private function _validateBoolean($fieldname){
+    private function _validateBoolean($fieldname, $data_type=null){
 
         $value = @$this->data[$fieldname];
 
-        if($value!=null){
-
-            if(is_bool($value)){
-                $value = $value?1:0;
-            }elseif(is_numeric($value)){
-                $value = $value==1?1:0;
-            }else{
-                $value = $value=='y'?1:0;
-            }
-            if(!($value==1 || $value==0)){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
-                return false;
-            }
-            return $value;
-
+        if($value==null){
+            return true;
         }
-        return true;
+
+        if(is_bool($value)){
+            $value = $value?1:0;
+        }elseif(is_numeric($value)){
+            $value = $value==1?1:0;
+        }else{
+            $value = $value=='y'?1:0;
+        }
+        if(!($value==1 || $value==0)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
+            return false;
+        }
+        return $value;
     }
 
 
-    //
-    //
-    //
+    /**
+     * Validates the input data based on the field configuration.
+     *
+     * @param array $data The input data to validate.
+     * @return array|bool Returns the validated data or false if validation fails.
+     */
     public function validateParams($data){
 
         $this->data = $data;
 
         //loop for config
-        foreach($this->fields as $fieldname=>$field_config){
-            $value = @$this->data[$fieldname];
+        foreach($this->fields as $fieldname=>$field_config)
+        {
+            $value = $this->data[$fieldname] ?? null;
 
-            if($value!=null){
+            if($this->isPrimaryField($field_config)){
+                $this->primaryField = $fieldname;
+            }
 
-                $data_type = $field_config['dty_Type'];
-                $data_role = @$field_config['dty_Role'];
+            if($value==null){
+                continue;
+            }
 
-                $is_ids = ($data_role=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+            if($value==SQL_NULL || $value=='-'.SQL_NULL){
+                continue;
+            }
 
-                if($value=='NULL' || $value=='-NULL'){
-                    $res = true;
-                }elseif($is_ids=='ids'){
-                    $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
-
-                }elseif($data_type == 'enum' && !$is_ids){
-                    $res = $this->_validateEnum($fieldname);
-
-                }elseif($data_type=='boolean'){
-                    $res = $this->_validateBoolean($fieldname);
-
-                }else{
-                    $res = true;
-                }
-
-                if(!is_bool($res)){
-                    $this->data[$fieldname] = $res;
-                }else{
-                    if(!$res) {return false;}
-                }
+            if(!$this->validateParam($fieldname, $field_config)){
+                return false;
             }
         }
 
         return $this->data;
     }
 
+    private function validateParam($fieldname, $field_config){
+        
+            $data_type = $field_config['dty_Type'];
+            $methodName = $data_type;
+
+            if($this->primaryField == $fieldname || @$field_config['rst_FieldConfig']['entity']!=null){
+                $methodName = 'ids';
+            }
+
+            $methodName = '_validate'.ucfirst($methodName);
+            $res = true;
+
+            if(method_exists($this, $methodName)){ //&& is_callable(array($this, $methodName))){
+                $res = $this->$methodName($fieldname, $data_type);
+            }
+
+            if(!is_bool($res)){
+                $this->data[$fieldname] = $res;
+                return true;
+            }
+                
+            return $res;
+    }
 
     //
     // remove quoted values and double spaces
@@ -195,6 +215,75 @@ class DbEntitySearch
         return $val;
     }
 
+
+    public function addPredicate($fieldname, $is_ids=false) {
+
+        $pred = $this->getPredicate($fieldname, $is_ids);
+        if($pred!=null) {array_push($this->whereConditions, $pred);}
+
+    }
+
+    public function setSelFields($fields){
+        if(!is_array(@$this->data['details'])){
+            $this->data['details'] = $fields;
+        }
+    }
+
+
+    public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
+
+        if(!is_array($this->data['details'])){ //specific list of fields
+            $this->data['details'] = explode(',', $this->data['details']);
+        }
+
+        //ID field is mandatory and MUST be first in the list
+        $idx = array_search($this->primaryField, $this->data['details']);
+        if($idx>0){ //remove from list if not on first place
+            unset($this->data['details'][$idx]);
+            $idx = false;
+        }
+        if($idx===false){
+            array_unshift($this->data['details'], $this->primaryField); //insert first
+        }
+        $is_ids_only = (count($this->data['details'])==1);
+
+        //compose query
+        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        .' FROM '.$this->config['tableName'];
+
+        if($sup_tables!=null){
+            $query .= $sup_tables;
+        }
+        if($sup_where!=null){
+            $this->whereConditions[] = $sup_where;
+        }
+
+        if(!empty($this->whereConditions)){
+            $query .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
+        }
+
+
+        if($orderBy!=null){
+            $query .= ' ORDER BY '.$orderBy;
+        }
+
+        $query .= ' '.$this->getLimit().$this->getOffset();
+
+        $res = $this->execute($query, $is_ids_only);
+        return $res;
+
+    }
+
+    /**
+     * Determines if a field is marked as the primary field.
+     *
+     * @param array $field_config The configuration for the field.
+     * @return bool True if the field is primary, otherwise false.
+     */
+    private function isPrimaryField($field_config) {
+        return isset($field_config['dty_Role']) && $field_config['dty_Role'] === 'primary';
+    }
+
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
     //
@@ -206,12 +295,12 @@ class DbEntitySearch
         $field_config = @$this->fields[$fieldname];
         if($field_config==null) {return null;}
         $data_type = $field_config['dty_Type'];
-        $is_ids = ($is_ids || @$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+        $is_ids = ($is_ids || $this->isPrimaryField($field_config) || @$field_config['rst_FieldConfig']['entity']!=null);
 
         //special case for ids - several values can be used in IN operator
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
 
-            if($value == 'NULL'){
+            if($value == SQL_NULL){
                 return '(NOT ('.$fieldname.'>0))';
             }elseif($value == '-NULL'){
                 return '('.$fieldname.'>0)';
@@ -231,7 +320,7 @@ class DbEntitySearch
                 $value = prepareIds($value);
             }
 
-            if(count($value)==0) {return null;}
+            if(empty($value)) {return null;}
 
             if(count($value)>1){
                 // comma-separated list of ids
@@ -299,7 +388,7 @@ class DbEntitySearch
 
             if($between){
                 $values = explode('<>', $value);
-                $between = ((negate)?' not':'').' between ';
+                $between = ((negate)?' not':'').SQL_BETWEEN;
                 $values[0] = $mysqli->real_escape_string($values[0]);
                 $values[1] = $mysqli->real_escape_string($values[1]);
             }else{
@@ -311,7 +400,7 @@ class DbEntitySearch
             if ($data_type == 'integer' || $data_type == 'float' || $data_type == 'year') {
 
                 if($between){
-                    $res = $between.$values[0].' and '.$values[1];
+                    $res = $between.$values[0].SQL_AND.$values[1];
                 }else{
                     $res = " $eq ".($data_type == 'int'?intval($value):$value);//no quotes
                 }
@@ -321,7 +410,7 @@ class DbEntitySearch
                 //$datestamp = Temporal::dateToISO($this->value);
 
                 if($between){
-                    $res = $between." '".$values[0]."' and '".$values[1]."'";
+                    $res = $between." '".$values[0]."' ".SQL_AND." '".$values[1]."'";
                 }else{
 
                     if($eq=='=' && !$exact){
@@ -336,7 +425,7 @@ class DbEntitySearch
             } else {
 
                 if($between){
-                    $res = $between.$values[0].' and '.$values[1];
+                    $res = $between.$values[0].SQL_AND.$values[1];
                 }else{
 
                     if(($eq=='=' || $eq=='!=') && !$exact && ($data_type == 'freetext' || $data_type == 'url' || $data_type == 'blocktext') ){
@@ -359,7 +448,7 @@ class DbEntitySearch
 
         }//for or_values
 
-        if(count($or_predicates)>0){
+        if(!empty($or_predicates)){
             $res = '('.implode(' OR ', $or_predicates).')';
             return $res;
         }else{
@@ -398,9 +487,29 @@ class DbEntitySearch
 
     //
     //
+    //
+    public function setOrderBy($default=null){
+        $orderby = null;
+        foreach($this->data as $key=>$value){
+            if(strpos($key,'sort:')===0){
+                $field = substr($key,5);
+                $orderby = $field.' '.($value==1?'ASC':'DESC');
+                break;
+            }
+        }
+
+        if($orderby==null && $default!=null){
+            $orderby = $default;
+        }
+        return $orderby;
+    }
+
+
+    //
+    //
     // $calculatedFields - is function that returns array of fieldnames or calculate and adds values of this field to result row
     //
-    public function execute($query, $is_ids_only, $entityName, $calculatedFields=null, $multiLangs=null){
+    public function execute($query, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
 
         $mysqli = $this->system->get_mysqli();
 
@@ -408,17 +517,12 @@ class DbEntitySearch
         if (!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
-        }else{
+        }
+        $total_count_rows = mysql__found_rows($mysqli);
 
-            $fres = $mysqli->query('select found_rows()');
-            if (!$fres)     {
-                $this->system->addError(HEURIST_DB_ERROR, 'Search error (retrieving number of records)', $mysqli->error);
-                return false;
-            }else{
-
-                $total_count_rows = $fres->fetch_row();
-                $total_count_rows = $total_count_rows[0];
-                $fres->close();
+        if($entityName==null){
+            $entityName = $this->config['entityName'];
+        }
 
                 if($is_ids_only){ //------------------------  LOAD and RETURN only IDS
 
@@ -528,9 +632,6 @@ class DbEntitySearch
                     }
 
                 }//$is_ids_only
-            }
-
-        }
 
         return $response;
     }

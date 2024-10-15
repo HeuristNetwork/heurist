@@ -144,7 +144,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     if(val.length==3 && val[2]) item.find('input[data-type="flex-basis"]').val(val[2]);
 
                     item.find('input').on('change', function(e){
-                        let item = $(e.target).parent();//('div[data-flexitem]');
+                        let item = $(e.target).parent();
                         let k = item.attr('data-flexitem');
 
                         if(!l_cfg.children[k].css) l_cfg.children[k].css = {};
@@ -211,10 +211,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             }
             _getCss();
             
-            //var css = 
-            //element.removeAttr('style');
-            //element.css(css);
-            
             _enableSave();
         }});
 
@@ -225,8 +221,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         cont.find('input[name="background"]').on('change',_getCss);
         /*
             var css = _getCss();
-            //element.removeAttr('style');
-            //element.css(css);
+           
+           
         });*/
         
         //4c. button listeners
@@ -288,7 +284,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         textAreaCss.on('change',function(){
 
             let vals = textAreaCss.val();
-            //vals = vals.replace(/;/g, ";\n");
+           
             vals = vals.replace(/"/g, ' ');
             
             vals = vals.split(';')
@@ -306,8 +302,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             element.css(new_css);
             l_cfg.css = new_css;
 
-            //element.attr('style',textAreaCss.val());
-            //l_cfg.css = element.css();
+           
+           
 
             _assignCssToUI();
            
@@ -509,8 +505,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         if($(event.target).is(':checked')){
             
             //disable
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), true);
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-left"]'), false);
+            
+            
 
             $container.find('input[name^="'+type+'-"]').prop('readonly',true);
             $container.find('input[name^="'+type+'-left"]').removeProp('readonly');
@@ -519,7 +515,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             
         }else{
             $container.find('input[name^="'+type+'-"]').removeProp('readonly');
-            //window.hWin.HEURIST4.util.setDisabled($container.find('input[name^="'+type+'-"]'), false);
+            
         }       
     }
     
@@ -696,7 +692,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     }
                 }
             });
-            margin_mode_full = true; //no_margin_values || mode_full;
+            margin_mode_full = true;
             //init file picker
             cont.find('input[name="bg-image"]')
                     .on('click',_selecHeuristMedia);
@@ -744,13 +740,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     
    
-    //
+    // NOT USED
     // from UI to element properties/css
     //
     function _getValues(){
-        
-
-        //return opts;
+        return '';
     }//_getValues
 
 
@@ -937,7 +931,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
         //autoformat
         setTimeout(function(){
-                    //codeEditorDlg.find('div.CodeMirror').css('height','100%').show();
+                   
                     
                     let totalLines = codeEditor.lineCount();  
                     codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
@@ -945,7 +939,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     codeEditor.setCursor(0,0); //clear selection
                     
                     codeEditor.focus()
-                    //setTimeout(function(){;},200);
+                   
                 },500);
     }
     

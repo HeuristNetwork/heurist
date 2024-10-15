@@ -23,8 +23,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
 
-        let that = this;
-        
         /*
         this.btn_add_record = this.element.find('#btn_add_record');
         if(this.options.edit_mode=='none'){
@@ -47,11 +45,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
         this.input_search_type = this.element.find('#input_search_type');
         this._on( this.input_search_type, { change: this.startSearch });
         
-        if(this.options.select_mode=='manager'){
-//            this.element.find('#input_search_type_div').css('float','left');
-        }
-                      
-        //this.startSearch();            
     },  
 
     //
@@ -59,8 +52,6 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {};
             
             if(this.input_search.val()!=''){

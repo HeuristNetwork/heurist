@@ -8,7 +8,7 @@
 */
 
 /**
-* exportRecords.php - abstract class to export records
+* ExportRecords.php - abstract class to export records
 *
 * Controller is records_output
 *
@@ -21,318 +21,366 @@
 * @version     4.0
 */
 
+namespace hserv\records\export;
 
-require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
+require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP and EasyRdf
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 /**
-*
-*  setSession - switch current datbase
-*  output - main method
-*
-*/
+ * Abstract class ExportRecords
+ * 
+ * Handles the export of records from the system in multiple formats such as JSON, GeoJSON, XML, etc.
+ * It supports fetching related records, applying various filters, and exporting to file or direct output.
+ */
 abstract class ExportRecords {
 
+    /**
+     * @var bool $initialized Indicates if the class has been initialized
+     */
     private $initialized = false;
 
+    /**
+     * @var mixed $system The system instance used for database and system-wide operations
+     */
     protected $system = null;
+
+    /**
+     * @var mysqli $mysqli The MySQLi connection instance
+     */
     protected $mysqli = null;
 
+    /**
+     * @var array $records An array to store the records to be exported
+     */
     protected $records;
 
-    protected $rt_counts; //count by rectype ids:  rty_ID => count
+    /**
+     * @var array $rt_counts Counts of records grouped by record type ID (rty_ID => count)
+     */
+    protected $rt_counts; 
 
-    private $tmp_destination; //temp file
-    protected $fd;  //file handler
-    protected $comma = '';//separator for json
+    /**
+     * @var string $tmp_destination Path to the temporary file for storing export data
+     */
+    private $tmp_destination; 
 
-    //csv of header fields
+    /**
+     * @var resource $fd File handler for writing to the export file
+     */
+    protected $fd; 
+
+    /**
+     * @var string $comma Separator used for JSON formatting
+     */
+    protected $comma = '';
+
+    /**
+     * @var string|null $retrieve_header_fields CSV of header fields to be retrieved
+     */
     protected $retrieve_header_fields = null;
-    //array of detail fields
+
+    /**
+     * @var array|bool $retrieve_detail_fields Array of detail fields to be retrieved
+     */
     protected $retrieve_detail_fields = false;
 
-    //param "extended"
-    //0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels, 3 - for media viewer
+    /**
+     * @var int $extended_mode Defines the output format for extended data
+     * 0 = Heurist internal format
+     * 1 = Interpretable format
+     * 2 = Include concept code and labels
+     * 3 = Format for media viewer
+     */
     protected $extended_mode = 0;
 
+    /**
+     * @var array|null $defRecTypes Static cache for default record types
+     */
     protected static $defRecTypes = null;
+
+    /**
+     * @var array|null $defDetailtypes Static cache for default detail types
+     */
     protected static $defDetailtypes = null;
+
+    /**
+     * @var array|null $defTerms Static cache for default terms
+     */
     protected static $defTerms = null;
 
-//
-//
-//
-public function __construct( $system ) {
-    $this->setSession($system);
-}
-
-//
-//
-//
-private function initialize()
-{
-    if ($this->initialized) {return;}
-
-    global $system;
-    $this->system  = $system;
-    $this->mysqli = $system->get_mysqli();
-    $this->initialized = true;
-}
-
-//
-// set session different that current global one (to work with different database)
-//
-public function setSession($system){
-    $this->system  = $system;
-    $this->mysqli = $system->get_mysqli();
-    $this->initialized = true;
-}
-
-//
-// output records as json or xml
-//
-// $data - recordSearch response
-//
-// $params:
-//    format - json|geojson|xml|gephi|iiif
-//    linkmode = direct, direct_links, none, all
-//    defs  0|1  include database definitions
-//    file  0|1
-//    filename - export into file with given name
-//    zip   0|1
-//    depth 0|1|2|...all
-//
-//    tlcmap 0|1  convert tlcmap records to layer
-//    restapi 0|1  - json output in format {records:[]}
-//
-// prefs for iiif
-//     version 2 or 3(default)
-
-// prefs for geojson, json
-//    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels, 3 - for media viewer
-//
-//    datatable -   datatable session id  - returns json suitable for datatable ui component
-//              >1 and "q" is defined - save query request in session to result set returned,
-//              >1 and "q" not defined and "draw" is defined - takes query from session
-//              1 - use "q" parameter
-//    columns - array of header and detail fields to be returned
-//    detail_mode  0|1|2  - 0- no details, 1 - inline, 2 - fill in "details" subarray
-//
-//    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
-//        geofields  - additional filter - get geodata from specified fields only (in facetsearch format rt:dt:rt:dt )
-//        suppress_linked_places - do not retriev geodata from linked places
-//        separate - do not create GeometryCollection for heurist record
-//    simplify  0|1 simplify  paths with more than 1000 vertices
-//
-//    limit for leaflet and gephi only
-//
-// @todo if output if file and zip - output datatabase,defintions and records as separate files
-//      split records by 1000 entries chunks
-//
-protected function _outputPrepare($data, $params){
-
-    $this->initialize();
-
-    if (!($data && @$data['status']==HEURIST_OK)){
-        return false;
+    /**
+     * Constructor for ExportRecords
+     * 
+     * @param mixed $system System instance to be used by the class
+     */
+    public function __construct($system) {
+        $this->setSession($system);
     }
 
-    $data = $data['data'];
+    /**
+     * Initializes the class by setting the system and database connection.
+     * Ensures that initialization is only done once.
+     */
+    private function initialize() {
+        if ($this->initialized) { return; }
 
-    if(@$data['memory_warning']){ //memory overflow in recordSearch
-        $this->records = array();//@todo
-    }elseif(!(@$data['reccount']>0)){   //empty response
-        $this->records = array();
-    }else{
-        $this->records = $data['records'];
+        global $system;
+        $this->system = $system;
+        $this->mysqli = $system->get_mysqli();
+        $this->initialized = true;
     }
 
-    $records_out = array();//ids already out - NOT USED
-    $this->rt_counts = array();//counts of records by record type
-
-    //NOT USED
-    $records_original_count = is_array($this->records)?count($this->records):0; //mainset of ids (result of search without linked/related)
-    $error_log = array();//NOT USED
-    $error_log[] = 'Total rec count '.count($this->records);
-
-    $this->tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
-    //$this->fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
-    $this->fd = fopen($this->tmp_destination, 'w');//less than 1MB in memory otherwise as temp file
-    if (false === $this->fd) {
-        $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
-        return false;
+    /**
+     * Sets the session system instance and initializes the database connection.
+     * 
+     * @param mixed $system System instance
+     */
+    public function setSession($system) {
+        $this->system = $system;
+        $this->mysqli = $system->get_mysqli();
+        $this->initialized = true;
     }
 
-    if(intval(@$params['extended'])>0){
-        $this->extended_mode = intval($params['extended']);//prefs for geojson, json
-    }else{
-        $this->extended_mode = 0;
-    }
+    /**
+     * Prepares the output by initializing, fetching records, and applying depth for linked records.
+     * 
+     * @param array $data Record search response data
+     * @param array $params Parameters controlling the export (format, depth, etc.)
+     * 
+     * @return bool True if successful, false otherwise
+     */
+    protected function _outputPrepare($data, $params) {
+        $this->initialize();
 
-    //
-    // in case depth>0 gather all linked and related record ids with given depth
-    //
-    $max_depth = 0;
-    if(@$params['depth']!=null){
-        $max_depth = (@$params['depth']=='all') ?9999:intval(@$params['depth']);
-    }
-
-    $direction = 0;// both direct and reverse links
-    $no_relationships = false;
-
-    if(@$params['linkmode']){//direct, direct_links, none, all
-
-        if($params['linkmode']=='none'){
-            $max_depth = 0;
-        }elseif($params['linkmode']=='direct'){
-            $direction = 1; //direct only
-        }elseif($params['linkmode']=='direct_links'){
-            $direction = 1; //direct only
-            $no_relationships = true;
-        }
-    }
-
-    if($max_depth>0){
-        if($params['format']=='gephi' && @$params['limit']>0){
-           $limit = $params['limit'];
-        }else{
-           $limit = 0;
+        if (!($data && @$data['status'] == HEURIST_OK)) {
+            return false;
         }
 
-        //search direct and reverse linked records for given set of records
-        //it adds ids to $this->records
-        recordSearchRelatedIds($this->system, $this->records, $direction, $no_relationships, 0, $max_depth, $limit);
+        $data = $data['data'];
+
+        if (@$data['memory_warning']) {//memory overflow in recordSearch
+            $this->records = array();
+        } elseif (!(@$data['reccount'] > 0)) {
+            $this->records = array();
+        } else {
+            $this->records = $data['records'];
+        }
+
+        $this->rt_counts = array();
+        $this->tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
+        $this->fd = fopen($this->tmp_destination, 'w');
+
+        if ($this->fd === false) {
+            $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
+            return false;
+        }
+
+        $this->extended_mode = intval(@$params['extended']) > 0 ? intval($params['extended']) : 0;
+
+        // Handling depth and linked records
+        $max_depth = 0;
+        if (@$params['depth'] !== null) {
+            $max_depth = (@$params['depth'] == 'all') ? 9999 : intval(@$params['depth']);
+        }
+
+        $direction = 0;
+        $no_relationships = false;
+
+        if (@$params['linkmode']) {
+            switch ($params['linkmode']) {
+                case 'none':
+                    $max_depth = 0;
+                    break;
+                case 'direct':
+                    $direction = 1;
+                    break;
+                case 'direct_links':
+                    $direction = 1;
+                    $no_relationships = true;
+                    break;
+                default:
+                    $direction = 0;
+                    break;
+            }
+        }
+
+        if ($max_depth > 0) {
+            $limit = ($params['format'] == 'gephi' && @$params['limit'] > 0) ? $params['limit'] : 0;
+            recordSearchRelatedIds($this->system, $this->records, $direction, $no_relationships, 0, $max_depth, $limit);
+        }
+
+        return true;
     }
 
-    $this->_outputPrepareFields($params);
-
-    return true;
-}
-
-//
-// Detect what header and detail fields to be retrieved
-//
-protected function _outputPrepareFields($params){
-
+    /**
+     * Detects which header and detail fields should be retrieved for export based on the given parameters.
+     * 
+     * @param array $params Parameters controlling the retrieval of fields (columns, details, etc.)
+     */
+    protected function _outputPrepareFields($params) {
         $default_all_fields = true;
-
         $this->retrieve_header_fields = array();
         $this->retrieve_detail_fields = array();
 
-        if(@$params['detail']){
-            $params['columns'] = is_array($params['detail'])?$params['detail']:explode(',',$params['detail']);
+        if (@$params['detail']) {
+            $params['columns'] = is_array($params['detail']) ? $params['detail'] : explode(',', $params['detail']);
             $default_all_fields = false;
         }
 
-        if(@$params['columns'] && is_array($params['columns'])){
-
-            foreach($params['columns'] as $col_name){
-
-                if(is_numeric($col_name) && $col_name>0){
-                    array_push($this->retrieve_detail_fields, $col_name);
-                }elseif(strpos($col_name,'rec_')===0){
-                    array_push($this->retrieve_header_fields, $col_name);
+        if (@$params['columns'] && is_array($params['columns'])) {
+            foreach ($params['columns'] as $col_name) {
+                if (is_array($col_name)) {
+                    $col_name = $col_name['data'];
                 }
 
+                if (is_numeric($col_name) && $col_name > 0) {
+                    array_push($this->retrieve_detail_fields, $col_name);
+                } elseif (strpos($col_name, 'rec_') === 0) {
+                    array_push($this->retrieve_header_fields, $col_name);
+                }
             }
         }
 
-        //header fields
-        if(count($this->retrieve_header_fields)==0){
-            $this->retrieve_header_fields = null; //retrieve all header fields
-        }else{
-            //always include rec_ID and rec_RecTypeID
-            if(!in_array('rec_RecTypeID',$this->retrieve_header_fields)) {array_unshift($this->retrieve_header_fields, 'rec_RecTypeID');}
-            if(!in_array('rec_ID',$this->retrieve_header_fields)) {array_unshift($this->retrieve_header_fields, 'rec_ID');}
+        if (empty($this->retrieve_header_fields)) {
+            $this->retrieve_header_fields = null; // Retrieve all header fields
+        } else {
+            if (!in_array('rec_RecTypeID', $this->retrieve_header_fields)) {
+                array_unshift($this->retrieve_header_fields, 'rec_RecTypeID');
+            }
+            if (!in_array('rec_ID', $this->retrieve_header_fields)) {
+                array_unshift($this->retrieve_header_fields, 'rec_ID');
+            }
             $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);
         }
 
-        //detail fields  (by default NONE detail fields)  ????
-        $this->retrieve_detail_fields = (count($this->retrieve_detail_fields)>0)?$this->retrieve_detail_fields:$default_all_fields;
-
-}
-
-//
-//
-//
-abstract protected function _outputHeader();
-
-abstract protected function _outputRecord($record);
-
-abstract protected function _outputFooter();
-
-//
-//
-//
-public function output($data, $params){
-
-    if(!$this->_outputPrepare($data, $params)){
-        return false;
+        $this->retrieve_detail_fields = !empty($this->retrieve_detail_fields) ? $this->retrieve_detail_fields : $default_all_fields;
     }
 
-    $this->_outputHeader();
+    /**
+     * Outputs the header for the export (must be implemented by subclasses).
+     */
+    abstract protected function _outputHeader();
 
-    //MAIN LOOP  ----------------------------------------
-    foreach($this->records as $record){
+    /**
+     * Outputs a single record for the export (must be implemented by subclasses).
+     * 
+     * @param array $record The record data to be output
+     */
+    abstract protected function _outputRecord($record);
 
-        if(is_array($record)){
-            //record data is already loaded
-            $recID = $record['rec_ID'];
-        }else{
-            $recID = $record;
-            $record = recordSearchByID($this->system, $recID, $this->retrieve_detail_fields, $this->retrieve_header_fields );
+    /**
+     * Outputs the footer for the export (must be implemented by subclasses).
+     */
+    abstract protected function _outputFooter();
+
+    /**
+    * Manages the entire export process by preparing data, outputting headers, records, and footers.
+    * Also handles file compression and download, if specified.
+    * 
+    * @param array $data Record search response data
+    * @param array $params Parameters controlling the export
+    * 
+    *    format - json|geojson|xml|gephi|iiif
+    *    linkmode = direct, direct_links, none, all
+    *    defs  0|1  include database definitions
+    *    file  0|1
+    *    filename - export into file with given name
+    *    zip   0|1
+    *    depth 0|1|2|...all
+    *
+    *    tlcmap 0|1  convert tlcmap records to layer
+    *    restapi 0|1  - json output in format {records:[]}
+    *
+    * prefs for iiif
+    *     version 2 or 3(default)
+
+    * prefs for geojson, json
+    *    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels, 3 - for media viewer
+    *
+    *    datatable -   datatable session id  - returns json suitable for datatable ui component
+    *              >1 and "q" is defined - save query request in session to result set returned,
+    *              >1 and "q" not defined and "draw" is defined - takes query from session
+    *              1 - use "q" parameter
+    *    columns - array of header and detail fields to be returned
+    *    detail_mode  0|1|2  - 0- no details, 1 - inline, 2 - fill in "details" subarray
+    *
+    *    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
+    *        geofields  - additional filter - get geodata from specified fields only (in facetsearch format rt:dt:rt:dt )
+    *        suppress_linked_places - do not retriev geodata from linked places
+    *        separate - do not create GeometryCollection for heurist record
+    *    simplify  0|1 simplify  paths with more than 1000 vertices
+    *
+    *    limit for leaflet and gephi only
+    *
+    * 
+    * 
+    * @return bool True if successful, false otherwise
+    */
+    public function output($data, $params) {
+        if (!$this->_outputPrepare($data, $params)) {
+            return false;
         }
 
-        $rty_ID = @$record['rec_RecTypeID'];
+        $this->_outputPrepareFields($params);
+        $this->_outputHeader();
 
-        if($rty_ID>0){
-            if(!@$this->rt_counts[$rty_ID]){
-                $this->rt_counts[$rty_ID] = 1;
-            }else{
-                $this->rt_counts[$rty_ID]++;
+        //MAIN LOOP  ----------------------------------------
+        foreach ($this->records as $record) {
+            $recID = is_array($record) ? $record['rec_ID'] : $record;
+            if (!is_array($record)) {
+                $record = recordSearchByID($this->system, $recID, $this->retrieve_detail_fields, $this->retrieve_header_fields);
+            }
+
+            $rty_ID = @$record['rec_RecTypeID'];
+            if ($rty_ID > 0) {
+                $this->rt_counts[$rty_ID] = isset($this->rt_counts[$rty_ID]) ? $this->rt_counts[$rty_ID] + 1 : 1;
+            }
+
+            if (!$this->_outputRecord($record)) {
+                break;
             }
         }
 
-        if(!$this->_outputRecord($record)){
-            break;
+        //CLOSE brackets ----------------------------------------
+        $this->_outputFooter();
+        
+        $this->_outputResult($params);
+        
+        return true;
+    }
+    
+    private function _outputResult($params){
+
+        $format = @$params['format'];
+        if($format==null) {$format = 'xml';}
+        if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
+            $mimeType = CTYPE_JSON;
+        }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
+            $mimeType = CTYPE_HTML;
+        }else {
+            $mimeType = 'Content-Type: text/xml';
         }
 
+        //
+        // OUTPUT
+        //
+        if(@$params['zip']==1 || @$params['zip']===true){
 
-    }//while records
+            $output = gzencode(file_get_contents($this->tmp_destination), 6);
+            fclose($this->fd);
 
-    //CLOSE brackets ----------------------------------------
-    $this->_outputFooter();
+            header('Content-Encoding: gzip');
+            header($mimeType);
 
-    $format = @$params['format'];
-    if($format==null) {$format = 'xml';}
-    if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
-        $mimeType = CTYPE_JSON;
-    }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
-        $mimeType = 'Content-Type: text/html';
-    }else {
-        $mimeType = 'Content-Type: text/xml';
-    }
+            fileDelete($this->tmp_destination);
+            echo $output;
+            unset($output);
 
-    //
-    // OUTPUT
-    //
-    if(@$params['zip']==1 || @$params['zip']===true){
-
-        $output = gzencode(file_get_contents($this->tmp_destination), 6);
-        fclose($this->fd);
-
-        header('Content-Encoding: gzip');
-        header($mimeType);
-
-        fileDelete($this->tmp_destination);
-        echo $output;
-        unset($output);
-
-        return true;
-    }else{
+            return;
+        }
 
         //$content = stream_get_contents($this->fd);
         fclose($this->fd);
@@ -355,12 +403,6 @@ public function output($data, $params){
                 }
 
                 if($this->system->defineConstant('DT_NAME', true)){
-
-                    //$val = mysql__select_value($this->mysqli,'select dtl_Value from recDetails where rec_ID='
-                    //    .$params['metadata'].' and dtl_DetailTypeID='.DT_NAME);
-                    //if($val){
-                        //$originalFileName = USanitize::sanitizeFileName($val);
-                    //}
 
                     recordSearchDetails($this->system, $record, array(DT_NAME));
                     if(is_array($record['details'][DT_NAME])){
@@ -390,156 +432,92 @@ public function output($data, $params){
 
             // SAVE hml into file DOES NOT WORK - need to rewrite flathml
             if(@$params['metadata']){//save hml into scratch folder
-                    $zip->addFromString($originalFileName.'.txt',
-                                    recordLinksFileContent($this->system, $record));
+                $zip->addFromString($originalFileName.'.txt',
+                    recordLinksFileContent($this->system, $record));
 
             }
             $zip->close();
             //donwload
             $contentDispositionField = 'Content-Disposition: attachment; '
-                . sprintf('filename="%s";', rawurlencode($file_zip))
-                . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
+            . sprintf('filename="%s";', rawurlencode($file_zip))
+            . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
 
             header('Content-Type: application/zip');
             header($contentDispositionField);
-            header(CONTENT_LENGTH . self::get_file_size($file_zip_full));
-            self::readfile_by_chunks($file_zip_full);
+            header(CONTENT_LENGTH . getFileSize($file_zip_full));
+            fileReadByChunks($file_zip_full);
 
             // remove the zip archive and temp files
             //unlink($file_zip_full);
             //unlink($file_metadata_full);
             fileDelete($this->tmp_destination);
-            return true;
-        }else{
-            //$content = file_get_contents($this->tmp_destination);
+            return;
+        }
+            
+        if(@$params['restapi']){
 
-            if(@$params['restapi']){
-                //header(HEADER_CORS_POLICY);
-                //header("Access-Control-Allow-Methods: POST, GET");
+            // Allow from any origin
+            if (isset($_SERVER['HTTP_ORIGIN'])) {
+                // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
+                // you want to allow, and if so:
+                header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+                header('Access-Control-Allow-Credentials: true');
+                header('Access-Control-Max-Age: 5');// default value 5 sec
+            }
+            //2024-02-23 else header(HEADER_CORS_POLICY);
+        }
 
-                // Allow from any origin
-                if (isset($_SERVER['HTTP_ORIGIN'])) {
-                    // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-                    // you want to allow, and if so:
-                    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-                    header('Access-Control-Allow-Credentials: true');
-                    header('Access-Control-Max-Age: 5');// default value 5 sec
-                    //header('Access-Control-Max-Age: 86400');// cache for 1 day
-                /*}elseif($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        header($mimeType);
 
-                    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-                        // may also be using PUT, PATCH, HEAD etc
-                        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+        if(@$params['file']==1 || @$params['file']===true){
 
-                    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-                        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-                    exit(0);*/
-                }else{
-                    //2024-02-23 header(HEADER_CORS_POLICY);
-                }
+            if($format=='iiif'){
+                $filename = 'manifest_'.$params['db'].'_'.date("YmdHis").'.json';
+            }else{
+                $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.($format=='gephi'?'gexf':$format);
             }
 
-            header($mimeType);
+            header('Content-Disposition: attachment; filename='.$filename);
+            header(CONTENT_LENGTH . getFileSize($this->tmp_destination));
+        }
 
-            if(@$params['file']==1 || @$params['file']===true){
+        if(@$params['restapi']){
 
-                if($format=='iiif'){
-                    $filename = 'manifest_'.$params['db'].'_'.date("YmdHis").'.json';
-                }else{
-                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.($format=='gephi'?'gexf':$format);
-                }
-
-                header('Content-Disposition: attachment; filename='.$filename);
-                header(CONTENT_LENGTH . self::get_file_size($this->tmp_destination));
+            if(empty($this->rt_counts)){
+                http_response_code(404);
+            }else{
+                http_response_code(200);
             }
-
-            if(@$params['restapi']){
-
-                if(count($this->rt_counts)==0){
-                    http_response_code(404);
-                }else{
-                    http_response_code(200);
-                }
-            }
-            self::readfile_by_chunks($this->tmp_destination);
-            fileDelete($this->tmp_destination);
-
-            return true;
-//            exit($content);
         }
+        //read and download file
+        fileReadByChunks($this->tmp_destination);
+        fileDelete($this->tmp_destination);
+
     }
 
-}
+    //
+    //
+    //
+    protected function _getDatabaseInfo(){
 
-//
-//
-//
-protected function _getDatabaseInfo(){
+        //add database information to be able to load definitions later
+        $dbID = $this->system->get_system('sys_dbRegisteredID');
+        $database_info = array('id'=>$dbID,
+                                'url'=>HEURIST_BASE_URL,
+                                'db'=>$this->system->dbname());
 
-    //add database information to be able to load definitions later
-    $dbID = $this->system->get_system('sys_dbRegisteredID');
-    $database_info = array('id'=>$dbID,
-                            'url'=>HEURIST_BASE_URL,
-                            'db'=>$this->system->dbname());
+        $query = 'select rty_ID,rty_Name,'
+        ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
+        .' from defRecTypes where rty_ID in ('.implode(',',array_keys($this->rt_counts)).')';
+        $rectypes = mysql__select_all($this->system->get_mysqli(),$query,1);
 
-    $query = 'select rty_ID,rty_Name,'
-    ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
-    .' from defRecTypes where rty_ID in ('.implode(',',array_keys($this->rt_counts)).')';
-    $rectypes = mysql__select_all($this->system->get_mysqli(),$query,1);
-
-    foreach($this->rt_counts as $rtid => $cnt){
-        //include record types that are in output - name, ccode and count
-        $this->rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
-    }
-    $database_info['rectypes'] = $this->rt_counts;
-
-    return $database_info;
-}
-
-//
-// read file by 10MB chunks
-//
-private static function readfile_by_chunks($file_path)
-{
-    $file_size = self::get_file_size($file_path);
-    $chunk_size = 10 * 1024 * 1024; // 10 MiB
-    if ($chunk_size && $file_size > $chunk_size) {
-        $handle = fopen($file_path, 'rb');
-        while (!feof($handle)) {
-            echo fread($handle, $chunk_size);
-            @ob_flush();
-            @flush();
+        foreach($this->rt_counts as $rtid => $cnt){
+            //include record types that are in output - name, ccode and count
+            $this->rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
         }
-        fclose($handle);
-        return $file_size;
-    }
-    return readfile($file_path);
-}
+        $database_info['rectypes'] = $this->rt_counts;
 
-
-// Fix for overflowing signed 32 bit integers,
-// works for sizes up to 2^32-1 bytes (4 GiB - 1):
-private static function fix_integer_overflow($size) {
-    if ($size < 0) {
-        $size += 2.0 * (PHP_INT_MAX + 1);
+        return $database_info;
     }
-    return $size;
-}
-
-private static function get_file_size($file_path, $clear_stat_cache = false) {
-    if ($clear_stat_cache) {
-        if (version_compare(phpversion(), '5.3.0') >= 0) { //strnatcmp(phpversion(), '5.3.0') >= 0
-            clearstatcache(true, $file_path);
-        } else {
-            clearstatcache();
-        }
-    }
-    if(file_exists($file_path)){
-        return self::fix_integer_overflow(filesize($file_path));
-    }else{
-        return 0;
-    }
-}
-
 } //end class
 ?>

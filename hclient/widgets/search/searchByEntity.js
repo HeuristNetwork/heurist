@@ -70,7 +70,7 @@ $.widget( "heurist.searchByEntity", {
         if(this.options.use_combined_select){
             
             this.combined_select = $('<div class="ui-heurist-header" style="top:0px;">'+window.hWin.HR('Filter by entity')+'</div>'
-                +'<div style="top:37px;position:absolute;width:100%">'  //width:100%;
+                +'<div style="top:37px;position:absolute;width:100%">' 
                     +'<div class="ui-heurist-title favorites" style="width: 100%;padding:12px 0px 0px 6px;">'
                                 +window.hWin.HR('Favorites')+'</div>'
                     +'<ul class="by-selected" style="list-style-type:none;margin:0;padding:6px"/>'
@@ -195,7 +195,7 @@ $.widget( "heurist.searchByEntity", {
                     setTimeout(function(){that.refreshOnShow()},500);
             }} );
             
-        //this.div_search.find('.div-table-cell').css('vertical-align','top');
+       
 
         this.recreateRectypeSelectors();
         
@@ -337,7 +337,7 @@ $.widget( "heurist.searchByEntity", {
                         .attr('data-id', rty_ID)
                         .css({'margin-left':'6px','font-size':'0.9em'})        
                         .addClass('entity-filter-button')  // ui-state-active
-                        .insertAfter(this.config_btn.parent()); //appendTo(this.div_entity_btns);
+                        .insertAfter(this.config_btn.parent());
                     
                 }
             
@@ -420,7 +420,7 @@ $.widget( "heurist.searchByEntity", {
             
             let select_rectype = opts['select_name'];
             
-            opts.useIds = true;//(exp_level<2);
+            opts.useIds = true;
             
             opts.useHtmlSelect = (select_rectype=='usage_select' && that.options.use_combined_select);
             
@@ -524,7 +524,7 @@ $.widget( "heurist.searchByEntity", {
     _doSearch: function(rty_ID){
 
             let request = {};
-            request.q = 't:'+rty_ID; //'{"t":"'+rty_ID+'"}';
+            request.q = 't:'+rty_ID;
             request.w  = 'a';
             request.qname = $Db.rty(rty_ID, 'rty_Plural');
             request.detail = 'ids';

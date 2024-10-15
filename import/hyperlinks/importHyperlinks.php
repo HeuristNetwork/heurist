@@ -33,11 +33,14 @@
 define('LOGIN_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
 
+use hserv\entity\DbUsrTags;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
-require_once dirname(__FILE__).'/../../hserv/entity/dbUsrTags.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 
+
+global $linkno, $disambiguate_rec_ids, $notes, $mysqli;
 
 $nextmode = 'inputselect';
 $mysqli = $system->get_mysqli();
@@ -240,7 +243,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		array_push($record_tobebookmarked, $rec_id);
 	}
 
-	if(count($record_tobebookmarked)>0){
+	if(!empty($record_tobebookmarked)){
 
 		if (@$_REQUEST['adding_tags'] == 1) {
 			$kwd = @$_REQUEST['wgTags'];
@@ -604,7 +607,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $out = recordSave($system, $record);//see recordModify.php
 
     if ( @$out['status'] != HEURIST_OK ) {
-        //print "<div style='color:red'> Error: ".$out["message"]."</div>";
+        //print "<div style='color:red'> Error: ".$out["message"].DIV_E;
         return 0;
     }else{
 

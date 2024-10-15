@@ -202,9 +202,6 @@ function HMultiSelect(){
 		if(window.hWin.HEURIST4.util.isempty(recset)){ return; } // skip if there are no base fields
 
 		recset.each2(function(fID, fields){ // proceed through all fields and record each id
-
-			let type = getTypeById(fields['rst_DetailTypeID']);
-
 			assigned_fields.push(fID);
 		});
 	}
@@ -386,10 +383,11 @@ function HMultiSelect(){
 
 								window.hWin.HEURIST4.msg.showMsgFlash('Checked ' + name, 5000);
 							}else{
-								window.hWin.HEURIST4.msg.showMsgErr(
-									'An error has occurred with the selection of base field ' + name + ' (' + id + ')<br>'
-								  + 'Please contact the Heurist Team if this problem persists.'
-								);
+								window.hWin.HEURIST4.msg.showMsgErr({
+									message: `An error has occurred with the selection of base field ${name} (${id})`,
+									error_title: 'Invalid base field',
+									status: window.hWin.ResponseStatus.UNKNOWN_ERROR									
+								});
 							}
 
 							result_container.hide();
@@ -416,10 +414,11 @@ function HMultiSelect(){
 
 									window.hWin.HEURIST4.msg.showMsgFlash('Checked ' + name + ' (' + sel_name + ')', 5000);
 								}else{
-									window.hWin.HEURIST4.msg.showMsgErr(
-										'An error has occurred with the selection of base field ' + sel_name + ' (' + id + ' => ' + name + ')<br>'
-									  + 'Please contact the Heurist Team if this problem persists.'
-									);
+									window.hWin.HEURIST4.msg.showMsgErr({
+										message: `An error has occurred with the selection of base field ${sel_name} (${id} => ${name})`,
+										error_title: 'Invalid base field',
+										status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+									});
 								}
 
 								result_container.hide();
@@ -487,7 +486,10 @@ function HMultiSelect(){
 			getCheckedFields();
 
 			if(window.hWin.HEURIST4.util.isempty(selected_fields)){
-				window.hWin.HEURIST4.msg.showMsgErr('No fields have been selected');
+				window.hWin.HEURIST4.msg.showMsgErr({
+					message: 'No fields have been selected',
+					error_title: 'Missing fields'
+				});
 				return;
 			}
 			else{
@@ -523,7 +525,10 @@ function HMultiSelect(){
 		rtyID = window.hWin.HEURIST4.util.getUrlParameter('rtyID', location.search);
 
 		if(window.hWin.HEURIST4.util.isempty(rtyID)){
-			window.hWin.HEURIST4.msg.showMsgErr('A record type is required to use this tool');
+			window.hWin.HEURIST4.msg.showMsgErr({
+				message: 'A record type is required to use this tool',
+				error_title: 'Missing record type'
+			});
 			window.close();
 		}
 

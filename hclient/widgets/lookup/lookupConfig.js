@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global stringifyMultiWKT, accessToken_GeonamesAPI */
+/* global stringifyMultiWKT */
 
 $.widget( "heurist.lookupConfig", {
 
@@ -67,7 +67,7 @@ $.widget( "heurist.lookupConfig", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -81,11 +81,11 @@ $.widget( "heurist.lookupConfig", {
                 service: 'https://ghap.tlcmap.org/places?containsname=London&searchausgaz=on&searchncg=on&searchpublicdatasets=on'
             },
             geoName: {
-                lookup: `http://api.geonames.org/searchJSON?username=${accessToken_GeonamesAPI}&maxRows=10&q=London`,
+                lookup: `http://api.geonames.org/searchJSON?maxRows=10&q=London`,
                 service: 'https://www.geonames.org/search.html?q=London&country='
             },
             postalCodeSearch: {
-                lookup: `http://api.geonames.org/postalCodeLookupJSON?username=${accessToken_GeonamesAPI}&maxRows=10&placename=London`,
+                lookup: `http://api.geonames.org/postalCodeLookupJSON?maxRows=10&placename=London`,
                 service: 'https://www.geonames.org/postalcode-search.html?q=London&country='
             },
             bnfLibrary: {
@@ -118,6 +118,7 @@ $.widget( "heurist.lookupConfig", {
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: 'There are no available services, or the configuration file was not found or is broken',
+                error_title: 'No services',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
             });
             return;
@@ -143,7 +144,11 @@ $.widget( "heurist.lookupConfig", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }else{
                     if(that._initControls()){
                         if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
@@ -639,7 +644,7 @@ $.widget( "heurist.lookupConfig", {
                 this.saveConfigrations();
             }else{
                 if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
-                    this._as_dialog.dialog('close'); // this.closeDialog(true);
+                    this._as_dialog.dialog('close');
                 }else{
                     this.element.empty().hide();
                 }
@@ -803,7 +808,7 @@ $.widget( "heurist.lookupConfig", {
                         let dty_ID = $(ele).val();
 
                         if(dty_ID == ""){
-                            //dty_ID = null;
+                           
                         }
                         
                         if(that._current_cfg.fields[field]!=dty_ID){
@@ -891,6 +896,7 @@ $.widget( "heurist.lookupConfig", {
                     click: function(){
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'Due to security reasons this url cannot be provided.',
+                            error_title: 'Cannot provide URL',
                             status: window.hWin.ResponseStatus.ACTION_BLOCKED
                         });
                         return false;
@@ -1178,6 +1184,7 @@ $.widget( "heurist.lookupConfig", {
         if(nomismaServices.indexOf(type) == -1){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: `An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "${type}"`,
+                error_title: 'Invalid Nomisma request',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
             });
             return;

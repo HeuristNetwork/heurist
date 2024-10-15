@@ -27,16 +27,16 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Notification',
-        helpContent: ''  //'usrTags.html'
+        helpContent: false  //'usrTags'
     },
-    
+
     _reminderWidgetContainer:null,
     _reminderWidget:null,
     
 
     _initControls:function(){
         
-        this.element.find('#div_header')
+        this._$('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html('Share these records with other users via email<br>'
@@ -62,8 +62,8 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         
         
         //align scope selector and edit form
-        this.element.find('#div_fieldset').css({'padding':'10px 0px'});
-        this.element.find('#div_fieldset .header').css({'padding':'0 24px 0 0'});
+        this._$('#div_fieldset').css({'padding':'10px 0px'});
+        this._$('#div_fieldset .header').css({'padding':'0 24px 0 0'});
         
         return this._super();
     },

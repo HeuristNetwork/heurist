@@ -20,13 +20,13 @@
 
 if(!defined('PDIR')){
     define('PDIR','../');
-    require_once dirname(__FILE__).'/../hserv/System.php';
+    require_once dirname(__FILE__).'/../autoload.php';
 }
 
 $is_json = (@$_REQUEST['format']=='json');
 
 if(!isset($system)){
-    $system = new System();
+    $system = new hserv\System();
 }
 
 if(!$system->is_inited()){
@@ -43,7 +43,7 @@ if($system->get_mysqli()!=null) { //server is connected
     $list =  mysql__getdatabases4($system->get_mysqli());
     if(!$is_json && count($list)<1){
         //redirect to create database
-        header('Location: ' . HEURIST_BASE_URL . 'startup/index.php');
+        redirectURL(HEURIST_BASE_URL . 'startup/index.php');
         exit;
     }
 }
@@ -88,7 +88,7 @@ if($is_json){
             if(isset($error_msg) && $error_msg!=''){
                 echo '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">';
                 echo '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>';
-                echo $error_msg.'</div>';
+                echo $error_msg.DIV_E;
                 $list_top = '12em';
             }else{
                 $list_top = '6em';
@@ -101,6 +101,7 @@ if($is_json){
                 <ul class="db-list">
                     <?php
                     foreach ($list as $name) {
+                        $name = htmlentities($name);
                         print "<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>";
                     }
 

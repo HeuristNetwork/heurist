@@ -28,8 +28,7 @@ function HLayout(args) {
      const _className = "HLayout",
          _version   = "0.4";      
 
-    let widgetinstances = [], //@todo array of all inited widgets 
-         widgets = [],
+    let  widgets = [],
          layouts = [],  //json description of layout
          _containerid,
          _is_container_layout = false;
@@ -98,7 +97,6 @@ function HLayout(args) {
         
         if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
         
-        //var $container = $(_containerid);
         let ele = $('div[layout_id="'+layout_id+'"]');
         if( ele.hasClass('ui-tabs-panel') ){
             $(ele.parent()).tabs( "option", "active", ele.index()-1 );
@@ -128,7 +126,6 @@ function HLayout(args) {
             $container = $(_containerid); 
         }
      
-        //if(!window.hWin.HEURIST4.util.isFunction($container.layout)) return;
         if(!$container.hasClass('ui-layout-container')) {
             $container = $container.children().find('.ui-layout-container');
         }
@@ -254,9 +251,7 @@ function HLayout(args) {
 
     //--------------------------------------------
     let grid_min_size = 200;
-    let grid_step_size = 100;
     let app_counter = 0; //to maintain unique id for panels and tabs
-    //var layout, $container;
 
     //
     // north-west-east-south layout
@@ -282,7 +277,7 @@ function HLayout(args) {
               togglerLength_closed:40,
               onopen_start : function(){ 
                   let  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
-                  let mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
+                  let mw = 250; 
                   if(w<310){
                       let tw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
                       window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
@@ -336,11 +331,11 @@ function HLayout(args) {
             onopen_end: function(pane_name, pane_element){
                 if(pane_name=='west'){
                     var tog = pane_element.parent().find('.ui-layout-toggler-west');
-                    //tog.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-w');
-                    //tog.find('.content-open').addClass('ui_icon ui-icon-triangle-1-e');
-                    //tog.find('.content-closed').addClass('ui_icon ui-icon-triangle-1-w');
-                    //tog.removeClass('ui_icon ui-icon-triangle-1-e');
-                    //tog.addClass('ui_icon ui-icon-triangle-1-w');
+                   
+                   
+                   
+                   
+                   
                     
                 }
             },
@@ -357,7 +352,7 @@ function HLayout(args) {
 
         if(!layout.center){
             layout_opts.center__minWidth = 200;
-            //$pane.addClass('pane_dropable');
+           
             layout['center'].dropable = true;
         }else{
             if(layout.center.minsize){
@@ -401,7 +396,7 @@ function HLayout(args) {
         // 3) add tabs/apps to panes
 
         let bg_color = window.hWin.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
-        //$('.ui-widget-content:first').css('background-color');
+       
         $('body').css('background-color', bg_color);
 
         layoutInitPane(layout, $container, 'north', bg_color);
@@ -460,7 +455,7 @@ function HLayout(args) {
             }
         });
     */
-        //temp appAdjustContainer();
+       
     }
 
     //
@@ -468,7 +463,7 @@ function HLayout(args) {
     //
     function __toogleIcons($container, pane, closed, opened){
         let tog = $container.find('.ui-layout-toggler-'+pane);
-        //tog.addClass('ui-heurist-btn-header1');
+       
         
         let togc = tog.find('.content-closed'); togc.empty();
         $('<div>').addClass('ui-icon ui-icon-carat-2-'+closed).appendTo(togc);
@@ -485,7 +480,7 @@ function HLayout(args) {
     */
     function _initLayoutFree(layout, $container){
 
-        //$container.hide();
+       
 
         //find main container and load template
         if(layout['template']){
@@ -538,10 +533,7 @@ function HLayout(args) {
             }
         }
 
-        
-        let bg_color = $('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', '');
-        
         
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
@@ -552,7 +544,7 @@ function HLayout(args) {
 
         initDragDropListener();
         
-        //setTimeout(function(){$container.show();},1000);
+       
     }
 
     
@@ -611,8 +603,6 @@ function HLayout(args) {
                     }else{ //tabs by default
                         // in design mode - it is called from iframe and baseURL is different 
                         // to fix this mess
-                        //var rhash = /#.*$/;
-                        //var locationUrl = window.location.href.replace( rhash, "" ); //Client_DOM_Code_Injection
                         
                         let locationUrl = window.hWin.HAPI4.baseURL;
                         $pane.find('li > a').each(function(idx, item){
@@ -809,22 +799,12 @@ console.error('Cardinal layout widget does not have proper options');
 
                 let $src_tab = $app_content.parent();
 
-                let app = _appGetWidgetById($app_content.attr('widgetid')); //ART04-26
                 let offset = $pane_content.offset();
                 let $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.substr(1) }, //to remove #
                     {dockable: true, dragable:true, resizable:true,
                         css:{top:event.pageY-offset.top,left:event.pageX-offset.left,height:200,width:200}});
                 appAdjustContainer();
                 $app_content.appendTo( $tab );
-
-                /*the same
-                //var tt = $tab.get();
-                //var pp = $portlet.get();
-                //tt.appendChild(tt);
-                //$portlet.prependTo( $tab );
-                //$portlet.appendTo($tab);
-                //$tab.append($portlet);
-                */
 
                 //remove from source
                 $li.remove();
@@ -839,7 +819,7 @@ console.error('Cardinal layout widget does not have proper options');
 
             }
         });
-        //temp appAdjustContainer();
+       
     }
 
 
@@ -857,7 +837,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         let $d;
         
-        //is_cardinal_layout = true;
+       
         
         if(!_is_container_layout ){
             $d = $(document.createElement('div'));
@@ -891,8 +871,8 @@ console.error('Cardinal layout widget does not have proper options');
             appAddContent($d, application, app);
 
             $d.addClass('ui-widget-content');
-            //.addClass('ui-corner-all');
-            //.css('padding','0.2em');
+           
+           
         }
 
         if(app.css){
@@ -977,6 +957,7 @@ console.error('Cardinal layout widget does not have proper options');
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: `Widget ${app.widgetname} not loaded. Verify your configuration`,
+                            error_title: 'Widget loading failed',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                     }
@@ -1076,7 +1057,7 @@ console.error('Cardinal layout widget does not have proper options');
         
         if(tabcfg && tabcfg.style){    //@todo!!!!!
             if(tabcfg.style['background-header']){
-                //$tab_ctrl.attr('background-header', tabcfg.style['background-header']+' !important');
+               
                 //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
             }
         }
@@ -1129,7 +1110,7 @@ console.error('Cardinal layout widget does not have proper options');
             start: function(event, ui){
                 $('.tab_ctrl').css('z-index', '0');
                 $( this ).parent().css('z-index', '1');
-                //ui.helper.css('z-index', '999999');
+               
             }
         });
 
@@ -1197,7 +1178,7 @@ console.error('Cardinal layout widget does not have proper options');
             containment: containment_selector //'.ui-layout-content'
         });
 
-        //to destrot use 'destroy' to disable $( '.ui-tabs-nav li' ).draggable('disable');
+       
         
         
         $( '.tab_ctrl ul' ).disableSelection();
@@ -1218,7 +1199,6 @@ console.error('Cardinal layout widget does not have proper options');
     //
     function isMouseoverTabControl(e){
 
-        let s = e.pageX+"  "+e.pageY;
         let res = false;
 
         $(".tab_ctrl").each(
@@ -1238,7 +1218,7 @@ console.error('Cardinal layout widget does not have proper options');
                     return false;
 
                 }
-                //$("#lblhover").html("xxxx");
+               
 
         });
 
@@ -1262,8 +1242,6 @@ console.error('Cardinal layout widget does not have proper options');
                 return;
             }
         }
-        
-        //var $container = $(containerid);
         
         //add style to header
         if(!window.hWin.HEURIST4.util.isempty(layout.cssfile)){
@@ -1336,7 +1314,7 @@ console.error('Cardinal layout widget does not have proper options');
                 lis.each(function(idx,item){
                     
                    if(idx == lis.length-1) $(item).css({width:'300px'});
-                   //$(item).css({width:((idx+1)*100+'px')});
+                  
                    $(item).css({'z-index': count_lis - idx});
                    $(item).attr('data-zkeep', count_lis - idx);
                    $(item).attr('data-zmax', count_lis+1);
@@ -1357,7 +1335,7 @@ console.error('Cardinal layout widget does not have proper options');
                        })
                        .appendTo($(item));
                        
-                       //$(item).attr('admintab',1);
+                      
                    }
                    
                 });
@@ -1403,9 +1381,9 @@ console.error('Cardinal layout widget does not have proper options');
         getWidgetByName: function( widgetname ){
             
             if(widgetname=='svs_list'){
-                let app2 = _appGetWidgetByName('mainMenu6');
+                let app2 = _appGetWidgetByName('slidersMenu');
                 if(app2.widget){
-                    return $(app2.widget).mainMenu6('getSvsList');
+                    return $(app2.widget).slidersMenu('getSvsList');
                 }
             }  
             
@@ -1417,6 +1395,7 @@ console.error('Cardinal layout widget does not have proper options');
             }
         },
         
+        //not used
         executeCommand: function( widgetname, method, command ){
             let app = _appGetWidgetByName( widgetname );
             if(app && app.widget)
@@ -1435,7 +1414,7 @@ console.error('Cardinal layout widget does not have proper options');
             }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
                 console.log('widget '+widgetname+' not loaded');
             //}else {
-            //    console.error('widget '+widgetname+' not inited');
+           
             }
         },
     
@@ -1497,7 +1476,6 @@ console.error('Cardinal layout widget does not have proper options');
         visibilityAppById: function ( layout_id, show_or_hide ){
             
             if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
-            //var $container = $(_containerid);
             let ele = $('div[layout_id="'+layout_id+'"]');
             
             if( ele.hasClass('ui-tabs-panel') ){

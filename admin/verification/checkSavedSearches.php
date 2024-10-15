@@ -38,6 +38,8 @@ $databases = mysql__getdatabases4($mysqli);
 // Generic record fields
 $rec_meta = array('title','typeid','typename','added','modified','addedby','url','notes','owner','access','tag');
 
+$databases = array_map('htmlentities', $databases);
+
 $results = array_fill_keys(array_values($databases), array());
 
 $field_in_rst = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID = dtyID AND rst_RecTypeID = rtyID';
@@ -209,7 +211,7 @@ foreach($databases as $db){
                                         . "ID: <strong style='padding-right: 15px;'>$svs_ID</strong> "
                                         . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>"
                                         . implode("<br>", $results[$db][$svs_ID])
-                                    ."</div>";
+                                    .DIV_E;
         }elseif(array_key_exists($svs_ID, $results[$db])){
             unset($results[$db][$svs_ID]);
         }

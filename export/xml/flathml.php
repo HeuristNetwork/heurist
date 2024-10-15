@@ -101,16 +101,21 @@ if (@$argv) {
 
 }
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\structure\ConceptCode;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 
 if(@$_REQUEST['postdata']){
     //all parameters can be sent as json array in postdata
     $_REQUEST = json_decode($_REQUEST['postdata'], true);
 }
+
+define('REGEX_JSON_CHECK','/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/');
+define('REGEX_SPLIT_DATE', "![-\/]!");
+define('ERR_INVALID_FILTER', 'Error: invalid json filters string');
 
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
 
@@ -137,7 +142,7 @@ $output_file_fd = null;
 $hunifile = null; //name of file-per-record for HuNI mode
 
 if(!defined('PDIR')){
-    $system = new System();
+    $system = new hserv\System();
     if( !$system->init(@$_REQUEST['db']) ){
         die("Cannot connect to database");
     }
@@ -145,27 +150,17 @@ if(!defined('PDIR')){
 
 //write the output into single file
 // output to file is allowed in the only case - archiving database
-if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME)){
+if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME)){
     $output_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "xml");
 
     $output_file_fd = fopen($output_file, 'w');
-    //$output_file = fopen ($output_file_name, "w");
-    //if(!$output_file){
-    //    die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
-    //}
+
     $_REQUEST['mode'] = 1;
 }
 
 
 if(!defined('HEURIST_HML_DIR')){
-    /*$path = $system->get_system('sys_hmlOutputDirectory');//@todo check
-    if ($path) {
-    $path = getRelativePath(HEURIST_FILESTORE_DIR, $path);
-    if(folderCreate($path, true)){
-    define('HEURIST_HML_DIR', $path);
-    }
-    }
-    if(!defined('HEURIST_HML_DIR')){*/
+
     define('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR . 'hml-output/');
     folderCreate2(HEURIST_HML_DIR, '', true);
     define('HEURIST_HML_URL', HEURIST_FILESTORE_URL . 'hml-output/');
@@ -186,7 +181,7 @@ if(!$intofile){
             }
 
             header('Content-Disposition: attachment; filename='.$filename);
-            //header(CONTENT_LENGTH . strlen($content));
+
         }
 
     }
@@ -375,12 +370,11 @@ $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == - 1
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0 ? false : true);// default to supress loopbacks or gives oneside of a relationship record  ARTEM:NOT USED ANYMORE
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
 //$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
-//			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
 $PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true : (!$system->has_access() ? true : false));
 
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json record type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -389,8 +383,8 @@ if (!isset($RECTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['relfilters'] ? $_REQUEST['relfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json relation type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $RELTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -399,8 +393,8 @@ if (!isset($RELTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['ptrfilters'] ? $_REQUEST['ptrfilters'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json pointer type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $PTRTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -409,8 +403,8 @@ if (!isset($PTRTYPE_FILTERS)) {
 }
 
 $filterString = (@$_REQUEST['selids'] ? $_REQUEST['selids'] : null);
-if ($filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/', $filterString)) {
-    die(" error invalid json record type filters string");
+if ($filterString && preg_match(REGEX_JSON_CHECK, $filterString)) {
+    die(ERR_INVALID_FILTER);
 }
 
 $SELIDS_FILTERS = ($filterString ? json_decode($filterString, true) : array());
@@ -439,7 +433,7 @@ if(@$_REQUEST['depth']=='all'){
 // handle special case for collection where ids are stored in the session.
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
-        //@todo check if (!session_id()) session_start();
+
         $collection =  &$_SESSION[HEURIST_DBNAME_FULL]['record-collection'];
         if (count($collection) > 0) {
             $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
@@ -469,12 +463,34 @@ if ($system->has_access()) { //logged in
     }
 }
 
-
 //----------------------------------------------------------------------------//
 // Traversal functions
 // The aim here is to bundle all the queries for each level of relationships
 // into one query, rather than doing them all recursively.
 //----------------------------------------------------------------------------//
+
+//
+//
+//
+function predicateRecordVisibility($dst='trg'){
+    global $system, $ACCESSABLE_OWNER_IDS, $PUBONLY;
+
+
+    return  (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
+            ? '('.$dst.'.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
+            : '(') .
+    (($system->has_access() && !$PUBONLY) ? 'NOT '.$dst.'.rec_NonOwnerVisibility = "hidden")' : $dst.'.rec_NonOwnerVisibility = "public")');
+
+}
+
+//
+//
+//
+function predicateRtyDtyFilters($rtyIDs, $dtyIDs, $dt_field='dty_ID')
+{
+    return predicateId('trg.rec_RecTypeID', $rtyIDs, SQL_AND) . predicateId($dt_field, $dtyIDs, SQL_AND);
+}
+
 
 /**
 * findPointers - Helper function that finds recIDs of record pointer details for all records in a given set of recIDs
@@ -486,9 +502,9 @@ if ($system->has_access()) { //logged in
 * @return $ret a comma separated list of recIDs
 */
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
-    global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY;
+    global $system, $mysqli;
     //saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
-    // find all detail values for resource type details which exist for any record with an id in $rec_ids
+    // find all detail values for record pointer type details which exist for any record with an id in $rec_ids
     // and also is of a type in rtyIDs if rtyIDs is set to non null
     $nlrIDs = array();// new linked record IDs
     $query = 'SELECT dtl_RecID as srcRecID, src.rec_RecTypeID as srcType, '
@@ -498,14 +514,11 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID ' .
     'LEFT JOIN Records src on src.rec_ID = dtl_RecID ' .
     'LEFT JOIN Records trg on trg.rec_ID = dtl_Value ' .
-    'WHERE dtl_RecID in (' . join(',', prepareIds($qrec_ids)) . ') AND (trg.rec_FlagTemporary=0) ' .
-    (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
-    (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' . join(',', prepareIds($dtyIDs)) . ') ' : '')
+    'WHERE dtl_RecID in (' . join(',', prepareIds($qrec_ids)) . ') AND (trg.rec_FlagTemporary=0) '
+    . predicateRtyDtyFilters($rtyIDs, $dtyIDs)
     . 'AND dty_Type = "resource" AND '
-        . (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '(') .
-    (($system->has_access() && !$PUBONLY) ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+        .predicateRecordVisibility();
+
 
     $res = $mysqli->query($query);
     if($res){
@@ -558,7 +571,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
         $res->close();
     }
     return array_keys($nlrIDs);
-    //	return $rv;
+
 }
 
 
@@ -575,7 +588,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 */
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     global $system, $mysqli, $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $PUBONLY;
-    //if (!$REVERSE) {return array();}
+
     $nlrIDs = array();// new linked record IDs
     $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' .
     'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .
@@ -585,13 +598,9 @@ function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     .' LEFT JOIN Records src on src.rec_ID = dtl_Value '
     .' WHERE dty_Type = "resource" ' . 'AND dtl_Value IN (' .
         join(',', prepareIds($qrec_ids)) . ') ) AND (trg.rec_FlagTemporary=0) '
-    . (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' .
-        join(',', prepareIds($rtyIDs)) . ') ' : '') . (is_array($dtyIDs) && count($dtyIDs) > 0 ? 'AND dty_ID in (' .
-        join(',', prepareIds($dtyIDs)) . ') ' : '') . "AND trg.rec_RecTypeID != $relRT AND " .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? '(trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '(') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    . predicateRtyDtyFilters($rtyIDs, $dtyIDs)
+    . "AND trg.rec_RecTypeID != $relRT AND "
+    . predicateRecordVisibility();
 
     $res = $mysqli->query($query);
     if($res){
@@ -670,17 +679,13 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value ' . 'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value ' .
     'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value ' .
     'WHERE rel.rec_RecTypeID = ' . intval($relRT) . ' AND (rel.rec_FlagTemporary=0) '
-        . 'AND (f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') '.
-    (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND trg.rec_RecTypeID in (' . join(',', prepareIds($rtyIDs)) . ') ' : '') .
-    ($REVERSE ? 'OR t.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') ' .
+        . 'AND (f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') '
+    .predicateRtyDtyFilters($rtyIDs, null)
+    .($REVERSE ? 'OR t.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . ') ' .
         (is_array($rtyIDs) && count($rtyIDs) > 0 ? 'AND src.rec_RecTypeID in (' .
-            join(',', prepareIds($rtyIDs)) . ') ' : '') : '') . ')' .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (src.rec_OwnerUGrpID in (' .
-        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (') .
-    (($system->has_access() && !$PUBONLY) ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")') .
-    (count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? 'AND (trg.rec_OwnerUGrpID in (' .
-        join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR ' : 'AND (').
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")').
+            join(',', prepareIds($rtyIDs)) . ') ' : '') : '') . ')'
+    .predicateRecordVisibility('src')
+    .predicateRecordVisibility()
     (is_array($relTermIDs) && count($relTermIDs) > 0 ? 'AND (trm.trm_ID in (' .
         join(',', prepareIds($relTermIDs)) . ') OR trm.trm_InverseTermID in (' . join(',', prepareIds($relTermIDs)) . ')) ' : '');
 
@@ -690,7 +695,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
             if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
                 continue;
             }
-            //echo "row is ".print_r($row,true);
+
             // if source is not in the result
             if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
                 $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth, 'recID' => $row['srcRecID']);
@@ -817,12 +822,9 @@ function _getReversePointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, src.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records src '
     .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (src.rec_ID = rl_SourceID) and (src.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .' AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
+    .predicateId('src.rec_RecTypeID', $rtfilter, SQL_AND)
+    .predicateId('rl_DetailTypeID', $ptrfilter, SQL_AND)
+    .predicateRecordVisibility('src');
 
     $resout = array();
 
@@ -856,12 +858,8 @@ function _getForwardPointers_for_relRT($rec_id, $depth){
     $query = 'SELECT dtl_RecID, dtl_Value, trg.rec_RecTypeID, dtl_DetailTypeID FROM recDetails, Records trg '
     .' where dtl_RecID='.intval($rec_id).' and (dtl_DetailTypeID='.intval($relSrcDT).' OR dtl_DetailTypeID='.intval($relTrgDT).') '
     .'  and (trg.rec_ID = dtl_Value)  and (trg.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS,true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    .predicateRtyDtyFilters($rtfilter, $ptrfilter, 'dtl_DetailTypeID')
+    .predicateRecordVisibility();
 
 
     $resout = array();
@@ -898,13 +896,8 @@ function _getForwardPointers($rec_id, $depth){
     $query = 'SELECT rl_SourceID, rl_TargetID, trg.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records trg '
     .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
     .'  and (trg.rec_ID = rl_TargetID)  and (trg.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($ptrfilter) && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', prepareIds($ptrfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                    ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                    : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
-
+    .predicateRtyDtyFilters($rtfilter, $ptrfilter, 'rl_DetailTypeID')
+    .predicateRecordVisibility();
 
     $resout = array();
 
@@ -943,12 +936,8 @@ function _getRelations($rec_id, $depth){
     .' left join Records rel on rel.rec_ID=rl_RelationID'
     .' where rl_SourceID='.intval($rec_id).' and rl_RelationTypeID>0 '
     .'  and trg.rec_ID = rl_TargetID  and (trg.rec_FlagTemporary=0) and (rel.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-                ? 'trg.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-                : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+    .predicateRtyDtyFilters($rtfilter, $relfilter, 'rl_RelationTypeID')
+    .predicateRecordVisibility();
 
     $resout = array();
 
@@ -960,30 +949,29 @@ function _getRelations($rec_id, $depth){
         $res->close();
     }
 
-    if($REVERSE){
-    //
-    // find reverse relations
-    //
-    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
-    .' left join Records rel on rel.rec_ID=rl_RelationID'
-    .' where rl_TargetID='.intval($rec_id).' and rl_RelationTypeID>0 '
-    .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
-    . (is_array($rtfilter) && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', prepareIds($rtfilter)) . ') ' : '')
-    . (is_array($relfilter) && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', prepareIds($relfilter)) . ') ' : '')
-    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY
-            ? 'src.rec_OwnerUGrpID in (' .join(',', prepareIds($ACCESSABLE_OWNER_IDS, true)) . ') OR '
-            : '') .
-    ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : 'src.rec_NonOwnerVisibility = "public")');
+    if(!$REVERSE){
+        return $resout;
+    }
+
+        //
+        // find reverse relations
+        //
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
+        .' left join Records rel on rel.rec_ID=rl_RelationID'
+        .' where rl_TargetID='.intval($rec_id).' and rl_RelationTypeID>0 '
+        .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
+        .predicateId('src.rec_RecTypeID', $rtfilter, SQL_AND)
+        .predicateId('rl_RelationTypeID', $relfilter, SQL_AND)
+        .predicateRecordVisibility('src');
 
 
-    $res = $mysqli->query($query);
-    if($res){
-        while ($row = $res->fetch_assoc()) {
-            $resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+        $res = $mysqli->query($query);
+        if($res){
+            while ($row = $res->fetch_assoc()) {
+                $resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+            }
+            $res->close();
         }
-        $res->close();
-    }
-    }
 
     return $resout;
 }
@@ -1035,7 +1023,7 @@ function outputRecords($result) {
     $already_out = array();//result - array of all printed out records recID => recTypeID
 
     if(!$intofile){
-        openTag('records');//, array('count' => $recSet['count']));
+        openTag('records');
     }
 
     $relations_rec_ids = array();//list of all relationship records
@@ -1062,7 +1050,7 @@ function outputRecords($result) {
 
                 $related_rec_ids = $res['related'];
 
-                if(count($res['relationRecs'])>0){
+                if(!empty($res['relationRecs'])){
                     $relations_rec_ids[$current_depth] = array_merge($relations_rec_ids[$current_depth], $res['relationRecs']);
                 }
 
@@ -1139,7 +1127,7 @@ function outputRecords($result) {
     }
 
     if($res){
-    $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
+    $resout[$recID] = $res;
     }elseif($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
     unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
     }
@@ -1183,7 +1171,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         if ($record['rec_RecTypeID'] != $relRT) { //not a relationship rectype
             if ($depth > 0) {
                 //				if ($USEXINCLUDELEVEL){
-                //					outputXInclude($record);
+
                 //				}else
                 if ($outputStub) {
                     outputRecordStub($record);
@@ -1207,7 +1195,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         output( XML_HEADER."\n" );
 
         //add attributes
-        $recAttr['xmlns'] = 'http:s//heuristnetwork.org';
+        $recAttr['xmlns'] = 'https://heuristnetwork.org';
         $recAttr['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
         $recAttr['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation_and_templates/scheme_record.xsd';
     }
@@ -1287,7 +1275,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             if(!$outputStub){
                 outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
             }
-            //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
+
         }
     }
     /* woot is disabled
@@ -1342,7 +1330,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         if(!$NO_RELATIONSHIPS){
 
             $relations = _getRelations($recID, $depth+1);
-            //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+
             foreach ($relations as $relRec_id => $attrs) {
 
                 $trmID = $attrs['termID'];
@@ -1402,23 +1390,26 @@ function outputRecordStub($recordStub) {
 
 function makeFileContentNode($file) {
 
-    if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
+    if (@$file['fxm_MimeType'] !== "application/xml") {
+        return;
+    }
 
         $filename = resolveFilePath($file['fullPath']);
-        if ( !($file['ulf_OrigFileName'] == '_remote' || strpos($file['ulf_OrigFileName'],'_iiif')===0 ) && file_exists($filename)) { //@todo check preferred source
+        if ( !($file['ulf_OrigFileName'] == ULF_REMOTE || strpos($file['ulf_OrigFileName'],ULF_IIIF)===0 ) && file_exists($filename)) { //@todo check preferred source
 
+            $src = $filename;
             $xml = simplexml_load_file( $filename );
-            if (!$xml) {
-                makeTag('error', null, " Error while attemping to read $filename .");
-                return;
+            if ($xml) {
+                $xml = $xml->asXML();
             }
-            $xml = $xml->asXML();
         } else {
+            $src = $file['URL'];
             $xml = loadRemoteURLContent($file['URL']);//include remote xml into hml output
-            if (!$xml) {
-                makeTag('error', null, ' Error while attemping to read '.$file['URL']);
-                return;
-            }
+        }
+
+        if (!$xml) {
+            makeTag('error', null, ' Error while attemping to read '.$src);
+            return;
         }
 
         //embedding so remove any xml element
@@ -1435,14 +1426,11 @@ function makeFileContentNode($file) {
         if ($ret == 0) {
             makeTag('error', null, "Invalid XML - ".xml_error_string(xml_get_error_code($parser)));
             xml_parser_free($parser);
-            return;
-        }
 
-        if ($content) {
+        }elseif ($content) {
             makeTag('content', array("type" => "xml"), $content, true, false);
         }
         return;
-    }
 }
 
 
@@ -1486,7 +1474,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                 openTag('detail', $attrs);
 
                 $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
-                outputRecordStub($recinfo);//$recInfos[$value['id']]['record']);
+                outputRecordStub($recinfo);
                 closeTag('detail');
             } else {
                 makeTag('detail', $attrs, $value['id']);
@@ -1512,16 +1500,16 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
                     //if path is relative then we copy file
                     if(@$file['ulf_FilePath']==null || $file['ulf_FilePath']=='' || substr($file['ulf_FilePath'],1)!='/'){
 
-                        //$path_parts = pathinfo($file['fullpath']);
-                        //$dirname = $path_parts['dirname'].'/';
+
+
                         //copy file and create required folders
                         chdir(HEURIST_FILESTORE_DIR);// relatively db root
                         $fpath = realpath($file['fullPath']);
-                        //$fpath = str_replace('\\','/',$fpath);
+
 
                         //ARTEM 2016-12-13 This recurse_copy - since ti copy everything in backup recursively!!!!
                         //moreover it is already done in exportMyDataPopup
-                        //recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', array('no copy folders'), $fpath);
+
 
                     }else{
                         //otherwise skip copy and use downloadURL
@@ -1530,7 +1518,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
                     /* this code is not use anymore - we copy the entire file_uploads folder
                     // backup file into backup/user folder
-                    $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/resources/";
+                    $folder = HEURIST_FILESTORE_DIR . DIR_BACKUP . get_user_username() . "/resources/";
 
                     if(!file_exists($folder) && !mkdir($folder, 0777, true)){
                     print "<p class='error'>'Failed to create folder for file resources: ".$folder.'</p>';
@@ -1637,12 +1625,12 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         if ($MAX_DEPTH == 0 && $outputStub) {
             openTag('detail', $attrs);
             $recinfo = recordSearchByID($system, $value['id']);//recordSearch.php
-            outputRecordStub($recinfo);//$recInfos[$value['id']]['record']);
+            outputRecordStub($recinfo);
             closeTag('detail');
         } else {
             makeTag('detail', $attrs, $value['id']);
         }
-    } elseif (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype')) {
+    } elseif ($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype') {
         if($human_readable_names){
             $attrs['termID'] = $value;
         }
@@ -1740,12 +1728,12 @@ function outputDateDetail($attrs, $value) {
                 makeTag('month', null, intval($matches[2]));
             } else {
                 @list($date, $time) = preg_split("![ T]!", $value);
-                @list($y, $m, $d) = array_map("intval", preg_split("![-\/]!", $date));
+                @list($y, $m, $d) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 if (!(1 <= $m && $m <= 12 && 1 <= $d && $d <= 31)) {
-                    @list($d, $m, $y) = array_map("intval", preg_split("![-\/]!", $date));
+                    @list($d, $m, $y) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 }
                 if (!(1 <= $m && $m <= 12 && 1 <= $d && $d <= 31)) {
-                    @list($m, $d, $y) = array_map("intval", preg_split("![-\/]!", $date));
+                    @list($m, $d, $y) = array_map("intval", preg_split(REGEX_SPLIT_DATE, $date));
                 }
                 if (1 <= $m && $m <= 12 && 1 <= $d && $d <= 31) {
                     makeTag('year', null, $y);
@@ -1786,7 +1774,10 @@ function outputTDateDetail($attrs, $value) {
         }
         if ($time) {
                          // hours                                 minutes                   seconds
-            preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
+
+
+            preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
+
             if (@$matches[1]) {makeTag('hour', null, $matches[1]);}
             if (@$matches[2]) {makeTag('minutes', null, $matches[2]);}
             if (@$matches[3]) {makeTag('seconds', null, $matches[3]);}
@@ -1815,7 +1806,8 @@ function outputDurationDetail($attrs, $value) {
             if (preg_match('/[HMS]/', $time)) { //char separated version 6H5M8S
                 preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/', $time, $matches);
             } else { //delimited version  23:59:59
-                preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
+
+                preg_match('/([0-1]?\d|2[0-3])?(?::([0-5]?\d))?(?:[:\.]([0-5]?\d))?/', $time, $matches);
             }
             if (@$matches[1]) {makeTag('hour', null, intval($matches[1]));}
             if (@$matches[2]) {makeTag('minutes', null, intval($matches[2]));}
@@ -1837,7 +1829,7 @@ function replaceIllegalChars($text) {
 function check($text) {
     global $invalidChars;
     foreach ($invalidChars as $charCode) {
-        //$pattern = "". chr($charCode);
+
         if (strpos($text, $charCode)) {
             return false;
         }
@@ -1904,7 +1896,7 @@ if($rectype_templates){
     }else{
         $error_msg = @$result['message'];
         $error_msg = $system->getError();
-        if(count($error_msg)>0){
+        if(!empty($error_msg)){
             $error_msg = $error_msg[0]['message'];
         }else{
             $error_msg = 'Unknown error on record search. Search parmeters: '.print_r($params,true);
@@ -2019,7 +2011,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
             fwrite( $huni_resources, "</resources>");
             fclose( $huni_resources );
 
-            //was   print "<h3>Export completed</h3> Harvestable file(s) are in <b>".HEURIST_HML_DIR."</b>";
+
             print '<h3>Export completed</h3> Files are in <b><a href='.HEURIST_HML_URL.' target="_blank">'.HEURIST_HML_URL.'</a></b>';
             print '</body></html>';
         }
@@ -2112,7 +2104,7 @@ else{ // single output stream
 
 
     }
-    //makeTag('raw',null, $response2 );
+
 
     /*  TODO: The schema locations are clearly rubbish
     openTag('hml', array(
@@ -2145,7 +2137,7 @@ else{ // single output stream
 
     if($output_file_fd){
         fclose ($output_file_fd);
-        $output_file_name = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
+        $output_file_name = HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
         rename($output_file, $output_file_name);
     }
 

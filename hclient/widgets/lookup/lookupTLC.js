@@ -24,103 +24,40 @@
 
 /* global stringifyMultiWKT */
 
-$.widget( "heurist.lookupTLC", $.heurist.recordAction, {
+$.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
     // dialog options, the default values and other available options can be found in hclient/widget/record/recordAction.js
     options: {
 
         height: 520,
         width:  800,
-        modal:  true,
 
         title:  'Lookup values for Heurist record', // dialog title
-        
-        htmlContent: 'lookupTLC.html', // in hclient/widgets/lookup folder
-        helpContent: 'lookupTLC.html', // in context_help folder
 
-        mapping: null, //configuration from record_lookup_config.json (DB Location: sysIdentification.sys_ExternalReferenceLookups)
-               
-        add_new_record: false  //if true it creates new record on selection
+        htmlContent: 'lookupTLC.html' // in hclient/widgets/lookup folder
     },
-    
-    recordList: null,
 
     //  
     // invoked from _init after loading of html content
     //
     _initControls: function(){
 
-        let that = this;
-
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
-        // prepare record list options
-        this.options.resultList = $.extend(this.options.resultList, 
-        {
-            recordDivEvenClass: 'recordDiv_blue', // for alternating colours
-            eventbased: false,  // do not listent global events
-
-            multiselect: false, // (this.options.select_mode!='select_single'), 
-
-            select_mode: 'select_single', // or select_multi, this.options.select_mode
-            selectbutton_label: 'select!!', // button for confirming selected rows, multiselect
-
-            view_mode: 'list', // initial view mode
-            show_viewmode: false, // show view mode options
-
-            entityName: this._entityName,
-
-            pagesize:(this.options.pagesize>0) ? this.options.pagesize : 50, // number of records on each 'page'
-            empty_remark: '<div style="padding:1em 0 1em 0">No records found</div>', // alternative to an empty space when there is no result
-            renderer: this._rendererResultList // how the records are displayed
-        });                
-
-        // init record list widget, found at hclient/widget/viewers/resultList.js (additional options can be found there too)
-        this.recordList = this.element.find('#div_result');
-        this.recordList.resultList( this.options.resultList );     
-        
-        // adding standard event listeners for the record list
-        this._on( this.recordList, {        
-            "resultlistonselect": function(event, selected_recs){
-                        window.hWin.HEURIST4.util.setDisabled( 
-                            this.element.parents('.ui-dialog').find('#btnDoAction'), 
-                            (selected_recs && selected_recs.length()!=1));
-                    },
-            "resultlistondblclick": function(event, selected_recs){
-                        if(selected_recs && selected_recs.length()==1){
-                            this.doAction();                                
-                        }
-                    }
-            //,"resultlistonaction": this._onActionListener
+        window.hWin.HEURIST4.msg.showMsgErr({
+            error_title: 'Warning: broken lookup',
+            message: 'Please beware that due to changes with the TLC map project this lookup is not currently 100% functional.<br><br>'
+                    +'The issue appears when attempting to search, if the results are too large the server will response with a "un-supported format" error.<br>'
+                    +'We recommend either:<br>'
+                    +'a) Searching directly on the projects website at <a href="https://ghap.tlcmap.org/" target="_blank" rel="noopener">https://ghap.tlcmap.org/</a><br>'
+                    +'b) Using one of the GeoNames lookup instead, or<br>'
+                    +'c) You can attempt to refine your search here <strong>NOT RECOMMENDED</strong><br><br>'
+                    +'We apologise for any inconvenience.'
         });
 
-        // adding additional event listeners
-        this._on(this.element.find('#btnStartSearch').button(),{
-            'click':this._doSearch
-        });
-
-        this._on(this.element.find('input'),{
-            'keypress':this.startSearchOnEnterPress
-        });
-        
         return this._super();
     },
-    
-    //
-    // Event handler - 'Enter' key press
-    // Start search
-    //
-    startSearchOnEnterPress: function(e){
-        
-        let code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 13) {
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
-            this._doSearch();
-        }
-    },
-    
-    
+
     //
     // Record Renderer
     // Defines how a record is rendered within the list, customised via the recTitle variable within
@@ -136,56 +73,21 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
                 s = s.lga; 
             }
 
-            s = s?s:'';
+            s = s || '';
             let title = s;
 
-            if(fldname == 'recordLink'){
-                s = '<a href="' + s + '" target="_blank"> view here </a>';
+            if(fldname == 'tlc_link'){
+                s = `<a href="${s}" target="_blank"> view here </a>`;
                 title = 'View tlcmap record';
             }
 
-            if(width>0){
-                s = '<div style="display:inline-block;width:'+width+'ex" class="truncate" title="'+title+'">'+s+'</div>';
-            }
-            return s;
+            return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
-        let recID = fld('rec_ID');
-        let rectypeID = fld('rec_RecTypeID');
+        const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('tlc_link', 12); 
+        recordset.setFld(record, 'rec_Title', recTitle);
 
-        let recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
-
-        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-                + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
-
-        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
-                        + html_thumb
-                        + '<div class="recordIcons">'
-                        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>' 
-                        + '</div>'
-                        +  recTitle
-                    + '</div>';
-        return html;
-    },
-
-    //    
-    // Get and customise dialog buttons
-    // By default there are two 'Go' and 'Cancel', these can be edited or more buttons can be added
-    //
-    _getActionButtons: function(){
-        let res = this._super(); // setups and retrieves default dialog buttons
-
-        /*
-            res[0] => Cancel/Close: Closes dialog
-            res[1] => Go/Select: Calls doAction
-        */
-
-        res[1].text = window.hWin.HR('Select');
-
-        return res;
+        return this._super(recordset, record);
     },
 
     //
@@ -194,25 +96,19 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     doAction: function(){
 
         // retrieve selected record/s
-        let sel = this.recordList.resultList('getSelected', false);
-
-        if(sel && sel.length() == 1){
-
-            if(this.options.add_new_record){
-
-                //create new record 
-                window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-                let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
-
-                this._addNewRecord(rectype_id, sel);                     
-            }else{
-
-                //pass mapped values and close dialog
-                this._context_on_close = sel;
-                this._as_dialog.dialog('close');
-            }
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
+            return;
         }
+
+        if(!this.options.add_new_record){
+            this.closingAction(recset);
+            return;
+        }
+
+        //create new record 
+        let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
+        this._addNewRecord(rectype_id, recset);
     },
     
     //
@@ -225,7 +121,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
         // get base url
         if(this.options.mapping.service=='tlcmap'){
-            sURL = 'https://tlcmap.org/ghap/search?format=csv&paging=100';
+            sURL = 'https://tlcmap.org/ghap/search?format=json&paging=100';
         }else if(this.options.mapping.service=='tlcmap_old'){
             sURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
         }else{
@@ -243,22 +139,20 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
         // add input to request url
         if(this.element.find('#inpt_name').val()!=''){
-            sURL = sURL + '&' 
-            + (this.element.find('#inpt_exact').is(':checked')?'name':'fuzzyname')
-            + '=' + encodeURIComponent(this.element.find('#inpt_name').val());
+            sURL += `&${this.element.find('#inpt_exact').is(':checked')?'name':'fuzzyname'}=${encodeURIComponent(this.element.find('#inpt_name').val())}`;
         }
         if(this.element.find('#inpt_anps_id').val()!=''){
-            sURL = sURL + '&anps_id=' + this.element.find('#inpt_anps_id').val();
+            sURL += `&anps_id=${this.element.find('#inpt_anps_id').val()}`;
         }
         if(this.element.find('#inpt_lga').val()!=''){
-            sURL = sURL + '&lga=' + encodeURIComponent(this.element.find('#inpt_lga').val());
+            sURL += `&lga=${encodeURIComponent(this.element.find('#inpt_lga').val())}`;
         }
         if(this.element.find('#inpt_state').val()!=''){
-            sURL = sURL + '&state=' + this.element.find('#inpt_state').val();
+            sURL += `&state=${this.element.find('#inpt_state').val()}`;
         }
 
         let that = this;
-        let request = {service:sURL, serviceType:'tlcmap'};             
+        let request = {service:sURL, serviceType: 'tlcmap'};             
 
         // performing request - see controller hserv/controller/record_lookup.php for service external lookups
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
@@ -277,144 +171,67 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             }
         );
     },
-    
-    //
-    // Process response to request from _doSearch
-    // Create records to display within the record list and to map back to Heurist record
-    //
+
+    /**
+     * Prepare json for displaying via the Heuirst resultList widget
+     *
+     * @param {json} json_data - search response
+     */
     _onSearchResult: function(geojson_data){
-        
-        this.recordList.show();
-       
-        let is_wrong_data = true;
-                        
-        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // validate response as GeoJSON
-            
-            let res_records = {}, res_orders = [];
 
-            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
+            this._super(false);
+        }
 
-            // Retrieve fields for records, any additional fields that are not part of the new record (e.g. url to original record) can be added here
-            let fields = ['rec_ID','rec_RecTypeID'];
-            let map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);
-            fields = fields.concat('recordLink');
-            
-            for(let k=0; k<map_flds.length; k++){
-                map_flds[k] = map_flds[k].split('.'); 
-            }
-            
-            if(!geojson_data.features) geojson_data.features = geojson_data;
-            
-            // Parse GeoJSON, special handling can be done here (e.g. creating Geo Objects for Geospatial fields)
-            let i=0;
-            for(;i<geojson_data.features.length;i++){
-                let feature = geojson_data.features[i];
-                
-                let recID = i+1;
-                
-                let hasGeo = false;
-                let values = [recID, this.options.mapping.rty_ID];
-                for(let k=0; k<map_flds.length; k++){
-                    
-                    let val = feature[ map_flds[k][0] ];
-                    
-                    for(let m=1; m<map_flds[k].length; m++){
-                        if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
-                            val = val[ map_flds[k][m] ];
-                        }
-                    }      
-                    
-                    // Special handling for Geo Objects
-                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
-                        if(!window.hWin.HEURIST4.util.isempty(val)){
-                            val = {"type": "Feature", "geometry": val};
-                            let wkt = stringifyMultiWKT(val);    
-                            if(window.hWin.HEURIST4.util.isempty(wkt)){
-                                val = '';
-                            }else{
-                                //@todo the same code mapDraw.php:134
-                                let typeCode = 'm';
-                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                    if(wkt.indexOf('LINESTRING')>=0){
-                                        typeCode = 'l';
-                                    }else if(wkt.indexOf('POLYGON')>=0){
-                                        typeCode = 'pl';
-                                    }else {
-                                        typeCode = 'p';
-                                    }
-                                }
-                                val = typeCode+' '+wkt;
-                                hasGeo = true;
-                            }
-                        }
-                    }
-                    values.push(val); // push value into record
+        let res_records = {}, res_orders = [];
+
+        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+
+        // Retrieve fields for records, any additional fields that are not part of the new record (e.g. url to original record) can be added here
+        let fields = ['rec_ID','rec_RecTypeID'];
+        let map_flds = Object.keys(this.options.mapping.fields);
+        fields = fields.concat(map_flds);
+        fields = fields.concat('tlc_link');
+
+        map_flds = map_flds.map((prop) => prop.split('.'));
+
+        if(!geojson_data.features) geojson_data.features = geojson_data;
+
+        // Parse GeoJSON, special handling can be done here (e.g. creating Geo Objects for Geospatial fields)
+        let i = 0;
+        for(const feature of geojson_data.features){
+
+            let recID = i++;
+
+            let hasGeo = false;
+            let values = [recID, this.options.mapping.rty_ID];
+            for(const fld_Name of map_flds){
+
+                let val = feature[ fld_Name[0] ];
+
+                val = this.getValueByParts(fld_Name, val);
+
+                // Special handling for Geo Objects
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
+                    val = this.createGeoFeature(val);
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
                 }
 
-                // creating the additional recordLink field
-                values.push('https://tlcmap.org/ghap/search?id=' + feature['properties']['id']);
-
-                if(hasGeo){
-
-                    // add record into recordset
-                    res_orders.push(recID);
-                    res_records[recID] = values;    
-                }
+                values.push(val); // push value into record
             }
 
-            if(res_orders.length>0){
+            // creating the additional recordLink field
+            values.push(`https://tlcmap.org/ghap/search?id=${feature['properties']['id']}`);
 
-                // initialise recordset
-                let res_recordset = new HRecordSet({
-                    count: res_orders.length,
-                    offset: 0,
-                    fields: fields,
-                    rectypes: [this.options.mapping.rty_ID],
-                    records: res_records,
-                    order: res_orders,
-                    mapenabled: true //???
-                });              
-                
-                this.recordList.resultList('updateResultSet', res_recordset);            
-                is_wrong_data = false;
+            if(hasGeo){
+                // Add record into recordset
+                res_orders.push(recID);
+                res_records[recID] = values;    
             }
         }
-       
-        if(is_wrong_data){
-            this.recordList.resultList('updateResultSet', null);            
-            
-            window.hWin.HEURIST4.msg.showMsgErr({
-                message: 'Service did not return data in an appropriate format',
-                error_title: 'No valid data'
-            });
-        }
-    },
-    
-    //
-    // Create new records with provided field values
-    //
-    _addNewRecord: function (rectype_id, field_values){
-        
-        let that = this;
 
-        let request = {
-            a: 'save',
-            ID: 0,
-            RecTypeID: rectype_id,
-            details: field_values
-        };
-
-        window.hWin.HAPI4.RecordMgr.saveRecord(request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            if(response.status == window.hWin.ResponseStatus.OK){
-                // ... Complete final tasks, then
-                that._as_dialog.dialog('close'); // close dialog
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }
-        });
-    }  
+        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        this._super(res);
+    }
 });
 

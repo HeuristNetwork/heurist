@@ -34,7 +34,7 @@
 
             $rec_ids = prepareIds($rec_ids);
 
-            if (count($rec_ids)>0) {
+            if (!empty($rec_ids)) {
 
                 $mysqli = $system->get_mysqli();
                 $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_ID in ('
@@ -78,9 +78,6 @@
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
 
-            //$groups = user_getWorkgroups($mysqli, $ugrID);
-            //if( $groups && count($groups)>0){
-
             $ugr_groups = $system->get_user_group_ids(null, true);//always get latest
 
             $current_User = $system->getCurrentUser();
@@ -115,7 +112,7 @@
                 }
             }
 
-            if(count($order)>0){
+            if(!empty($order)){
                 $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
             }
         }
@@ -285,7 +282,7 @@
             $system->addError(HEURIST_REQUEST_DENIED,
                 'Cannot delete filter criteria. Current user must be an administrator for group');
             return false;
-        }else{
+        }
 
             if(!$ugrID>0){
                 $ugrID = $system->get_user_id();
@@ -293,32 +290,28 @@
 
             $rec_ids = prepareIds($rec_ids);
 
-            if (count($rec_ids)>0) {
+            if (isEmptyArray($rec_ids)) {
+                $system->addError(HEURIST_INVALID_REQUEST);
+                return false;
+            }
 
                 $query = 'delete from usrSavedSearches where svs_ID in ('. join(', ', $rec_ids) .') and svs_UGrpID='.$ugrID;
 
                 $mysqli = $system->get_mysqli();
                 $res = $mysqli->query($query);
 
-                if($res){
-                    $cnt = $mysqli->affected_rows;
-                    if($cnt>0){
-                        return array("status"=>HEURIST_OK, "data"=> $cnt);
-                    }else{
-                        $system->addError(HEURIST_NOT_FOUND);
-                        return false;
-                    }
-                }else{
+                if(!$res){
                     $system->addError(HEURIST_DB_ERROR,'Cannot delete saved search', $query.' '.$mysqli->error );
                     return false;
                 }
 
-            }else{
-                $system->addError(HEURIST_INVALID_REQUEST);
-                return false;
-            }
-
-        }
+                $cnt = $mysqli->affected_rows;
+                if($cnt>0){
+                    return array("status"=>HEURIST_OK, "data"=> $cnt);
+                }else{
+                    $system->addError(HEURIST_NOT_FOUND);
+                    return false;
+                }
     }
 
     /**
@@ -352,7 +345,7 @@
             }
         }
 
-        if(count($personal_data)>0){
+        if(!empty($personal_data)){
 
                 $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr',
                    array( 'ugr_ID'=>$ugrID, 'ugr_NavigationTree'=>implode(',', $personal_data)));
@@ -395,7 +388,6 @@
         }
 
         // 5 - websearch
-        //if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){
         if(is_array($groups) && count($groups)==1){
             $where = ' = '.$groups[0];
         }elseif(is_array($groups) && count($groups)>1){

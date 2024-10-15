@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrBoomarks table
@@ -20,11 +22,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-
 
 class DbUsrBookmarks extends DbEntityBase
 {
@@ -46,64 +44,19 @@ class DbUsrBookmarks extends DbEntityBase
               return false;
         }
 
-        $needCheck = false;
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
+        $this->searchMgr->addPredicate('bkm_ID');
+        $this->searchMgr->addPredicate('bkm_UGrpID');
+        $this->searchMgr->addPredicate('bkm_RecID');
+        $this->searchMgr->addPredicate('bkm_Rating');
 
-        $pred = $this->searchMgr->getPredicate('bkm_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_UGrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_RecID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('bkm_Rating');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'bkm_ID';
-
-        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes';
-
+            $this->searchMgr->setSelFields('bkm_ID');
         }else{
-            $needCheck = true;
+            $this->searchMgr->setSelFields('bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes');
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute(null);
     }
 
 
@@ -113,7 +66,7 @@ class DbUsrBookmarks extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             //$ugrs = $this->system->get_user_group_ids();
             $ugrID = $this->system->get_user_id();
@@ -121,7 +74,7 @@ class DbUsrBookmarks extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
 
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField,
-                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID);//' not in ('.implode(',',$ugrs).')');
+                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID);
 
 
             $cnt = count($recIDs_norights);
@@ -168,24 +121,17 @@ class DbUsrBookmarks extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);//bookmark ids
+        $this->recordIDs = null; //reset to obtain ids from $data
+        $this->isDeleteReady = false;
 
-        $mysqli = $this->system->get_mysqli();
+        $this->foreignChecks = array(
+                    array('SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks '
+                    .'WHERE tag_ID=rtl_TagID AND tag_UGrpID='.$this->system->get_user_id()
+                    .' AND rtl_RecID=bkm_RecID AND bkm_ID',
+                    'It is not possible to remove bookmark. Bookmarked record has personal tags')
+                );
 
-
-        $query = 'SELECT count(tag_ID) FROM usrBookmarks, usrTags, usrRecTagLinks where tag_ID=rtl_TagID AND tag_UGrpID='
-            .$this->system->get_user_id()
-            .' AND rtl_RecID=bkm_RecID AND bkm_ID in (' . implode(',', $this->recordIDs). ')';
-
-        $cnt = mysql__select_value($mysqli, $query);
-
-        if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'It is not possible to remove bookmark. Bookmarked record has personal tags');
-                return false;
-        }
-
-        $ret = parent::delete();
+        return parent::delete();
     }
 
 
@@ -199,7 +145,7 @@ class DbUsrBookmarks extends DbEntityBase
         $rec_IDs = prepareIds(@$this->data['bkm_RecID']);//these are rec_IDs from Record table
         $bkm_IDs = prepareIds(@$this->data['bkm_ID']);
 
-        if(count($rec_IDs)==0 && count($bkm_IDs)==0){
+        if(empty($rec_IDs) && empty($bkm_IDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
         }
@@ -207,14 +153,14 @@ class DbUsrBookmarks extends DbEntityBase
         $mysqli = $this->system->get_mysqli();
 
         //bookmarks id not defined - find them by record ids
-        if(count($bkm_IDs)==0){
+        if(empty($bkm_IDs)){
             $query =  'bkm_RecID in (' . join(',', $rec_IDs).')';
 
             $rec_RecTypeID = @$this->data['rec_RecTypeID'];
             if($rec_RecTypeID>0){
                 $query = ', Records where (rec_RecTypeID='.$rec_RecTypeID.') and (rec_ID=bkm_RecID) and '.$query;
             }else{
-                $query = ' where '.$query;
+                $query = SQL_WHERE.$query;
             }
 
             //get bookmarks
@@ -229,7 +175,7 @@ class DbUsrBookmarks extends DbEntityBase
         if($is_unbookmark){
             //remove bookmarks and detach personal tags
 
-            if(count($bkm_IDs)>0){
+            if(!empty($bkm_IDs)){
 
                 $keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -279,10 +225,10 @@ class DbUsrBookmarks extends DbEntityBase
                 return false;
             }
 
-            if(count($bkm_IDs)>0){
+            if(!empty($bkm_IDs)){
                 $query =  'bkm_ID in (' . join(',', $bkm_IDs).')';
 
-                $query =  'update usrBookmarks set bkm_Rating = ' . $rating . ' where '.$query
+                $query =  'update usrBookmarks set bkm_Rating = ' . $rating . SQL_WHERE.$query
                         .' and bkm_UGrpID = ' . $this->system->get_user_id();
 
                 $res = $mysqli->query($query);

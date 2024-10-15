@@ -57,15 +57,15 @@ $baseUrl = null;
 //if database and record id are defined we take manifest url from database
 if(!preg_match('[\W]', $dbname) && $rec_ID>0){
 
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../autoload.php';
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init($_REQUEST['db'], true, false) ){
         //get error and response
         $system->error_exit_api();//exit from script
     }
     //get baseURL
-    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null; //HEURIST_BASE_URL;
+    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null;
 
     //detect is this mirador image or annotation
     if($system->defineConstant('RT_MAP_ANNOTATION')){
@@ -73,7 +73,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
         $mysqli = $system->get_mysqli();
-        //$file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
+
 
         if($res['rec_RecTypeID']==RT_MAP_ANNOTATION){
             //find parent record with iiif image - it returns obfuscation id
@@ -82,7 +82,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 .' FROM recLinks, recDetails, recUploadedFiles '
                 .' WHERE rl_SourceID='.$rec_ID
                 .' AND dtl_RecID=rl_TargetID '  //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
+                .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
 
             $row = mysql__select_row($mysqli, $query);
 
@@ -118,7 +118,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 $query = 'SELECT ulf_ObfuscatedFileID '
                     .' FROM recDetails, recUploadedFiles '
                     .' WHERE dtl_RecID='.$rec_ID //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
+                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
 
                 $_REQUEST['iiif'] = mysql__select_value($mysqli, $query);
             }
@@ -159,7 +159,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }else{
     if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
-        //$url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
+
     }elseif(!@$_REQUEST['q']){ //query not defined
         exit('Need to define either query or file ID');
     }else{
@@ -172,7 +172,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }
 
 
-    //$_SERVER['QUERY_STRING'];
+
 $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
 $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
@@ -207,7 +207,6 @@ if($use_custom_mirador){
 if (!preg_match('[\W]', $dbname)){
 ?>
     window.endpointURL = "<?php echo $baseUrl.'heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
-//    window.endpointURL = "<?php echo $baseUrl.'h6-alpha/api/'.htmlspecialchars($dbname).'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php
 }
@@ -269,11 +268,6 @@ var mirador = Mirador.viewer({
     }
   ]
 });
-
-// We create the action first. Note we are using a specified `windowId` here. This could be accessed from the store instead of specifying upfront.
-//var action = Mirador.actions.setCanvas('uniqueid', 'https://iiif.harvardartmuseums.org/manifests/object/299843/canvas/canvas-43182083')
-// Dispatch it.
-//mirador.store.dispatch(action);
 
 </script>
 <?php

@@ -133,8 +133,7 @@ class ImportDefinitions {
         }
 
         $this->mysqli->query("SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'");
-        $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
-
+        mysql__foreign_check( $this->mysqli, false );
 
         //order of tables - this must correspond with order in getDBStructureAsSQL.php
         $tables = array('',
@@ -167,7 +166,9 @@ class ImportDefinitions {
             $dataSet = $this->prepareDataSet($tableData);
 
 
-            if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            if(($dataSet == "") || (strlen($dataSet) <= 2)) { // no action if no data
+                continue;
+            }
 
                 $flds = mysql__select_list2($this->mysqli, 'SHOW COLUMNS FROM '.$tables[$idx]);
                 if($tables[$idx]=='defTermsLinks'){
@@ -185,18 +186,17 @@ class ImportDefinitions {
                     $error = 'Error inserting data into '.$tables[$idx];
 
                     $this->mysqli->query("SET SESSION sql_mode=''");
-                    $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+                    mysql__foreign_check( $this->mysqli, true );
 
                     //add error
                     $this->system->addError(HEURIST_DB_ERROR,  $error, $merror);
                     return false;
                 }
-            }
-
         }//for
 
         $this->mysqli->query("SET SESSION sql_mode=''");
-        $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+        mysql__foreign_check( $this->mysqli, true );
+
 
         return true;
     }

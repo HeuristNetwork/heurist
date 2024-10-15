@@ -21,7 +21,8 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
 
 /**
 *
@@ -60,7 +61,7 @@ protected function _outputHeader(){
         return false;
     }
 
-    $t2 = new DateTime();
+    $t2 = new \DateTime();
     $dt = $t2->format('Y-m-d');
 
     //although anyURI is defined it is not recognized by gephi v0.92
@@ -81,19 +82,19 @@ protected function _outputHeader(){
     }
 
     // Relationship record values
-    $rel_RecTypeID = $this->system->defineConstant('RT_RELATION') ? RT_RELATION : null;
-    $rel_Source = $this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : null;
-    $rel_Target = $this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : null;
-    $rel_Type = $this->system->defineConstant('DT_RELATION_TYPE') ? DT_RELATION_TYPE : null;
-    $rel_Start = $this->system->defineConstant('DT_START_DATE') ? DT_START_DATE : null;
-    $rel_End = $this->system->defineConstant('DT_END_DATE') ? DT_END_DATE : null;
+    $rel_RecTypeID = $this->system->getConstant('RT_RELATION');
+    $rel_Source = $this->system->getConstant('DT_PRIMARY_RESOURCE');
+    $rel_Target = $this->system->getConstant('DT_TARGET_RESOURCE');
+    $rel_Type = $this->system->getConstant('DT_RELATION_TYPE');
+    $rel_Start = $this->system->getConstant('DT_START_DATE');
+    $rel_End = $this->system->getConstant('DT_END_DATE');
 
     $rel_fields = '';
     if($rel_RecTypeID && $rel_Source && $rel_Target && $rel_Type && $rel_Start && $rel_End){
 
         $query = "SELECT rst_DisplayName, rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID = ? AND rst_DetailTypeID NOT IN (?,?,?,?,?)";
         $query_params = ['iiiiii', $rel_RecTypeID, $rel_Source, $rel_Target, $rel_Type, $rel_Start, $rel_End];
-        $res = mysql__select_param_query(self::$mysqli, $query, $query_params);
+        $res = mysql__select_param_query($this->mysqli, $query, $query_params);
 
         $id_idx = 6;
 
@@ -155,27 +156,29 @@ protected function _outputRecord($record){
 
     $rec_values = '';
     if(is_array($this->retrieve_detail_fields)){
-
-        $att_id = 4;
-        foreach($this->retrieve_detail_fields as $dty_ID){
-
-            $att_id ++;
-            $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ?
-                        $record['details'][$dty_ID] : null;
-
-            if(empty($values)){
-                continue;
-            }
-
-            $this->_processFieldData($dty_ID, $values);
-
-            if(empty($values)){
-                continue;
-            }
-
-            $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
-        }
+        $this->retrieve_detail_fields = array();
     }
+
+    $att_id = 4;
+    foreach($this->retrieve_detail_fields as $dty_ID){
+
+        $att_id ++;
+        $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ?
+                    $record['details'][$dty_ID] : null;
+
+        if(empty($values)){
+            continue;
+        }
+
+        $this->_processFieldData($dty_ID, $values);
+
+        if(empty($values)){
+            continue;
+        }
+
+        $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+    }
+
             $gephi_node = <<<XML
 <node id="{$recID}" label="{$name}">
     <attvalues>
@@ -192,15 +195,15 @@ XML;
     fwrite($this->fd, $gephi_node);
 
     $links = recordSearchRelated($this->system, $recID, 0, false);
-    if($links['status']==HEURIST_OK){
-        if(@$links['data']['direct']){
-            fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
-        }
-        if(@$links['data']['reverse']){
-            fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['reverse'], $this->links_cnt, 'reverse'));
-        }
-    }else{
+    if($links['status']!=HEURIST_OK){
         return false;
+    }
+
+    if(@$links['data']['direct']){
+        fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
+    }
+    if(@$links['data']['reverse']){
+        fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['reverse'], $this->links_cnt, 'reverse'));
     }
 
     return true;
@@ -237,7 +240,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
     }
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
-        self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+        self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
     }
 
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];

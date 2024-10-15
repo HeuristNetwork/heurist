@@ -26,24 +26,25 @@ Restore
 */
 set_time_limit(0);
 
-require_once dirname(__FILE__).'/../System.php';
+use hserv\utilities\DbUtils;
+use hserv\utilities\DbVerify;
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/../utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../utilities/dbVerify.php';
 require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php';
 
-$system = new System();
+define('PARAM_WELCOME','?welcome=1&db=');
+
+$system = new hserv\System();
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
-$create_pwd = System::getAdminPwd('create_pwd');
-$challenge_pwd = System::getAdminPwd('chpwd');
-$sysadmin_pwd = System::getAdminPwd('pwd');
+$create_pwd = USanitize::getAdminPwd('create_pwd');
+$challenge_pwd = USanitize::getAdminPwd('chpwd');
+$sysadmin_pwd = USanitize::getAdminPwd('pwd');
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $action = @$req_params['a'];
 $locale = @$req_params['locale'];
@@ -156,7 +157,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                             //add url to new database
                             $res = array(
                                 'newdbname'  => $database_name,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1',
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$database_name,
                                 'newusername'=> $usr_owner['ugr_Name'],
                                 'warnings'   => $res);
                         }
@@ -186,7 +187,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                         //add url to new database
                         $res = array(
                             'newdbname'  => $database_name,
-                            'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1'
+                            'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$database_name
                         );
                     }
                 }
@@ -345,7 +346,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     if($res!==false){
                         $res = array(
                                 'newdbname'  => $db_target,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1',
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$db_target,
                                 'warning'    => $system->getErrorMsg());
                     }
 
@@ -365,7 +366,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                         $res = array(
                                 'newdbname'  => $db_target,
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
+                                'newdblink'  => HEURIST_BASE_URL.PARAM_WELCOME.$db_target);
 
                     }
 
@@ -397,7 +398,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                 }
 
                 $res = array();
-                if(count($actions)>0){
+                if(!empty($actions)){
 
                     $counter = 0;
                     foreach($actions as $action){
@@ -410,7 +411,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                             if(is_bool($res2) && $res2==false){
                                 //terminated by user
-                                if(count($res)==0){
+                                if(empty($res)){
                                     $res = false;
                                 }
                                 break;
@@ -420,7 +421,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                                 if(DbUtils::setSessionVal($counter)){
                                     //terminated by user
                                     $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
-                                    if(count($res)==0){
+                                    if(empty($res)){
                                         $res = false;
                                     }
                                     break;
@@ -431,7 +432,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                 }
                 if(is_array($res)){
-                    if(!(count($res)>0)){
+                    if(empty($res)){
                         $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");
                         $res = false;
                     }elseif(@$req_params['reload']==1){
@@ -455,7 +456,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
    }
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 
 

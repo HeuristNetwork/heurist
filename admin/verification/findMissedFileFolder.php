@@ -54,19 +54,6 @@ if(!@$_REQUEST['mail']){
     //1. find all database
     $databases = mysql__getdatabases4($mysqli, false);
 
-/*
-    $query = 'show databases';
-    $res = $mysqli->query($query);
-    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
-    $databases = array();
-    while (($row = $res->fetch_row())) {
-        if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
-                $databases[] = $row[0];
-        }
-    }
-*/
-
     $root = $system->getFileStoreRootFolder();
 
     $check_subfolders = true;
@@ -80,8 +67,7 @@ if(!@$_REQUEST['mail']){
 
     foreach ($databases as $idx=>$db_name){
 
-        //list($database_name_full, $db_name) = mysql__get_names($db_name);
-        $db_name = htmlspecialchars($db_name);
+        $db_name = basename($db_name);
 
         $dir = $root.$db_name.'/';
 
@@ -111,7 +97,7 @@ if(!@$_REQUEST['mail']){
 
     $rep = '';
 
-    if(count($not_exists)>0){
+    if(!empty($not_exists)){
         $rep.='<h3>MISSED HEURIST_FILESTORE_DIR for databases:</h3>';
 
         foreach ($not_exists as $db_name){
@@ -119,7 +105,7 @@ if(!@$_REQUEST['mail']){
         }
         $rep.='<hr>';
     }
-    if(count($not_writeable)>0){
+    if(!empty($not_writeable)){
         $rep.='<h3>NOT WRITEABLE HEURIST_FILESTORE_DIR for databases:</h3>';
 
         foreach ($not_writeable as $db_name){
@@ -128,7 +114,7 @@ if(!@$_REQUEST['mail']){
         $rep.='<hr>';
     }
 
-    if(count($not_exists2)>0){
+    if(!empty($not_exists2)){
         $rep.='<h3>MISSED subfolders</h3>';
 
         foreach ($not_exists2 as $dir){
@@ -140,7 +126,7 @@ if(!@$_REQUEST['mail']){
         }
         $rep.='<hr>';
     }
-    if(count($not_writeable2)>0){
+    if(!empty($not_writeable2)){
         $rep.='<h3>NOT WRITEABLE subfolders</h3>';
 
         foreach ($not_writeable2 as $dir){

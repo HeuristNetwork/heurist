@@ -22,12 +22,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
-$system = new System();
-$inverses = null;
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
@@ -43,6 +44,10 @@ require_once dirname(__FILE__).'/../../hserv/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 
+define('CSS_HIDDEN', 'display:none;');
+define('NBSP','&nbsp; ');
+define('DIV_MAP_POPUP','<div class="map_popup">');
+
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
@@ -57,18 +62,10 @@ $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['relo
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
 $show_private_details = !array_key_exists('privateDetails', $_REQUEST) ? 1 : intval($_REQUEST['privateDetails']);
 
-$hide_images = -1;
-
+// 1 - No linked media, 2 - No images at all
+$hide_images = 0;
 if(array_key_exists('hideImages', $_REQUEST)){
     $hide_images =  intval($_REQUEST['hideImages']);
-}
-// 1 - No linked media, 2 - No images at all
-if($hide_images<0 || $hide_images>2){
-    if($is_production){ //for production all images are allways visible
-        $hide_images = 0;
-    }else{
-        $hide_images = $system->user_GetPreference('recordData_Images', 0);
-    }
 }
 
 // How to handle fields set to hidden
@@ -173,9 +170,8 @@ if(@$_REQUEST['ids']){
 }
 if(!($is_map_popup || $without_header)){
 
-$isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>HEURIST - View record</title>
@@ -440,23 +436,31 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
             //
             function showHidePrivateInfo( event ){
 
-                if($('#link_showhide_private').length == 0){
-                    return;
+
+
+                let ele = $('#link_showhide_private');
+
+                if(ele.length == 0){
+                    return false;
                 }
 
-                var prefVal = 0;
-                if(window.hWin && window.hWin.HAPI4){
-                    prefVal = window.hWin.HAPI4.get_prefs('recordData_PrivateInfo');
-                }
+                let prefVal = 1;
+
                 if(event!=null){
+                    prefVal = ele.attr('data-expand')>=0?ele.attr('data-expand'):prefVal;
                     prefVal = (prefVal!=1)?1:0;
-                }else{
-                    prefVal = $('#link_showhide_private').attr('data-expand') !== null ?
-                                    $('#link_showhide_private').attr('data-expand') : prefVal;
-                }
 
-                if(prefVal==1){
-                    $('#link_showhide_private').text('less...');
+                    //save in prefs
+                    if(event!=null && window.hWin && window.hWin.HAPI4){
+                        window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
+                    }
+                }else if(window.hWin && window.hWin.HAPI4){
+                    prefVal = window.hWin.HAPI4.get_prefs_def('recordData_PrivateInfo',1);
+                }
+                ele.attr('data-expand',prefVal);
+
+                if(prefVal==0){
+                    ele.text('less...');
                     $('.morePrivateInfo').show();
                     if(event!=null){
                         setTimeout(function(){
@@ -464,13 +468,12 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                             },200);
                     }
                 }else{
-                    $('#link_showhide_private').text('more...');
+                    ele.text('more...');
                     $('.morePrivateInfo').hide();
                 }
-                //$(event.target).parents('.detailRowHeader').hide();
-                if(event!=null && window.hWin && window.hWin.HAPI4){
-                    window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
-                }
+
+
+                return false;
             }
 
             //
@@ -728,76 +731,91 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 };
 
                 $('.miradorViewer_link').on('click', __openMiradorViewer);
+
+                $('.popupMedia_link').on('click', (e) => {
+
+                    let $ele = $(e.target);
+
+                    let file_nonce = $ele.attr('data-id');
+                    let file = rec_Files.find((file) => file.id === file_nonce);
+                    let file_url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${file_nonce}`;
+
+                    let file_desc = $ele.closest('.download_link').find('span.media-desc').attr('title');
+                    file_desc = window.hWin.HEURIST4.util.isempty(file_desc) ? '' : file_desc;
+                    file_desc = file_desc.replace('"', '&quote;').replace("'", '&apos;');
+
+                    let msg = `<img src='${file_url}' alt='${file_desc}' style='height:99%;width:99%;object-fit:contain' />`;
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        msg, null, {title: file.filename},
+                        {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
+                    );
+                    $dlg.css('max-width', 'none');
+                });
             }
 
-            //
-            // Show/Hide media and linked media
-            // @param {force_all_images} Boolean - was call triggered by clicking 'show all images'
-            //
-            function displayImages(force_all_images){
+            /**
+             * Show/Hide media and linked media
+             *
+             * @param {boolean} [show_all=false] Force the display of all images
+             */
+            function displayImages(show_all = false){
 
                 // 0 - show all (default), 1 - hide linked, 2 - hide all
-                /*if(force_all_images && window.hWin && window.hWin.HAPI4
-                    hide_images = window.hWin.HAPI4.get_prefs_def('recordData_Images', 0);
-                }else */
-                let hide_images = $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
+                let hide_images = show_all || $('#show-linked-media').length==0 || $('#show-linked-media').is(':checked') ? 0 : 1;
 
-                if(!force_all_images && hide_images == 2){ //hide all images
-                    $('.media-content').hide();
-
+                $('.media-content').show();
+                if(hide_images == 1){ // hide linked media
+                    $('.linked-media:not(:first)').hide();
                 }else{
-                    $('.media-content').show();
-                    if(hide_images == 1){ // hide linked media
-                        $('.linked-media').hide();
-                    }else{
-                        $('.linked-media').show();
-                        //$('#show-linked-media').attr('checked', true);
-                    }
+                    $('.linked-media').show();
                 }
 
-                //if(!force_all_images && window.hWin && window.hWin.HAPI4){
-                //    window.hWin.HAPI4.save_pref('recordData_Images', hide_images);
-                //}
+                sessionStorage.setItem('Heurist_RecView_LinkedMedia', hide_images);
+
+                if(show_all){ // set checkbox to checked
+                    $('#show-linked-media').attr('checked', true);
+                }
             }
 
             function mediaTooltips(){
 
-                $('span.media-desc, span.media-right').tooltip({
-                    //item: '[data-value]',
-                    content: function(){
-                        return $(this).attr('data-value');
-                    },
-                    open: function(event, ui){
+                $('span.media-desc, span.media-right').on('mouseenter focusin', (event) => {
 
-                        ui.tooltip.css({
-                            background: '#D4DBEA',
-                            "font-size": '1em',
-                            padding: '5px',
-                            width: '85%',
-                            cursor: 'default'
-                        });
+                    let $ele = $(event.target);
+                    $ele.tooltip({
+                        open: function(event, ui){
 
-                        let $ele = $(this);
-                        let $tooltip = ui.tooltip;
+                            ui.tooltip.css({
+                                background: '#D4DBEA',
+                                "font-size": '1em',
+                                padding: '5px',
+                                width: '85%',
+                                cursor: 'default'
+                            });
 
-                        $tooltip.off('mouseenter mouseleave');
+                            let $ele = $(this);
+                            let $tooltip = ui.tooltip;
 
-                        $tooltip.on('mouseleave', function(){
-                            $ele.attr('data-tooltip', 0);
-                            setTimeout(function(){
-                                if($ele.attr('data-tooltip') != 1){
-                                    $ele.tooltip('close');
-                                }
-                            }, 1000);
-                        }).on('mouseenter', function(){
-                            $ele.attr('data-tooltip', 1);
-                        });
-                    },
-                    position: {
-                        my: "left top+5",
-                        at: "left bottom",
-                        collision: "flipfit"
-                    }
+                            $tooltip.off('mouseenter mouseleave');
+
+                            $tooltip.on('mouseleave', function(){
+                                $ele.attr('data-tooltip', 0);
+                                setTimeout(function(){
+                                    if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
+                                        $ele.tooltip('close');
+                                    }
+                                }, 1000);
+                            }).on('mouseenter', function(){
+                                $ele.attr('data-tooltip', 1);
+                            });
+                        },
+                        position: {
+                            my: "left top+5",
+                            at: "left bottom",
+                            collision: "flipfit"
+                        }
+                    });
+                    $ele.tooltip('open');
                 }).on('mouseleave focusout', function(event){
 
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -806,14 +824,13 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                     let $ele = $(event.target);
 
                     let int_id = setInterval(function(){
-                        if($ele.attr('data-tooltip') != 1){
-                            $ele.tooltip('close');
+                        if($ele.attr('data-tooltip') != 1 && $ele.tooltip('instance') !== undefined){
+                            $ele.tooltip('destroy');
                         }
                         clearInterval(int_id);
                     }, 1000);
                 });
 
-                //$('a.img-desc, a.img-right').off('mouseleave focusout');
             }
 
             // Toggle the visibility of hidden fields
@@ -902,7 +919,13 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
                 showMediaViewer();//init thumbs for iiif
 
-                //displayImages(false);
+                // Set default setting for show linked media, stored within session
+                let def_ImageSettings = sessionStorage.getItem('Heurist_RecView_LinkedMedia');
+                //let param_ImageSetting = window.hWin.HEURIST4.util.getUrlParameter('hideImages', location.search);
+                def_ImageSettings = def_ImageSettings != 0 && def_ImageSettings != 1 ? 1 : def_ImageSettings;
+                if($('#show-linked-media').length > 0){
+                    $('#show-linked-media').prop('checked', def_ImageSettings == 0).trigger('change');
+                }
 
                 mediaTooltips();
 
@@ -937,7 +960,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
         </script>
 <?php
 if(!empty($import_webfonts)){
-    echo '<style>'.$import_webfonts.'</style>';
+    echo "<style>$import_webfonts</style>";
 }
 ?>
         <style>
@@ -968,7 +991,7 @@ if(!empty($import_webfonts)){
         }
 
         .external-link {
-            background-image: url(<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif);
+            background-image: url(<?php echo ICON_EXTLINK;?>);
             background-repeat: no-repeat;
             padding-left: 16px;
             padding-top: 4px;
@@ -991,7 +1014,7 @@ if(!empty($import_webfonts)){
             vertical-align: middle;
         }
         .thumb_image {
-            margin: 5px;
+            margin: 5px 5px 10px;
             cursor: url(<?=HEURIST_BASE_URL?>hclient/assets/zoom-in.png),pointer;
         }
         div.thumbnail .fullSize img {
@@ -1006,6 +1029,7 @@ if(!empty($import_webfonts)){
             padding: 15px 10px;
             font-size: 9px;
             min-width: 80px;
+            cursor: default;
         }
         .prompt {
             color: #999999;
@@ -1042,10 +1066,11 @@ if(!empty($import_webfonts)){
             font-weight: normal;
             font-size: 11px;
             margin-left: 15px;
+            cursor: pointer;
+            vertical-align: middle;
         }
         .media-control input {
             margin: 0;
-            vertical-align: -2px;
         }
 <?php
 if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
@@ -1128,14 +1153,9 @@ if ($bkm_ID>0 || $rec_id>0) {
             .$rec_id.' and not rec_FlagTemporary');
         }
 
-        /*if($is_map_popup){
-            print '<div data-recid="'.$bibInfo['rec_ID'].'" style="max-height:250px;overflow-y:auto;">';// style="font-size:0.8em"
-        }else{
-        }*/
-
             print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
-	        print '</div>';
+	        print DIV_E;
 
             $opts = '';
             $list = '';
@@ -1156,16 +1176,17 @@ if ($bkm_ID>0 || $rec_id>0) {
                     if($id!=$rec_id){  //print details for linked records - hidden
                         print '<div data-recid="'.intval($id).'" style="display:none">';//font-size:0.8em;
                         print_details($bibInfo);
-                        print '</div>';
+                        print DIV_E;
                     }
                     $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
 
                     $list = $list  //$id==$rec_id || $cnt>3
-                        .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
-                            .'<div style="display:table-cell;padding-right:4px">'
-                                .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'.strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
-                                .'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>'
-                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '
+                        .'<div class="detailRow placeRow" style="'.($cnt>2?CSS_HIDDEN:'').'">'
+                            .'<div style="display:table-cell;padding-right:4px"><img class="rft" style="background-image:url('
+                                .HEURIST_RTY_ICON.$bibInfo['rec_RecTypeID'].')" title="'
+                                .strip_tags($rectypesStructure['names'][$bibInfo['rec_RecTypeID']])
+                                .'" src="'.ICON_PLACEHOLDER.DIV_E
+                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a '
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
@@ -1179,28 +1200,21 @@ if ($bkm_ID>0 || $rec_id>0) {
                 if($cnt>3){
                     ?>
                     <div class="detailRow"><div class="detailType">
-                        <a href="#" oncontextmenu="return false;" onClick="$('.placeRow').show();$(event.target).hide
-                            ()" style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
+                        <a href="#more" oncontextmenu="return false;"
+                            onClick="$('.placeRow').show();$(event.target).hide();return false;"
+                            style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
                         <div class="detail"></div>
                     </div>
                     <?php
                 }
-                print '</div>';
-
-                /*Multiple entries here<br><br>
-                print '<div style="font-size:0.8em"><select style="font-size:0.9em"'
-                .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '
-                .'>'.$opts;
-                print '</select></div>';*/
-
-
+                print DIV_E;
 
             }
         } else {
             print 'No details found';
         }
  if($is_map_popup || $without_header){
-//    print '</div>';
+//    print DIV_E;
  }else{
        ?>
         <div id=bottom><div></div>
@@ -1236,8 +1250,8 @@ function print_details($bib) {
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
-            <a href="#" oncontextmenu="return false;"
-                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);' style="color:blue">
+            <a href="#more" oncontextmenu="return false;"
+                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);return false;' style="color:blue">
                 more...
             </a>
             </div><div class="detail"></div></div></div>
@@ -1293,7 +1307,7 @@ function print_header_line($bib) {
             <span class="link"><a id=edit-link class="normal"
                 onClick="return sane_link_opener(this);"
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" title="Edit record" style="vertical-align: top"></a>
+                <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
 
         <?php }
@@ -1304,7 +1318,7 @@ function print_header_line($bib) {
 
             <span style="cursor: default; padding-left: 20px;">
                 Workflow stage: <?php echo htmlspecialchars($wfs_details[1]);?>
-                <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
+                <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo ICON_PLACEHOLDER;?>"></span>
             </span>
 
         <?php } ?>
@@ -1361,10 +1375,12 @@ function print_private_details($bib) {
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
     //show or hide private details depends on preferences
+    //0 collapsed 1 show
     ?>
     <div class="detailRowHeader" style="float:left;padding:10px">
-        <a href="#" oncontextmenu="return false;" id="link_showhide_private"
+        <a href="#more"  id="link_showhide_private"
             data-expand="<?php echo $show_private_details -= 1; ?>"
+            oncontextmenu="return false;"
             onClick="showHidePrivateInfo(event)">more...</a>
     </div>
     <div class="detailRowHeader morePrivateInfo" style="float:left;padding:0 0 20px 0;display:none;border:none;">
@@ -1387,10 +1403,10 @@ function print_private_details($bib) {
     <?php
     }
     ?>
-    <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+    <div class="detailRow fieldRow" style="<?php echo $is_map_popup?CSS_HIDDEN:''?>">
         <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
-                href="<?= HEURIST_SERVER_URL ?>/heurist/?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
+                href="<?= HEURIST_SERVER_URL.HEURIST_DEF_DIR ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link"
@@ -1422,7 +1438,7 @@ function print_private_details($bib) {
     }
     if($add_date){
         ?>
-        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+        <div class="detailRow fieldRow" style="<?php echo $is_map_popup?CSS_HIDDEN:''?>">
             <div class=detailType>Added</div><div class=detail>
                 <?php print $add_date.'  '.$add_date_local; ?>
             </div>
@@ -1431,7 +1447,7 @@ function print_private_details($bib) {
     }
     if($mod_date){
         ?>
-        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+        <div class="detailRow fieldRow" style="<?php echo $is_map_popup?CSS_HIDDEN:''?>">
             <div class=detailType>Updated</div><div class=detail>
                 <?php print $mod_date.' '.$mod_date_local; ?>
             </div>
@@ -1489,7 +1505,7 @@ function print_private_details($bib) {
                             for ($i=0; $i < count($kwds);++$i) {
                                 $grp = $kwds[$i][0];
                                 $kwd = $kwds[$i][1];
-                                if ($i > 0) {print '&nbsp; ';}
+                                if ($i > 0) {print NBSP;}
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
@@ -1505,7 +1521,7 @@ function print_private_details($bib) {
     if (is_array($bib) && array_key_exists('bkm_ID', $bib)) {
                 print_personal_details($bib);
     }
-    print '</div>';
+    print DIV_E;
 }
 
 
@@ -1527,7 +1543,7 @@ function print_personal_details($bkmk) {
             <?php
             if ($tags) {
                 for ($i=0; $i < count($tags);++$i) {
-                    if ($i > 0) {print '&nbsp; ';}
+                    if ($i > 0) {print NBSP;}
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
                     if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
@@ -1631,7 +1647,7 @@ function print_public_details($bib) {
         .' where d1.dtl_RecID = '. intval($bib['rec_ID']).' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
         .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" '
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
-        .' AND '.$ACCESS_CONDITION;
+        .SQL_AND.$ACCESS_CONDITION;
 
 //print $query;
         $allow_execute_this_complex_query = true;
@@ -1660,6 +1676,11 @@ function print_public_details($bib) {
                     $trm_label = !empty($translated_label) ? $translated_label : $trm_label;
                 }
 
+                //snyk does not see this code in sanitizeString
+                $trm_label = htmlspecialchars($trm_label, ENT_NOQUOTES);
+                $trm_label = str_replace('&lt;', '<', $trm_label);
+                $trm_label = str_replace('&gt;', '>', $trm_label);
+
                 $bd['val'] = output_chunker($trm_label);
 
             }elseif($bd['dty_Type'] == 'date') {
@@ -1677,7 +1698,7 @@ function print_public_details($bib) {
 
                 $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
                 list($lang, $value) = output_chunker($bd['val'], true);
-                $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', $value));
+                $bd['val'] = nl2br(str_replace('  ', NBSP, $value));
 
                 if(!empty($primary_language)){
 
@@ -1725,16 +1746,15 @@ function print_public_details($bib) {
                                     ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS)));//viewable or owner
 
 
+                    $rec_title = USanitize::sanitizeString($rec_title,ALLOWED_TAGS);
+
                     if($hasAccess){
 
-                        $bd['val'] = '<a target="_popup" href="'.$system->recordLink($rec_id)
-                            .'" onclick="return link_open(this);">'
-                            .USanitize::sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
-
+                        $bd['val'] = composeRecLink($rec_id, $rec_title);
                     }else{
 
                         $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
-                            .USanitize::sanitizeString($rec_title,ALLOWED_TAGS).'</a>';
+                            .$rec_title.'</a>';
 
                     }
 
@@ -1744,7 +1764,7 @@ function print_public_details($bib) {
                             .' WHERE rdi_RecID='.$rec_id .' AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')');
 
                     if($row){
-                        $bd['order_by_date'] = $row[0];
+                        $bd['order_by_date'] = htmlspecialchars($row[0]);
                     }
 
 
@@ -1783,9 +1803,9 @@ function print_public_details($bib) {
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
 
-                    $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
+                    $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME."&file=$file_nonce&mode=tag";
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&offer_download=1&thumb='.$file_nonce;
-                    $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
+                    $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME."&file=$file_nonce"; //download
 
                     array_push($thumbs, array(
                         'id' => $bd['dtl_UploadedFileID'],
@@ -1816,13 +1836,13 @@ function print_public_details($bib) {
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
-                    if(strpos($originalFileName,'_iiif')===0){
+                    if(strpos($originalFileName,ULF_IIIF)===0){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
                         $originalFileName = null;
                     }
 
 
-                    $bd['val'] .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!='_remote')
+                    $bd['val'] .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!=ULF_REMOTE)
                                         ?$originalFileName
                                         :($external_url?$external_url:$file_URL)).'</span></a> '
                             .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
@@ -1832,12 +1852,13 @@ function print_public_details($bib) {
             }
             else {
                 if (preg_match('/^https?:/', $bd['val'])) {
-                    if (strlen($bd['val']) > 100){
-                        $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
+                    $url = $bd['val'];
+                    if (strlen($url) > 100){
+                        $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $url);
                     }else{
-                        $trim_url = $bd['val'];
+                        $trim_url = $url;
                     }
-                    $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
+                    $bd['val'] = "<a href=\"$url\" target=\"_new\">".htmlspecialchars($trim_url).'</a>';
                 } elseif($bd['dtl_Geo']){
 
                     $minX = null;
@@ -1920,7 +1941,7 @@ function print_public_details($bib) {
 
 
     if($is_map_popup){
-        print '<div class="map_popup">';
+        print DIV_MAP_POPUP;
     }
 
     //print info about parent record
@@ -1929,7 +1950,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.($bd['val']).'</div></div>';// htmlentities
+            .' '.($bd['val']).DIV_E.DIV_E;// htmlentities
             break;
         }
     }
@@ -1940,7 +1961,7 @@ function print_public_details($bib) {
     if(!($is_map_popup || $without_header)){
         print '<script>';
         foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'], '_iiif')===0 || $thumb['mode_3d_viewer']!=''){
+            if(strpos($thumb['orig_name'], ULF_IIIF)===0 || $thumb['mode_3d_viewer']!=''){
 
                 $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
                 print $to_array.'.push({rec_ID:'.$bib['rec_ID']
@@ -1949,7 +1970,6 @@ function print_public_details($bib) {
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-                //if($is_map_popup) {break;}
             }else{
                 print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }
@@ -1972,7 +1992,7 @@ function print_public_details($bib) {
     if($hide_images != 2){ // use/hide all thumbnails
         foreach ($thumbs as $k => $thumb) {
 
-            if(strpos($thumb['orig_name'],'_iiif')===0 || $thumb['mode_3d_viewer'] != '' ){
+            if(strpos($thumb['orig_name'],ULF_IIIF)===0 || $thumb['mode_3d_viewer'] != '' ){
 
                 if($thumb['linked'] && !$added_linked_media_cont){
                     print '<div class="thumbnail2 linked-media" style="text-align:center"></div>';
@@ -1984,20 +2004,26 @@ function print_public_details($bib) {
 
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
 
-            $isImageOrPdf = (strpos($thumb['mimeType'],"image/")===0 || $thumb['mimeType']=='application/pdf');
+            $isImageOrPdf = (strpos($thumb['mimeType'],DIR_IMAGE)===0 || $thumb['mimeType']=='application/pdf');
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'
                     .($is_production?'margin-left:100px':'')
-                    .($k>0?'display:none;':'').'">';
+                    .($k>0?CSS_HIDDEN:'').'">';
             }else{
                 print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?'display:none;':'').'">';
+                    .($k>0?CSS_HIDDEN:'').'">';
             }
 
             $media_control_chkbx = '';
-            if($k == 0 && $thumb['linked'] != true && !$is_production && !$is_map_popup && $several_media>1){
-                $media_control_chkbx = ' <label class="media-control"><input type="checkbox" id="show-linked-media" onchange="displayImages(false);" '. ($hide_images == 0 ? ' checked="checked"' : '') .'> show linked media</label>';
+            if($k == 0 && !$is_production && !$is_map_popup && $several_media>1){
+                $checked_status = $hide_images == 0 ? ' checked="checked"' : '';
+                $media_control_chkbx = " <label class='media-control'><input type='checkbox' id='show-linked-media' onchange='displayImages(false);' $checked_status> show all linked media</label>";
+
+                if($thumb['linked'] == true){
+                    print "<h5 style='margin-block:1.5em'>Linked Media Only: $media_control_chkbx</h5>";
+                    $media_control_chkbx = '';
+                }
             }
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0)
@@ -2005,88 +2031,87 @@ function print_public_details($bib) {
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
             $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
 
-        if(!$is_map_popup){
-            print '<div class="download_link">';
-
             if(!$is_map_popup){
+                print '<div class="download_link">';
 
                 if($k==0 && $several_media>1){
                     print '<a href="#" onclick="displayImages(true);">'
-                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a><br><br>';
+                    .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a>'.BR2;
                 }
                 if(!empty($thumbs) && !$isAudioVideo){
                     print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
-                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a><br><br>';
+                    .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a>'.BR2;
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="popupMedia_link">'
+                    .'<span class="ui-icon ui-icon-popup" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;view in popup</a>'.BR2;
                 }
+
+                if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
+                    ( strpos($thumb['mimeType'],'youtube')===false &&
+                    strpos($thumb['mimeType'],'vimeo')===false &&
+                    strpos($thumb['mimeType'],'soundcloud')===false)) )
+                {
+                    print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
+                        .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                        .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                        .'"></span>&nbsp;Mirador</a>'.BR2;
+                }
+
+                if(@$thumb['external_url']){
+                    print '<a href="' . htmlspecialchars($thumb['external_url'])
+                                    . '" class="external-link" target=_blank>open in new tab'
+                                    . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
+                }else{
+                    print '<a href="' . htmlspecialchars($download_url)
+                                    . '" class=" image_tool" target="_surf">'
+                                    . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
+                                    . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
+                }
+                print BR2;
+
+                $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
+                $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
+                $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
+                $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
+
+                if(!empty($caption) || !empty($description)){
+
+                    $val = !empty($caption) ? $caption : '';
+                    $val = !empty($description) && !empty($val) ? $val . BR2 . $description : $val;
+                    $val = empty($val) ? $description : $val;
+
+                    print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
+                            . 'description</span>'.BR2;
+                }
+
+                if(!empty($rights) || !empty($owner)){
+
+                    $val = !empty($rights) ? $rights : '';
+                    $val = !empty($owner) && !empty($val) ? $val . BR2 . $owner : $val;
+                    $val = empty($val) ? $owner : $val;
+
+                    print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
+                            . 'title="'.addslashes(htmlspecialchars($val)).'">'
+                            . 'rights</span>'.BR2;
+                }
+
+                if($thumb['player'] && !$without_header){
+                    print '<a id="lnk'.htmlspecialchars($thumb['id'])
+                            .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                            .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
+                }
+
+                print '</div><!-- CLOSE download_link -->';//CLOSE download_link
             }
-
-            if(strpos($thumb['mimeType'],'image/')===0 || ($isAudioVideo &&
-                 ( strpos($thumb['mimeType'],'youtube')===false &&
-                   strpos($thumb['mimeType'],'vimeo')===false &&
-                   strpos($thumb['mimeType'],'soundcloud')===false)) )
-            {
-                print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="miradorViewer_link">'
-                    .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
-                    .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
-                    .'"></span>&nbsp;Mirador</a><br><br>';
-            }
-
-            if(@$thumb['external_url']){
-                print '<a href="' . htmlspecialchars($thumb['external_url'])
-                                . '" class="external-link" target=_blank>open in new tab'
-                                . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-            }else{
-                print '<a href="' . htmlspecialchars($download_url)
-                                . '" class=" image_tool" target="_surf">'
-                                . '<span class="ui-icon ui-icon-download" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;'
-                                . 'download' . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
-            }
-            print '<br><br>';
-
-            $caption = !empty(@$thumb['caption']) ? linkifyValue($thumb['caption']) : '';
-            $description = !empty(@$thumb['description']) ? linkifyValue($thumb['description']) : '';
-            $rights = !empty(@$thumb['rights']) ? linkifyValue($thumb['rights']) : '';
-            $owner = !empty(@$thumb['owner']) ? linkifyValue($thumb['owner']) : '';
-
-            if(!empty($caption) || !empty($description)){
-
-                $val = !empty($caption) ? $caption : '';
-                $val = !empty($description) && !empty($val) ? $val . '<br><br>' . $description : $val;
-                $val = empty($val) ? $description : $val;
-
-                print '<span class="media-desc" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
-                        . 'description</span><br><br>';
-            }
-
-            if(!empty($rights) || !empty($owner)){
-
-                $val = !empty($rights) ? $rights : '';
-                $val = !empty($owner) && !empty($val) ? $val . '<br><br>' . $owner : $val;
-                $val = empty($val) ? $owner : $val;
-
-                print '<span class="media-right" style="cursor: pointer; color: #2080C0; padding-left: 7.5px;" '
-                        . 'data-value="'.addslashes(htmlspecialchars($val)).'" title=" ">'
-                        . 'rights</span><br><br>';
-            }
-
-            if(!$is_map_popup && $thumb['player'] && !$without_header){
-                print '<a id="lnk'.htmlspecialchars($thumb['id'])
-                        .'" href="#" oncontextmenu="return false;" style="display:none;" onclick="window.hWin.HEURIST4.ui.hidePlayer('
-                        .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
-            }
-
-            print '</div><!-- CLOSE download_link -->';//CLOSE download_link
-        }
-
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'
                     .($is_production?'margin-left:100px':'')
-                    .($k>0?'display:none;':'').'">';
+                    .($k>0?CSS_HIDDEN:'').'">';
             }else{
-                print '<div class="thumb_image media-content'. ($thumb['linked'] == true ? ' linked-media' : '') .'"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
-                    .($k>0?'display:none;':'').'">';
+                //'. ($thumb['linked'] == true ? ' linked-media' : '') .'
+                print '<div class="thumb_image media-content"  style="min-height:140px;'.($isImageOrPdf?'':'cursor:default;')
+                    .($k>0?CSS_HIDDEN:'').'">';
             }
 
             if($thumb['linked'] == true){
@@ -2105,7 +2130,7 @@ function print_public_details($bib) {
                     print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);//see recordFile.php
 
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null);
-                    print '</div>';
+                    print DIV_E;
                 }else{
                     print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
                     if($isImageOrPdf && !$without_header){
@@ -2119,7 +2144,7 @@ function print_public_details($bib) {
                         ?''
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
-            print '</div>';
+            print DIV_E;
             print '</div><!--CLOSE THUMB SECTION-->';
             if($is_map_popup){
                 print '<br>';
@@ -2150,8 +2175,7 @@ function print_public_details($bib) {
             .'<span class="link">'
                 .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
                 .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
-            .'</span>'
-            .'</div></div>';
+            .'</span></div></div>';
     }
 
     $always_visible_dt = array(DT_SHORT_SUMMARY);
@@ -2164,7 +2188,7 @@ function print_public_details($bib) {
     if(!$is_map_popup && $usr_font_size != 0){
         $usr_font_size = ($usr_font_size < 8) ? 8
                                               : (($usr_font_size > 18) ? 18 : $usr_font_size);
-        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+        $font_size = "font-size:{$usr_font_size}px;";
     }
 
     $prevLbl = null;
@@ -2200,7 +2224,7 @@ function print_public_details($bib) {
         if($prevLbl != $bd['name']){ // start new detail row
 
             if($prevLbl != null){
-                print '</div></div>';// close previous detail row
+                print DIV_E.DIV_E;// close previous detail row
             }
 
             // open new detail row
@@ -2208,7 +2232,7 @@ function print_public_details($bib) {
                                                     ' hiddenField' : '');
 
             print '<div class="'. $row_classes .'" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
-                    .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none;':'')
+                    .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?CSS_HIDDEN:'')
                     .($is_map_popup?'':'width:100%;')
                     .$font_size
                     .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
@@ -2224,7 +2248,7 @@ function print_public_details($bib) {
     }
 
     if($prevLbl != null){
-        print '</div></div>';// close final detail row
+        print DIV_E.DIV_E;// close final detail row
     }
 
     $group_details = array();
@@ -2255,7 +2279,7 @@ function print_public_details($bib) {
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
     }
 
-    echo '</div></div>';
+    echo DIV_E.DIV_E;
 }
 
 
@@ -2298,9 +2322,9 @@ function print_relation_details($bib) {
 
     if($is_map_popup){
         print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
-        print '<div class="map_popup">';
+        print DIV_MAP_POPUP;
     }else{
-        print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related';
+        print '<div class="detailRowHeader relatedSection">Related';
     }
 
     $relfields_details = mysql__select_all($mysqli,
@@ -2319,13 +2343,13 @@ function print_relation_details($bib) {
     if(!$is_map_popup && $usr_font_size != 0){
         $usr_font_size = ($usr_font_size < 8) ? 8
                                               : (($usr_font_size > 18) ? 18 : $usr_font_size);
-        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+        $font_size = "font-size:{$usr_font_size}px;";
     }
 
     if($from_res){
 		while ($reln = $from_res->fetch_assoc()) {
 
-			$bd = fetch_relation_details($reln['dtl_RecID'], true);
+			$bd = fetch_relation_details($system, $reln['dtl_RecID'], true);
 
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
@@ -2383,38 +2407,36 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?CSS_HIDDEN:'').'">';// && $link_cnt>2 linkRow
 			$link_cnt++;
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
-				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . DIV_E;
 			}elseif($field_name !== false){
-				print '<div class=detailType>' . $field_name . '</div>';
+				print "<div class=detailType>$field_name</div>";
 			}
 
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
 
-					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
-                            .'" onclick="return link_open(this);">'
-							.USanitize::sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
+					print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
 				} else {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) {print Temporal::toHumanReadable($bd['StartDate'], true, 1);}//compact
 				if (@$bd['EndDate']) {print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);}
-			print '</div></div>';
+			print DIV_E.DIV_E;
 		}
 		$from_res->close();
     }
     if($to_res){
         while ($reln = $to_res->fetch_assoc()) {
 
-			$bd = fetch_relation_details($reln['dtl_RecID'], false);
+			$bd = fetch_relation_details($system, $reln['dtl_RecID'], false);
 			// check related record
 			if (!@$bd['RelatedRecID'] || !array_key_exists('rec_ID',$bd['RelatedRecID'])) {
 				continue;
@@ -2472,35 +2494,33 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?CSS_HIDDEN:'').'">';// && $link_cnt>2 linkRow
 			$link_cnt++;
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
-				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
+				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . DIV_E;
 			}elseif($field_name !== false){
-				print '<div class=detailType>' . $field_name . '</div>';
+				print "<div class=detailType>$field_name</div>";
 			}
 
 			print '<div class="detail" '. $extra_styling .'>';
 				if (@$bd['RelatedRecID']) {
 
-					print '<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$bd['RelatedRecID']['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif">&nbsp;';
+					print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
 
-					print '<a target=_popup href="'.$system->recordLink($bd['RelatedRecID']['rec_ID'])
-                        .'" onclick="return link_open(this);">'
-						.USanitize::sanitizeString($recTitle,ALLOWED_TAGS).'</a>';
+					print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
 				} else {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
 				if (@$bd['StartDate']) {print htmlspecialchars($bd['StartDate']);}
 				if (@$bd['EndDate']) {print ' until ' . htmlspecialchars($bd['EndDate']);}
-			print '</div></div>';
+			print DIV_E.DIV_E;
         }
         $to_res->close();
     }
 
-    print '</div>';
+    print DIV_E;
 
     //$move_details - array of related records without particular relmarker field
     if(is_array($move_details) && !empty($move_details)){
@@ -2510,48 +2530,13 @@ function print_relation_details($bib) {
     return $link_cnt;
 }
 
-//
-// print reverse link
-//
-function print_linked_details($bib, $link_cnt)
-{
-    global $system, $relRT, $ACCESS_CONDITION,
-        $is_map_popup, $is_production, $rectypesStructure, $already_linked_ids;
 
-    /* old version without recLinks
-    $query = 'select * '.
-    'from recDetails '.
-    'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
-    'left join Records on rec_ID = dtl_RecID '.
-    'where dty_Type = "resource" '.
-    'and dtl_DetailTypeID = dty_ID '.
-    'and dtl_Value = ' . $bib['rec_ID'].' '.
-    'and rec_RecTypeID != '.$relRT.' '.
-    'and '.$ACCESS_CONDITION.
-    ' ORDER BY rec_RecTypeID, rec_Title';
-    */
-
-    $ignored_ids = '';
-    if(!empty($already_linked_ids)){
-        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
-    }
-
-    $mysqli = $system->get_mysqli();
-
-    $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
-                .'where rl_TargetID = '.intval($bib['rec_ID'])
-                .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
-                .$ignored_ids
-    .' and '.$ACCESS_CONDITION
-    .' ORDER BY rec_RecTypeID, rec_Title';
-
-    $res = $mysqli->query($query);
-
-    if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
+function print_linked_details_header($bib){
+   global $is_map_popup, $is_production;
 
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
-       print '<div class="map_popup">';//
+       print DIV_MAP_POPUP;//
     }else{
        print '<div class="detailRowHeader" style="float:left">Linked from</div><div>';
        if(!$is_production){
@@ -2567,32 +2552,60 @@ function print_linked_details($bib, $link_cnt)
        }
     }
 
+
+}
+
+//
+// print reverse link
+//
+function print_linked_details($bib, $link_cnt)
+{
+    global $system, $relRT, $ACCESS_CONDITION,
+        $is_map_popup, $rectypesStructure, $already_linked_ids;
+
+    $ignored_ids = '';
+    if(!empty($already_linked_ids)){
+        $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
+    }
+
+    $mysqli = $system->get_mysqli();
+
+    $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
+                .'where rl_TargetID = '.intval($bib['rec_ID'])
+                .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
+                .$ignored_ids
+    .SQL_AND.$ACCESS_CONDITION
+    .' ORDER BY rec_RecTypeID, rec_Title';
+
+    $res = $mysqli->query($query);
+
+    if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
+
+    print_linked_details_header($bib);
+
     $usr_font_size = $system->user_GetPreference('userFontSize', 0);
     $font_size = '';
     if(!$is_map_popup && $usr_font_size != 0){
-        $usr_font_size = ($usr_font_size < 8) ? 8
-                                              : (($usr_font_size > 18) ? 18 : $usr_font_size);
-        $font_size = 'font-size: ' . $usr_font_size . 'px;';
+        $usr_font_size = max(8, min(18, $usr_font_size));
+        $font_size = "font-size:{$usr_font_size}px;";
     }
 
     while ($row = $res->fetch_assoc()) {
 
-        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
+        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?CSS_HIDDEN:'').'">';// && $link_cnt>2 linkRow
         $link_cnt++;
 
             print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                    .'<img class="rft" style="background-image:url('.HEURIST_RTY_ICON.$row['rec_RecTypeID'].')" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'hclient/assets/16x16.gif"></div>';
+                .composeRecTypeIcon($row['rec_RecTypeID']).DIV_E;
 
             print '<div style="display: table-cell;vertical-align:top;'
-            .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_popup href="'
-                            .$system->recordLink($row['rec_ID'])
-                            .'" onclick="return link_open(this);">'
-                .USanitize::sanitizeString($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
+            .($is_map_popup?'max-width:250px;':'').'" class="truncate">'
+            .composeRecLink($row['rec_ID'], $row['rec_Title']).DIV_E;
 
-        print '</div>';
+        print DIV_E;
     }
 
-    print '</div>';
+    print DIV_E;
     return $link_cnt;
 
 }
@@ -2703,7 +2716,7 @@ function print_woot_precis($content,$bib) {
                 }
                 ?>
 
-                <div><a target=_blank href="<?=HEURIST_BASE_URL?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
+                <div><a target="_blank" rel="noopener" href="<?=HEURIST_BASE_URL?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
             </div>
         </div>
         <?php
@@ -2723,7 +2736,7 @@ function print_threaded_comments($cmts) {
                     $level = 20 * $pair["level"];
                     print '<div style=" font-style:italic; padding: 0px 0px 0px ';
                     print $level;
-                    print  'px ;"> ['.$cmts[$pair['id']]["user"]. "] " . $cmts[$pair['id']]["text"] . "</div>";
+                    print  'px ;"> ['.$cmts[$pair['id']]["user"]. "] " . $cmts[$pair['id']]["text"] . DIV_E;
                 }
                 ?>
             </div>
@@ -2779,7 +2792,7 @@ function orderComments($cmts) {
     return $ret;
 }
 
-//sort array by order_by_date for resource (pointer) details
+//sort array by order_by_date for resource (record pointer) details
 function __sortResourcesByDate($a, $b)
 {
     if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
@@ -2808,7 +2821,9 @@ function linkifyValue($value){
 
     preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches);// only urls that contain a protocol [http|https|ftp|mailto]
 
-    if(is_array($url_matches) && !empty($url_matches[0])){
+    if(isEmptyArray($url_matches)){
+        return $new_value;
+    }
 
         foreach($url_matches[0] as $url){
             if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case
@@ -2821,14 +2836,37 @@ function linkifyValue($value){
                 $url = mb_substr($url, 0, -1);
             }
 
-            if(!empty($url) && is_string($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
+            if(!isEmptyStr($url) && filter_var($url, FILTER_VALIDATE_URL)){ // php validate url
                 $linked_url = '<a href='. $url .' target="_blank">'. $url .'</a>';
                 $new_value = str_replace($url, $linked_url, $new_value);
             }
         }
-    }
 
-    return $new_value;
+        return $new_value;
 }
+
+//
+//
+//
+function composeRecTypeIcon($rty_ID){
+    global $rectypesStructure;
+
+    $rty_Name = $rectypesStructure['names'][$rty_ID];
+
+    return '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_RTY_ICON
+                            .$rty_ID.')" title="'
+                            .$rty_Name.'" src="'.ICON_PLACEHOLDER.'">&nbsp;';
+}
+//
+//
+//
+function composeRecLink($rec_ID, $rec_Title){
+    global $system;
+
+    return '<a target="_popup" href="'.$system->recordLink($rec_ID)
+                            .'" onclick="return link_open(this);">'
+                            .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';
+}
+
 
 ?>

@@ -58,9 +58,9 @@ $.widget( "heurist.resultListCollection", {
                 .appendTo($('<div style="display:inline-block;vertical-align:bottom">').appendTo(this.element));
 
         this._initBtn('Add');
-        //this._initBtn('Remove');
+       
         this._initBtn('Clear');
-        //this._initBtn('List');
+       
         
         this._initBtn('Action');    
         if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
@@ -182,7 +182,7 @@ $.widget( "heurist.resultListCollection", {
 
         let link = $('<a>',{
             text: window.hWin.HR(label), href:'#'
-        });//IJ 2015-06-26 .css('font-weight','bold');
+        });
         
         this['btn_'+name] = $('<li data-action="'+name+'">')
             .css({background: 'lightgray','margin-right':'10px'})
@@ -260,8 +260,11 @@ $.widget( "heurist.resultListCollection", {
         
         if(!this.options.target_db){
             
-            window.hWin.HEURIST4.msg.showMsgErr('Wrong configuration. Target database for mapspace is not defined');
-            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Wrong configuration. Target database for mapspace is not defined',
+                error_title: 'Missing target database'
+            });
+
         }else
         if(!window.hWin.HEURIST4.util.isempty(this._collection)){
             
@@ -315,7 +318,7 @@ $.widget( "heurist.resultListCollection", {
     
     warningOnExit: function( callback_continue ){
 
-        let col = this._collection; //window.hWin.HEURIST4.collection.collectionGet();
+        let col = this._collection; 
         if( col && col.length>0 ){
             
                 let that = this, $dlg, buttons = {};

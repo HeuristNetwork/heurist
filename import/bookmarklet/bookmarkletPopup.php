@@ -20,9 +20,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-header('Content-type: text/javascript');
-require_once dirname(__FILE__).'/../../hserv/System.php';
-$system = new System();
+header(CTYPE_JS);
+require_once dirname(__FILE__).'/../../autoload.php';
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
 }

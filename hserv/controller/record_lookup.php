@@ -27,8 +27,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-    require_once dirname(__FILE__).'/../System.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
     // allowed and handled services, 'serviceType' => 'service/url base'
     // base url is used to reconstruct url validated request
@@ -93,7 +92,8 @@
             'country' => $MIXED,
             'postalcode' => $MIXED,
             'placename' => $MIXED,
-            'maxRows' => $NUMBERED
+            'maxRows' => $NUMBERED,
+            'geonameId' => $MIXED
         ),
 
         'bnf' => array(
@@ -151,7 +151,7 @@
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     $params = $_REQUEST;
 
@@ -160,7 +160,7 @@
     if(!$valid_service){
         $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST);//exit from script
     }
-    if($cur_type == 'geonames' && (!isset($accessToken_GeonamesAPI) || empty($accessToken_GeonamesAPI))){
+    if($cur_type == 'geonames' && empty($accessToken_GeonamesAPI)){
         $system->error_exit_api('Unable to use the geonames API, API key is missing from configuration file', HEURIST_ACTION_BLOCKED);
     }
 
@@ -346,7 +346,6 @@
     // validate url and query
 
     $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
-    //if(!$url){$url = filter_var($params['service'], FILTER_VALIDATE_URL);}
 
     $clean_query = array();
 
@@ -477,10 +476,6 @@
         if(array_key_exists('author_codes', $params) && !empty($params['author_codes']) && $params['author_codes'] != 'all'){
             $author_codes = explode(',', $params['author_codes']);
         }
-        /*if(array_key_exists('contributor_codes', $params) && !empty($params['contributor_codes'])){
-            $contributor_codes = explode(',', $params['contributor_codes']);
-        }*/
-
         $results = array();
 
         // Create xml object
@@ -858,7 +853,7 @@
                 }
             }
 
-            if(count($formatted_array) > 0 && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
+            if(!empty($formatted_array) && array_key_exists('name', $formatted_array) && !empty($formatted_array['name'])){
                 $results['result'][] = $formatted_array;
             }
         }
@@ -879,7 +874,7 @@
 
         foreach($records as $key => $details){
             $record = $details->recordData->children($BNF_XML_DETAILS_NAMESPACE, false)->record;
-            $results['record'] = $record->asXML();//json_encode($record, JSON_PRETTY_PRINT);
+            $results['record'] = $record->asXML();
             break;
         }
 
@@ -1075,7 +1070,7 @@
                 $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
                                 $details[$geopoint_idx][0]['value'] : '';
 
-                array_push($results, array('label' => $label, 'desc' => $desc, 'code' => $code, 'uri' => $uri, 'translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint));
+                $results[] = ['term_label' => $label, 'term_desc' => $desc, 'term_code' => $code, 'term_uri' => $uri, 'term_translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint];
             }
         }else{
             $system->error_exit_api('An error occurred while attempting to process the search results from Opentheso', HEURIST_UNKNOWN_ERROR);
@@ -1085,10 +1080,7 @@
     }
 
 	// Return response
-    header(CTYPE_JSON);
-    header(CONTENT_LENGTH . strlen($remote_data));
-
-    echo $remote_data;
+    dataOutput($remote_data);
 
 //------------------------------------------------------------------------------
 
@@ -1276,7 +1268,7 @@
             return $data[$server][$theso]['groups'];
         }
 
-        $url = $service_types['opentheso'][$server] . 'group/' . $theso;
+        $url = $service_types['opentheso'][$server] . 'group/' . urlencode($theso);
 
         $groups = loadRemoteURLContentWithRange($url, null, true, 60);
 
@@ -1317,6 +1309,16 @@
         return $data[$server][$theso];// return group details only
     }
 
+    /**
+     * Retrieves Nakala metadata based on the provided type.
+     *
+     * It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
+     * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
+     *
+     * @param object $system The system object for error handling and other functionality.
+     * @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
+     * @return array The metadata corresponding to the requested type, or an empty array if not found.
+     */
     function getNakalaMetadata($system, $type){
         // check NAKALA_metadata_values.json
         // if date in file is old (data.last_update), update metadata first (all types)
@@ -1345,33 +1347,39 @@
             if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || $data['last_update'] < date('Y-m-d')){
                 if($already_updated){
                     $system->error_exit_api('Unable to retrieve Nakala metadata due to unknown error.', HEURIST_UNKNOWN_ERROR);
-                    exit;
                 }
                 $data = updateNakalaMetadata($system);
             }
         }
 
-        if(!$data || !is_array($data) || empty($data)){
+        if(isEmptyArray($data)){
             return array();
         }
 
-        $data_rtn = array();
-        if($type == 'types'){
-            $data_rtn = $data['types'];
-        }
-        if($type == 'licenses'){
-            $data_rtn = $data['licenses'];
-        }
-        if($type == 'years'){
-            $data_rtn = $data['years'];
-        }
+        // Return the requested type of data or the entire metadata
+        return getRequestedNakalaData($data, $type);
+    }
 
-        if(empty($data_rtn) || count($data_rtn) == 0){ // all
-            return $data;
-        }else{
-            return $data_rtn;
+    /**
+     * Returns the requested Nakala data type or the full data.
+     *
+     * @param array $data The Nakala metadata.
+     * @param string $type The requested type ('types', 'licenses', 'years', or 'all').
+     * @return array The requested metadata or full data if 'all' is specified.
+     */
+    function getRequestedNakalaData($data, $type) {
+        switch ($type) {
+            case 'types':
+                return $data['types'] ?? array();
+            case 'licenses':
+                return $data['licenses'] ?? array();
+            case 'years':
+                return $data['years'] ?? array();
+            default:
+                return $data;
         }
     }
+
 
     function updateNakalaMetadata($system){
         // update NAKALA_metadata_values.json

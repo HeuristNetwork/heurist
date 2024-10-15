@@ -184,7 +184,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //if(this.selectRecordScope) this.selectRecordScope.remove();
 
     },
     
@@ -316,20 +315,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             let btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
             btn_stop.button();
             this._on(btn_stop,{click:function(){
-                let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+                let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
                 let request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
                 let that = this;
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._session_id = 0;
                     that._hideProgress();
-                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    //console.error(response);                   
-                    //}
-                    /*if(response.data && response.data.length>0){
-                        response.status = window.hWin.ResponseStatus.OK;
-                        that._afterActionEvenHandler(response.data);
-                    }*/
-                    //window.hWin.HEURIST4.msg.showMsgErr(response);
                 });
                 
                 
@@ -360,7 +351,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _sendRequest: function(request)
     {
         //unique session id    ------------------------
-        this._session_id = Math.round((new Date()).getTime()/1000);
+        this._session_id = window.hWin.HEURIST4.util.random();
         
         request['action'] = this.options.actionName;       
         request['db'] = window.hWin.HAPI4.database;
@@ -434,7 +425,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     if(res && res.filename){
                         that._$('#selectedZip').text(res.filename);
                         that._$('#divSelectedZip').show();
-                        //alert(res.path, res.filename);
+                       
                         
                         //suggest database name
                         if(that._$('#dbname').val().trim()==''){
@@ -567,6 +558,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }    
     },
 
+    //   @todo use msg.showProgress
     //
     // Requests reportProgress every t_interval ms 
     // is_autohide 
@@ -602,7 +594,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         if(t_interval>900){
 
-            let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+            let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
                 
             this._progressInterval = setInterval(function(){ 
                 
@@ -743,7 +735,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _initVerificationResponse: function(response){
         
-            //if(this._session_id==0) return;
             this._session_id = 0;
     
             let div_res = this._$("#div_result");
@@ -869,7 +860,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 if(ids.length>0){
                     ids = ids.join(',');
                     //window.hWin.HEURIST4.util.windowOpenInPost(window.hWin.HAPI4.baseURL, '_blank', null,
-                    //    {db:window.hWin.HAPI4.database,w:'all',q:'ids:'+ids});
+                   
                     window.open( window.hWin.HAPI4.baseURL_pro+'?db='
                                 +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
                 }

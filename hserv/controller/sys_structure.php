@@ -20,8 +20,10 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    use hserv\utilities\USanitize;
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     require_once dirname(__FILE__).'/../structure/search/dbsData.php';
     require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
     require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
@@ -30,11 +32,7 @@
     $is_remote = false;
     $remoteURL = null;
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
+    $req_params = USanitize::sanitizeInputArray();
 
     //get list of registered database and master index db on the same server
     if(@$req_params['remote']){
@@ -47,6 +45,7 @@
             unset($req_params['remote']);
             $req_params['db'] = $match[1];
        }else{
+           
                 if(@$match[1]==null || $match[1]==''){
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
                      $data = json_encode($data);
@@ -75,24 +74,19 @@
                         $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
                         $data = json_encode($data);
                     }else{
-//$defs = json_decode(gzdecode($data), true);
-
                         header('Content-Encoding: gzip');
                     }
                 }
 
-                header(CTYPE_JSON);
+                header('Content-type: application/json;charset=UTF-8');
                 echo $data;
                 exit;
-                //$response = json_decode($data, true);
-                //$is_remote = true;
-
        }
     }
 
 
     $mode = 0;
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$req_params['db']) ){
 
         //get error and response
@@ -145,7 +139,7 @@ ini_set('max_execution_time', 0);
             //
             // send error report about terms that were failed
             //
-            if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
+            if(@$response['report']['broken_terms'] && !empty($response['report']['broken_terms'])){
 
                 $sText = 'Target database '.HEURIST_DBNAME;
                 $sText .= ("\n".'Source database '.intval(@$req_params["databaseID"]));
@@ -164,8 +158,8 @@ ini_set('max_execution_time', 0);
 
                 $sText = 'Target database '.HEURIST_DBNAME;
                 $sText .= ("<br>".'Source database '.intval(@$req_params["databaseID"]));
-                $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
-                        .$response['report']['rectypes'].'</table>');
+                $sText .= (TABLE_S.'<tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
+                        .$response['report']['rectypes'].TABLE_E);
 
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'Download templates', $sText, true);
             }
@@ -242,7 +236,7 @@ ini_set('max_execution_time', 0);
 /*
     ini_set("zlib.output_compression", '4096');
     ini_set("zlib.output_compression_level", '6');
-    header('Content-type: text/javascript');
+    header(CTYPE_JS);
     print json_encode($response);
 */
 

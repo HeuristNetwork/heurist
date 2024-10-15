@@ -15,7 +15,7 @@
     
     let arc = s.split(' ');  
     
-    let islat = false, k;
+    let islat = false;
     let hemisphere = 'N';  
     
     if(window.hWin.HEURIST4.util.isnull(type) && arc.length>2){
@@ -47,8 +47,6 @@
         //check for UTM - assume they are integer and at least several are more than 180
         for (let k=0; k<arc.length; k++){
             
-            //if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE) continue;
-        
             let crd = Number(arc[k]);
             if(isNaN(crd)){
                 alert(arc[k]+" is not number value");
@@ -166,13 +164,11 @@
             }else{
                 wkt =  'LINESTRING ('+coords.join(', ')+')';
             }
-        }else {
-            if(coords.length==1){
+        }else if(coords.length==1){
                 wkt =  'POINT ('+coords[0]+')';
                 
-            }else{
+        }else{
                 wkt =  'MULTIPOINT ('+coords.join(', ')+')';
-            }
         }
     }
     if(wkt!='' && window.hWin.HEURIST4.util.isFunction(callback)){

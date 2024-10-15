@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to recThreadedComments.php table
@@ -20,10 +22,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 class DbRecThreadedComments extends DbEntityBase
 {
 
@@ -36,7 +34,6 @@ class DbRecThreadedComments extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
     */
     public function search(){
 
@@ -48,97 +45,41 @@ class DbRecThreadedComments extends DbEntityBase
               return false;
         }
 
-        $needCheck = false;
         $needRecords = false;
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
+        $this->searchMgr->addPredicate('cmt_ID');
+        $this->searchMgr->addPredicate('cmt_OwnerUgrpID');
+        $this->searchMgr->addPredicate('cmt_RecID');
+        $this->searchMgr->addPredicate('cmt_Text');
 
-        $pred = $this->searchMgr->getPredicate('cmt_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('cmt_OwnerUgrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('cmt_RecID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('cmt_Text');
-        if($pred!=null) {array_push($where, $pred);}
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'cmt_ID';
-
-        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list'){
-
-            $needRecords = (@$this->data['details']=='list');
-
-            $this->data['details'] = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
-
-        }else{
-            $needCheck = true;
-        }
-
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:cmt_Modified'];
-        if($value!=null){
-            array_push($order, 'cmt_Modified '.($value==1?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:cmt_RecTitle'];
-            if($value!=null){
-                array_push($order, 'rec_Title '.($value==1?'ASC':'DESC'));
+        switch (@$this->data['details']){
+            case 'id': $fieldList = 'cmt_ID'; break;
+            case 'list':
                 $needRecords = true;
-            }
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
+                break;
+            case 'name':
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
+                break;
+            default:   //'full'
+                $fieldList = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
+                break;
         }
 
-
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        if($needRecords){
-              array_push($this->data['details'], 'rec_Title as cmt_RecTitle');
-              array_push($from_table,'Records');
-              array_push($where, 'rec_ID=cmt_RecID');
+        $orderby = $this->searchMgr->setOrderBy();
+        if($orderby!=null && strpos('recTitle',$orderby)===0){
+            $needRecords = true;
         }
 
+        if($needRecords){ //return rec_Title for comment
+              $fieldList .= ', rec_Title as cmt_RecTitle';
+              $sup_tables = ', Records';
+              $sup_where = '(rec_ID=cmt_RecID)';
+        }
 
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
+        $this->searchMgr->setSelFields($fieldList);
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby, $sup_tables, $sup_where);
     }
 
     //
@@ -147,7 +88,7 @@ class DbRecThreadedComments extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) &&  count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -201,7 +142,7 @@ class DbRecThreadedComments extends DbEntityBase
     public function batch_action(){
 
         $recordIDs = prepareIds($this->data['recIDs']);
-        if(count($recordIDs)>0){
+        if(!empty($recordIDs)){
             //find record by ids  - todo
 
         }

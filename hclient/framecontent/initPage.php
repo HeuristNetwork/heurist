@@ -24,8 +24,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
 
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
@@ -34,15 +36,13 @@ if(defined('IS_INDEX_PAGE')){
 }else{
     if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-
-    $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 }
 
 $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
-$system = new System();
+$system = new hserv\System(true);
 
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database
@@ -50,9 +50,6 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    /*if(count($system->getError()) > 0){
-        $_REQUEST['error'] = $system->getError();
-    }*/
     include_once ERROR_REDIR;
     exit;
 }
@@ -64,7 +61,7 @@ if(defined('IS_INDEX_PAGE')){
 
     if($subsubVer===null){
         $message = $system->getErrorMsg();
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        include_once ERROR_REDIR;
         exit;
     }
 
@@ -81,7 +78,7 @@ if(defined('IS_INDEX_PAGE')){
     $missed = hasAllTables($system->get_mysqli());
 
     if(is_array($missed)){
-        if(count($missed)>0){
+        if(!empty($missed)){
             $message = 'Database <b>'.HEURIST_DBNAME
             .'</b> is missing the following tables:<br><br><i>'
             .implode(', ',$missed)
@@ -92,7 +89,7 @@ if(defined('IS_INDEX_PAGE')){
             $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
                     .' is missing the following tables: '.implode(', ',$missed));
 
-            include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+            include_once ERROR_REDIR;
             exit;
         }
     }else{
@@ -100,14 +97,14 @@ if(defined('IS_INDEX_PAGE')){
 
         $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
 
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        include_once ERROR_REDIR;
         exit;
     }
 }
 
 if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
 
-    $user_pwd = System::getAdminPwd();
+    $user_pwd = USanitize::getAdminPwd();
 
     $mysqli = $system->get_mysqli();
     $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;
@@ -153,12 +150,11 @@ $is_admin = $system->is_admin();
 
 //
 // to limit access to particular page
-// define const in the very begining of your php code  just before require_once '/initPage.php';
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
-    //include_once ERROR_REDIR;
+
     exit;
 }elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
@@ -198,7 +194,6 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-//header("Content-Security-Policy: frame-ancestors 'self'");
 ?>
 <!DOCTYPE html>
 <?php
@@ -242,22 +237,14 @@ $isUpgrade = true;
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
-<!--
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script>
- -->
-
-<script type="text/javascript">
-//init globa variables
-//let Hul, $Db, cfg_widgets, cfg_layout, regional, layoutMgr, editCMS_instance2;
-</script>
-
-
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
@@ -274,13 +261,13 @@ $isUpgrade = true;
     // overwrite the standard jquery show method
     // apply listener in widgets on this page to refresh content on show
     // example
-    //        var that = this;
+
     //        this.element.on("myOnShowEvent", function(event){
     //            if( event.target.id == that.element.attr('id')){
-    //                that._refresh();
+
     //            }
-    //        });
-    //        this.element.off("myOnShowEvent");
+
+
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
@@ -311,7 +298,9 @@ $isUpgrade = true;
     }
 
 
-    var onAboutInit, onPageInit, isHapiInited = false;
+    window.onAboutInit = null;
+    window.onPageInit = null;
+    window.isHapiInited = false;
 
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
@@ -319,7 +308,7 @@ $isUpgrade = true;
         // Standalone check
         if(!window.hWin.HAPI4){
             window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
-        }else{
+        }else if(!window.isHapiInited){
             // Not standalone, use HAPI from parent window
             onHapiInit( true );
         }
@@ -331,28 +320,19 @@ $isUpgrade = true;
     //
     function onHapiInit(success)
     {
-        //if(isHapiInited) {return;}
-
-        isHapiInited = true;
+        window.isHapiInited = true;
 
         if(success) // Successfully initialized system
         {
             
             var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
 
-            if(window.hWin.HEURIST4.util.isempty(layoutid)){
-                layoutid = "H6Default";
-            }
-            if(!window.hWin.HAPI4.sysinfo['layout']){
-                window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-            }            
-            
-            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
+            if(!window.hWin.HEURIST4.util.isnull(window.onAboutInit) && window.hWin.HEURIST4.util.isFunction(window.onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                    onAboutInit();//init about dialog
+                    window.onAboutInit();//init about dialog
             }
 
-            if(initialLoadDatabaseDefintions(null, onPageInit)){
+            if(initialLoadDatabaseDefintions(null, window.onPageInit)){
                 return;
             }
 
@@ -364,8 +344,8 @@ $isUpgrade = true;
             success = false;
         }
 
-        if(window.hWin.HEURIST4.util.isFunction(onPageInit)){
-            onPageInit(success);
+        if(window.hWin.HEURIST4.util.isFunction(window.onPageInit)){
+            window.onPageInit(success);
         }
     }
 
@@ -382,7 +362,7 @@ $isUpgrade = true;
                 +'corruption of the database.';
 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
-                var entities = (params)?params:'all';//'rty,dty,rst,swf';
+                var entities = (params)?params:'all';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){
@@ -403,6 +383,14 @@ $isUpgrade = true;
                             });
                             if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
                         }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: sMsg,
+                            error_title: 'Issue with database definitions',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
+                    }
                     }
                 });
                 return true;

@@ -1,4 +1,7 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\utilities\USanitize;
 
     /**
     * db access to sysArchive table
@@ -20,9 +23,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
@@ -118,10 +118,10 @@ class DbSysArchive extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-        if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+        if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
         }
-        if(count($order)>0){
+        if(!empty($order)){
             $query = $query.' ORDER BY '.implode(',',$order);
         }
 
@@ -150,7 +150,7 @@ class DbSysArchive extends DbEntityBase
             $records = array();
             $order = array();
             $csv_delimiter = "\t";
-            $csv_enclosure = '|';//'@';
+            $csv_enclosure = '|';
 
             if($details=='records_list'){ //returns fields suitable for list only
                 //0,1,2,3,4,6,11,12
@@ -171,7 +171,7 @@ class DbSysArchive extends DbEntityBase
 
                 $arc = $arcrow[$idx_data];
                 //$arc = substr(str_replace('","', "\t", $arc),1);
-                $arc = str_replace('NULL','""', $arc);
+                $arc = str_replace(SQL_NULL,'""', $arc);
                 $arc = str_replace('","', "|\t|", $arc);
                 /*
                 $arc = str_replace('",NULL', "@\tNULL", $arc);
@@ -240,7 +240,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
     }
 
     //
-    // delete group
+    // delete disabled
     //
     public function delete($disable_foreign_checks = false){
         return false;

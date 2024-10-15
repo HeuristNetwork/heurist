@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2022 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -66,7 +66,7 @@ if (@$argv) {
     /*web browser
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
+    $tabs = DIV_E.$tabs0;
 
     if(array_key_exists('db', $_REQUEST)){
         $arg_database = explode(',',$_REQUEST['db']);
@@ -77,14 +77,14 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USystem;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
@@ -102,7 +102,7 @@ $base_url = '';
 if(defined('HEURIST_BASE_URL_PRO')){
     $base_url = HEURIST_BASE_URL_PRO;
 }else{
-    $base_url = 'https://' . HEURIST_SERVER_NAME . '/heurist/';
+    $base_url = 'https://' . HEURIST_SERVER_NAME . HEURIST_DEF_DIR;
 }
 
 if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'https://') == 0){
@@ -112,8 +112,8 @@ if(empty($base_url) || strcmp($base_url, 'http://') == 0 || strcmp($base_url, 'h
 if(substr($base_url, -1, 1) != '/'){
     $base_url .= '/';
 }
-if(strpos($base_url, '/heurist/') === false){
-    $base_url = rtrim($base_url, '/') . '/heurist/';
+if(strpos($base_url, HEURIST_DEF_DIR) === false){
+    $base_url = rtrim($base_url, '/') . HEURIST_DEF_DIR;
 }
 
 $mysqli = $system->get_mysqli();
@@ -142,45 +142,47 @@ $value_to_replace = array('{db_name}','{db_desc}','{db_url}','{db_website}','{db
 //
 // File content for (HarvestableDatabaseDescriptions/index.html)
 //
-$index_page = '<!DOCTYPE html>'
-. '<html>'
+$index_page = <<<EXP
+<!DOCTYPE html>
+<html>
 
-    . '<head>'
-        . '<meta charset="UTF-8">'
-        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-        . '<meta name=”generator” content=”Heurist”>'
-        . '<meta name="keywords" content="Heurist, Heurist databases, Digital Humanitites, Database management">' //{sys_kywds}
-        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
-        . '<title>Index of Heurist Databases</title>'
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name=”generator” content=”Heurist”>
+        <meta name="keywords" content="Heurist, Heurist databases, Digital Humanitites, Database management">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>Index of Heurist Databases</title>
 
-        . '<style>'
-            . '.desc{display: inline-block; max-width: 800px; text-align: justify;}'
-            . '.heurist_logo{object-fit: cover;object-position: 5% 0;width: 40px;height: 38px;vertical-align: -12px;}'
-        . '</style>'
-    . '</head>'
+        <style>
+            .desc{display: inline-block; max-width: 800px; text-align: justify;}
+            .heurist_logo{object-fit: cover;object-position: 5% 0;width: 40px;height: 38px;vertical-align: -12px;}
+        </style>
+    </head>
 
-    . '<body>'
-        . '<div style="margin: 10px 0px;">'
-            . ' <img src="'.$base_url.'hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">'
-            . ' <strong>Heurist database builder for Humanities research </strong>'
-            . ' (<a href="https://HeuristNetwork.org" target="_blank" rel="noopener">https://HeuristNetwork.org</a>)'
-        . '</div>'
+    <body>
+        <div style="margin: 10px 0px;">
+             <img src="{$base_url}hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">
+             <strong>Heurist database builder for Humanities research </strong>
+             (<a href="https://HeuristNetwork.org" target="_blank" rel="noopener">https://HeuristNetwork.org</a>)
+        </div>
 
-        . '<div style="margin: 10px 5px 15px;">'
-            . 'Databases and websites on this server (<a href="'.$base_url.'" target=_blank>'.$base_url.'</a>)'
-            . '<p><b>**************************************************'
-            . '<br>This page is primarily for web indexing.'
-            . '<br>Many of these websites are just undeveloped stubs.'
-            . '<br><u>You will not be able to log into a database unless you have a password for it.'
-            . '</u><br>**************************************************</b></p>'
-        . '</div>'
+        <div style="margin: 10px 5px 15px;">
+            . 'Databases and websites on this server (<a href="$base_url" target=_blank>$base_url</a>)
+            <p><b>**************************************************
+            <br>This page is primarily for web indexing.
+            <br>Many of these websites are just undeveloped stubs.
+            <br><u>You will not be able to log into a database unless you have a password for it.
+            </u><br>**************************************************</b></p>
+        </div>
 
-        . '<div style="margin-left: 10px;">'
-            . '{databases}'
-        . '</div>'
-    . '</body>'
+        <div style="margin-left: 10px;">
+            {databases}
+        </div>
+    </body>
 
-. '</html>';
+</html>
+EXP;
 //
 // Format for each row of database details within index.html
 //
@@ -192,114 +194,116 @@ $index_row_replace = array('{db_name}', '{db_page_link}', '{website_url}', '{db_
 //
 // File content for each database file (HarvestableDatabaseDescriptions/{database_name}.html)
 //
-$template_page = '<!DOCTYPE html>'
-. '<html>'
+$template_page = <<<EXP
+<!DOCTYPE html>
+<html>
 
-    . '<head>'
-        . '<meta charset="UTF-8">'
-        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-        . '<meta name=”generator” content=”Heurist”>'
-        . '<meta name="description" content="{db_desc}">'
-        . '<meta name="keywords" content="Heurist, Heurist database, Digital Humanitites, Database management, {db_name}, {db_dname}, {db_owner}">' //{sys_kywds}
-        . '<meta name="author" content="{db_owner}">' //{owner_name}
-        . '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
-        . '<title>Heurist DB {db_name} on {server_host} updated {date_now}</title>'
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name=”generator” content=”Heurist”>
+        <meta name="description" content="{db_desc}">
+        <meta name="keywords" content="Heurist, Heurist database, Digital Humanitites, Database management, {db_name}, {db_dname}, {db_owner}">
+        <meta name="author" content="{db_owner}">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>Heurist DB {db_name} on {server_host} updated {date_now}</title>
 
-        . '<style>'
-            . '.dtl_row{display: table-row}'
-            . '.dtl_head{ display: table-cell; width: 175px; }' // 25%
-            . '.dtl_value{ display: table-cell; width: 800px; }' // 70%
-            . '.dtl_row > span{ padding-bottom: 10px; }'
-            . 'img{ vertical-align:middle; }'
-            . '.db_logo{ max-width: 120px; max-height: 120px; padding-left: 20px; }'
-            . '.heurist_logo{ background-color: #364050; max-width: 150px; max-height: 40px; margin-right: 10px; border-radius: 25px; }'
-        . '</style>'
-    . '</head>'
+        <style>
+            .dtl_row{display: table-row}
+            .dtl_head{ display: table-cell; width: 175px; }
+            .dtl_value{ display: table-cell; width: 800px; }
+            .dtl_row > span{ padding-bottom: 10px; }
+            . 'img{ vertical-align:middle; }
+            .db_logo{ max-width: 120px; max-height: 120px; padding-left: 20px; }
+            .heurist_logo{ background-color: #364050; max-width: 150px; max-height: 40px; margin-right: 10px; border-radius: 25px; }
+        </style>
+    </head>
 
-    . '<body>'
-        . '<div style="margin: 10px 0px;">'
-            . '<img src="'.$base_url.'hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">'
-            . ' <strong>Heurist database builder for Humanities research </strong>'
-            . ' (<a href="https://HeuristNetwork.org" target="_blank" rel="noopener">https://HeuristNetwork.org</a>)'
-        . '</div>'
+    <body>
+        <div style="margin: 10px 0px;">
+            <img src="{$base_url}hclient/assets/branding/h4logo_small.png" alt="Heurist logo" class="heurist_logo">
+             <strong>Heurist database builder for Humanities research </strong>
+             (<a href="https://HeuristNetwork.org" target="_blank" rel="noopener">https://HeuristNetwork.org</a>)
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Database name:</span>'
-            . '<span class="dtl_value">{db_name} <img class="db_logo" src="{db_logo}" alt="Database logo"></img></span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Database name:</span>
+            <span class="dtl_value">{db_name} <img class="db_logo" src="{db_logo}" alt="Database logo"></img></span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Hosting server:</span>'
-            . '<span class="dtl_value">{server_host} (find a db: <a href="{server_url}" target=_blank>{server_url}</a>)</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Hosting server:</span>
+            <span class="dtl_value">{server_host} (find a db: <a href="{server_url}" target=_blank>{server_url}</a>)</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Database access:</span>'
-            . '<span class="dtl_value"><a href="{db_url}" target=_blank>{db_url}</a></span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Database access:</span>
+            <span class="dtl_value"><a href="{db_url}" target=_blank>{db_url}</a></span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Generated website(s):</span>'
-            . '<span class="dtl_value">{db_website}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Generated website(s):</span>
+            <span class="dtl_value">{db_website}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Display name:</span>'
-            . '<span class="dtl_value">{db_dname}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Display name:</span>
+            <span class="dtl_value">{db_dname}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Description:</span>'
-            . '<span class="dtl_value">{db_desc}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Description:</span>
+            <span class="dtl_value">{db_desc}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Copyright:</span>'
-            . '<span class="dtl_value">{db_rights}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Copyright:</span>
+            <span class="dtl_value">{db_rights}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Ownership:</span>'
-            . '<span class="dtl_value">{db_owner}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Ownership:</span>
+            <span class="dtl_value">{db_owner}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Database owner:</span>'
-            . '<span class="dtl_value">{owner_name} [ <a href="mailto:{owner_email}">{owner_email}</a> ]</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Database owner:</span>
+            <span class="dtl_value">{owner_name} [ <a href="mailto:{owner_email}">{owner_email}</a> ]</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Record count:</span>'
-            . '<span class="dtl_value">{rec_count}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Record count:</span>
+            <span class="dtl_value">{rec_count}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Files referenced:</span>'
-            . '<span class="dtl_value">{file_count}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Files referenced:</span>
+            <span class="dtl_value">{file_count}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Data last updated:</span>'
-            . '<span class="dtl_value">{rec_last}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Data last updated:</span>
+            <span class="dtl_value">{rec_last}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Structure last updated:</span>'
-            . '<span class="dtl_value">{struct_last}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Structure last updated:</span>
+            <span class="dtl_value">{struct_last}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Registration ID:</span>'
-            . '<span class="dtl_value">{db_id}</span>'
-        . '</div>'
+        <div class="dtl_row">
+            <span class="dtl_head">Registration ID:</span>
+            <span class="dtl_value">{db_id}</span>
+        </div>
 
-        . '<div class="dtl_row">'
-            . '<span class="dtl_head">Entity types / Record types:</span>'
-            . '<span class="dtl_value">{struct_names}</span>'
-        . '</div>'
-    . '</body>'
+        <div class="dtl_row">
+            <span class="dtl_head">Entity types / Record types:</span>
+            <span class="dtl_value">{struct_names}</span>
+        </div>
+    </body>
 
-. '</html>';
+</html>
+EXP;
 
 set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
@@ -345,7 +349,7 @@ foreach ($databases as $idx=>$db_name){
 
     $vals = mysql__select_row_assoc($mysqli, 'SELECT sys_dbRegisteredID as db_id, sys_dbName as db_dname, sys_dbRights as db_rights, sys_dbOwner as db_owner, sys_dbDescription as db_desc FROM sysIdentification WHERE sys_ID = 1');
     if($vals==null){
-        echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
+        echo $tabs0.$db_name.' cannot execute query for sysIdentification table'.$eol;
         continue;
     }
 
@@ -367,6 +371,7 @@ foreach ($databases as $idx=>$db_name){
     $values[3] = 'None';
 
     $cms_home_id = mysql__select_value($mysqli, 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 99 AND rty_IDInOriginatingDB = 51');
+    $db_name = basename($db_name);
     $prime_url_base = $base_url.$db_name.'/web/';
     $alt_url_base = $base_url.'?db='.$db_name.'&website&id=';
 
@@ -392,7 +397,7 @@ foreach ($databases as $idx=>$db_name){
 
     $vals = mysql__select_row_assoc($mysqli, 'SELECT CONCAT(ugr_FirstName, " ",ugr_LastName) as owner_name, ugr_eMail as owner_email FROM sysUGrps WHERE ugr_ID = 2');
     if($vals==null){
-        echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
+        echo $tabs0.$db_name.' cannot execute query for sysUGrps table'.$eol;
         continue;
     }
 
@@ -450,7 +455,7 @@ foreach ($databases as $idx=>$db_name){
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);
 
-    //echo $content . '<br><hr><br>';
+
 
     //Write to file
     $fname = $index_dir.'/'.$db_name.'.html';

@@ -47,9 +47,8 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
         }
     }
@@ -73,7 +72,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -84,7 +83,7 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($rec_types, array_map('htmlspecialchars',$row2));
                }
         }
@@ -100,7 +99,7 @@ $mysqli = $system->get_mysqli();
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
         $not_found = true;
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -111,7 +110,7 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($det_types, array_map('htmlspecialchars',$row2));
                }
         }
@@ -126,7 +125,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
 
                $is_found = true;
 
@@ -137,35 +136,35 @@ $mysqli = $system->get_mysqli();
 
                $res2 = $mysqli->query($query);
                if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
-               while (($row2 = $res2->fetch_row())) {
+               while ($row2 = $res2->fetch_row()) {
                       array_push($terms, array_map('htmlspecialchars',$row2));
                }
         }
 
         if($is_found){
             print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';
-            if(is_array($rec_types) && count($rec_types)>0){
+            if(!isEmptyArray($rec_types)){
                 print '<tr><td colspan=4><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
-            if(is_array($det_types) && count($det_types)>0){
+            if(!isEmptyArray($det_types)){
                 print '<tr><td colspan=4><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
-            if(is_array($terms) && count($terms)>0){
+            if(!isEmptyArray($terms)){
                 print '<tr><td colspan=4><i>Terms</i></td></tr>';
                 foreach($terms as $row){
                     //snyk does not see htmlspecialchars above
-                    $list = str_replace(chr(29),'</td><td>',htmlspecialchars(implode(chr(29),$row)));
-                    print '<tr><td>'.$list.'</td></tr>';
+                    $list = str_replace(chr(29),TD,htmlspecialchars(implode(chr(29),$row)));
+                    print TR_S.$list.TR_E;
                 }
             }
             print '</table>';

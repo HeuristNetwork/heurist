@@ -65,32 +65,33 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\utilities\USanitize;
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-
-    require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../records/search/recordFile.php';
     require_once dirname(__FILE__).'/../structure/dbsTerms.php';
     require_once dirname(__FILE__).'/../utilities/Temporal.php';
     require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 
-    require_once dirname(__FILE__).'/../records/export/exportRecords.php';
-    require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../records/export/recordsExportCSV.php';
 
     $response = array();
 
-    if(@$_REQUEST['postdata']){
-        //in export csv all parameters send as json array in postdata
-        $params = json_decode($_REQUEST['postdata'], true);
+    if(isset($req_params)){ //if set array has been already modified in api.php
+        $params = $req_params;
     }else{
-        $params = $_REQUEST;
+        $params = USanitize::sanitizeInputArray();
+    }
+
+    if(@$params['postdata']){
+        //in export csv all parameters send as json array in postdata
+        $params = json_decode($params['postdata'], true);
     }
 
     if(!isset($system) || $system==null){
 
-        $system = new System();
+        $system = new hserv\System();
 
         if( ! $system->init(@$params['db']) ){
             //get error and response
@@ -151,9 +152,6 @@
 
 
     $is_csv = (@$params['format'] == 'csv');
-    /*if(@$params['format']=='json' && @$params['detail']!=null){
-        $search_params['detail'] = $params['detail'];
-    }else */
     if(@$params['format']){
         //search only ids - all
         $search_params['detail'] = 'ids';
@@ -161,8 +159,6 @@
 
     if(@$params['prefs']['csv_headeronly']===true){
         $response = array('status'=>HEURIST_OK,'data'=>array());
-        //$search_params['limit'] = 1;
-        //$search_params['needall'] = 0;
     }else{
 
 //    datatable -   datatable session id  - returns json suitable for datatable ui component
@@ -179,7 +175,7 @@
 
                 if($search_params['q']==null){
                     //query was removed
-                    header( CTYPE_JSON);
+                    header(CTYPE_JSON);
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
@@ -233,7 +229,7 @@
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
-                header( CTYPE_JSON);
+                header(CTYPE_JSON);
                 echo json_encode(array('status'=>HEURIST_OK));
                 exit;
             }
@@ -269,8 +265,6 @@
 
     }else{
 
-        if(@$params['vers']==2){
-
             $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf');
             $idx = array_search(strtolower($params['format']),$allowed_formats);
 
@@ -278,34 +272,16 @@
                 $idx = 0;
             }
 
-            $classname = 'exportRecords'.strtoupper($allowed_formats[$idx]);
+            $classname = 'hserv\records\export\ExportRecords'.strtoupper($allowed_formats[$idx]);
 
-            spl_autoload_register(function ($class) {
-                $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
-                if (file_exists($file)) {
-                    require_once $file;
-                    return true;
-                }
-                return false;
-            });
-
-            $outputHandler = false;
-
-            if(class_exists($classname, true)){
-                $outputHandler = new $classname($system);
-            }
+            $outputHandler = new $classname($system);
 
             if(!$outputHandler){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
+                $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
                 return false;
             }else{
                 $res = $outputHandler->output( $response, $params );
             }
-
-        }else{
-            //old version
-            $res = RecordsExport::output( $response, $params );
-        }
     }
 
     if(!$res) {
@@ -318,8 +294,8 @@
 /**
  * Write file references out into CSV format
  *
+ * @param hserv\System $system Initialised Heurist system
  * @param string|array $ids File ids to include (comma separated string or array)
- *
  * @return none
  *  Output CSV file containing file references, or error message
  */
@@ -327,7 +303,7 @@ function downloadFileReferences($system, $ids){
 
     if(empty($ids)){
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo 'No file ids have been provided';
         exit;
     }
@@ -342,7 +318,7 @@ function downloadFileReferences($system, $ids){
     $fd = fopen('php://output', 'w');
     if(!$fd){
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
         exit;
     }
@@ -363,7 +339,7 @@ function downloadFileReferences($system, $ids){
         $err_message = 'File record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
         if($total_count_rows==0){
             $err_message = 'Empty result set';
         }
@@ -372,20 +348,15 @@ function downloadFileReferences($system, $ids){
     if($err_message!=null){
         fclose($fd);
 
-        header('Content-type: text/html');
+        header(CTYPE_HTML);
         echo $err_message;
         exit;
     }
 
     // return setup
-    $filename = HEURIST_DBNAME . '_File_References.csv';
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="' . $filename . '";');
-    header("Pragma: no-cache;");
-    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // write results
-    fputcsv($fd, array("ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
+    fputcsv($fd, array("Uploaded_File_ID", "Referenced by", "New ref H-IDs", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name"), $sep);
 
     /*
         [0] => File Name
@@ -426,12 +397,9 @@ function downloadFileReferences($system, $ids){
 
     rewind($fd);
     $output = stream_get_contents($fd);
-    $len = strlen($output);
     fclose($fd);
 
-    if($len>0){
-        header(CONTENT_LENGTH . $len);
-    }
-    exit($output);
+    $filename = HEURIST_DBNAME . '_File_References.csv';
+    dataOutput($output, $filename, 'text/csv');
 }
 ?>

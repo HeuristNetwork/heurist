@@ -1,4 +1,6 @@
 <?php
+namespace hserv\utilities;
+
 /**
 * Sanitize library to make requests, urls, paths, filenames safe
 * (SSRF and path traversal attacks)
@@ -37,6 +39,35 @@ class USanitize {
     private static $purifier = null;
 
     //
+    // sysadmin protection - reset from request to avoid exposure in possible error/log messages
+    //
+    //
+    //
+    //
+    public static function getAdminPwd($name='pwd'){
+        if(@$_REQUEST[$name]){
+            $sysadmin_pwd  = $_REQUEST[$name];
+            unset($_REQUEST[$name]);
+        }else{
+            $sysadmin_pwd = null;
+        }
+        return $sysadmin_pwd;
+    }
+
+    //
+    //
+    //
+    public static function sanitizeInputArray()
+    {
+        if(@$_SERVER['REQUEST_METHOD']=='POST'){
+            $req_params = filter_input_array(INPUT_POST);
+        }else{
+            $req_params = filter_input_array(INPUT_GET);
+        }
+        return $req_params;
+    }
+
+    //
     //
     //
     public static function sanitizeRequest(&$params){
@@ -45,7 +76,7 @@ class USanitize {
         {
             if($v!=null){
 
-                if(is_array($v) && count($v)>0){
+                if(!isEmptyArray($v)){
                     USanitize::sanitizeRequest($v);
 
                 }else{
@@ -123,14 +154,14 @@ class USanitize {
     }
 
     //
-    // We can also use HTMLPurifier (see example in showReps.php)
+    // We can also use HTMLPurifier (see example in ReportExecute.php)
     //
-    public static function sanitizeString($message, $allowed_tags=null){
+    public static function sanitizeString($message, $allowed_tags=null, $allowed_entities=true){
         if($message==null){
             $message = '';
         }else{
             if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><font><blockquote><pre><span>';
+                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><blockquote><pre><span>';
             }elseif($allowed_tags===false){
                 $allowed_tags = null;
             }
@@ -150,6 +181,12 @@ class USanitize {
                 $message = str_replace('&lt;', '<', $message);
                 $message = str_replace('&gt;', '>', $message);
             }
+
+            if($allowed_entities){
+                $message = mb_ereg_replace_callback("&amp;([a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});", function($matches){
+                    return "&{$matches[1]};";
+                }, $message);
+            }
         }
         return $message;
     }
@@ -163,7 +200,7 @@ class USanitize {
         {
             if($v!=null){
 
-                if(is_array($v) && count($v)>0){
+                if(!isEmptyArray($v)){
                     USanitize::stripScriptTagInRequest($v);
                 }else{
                     $v = trim($v);//so we are sure it is whitespace free at both ends
@@ -182,7 +219,7 @@ class USanitize {
     //
     public static function getHTMLPurifier(){
 
-            $config = HTMLPurifier_Config::createDefault();
+            $config = \HTMLPurifier_Config::createDefault();
 
             $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
             $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
@@ -214,7 +251,7 @@ class USanitize {
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
 
-            return new HTMLPurifier($config);
+            return new \HTMLPurifier($config);
 
     }
 
@@ -238,11 +275,11 @@ class USanitize {
             {
                 if($v!=null){
 
-                    if(is_array($v) && count($v)>0){
-                        USanitize::purifyHTML($v, $purifier);
-                    }else{
+                    if(isEmptyArray($v)){
                         $v = $purifier->purify($v);
                         //$v = htmlspecialchars_decode($v);
+                    }else{
+                        USanitize::purifyHTML($v, $purifier);
                     }
                     $params[$k] = $v;
                 }
@@ -312,9 +349,7 @@ class USanitize {
     * @param mixed $message
     */
     public static function errorLog($message){
-        //$regex = '/\R/';
-        $regex = "/[\r\n]/";
-        $safe_message = preg_replace($regex, ' ', $message);
+        $safe_message = preg_replace(REGEX_EOL, ' ', $message);
         error_log($safe_message);
     }
 

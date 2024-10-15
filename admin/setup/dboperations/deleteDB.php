@@ -20,24 +20,27 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../../hserv/System.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
+use hserv\utilities\USanitize;
+use hserv\utilities\DbUtils;
+
+require_once dirname(__FILE__).'/../../../autoload.php';
+
 require_once 'welcomeEmail.php';
 
 set_time_limit(0);
 
 $res = false;
 
-$system = new System();
+$system = new hserv\System();
 
-$sysadmin_pwd = System::getAdminPwd();
+$sysadmin_pwd = USanitize::getAdminPwd();
 
 if($sysadmin_pwd==null){
-    $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
+    $system->addError(HEURIST_INVALID_REQUEST, error_WrongParam('Password'));
 }else{
 
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
-    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
+
     $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, 2);
 
     if ($sErrorMsg!=null) {
@@ -65,10 +68,6 @@ if($sysadmin_pwd==null){
 
             /** Db check */
             if($isSystemInited){
-
-//if(!$database_to_delete){
-//    $system->addError(HEURIST_INVALID_REQUEST, 'Database parameter is not defined');
-//}
 
                     $allow_deletion = true;
 
@@ -142,6 +141,6 @@ if(is_bool($res) && !$res){
     $response = array("status"=>HEURIST_OK, "data"=> $res);
 }
 
-header('Content-type: text/javascript');
+header(CTYPE_JS);
 print json_encode($response);
 ?>

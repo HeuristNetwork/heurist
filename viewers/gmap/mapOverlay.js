@@ -180,12 +180,11 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
                         map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
                         _loadMapDocumentById_continue();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(
-                        'Map document (ID '
-                        + current_map_document_id
-                        + ') does not exist in the database. '
-                        + 'Please email the database owner ('
-                        +window.hWin.HAPI4.sysinfo['dbowner_email']+') and ask them to correct the URL');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message:  `Map document (ID ${current_map_document_id}) does not exist in the database. `
+                                    + `Please email the database owner (${window.hWin.HAPI4.sysinfo['dbowner_email']}) and ask them to correct the URL`,
+                            error_title: 'Invalid map document provided'
+                        });
                     }
                 
                 }else{
@@ -321,11 +320,13 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
                 }
             }//for map bookmarks
             if(err_msg_all!=''){
-                window.hWin.HEURIST4.msg.showMsgErr('<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div>'
-                +'<br>eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br> '
-                    +err_msg_all
-                    +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
-                );
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: '<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div><br>'
+                            +'eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br> '
+                            +err_msg_all
+                            +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>',
+                    error_title: 'Invalid map bookmark'
+                });
             }
 
 
@@ -818,7 +819,7 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
         if(msg=='') {
             let imageURL = source.files[0];
 
-            let image_bounds = window.hWin.HEURIST4.geo.parseCoordinates('rect', source.bounds, 1, google);
+            let image_bounds = window.hWin.HEURIST4.geo.parseWKTCoordinates('rect', source.bounds, 1, google);
 
             let overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
 
@@ -826,8 +827,11 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
         }else{
             overlays[index] = _getStubOverlay();
 
-            window.hWin.HEURIST4.msg.showMsgErr('Map layer: '+source.title
-                +'<br>Unable to add image layer. '+msg);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Map layer: ${source.title}<br>`
+                        +`Unable to add image layer. ${msg}`,
+                error_title: 'Unable to add image layer'
+            });
             //Please check that the file or service specified is in one of the supported formats. 
         }
     }

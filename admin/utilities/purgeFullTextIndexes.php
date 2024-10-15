@@ -10,7 +10,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2022 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -34,6 +34,8 @@ $tabs0 = '';
 
 if (@$argv) {
 
+    define('PURGE','-purge');
+
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/purgeFullTextIndexes.php -- -purge
 //  sudo php -f purgeFullTextIndexes.php -- -purge  -  action, otherwise only report
@@ -48,8 +50,8 @@ if (@$argv) {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
             } else {
-                if(strpos($argv[$i],'-purge')===0){
-                    $ARGV['-purge'] = true;
+                if(strpos($argv[$i],PURGE)===0){
+                    $ARGV[PURGE] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;
                 }
@@ -61,7 +63,7 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-purge']) {$arg_no_action = false;}
+    if (@$ARGV[PURGE]) {$arg_no_action = false;}
 
 }else{
 
@@ -69,22 +71,22 @@ if (@$argv) {
     $arg_no_action = true;
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
-    //exit('This function must be run from the shell');
+    $tabs = DIV_E.$tabs0;
+
 }
 
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 
 if(!$is_shell){
-    $sysadmin_pwd = System::getAdminPwd();
+    $sysadmin_pwd = USanitize::getAdminPwd();
 
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         $response = $system->getError();
@@ -122,10 +124,6 @@ foreach ($databases as $idx=>$db_name){
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
-    //if(strcmp($db_name,'crvr_eglisesXX')<=0){
-    //    continue;
-    //}
-
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
         echo @$res[1]."\n";
@@ -236,7 +234,7 @@ function exclusion_list(){
     $res = array();
     $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_purge.txt");
     if($fname!==false && file_exists($fname)){
-        //ini_set('auto_detect_line_endings', 'true');
+
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));

@@ -1,4 +1,8 @@
 <?php
+use hserv\utilities\DbUtils;
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
+
 //@TODO convert to class
 
     /**
@@ -8,6 +12,10 @@
     *  mysql__usedatabase
     *  mysql__create_database
     *  mysql__drop_database
+    *  mysql__foreign_check
+    *  mysql__supress_trigger
+    *  mysql__safe_updatess
+    *  mysql__found_rows
     *
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
@@ -29,6 +37,7 @@
     *  mysql__begin_transaction
     *  mysql__script - executes sql script file
     *
+    *
     *  getSysValues - Returns values from sysIdentification
     *  isFunctionExists - verifies that mysql stored function exists
     *  checkDatabaseFunctions - checks that all db functions exists and recreates them if they are missed
@@ -36,6 +45,9 @@
     *  trim_item
     *  stripAccents
     *  prepareIds
+    * prepareStrIds
+    *  predicateId - prepare field compare with one or more ids
+    *
     *  checkMaxLength - check max length for TEXT field
     *  getDefinitionsModTime - returns timestamp of last update of db denitions
     *
@@ -110,7 +122,7 @@
             list($database_name_full, $database_name) = mysql__get_names( $dbname );
 
             $res = mysql__check_dbname($dbname);
-            if($res===true){
+            if($res==null){
                 $success = $mysqli->select_db($database_name_full);
                 if(!$success){
                     $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
@@ -124,7 +136,7 @@
                     }
                 }
             }else{
-                return $res;
+                return array(HEURIST_INVALID_REQUEST, $res);
             }
 
             //$mysqli->query('SET CHARACTER SET utf8mb4');//utf8 is utf8mb3 by default
@@ -140,18 +152,14 @@
     //
     function mysql__check_dbname($db_name){
 
-        $res = true;
+        $res = null;
 
-        if($db_name==null || trim($db_name)==''){
+        if(isEmptyStr($db_name)){
             $res = 'Database parameter not defined';
         }elseif(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
             $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
         }elseif(strlen($db_name)>64){
             $res = 'Database name '.htmlspecialchars($db_name).' is too long. Max 64 characters allowed';
-        }
-
-        if($res!==true){
-            $res = array(HEURIST_INVALID_REQUEST, $res);
         }
 
         return $res;
@@ -165,7 +173,7 @@
         $res = mysql__check_dbname($db_name);
 
         // Avoid illegal chars in db
-        if ($res===true) {
+        if ($res==null) {
             // Create database
             // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
             // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
@@ -183,6 +191,8 @@
                             .htmlspecialchars($db_name, ENT_QUOTES, 'UTF-8')
                             .' SQL error: '.$mysqli->error);
             }
+        }else{
+            $res = array(HEURIST_INVALID_REQUEST, $res);
         }
         return $res;
     }
@@ -193,6 +203,34 @@
     function mysql__drop_database( $mysqli, $db_name ){
 
         return $mysqli->query('DROP DATABASE `'.$db_name.'`');
+    }
+
+    //
+    // on / off foreign indexes verification
+    //
+    function mysql__foreign_check( $mysqli, $is_on ){
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = '.($is_on?'1':'0'));
+    }
+
+    //
+    //
+    //
+    function mysql__supress_trigger($mysqli, $is_on ){
+        $mysqli->query('SET @SUPPRESS_UPDATE_TRIGGER='.($is_on?'1':'NULL'));
+    }
+
+    //
+    //
+    //
+    function mysql__safe_updatess($mysqli, $is_on ){
+        $mysqli->query('SET SQL_SAFE_UPDATES='.($is_on?'1':'0'));
+    }
+
+    //
+    // FOUND_ROWS function are deprecated; expect them to be removed in a future version of MySQL
+    //
+    function mysql__found_rows($mysqli){
+        return mysql__select_value($mysqli, 'SELECT FOUND_ROWS()');
     }
 
     //
@@ -215,77 +253,92 @@
         return array($database_name_full, $database_name);
     }
 
-
     /**
-    * returns list of databases as array
-    * @param    mixed $with_prefix - if false it remove "hdb_" prefix
-    * @param    mixed $email - current user email
-    * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
-    */
-    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with=null,
-                             $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
+     * Returns a list of databases as an array.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param bool $with_prefix - Whether to include the prefix (default: false)
+     * @param string|null $starts_with - Optional string to filter database names by a prefix
+     * @param string|null $email - The email of the current user for role filtering
+     * @param string|null $role - The role to filter by ('admin' or 'user')
+     * @param string $prefix - The prefix used for database names (default: HEURIST_DB_PREFIX)
+     *
+     * @return array - List of database names matching the criteria
+     *
+     * @throws Exception - If the SQL query fails
+     */
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with = null,
+                                  $email = null, $role = null, $prefix = HEURIST_DB_PREFIX)
     {
-
-        if($starts_with!=null)
-        {
-            if(mysql__check_dbname($starts_with)===true
-              && preg_match('/[A-Za-z0-9_\$]/', $starts_with)){
-
-                $where = 'hdb_'.$starts_with.'%';
-            }else{
-                $where = '';//invalid dbname
-            }
-        }else{
-            $where = 'hdb_%';
+        // Step 1: Validate and construct the `LIKE` clause for database filtering
+        $where = $prefix . '%'; // Default case
+        if ($starts_with && mysql__check_dbname($starts_with) == null) { // && preg_match('/^[A-Za-z0-9_\$]+$/', $starts_with)
+            $where = $prefix . $starts_with . '%';
         }
 
-        $query = "show databases where `database` like '".$mysqli->real_escape_string($where)."'";
+        // Step 2: Execute the database query
+        $query = "SHOW DATABASES WHERE `database` LIKE '" . $mysqli->real_escape_string($where) . "'";
         $res = $mysqli->query($query);
-        $result = array();
-        $isFilter = ($email != null && $role != null);
 
-        if($res){
-            while ($row = $res->fetch_row()) {
-                $test = strpos($row[0], $prefix);
-                if ($test === 0) {
-                    $database = preg_replace(REGEX_ALPHANUM, "", $row[0]);//for snyk
-                    if ($isFilter) {
-                        $query2 = null;
-                        if ($role == 'user') {
-                            $query2 = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
-                        } elseif($role == 'admin') {
-                            $query2 = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
-                            " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
-                            " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
-                        }
-                        if ($query2!=null) {
-                            $res2 = $mysqli->query($query2);
-                            $cnt = $res2->num_rows; // mysql_num_rows($res2);
-                            $res2->close();
-                            if ($cnt < 1) {
-                                continue;
-                            }
-                        } else {
-                            continue;
-                        }
-                    }
-                    if ($with_prefix) {
-                        array_push($result, $database);
-                    } else {
-                        // delete the prefix
-                        array_push($result, substr($database, strlen($prefix)));
-                    }
-                }
-            }//while
-            $res->close();
-        }//if
+        if (!$res) {
+            throw new Exception('Error executing SHOW DATABASES query: ' . $mysqli->error);
+        }
 
-        natcasesort($result);// case insensetive order
-        $result = array_values($result);// correct array indexes, for json object
+        $databases = [];
 
-        return $result;
+        // Step 3: Filter databases based on role and email, if provided
+        while ($row = $res->fetch_row()) {
+            $database = $row[0];
+            if (strpos($database, $prefix) !== 0) {
+                continue;
+            }
+            $filtered_db = mysql__checkUserRole($mysqli, $database, $email, $role);
+            if ($filtered_db) {
+                $databases[] = $with_prefix ? $database : substr($database, strlen($prefix));
+            }
+        }
+        $res->close();
 
+        // Step 4: Sort the result case-insensitively
+        natcasesort($databases);
+        return array_values($databases); // Re-index for JSON compatibility
     }
+
+
+    /**
+     * Checks that given database user has specified role
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param string $database - The database name
+     * @param string|null $email - The user's email for filtering
+     * @param string|null $role - The role to filter by ('admin' or 'user')
+     *
+     * @return bool - True if the database matches the role and email filter, false otherwise
+     */
+    function mysql__checkUserRole($mysqli, $database, $email, $role) {
+        if (!$email || !$role) {
+            return true; // No filtering required
+        }
+
+        $sanitized_db = $mysqli->real_escape_string($database);
+        $query = null;
+
+        // Determine the query based on the role
+        if ($role == 'user') {
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps
+                      WHERE ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
+        } elseif ($role == 'admin') {
+            $query = "SELECT ugr_ID FROM `$sanitized_db`.sysUGrps
+                      JOIN `$sanitized_db`.sysUsrGrpLinks ON ugr_ID = ugl_UserID
+                      JOIN sysIdentification ON ugl_GroupID = sys_OwnerGroupID
+                      WHERE ugl_Role = 'admin' AND ugr_eMail = '" . $mysqli->real_escape_string($email) . "'";
+        }
+
+        $value = mysql__select_value($mysqli, $query);
+
+        return $value!=null;
+    }
+
 
 
     function mysql__select($mysqli, $query){
@@ -295,13 +348,14 @@
             $res = $mysqli->query($query);
             if (!$res){
                 error_log($mysqli->errno.'****'.$mysqli->error);
-//remarked to avoid security report alert      error_log($query);
+//remarked to avoid security report alert  error_log($query)
                 return null;
 
-/* determine our thread id */
-//$thread_id = $mysqli->thread_id;
-/* Kill connection */
-//$mysqli->kill($thread_id);
+/*
+determine our thread id and kill connection
+$thread_id = $mysqli->thread_id;
+$mysqli->kill($thread_id);
+*/
             }
         }
 
@@ -332,8 +386,11 @@
     *
     * @param mixed $mysqli
     * @param mixed $query
+    * @param mixed $mode
+    *                   0 - two dimensional array of records
+    *                   1 - array of records with index from first column
     */
-    function mysql__select_assoc($mysqli, $query):array{
+    function mysql__select_assoc($mysqli, $query, $mode=1):array{
 
         $matches = array();
         if($mysqli && $query){
@@ -341,8 +398,12 @@
             $res = $mysqli->query($query);
             if ($res){
                 while ($row = $res->fetch_assoc()){
-                    $key = array_shift($row);
-                    $matches[$key] = $row;
+                    if($mode==0){
+                        $matches[] = $row;
+                    }else{
+                        $key = array_shift($row);
+                        $matches[$key] = $row;
+                    }
                 }
                 $res->close();
             }
@@ -352,25 +413,30 @@
 
     /**
     * returns array of FIRST column values
+    * alwasys return array
     */
     function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
-        $matches = array();
-        if($mysqli && $query){
-            $res = $mysqli->query($query);
 
-            if ($res){
-                if($functionName!=null){
-                    while ($row = $res->fetch_row()){
-                        array_push($matches, $functionName($row[0]));
-                    }
-                }else{
-                    while ($row = $res->fetch_row()){
-                        array_push($matches, $row[0]);
-                    }
+        if(!($mysqli && $query)){
+            return array();
+        }
+
+        $matches = array();
+
+        $res = $mysqli->query($query);
+
+        if ($res){
+            if($functionName!=null){
+                while ($row = $res->fetch_row()){
+                    array_push($matches, $functionName($row[0]));
                 }
-                $res->close();
+            }else{
+                while ($row = $res->fetch_row()){
+                    array_push($matches, $row[0]);
+                }
             }
+            $res->close();
         }
 
         return $matches;
@@ -455,27 +521,31 @@
     * @return []
     */
     function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
-        $result = null;
-        if($mysqli){
-            $res = $mysqli->query($query);
-            if ($res){
-                $result = array();
-                while ($row = $res->fetch_row()){
 
-                    if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
-
-                    if($mode==1){
-                        $rec_id = array_shift($row);
-                        $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
-                    }else {
-                        array_push($result, $row);
-                    }
-                }
-                $res->close();
-
-            }else{
-            }
+        if(!$mysqli){
+            return null;
         }
+
+        $result = array();
+        $res = $mysqli->query($query);
+        if ($res){
+            while ($row = $res->fetch_row()){
+
+                if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
+
+                if($mode==1){
+                    $rec_id = array_shift($row);
+                    $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
+                }else {
+                    array_push($result, $row);
+                }
+            }
+            $res->close();
+
+        }elseif($mysqli->error){
+            return null;
+        }
+
         return $result;
     }
 
@@ -487,7 +557,7 @@
         if (!$res) {return null;}
         $matches = array();
         if($res){
-            while (($row = $res->fetch_row())) {array_push($matches, $row[0]);}
+            while ($row = $res->fetch_row()) {array_push($matches, $row[0]);}
 
             $res->close();
         }
@@ -511,7 +581,7 @@
 
         if($idfield!=null && $newid!=null){
 
-            $idx = array_search($idfield, $columns3);
+            $idx = array_search('`'.$idfield.'`', $columns3);
             $columns2 = $columns3;
             $columns2[$idx] = intval($newid);
             $columns2 = implode(',',$columns2);
@@ -553,13 +623,13 @@
 
         $rec_ID = prepareIds($rec_ID);
 
-        if(count($rec_ID)>0){
+        if(!empty($rec_ID)){
 
             if (substr($table_prefix, -1) !== '_') {
                 $table_prefix = $table_prefix.'_';
             }
 
-            $query = "DELETE from $table_name WHERE ".$table_prefix.'ID in ('.implode(',', $rec_ID).')';
+            $query = SQL_DELETE."`$table_name`".SQL_WHERE.predicateId($table_prefix.'ID', $rec_ID);
 
             $res = $mysqli->query($query);
 
@@ -695,7 +765,7 @@
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $query = $query.' where '.$primary_field.'=?';
+            $query = $query.SQL_WHERE.$primary_field.'=?';
 
             if($primary_field_type=='integer'){
                 $params[0] = $params[0].'i';
@@ -743,78 +813,82 @@
         return $result;
     }
 
-    //
-    //  For INSERT, UPDATE  return $return_affected_rows or true
-    //         if fails it returns mysql error
-    //  $query with parameters "?"
-    //  $params - array for parameters, first element is string with types "sdi"
-    //
-    function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
+    /**
+     * Executes a MySQL query with optional parameters and returns the result or error.
+     *
+     * For `INSERT` and `UPDATE` queries, returns the affected rows or insert ID.
+     * If the query fails, returns the MySQL error message.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param string $query - The SQL query with placeholders for parameters
+     * @param array|null $params - An array of parameters, first element is a string of types (e.g., 'sdi')
+     * @param bool $return_affected_rows - If true, return affected rows or insert ID (default: false)
+     *
+     * @return mixed - True on success, MySQL error string on failure, affected rows or insert ID if requested
+     */
+    function mysql__exec_param_query($mysqli, $query, $params = null, $return_affected_rows = false) {
 
+        // Determine if the query is an INSERT operation
+        $is_insert = (stripos($query, 'INSERT') === 0);
         $result = false;
 
-        $is_insert = (stripos($query, 'INSERT')===0);
-
-        if (!is_array($params) || count($params) < 1) {// not parameterised
-            if ($result = $mysqli->query($query)) {
-                $result = true;
+        // Non-parameterized query execution
+        if (isEmptyArray($params)) {
+            if ($mysqli->query($query)) {
+                $result = handleResult($mysqli, $is_insert, $return_affected_rows);
             } else {
                 $result = $mysqli->error;
-                if ($result == '') {
-                    if($return_affected_rows){
-                        if($is_insert){
-                            $result = $mysqli->insert_id;
-                        }else{
-                            $result = $mysqli->affected_rows;
-                        }
-                    }else{
-                        $result=true;
-                    }
-                }
             }
-        }else{
+            return $result;
+        }
 
-            $stmt = $mysqli->prepare($query);
-            if($stmt){
-                //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
-                call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
-                if(!$stmt->execute()){
-                    $result = $mysqli->error;
-                }else{
-                    $result = true;
+        // Parameterized query execution
+        $stmt = $mysqli->prepare($query);
+        if ($stmt) {
+            call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
 
-                    if($return_affected_rows){
-                        if($is_insert){
-                            $result = $mysqli->insert_id;
-                        }else{
-                            $result = $mysqli->affected_rows;
-                        }
-                    }else{
-                        $result=true;
-                    }
-                }
-                $stmt->close();//affected_rows and insert_id will be reset after close
-            }else{
-                $result = $mysqli->error;
+            if (!$stmt->execute()) {
+                $result = $stmt->error;
+            } else {
+                $result = handleResult($mysqli, $is_insert, $return_affected_rows);
             }
+
+            $stmt->close(); // Close the statement
+        } else {
+            $result = $mysqli->error;
         }
 
         return $result;
     }
+
     /**
-    * converts array of values to array of value references for PHP 5.3+
-    * detailed desription
-    * @param    array [$arr] of values
-    * @return   array of values or references to values
-    */
-    function referenceValues($arr) {
-        if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
-        {
-            $refs = array();
-            foreach ($arr as $key => $value) {$refs[$key] = &$arr[$key];}
-            return $refs;
+     * Handles the result of the query, returning the affected rows or insert ID if required.
+     *
+     * @param mysqli $mysqli - The MySQLi connection object
+     * @param bool $is_insert - Whether the query is an INSERT operation
+     * @param bool $return_affected_rows - Whether to return affected rows or insert ID
+     *
+     * @return mixed - True on success, insert ID or affected rows if requested
+     */
+    function handleResult($mysqli, $is_insert, $return_affected_rows) {
+        if ($return_affected_rows) {
+            return $is_insert ? $mysqli->insert_id : $mysqli->affected_rows;
         }
-        return $arr;
+        return true;
+    }
+
+    /**
+     * Converts an array of values to a format suitable for `call_user_func_array`.
+     *
+     * @param array $arr - The array of values (first element is the types string)
+     * @return array - The array with references for binding parameters
+     */
+    function referenceValues($arr) {
+        $refs = [];
+        foreach ($arr as $key => $value) {
+            $refs[$key] = &$arr[$key]; // Make reference for call_user_func_array
+        }
+        return $refs;
     }
 
     /**
@@ -874,9 +948,15 @@
                 if(strpos(HEURIST_DB_MYSQLPATH,' ')>0){
                     $cmd = '"'.$cmd.'"';
                 }
-
+                
+                $port = '';
+                if(HEURIST_DB_PORT){
+                    $port = " -P ".HEURIST_DB_PORT;
+                }
+                
                 /* remarked temporary to avoid security warnings */
                 $cmd = $cmd         //." --login-path=local "
+                ." -h ".HEURIST_DBSERVER_NAME." ".$port
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
 
@@ -884,47 +964,12 @@
 
                 if ($res2 != 0) { // $shell_res is either empty or contains $arr_out as a string
                     $error = 'Error. Shell returns status: '.($res2!=null?intval($res2):'unknown')
-                        .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
+                        .'. Output: '.(!isEmptyArray($arr_out)?print_r($arr_out, true):'');
                 }else{
                     $res = true;
                 }
 
-            /*}elseif($dbScriptMode==1){ //DISABLED
-                //internal routine
-                $script_content = file_get_contents($script_file);
 
-                //create separate connection
-                $mysqli2 = null;
-                $res2 = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
-                if ( is_array($res2) ){
-                    $error = $res2[1];
-                }else{
-                    $mysqli2 = $res2;
-                }
-
-                $connected = mysql__usedatabase($mysqli2, $database_name_full);
-                if($connected!==true){
-                    $error = $connected[1];//error message
-                }
-
-                if($error==''){
-                    // execute the SQL
-                    $res3 = mysqli_multi_query($mysqli2, $script_content);
-                    if (!$res3){
-                        $error = $mysqli2->error;
-                    }else{
-                        $res = true;
-                    }
-                    //if (!$mysqli2->ping()) {
-                    //    $mysqli2=null;
-                    //}
-                }
-
-                //close connection
-                if($mysqli2!=null){
-                    $mysqli2->close();
-                }
-            */
             }else{ //3d party function that uses PDO
 
                 if(!function_exists('execute_db_script')){
@@ -1084,7 +1129,7 @@
         $isok = true;
         $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');
 
-        $err_prefix = '';//'Update date index: ';
+        $err_prefix = '';
         $cnt = 0;
         $cnt_all = 0;
         $cnt_to_json = 0;
@@ -1139,15 +1184,15 @@
             //1. find all date values in recDetails
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
-            $fld_dates = implode(',',prepareIds($fld_dates));
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
+
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE '.predicateId('dtl_DetailTypeID',$fld_dates);
             $cnt_dates = mysql__select_value($mysqli, $query);
             if($offset>0){
                 $cnt_dates = $cnt_dates - $offset;
             }
 
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
-            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
+            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';
             if($offset>0){
                 $query = $query.' LIMIT '.$offset.', 18446744073709551615';
             }
@@ -1307,10 +1352,10 @@
 
                     //keep log
                     if(!$is_date_simple || $error){
-//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );
+                        // file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND )
                         if(!$is_date_simple) {$cnt_to_json++;}
                         if($error){
-                            $error = '<span style="color:red">'.$error.'</span>';
+                            $error = error_Div($error);
                             $cnt_err++;
                         }
 
@@ -1322,9 +1367,6 @@
                     }
                     if(!$error){
                         $cnt++;
-                        //if($offset>0 && $cnt % 50000 == 0){
-                        //    print 'processed :'.$cnt;
-                        //}
                     }
 
                     $cnt_all++;
@@ -1345,12 +1387,6 @@
                 $res->close();
 
                 if($isok){
-
-                    if($json_for_record_details && $dbVerSubSub<14){
-                        $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
-                    }
-
-
                     if($cnt_dates<150000){
                         $mysqli->commit();
                     }
@@ -1365,9 +1401,6 @@
         }
         }
 
-        //if(!$isok){
-        //    file_put_contents($log_file, json_encode( $system->getError() ));
-        //        }
         if($isok && $need_populate){ //verbose output
             $report[] = '<ul><li>Added into date index: '.$cnt.'</li>'
                         .'<li>Errors date pasring: '.$cnt_err.'</li>'
@@ -1489,7 +1522,7 @@
     }
 
     function is_true($val){
-        return $val===true || in_array(strtolower($val), array('y','yes','true','t','ok'));
+        return $val===true || (is_string($val) && in_array(strtolower($val), array('y','yes','true','t','ok')));
     }
     //
     //
@@ -1506,35 +1539,30 @@
     //
     function prepareIds($ids, $can_be_zero=false){
 
-        if($ids!=null){
-            if(!is_array($ids)){
-                if(is_numeric($ids)){
-                    $ids = array($ids);
-                }else{
-                    /*if(substr($ids, -1) === ','){//remove last comma
-                        $ids = substr($ids,0,-1);
-                    }*/
-                    $ids = explode(',', $ids);
-                }
-            }
-
-            $res = array();
-            foreach($ids as $v){
-                if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
-                    $res[] = intval($v);
-                }
-            }
-            return $res;
-            /*
-            $ids = array_filter($ids, function ($v) {
-                 return is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) ;
-            });
-            */
-        }else{
+        if($ids==null){
             return array();
         }
+
+        if(!is_array($ids)){
+            if(is_numeric($ids)){
+                $ids = array($ids);
+            }else{
+                $ids = explode(',', $ids);
+            }
+        }
+
+        $res = array();
+        foreach($ids as $v){
+            if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
+                $res[] = intval($v);
+            }
+        }
+        return $res;
     }
 
+    //
+    //
+    //
     function prepareStrIds($ids){
 
         if(!is_array($ids)){
@@ -1547,6 +1575,26 @@
 
         return $ids;
 
+    }
+
+    //
+    // if $operation not null it returns empty string for empty $ids and
+    //    full predictate
+    //
+    function predicateId($field, $ids, $operation=null)
+    {
+        $ids = prepareIds($ids);
+
+        $cnt = count($ids);
+        if($cnt==0){
+            return isEmptyStr($operation)?SQL_FALSE:''; // (1=0) none
+        }elseif($cnt==1){
+            $q = '='.$ids[0];
+        }elseif($cnt>1){
+            $q = SQL_IN.implode(',',$ids).')';
+        }
+
+        return (!isEmptyStr($operation)?" $operation ":'').'('.$field.$q.')';
     }
 
 
@@ -1631,17 +1679,22 @@
     //
     // returns timestamp of last update of db denitions
     //
-    function getDefinitionsModTime($mysqli)
+    function getDefinitionsModTime($mysqli, $recstructure_only=false)
     {
         //CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, '+00:00')
         $rst_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rst_Modified), @@session.time_zone, "+00:00") FROM defRecStructure');
-        $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
-        $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
-        $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
+        if($recstructure_only){
+            $last_mod = $rst_mod;
+        }else{
 
-        $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
-        $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
-        $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
+            $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
+            $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
+            $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
+
+            $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
+            $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
+            $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
+        }
 
         return date_create($last_mod);
     }
@@ -1665,69 +1718,24 @@
         }
 
         return $keep_autocommit;
-
     }
 
+    function mysql__end_transaction($mysqli, $res, $keep_autocommit){
 
-
-    // NOT USED
-    // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
-    //
-    function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
-
-        if($session_id==null) {return;}
-
-        $res = null;
-        $need_close = false;
-        /*
-        if($mysqli===null){
-            $need_close = true;
-            $mysqli = mysqli_connection_overwrite(DATABASE);
-        }*/
-
-        if($is_init){
-            //check that session table exists
-            if(!hasTable($mysqli, 'sysSessionProgress')){
-                //recreate
-                $mysqli->query('CREATE TABLE sysSessionProgress(stp_ID varchar(32) NOT NULL COMMENT "User session ID generated by the server", stp_Data varchar(32) COMMENT "Stores progress data for the session identified by the session ID", PRIMARY KEY (stp_ID))');
-
-            }
-        }
-
-        if($value=='REMOVE'){
-            //$mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
+        if($res){
+            $mysqli->commit();
         }else{
-            $session_id = $mysqli->real_escape_string($session_id);
-
-            $query = "select stp_Data from sysSessionProgress where stp_ID=".$session_id;
-            $res = mysql__select_value($mysqli, $query);
-            if($value!=null && $res!='terminate'){
-                $value = $mysqli->real_escape_string($value);
-                //write
-                if($res==null){
-
-                    $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
-                }else{
-
-                list($execution_counter, $tot)  = explode(',',$value);
-                if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
-                }
-
-                    $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
-                }
-                $mysqli->query($query);
-                $res = $value;
-            }
-            //$mysqli->commit();
+            $mysqli->rollback();
         }
-        if($need_close) {$mysqli->close();}
-
-        return $res;
+        if($keep_autocommit===true) {$mysqli->autocommit(true);}
     }
+
 
     //
     // returns value of session file
     // if $value is not set, it returns current value
+    //
+    // now it is not database based - session values are in file
     //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
 
@@ -1747,7 +1755,9 @@
             $res = 'terminate';
         }else{
             //get
-            if($is_exist) {$res = file_get_contents($session_file);}
+            if($is_exist) {
+                $res = file_get_contents($session_file);
+            }
 
             if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);
@@ -1765,62 +1775,15 @@
     function updateDatabaseToLatest($system){
 
         $sysValues = $system->get_system(null, true);
+        /*
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
 
-        if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>13){
-
-            $report = array();
-
-            if($dbVerSubSub<15){
-
-                $to_be_imported = array();
-                // import IIIF Annonation field
-                if(!(ConceptCode::getDetailTypeLocalID('2-1098')>0)){
-                    $to_be_imported[] = '2-1098';
-                }
-                // import Languages field
-                //if(!(ConceptCode::getDetailTypeLocalID('2-967')>0)){
-                //    $to_be_imported[] = '2-967';
-                //}
-                if(count($to_be_imported)>0){
-                    $importDef = new DbsImport( $system );
-                    if($importDef->doPrepare(  array(
-                    'defType'=>'detailtype',
-                    'databaseID'=>2,
-                    'definitionID'=>array('2-1098'))))
-                    {
-                        $res = $importDef->doImport();
-                    }
-                    if($res){
-                        $report[] = 'Field 2-1098 "IIIF Annonation and 2-967 "Languages" imported';
-                    }
-                }
-
-                $mysqli = $system->get_mysqli();
-
-                //add new columns for
-                if(!hasColumn($mysqli, 'recUploadedFiles', 'ulf_Caption', null, 'varchar(255)')){
-
-                    $query = 'ALTER TABLE `recUploadedFiles` '
-."ADD `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`,"
-."ADD `ulf_Copyright` varchar(255) COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`,"
-."ADD `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`";
-                    $res = $mysqli->query($query);
-                    if(!$res){
-                        $system->addError(HEURIST_DB_ERROR, 'Cannot modify recUploadedFiles to add ulf_Caption, ulf_Copyright and ulf_Copyowner', $mysqli->error);
-                        return false;
-                    }
-                    $report[] = 'recUploadedFiles:ulf_Caption, ulf_Copyright and ulf_Copyowner added';
-                } else {
-                    $report[] = 'defTrecUploadedFileserms:ulf_Caption, ulf_Copyright and ulf_Copyowner already exist';
-                }
-
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=15 WHERE 1');
-            }
+        if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>16){
 
         }
+        */
         return true;
     }
 
@@ -1842,7 +1805,12 @@
         $list = mysql__select_list2($mysqli, "SHOW TABLES $query", 'strtolower');
 
 
-        if($mysqli->error){
+        $mysql_gone_away_error = $mysqli && $mysqli->errno==2006;
+        if($mysql_gone_away_error){
+
+            return 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+
+        }elseif($mysqli->error){
 
             return $mysqli->error;
 
@@ -1859,6 +1827,7 @@
 
     //recreated via upgrade
     //'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+    //
 
             $check_list = array(
     'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
@@ -1866,7 +1835,9 @@
     'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
     'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
     'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
-    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
+    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags',
+    'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+    );
 
             $missed = array_diff($check_list, $list);
 
@@ -1875,13 +1846,13 @@
     }
 
     function createTable($system, $table_name, $query, $recreate = false){
-    
+
         $mysqli = $system->get_mysqli();
-    
+
         if($recreate || !hasTable($mysqli, $table_name)){
-            
+
             $res = $mysqli->query('DROP TABLE IF EXISTS '.$table_name);
-            
+
             $res = $mysqli->query($query);
             if(!$res){
                 $msg = "Cannot create $table_name";
@@ -1894,16 +1865,16 @@
         }
         return $res;
     }
-    
+
     function alterTable($system, $table_name, $field_name, $query, $modify_if_exists = false){
-    
+
         $mysqli = $system->get_mysqli();
-        
+
         $column_exists = hasColumn($mysqli, $table_name, $field_name);
-        
+
         $rep1 = 'add';
         $rep2 = 'added';
-        
+
         if($column_exists && $modify_if_exists){
             $query = str_replace('ADD COLUMN','MODIFY',$query);
             if(stripos($query,' AFTER `')>0){
@@ -1913,7 +1884,7 @@
             $rep1 = 'alter';
             $rep2 = 'altered';
         }
-        
+
         if(!$column_exists){ //column not defined
             $res = $mysqli->query($query);
             if(!$res){
@@ -1925,10 +1896,10 @@
         }else{
             $res = array(false, "$table_name: $field_name already exists");
         }
-    
+
         return $res;
     }
-    
+
 
     /**
     * Returns true if table exists in database
@@ -1962,10 +1933,9 @@
     function hasColumn($mysqli, $table_name, $column_name, $db_name=null, $given_type=null){
 
         if($db_name==null){
-            //$db_name = HEURIST_DBNAME_FULL;
-            $db_name = '';//$query = ;
+            $db_name = '';
         }else{
-            $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
+            $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name); //for snyk
             $db_name = "`$db_name`.";
         }
 

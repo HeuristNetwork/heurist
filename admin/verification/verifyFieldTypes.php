@@ -33,6 +33,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+global $TL, $RTN;
+
 $TL = array();//list of all terms
 $RTN = array();//rty_ID=>rty_Name
 
@@ -74,7 +76,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 
     global $TL, $RTN;
 
-    if(count($RTN)==0) {
+    if(empty($RTN)) {
         initGlobalArr($mysqli, 'rty');
     }
 
@@ -92,7 +94,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
         $query = $query.", defRecStructure WHERE rst_RecTypeID=".$rectype_id." and rst_DetailTypeID=dty_ID and ";
 
     }else{
-        $query = $query." WHERE ";
+        $query = $query.SQL_WHERE;
     }
     $query = $query.
     "(dty_Type in ('enum','relationtype','relmarker','resource')".
@@ -115,7 +117,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidTerms($dty['dty_JsonTermIDTree'], true);
             $invalidTerms = $res[0];
             $validTermsString = $res[1];
-            if (is_array($invalidTerms) && count($invalidTerms)>0){
+            if (!isEmptyArray($invalidTerms)){
                 $dtysWithInvalidTerms[$dtyID] = $dty;
                 $dtysWithInvalidTerms[$dtyID]['invalidTermIDs'] = $invalidTerms;
                 $dtysWithInvalidTerms[$dtyID]['validTermsString'] = $validTermsString;
@@ -126,7 +128,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidTerms($dty['dty_TermIDTreeNonSelectableIDs'], false);
             $invalidNonSelectableTerms = $res[0];
             $validNonSelTermsString = $res[1];
-            if (is_array($invalidNonSelectableTerms) && count($invalidNonSelectableTerms)>0){
+            if (!isEmptyArray($invalidNonSelectableTerms)){
                 $dtysWithInvalidNonSelectableTerms[$dtyID] = $dty;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['invalidNonSelectableTermIDs'] = $invalidNonSelectableTerms;
                 $dtysWithInvalidNonSelectableTerms[$dtyID]['validNonSelTermsString'] = $validNonSelTermsString;
@@ -136,7 +138,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
             $res = getInvalidRectypes($dty['dty_PtrTargetRectypeIDs']);
             $invalidRectypes = $res[0];
             $validRectypes   = $res[1];
-            if (is_array($invalidRectypes) && count($invalidRectypes)>0){
+            if (!isEmptyArray($invalidRectypes)){
                 $dtysWithInvalidRectypeConstraint[$dtyID] = $dty;
                 $dtysWithInvalidRectypeConstraint[$dtyID]['invalidRectypeConstraint'] = $invalidRectypes;
                 $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
@@ -151,7 +153,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 }
 
 //
-// Finds and clear wrong default values for resource and enum fields
+// Finds and clear wrong default values for record pointer and enum (term) fields
 //
 function getInvalidDefaultValues($mysqli, $rectype_id=null){
 
@@ -184,7 +186,7 @@ function getInvalidDefaultValues($mysqli, $rectype_id=null){
             if(is_numeric($row['rst_DefaultValue']) && $row['rst_DefaultValue']>0){
                 if($row['dty_Type']=='resource'){
 
-                        //check that record for resource field exists
+                        //check that record for record pointer field exists
                         $res2 = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$row['rst_DefaultValue']);
                         if($res2>0){
                             //record exists - check that it fits constraints
@@ -229,7 +231,7 @@ function getTermsWithIssues($mysqli){
 
     global $TL;
 
-    if(count($TL)==0) {
+    if(empty($TL)) {
         initGlobalArr($mysqli, 'trm');
     }
 
@@ -256,7 +258,7 @@ function getTermsWithIssues($mysqli){
     foreach ($TL as $trm_ID=>$trm){
 
         if($parent_id!=$trm['trm_ParentTermID']){
-            if(count($dupes)>0 && $parent_id>0){
+            if(!empty($dupes) && $parent_id>0){
                 $all_dupes[$parent_id] = $dupes;
             }
             $parent_id = $trm['trm_ParentTermID'];
@@ -271,17 +273,17 @@ function getTermsWithIssues($mysqli){
         if($lbl!=$prev_lbl){
             $prev_lbl = $lbl;
             $prev_id = $trm_ID;
-            continue;            
-            
+            continue;
+
         }
-        
+
         if($prev_id>0){
-            $dupes[] = $prev_id; //$TL[$prev_id]['trm_Label'];
+            $dupes[] = $prev_id;
             $prev_id = 0;
         }
         $dupes[] = $trm_ID;
     }//foreach
-    if(count($dupes)>0 && $parent_id>0){
+    if(!empty($dupes) && $parent_id>0){
         $all_dupes[$parent_id] = $dupes;
     }
 
@@ -299,7 +301,7 @@ function getTermsWithIssues($mysqli){
 //
 function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     global $TL;
-    if(count($TL)==0) {
+    if(empty($TL)) {
         initGlobalArr($mysqli, 'trm');
     }
 
@@ -343,7 +345,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
 
     $validStringOfTerms = "";
     //create valid set of terms
-    if(count($invalidTermIDs)>0){
+    if(!empty($invalidTermIDs)){
 
         if($isvocabulary ){ //vocabulary
             $validStringOfTerms =  "";
@@ -355,7 +357,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
             }
         } else {
             $termIDs = array_diff($termIDs, $invalidTermIDs);
-            if(count($termIDs)>0){
+            if(!empty($termIDs)){
                 $validStringOfTerms = '["'.implode('","',$termIDs).'"]';
             }else{
                 $validStringOfTerms = "";
@@ -378,7 +380,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
         if($key===false){
             $res = $res.'"'.$termid.'":{'.createValidTermTree($child_terms, $invalidTermIDs).'},';
         }else{ //invalid
-            //return "";
+
         }
     }
     return $res==''?'': substr($res,0,-1);
@@ -390,7 +392,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $RTN;
 
-    if(count($RTN)==0) {
+    if(empty($RTN)) {
         initGlobalArr($mysqli, 'rty');
     }
 

@@ -25,9 +25,9 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-    if(!@$_REQUEST['db']) {$_REQUEST['db'] = 'Heurist_Bibliographic';}
+    use hserv\utilities\USanitize;
 
-    $sysadmin_pwd = System::getAdminPwd();
+    if(!@$_REQUEST['db']) {$_REQUEST['db'] = 'Heurist_Bibliographic';}
 
     if(@$_REQUEST['verbose']!=1){
 
@@ -61,8 +61,10 @@
 <?php
     }
 
+    $sysadmin_pwd = USanitize::getAdminPwd();
+
     if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
-        print $response = $system->getError()['message'];
+        print $response = $system->getErrorMsg();
         $system->clearError();
     }else{
 
@@ -85,9 +87,8 @@
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         $databases = array();
-        while (($row = $res->fetch_assoc())) {
+        while ($row = $res->fetch_assoc()) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
-                //if($row[0]>'hdb_Masterclass_Cookbook')
                     $databases[] = $row[0];
             }
         }
@@ -123,10 +124,10 @@
 
         //get record structure for origin
         $where = null;
-        if(is_array(@$ids['rty_RecTypeGroupID']) && count($ids['rty_RecTypeGroupID'])>0){
+        if(!isEmptyArray(@$ids['rty_RecTypeGroupID'])){
             $where = 'rty_RecTypeGroupID in ('.implode(',',$ids['rty_RecTypeGroupID']).')';
         }
-        if(is_array(@$ids['rty_ID']) && count($ids['rty_ID'])>0){
+        if(!isEmptyArray(@$ids['rty_ID'])){
             if($where) {$where = $where.' OR ';}
             $where = 'rty_ID in ('.implode(',',$ids['rty_ID']).')';
         }
@@ -161,16 +162,12 @@
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
         //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-        while (($row = $res->fetch_assoc())) {
+        while ($row = $res->fetch_assoc()) {
 
              $rty_Code = $rty_Codes[$row['rst_RecTypeID']];
              $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
 
              if(!@$fields[$rty_Code]) {$fields[$rty_Code] = array();}
-
-              /*if($row['rst_RecTypeID']==17){
-                print $rty_Code.' '.$dty_Code.'  '.$row['rst_DisplayName'].'<br>';
-              }*/
 
              $fields[$rty_Code][$dty_Code] = $row['rst_DisplayName'];
              $fields_req[$rty_Code][$dty_Code] = $row['rst_RequirementType'];
@@ -179,7 +176,7 @@
                  //convert constraints to concept codes
                  $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                  $codes = array();
-                 //$codes[] = $row['dty_PtrTargetRectypeIDs'];
+
                  foreach($rids as $rty_id){
                      $codes[] = $rty_Codes[$rty_id];
                  }
@@ -263,8 +260,8 @@
                 if($stmt->execute()){
                     $res = $stmt->get_result();
                 }
-                //$query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
-                //$res = $mysqli->query($query);
+
+
 
                 if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error); return; }
                 $row = $res->fetch_assoc();
@@ -289,7 +286,7 @@
             $fields2 = array();//per record type
 
             //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-            while (($row = $res->fetch_assoc())) {
+            while ($row = $res->fetch_assoc()) {
 
                  $rty_Name = $row['rty_Name'];
                  $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
@@ -300,7 +297,7 @@
                      //convert constraints to concept codes
                      $rids = explode(',', $row['dty_PtrTargetRectypeIDs']);
                      $codes = array();
-                     //$codes[] = $row['dty_PtrTargetRectypeIDs'];
+
                      foreach($rids as $r_id){
                          $code = @$rty_Codes2[$r_id];
                          if($code){
@@ -362,7 +359,7 @@
                     array_push($missing, '<i'.$red_color.htmlspecialchars($f_code.'  '.$f_name).'</i>');
                 }
             }
-            if(count($missing)>0){
+            if(!empty($missing)){
                 $msg_error = $msg_error."<p style='padding-left:40px'>missing fields: ".implode(', ',$missing)."</p>";
             }
             //2. check constraints
@@ -376,16 +373,16 @@
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
                             $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);
-                            //array_push($missing2, $rty_code.'  '.@$rty_Names[$rty_code] );
+
                         }
                     }
-                    if(count($missing)>0){
+                    if(!empty($missing)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
                                     .' '.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .': missing constraint record types '.implode(',',$missing).'</p>';
                     }
                     /*
-                    if(count($missing2)>0){
+                    if(!empty($missing2)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing record types '.implode(',',$missing2).'</p>';
                     }
@@ -410,7 +407,7 @@
                             }
 
                         }
-                        if(count($missing)>0){
+                        if(!empty($missing)){
                                $fileds_differ_terms[$dty_Code] =
                                         "<p style='padding-left:10px'>field ".$dty_Code.' <b>'
                                         .htmlspecialchars($fields[$rty_Code][$dty_Code])
@@ -425,7 +422,7 @@
                     }
 
                     /*heck term presence in this db
-                    if(count($missing2)>0){
+                    if(!empty($missing2)){
                        $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
                                     .': missing terms '.implode(',',$missing2).'</p>';
                     }
@@ -443,8 +440,8 @@
         }//for record types
 
 
-        $has_issues = ($smsg!='' || count($fileds_differ_terms)>0 || count($fileds_missed_rectypes)>0 ||
-            (@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0));
+        $has_issues = ($smsg!='' || !empty($fileds_differ_terms) || !empty($fileds_missed_rectypes) ||
+            (@$_REQUEST['termlists']==1 && !empty($fileds_missed_terms)));
 
 
         //
@@ -465,14 +462,14 @@
 
             if($smsg) {print $smsg;} //main error message
 
-            if(count($fileds_differ_terms)>0){
+            if(!empty($fileds_differ_terms)){
                 print implode('',$fileds_differ_terms);
             }
-            if(@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0){
+            if(@$_REQUEST['termlists']==1 && !empty($fileds_missed_terms)){
                 print "<p style='padding-left:10px'>Missing terms (they are in defined the list of enumeration fields but not found in the terms table): "
                     .implode(', ',$fileds_missed_terms).'</p>';
             }
-            if(count($fileds_missed_rectypes)>0){
+            if(!empty($fileds_missed_rectypes)){
                 print "<p style='padding-left:10px'>Missing record types (however they are present in the constraint of record pointer field(s)):</p>"
                     ."<p style='padding-left:40px'>"
                     .implode('<br>',$fileds_missed_rectypes).'</p>';

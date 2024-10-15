@@ -629,7 +629,7 @@ function hImportRecords(_max_upload_size) {
                         window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);    
                         //window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');    
                         
-                        //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
+                        
                     }else{
                         _hideProgress(2);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -645,7 +645,7 @@ function hImportRecords(_max_upload_size) {
     function _showProgress( session_id, currentStep ){
 
         let progressCounter = 0;        
-        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
 
         $('body > div:not(.loading)').hide();//hide all except loading
         $('.loading').show();

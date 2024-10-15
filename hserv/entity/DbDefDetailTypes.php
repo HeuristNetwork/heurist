@@ -1,4 +1,9 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\entity\DbDefTerms;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
     /**
     * db access to sysUGrpps table
@@ -20,46 +25,11 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/dbDefTerms.php';
 
 class DbDefDetailTypes extends DbEntityBase
 {
-/*
-    'dty_Documentation'=>5000,
-    'dty_EntryMask'=>'text',
-    'dty_OriginatingDBID'=>'int',
-    'dty_NameInOriginatingDB'=>255,
-    'dty_IDInOriginatingDB'=>'int',
-
-    'dty_OrderInGroup'=>'int',
-    'dty_TermIDTreeNonSelectableIDs'=>1000,
-    'dty_FieldSetRectypeID'=>'int',
-    'dty_LocallyModified'=>'bool2'
-*/
-
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
+    *  search detail fields
     */
     public function search(){
 
@@ -67,118 +37,28 @@ class DbDefDetailTypes extends DbEntityBase
               return false;
         }
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
+        $this->searchMgr->addPredicate('dty_ID');
+        $this->searchMgr->addPredicate('dty_Name');
+        $this->searchMgr->addPredicate('dty_Type');
+        $this->searchMgr->addPredicate('dty_Status');
+        $this->searchMgr->addPredicate('dty_Modified');
+        $this->searchMgr->addPredicate('dty_DetailTypeGroupID');
 
-        $pred = $this->searchMgr->getPredicate('dty_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Type');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Status');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_Modified');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dty_DetailTypeGroupID');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        $needCheck = false;
-
-        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'dty_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'dty_ID,dty_Name';
-
-        }elseif(@$this->data['details']=='list'){
-
-            $this->data['details'] = 'dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID';
-
-        }elseif(@$this->data['details']=='full'){
-
-            $this->data['details'] = implode(',', $this->fieldNames) ;
-        }else{
-            $needCheck = true;
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('dty_ID'); break;
+            case 'name':
+                $this->searchMgr->setSelFields('dty_ID,dty_Name');
+                break;
+            case 'list':
+                $this->searchMgr->setSelFields('dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID');
+                break;
+            default:   // full
+                $this->searchMgr->setSelFields(implode(',', $this->fieldNames));
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:dty_Modified'];
-        if($value!=null){
-            array_push($order, 'dty_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:dty_Type'];
-            if($value!=null){
-                array_push($order, 'dty_Type '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:dty_Name'];
-                if($value!=null){
-                    array_push($order, 'dty_Name '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:dty_ID'];
-                    if($value!=null){
-                        array_push($order, 'dty_ID '.($value>0?'ASC':'DESC'));
-                    }
-                }
-            }
-        }
-
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('dty_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'],'dty_ID');
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
-
+        return $this->searchMgr->composeAndExecute($orderby);
     }
 
     //
@@ -186,12 +66,10 @@ class DbDefDetailTypes extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-
-        if(count($this->recordIDs)==0){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field type identificator');
+        if(!$this->deletePrepare()){
             return false;
         }
+
         if(count($this->recordIDs)>1){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove field types in batch');
             return false;
@@ -217,25 +95,6 @@ class DbDefDetailTypes extends DbEntityBase
         return parent::delete();
     }
 
-
-    //
-    // validate permission for edit record type
-    // for delete and assign see appropriate methods
-    //
-    protected function _validatePermission(){
-
-        if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-
-            $this->system->addError(HEURIST_REQUEST_DENIED,
-                    'You are not admin and can\'t edit field types. Insufficient rights (logout/in to refresh) for this operation');
-                return false;
-        }
-
-        return true;
-    }
-
     //
     //
     //
@@ -256,13 +115,10 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->records[$idx]['dty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['dty_Name']);
                 $this->records[$idx]['dty_Name'] = super_trim($this->records[$idx]['dty_Name']);
 
-                $res = mysql__select_value($mysqli,
-                        "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['dty_ID']){
-
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists', array('dty_id' => $res));
-                    return false;
+                //validate duplication
+                if(!$this->doDuplicationCheck($idx, 'dty_Name', 'Field type cannot be saved. The provided name already exists')){
+//$this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists', array('dty_id' => $res));
+                        return false;
                 }
             }
 
@@ -288,48 +144,25 @@ class DbDefDetailTypes extends DbEntityBase
                         $new_children = getTermChildrenAll($mysqli, $this->records[$idx]['dty_JsonTermIDTree'], true);
 
                         $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children);});
+                        
+                        $s = predicateId('dtl_Value', $children, SQL_AND);
 
-                        if(count($children)>0){
-                            if(count($children)>1){
-                                $s = 'in ('.implode(',',$children).')';
-                            }else{
-                                $s = '= '.$children[0];
-                            }
-                            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
+                        if($s!=''){
+
+                            $query = 'SELECT COUNT(DISTINCT dtl_RecID) FROM recDetails '
                                 .'WHERE (dtl_DetailTypeID='.$this->records[$idx]['dty_ID'].') AND '
                                 .'(dtl_Value '.$s.')';
-
-                            $total_count_rows = 0;
-                            $records = array();
-                            $res = $mysqli->query($query);
-                            if ($res){
-                                $fres = $mysqli->query('select found_rows()');
-                                if ($fres)     {
-                                    $total_count_rows = $fres->fetch_row();
-                                    $total_count_rows = $total_count_rows[0];
-                                    $fres->close();
-
-                                    if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
-
-                                        $records = array();
-                                        while ($row = $res->fetch_row())  {
-                                            array_push($records, (int)$row[0]);
-                                        }
-                                    }
-                                }
-                                $res->close();
-                            }
+                                
+                            $total_count_rows = mysql__select_value($mysqli, $query);
                             if($mysqli->error){
                                 $this->system->addError(HEURIST_DB_ERROR,
                                     'Search query error (retrieving number of records that uses terms)', $mysqli->error);
                                 return false;
                             }elseif($total_count_rows>0){
-                                $ret = array('reccount'=>$total_count_rows,'records'=>$records);
                                 $this->system->addError(HEURIST_ACTION_BLOCKED,
                                     'Sorry, we cannot change the vocabulary because terms in the '
-                                    .'current vocabulary are already in use for this field.', $ret);
+                                    .'current vocabulary are already in use for this field.');
                                 return false;
-                                //show records which use these terms.
                             }
                         }
                     }
@@ -357,9 +190,9 @@ class DbDefDetailTypes extends DbEntityBase
 
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             $dbID = $this->system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) {$dbID = 0;}
@@ -368,7 +201,7 @@ class DbDefDetailTypes extends DbEntityBase
 
             foreach($this->records as $idx=>$record){
                 $dty_ID = @$record['dty_ID'];
-                if($dty_ID>0 && in_array($dty_ID, $ret)){
+                if($dty_ID>0 && in_array($dty_ID, $savedRecIds)){
 
                     $query = null;
                     //set dbid or update modified locally
@@ -387,7 +220,7 @@ class DbDefDetailTypes extends DbEntityBase
                 }
             }
         }
-        return $ret;
+        return $savedRecIds;
     }
 
     //
@@ -418,7 +251,7 @@ class DbDefDetailTypes extends DbEntityBase
             $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "relation" ORDER BY vcg_Order';
             $vcg_rel = mysql__select_value($mysqli, $vcg_query);
 
-            if(count($this->data['fields'])>0){
+            if(!empty($this->data['fields'])){
 
                 $ret = array();
 
@@ -458,6 +291,7 @@ class DbDefDetailTypes extends DbEntityBase
                                 break;
 
                             case 'date':
+                            case 'datetime':
                                 $this->data['fields'][$idx]['dty_Type'] = 'date';
                                 $record['dty_Type'] = 'date';
                                 break;
@@ -489,6 +323,26 @@ class DbDefDetailTypes extends DbEntityBase
                             case 'relmarker':
                                 $this->data['fields'][$idx]['dty_Type'] = 'relmarker';
                                 $record['dty_Type'] = 'relmarker';
+                                break;
+
+                            case 'file':
+                            case 'uploads':
+                                $this->data['fields'][$idx]['dty_Type'] = 'file';
+                                $record['dty_Type'] = 'file';
+                                break;
+
+                            case 'geo':
+                            case 'geospatial':
+                            case 'location':
+                                $this->data['fields'][$idx]['dty_Type'] = 'geo';
+                                $record['dty_Type'] = 'geo';
+                                break;
+
+                            case 'group':
+                            case 'separator':
+                            case 'divider':
+                                $this->data['fields'][$idx]['dty_Type'] = 'separator';
+                                $record['dty_Type'] = 'separator';
                                 break;
 
                             default:
@@ -617,13 +471,8 @@ class DbDefDetailTypes extends DbEntityBase
             }
         }
 
-        if($ret===false){
-            $mysqli->rollback();
-        }else{
-            $mysqli->commit();
-        }
 
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }

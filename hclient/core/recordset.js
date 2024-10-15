@@ -86,7 +86,7 @@ function HRecordSet(initdata) {
                 fields_detail = response.fields_detail;
                 
                 _isMapEnabled = response.mapenabled;
-                //@todo - merging
+
             }else{
                     
                 if(response.order){
@@ -112,17 +112,15 @@ function HRecordSet(initdata) {
     */
     function _makeKeyValueArray(namefield){
         
-        let ids, record, key, rec_title;
-        
         let result = [];
         
         for(let idx in order){
             if(idx)
             {
-                key = order[idx];
+                const key = order[idx];
                 
-                record = records[key];
-                rec_title = _getFieldValue(record, namefield);
+                let record = records[key];
+                const rec_title = _getFieldValue(record, namefield);
                 
                 result.push({key:key, title:rec_title});
             }
@@ -177,9 +175,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
         let aitems = [], titems = [];
-        let item, titem, shape, idx;
-        const min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
+        let item, titem, idx;
         let mapenabled = 0,
             timeenabled = 0;
             
@@ -187,9 +183,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         const localIds = window.hWin.HAPI4.sysinfo['dbconst'];
         const DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        const DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        const DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
-        const DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
+        const DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR'];
+        const DT_BG_COLOR = localIds['DT_BG_COLOR'];
+        const DT_OPACITY = localIds['DT_OPACITY'];
         
         //make bounding box for map datasource transparent and unselectable
         let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
@@ -229,15 +225,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            
-            for (let i=0; i<dty_ids.length; i++) {
-                const dtype = $Db.dty(dty_ids[i],'dty_Type');
+            dty_ids.forEach((dty_id)=>{
+                const dtype = $Db.dty(dty_id,'dty_Type');
                 if(dtype=='date' || dtype=='year'){
-                    timefields.push(dty_ids[i]);
+                    timefields.push(dty_id);
                 }else if(dtype=='geo'){
-                    geofields.push(dty_ids[i]);
+                    geofields.push(dty_id);
                 }
-            }
+            });
         }
         
         let linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
@@ -245,8 +240,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //shape - coordinates
         //item - item object to be added to timemap 
         let linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
-        
-        let tot = 0;
         
         for(idx in records){
             if(idx)
@@ -294,8 +287,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 for(let k=0; k<timefields.length; k++){
                     const datetime = _getFieldValues(record, timefields[k]);
                     if(!isnull(datetime)){   
-                        let m, res = [];
-                        for(m=0; m<datetime.length; m++){
+                        for(let m=0; m<datetime.length; m++){
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
@@ -373,7 +365,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 //a record may have several geofields/placemarks for example place of birth and death
                 //besides it may be linked (several times) to "place" record types
                 //we need to treat them as separate timemap item
-                //var geovalues = array(); 
                 let shapes = (recShape && geoType!=1)?recShape:[];
                 if(!Array.isArray(shapes)){
                     shapes = [];
@@ -444,7 +435,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId; // + '.png';
+                            iconImgEvt = iconId;
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + '&color='
                                         + encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
@@ -519,15 +510,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
-                        //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
-                /*}
-                if(geoType!=2 || shapes.length>0){*/
                     aitems.push(item);
                 }
-
-                tot++;
         }}//for records
       
         //add linked places as separate items 
@@ -582,29 +568,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 
     */
     function _toGeoJSON(filter_rt, geoType, max_limit){
-
-        let aitems = [], titems = [];
-        let item, titem, shape, idx, 
-            min_date = Number.MAX_VALUE, 
-            max_date = Number.MIN_VALUE;
-        let mapenabled = 0,
-            timeenabled = 0;
             
-        let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
-        
         let localIds = window.hWin.HAPI4.sysinfo['dbconst'];
-        let DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
-        let DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
-        let DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-551;
-        let DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
-        let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY']; //3-1092;
+        let DT_SYMBOLOGY = localIds['DT_SYMBOLOGY'];
         
         //make bounding box for map datasource transparent and unselectable
-        let disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
-                                    localIds['RT_GEOTIFF_SOURCE'],
-                                    localIds['RT_KML_SOURCE'],
-                                    localIds['RT_MAPABLE_QUERY'],
-                                    localIds['RT_SHP_SOURCE']];
                                     
         let geofields = [], timefields = [];
         
@@ -623,14 +591,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         }
         
-        let linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
         //linkedRecs - records linked to this place
         //shape - coordinates
         //item - item object to be added to timemap 
-        let linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
-        
-        let tot = 0;
-        
         //{"geojson":[]}
         function __getGeoJsonFeature(record, extended, simplify){
                  
@@ -680,8 +643,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 let timevalues = [];
                 for(let k=0; k<dates.length; k++){
                         
-                        //if(true || timeenabled<MAXITEMS){
-                     
                             dres = dates[k];
                             
                             let date_start = (dres[0]==null)?dres[1]:dres[0];
@@ -692,9 +653,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(date_start==null) date_start = '';
                             if(date_end==null) date_end = '';
                             timevalues.push([date_start, '', '', date_end, '']);
-                                
-                        //}
-                        timeenabled++;
                 }                      
                 if(timevalues.length>0){
                     res['when'] = {timespans:timevalues};    
@@ -710,8 +668,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     geovalues = [recShape];
                 }
                 
-                let has_linked_places = [];
-                
                 if(geoType!=2){ //get coordinates from geo fields geoType==2 form recShape only - ignore native geo coords   
                     
                     for(let k=0; k<geofields.length; k++){
@@ -721,7 +677,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             for(let m=0; m<geodata.length; m++){
                                 
                                 let geo_json = parseWKT(geodata[m].wkt);
-                                //var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
 
                                 if(geo_json){ //main shape
                                     geovalues.push(geo_json);
@@ -760,8 +715,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     res['geometry'] = {type:'GeometryCollection', geometries:geovalues};
                 }else if(geovalues.length==1){
                     res['geometry'] = geovalues[0];
-                }else{
-                    //res['geometry'] = [];
                 }
                 
                 let symbology = _getFieldValue(record, DT_SYMBOLOGY);
@@ -811,7 +764,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     // some important id for record and detail types in local values
     const RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
         DT_TARGET_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
-        DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
         DT_PRIMARY_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
         DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
         //DT_YEAR = window.hWin.HAPI4.sysinfo['dbconst']['DT_YEAR'],     //73
@@ -833,7 +785,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
 
-            //find resource fields and its values
+            //find record pointer fields and its values
             
             for (let i=0; i<dty_ids.length; i++) {
                 let dtype = $Db.dty(dty_ids[i], 'dty_Type');
@@ -1083,10 +1035,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     }
                 }else if(fldname=="dtl_EndDate"){
                     return _getFieldValue(record, DT_END_DATE);
-                    //if(d[11] && d[11][0]){ return d[11][0]; }
+
                 }else if(fldname=="dtl_Description"){
                     return _getFieldValue(record, DT_SHORT_SUMMARY);
-                    //if(d[3] && d[3][0]){return d[3][0];}
                     
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[DT_GEO_OBJECT] && d[DT_GEO_OBJECT][0]){
                     let g = d[DT_GEO_OBJECT][0].split(' ');
@@ -1109,7 +1060,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(idx>-1){
             return record[idx];
         }else{
-            return isnull(record[fldname])?null:record[fldname]; //return null;
+            return isnull(record[fldname])?null:record[fldname];
         }
     }
     
@@ -1151,7 +1102,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     let that = {
 
         getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
+        isA: function (strClass) {return (strClass === _className || strClass === 'hRecordSet');},
         getVersion: function () {return _version;},
         entityName:'',
         calcfields:{}, //set of callback functions for calculation fields
@@ -1437,7 +1388,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         sort: function(sortFields){
             
-            let recID, fieldName, dataTypes={};
+            let fieldName, dataTypes={};
             
             if(sortFields==null || $.isEmptyObject(sortFields)) return
             
@@ -1503,7 +1454,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             let _records = {}, _order=[], that = this;
             
-            //if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
 
             // if structure not defined - default type is freetext            
@@ -1527,7 +1477,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
             }
             
-            let recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
+            let fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
             let isexact = {};
             let isnegate= {};
             let isless= {};
@@ -1686,7 +1636,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }else{
                 rectypes = recordset2.getRectypes();
             }    
-            //structures = response.structures;
+           
             
             let records2 = recordset2.getRecords();
             let order2 = recordset2.getOrder();
@@ -1787,7 +1737,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         */
         length: function(){
             //return Object.keys(records)
-            return order.length; //$(records).length;
+            return order.length;
         },
 
         /**

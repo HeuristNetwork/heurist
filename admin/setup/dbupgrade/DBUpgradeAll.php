@@ -46,9 +46,8 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
         }
     }
@@ -64,7 +63,7 @@ $mysqli = $system->get_mysqli();
         $ver = mysql__select_value($mysqli, $query);
 
 
-        if( (!($ver>0)) || $ver<3){
+        if( (!isPositiveInt($ver)) || $ver<3){
 
             if(!hasTable($mysqli, 'sysIdentification',$db_name)){
                 $db_undef[] = $db_name;
@@ -80,37 +79,34 @@ $mysqli = $system->get_mysqli();
             $res = doUpgradeDatabase($system, $db_name, 1, 3, false);
             if(!$res){
 
-                print '<p style="color:red">Error: Unable upgrade '.htmlspecialchars($db_name).'</p>';
+                print error_Div('Error: Unable upgrade '.htmlspecialchars($db_name));
 
                 $error = $system->getError();
                 if($error){
-                    print '<p style="color:red">'
-                        .$error['message']
-                        .'<br>'.@$error['sysmsg'].'</p>';
+                    print error_Div($error['message'].BR.@$error['sysmsg']);
                 }
                 break;
             }
 
             $cnt++;
-            //if($cnt>2) {break;}
 
         }else{
             //check that v1.3 has
-            //hasTable($mysqli, 'usrRecPermissions', $db_name);
-            //hasTable($mysqli, 'sysDashboard', $db_name);
+
+
         }
 
 
     }//while  databases
 
 
-    if(is_array($db_undef) && count($db_undef)>0){
+    if(!isEmptyArray($db_undef)){
         print '<p>It seems these are not Heurist databases</p>';
         foreach ($db_undef as $db_name){
             print htmlspecialchars($db_name).'<br>';
         }
     }
-    if(is_array($db) && count($db)>0){
+    if(!isEmptyArray($db)){
         foreach ($db as $ver => $dbs){
            print '<p>List of databases with v 1.'.$ver.'   Cnt: '.count($dbs).'</p>';
            foreach ($dbs as $db_name){

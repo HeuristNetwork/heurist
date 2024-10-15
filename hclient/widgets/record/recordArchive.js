@@ -29,7 +29,6 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         title:  'Lookup and restore archive records',
         
         htmlContent: 'recordArchive.html',
-        helpContent: 'recordArchive.html', //in context_help folder
         
         mapping:null, //maps external fields to heurist field details
         add_new_record: false  //if true it creates new record on selection
@@ -46,7 +45,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         let that = this;
         
        
-        this.element.find('fieldset > div > .header').css({width:'80px','min-width':'120px'})
+        this._$('fieldset > div > .header').css({width:'80px','min-width':'120px'})
         
         this.options.resultList = $.extend(this.options.resultList, 
         {
@@ -72,7 +71,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         });                
 
         //init record list
-        this.recordList = this.element.find('#div_result');
+        this.recordList = this._$('#div_result');
         this.recordList.resultList( this.options.resultList );     
         
         this._on( this.recordList, {        
@@ -91,16 +90,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         
         
-        this._on(this.element.find('#btnStartSearch').button(),{
+        this._on(this._$('#btnStartSearch').button(),{
             'click':this._doSearch
         });
         
-        this._on(this.element.find('input'),{
+        this._on(this._$('input'),{
             'keypress':this.startSearchOnEnterPress
         });
         
         
-        this.element.find('#inpt_date').datepicker({
+        this._$('#inpt_date').datepicker({
                             showOn: "button",
                             showButtonPanel: true,
                             changeMonth: true,
@@ -194,7 +193,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Restore');
-        //res[1].disabled = null;
+       
         return res;
     },
 
@@ -213,7 +212,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                 /*
                 if(this.options.add_new_record){
                     //create new record 
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+                    
                     //this._addNewRecord(this.options.rectype_for_new_record, sel);                     
                 }else{
                     //pass mapped values and close dialog
@@ -232,11 +231,11 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_user').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_user').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or user', 500);
             return;
         }
-        if(this.element.find('#inpt_recid').val()=='' && this.element.find('#inpt_date').val()==''){
+        if(this._$('#inpt_recid').val()=='' && this._$('#inpt_date').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define record ID or date', 500);
             return;
         }
@@ -245,17 +244,17 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         let request = {}
     
-        if(this.element.find('#inpt_recid').val()!=''){
-            request['arc_PriKey'] = this.element.find('#inpt_recid').val();
+        if(this._$('#inpt_recid').val()!=''){
+            request['arc_PriKey'] = this._$('#inpt_recid').val();
         }
-        if(this.element.find('#inpt_user').val()!=''){
-            request['arc_ChangedByUGrpID'] = this.element.find('#inpt_user').val();
+        if(this._$('#inpt_user').val()!=''){
+            request['arc_ChangedByUGrpID'] = this._$('#inpt_user').val();
         }
-        if(this.element.find('#inpt_state').val()!=''){
-            request['arc_ContentType'] = this.element.find('#inpt_state').val();
+        if(this._$('#inpt_state').val()!=''){
+            request['arc_ContentType'] = this._$('#inpt_state').val();
         }
-        if(this.element.find('#inpt_date').val()!=''){
-            request['arc_TimeOfChange'] = this.element.find('#inpt_date').val();
+        if(this._$('#inpt_date').val()!=''){
+            request['arc_TimeOfChange'] = this._$('#inpt_date').val();
         }
         
         request['arc_Table'] = 'rec';
@@ -263,7 +262,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         request['a']          = 'search'; //action
         request['entity']     = 'sysArchive';
-        request['details']    = 'full'; //'id';
+        request['details']    = 'full';
         request['convert']    = 'records_list';
 
         //returns recordset of heurist records with additional fields

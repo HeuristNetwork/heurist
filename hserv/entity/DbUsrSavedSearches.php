@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrSavedSearches table for saved searches
@@ -20,120 +22,34 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
-
 
 class DbUsrSavedSearches extends DbEntityBase
 {
 
-    /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
-    */
     public function search(){
 
         if(parent::search()===false){
               return false;
         }
 
-        $needCheck = false;
+        $this->searchMgr->addPredicate('svs_ID');
+        $this->searchMgr->addPredicate('svs_Name');
+        $this->searchMgr->addPredicate('svs_UGrpID');
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('svs_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('svs_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        //find filters belong to group
-        $pred = $this->searchMgr->getPredicate('svs_UGrpID');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'svs_ID';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'svs_ID,svs_Name';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'svs_ID,svs_Name,svs_UGrpID,svs_Query';
-
-        }else{
-            $needCheck = true;
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('svs_ID'); break;
+            case 'name':
+                $this->searchMgr->setSelFields('svs_ID,svs_Name');
+                break;
+            default:   // list, full
+                $this->searchMgr->setSelFields('svs_ID,svs_Name,svs_UGrpID,svs_Query');
         }
 
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
+        $orderby = $this->searchMgr->setOrderBy('svs_Name ASC');
 
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:svs_Modified'];
-        if($value!=null){
-            array_push($order, 'svs_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:svs_Name'];
-            if($value!=null){
-                array_push($order, 'svs_Name '.($value>0?'ASC':'DESC'));
-            }else{
-                $value = @$this->data['sort:svs_ID'];
-                if($value!=null){
-                    array_push($order, 'svs_ID '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:svs_Name'];
-                    if($value!=null){
-                        array_push($order, 'svs_Name ASC');
-                    }
-                }
-            }
-        }
-
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-        if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-        }
-        if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-        }
-
-        $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute($orderby);
     }
 
 
@@ -144,8 +60,8 @@ class DbUsrSavedSearches extends DbEntityBase
     protected function _validatePermission(){
 
         if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
-            || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
+            (!isEmptyArray($this->recordIDs)
+            || !isEmptyArray($this->records))){ //there are records to update/delete
 
 
             $grpIDs = $this->system->get_user_group_ids('admin');
@@ -178,6 +94,7 @@ class DbUsrSavedSearches extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
+
             $this->records[$idx]['svs_Modified'] = date(DATE_8601);//reset
 
             $tbl = $this->config['tableName'];

@@ -114,7 +114,7 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
         }
         
         
-        this._super();// null, afteraction );
+        this._super();
     },
     
     //

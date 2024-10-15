@@ -33,7 +33,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_any" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_any" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_any_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -52,7 +52,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_accesspoint" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_accesspoint" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_accesspoint_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -71,7 +71,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_type" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_type" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_type_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -90,7 +90,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_isni" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_isni" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_isni_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -109,7 +109,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_isnidate" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_isnidate" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_isnidate_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -128,7 +128,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_domain" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
+                <input id="inpt_domain" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
                 <select id="inpt_domain_logic">
                     <option value="and" selected>AND</option>
                     <option value="or">OR</option>
@@ -147,13 +147,7 @@
                     <option value="all" selected>ALL</option>
                     <option value="adj">ADJ</option>
                 </select>
-                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all" style="max-width:30em;margin-bottom: 7px;"/>
-            <!-- There is no field after record id
-                <select id="inpt_recordid_logic">
-                    <option value="and" selected>AND</option>
-                    <option value="or">OR</option>
-                </select>
-            -->
+                <input id="inpt_recordid" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em;margin-bottom: 7px;"/>
 
             </div>
 
@@ -183,7 +177,7 @@
 
     <!-- Result List Container -->
     <div id="frm-results" style="display: none;">
-        <div class="div_result ent_content_full" style="height: 600px;"></div>
+        <div id="div_result" class="ent_content_full" style="height: 600px;"></div>
     </div>
 
     <!-- Additional settings for role code fields -->

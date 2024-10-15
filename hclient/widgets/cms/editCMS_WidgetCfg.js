@@ -26,7 +26,6 @@
 function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
 
     const _className = 'editCMS_WidgetCfg';
-    //var isWebPage = false;
 
     const _def_labels = {
         heurist_SearchInput: {
@@ -38,7 +37,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             empty_remark_def: 'resultList_empty_remark'
         },
         heurist_resultListExt: {
-            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.html
+            placeholder_def: 'Please select a record on the left to view it here...', // is found in context_help/recordSelectMsg.htm
             empty_remark_def: 'No default'
         },
         heurist_resultListDataTable: {
@@ -177,9 +176,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 pages.unshift({key:'',title:''});   
                 window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
             }
-            //isWebPage = false;
+           
         }else{
-            //isWebPage = true;
+           
             selPage.parent().hide();
         }
         
@@ -210,7 +209,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             
             if(opts.search_page) {
                 $(selPage).val(opts.search_page);        
-                //selPage.hSelect('refresh');
+               
             }
             $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
             $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
@@ -372,7 +371,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
                         }else if(item.attr('type')=='radio'){
                             item.prop('checked', item.val()== String(opts[item.attr('name')]));
-                        }else {  //if(item.val()!=''){
+                        }else {
                             item.val( opts[item.attr('name')] );
                         }
                     }
@@ -771,13 +770,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                     let ifilter = null; 
                     let val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
-                    // $dlg.find('input[name="allowed_svsIDs"]').val();
+                   
                     if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
                         if(Array.isArray(val)) val = val.join(',');
                         ifilter = {svs_ID:val};
                     }else{
                         val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
-                        //$dlg.find('input[name="allowed_UGrpID"]').val();
+                       
                         if(!window.hWin.HEURIST4.util.isempty(val) && val[0]!=''){
                             if(Array.isArray(val)) val = val.join(',');
                             ifilter = {svs_UGrpID:val};
@@ -1293,11 +1292,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
         }else
-        if(widget_name=='heurist_StoryMap'){
-            //var storyRectypes = cont.find('#storyRectypes').editing_input('getValues');
-            //cont.find('input[name="storyRectypes"]').val( storyRectypes );
-            
-            //cont.find('select[name="storyFields"]').val
+        if(widget_name=='heurist_StoryMap')
+        {
             let storyFields = cont.find('#storyFields').editing_input('getValues');
             cont.find('input[name="storyFields"]').val( storyFields );
             
@@ -1362,9 +1358,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts[selection_mode] = true;
 
             if(opts['template'] != ''){
-                opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                opts['url'] = '?template='+encodeURIComponent(opts['template'])
                 +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
-                +'&template='+encodeURIComponent(opts['template'])
                 +'&[query]';
             }else{
                 opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';

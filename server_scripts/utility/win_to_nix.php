@@ -69,7 +69,7 @@ foreach ($iterator as $filepath => $info) {
 }
 print $lnbr.'total: '.$total;
 print $lnbr.'with dos line delimeter:'.count($dosed);
-if(is_array($dosed) && count($dosed)>0){
+if(!isEmptyArray($dosed)){
 /*
     foreach ($dosed as $filename){
         print $lnbr.$filename;

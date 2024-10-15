@@ -85,12 +85,12 @@ see dbsUserGroups.php for repository credentials methods
     user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
 
 */
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
 
 $need_compress = false;
 
-$system = new System();
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     //get error and response
@@ -105,7 +105,7 @@ if(!$system->init(@$_REQUEST['db'])){
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["a"];
         $res = false;
-        $ugr_ID = $system->get_user_id();//intval(@$_REQUEST["ugr_ID"]);
+        $ugr_ID = $system->get_user_id();
 
         if($action=='list'){
             //get list of available repositories for given user (including for database and groups)
@@ -147,6 +147,6 @@ if(!$system->init(@$_REQUEST['db'])){
         }
    }
 }
-header('Content-type: text/javascript');
+header(CTYPE_JSON);
 print json_encode($response);
 ?>

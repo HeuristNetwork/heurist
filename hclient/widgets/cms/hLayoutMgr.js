@@ -16,9 +16,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global cfg_widgets, prepareTemplateBlog */
+/* global cfg_widgets, prepareTemplateBlog, layoutMgr */
 
-var layoutMgr;  
+window.layoutMgr = null;  
 
 function hLayoutMgr(){
 
@@ -50,7 +50,6 @@ function hLayoutMgr(){
     function _layoutInitKey(layout, i){
         
         if(!layout[i].key){
-
             layout[i].key = pnl_counter;
             //data-lid is required to find title in treeveiew
             layout[i].title = '<span data-lid="'+pnl_counter+'">' + layout[i].name 
@@ -115,10 +114,8 @@ function hLayoutMgr(){
 
         if(isFirstLevel===true){
             
-            pnl_counter = 1;
-            
             if(_supp_options.page_name){
-                layout[0].name  = 'Page'; //_supp_options.page_name;
+                layout[0].name  = 'Page';
             }
             if(_supp_options.keep_top_config && isEditMode){
                 _main_layout_cfg = layout;
@@ -290,7 +287,7 @@ function hLayoutMgr(){
         }                         
         
         $d.attr('id', layout.dom_id)
-          .attr('data-hid', layout.key); //.attr('data-lid', layout.key);
+          .attr('data-hid', layout.key);
           
         if(classes){
             $d.addClass(classes);
@@ -320,7 +317,7 @@ function hLayoutMgr(){
         
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+           
         }
 
         if(layout.css && !$.isEmptyObject(layout.css)){
@@ -343,7 +340,7 @@ function hLayoutMgr(){
             
         if(!layout.css) layout.css = {};
         if($.isEmptyObject(layout.css)){ //default
-            //AAA layout.css = {'border':'1px dotted gray','border-radius':'4px','margin':'4px'};
+           
         }
             
         if(layout.css && !$.isEmptyObject(layout)){
@@ -398,11 +395,8 @@ function hLayoutMgr(){
         //remove previous one
         let old_widget = container.find('div[data-hid='+layout.key+']');
         if(old_widget.length>0){
-            //parent_ele = old_widget.parent();
-            //var prev_sibling = old_widget.prev();
             $d.insertBefore(old_widget);
             old_widget.remove();
-            //old_widget.replaceWith($d);
         }else{
             $d.appendTo(container);    
         }
@@ -411,7 +405,7 @@ function hLayoutMgr(){
         if(!layout.css){
             layout.css  = {};    
             layout.css['minHeight'] = '100px';
-            //layout.css['position'] = 'relative';
+           
         } 
         if(!layout.css['position']) layout.css['position'] = 'relative';
         
@@ -423,14 +417,14 @@ function hLayoutMgr(){
         
         if(layout.appid=='heurist_Search'){
             if(layout.css['display']!='flex'){
-                //layout.css['display'] = 'table';
+               
             }
             if(!layout.css['width']){
-                //layout.css['width'] = '100%';
+               
             }
         }else if(layout.appid=='heurist_Map'){
             if(!layout.css['height']){
-                //layout.css['height'] = '100%';
+               
             }
         }*/
 
@@ -444,10 +438,6 @@ function hLayoutMgr(){
             layout.css['minHeight'] = app.minh;
         }
 
-        if(isEditMode) {
-            //$d.css('border','2px dashed red');
-        }
-        
         if(layout.css && !$.isEmptyObject(layout)){
             
             $d.removeAttr('style');
@@ -459,7 +449,8 @@ function hLayoutMgr(){
     }
     
     //
-    //
+    // returns widget descrition/definitions from cfg_widgets
+    // this object contains name of widget, path to js, some default options
     //
     function _getWidgetById(id){
 
@@ -476,8 +467,6 @@ function hLayoutMgr(){
     //
     //
     function _layoutInitWidget(layout, container){
-
-        //var layout = _layoutContentFindElement(_layout_cfg, container.attr('data-lid'));
 
         let app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
 
@@ -497,7 +486,6 @@ function hLayoutMgr(){
             }
         }
         
-        //var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');
         if(_supp_options['lang']){
             // xx - means it will use current language
             layout.options['language'] = window.hWin.HAPI4.getLangCode3(_supp_options['lang'],'def');    
@@ -519,6 +507,7 @@ function hLayoutMgr(){
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: `Widget ${app.widgetname} not loaded. Verify your configuration`,
+                            error_title: 'Widget loading failed',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                     }
@@ -634,7 +623,7 @@ function hLayoutMgr(){
             $parent.layout( layout_opts );
         }
         
-        //$parent.find('.ui-layout-content2').css('padding','0px !important');
+       
     }
     
     //
@@ -662,8 +651,6 @@ function hLayoutMgr(){
         $d = _layoutCreateDiv(layout, '', forStorage);
         
         $d.appendTo(container);
-          
-        //if(isEditMode) $d.css('border','2px dotted blue');
           
         if($d.parent().hasClass('layout-content')){
             $d.addClass('ent_wrapper');    
@@ -876,6 +863,9 @@ function hLayoutMgr(){
         
         for(let i=0; i<content.length; i++){
             if(content[i].key == ele_key){
+                if(new_cfg.type && new_cfg.type.indexOf('text')==0){
+                   new_cfg.content =  content[i].content;
+                }
                 content[i] = new_cfg;
                 return true 
             }else if(content[i].children && content[i].children.length>0){
@@ -928,7 +918,7 @@ function hLayoutMgr(){
     //
     //
     //
-    // container.html(layout);
+   
     function _convertOldCmsFormat(container, lvl){
 
 
@@ -962,10 +952,7 @@ function hLayoutMgr(){
                         content: s };
                 }else{
 
-                    if(ele[0].nodeName=='TABLE'){
-                        //window.hWin.HEURIST4.msg.showMsgDlg('We encounter troubles on conversion. Dynamic widget is within TABLE element');
-                        //return false;
-                    }
+                    //if(ele[0].nodeName=='TABLE'){}
 
                     //there are widgets among children
                     child = {name:"Group "+lvl+'.'+idx,
@@ -995,7 +982,6 @@ function hLayoutMgr(){
                         }
                     }                 
 
-                    //var css = window.hWin.HEURIST4.util.isJSON(ele.attr('style'));
                     if(!$.isEmptyObject(css)) child['css'] = css;
                 }
                 res.push(child);
@@ -1014,7 +1000,7 @@ function hLayoutMgr(){
     // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
     // <div id="cms-widget-51" data-cms-name="Menu"  data-cms-type="app" css=""> options:{} </div>
     //
-    // 2. Convert html t json (to edit)
+    // 2. Convert html to json (to edit)
     //     id=>dom_id, data-cms-name=>name, data-cms-type=>type, css=>css, folder: true if it has children, 
     //        children|options|content , appid  
     // 
@@ -1087,7 +1073,7 @@ function hLayoutMgr(){
                 }
             }
             if(ele.attr('class')){
-                res['classes'] = ele.attr('class'); //ele[0].classList;
+                res['classes'] = ele.attr('class');
             }
                    
             if(res.type == 'app'){
@@ -1164,7 +1150,7 @@ function hLayoutMgr(){
     
     //
     //public members
-    layoutMgr = {
+    window.layoutMgr = {
 
         getClass: function () {
             return _className;

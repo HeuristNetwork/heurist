@@ -157,8 +157,6 @@ $.widget( "heurist.selectFile", {
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
                             
-                                    //var recordset = that.recordList.resultList('getRecordSet');
-                                    //recordset = recordset.getSubSetByIds(selected_recs);
                                     let recordset = selected_recs;
                                     let record = recordset.getFirstRecord();
                                     let filename = recordset.fld(record, 'file_name')

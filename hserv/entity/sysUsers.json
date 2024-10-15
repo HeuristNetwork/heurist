@@ -4,7 +4,7 @@
         "tableName": "sysUGrps",
         "tablePrefix": "ugr",
         
-        "helpContent": "sysUsers.html",
+        "helpContent": "sysUsers.htm",
         
         "searchFormContent": "searchSysUsers.html",
         

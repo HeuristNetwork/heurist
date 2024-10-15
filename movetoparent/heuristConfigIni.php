@@ -56,9 +56,9 @@ if (!@$defaultRootFileUploadPath) {$defaultRootFileUploadPath = "/var/www/html/H
 
 // [EMAIL]
 
-if (!@$sysAdminEmail) {$sysAdminEmail = "info@HeuristNetwork.org";}
+if (!@$sysAdminEmail) {$sysAdminEmail = "admin@example.org";}
 // REQUIRED, please set to email of the system administrator or mailing group
-if (!@$infoEmail) {$infoEmail = "info@HeuristNetwork.org";}
+if (!@$infoEmail) {$infoEmail = "info@example.org";}
 // recommended, please set to the email of whoever provides user assistance
 if (!@$bugEmail) {$bugEmail = "info@HeuristNetwork.org";}
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
@@ -103,7 +103,7 @@ $allowWebAccessThumbnails = true;
 $allowWebAccessUploadedFiles = true;
 $allowWebAccessEntityFiles = true;
 
-//Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within uFile.php
+//Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within UFile.php
 if (!@$httpProxy) {$httpProxy = '';}// blank = assumes direct internet access from server
 if (!@$httpProxyAuth) {$httpProxyAuth = '';}// authorization for proxy server "username:password"
 $httpProxyAlwaysActive = false;           // if true - always use proxy for CURL, otherwise proxy will mostly be used for non-heurist resources

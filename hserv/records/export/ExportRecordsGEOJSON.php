@@ -21,7 +21,9 @@
 * @version     4.0
 */
 
-require_once 'exportRecords.php';
+namespace hserv\records\export;
+use hserv\records\export\ExportRecords;
+use hserv\structure\ConceptCode;
 
 /**
 *
@@ -39,13 +41,13 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $search_all_geofields = true;
 
     // variables for leaflet
-    private $geojson_ids = array();//simplify array('all'=>array());
-    private $geojson_dty_ids = array();//unique list of all geofields
+    private $geojson_ids = array();
+    private $geojson_dty_ids = array(); //unique list of all geofields
     private $geojson_rty_ids = array();
-    private $timeline_dty_ids = array();//unique list of all date fields
+    private $timeline_dty_ids = array(); //unique list of all date fields
 
     private $timeline_data = array();
-    private $layers_record_ids = array();//list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
+    private $layers_record_ids = array(); //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
 
     private $simplify_wkt = true;
     private $detail_mode = 0;
@@ -103,7 +105,7 @@ protected function _outputPrepare($data, $params){
                     if(is_String($_geofields)){
                         $_geofields = explode(',', $_geofields);
                     }
-                    if(is_Array($_geofields) && count($_geofields)>0){
+                    if(!isEmptyArray($_geofields)){
 
                         foreach($_geofields as $idx=>$code){
                             if($code=='all'){
@@ -127,10 +129,10 @@ protected function _outputPrepare($data, $params){
                 }
 
 
-                if(is_array($this->find_geo_by_pointer_dty) && count($this->find_geo_by_pointer_dty)==0){
+                if(isEmptyArray($this->find_geo_by_pointer_dty)){
                     $this->find_geo_by_pointer_dty = null;
                 }
-                if(is_array($this->find_by_geofields) && count($this->find_by_geofields)==0){
+                if(isEmptyArray($this->find_by_geofields)){
                     $this->find_by_geofields = null;
                 }
 
@@ -148,7 +150,6 @@ protected function _outputPrepare($data, $params){
         $this->system->defineConstant('DT_MINIMUM_ZOOM_LEVEL', true);
         $this->system->defineConstant('DT_MAXIMUM_ZOOM_LEVEL', true);
 
-
     }
     return $res;
 }
@@ -159,7 +160,7 @@ protected function _outputPrepare($data, $params){
 protected function _outputPrepareFields($params){
 
     if($this->is_leaflet){
-        $this->retrieve_detail_fields = array('file');
+        $this->retrieve_detail_fields = null;
         $this->retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else{
         parent::_outputPrepareFields($params);
@@ -327,7 +328,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         if(self::$defTerms==null) {
             self::$defTerms = dbs_GetTerms($this->system);
-            self::$defTerms = new DbsTerms($this->system, self::$defTerms);
+            self::$defTerms = new \DbsTerms($this->system, self::$defTerms);
         }
     }else{
         $idx_name = -1;
@@ -364,7 +365,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
 
-            if(is_array($value)){ //geo,file,resource
+            if(is_array($value)){ //geo,file,resource (record pointer)
                 if(@$value['file']){
                     //remove some fields
                     $val = $value['file'];
@@ -372,25 +373,21 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     unset($val['fullPath']);
                     unset($val['ulf_Parameters']);
 
-                }elseif(@$value['id']){ //resource
+                }elseif(@$value['id']){ //resource (record pointer)
                     $val = $value['id'];
                 }elseif(@$value['geo']){
 
                     if($this->find_by_geofields==null || in_array($dty_ID, $this->find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
-                        /*if($value['geo']['type']=='r'){
-                        //@todo convert rect to polygone
-                        }elseif($value['geo']['type']='c'){
-                        //@todo convert circle to polygone
-                        }*/
+                        
                         try{
                             $json = self::_getJsonFromWkt($wkt, $simplify);
                             if($json){
                                $geovalues[] = $json;
                                $geovalues_dty[] = $dty_ID;
                             }
-                        }catch(Exception $e){
+                        }catch(\Exception $e){
                         }
 
                         $val = $wkt;
@@ -407,7 +404,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         $date_end = $value;
                     }elseif($value!=null){
                         //parse temporal
-                        $ta = new Temporal($value);
+                        $ta = new \Temporal($value);
                         $ta = $ta->getTimespan(true);
                         if($ta!=null){
                             $ta[] = $dty_ID;
@@ -431,7 +428,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
-            if(is_array($value) && @$value['id']>0){ //resource
+            if(is_array($value) && @$value['id']>0){ //resource (record poitner)
                 $val['resourceTitle']     = @$value['title'];
                 $val['resourceRecTypeID'] = @$value['type'];
             }
@@ -474,7 +471,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         unset($res['properties']['details']);
     }
 
-    if(is_array($this->find_by_geofields) && count($this->find_by_geofields)>0){
+    if(!isEmptyArray($this->find_by_geofields)){
         //find geo values in linked records
         foreach ($this->find_by_geofields as $idx => $code){
             if(is_array($code) && @$code['id'] && @$code['q']){
@@ -505,8 +502,8 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
     }else
     //record does not contains geo field - search geo in linked records
-    if( (!is_array($geovalues) || count($geovalues)==0) &&
-        ($this->find_geo_by_pointer_rty===true || (is_array($this->find_geo_by_pointer_rty) && count($this->find_geo_by_pointer_rty)>0)) ){
+    if( (isEmptyArray($geovalues)) &&
+        ($this->find_geo_by_pointer_rty===true || (!isEmptyArray($this->find_geo_by_pointer_rty))) ){
 
         //this record does not have geo value - find it in related/linked places
         $point0 = array();
@@ -552,7 +549,9 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
         //special case
         //create link path from begin to end place
-        if (count($point1)>0 && count($point0)>0 || count($points)>0){
+        if ((!empty($point1) 
+            && !empty($point0)) 
+            || !empty($points)){
             //$geovalues = array();
 
             //many start points and transition points - star from start points to first transition
@@ -560,10 +559,10 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 $path = array('type'=>'MultiLineString', 'coordinates'=>array());
 
 
-                if(count($points)>0){
+                if(!empty($points)){
 
                     //adds lines from start to first transition
-                    if(count($point0)>0){
+                    if(!empty($point0)){
                         foreach($point0 as $pnt){
                             $path['coordinates'][] = array($pnt['coordinates'], $points[0]['coordinates']);
                         }
@@ -576,7 +575,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     $path['coordinates'][] = $path_t;
 
                     //lines from last transition to end points
-                    if(count($point1)>0){
+                    if(!empty($point1)){
                         $lidx = count($points)-1;
                         foreach($point1 as $pnt){
                             $path['coordinates'][] = array($points[$lidx]['coordinates'], $pnt['coordinates']);
@@ -594,19 +593,19 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
             }else{
                 $path = array('type'=>'LineString', 'coordinates'=>array());
 
-                if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
+                if(!empty($point0)) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
-                if(count($points)>0){
+                if(!empty($points)){
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }
                 }
-                if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
+                if(!empty($point1)) {$path['coordinates'][] = $point1[0]['coordinates'];}
 
             }
 
 
-            if(count($path['coordinates'])>0){
+            if(!empty($path['coordinates'])){
                 $geovalues[] = $path;
                 $geovalues_dty[] = 'Path';
             }
@@ -634,13 +633,13 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         $dty_ID = intval(DT_START_DATE);
 
         if($date_start && $date_end){ //both are defined
-            $dt = Temporal::mergeTemporals($date_start, $date_end);
+            $dt = \Temporal::mergeTemporals($date_start, $date_end);
         }else{
             if(!$date_start){
                 $date_start = $date_end;
                 $dty_ID = intval(DT_END_DATE);
             }
-            $dt = new Temporal($date_start);
+            $dt = new \Temporal($date_start);
         }
 
         if($dt && $dt->isValid())
@@ -655,7 +654,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         }
     }
 
-    if(count($timevalues)>0){
+    if(!empty($timevalues)){
 
 //profile: Flat(0), Central(1) (circa), Slow Start(2) (before), Slow Finish(3) (after) - responsible for gradient
 //determination: Unknown(0), Conjecture(2), Measurment(3), Attested(1)  - color depth
@@ -683,17 +682,17 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 //
 private static function _getJsonFromWkt($wkt, $simplify=true)
 {
-        $geom = geoPHP::load($wkt, 'wkt');
+        $geom = \geoPHP::load($wkt, 'wkt');
         if(!$geom->isEmpty()){
 
             /*The GEOS-php extension needs to be installed for these functions to be available
             if($simplify)$geom->simplify(0.0001, TRUE);
             */
 
-            $geojson_adapter = new GeoJSON();
+            $geojson_adapter = new \GeoJSON();
             $json = $geojson_adapter->write($geom, true);
 
-            if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
+            if(!isEmptyArray(@$json['coordinates'])){
 
                 if($simplify){
                     if($json['type']=='LineString'){

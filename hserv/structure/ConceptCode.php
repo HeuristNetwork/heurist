@@ -1,4 +1,6 @@
 <?php
+namespace hserv\structure;
+
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
@@ -31,10 +33,10 @@ private static $initialized = false;
 private static $system = null;
 private static $database_id = null;
 
-private static function initialize($system2=null)
+private static function initialize($init_system=null)
 {
-    if($system2!=null){
-        self::$system = $system2;
+    if($init_system!=null){
+        self::$system = $init_system;
     }
     elseif (self::$initialized){
         return;
@@ -68,7 +70,7 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
 
     if($lclID>0){
 
-        $query = "select " . $fieldNamePrefix . "OriginatingDBID," . $fieldNamePrefix . "IDInOriginatingDB from $tableName where " . $fieldNamePrefix . "ID = $lclID";
+        $query = "select {$fieldNamePrefix}OriginatingDBID,{$fieldNamePrefix}IDInOriginatingDB from $tableName where {$fieldNamePrefix}ID = $lclID";
 
         $ids = mysql__select_row(self::$system->get_mysqli(), $query);
 
@@ -150,15 +152,14 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
             $res_id = $ids[0];
         }
 
-        $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "ID=" . intval($res_id);
+        $query = "select {$fieldNamePrefix}ID from $tableName where {$fieldNamePrefix}ID=" . intval($res_id);
 
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
 
 
     } elseif (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
- $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix
-                . "OriginatingDBID=" . intval($ids[0]) . " and "
-                . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
+ $query = "select {$fieldNamePrefix}ID from $tableName where {$fieldNamePrefix}OriginatingDBID=".intval($ids[0])
+             . SQL_AND . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
 
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
     }
@@ -206,4 +207,3 @@ public static function getOntologyLocalID($ontConceptID) {
 }
 
 }
-?>

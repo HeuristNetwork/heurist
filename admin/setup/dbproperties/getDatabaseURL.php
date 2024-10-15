@@ -28,7 +28,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+use hserv\structure\ConceptCode;
+
+require_once dirname(__FILE__).'/../../../autoload.php';
 
 $isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);//this is reference server
 if($isOutSideRequest){ //this is request from outside - redirect to master index
@@ -40,7 +42,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $data = loadRemoteURLContentSpecial($reg_url);//get registered database URL
 
     if (!$data) {
-        global $glb_curl_error;
+
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
         $error_msg = "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
@@ -65,7 +67,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 }else{
     //on this server
 
-    $system2 = new System();
+    $system2 = new hserv\System();
     $system2->init(HEURIST_INDEX_DATABASE, true, false);//init without paths and consts
 
     if(@$_REQUEST['remote']){
@@ -101,7 +103,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     }
 
     if(@$_REQUEST['remote']) {
-        header('Content-type: text/javascript');
+        header(CTYPE_JS);
 
         if(isset($error_msg)){
             $res = array('error_msg'=>$error_msg);

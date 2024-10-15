@@ -106,7 +106,7 @@ if($init_client){
 
         var action_url = window.hWin.HAPI4.baseURL + "admin/verification/rebuildCalculatedFields.php";
 
-        var session_id = window.hWin.HEURIST4.msg.showProgress( $('.progress_div'),  0, 500 );
+        var session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('.progress_div'), interval:500} );
 
         var request = {
             'session': session_id
@@ -197,11 +197,11 @@ if($init_client){
     }
 }else{
     if( is_bool($res) && !$res ){
-        print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
+        print error_Div(htmlspecialchars($system->getErrorMsg()));
         print '</div></body></html>';
         exit;
     }elseif($res['message']){
-        print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
+        print error_Div(htmlspecialchars($system->getErrorMsg()));
     }
 
     if($res['q_updates']){
@@ -217,7 +217,7 @@ if($init_client){
         $q_cleared = '';
     }
 
-    if(is_array(@$res['errors']) && count($res['errors'])>0){
+    if(!isEmptyArray(@$res['errors'])){
         $q_errors = '';
         foreach($res['errors'] as $key=>$msg){
             $q_errors = $q_errors . $key . '  ' .$msg . '<br>';

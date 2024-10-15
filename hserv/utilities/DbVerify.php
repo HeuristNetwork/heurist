@@ -1,6 +1,7 @@
 <?php
 /**
 * dbVerify.php : methods to validate and fix database struture and data integrity
+* see databaseController $action=='verify'
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -9,7 +10,7 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
-* @subpackage  DataStore
+* @subpackage  utilities
 */
 
 /*
@@ -20,36 +21,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/**
-* Static class to perform database operations
-*
-* Methods:
-*
-* databaseDrop - Removes database entirely with optional beforehand archiving
-* databaseDump - dumps all tables (except csv import cache) into SQL dump
-* databaseCreateFull - Creates new heurist database, with file folders, given user and ready to use
-* databaseValidateName - Verifies that database name is valid and optionally that database exists or unique
-* databaseRestoreFromArchive - Restores database from archive
-* databaseEmpty - Clears data tables (retains defintions)
-* databaseCloneFull - clones database including folders
-* databaseResetRegistration
-* databaseRename - renames database (in fact it clones database with new name and archive/drop old database)
-*
-* databaseCheckNewDefs
-* updateOriginatingDB - Assigns given Origin ID for rectype, detail and term defintions
-* updateImportedOriginatingDB - Assigns Origin ID for rectype, detail and term defintions after import from unregistered database
-*
-* private:
-*
-* _databaseInitForNew - updates dbowner, adds default saved searches and lookups
-* databaseClone - copy all tables (except csv import cache) from one db to another (@todo rename to _databaseCopyTables)
-* _emptyTable - delete all records for given table
-* databaseCreateFolders - creates if not exists the set of folders for given database
-* databaseCreate - Creates new heurist database
-* databaseCreateConstraintsAndTriggers - Recreates constraints and triggers
-*/
+namespace hserv\utilities;
+use hserv\utilities\DbUtils;
 
-require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
 require_once dirname(__FILE__).'/../utilities/Temporal.php';
@@ -57,11 +31,6 @@ require_once dirname(__FILE__)."/../utilities/geo/mapCoordinates.php";
 
 class DbVerify {
 
-     /**
-     * Construct won't be called inside this class and is uncallable from
-     * the outside. This prevents instantiating this class.
-     * This is by purpose, because we want a static class.
-     */
     private $mysqli = null;
     private $system = null;
 
@@ -77,7 +46,7 @@ class DbVerify {
     //
     //
     private function _outStreamInit(){
-        $this->out = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
+        $this->out = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
     }
 
     //
@@ -109,9 +78,20 @@ class DbVerify {
     }
 
     //
+    // compose record edit url
+    //
+    private function getEditURL($rec_ID){
+        return HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$rec_ID;
+    }
+
+    private function getAllURL($rec_IDs){
+        return HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $rec_IDs);
+    }
+
     //
     //
-    private function _printList($title, $sub_title, $resList, $marker){
+    //
+    private function printList($title, $sub_title, $resList, $marker){
 
         if(!$sub_title) {$sub_title = '';}
 
@@ -146,8 +126,8 @@ class DbVerify {
 
         if($resList!=null){
 
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            $url_icon_placeholder = ICON_PLACEHOLDER;
+            $url_icon_extlink = ICON_EXTLINK;
 
             //$ids = array();
             $rec_id = null;
@@ -163,7 +143,7 @@ class DbVerify {
 
                     //array_push($ids, $rec_id);
                     $url_icon = @$row['rec_RecTypeID']?HEURIST_RTY_ICON.$row['rec_RecTypeID']:'';
-                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$rec_id;
+                    $url_rec =  $this->getEditURL($rec_id);
                     $rec_title = @$row['rec_Title']?strip_tags($row['rec_Title']):'';
                     if(@$row['wkt']){
                         $dtl_value = $row['wkt'];
@@ -196,10 +176,10 @@ class DbVerify {
 
 
             if($title!=null){
-                fwrite($this->out, '</table>');
+                fwrite($this->out, TABLE_E);
             }
 
-            //$url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids);
+            //$url_all = $this->getAllURL($ids);
             //$resMsg = str_replace('href="url_all"','href="'.$url_all.'"',$resMsg);
 
             if(!is_array($resList)){
@@ -212,51 +192,62 @@ class DbVerify {
     }
 
     /**
-    * Check that records have valid Owner and Added by User references
-    *
-    * @param array $params
-    */
+     * Checks if the system is in "fix mode" based on the parameters.
+     *
+     * @param array|null $params The input parameters, which may contain a 'fix' flag.
+     * @return bool Returns true if 'fix' mode is enabled, false otherwise.
+     */
+    private function isFixMode($params)
+    {
+        return is_array($params) && @$params['fix'] == 1;
+    }
+
+    /**
+     * Checks that all records have valid Owner and Added By User references.
+     *
+     * This function verifies that all records in the database have valid 'Added By' and 'Owner' references.
+     * If invalid references are found (users that don't exist), it provides an option to attribute those records
+     * to the Database OwnerM (user ID #2). Additionally, it can auto-fix these issues in "fix mode."
+     *
+     * @param array|null $params An associative array of parameters. If 'fix' is set to 1, it will attempt to fix invalid references.
+     * @return array An associative array with 'status' (true if no issues or successfully repaired, false if errors found)
+     *               and 'message' (HTML string describing the results or errors).
+     */
     public function check_owner_ref($params=null){
 
-        $resStatus = true;
-        $resMsg = '';
-        $wasassigned1 = 0;
-        $wasassigned2 = 0;
+        $resStatus = true; // Default status is 'true' unless issues are found.
+        $resMsg = ''; // Message to hold the result or error information.
+        $wasassigned1 = 0; // Track number of records assigned to 'Added by' user #2.
+        $wasassigned2 = 0; // Track number of records assigned to owner user #2.
 
+        // If the system is in fix mode, attempt to repair invalid references.
+        if($this->isFixMode($params)){
 
-        if(is_array($params) && @$params['fix']==1){
+            mysql__safe_updatess($this->mysqli, false);
 
-            $this->mysqli->query('SET SQL_SAFE_UPDATES=0');
+            // Attempt to update invalid 'Added By' and 'Owner' references
+            $resMsg = $this->updateGroupIds('rec_AddedByUGrpID', 'reference (Added By)');
+            $resMsg .= $this->updateGroupIds('rec_OwnerUGrpID', 'ownership');
 
-            $query = 'UPDATE Records left join sysUGrps on rec_AddedByUGrpID=ugr_ID '
-            .' SET rec_AddedByUGrpID=2 WHERE ugr_ID is null';
-            $wasassigned1 = mysql__exec_param_query($this->mysqli, $query, null, true );
-            if(is_string($wasassigned1))
-            {
-                $resMsg = '<div class="error">Cannot assign correct User reference (Added By) for Records.</div>';
-                $resStatus = false;
-            }
-
-            $query = 'UPDATE Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID '
-            .' SET rec_OwnerUGrpID=2 WHERE ugr_ID is null';
-            $wasassigned2 = mysql__exec_param_query($this->mysqli, $query, null, true );
-            if(is_string($wasassigned2))
-            {
-                $resMsg = '<div class="error">Cannot assign correct User ownership for Records.</div>';
-                $resStatus = false;
-            }
-
-            $this->mysqli->query('SET SQL_SAFE_UPDATES=1');
+            mysql__safe_updatess($this->mysqli, true);
         }
 
+        // If any error messages are generated during the repair, set status to false.
+        if ($resMsg != '') {
+            $resStatus = false;
+        }
+
+        // Check for records with non-existent 'Added By' users.
         $wrongUser_Add = mysql__select_value($this->mysqli,
                 'SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_AddedByUGrpID=ugr_ID where ugr_ID is null');
         $wrongUser_Add = intval($wrongUser_Add);
 
+        // Check for records with non-existent 'Owner' users.
         $wrongUser_Owner = mysql__select_value($this->mysqli,
                 'SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID where ugr_ID is null');
         $wrongUser_Owner = intval($wrongUser_Owner);
 
+        // If no issues are found, display success message.
         if($wrongUser_Add==0 && $wrongUser_Owner==0){
             $resMsg .= '<div><h3 class="res-valid">OK: All records have valid Owner and Added by User references</h3></div>';
 
@@ -269,10 +260,11 @@ class DbVerify {
         }
         else
         {
+            // If invalid references are found, display a warning and provide an option to fix the issues.
             $resStatus = false;
-            $resMsg .= '<div>';
+            $resMsg .= DIV_S;
             if($wrongUser_Add>0){
-                $resMsg .= "<h3> $wrongUser_Add records are owned by non-existent users</h3>";
+                $resMsg .= "<h3> $wrongUser_Add records are added by non-existent users</h3>";
             }
             if($wrongUser_Owner>0){
                 $resMsg .= "<h3> $wrongUser_Owner records are owned by non-existent users</h3>";
@@ -281,7 +273,38 @@ class DbVerify {
             $resMsg .= '<br><br><button data-fix="owner_ref">Attribute them to owner # 2 Database Manager</button></div>';
         }
 
+        // Return the status and message as an associative array.
         return array('status'=>$resStatus,'message'=>$resMsg);
+    }
+
+    /**
+     * Updates invalid user group references in the Records table.
+     *
+     * This function assigns the default user group ID (2, Database Manager) to records
+     * where the current user group reference is invalid (i.e., where the user group does not exist).
+     * It operates on the specified column and logs the type of change made (e.g., 'Added By' or 'Owner').
+     *
+     * @param string $column The column in the Records table to update (e.g., 'rec_AddedByUGrpID' or 'rec_OwnerUGrpID').
+     * @param string $msg A descriptive message indicating the type of user reference being updated (e.g., 'reference (Added By)' or 'ownership').
+     * @return string Returns an empty string if the update is successful, or an error message if the query fails.
+     */
+    private function updateGroupIds($column, $msg) {
+        // SQL query to update the specified column in Records where the user group reference is invalid (ugr_ID is NULL)
+        $query = "UPDATE Records
+                  LEFT JOIN sysUGrps ON $column = ugr_ID
+                  SET $column = 2
+                  WHERE ugr_ID IS NULL";
+
+        // Execute the query and check for errors
+        $result = mysql__exec_param_query($this->mysqli, $query, null, true);
+
+        // If the result is a string (indicating an error), return an error message
+        if (is_string($result)) {
+            return "<div class='error'>Cannot assign correct User $msg for Records.</div>";
+        }
+
+        // Return an empty string if the operation was successful
+        return '';
     }
 
     /**
@@ -310,9 +333,9 @@ class DbVerify {
         $wasassigned2 = 0;
         if(@$params['fix']=="1")
         {
-                $mysqli->query('SET SQL_SAFE_UPDATES=0');
+                mysql__safe_updatess($mysqli, false);
 
-                if(is_array($trmWithWrongParents) && count($trmWithWrongParents)>0){
+                if(!isEmptyArray($trmWithWrongParents)){
 
                     $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
 
@@ -324,7 +347,7 @@ class DbVerify {
                         $wasassigned1 = mysql__exec_param_query($this->mysqli, $query, null, true );
                         if(is_string($wasassigned1))
                         {
-                            $resMsg = '<div class="error">Cannot delete invalid pointers to parent terms. Error:'.$wasassigned1.'</div>';
+                            $resMsg = '<div class="error">Cannot delete invalid pointers to parent terms. Error:'.$wasassigned1.DIV_E;
                             $resStatus = false;
                         }else{
                             $trmWithWrongParents = array();//reset
@@ -336,14 +359,14 @@ class DbVerify {
                     }
                 }
 
-                if(is_array($trmWithWrongInverse) && count($trmWithWrongInverse)>0){
+                if(!isEmptyArray($trmWithWrongInverse)){
                     $query = 'UPDATE defTerms set trm_InverseTermID=NULL '
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
 
                     $wasassigned2 = mysql__exec_param_query($this->mysqli, $query, null, true );
                     if(is_string($wasassigned2))
                     {
-                        $resMsg = '<div class="error">Cannot clear missing inverse terms ids. Error:'.$wasassigned2.'</div>';
+                        $resMsg = '<div class="error">Cannot clear missing inverse terms ids. Error:'.$wasassigned2.DIV_E;
                         $resStatus = false;
                     }else{
                         $trmWithWrongInverse = array();//reset
@@ -351,10 +374,10 @@ class DbVerify {
 
                 }
 
-                $mysqli->query('SET SQL_SAFE_UPDATES=1');
+                mysql__safe_updatess($mysqli, true);
         }
 
-        if(count($trmWithWrongParents)==0 && count($trmWithWrongInverse)==0){
+        if(empty($trmWithWrongParents) && empty($trmWithWrongInverse)){
                 $resMsg .= '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
 
                 if($wasassigned1>0){
@@ -367,8 +390,8 @@ class DbVerify {
             else
             {
 
-                $resMsg .= '<div>';
-                if(count($trmWithWrongParents)>0){
+                $resMsg .= DIV_S;
+                if(!empty($trmWithWrongParents)){
 
                     $resMsg .= '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
                     $cnt = 0;
@@ -382,7 +405,7 @@ class DbVerify {
                     }
                     $resStatus = false;
                 }
-                if(count($trmWithWrongInverse)>0){
+                if(!empty($trmWithWrongInverse)){
 
                     $resMsg .= '<h3>'.count($trmWithWrongInverse).' terms have wrong inverse term references</h3>';
                     $cnt = 0;
@@ -400,17 +423,17 @@ class DbVerify {
                 $resMsg .= '<br><br><button data-fix="dup_terms">Correct wrong parent and inverse term references</button></div>';
         }
 
-        if(count($trmDuplicates)>0){
+        if(!empty($trmDuplicates)){
             $resStatus = false;
 
             $resMsg .= '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
             .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
             foreach ($trmDuplicates as $parent_ID=>$dupes) {
                 $resMsg .= '<div style="padding-top:10px;font-style:italic">parent '.intval($parent_ID).'  '
-                    .htmlspecialchars($TL[$parent_ID]['trm_Label']).'</div>';
+                    .htmlspecialchars($TL[$parent_ID]['trm_Label']).DIV_E;
                 foreach ($dupes as $trm_ID) {
                     $resMsg .= '<div style="padding-left:60px">'.intval($trm_ID).'  '
-                    .htmlspecialchars($TL[$trm_ID]['trm_Label']).'</div>';
+                    .htmlspecialchars($TL[$trm_ID]['trm_Label']).DIV_E;
                 }
             }
         }
@@ -419,88 +442,60 @@ class DbVerify {
     }
 
     /**
-    * Check
-    *
-    * @param array $params
-    */
+     * Check field types for inconsistencies or invalid data and optionally repair them.
+     *
+     * This function checks the validity of field types in terms of terms, non-selectable terms,
+     * and record type constraints. It can also auto-repair invalid fields if in fix mode.
+     *
+     * @param array|null $params An associative array of parameters.
+     *                           'data' or 'show' can be used to check or display field types.
+     *                           'rt' for the record type ID.
+     * @return array Returns an associative array with 'status' and 'message'.
+     *               'status' is true if valid or repairable, false otherwise.
+     *               'message' contains success/error or repair information.
+     */
     public function check_field_type($params=null){
         global $TL;
+
+        $mysqli = $this->mysqli;
+        $lists = array();
+
+        if(@$params['data']){
+            $lists = json_decode($params['data'], true);
+        }elseif (@$params['show']) {
+
+            $lists = getInvalidFieldTypes($mysqli, intval(@$params['rt']));//in verifyFieldTypes.php
+        }
+
+        $resMsgSuccess = '<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
+
+        if (isEmptyArray(@$lists["terms"]) &&
+            isEmptyArray(@$lists["terms_nonselectable"]) &&
+            isEmptyArray(@$lists["rt_contraints"])){
+
+                return array('status'=>true, 'message'=>DIV_S.$resMsgSuccess);
+        }
 
         $resStatus = true;
         $resMsg = '';
 
-        $mysqli = $this->mysqli;
+        // Check if fix mode is enabled
+        if($this->isFixMode($params)){
 
-        if(@$params['data']){
-            $lists = json_decode($params['data'], true);
-        }else{
+            try {
+                $k = $this->repairInvalidFields(@$lists['terms'], 'dty_JsonTermIDTree', 'validTermsString');
+                $k += $this->repairInvalidFields(@$lists['terms_nonselectable'], 'dty_TermIDTreeNonSelectableIDs', 'validNonSelTermsString');
+                $k += $this->repairInvalidFields(@$lists['rt_contraints'], 'dty_PtrTargetRectypeIDs', 'validRectypeConstraint');
 
-            $lists = getInvalidFieldTypes($mysqli, intval(@$params['rt']));//in getFieldTypeDefinitionErrors.php
-            if(!@$params['show']){
-                if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
-                && count($lists["rt_contraints"])==0){
-                    $lists = array();
-                }
+                $resMsg = $k.' field'.($k>1?'s have':' has')
+                .' been repaired. If you have unsaved data in an edit form, save your changes and reload the page to apply revised/corrected field definitions';
+                return array('status'=>true,'message'=>DIV_S.$resMsg.$resMsgSuccess);
+
+            } catch (\Exception $e) {
+                $resMsg = '<div class="error">SQL error updating field type '.$e->getMessage().DIV_E;
             }
-        }
 
-        //see getInvalidFieldTypes in verifyFieldTypes.php
-        $dtysWithInvalidTerms = @$lists["terms"];
-        $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
-        $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
-
-        $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
-
-        if (($dtysWithInvalidTerms && is_array($dtysWithInvalidTerms) && count($dtysWithInvalidTerms)>0) ||
-            ($dtysWithInvalidNonSelectableTerms && is_array($dtysWithInvalidNonSelectableTerms) && count($dtysWithInvalidNonSelectableTerms)>0) ||
-            ($dtysWithInvalidRectypeConstraint && is_array($dtysWithInvalidRectypeConstraint) && count($dtysWithInvalidRectypeConstraint)>0)){
-
-                if(@$params['fix']==1){
-
-                    $k = 0;
-                    $err = null;
-                    if(is_array($dtysWithInvalidTerms))
-                    {
-                        foreach ($dtysWithInvalidTerms as $row) {
-                            $query='UPDATE defDetailTypes SET dty_JsonTermIDTree=? WHERE dty_ID='.intval($row['dty_ID']);
-                            $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validTermsString']), true );
-                            if(is_string($res)){
-                                $err = $row['dty_ID'].'. Error: '.$res;
-                                break;
-                            }
-                            $k++;
-                        }
-                    }
-                    if($err==null && is_array($dtysWithInvalidNonSelectableTerms)){
-                    foreach ($dtysWithInvalidNonSelectableTerms as $row) {
-                        $query='UPDATE defDetailTypes SET dty_TermIDTreeNonSelectableIDs=? WHERE dty_ID='.intval($row['dty_ID']);
-                        $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validNonSelTermsString']), true );
-                        if(is_string($res)){
-                            $err = $row['dty_ID'].'. Error: '.$res;
-                            break;
-                        }
-                        $k++;
-                    }}
-                    if($err==null && is_array($dtysWithInvalidRectypeConstraint)){
-                    foreach ($dtysWithInvalidRectypeConstraint as $row) {
-                        $query='UPDATE defDetailTypes SET dty_PtrTargetRectypeIDs=? WHERE dty_ID='.intval($row['dty_ID']);
-                        $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validRectypeConstraint']), true );
-                        if(is_string($res)){
-                            $err = $row['dty_ID'].'. Error: '.$res;
-                            break;
-                        }
-                        $k++;
-                    }}
-
-                    if($err!=null){
-                        $resMsg = '<div class="error">SQL error updating field type '.$err.'</div>';
-                        $resStatus = false;
-                    }else{
-                        $resMsg = $k.' field'.($k>1?'s have':' has')
-.' been repaired. If you have unsaved data in an edit form, save your changes and reload the page to apply revised/corrected field definitions';
-                    }
-
-                }else{
+        }else{
 
             $contact_us = CONTACT_HEURIST_TEAM;
             $resMsg = <<<HEADER
@@ -509,42 +504,71 @@ class DbVerify {
             To fix the inconsistencies, please click here: <button data-fix="field_type">Auto Repair</button>  <br>&nbsp;<br>
             <hr>
             HEADER;
-//            You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
 
-            foreach ($dtysWithInvalidTerms as $row) {
-                $resMsg .=
-                '<div class="msgline"><b>'
-                    .htmlspecialchars( $row['dty_Name']). '</b> field (code ' . intval($row['dty_ID']) .' ) has '
-                    .count($row['invalidTermIDs']).' invalid term ID'.(count($row['invalidTermIDs'])>1?"s":"")
-                    .'(code: '. htmlspecialchars(implode(",",$row['invalidTermIDs'])).')</div>';
-
-            }//for
-            foreach ($dtysWithInvalidNonSelectableTerms as $row) {
-                //<a href="#invalid_terms2" onclick="{ onEditFieldType('. intval($row['dty_ID']) .'); return false}">'
-                $resMsg .=
-                '<div class="msgline"><b>'
-                    .htmlspecialchars( $row['dty_Name']). '</b> field (code ' . intval($row['dty_ID']) .' ) has '
-                    .count($row['invalidNonSelectableTermIDs']).' invalid non selectable term ID'.(count($row['invalidNonSelectableTermIDs'])>1?"s":"")
-                    .'(code: '. htmlspecialchars(implode(",",$row['invalidNonSelectableTermIDs'])).')</div>';
-            }
-            foreach ($dtysWithInvalidRectypeConstraint as $row) {
-                $resMsg .=
-                '<div class="msgline"><b>'
-                    .htmlspecialchars( $row['dty_Name']). '</b> field (code ' . intval($row['dty_ID']) .' ) has '
-                    .count($row['invalidRectypeConstraint']).' invalid record type constraint'.(count($row['invalidRectypeConstraint'])>1?"s":"")
-                    .'(code: '. htmlspecialchars(implode(",",$row['invalidRectypeConstraint'])).')</div>';
-            }
-            $resStatus = false;
-
-                }
+            $resMsg .= $this->generateFieldMessages(@$lists["terms"], 'invalidTermIDs', 'term ID');
+            $resMsg .= $this->generateFieldMessages(@$lists["terms_nonselectable"], 'invalidNonSelectableTermIDs', 'non selectable term ID');
+            $resMsg .= $this->generateFieldMessages(@$lists["rt_contraints"], 'invalidRectypeConstraint', 'record type constraint');
 
         }
 
-        if($resStatus){
-            $resMsg = '<div>'.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
+        return array('status'=>false, 'message'=>$resMsg);
+    }
+
+
+    /**
+     * Repair invalid field types by updating the database.
+     *
+     * This function attempts to repair invalid fields by updating the specified column with valid data.
+     *
+     * @param array $fieldList A list of invalid fields to be repaired.
+     * @param string $column The database column to update.
+     * @param string $validField The key representing the valid data for each field in the fieldList.
+     * @return int The number of fields successfully repaired.
+     * @throws \Exception If there is an error during the update operation.
+     */
+    private function repairInvalidFields($fieldList, $column, $validField){
+
+        if(isEmptyArray($fieldList)){
+            return 0;
+        }
+        $k = 0;
+
+        foreach ($fieldList as $row) {
+            $query="UPDATE defDetailTypes SET $column=? WHERE dty_ID=".intval($row['dty_ID']);
+            $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row[$validField]), true );
+            if(is_string($res)){
+                throw new \Exception($row['dty_ID'] . ". Error: $res");
+            }
+            $k++;
         }
 
-        return array('status'=>$resStatus,'message'=>$resMsg);
+        return $k;
+    }
+
+    /**
+     * Generate messages for fields with invalid data.
+     *
+     * This function generates error messages for fields that contain invalid term IDs, non-selectable term IDs, or record type constraints.
+     *
+     * @param array $fieldList A list of fields to check for invalid data.
+     * @param string $invalid_ids The key for the invalid data (term IDs, non-selectable term IDs, etc.).
+     * @param string $msgType The type of message to generate (term ID, record type constraint, etc.).
+     * @return string The generated HTML error messages for each invalid field.
+     */
+    private function generateFieldMessages($fieldList, $invalid_ids, $msgType)
+    {
+        $resMsg = '';
+        if (is_array($fieldList)) {
+            foreach ($fieldList as $row) {
+                $cnt = count($row[$invalid_ids]);
+
+                $resMsg .= '<div class="msgline"><b>' . htmlspecialchars($row['dty_Name']) . '</b> field (code ' .
+                            intval($row['dty_ID']) . ') has ' . $cnt . ' invalid ' . $msgType
+                            . ($cnt>1?'s':'')
+                            . ' (code: ' . htmlspecialchars(implode(',', $row[$invalid_ids])) . ')</div>';
+            }
+        }
+        return $resMsg;
     }
 
 
@@ -568,7 +592,7 @@ class DbVerify {
 
         $rstWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-        if (($rstWithInvalidDefaultValues && is_array($rstWithInvalidDefaultValues) && count($rstWithInvalidDefaultValues)>0)){
+        if (!isEmptyArray($rstWithInvalidDefaultValues)){
 
 
             $resMsg = <<<'HEADER'
@@ -608,7 +632,7 @@ class DbVerify {
         $wasdeleted = 0;
         $mysqli = $this->mysqli;
 
-        if(is_array($params) && @$params['fix']==1){
+        if($this->isFixMode($params)){
 
             $query = 'DELETE d from recDetails d
             left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
@@ -618,7 +642,7 @@ class DbVerify {
             $res = $mysqli->query( $query );
             if(! $res )
             {
-                $resMsg = '<div class="error">Cannot delete invalid pointers from Records.</div>';
+                $resMsg = error_Div('Cannot delete invalid pointers from Records');
                 $resStatus = false;
             }else{
                 $wasdeleted = $mysqli->affected_rows;
@@ -640,7 +664,7 @@ class DbVerify {
         }
         $res->close();
 
-        if(count($bibs)==0){
+        if(empty($bibs)){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
 
             if($wasdeleted>0){
@@ -655,7 +679,7 @@ class DbVerify {
             fwrite($this->out, $resMsg);
 
             $fixMsg = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
-            $this->_printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
+            $this->printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -694,7 +718,7 @@ class DbVerify {
         }
         $res->close();
 
-        if(count($bibs)==0){
+        if(empty($bibs)){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to the correct record type</h3></div>';
         }
         else
@@ -704,7 +728,7 @@ class DbVerify {
             fwrite($this->out, $resMsg);
 
             $fixMsg = null;
-            $this->_printList('Records with record pointers to the wrong record type', $fixMsg, $bibs, 'recCB2');
+            $this->printList('Records with record pointers to the wrong record type', $fixMsg, $bibs, 'recCB2');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -729,7 +753,9 @@ class DbVerify {
         $this->system->defineConstant('DT_PARENT_ENTITY');
         $dt_parent_entity_field_id = DT_PARENT_ENTITY;
 
-        if(false && is_array($params) && @$params['fix']==1){ //OLD WAY DISABLED
+        $error_msg = 'Cannot delete invalid pointers from Records';
+
+        if(false && $this->isFixMode($params)){ //OLD WAY DISABLED
 
             //remove pointer field in parent records that does not have reverse in children
             $query = 'DELETE parent FROM Records parentrec, defRecStructure, recDetails parent '
@@ -743,7 +769,7 @@ class DbVerify {
             $res = $mysqli->query( $query );
             if(! $res )
             {
-                $resMsg = '<div class="error">Cannot delete invalid pointers from Records.</div>';
+                $resMsg = error_Div($error_msg);
                 $resStatus = false;
             }else{
                 $wasdeleted1 = $mysqli->affected_rows;
@@ -844,13 +870,13 @@ ORDER BY child.dtl_RecID";
         }
 
         $wasdeleted2 = 0;
-        if(@$params['fix']==2 && count($det_ids)>0){
+        if(@$params['fix']==2 && !empty($det_ids)){
 
             $query = 'DELETE FROM recDetails WHERE dtl_ID in ('.implode(',',$det_ids).')';
             $res = $mysqli->query( $query );
             if(! $res )
             {
-                $resMsg .= '<div class="error">Cannot delete invalid pointers from Records.</div>';
+                $resMsg .= error_Div($error_msg);
                 $resStatus = false;
             }else{
                 $wasdeleted2 = $mysqli->affected_rows;
@@ -858,10 +884,10 @@ ORDER BY child.dtl_RecID";
             }
         }
 
-        $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-        $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+        $url_icon_placeholder = ICON_PLACEHOLDER;
+        $url_icon_extlink = ICON_EXTLINK;
 
-        if(count($bibs1)==0){
+        if(empty($bibs1)){
             $resMsg .= '<div><h3>OK: All parent records are correctly referenced by their child records</h3></div>';
 
             if($wasdeleted1>1){
@@ -876,7 +902,7 @@ ORDER BY child.dtl_RecID";
         {
             $resStatus = false;
 
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($prec_ids1));
+            $url_all = $this->getAllURL(array_keys($prec_ids1));
 
             $resMsg .= <<<HEADER
                 <br><h3>Parent records which are not correctly referenced by their child records (missing pointer to parent)</h3>
@@ -901,14 +927,14 @@ ORDER BY child.dtl_RecID";
                 </tr>
 HEADER;
 
-                $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-                $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+                $url_icon_placeholder = ICON_PLACEHOLDER;
+                $url_icon_extlink = ICON_EXTLINK;
 
                 foreach ($bibs1 as $row) {
 
                     $url_icon_parent = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec_parent =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['rec_ID'];
-                    $url_rec_child =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_Value'];
+                    $url_rec_parent = $this->getEditURL($row['rec_ID']);
+                    $url_rec_child =  $this->getEditURL($row['dtl_Value']);
                     $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
                     $rec_title_child = substr(strip_tags($row['c_title']),0,50);
 
@@ -931,7 +957,7 @@ HEADER;
                     EOT;
 
                 }//foreach
-                $resMsg .= "</table>\n";
+                $resMsg .= TABLE_E."\n";
         }
 
 
@@ -946,7 +972,7 @@ HEADER;
         {
             $resStatus = false;
 
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($prec_ids2));
+            $url_all = $this->getAllURL(array_keys($prec_ids2));
 
             $resMsg .= <<<HEADER
             <br><h3>Child records indicate a parent which does not identify them as their child. </h3>
@@ -977,8 +1003,8 @@ HEADER;
 
             foreach ($bibs2 as $row) {
 
-                    $url_rec_parent =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_Value'];
-                    $url_rec_child =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['child_id'];
+                    $url_rec_parent = $this->getEditURL($row['dtl_Value']);
+                    $url_rec_child = $this->getEditURL($row['child_id']);
                     $rec_title_parent = substr(strip_tags($row['p_title']),0,50);
                     $rec_title_child = substr(strip_tags($row['c_title']),0,50);
 
@@ -999,7 +1025,7 @@ HEADER;
                     </tr>
                     EOT;
             }
-            $resMsg .= "</table>\n";
+            $resMsg .= TABLE_E."\n";
 
         }
 
@@ -1020,15 +1046,15 @@ HEADER;
         $mysqli = $this->mysqli;
 
 
-        if(is_array($params) && @$params['fix']==1){
+        if($this->isFixMode($params)){
 
-            $mysqli->query('SET SQL_SAFE_UPDATES=0');
+            mysql__safe_updatess($mysqli, false);
             $mysqli->query('DELETE d.* FROM recDetails d, defDetailTypes, Records a '
                 .'WHERE (dtl_ID>0) and (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
 
             $wascorrected = $mysqli->affected_rows;
-            $mysqli->query('SET SQL_SAFE_UPDATES=1');
+            mysql__safe_updatess($mysqli, true);
         }
 
         $total_count_rows = 0;
@@ -1039,7 +1065,7 @@ HEADER;
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
         and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null)) ORDER BY a.rec_ID');
 
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
 
         if($total_count_rows<1){
             $resMsg .= '<div><h3 class="res-valid">OK: There are no fields containing null values</h3></div>';
@@ -1057,7 +1083,7 @@ HEADER;
             $fixMsg =
             '<div>NULL values are not useful in Heurist, as Heurist handles NULLs by storing no value. It is therefore perfectly safe to delete them</div>'
             .'<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
-            $this->_printList('Records with empty fields', $fixMsg, $res, 'recCB5');
+            $this->printList('Records with empty fields', $fixMsg, $res, 'recCB5');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -1079,7 +1105,7 @@ HEADER;
         $mysqli = $this->mysqli;
 
 
-        if(is_array($params) && @$params['fix']==1){
+        if($this->isFixMode($params)){
 
             $query = 'DELETE d FROM recDetails d
             left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
@@ -1091,7 +1117,7 @@ HEADER;
             if(! $res )
             {
                 $resStatus = false;
-                $resMsg = '<div class="error">Cannot delete invalid term values from Records. SQL error: '.$mysqli->error.'</div>';
+                $resMsg = '<div class="error">Cannot delete invalid term values from Records. SQL error: '.$mysqli->error.DIV_E;
             }else{
                 $wasdeleted = $mysqli->affected_rows;
             }
@@ -1109,7 +1135,7 @@ HEADER;
             and a.rec_ID is not null
             and b.trm_ID is null ORDER BY a.rec_ID');
 
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
 
         if($total_count_rows<1){
             $resMsg .= '<div><h3 class="res-valid">OK: All records have recognisable term values</h3></div>';
@@ -1125,7 +1151,7 @@ HEADER;
             fwrite($this->out, $resMsg);
 
             $fixMsg  = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
-            $this->_printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
+            $this->printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -1160,7 +1186,7 @@ HEADER;
             GROUP BY rec_ID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
             HAVING cnt > 1 ORDER BY rec_ID');
 
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
@@ -1170,7 +1196,7 @@ HEADER;
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
-            $this->_printList('Single value fields with multiple values', null, $res, 'recCB7');
+            $this->printList('Single value fields with multiple values', null, $res, 'recCB7');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -1205,7 +1231,7 @@ HEADER;
             and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator' and dty_Type!='relmarker'
         order by rec_ID");
 
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
@@ -1215,7 +1241,7 @@ HEADER;
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
-            $this->_printList('Records with missing or empty required values', null, $res, 'recCB8');
+            $this->printList('Records with missing or empty required values', null, $res, 'recCB8');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -1244,23 +1270,27 @@ HEADER;
         left join recDetails on rec_ID = dtl_RecID
         left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
         left join defDetailTypes on dtl_DetailTypeID = dty_ID
-        where rec_FlagTemporary!=1 AND rst_ID is null';
+        where rec_FlagTemporary!=1 AND rst_ID IS NULL';
 
+        $except_ids = array();
         if($this->system->defineConstant('DT_PARENT_ENTITY')){
-            $query .= " AND dtl_DetailTypeID != ".DT_PARENT_ENTITY;
+            $except_ids[] = DT_PARENT_ENTITY;
         }
         if($this->system->defineConstant('DT_WORKFLOW_STAGE')){
-            $query .= " AND dtl_DetailTypeID != ".DT_WORKFLOW_STAGE;
+            $except_ids[] = DT_WORKFLOW_STAGE;
         }
         if($this->system->defineConstant('DT_ORIGINAL_RECORD_ID')){
-            $query .= " AND dtl_DetailTypeID != ".DT_ORIGINAL_RECORD_ID;
+            $except_ids[] = DT_ORIGINAL_RECORD_ID;
+        }
+        if(!empty($except_ids)){
+            $query .= ' AND dtl_DetailTypeID NOT IN ('.implode(',',$except_ids).')';
         }
 
         $query .= ' order by rec_ID';
 
         $res = $mysqli->query( $query );
 
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+        $total_count_rows = mysql__found_rows($mysqli);
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';
@@ -1270,7 +1300,7 @@ HEADER;
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
 
-            $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
+            $this->printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
 
             $resMsg = $this->_outStreamRes();
         }
@@ -1340,7 +1370,7 @@ HEADER;
 
                         if ($prevInvalidRecId < $row['dtl_RecID']) {
 
-                            $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
+                            $url_rec = $this->getEditURL($row['dtl_RecID']);
                             $resMsg .= '<tr><td><a target=_blank href="'.$url_rec. '"> ' . $row['dtl_RecID']. "</a></td></tr>\n";
                             $prevInvalidRecId = $row['dtl_RecID'];
 
@@ -1401,7 +1431,7 @@ HEADER;
 
                 $resMsg = '<div><h3>'.$cnt.' Records with invalid characters in '.$cnt2
                     .' freetext and blocktext fields</h3></div><table role="presentation">'
-                    .$resMsg.'</table>';
+                    .$resMsg.TABLE_E;
         }
 
         if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
@@ -1432,14 +1462,14 @@ HEADER;
                 $res[0] = "Title mask is not defined";
             }else{
                 //get human readable
-                $res = TitleMask::execute($mask, $rty_ID, 2, null, ERROR_REP_MSG);
+                $res = \TitleMask::execute($mask, $rty_ID, 2, null, ERROR_REP_MSG);
             }
 
             if(is_array($res)){ //error
                 $resStatus = false;
                 $resMsg .= "<div style=\"padding:15px 0px 10px 4px;\"><b> $rty_ID : <i>".htmlspecialchars($rectype['rty_Name'])."</i></b> <br> </div>";
                 $resMsg .= '<div class="maskCell">Mask: <i>'.htmlspecialchars($mask).'</i></div>';
-                $resMsg .= '<div class="errorCell" style="padding:10px 40px"><b>'.(@$res['message']?$res['message']:$res[0]).'</b></div>';
+                $resMsg .= '<div class="errorCell" style="padding:10px 40px"><b>'.(@$res['message']?$res['message']:$res[0]).'</b>'.DIV_E;
             }
 
         }//for
@@ -1467,13 +1497,13 @@ HEADER;
 
         $mysqli = $this->mysqli;
 
-        if(is_array($params) && @$params['fix']==1){
+        if($this->isFixMode($params)){
 
             if(recreateRecLinks($this->system, true)){
                 $resMsg = '<div><h3 class="res-valid">Relationship cache has been successfully recreated</h3></div>';
             }else{
                 $response = $this->system->getError();
-                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resMsg = "<div><h3 class=\"error\">{$response['message']}</h3></div>";
                 $resStatus = false;
             }
         }
@@ -1514,17 +1544,17 @@ HEADER;
 
 
                 $resMsg .= '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'
-                        .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
+                        .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').DIV_E;
 
                 if($missed_relationships>0){
-                    $resMsg .='<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b></div>';
+                    $resMsg .='<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b>'.DIV_E;
                 }
 
                 $resMsg .= '<br><div style="padding:5px">Total count of links/resources:&nbsp;<b>'.$cnt_links.'</b>'
-                        .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').'</div>';
+                        .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').DIV_E;
 
                 if($missed_links>0){
-                    $resMsg .= '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b></div>';
+                    $resMsg .= '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b>'.DIV_E;
                 }
 
             }else{
@@ -1555,14 +1585,14 @@ HEADER;
         $resStatus = true;
         $resMsg = '';
 
-        if(is_array($params) && @$params['fix']==1){
+        if($this->isFixMode($params)){
 
             $rep = recreateRecDetailsDateIndex($this->system, true, false, 0, @$params['progress_report_step']);//see utils_db
 
             if(is_bool($rep) && $rep==false){
 
                 $response = $this->system->getError();
-                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resMsg = "<div><h3 class=\"error\">{$response['message']}</h3></div>";
                 $resStatus = false;
             }else{
                 $resMsg = '<div><h3 class="res-valid">Record Details Date Index has been successfully recreated</h3></div>';
@@ -1586,8 +1616,8 @@ HEADER;
             $query = 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID in ('.$fld_dates.') AND dtl_Value LIKE "%estMinDate%"';
             $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
 
-            $resMsg .= '<div style="padding:5px">Total count of date fields:&nbsp;<b>'.$cnt_dates.'</b></div>';
-            $resMsg .= '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.intval($cnt_fuzzy_dates).'</b></div>';
+            $resMsg .= '<div style="padding:5px">Total count of date fields:&nbsp;<b>'.$cnt_dates.'</b>'.DIV_E;
+            $resMsg .= '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.intval($cnt_fuzzy_dates).'</b>'.DIV_E;
 
 
             $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');
@@ -1608,10 +1638,10 @@ HEADER;
 
                 if($cnt_dates > $cnt_index || $cnt_empty>0){
                     if($cnt_dates > $cnt_index){
-                        $resMsg .= '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b></div>';
+                        $resMsg .= '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b>'.DIV_E;
                     }
                     if($cnt_empty > 0){
-                        $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b></div>';
+                        $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b>'.DIV_E;
                     }
 
                     $resMsg .= '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';
@@ -1644,12 +1674,15 @@ HEADER;
 
         $mysqli = $this->mysqli;
 
+        $div_valid = '<div><h3 class="res-valid">';
+        $div_found = '<div><h3 class="error">Found ';
+
         // record types =========================
         $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' record types that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' record types that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
@@ -1659,7 +1692,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' record types have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';
             }
@@ -1672,7 +1705,7 @@ HEADER;
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' base field types that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' base field types that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
@@ -1682,7 +1715,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' field types have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';
             }
@@ -1695,7 +1728,7 @@ HEADER;
         if($cnt>0){
 
             $resStatus = false;
-            $resMsg .= '<div><h3 class="error">Found '.$cnt.' vocabularies that are not belong any group</h3></div>';
+            $resMsg .= $div_found.$cnt.' vocabularies that are not belong any group</h3></div>';
 
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
@@ -1704,7 +1737,7 @@ HEADER;
 
                 $cnt2 = $mysqli->affected_rows;
 
-                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
+                $resMsg .= $div_valid.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
             }else{
                 $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';
             }
@@ -1755,16 +1788,16 @@ HEADER;
         $this->keep_autocommit = null;
         if($need_correct_long){
             if(method_exists('geoPHP','getAdapter')){
-                $wkt_adapter = geoPHP::getAdapter('wkt');
-                $geojson_adapter = geoPHP::getAdapter('json');
+                $wkt_adapter = \geoPHP::getAdapter('wkt');
+                $geojson_adapter = \geoPHP::getAdapter('json');
             }else{
-                $wkt_adapter = new WKT();
-                $geojson_adapter = new GeoJSON();
+                $wkt_adapter = new \WKT();
+                $geojson_adapter = new \GeoJSON();
             }
             $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
             $this->keep_autocommit = mysql__begin_transaction($mysqli);
         }
-        $isOk = true;
+        $isOK = true;
 
         while ($row = $res->fetch_assoc()){
 
@@ -1807,7 +1840,7 @@ HEADER;
 
             try{
 
-                $geom = geoPHP::load($row['wkt'], 'wkt');
+                $geom = \geoPHP::load($row['wkt'], 'wkt');
                 if($geom!=null && !$geom->isEmpty()){ // Check that long (x) < 180 AND lat (y) < 90
 
                     $bbox = $geom->getBBox();
@@ -1822,12 +1855,12 @@ HEADER;
                         if( $is_wrong_long && $need_correct_long){
 
                                 $json = $geojson_adapter->write($geom, true);
-                                $json = geo_CorrectLng_JSON($json);
+                                $json = geoCorrectLngJSON($json);
                                 $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
                                 list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
                                 if($r_type===false){
-                                    $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.'</div>';
+                                    $isOK = false;
+                                    $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. '.$r_value);
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -1836,8 +1869,8 @@ HEADER;
                                 $res33 = $update_stmt->execute();
                                 if(! $res33 )
                                 {
-                                    $isOk = false;
-                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.'</div>';
+                                    $isOK = false;
+                                    $resMsg .=  error_Div('Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error);
                                     $mysqli->rollback();
                                     break;
                                 }
@@ -1856,7 +1889,7 @@ HEADER;
                     //array_push($ids3, $row['rec_ID']);
                     continue;
                 }
-            }catch(Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
+            }catch(\Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
                 array_push($bibs3, $row);
                 //array_push($ids3, $row['rec_ID']);
                 continue;
@@ -1864,7 +1897,7 @@ HEADER;
         } //while
         if($res) {$res->close();}
 
-        if($isOk){
+        if($isOK){
             $mysqli->commit();
         }
         if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
@@ -1877,7 +1910,7 @@ HEADER;
             fwrite($this->out, '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>');
         }else{
             $resStatus = false;
-            $this->_printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
+            $this->printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
         }
 
 
@@ -1886,7 +1919,7 @@ HEADER;
             fwrite($this->out, '<h3 class="res-valid">OK: No missing geospatial values</h3><br>');
         }else{
             $resStatus = false;
-            $this->_printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
+            $this->printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
         }
 
         // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
@@ -1895,12 +1928,12 @@ HEADER;
         }else{
             $resStatus = false;
             $fixMsg = null;
-            if(count($ids2_lng)>0){
+            if(!empty($ids2_lng)){
                 $fixMsg = '<div style="padding:20px 0px">There are '.count($ids2_lng)
                         .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
                         .' <button data-fix="geo_values">Fix longitudes</button></div>';
             }
-            $this->_printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
+            $this->printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
         }
 
         $resMsg = $this->_outStreamRes();
@@ -1995,8 +2028,8 @@ HEADER;
 
                     if($new_val != $org_val){ // update existing value
 
-                        $upd_query = 'UPDATE recDetails SET dtl_Value = "' . $new_val . '" WHERE dtl_ID = ' . intval($row['dtl_ID']);
-                        $mysqli->query($upd_query);
+                        $upd_query = 'UPDATE recDetails SET dtl_Value = ? WHERE dtl_ID = ' . intval($row['dtl_ID']);
+                        mysql__exec_param_query($mysqli,$upd_query,array('s',$new_val));
 
                         if($fixed_multi && !in_array($rec_id, $fixed2)){
                             $fixed2[] = $rec_id;
@@ -2046,11 +2079,10 @@ HEADER;
                     .'<span>Leading and trailing spaces should never exist in data.</span><br>');
             }
 
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids1);
+            $url_all = $this->getAllURL($ids1);
 
             fwrite($this->out, '<a target=_new href="'.$url_all.'">Search for updated values '
-                       .'<img alt src="'.$url_icon_extlink.'" style="vertical-align:middle"></a>');
+                       .'<img alt src="'.ICON_EXTLINK.'" style="vertical-align:middle"></a>');
         }
 
         // Value that has multi-spaces, except double spacing
@@ -2070,7 +2102,7 @@ HEADER;
             <button data-fix="fld_spacing" data-selected="recCB14">Fix selected records</button></div>
             FIX;
 
-            $this->_printList('Multiple consecutive spaces detected', $fixMsg, $bibs2, 'recCB14');
+            $this->printList('Multiple consecutive spaces detected', $fixMsg, $bibs2, 'recCB14');
         }
 
         if(count($fixed2) > 0){
@@ -2105,7 +2137,7 @@ HEADER;
                 .' WHERE dtl_DetailTypeID = '. DT_WORKFLOW_STAGE
                 .' GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1');
 
-            if(is_array($recsWithManySWF) && count($recsWithManySWF)>0){
+            if(!isEmptyArray($recsWithManySWF)){
 
                 foreach($recsWithManySWF as $rec_ID => $rec){
 
@@ -2164,12 +2196,12 @@ HEADER;
             }
         }
 
-        if(count($completedRecords)==0){
+        if(empty($completedRecords)){
             $resMsg = '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
         }else{
             $resStatus = false;
             $this->_outStreamInit();
-            $this->_printList('Records were found to have multiple workflow stages',
+            $this->printList('Records were found to have multiple workflow stages',
                 '<div style="padding:20px 0px">There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).</div>',
                 $completedRecords, 'recCB15');
             $resMsg = $this->_outStreamRes();
@@ -2206,7 +2238,7 @@ HEADER;
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes '
             .'WHERE dtl_DetailTypeID = dty_ID AND (dty_Type = "enum" or dty_Type = "relmarker")');
 
-        $dbterms = VerifyValue::getTerms();
+        $dbterms = \VerifyValue::getTerms();
 
         $this->keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -2233,7 +2265,7 @@ HEADER;
 
                     //verify value
                     if(trim($term_id) == ''
-                       ||  VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $term_id, $row['dty_ID'] ))
+                       ||  \VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $term_id, $row['dty_ID'] ))
                     {
                         continue;   //valid term
                     }
@@ -2241,7 +2273,7 @@ HEADER;
 
                     if($is_first){
                         $is_first = false;
-                        $this->_printList('Records with terms not in the list of terms specified for the field', null, null, 'recCB16');
+                        $this->printList('Records with terms not in the list of terms specified for the field', null, null, 'recCB16');
                     }
 
                     //ok - term does not belong to required vocabullary
@@ -2250,7 +2282,7 @@ HEADER;
                     if($term_label){
                         $row['dtl_Value'] = $term_id.'&nbsp;'.$term_label;
 
-                        $suggested_term_id = VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $term_label);
+                        $suggested_term_id = \VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $term_label);
                         if($suggested_term_id>0){
 
                             if($fix_same_name_terms){
@@ -2261,19 +2293,19 @@ HEADER;
                                 if(!$update_res)
                                 {
                                     $resStatus = false;
-                                    $resMsg = '<div class="error" style="color:red">Cannot replace terms in record details. Query :'
-                                            .$update_query.'  SQL error: '.$mysqli->error.'</div>';
+                                    $resMsg = error_Div('Cannot replace terms in record details. Query :'
+                                            .$update_query.'  SQL error: '.$mysqli->error);
                                     $mysqli->rollback();
                                     fclose($this->out);
                                     $this->out = null;
                                     break 2;
                                 }
 
-                                $row['dtl_Value'] .= ' <span style="color:green">changed to '.$suggested_term_id.'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:green\">changed to $suggested_term_id</span>";
                                 $fix_count++;
 
                             }else{
-                                $row['dtl_Value'] .= ' <span style="color:green">suggestion: '.$suggested_term_id.'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:green\">suggestion: $suggested_term_id</span>";
                                 $suggest_cnt++;
                             }
                         }
@@ -2282,7 +2314,7 @@ HEADER;
                         $err_count++;
                     }
 
-                    $this->_printList(null, null, array($row), 'recCB16');//out one row
+                    $this->printList(null, null, array($row), 'recCB16');//out one row
 
                     $cnt++;
 
@@ -2316,7 +2348,7 @@ HEADER;
             if ($cnt == 0) {
                 fwrite($this->out, '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>');
             }else{
-                fwrite($this->out, '</table>');
+                fwrite($this->out, TABLE_E);
 
                 if($err_count>0){
                     $resStatus = false;
@@ -2438,13 +2470,13 @@ FIXMSG
                     if($row['new_value']==null && $row['is_ambig']===true){
 
                         //parse and validate value order 2 (mm/dd), don't add day if it is not defined
-                        $row['new_value'] = Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
+                        $row['new_value'] = \Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
                         if($row['new_value']==$date_val){ //nothing to correct - result is the same
 
                             if(strlen($date_val)>=8 && strpos($date_val,'-')==false){ // try automatic convert to ISO format
 
                                 try{
-                                    $t2 = new DateTime($date_val);
+                                    $t2 = new \DateTime($date_val);
 
                                     $format = 'Y-m-d';
                                     if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
@@ -2456,14 +2488,14 @@ FIXMSG
                                     }
                                     $row['new_value'] = $t2->format($format);
                                     $row['dtl_Value'] = $row['new_value'];// for final ambiguous check
-                                }catch(Exception  $e){
+                                }catch(\Exception  $e){
                                     //skip
                                 }
                             }
                             continue;
                         }
                         if($row['new_value']!=null && $row['new_value']!=''){
-                            $row['is_ambig'] = Temporal::correctDMYorder($date_val, true);
+                            $row['is_ambig'] = \Temporal::correctDMYorder($date_val, true);
                             $autofix = ($row['is_ambig']===false);
                         }
                     }
@@ -2476,7 +2508,7 @@ FIXMSG
                             $query = 'update recDetails set dtl_Value=? where dtl_ID='.intval($row['dtl_ID']);
                             mysql__exec_param_query($mysqli, $query, array('s',$row['new_value']), false );
 
-                            $row['dtl_Value'] .= ' <span style="color:green">changed to '.$row['new_value'].'</span>';
+                            $row['dtl_Value'] .= " <span style=\"color:green\">changed to {$row['new_value']}</span>";
                         }else{
                             $mysqli->query('delete from recDetails where dtl_ID='.intval($row['dtl_ID']));
 
@@ -2485,22 +2517,22 @@ FIXMSG
 
                         if($is_first){
                             $is_first = false;
-                            $this->_printList('Auto-corrected dates', 'The following dates have been corrected as shown', null, 'recCB17');
+                            $this->printList('Auto-corrected dates', 'The following dates have been corrected as shown', null, 'recCB17');
                         }
-                        $this->_printList(null, null, array($row), 'recCB17');//out one row
+                        $this->printList(null, null, array($row), 'recCB17');//out one row
                         $fix_count++;
                     }else {
 
                         if($row['new_value']==null || $row['new_value']==''){
                             //manual fix
                             if($row['is_ambig']!==true){
-                                $row['dtl_Value'] .= ' <span style="color:red">'.$row['is_ambig'].'</span>';
+                                $row['dtl_Value'] .= " <span style=\"color:red\">{$row['is_ambig']}</span>";
                             }
                             $bibs_manualfix[] = $row;
 
-                        } else { //if ($row['is_ambig']===true)
+                        } else {
                             //suggestion
-                            $row['dtl_Value'] .= ' <span style="color:green">suggestion to '.$row['new_value'].'</span>';
+                            $row['dtl_Value'] .= " <span style=\"color:green\">suggestion to {$row['new_value']}</span>";
                             $bibs_suggested[] = $row;
                         }
 
@@ -2535,18 +2567,18 @@ FIXMSG
         }
 
         if($fix_count>0){
-            fwrite($this->out, '</table>');
+            fwrite($this->out, TABLE_E);
         }
         if($cnt>0){
             $resStatus = false;
 
-            if(count($bibs_suggested)>0){
+            if(!empty($bibs_suggested)){
                 $fixMsg = '<div>To fix faulty date values as suggested, mark desired records and please click here: <button data-fix="date_values" data-selected="recCB18">Fix dates</button></div>';
-                $this->_printList('Suggestions for date field corrections', $fixMsg, $bibs_suggested, 'recCB18');
+                $this->printList('Suggestions for date field corrections', $fixMsg, $bibs_suggested, 'recCB18');
             }
-            if(count($bibs_manualfix)>0){
+            if(!empty($bibs_manualfix)){
 
-                $this->_printList('Invalid dates that needs to be fixed manually by a user', null, $bibs_manualfix, 'recCB19');
+                $this->printList('Invalid dates that needs to be fixed manually by a user', null, $bibs_manualfix, 'recCB19');
             }
         }
 
@@ -2575,6 +2607,7 @@ FIXMSG
 
         return array('status'=>$resStatus, 'message'=>$resMsg);
     }
+
 
 }
 

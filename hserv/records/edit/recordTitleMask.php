@@ -35,6 +35,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  CommonPHP
 */
+use hserv\utilities\USystem;
+
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 
@@ -213,7 +215,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
                 return $value;
             }else{
                 $replacements[$matches[1][$i]] = "";
-                $fields_err++;//return "";
+                $fields_err++;
             }
         }elseif (null==$value || trim($value)==""){
             $replacements[$matches[1][$i]] = "";
@@ -330,11 +332,14 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
             $puncts = '-:;,.@#|+=&(){}';// These are stripped from begining and end of title
             $puncts2 = '-:;,@#|+=&';// same less period
 
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $regex_ = '/\\s]*(.*?)[';
+            $regex_2 = '!\\([';
+
+            $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $title = preg_replace($regex_2.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace($regex_2.$puncts.$regex_.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
+            $title = preg_replace($regex_2.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
             $title = preg_replace('!,\\s*,+!s', ',', $title);// replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
             $title = preg_replace('!\\s+,!s', ',', $title);// remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
 
@@ -446,7 +451,7 @@ private static function __get_rec_detail_types($rt) {
         .' dty_Type, if(rst_PtrFilteredIDs,rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs,'
         .' dty_OriginatingDBID, dty_IDInOriginatingDB, dty_ID, rst_RequirementType '
         .' from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID '
-        .' where '//since 2017-11-25 rst_RequirementType in ("required", "recommended", "optional") and '
+        .SQL_WHERE//since 2017-11-25 rst_RequirementType in ("required", "recommended", "optional") and '
         .' rst_RecTypeID='.intval($rt)
         .' order by rst_DisplayOrder';
 
@@ -560,7 +565,9 @@ private static function __get_record_value($rec_id, $reset=false) {
         self::$records = array();
     }
 
-    if(!@self::$records[$rec_id]){
+    if(@self::$records[$rec_id]){
+        return self::$records[$rec_id];
+    }
 
         $ret = null;
 
@@ -592,7 +599,7 @@ private static function __get_record_value($rec_id, $reset=false) {
         }
 
         self::$records[$rec_id] = $ret;
-    }
+
     return self::$records[$rec_id];
 }
 
@@ -604,7 +611,6 @@ private static function __get_record_value($rec_id, $reset=false) {
 */
 private static function __get_enum_value($enum_id, $enum_param_name)
 {
-    $ret = null;
 
     if($enum_param_name==null || strcasecmp($enum_param_name,'term')==0){
         $enum_param_name = "label";
@@ -614,46 +620,50 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 
     $ress = self::$mysqli->query('select trm_id, trm_label, trm_code, '
     .'concat(trm_OriginatingDBID, \'-\', trm_IDInOriginatingDB) as trm_conceptid, trm_parenttermid from defTerms where trm_ID = '.intval($enum_id));
-    if($ress){
+    if(!$ress){
+        return null;
+    }
+
+
         $relval = $ress->fetch_assoc();
+        $ress->close();
 
         $get_param = mb_strtolower($enum_param_name, 'UTF-8');
 
         // If trm_label then construct is: "branch_trm_label. ... .leaf_term_label", ignore root label
-        if(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null){
+        if(!(strcasecmp($get_param, 'label') == 0 && @$relval['trm_parenttermid'] > 0 && $relval['trm_label'] != null)){
 
-            $trm_id = @$relval['trm_parenttermid'];
-            $ret = @$relval['trm_label'];
+            return @$relval['trm_'.$get_param];
 
-            while(1){
-
-                $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
-
-                if($parent_ress){
-
-                    $parent_trm = $parent_ress->fetch_assoc();
-                    if($parent_trm == null || $parent_trm['trm_ParentTermID'] == null || $parent_trm['trm_ParentTermID'] == 0){
-                        $parent_ress->close();
-                        break;
-                    }else{
-                        $ret = $parent_trm['trm_label'] . "." . $ret;
-
-                        $trm_id = $parent_trm['trm_ParentTermID'];
-                    }
-
-                    $parent_ress->close();
-                }else{
-                    break;
-                }
-            }
-        }else{
-            $ret = @$relval['trm_'.$get_param];
         }
 
-        $ress->close();
-    }
+        $ret = null;
 
-    return $ret;
+        $trm_id = @$relval['trm_parenttermid'];
+        $ret = @$relval['trm_label'];
+
+        while(1){
+
+            $parent_ress = self::$mysqli->query("select trm_label, trm_ParentTermID from defTerms where trm_ID = " . intval($trm_id));
+
+            if(!$parent_ress){
+                break;
+            }
+
+            $parent_trm = $parent_ress->fetch_assoc();
+            if($parent_trm == null || $parent_trm['trm_ParentTermID'] == null || $parent_trm['trm_ParentTermID'] == 0){
+                $parent_ress->close();
+                break;
+            }
+
+            $ret = $parent_trm['trm_label'] . "." . $ret;
+
+            $trm_id = $parent_trm['trm_ParentTermID'];
+
+            $parent_ress->close();
+        }//while
+
+        return $ret;
 }
 
 //
@@ -663,8 +673,8 @@ private static function __get_file_name($ulf_ID){
 
     if($ulf_ID>0){
         $fileinfo = fileGetFullInfo(self::$system, $ulf_ID);
-        if(is_array($fileinfo) && count($fileinfo)>0){
-            return $fileinfo[0]['ulf_OrigFileName'] == '_remote' ?
+        if(!isEmptyArray($fileinfo)){
+            return $fileinfo[0]['ulf_OrigFileName'] == ULF_REMOTE ?
                     $fileinfo[0]['ulf_ExternalFileReference'] : $fileinfo[0]['ulf_OrigFileName'];
             //  array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
         }
@@ -744,7 +754,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
         }
 
-        if(count($res)==0){
+        if(empty($res)){
             return "";
         /*}elseif($dt_type == 'file'){
             return count($res)." file".(count($res)>1?"s":"");*/
@@ -838,23 +848,26 @@ private static function __get_rt_id( $rt_search ){
 
         $res = mysql__select_param_query(self::$mysqli, $query, $params);
 
-        if($res){
-            $row = $res->fetch_assoc();
-            $res->close();
-            if($row){
+        if(!$res){
+            return array(0, '', '');
 
-                if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
-                is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
-                    $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
-                } elseif (self::$db_regid>0) {
-                    $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
-                } else {
-                    $rt_cc = $row['rty_ID'];
-                }
-                return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
-            }
         }
-        return array(0, '', '');
+
+        $row = $res->fetch_assoc();
+        $res->close();
+        if(!$row){
+            return array(0, '', '');
+        }
+
+        if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
+        is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
+            $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
+        } elseif (self::$db_regid>0) {
+            $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
+        } else {
+            $rt_cc = $row['rty_ID'];
+        }
+        return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
 }
 
 /*
@@ -945,7 +958,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         //parse human readable with double fullstops
         $matches = explode($fullstop, $field_name);
 
-        if (count($matches)>0) {
+        if (!empty($matches)) {
             // fix rare case when we have more than 2 fullstops
             // in this case redundant fullstops are added to previous field
             //  AAA...BBB  =>  AAA. and BB
@@ -1058,7 +1071,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype_cc = '';//concept code
         $multi_constraint = false;
 
-        if(count($matches)>3){ //this is resource field  [Places referenced..Media..Media item title]
+        if(count($matches)>3){ //this is resource (record pointer) field  [Places referenced..Media..Media item title]
 
             $ishift = 0;
             $pos = mb_strpos($inner_field_name, '{');//{Organization}..Name - name of target rectype is defined
@@ -1125,7 +1138,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if(is_array($s2)){
                     $res = $s2; //error
                 } else {
-                    $res = $s1. $fullstop_concat .$s2; //recursion;
+                    $res = $s1. $fullstop_concat .$s2; //recursion
                 }
             }
 
@@ -1150,7 +1163,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 //[Note title]  [Author(s).{PersonBig}.Family Name] ,  [Author(s).{Organisation}.Full name of organisation]
 // [2-1]  [2-15.{2-10}.2-1] ,  [2-15.{2-4}.2-1]
 
-            //get values for resource field
+            //get values for resource (record pointer) field
             $pointer_ids = self::__get_field_value( $rdt_id, $rt, $mode, $rec_id);
             $pointer_ids = prepareIds($pointer_ids);
             $res = array();
@@ -1158,7 +1171,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 $rec_value = self::__get_record_value($rec_id);
                 if($rec_value){
-                    $res_rt = $rec_value['rec_RecTypeID'];//resource rt
+                    $res_rt = $rec_value['rec_RecTypeID'];//resource (linked record) type rt
 
                     if($inner_rectype>0 && $inner_rectype!=$res_rt) {continue;}
 
@@ -1179,10 +1192,10 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             if($inner_rectype>0){
                 $inner_rec_type = array($inner_rectype);
             }else{
-                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');//$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
                 $inner_rec_type = explode(",", $inner_rec_type);
             }
-            if(count($inner_rec_type)>0){ //constrained
+            if(!empty($inner_rec_type)){ //constrained
                 $field_not_found = null;
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);
@@ -1280,23 +1293,25 @@ if (! function_exists('array_str_replace')) {
             $match_idx = -1;
             $match_offset = -1;
             for ($i=0; $i < count($search);++$i) {
-                if($search[$i]==null || $search[$i]=='') {continue;}
+                if(isEmptyStr($search[$i])) {continue;}
                 $offset = mb_strpos($subject, $search[$i]);
-                if ($offset === FALSE) {continue;}
+                if ($offset === false) {continue;}
+
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
                     $match_offset = $offset;
                 }
             }
 
-            if ($match_idx != -1) {
-                $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
-                $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
-            } else {    // no matches for any of the strings
+            if ($match_idx == -1) {
+                // no matches for any of the strings
                 $val .= $subject;
                 $subject = '';
                 break;
             }
+
+            $val .= mb_substr($subject, 0, $match_offset) . $replace[$match_idx];
+            $subject = mb_substr($subject, $match_offset + mb_strlen($search[$match_idx]));
         }
 
         return $val;

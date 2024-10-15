@@ -49,8 +49,8 @@ $rty_ids_list = null;
 if(@$_REQUEST['recTypeIDs']){
     $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
-    //$rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
-    if(count($rty_ids)>0) {$rty_ids_list = implode(',', $rty_ids);}
+
+    if(!empty($rty_ids)) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
 if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on client side
@@ -103,7 +103,7 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
 
         var action_url = window.hWin.HAPI4.baseURL + "admin/verification/rebuildRecordTitles.php";
 
-        var session_id = window.hWin.HEURIST4.msg.showProgress( $('.progress_div'),  0, 500 );
+        var session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('.progress_div'), interval:500} );
 
         var request = {
             'session': session_id
@@ -198,7 +198,7 @@ if($init_client){
 print '<br><br><b>DONE</b><br><br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
     '&w=all&q=ids:'.join(',', $updates).'">Click to view updated records</a><br>&nbsp;<br>';
 
-if(count($blanks)>0){
+if(!empty($blanks)){
     print '<br>&nbsp;<br><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
         '&w=all&q=ids:'.join(',', $blanks).
     '">Click to view records for which the data would create a blank title</a>'.
@@ -211,7 +211,7 @@ if(count($blanks)>0){
 
     if( is_bool($res) && !$res ){
 
-        print '<div><span style="color:red">'.$system->getError()['message'].'</span> are updated</div>';
+        print error_Div($system->getErrorMsg());
 
     }else{
         print '<div><span id=total_count>'.intval($res['total_count']).'</span> records in total</div>';
@@ -304,7 +304,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             $unchanged_count++;
 
         }elseif (! preg_match('/^\\s*$/', $new_title)) {    // if new title is blank, leave the existing title
-            //$updates[$rec_id] = $new_title;
+
             $updates[] = $rec_id;
             $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
                 $mysqli->real_escape_string($new_title).'" where rec_ID='.$rec_id);
@@ -353,14 +353,14 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
 
     $q_updates = '';
     if(count($updates)>1000){
-        $q_updates = 'sortby:-m';//'&limit='.count($updates);
-    }elseif(count($updates)>0){
+        $q_updates = 'sortby:-m';
+    }elseif(!empty($updates)){
         $q_updates = 'ids:'.implode(',',$updates);
     }
     $q_blanks = '';
     if(count($blanks)>2000){
         $q_blanks = 'ids:'.array_slice($blanks, 0, 2000);
-    }elseif(count($blanks)>0){
+    }elseif(!empty($blanks)){
         $q_blanks = 'ids:'.implode(',',$blanks);
     }
 

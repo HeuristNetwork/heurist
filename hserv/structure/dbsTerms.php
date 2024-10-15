@@ -39,6 +39,7 @@
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
     */
+use hserv\utilities\USanitize;
 
 class DbsTerms
 {
@@ -132,11 +133,16 @@ class DbsTerms
     public function getTermLabel($term_id, $with_hierarchy=false) {
 
         $term = $this->getTerm($term_id);
-        if($term){
+        if(!$term){
+            return '';
+        }
 
             $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
 
-            if($with_hierarchy){
+            if(!$with_hierarchy){
+                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
+            }
+
                 $labels = '';
                 $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
                 $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
@@ -147,7 +153,7 @@ class DbsTerms
 
                 while ( $term[$idx_term_parent]>0 ) {
                     $term = $this->getTerm($term[$idx_term_parent]);
-                    //if(!$term) {break;}
+
                     if($term[$idx_term_parent]>0){
                         array_unshift($labels, $term[$idx_term_label]);
                     }else{
@@ -155,13 +161,6 @@ class DbsTerms
                     }
                 }
                 return implode('.',$labels);
-            }else{
-                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
-            }
-        }else{
-            return '';
-        }
-
     }
 
     //
@@ -284,7 +283,7 @@ class DbsTerms
         }else{
 
             $children = @$this->data['trm_Links'][$parent_id];
-            if(is_array($children) && count($children)>0){
+            if(!isEmptyArray($children)){
 
                 foreach($children as $trm_ID){
 
@@ -310,7 +309,7 @@ class DbsTerms
                     }
 
                     $res2 = $this->treeData($trm_ID, $mode);
-                    if(is_array($res2) && count($res2)>0){
+                    if(!isEmptyArray($res2)){
                         if($mode==1){
                             //tree
                             $res[$trm_ID] = $res2;
@@ -334,7 +333,7 @@ class DbsTerms
 
         if($parent_id>0){
             $children = $this->treeData($parent_id, 3);//ids
-            if(count($children)>0){
+            if(!empty($children)){
                 $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
 
@@ -407,7 +406,7 @@ class DbsTerms
 
                     break;
 
-                }elseif(is_array($children) && count($children)>0){
+                }elseif(!isEmptyArray($children)){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -434,7 +433,7 @@ class DbsTerms
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }elseif(is_array($children) && count($children)>0 ) {
+            }elseif( !isEmptyArray($children) ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) {return $res;}
@@ -463,8 +462,7 @@ class DbsTerms
 
         if(is_array($lvl_src)){
             foreach($lvl_src as $trmId=>$children){
-                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
-                $lvl_values[] = $name1;
+                $lvl_values[] = trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
             }
         }
 
@@ -473,11 +471,9 @@ class DbsTerms
 
         if(is_array($lvl_src)){
             foreach($lvl_src as $trmId=>$children){
-                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
-                $lvl_values[] = $name1;
+                $lvl_values[] = trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
             }
         }
-
 
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
     }
@@ -495,7 +491,7 @@ class DbsTerms
         $name = removeLastNum(trim($term_value));
         $found = 0;
 
-        if(count($same_level_values)>0)
+        if(!empty($same_level_values))
         foreach ($same_level_values as $value){
                 $name1 = removeLastNum(trim($value));
                 if(strcasecmp($name, $name1)==0){

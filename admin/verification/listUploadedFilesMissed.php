@@ -23,6 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\USanitize;
+
 $is_included = (defined('PDIR'));
 $has_broken_url = false;
 
@@ -31,16 +33,17 @@ if($is_included){
     print '<div style="padding:10px"><h3 id="recordfiles_missed_msg">Check missed registered files</h3><br>';
 
 }else{
+
     define('PDIR','../../');
 
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-    $sysadmin_pwd = System::getAdminPwd();
+    $sysadmin_pwd = USanitize::getAdminPwd();
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
-        print $system->getError()['message'];
+        print $system->getErrorMsg();
         return;
     }
 
@@ -103,7 +106,7 @@ $missed_folders = array();
 
 foreach ($databases as $idx=>$db_name){
 
-    //mysql__usedatabase($mysqli, $db_name);
+
     list($db_full_name, $db_name) = mysql__get_names($db_name);// full name used for query, short hand used for filestore
 
     $db_full_name = preg_replace(REGEX_ALPHANUM, "", $db_full_name);//for snyk
@@ -145,7 +148,7 @@ foreach ($databases as $idx=>$db_name){
 
 }//for databases
 
-if(!(is_array($missed) && count($missed)>0)){
+if(isEmptyArray($missed)){
     echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
 }else{
 
@@ -162,7 +165,7 @@ if(!(is_array($missed) && count($missed)>0)){
 
     print '<div style="padding-top:20px;color:red">There are <b>'.count($missed).' of '.$total_count
          .'</b> registered files are missed</div>';
-    //print '<div><a href="#">Download report as CSV</a></div>';
+
 }
 
 if(!$is_included){

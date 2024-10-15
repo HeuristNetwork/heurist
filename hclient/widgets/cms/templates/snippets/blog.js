@@ -36,35 +36,23 @@ function prepareTemplateBlog(new_element_json, callback){
                 }
                 
                 //copy blog template to smarty folder
-                let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-                
-                let request = {mode:'import', 
-                               import_template:{name:'Blog post format - DO NOT DELETE.tpl',cms_tmp_name:'Blog entry.gpl',size:999}, 
-                               db:window.hWin.HAPI4.database};
-                
-                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(res){
-                    
-                    if(res['error']){
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: res['error'],
-                            error_title: 'Failed to prepare blog template'
-                        }, true);
-                    }else{
-                        let template_name = res['ok'];
-
+                window.hWin.HAPI4.SystemMgr.reportAction({
+                        action:'import',
+                        import_template:{name:'Blog post format - DO NOT DELETE.tpl',cms_tmp_name:'Blog entry.gpl'}},
+                function(response){
+                    if (response.status == window.hWin.ResponseStatus.OK) {
+                        let template_name = response.data.filename;
                         let ele = layoutMgr.layoutContentFindWidget(new_element_json, 'heurist_resultList');
                         if(ele){
                             ele.options.search_realm = realm_id;
                             ele.options.rendererExpandDetails = template_name;
                         }
                       
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, new_element_json);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, new_element_json);                    
+                    } else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                    
                 });
-                
-                
-                
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response, true);
             }

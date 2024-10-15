@@ -4,7 +4,7 @@
         "tableName": "defFileExtToMimetype",
         "tablePrefix": "fxm",
         
-        "helpContent": "defFileExtToMimetype.html",
+        "helpContent": "defFileExtToMimetype.htm",
         
         "searchFormContent": "searchDefFileExtToMimetype.html",
         

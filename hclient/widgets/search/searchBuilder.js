@@ -68,10 +68,10 @@ $.widget( "heurist.searchBuilder", {
     _create: function() {
 
         // prevent double click to select text
-        //this.element.disableSelection();
+       
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);
+       
 
         let that = this;
 
@@ -80,7 +80,7 @@ $.widget( "heurist.searchBuilder", {
         let ht = $(window).height();
         if(ht>700) ht = 700;
 
-        //this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+       
         if(this.options.is_dialog){
         
             this._dialog = this.element.dialog({
@@ -289,7 +289,7 @@ $.widget( "heurist.searchBuilder", {
         if(this.options.is_modal || !this.is_edit_continuing){
             
             if(!(this.options.is_modal && this.options.svsID>0) || !this.is_edit_continuing){
-                //this.options.params = {};
+               
             }
             
             this.is_edit_continuing = !this.options.is_modal;
@@ -305,7 +305,7 @@ $.widget( "heurist.searchBuilder", {
                         mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
                         mouseleave: function(e){ 
                             this.options.menu_locked.call( this, false, true ); //close after delay
-                        }}); //that.closeEditDialog();
+                        }});
             
         }else{
             
@@ -363,7 +363,7 @@ $.widget( "heurist.searchBuilder", {
     //
     // add or change selected field
     //    
-    , addFieldItem: function( code, codes, ele_id ){
+    , addFieldItem: function( code, codes, ele_id, reverse_RtyID  ){
 
         if(!codes) codes = code.split(':');
         
@@ -382,7 +382,6 @@ $.widget( "heurist.searchBuilder", {
 
         if(!(top_rty_ID>0)) top_rty_ID = 0;
         if(!(rty_ID>0)) rty_ID = 0;
-        //if(!(dty_ID>0)) dty_ID = 0;
         
         if(ele_id){
             
@@ -393,7 +392,8 @@ $.widget( "heurist.searchBuilder", {
                     rty_ID: rty_ID,
                     dty_ID: dty_ID,
                     enum_field:enum_field,
-                    language: lang
+                    language: lang,
+                    reverse_RtyID: reverse_RtyID
                 });
 
         }else{
@@ -410,6 +410,7 @@ $.widget( "heurist.searchBuilder", {
                     dty_ID: dty_ID,
                     enum_field: enum_field,
                     language: lang,
+                    reverse_RtyID: reverse_RtyID,
                     onremove: function(){
                         let id = this.element.attr('id');
                         $.each(that.field_array,function(k,item){
@@ -479,15 +480,15 @@ $.widget( "heurist.searchBuilder", {
             }
 
             if(that.select_main_rectype.val()<0){
-                //AAA that.pnl_Items.hide();
+               
                 that.pnl_CoverAll 
                 .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
                 .show();
             }else{
-                //that.pnl_Items.show();
+               
                 that.pnl_CoverAll.hide();
                 //load list of field types
-                //that.adjustTreePanel();
+               
                 that._initTreeView([that.select_main_rectype.val()]);
             }
 
@@ -551,12 +552,12 @@ $.widget( "heurist.searchBuilder", {
                             
                             //reset flag - facet was changed - need to proceed all steps of wizard
                             if(this.select_additional_rectypes.editing_input('getValues')[0]){
-                                //this._resetFacets();
+                               
                             }
                             this.select_additional_rectypes.editing_input('setValue', '');
                             this.select_additional_rectypes.hide();
                         }
-                        //this.adjustTreePanel();
+                       
                     }}});
             
                 this.pnl_Rectype  = this.element.find('#pnl_Rectype');
@@ -650,8 +651,8 @@ $.widget( "heurist.searchBuilder", {
 
                 this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
 
-                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search. &#010; '
-                    + 'ANY will search across the default language and all translated terms or texts. &#010; '
+                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search.\n'
+                    + 'ANY will search across the default language and all translated terms or texts.\n'
                     + 'Default is the default language used in construction of the database.');
             }
             
@@ -699,7 +700,7 @@ $.widget( "heurist.searchBuilder", {
                     }
                         this.pnl_Items.css('bottom',h);
                         this.pnl_CoverAll.css('bottom',h);
-                        //this.pnl_Tree.css('bottom',h);
+                       
                 }});
                 
                 
@@ -719,7 +720,7 @@ $.widget( "heurist.searchBuilder", {
             }
                 
                 
-        //this.adjustTreePanel();
+       
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
         this.adjustDimension();
         
@@ -761,14 +762,6 @@ $.widget( "heurist.searchBuilder", {
             change: function(){
                     let val = this.getValues();
                     val = val[0].split(',');
-                    //$.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
-                    /*
-                    that.pnl_Tree.find('#field_treeview').hide();
-                    setTimeout(function(){
-                        that.adjustTreePanel();
-                        that.pnl_Tree.find('#field_treeview').fadeIn(500);
-                    },1000);
-                    */
             }    
         };
 
@@ -779,13 +772,11 @@ $.widget( "heurist.searchBuilder", {
     // init fieldtreeview
     , _initTreeView: function(rectypeIds){
         
-        //if(!this.is_advanced) return;
         
-
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
 
             let that = this;
-            //this.options.params.rectypes = rectypeIds;
+           
             let treediv = this.element.find('#field_treeview');
             let rectype = rectypeIds.join(',');
 
@@ -801,7 +792,7 @@ $.widget( "heurist.searchBuilder", {
             }
             this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
-            //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
+            
 
             //'title','modified',
             let allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
@@ -963,7 +954,12 @@ $.widget( "heurist.searchBuilder", {
                     
                     let ptr_fld = window.hWin.HEURIST4.util.cloneJSON(data.node.data);
                     if(ptr_fld.type=='resource'){
-                        ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';
+                        //adds as a first in the list of pointer rectype fields
+                        if(ptr_fld.isreverse){
+                            ptr_fld.title = '<span style="font-size:smaller">Source record: '+$Db.rty(ptr_fld.rtyID_local, 'rty_Name')+'</span>'; 
+                        }else{
+                            ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';    
+                        }
                         ptr_fld.lazy = false;
                         data.result.unshift(ptr_fld);
                     }
@@ -980,7 +976,7 @@ $.widget( "heurist.searchBuilder", {
                 loadChildren: function(e, data){
                     setTimeout(function(){
                         that.showHideReverse(data);   
-                        //that._assignSelectedFacets();
+                       
                     },500);
                 },
                 /* select: function(e, data) {
@@ -1007,16 +1003,21 @@ $.widget( "heurist.searchBuilder", {
 
                             if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
                                 // by default, handle as internal id
-                                //code += ':term';
-                                //codes.push('term');
+                               
+                               
                             }
 
                             let codes2 = code.split(':');
                             codes2[0] = 'any';
                             code = codes2.join(':');
 
+                            let reverse_RtyID = 0;
+                            if(data.node.data.isreverse){
+                                reverse_RtyID = data.node.data.rtyID_local;
+                            }
+                            
                             //add or replace field in builderItem
-                            that.addFieldItem( code, codes, that.select_field_for_id);
+                            that.addFieldItem( code, codes, that.select_field_for_id, reverse_RtyID);
                             that.select_field_for_id = null;
                             that.pnl_Tree.hide();
                         }else{
@@ -1039,7 +1040,7 @@ $.widget( "heurist.searchBuilder", {
             });
 
             //hide all folder triangles
-            //treediv.find('.fancytree-expander').hide();
+           
 
             that.current_tree_rectype_ids = rectypeIds.join(',');
 
@@ -1048,8 +1049,8 @@ $.widget( "heurist.searchBuilder", {
                 that.showHideReverse();
             });
 
-            //tree.options.filter.mode = "hide";
-            //tree.options.filter.highlight = false;
+           
+           
             $("#fsw_showreverse").attr('checked', false);
             $("#fsw_showreverse").trigger('change');
 
@@ -1090,7 +1091,7 @@ $.widget( "heurist.searchBuilder", {
             }
         });
         
-        //this._update_GenericField(data);
+       
     }
     
     ,_update_GenericField: function(node){
@@ -1139,13 +1140,13 @@ $.widget( "heurist.searchBuilder", {
     //
     ,_doSaveSearch: function(prevent_real_save=false){
 
-        const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+        const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
         if(widget && !prevent_real_save){
 
             const top = this.element.parent().css('top');
             const left = this.element.parent().css('left');
             setTimeout(() => {
-                widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', {'top': top, 'left': left});
+                widget.slidersMenu('show_ExploreMenu', null, 'svsAdd', {'top': top, 'left': left});
             }, 2000);
         }
 
@@ -1364,7 +1365,7 @@ $.widget( "heurist.searchBuilder", {
                             let not_found = true;
                             $.each(branch, function(i,item){
                                 if(item[key]){
-                                    //is_relationship = (linktype=='rt')||(linktype=='rf');
+                                   
                                     if(!Array.isArray(item[key])){
                                         item[key] = [{ids:item[key]}];
                                     }
@@ -1377,7 +1378,7 @@ $.widget( "heurist.searchBuilder", {
                             //add new branch 
                             if(not_found){
                                 
-                                //is_relationship = (linktype=='rt')||(linktype=='rf');
+                               
                                 
                                 let newbranch = {};
                                 newbranch[key] = [];

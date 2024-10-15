@@ -18,10 +18,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../autoload.php';
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/uSanitize.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../framecontent/infoPage.php');
 
@@ -34,17 +34,13 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 @todo id - record with 3object media
 
 */
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $is_not_inited = true;
 $db = @$req_params['db'];
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
 define('EDIR','../../../external/3D/');
 
@@ -56,7 +52,7 @@ if($system->init($db, true, false)){
 
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
-        if(is_array($listpaths) && count($listpaths)>0){
+        if(!isEmptyArray($listpaths)){
             $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             $allowed_exts = array('obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae', 'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim');
@@ -65,14 +61,14 @@ if($system->init($db, true, false)){
 
                 $system->initPathConstants($db);
 
-                //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileinfo['ulf_ObfuscatedFileID'].'&ext=file.obj';
+
                 $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];//need extension
                 $textures = array();
 
                 //find related mtl and texture files by original file name
                 if($fileExt=='obj'){
                     $filename = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$fileinfo['fullPath']);
-                    //$filename = basename($fileinfo['fullPath']);
+
                     $file_obj = realpath($filename);
                     $file_mtl = null;
                     //find mtl file name  'mtllib name_of_file.mtl'
@@ -133,21 +129,21 @@ if($system->init($db, true, false)){
 
                     foreach($textures as $idx=>$fname) {
                         $textures[$idx] = HEURIST_FILESTORE_URL.'file_uploads/'.$fname;
-                        //$textures[$idx] = '../../../../HEURIST_FILESTORE/osmak_9b/file_uploads/'.$fname;
+
                     }
                 }
-                if(count($textures)>0){
+                if(!empty($textures)){
                     $textures = ',"'.implode('","',$textures).'"';
                 }else{
                     $textures = '';
                 }
 
 
-                //$url_mtl = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_128_Ms 1 ouvert 2.mtl';
-                //$url_texture = 'http://127.0.0.1/HEURIST_FILESTORE/osmak_9b/file_uploads/ulf_127_Ms1ouvert2.jpg';
 
-                //'http://127.0.0.1/heurist/?db=osmak_9b&file=2eb0b92c4d6a7792646b255bee7f124b3a7b5500';
-                //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
+
+
+
+
                 $is_not_inited = false;
 
             }else{
@@ -158,7 +154,7 @@ if($system->init($db, true, false)){
             $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');
         }
 
-    }else{ // if(@$req_params['id']){
+    }else{
         $system->addError(HEURIST_INVALID_REQUEST, 'Parameter "file" is not defined');
     }
 }
@@ -167,11 +163,6 @@ if($is_not_inited){
     include_once ERROR_REDIR;
     exit;
 }
-
-//$url = EDIR."models/car.glb";
-//$url = EDIR."models/solids.obj";
-//$url = 'https://mbh.huma-num.fr/sites/default/files/mbh-3d/alcazar_ms_11_reliure.fbx';
-//$url = EDIR."models/alcazar_ms_11_reliure.fbx";
 
 $url = str_replace('&amp;','&',htmlspecialchars($url));
 

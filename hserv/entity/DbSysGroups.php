@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrUGrps table for workgroups
@@ -20,15 +22,17 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';//for recordDelete
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 
 class DbSysGroups extends DbEntityBase
 {
+
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
 
     /**
     *  search groups
@@ -38,8 +42,6 @@ class DbSysGroups extends DbEntityBase
     *  offset
     *  limit
     *  request_id
-    *
-    *  @todo overwrite
     */
     public function search(){
 
@@ -78,7 +80,7 @@ class DbSysGroups extends DbEntityBase
 
                 if(@$this->data['ugl_Join']){ //always search for role
 
-                    $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(' AND ',$where2);
+                    $from_table[0] = $from_table[0].' LEFT JOIN sysUsrGrpLinks ON '.implode(SQL_AND,$where2);
 
                 }else{
                     $where = array_merge($where,$where2);
@@ -123,29 +125,7 @@ class DbSysGroups extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:ugr_Modified'];
-        if($value!=null){
-            array_push($order, 'ugr_Modified '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:ugr_Members'];
-            if($value!=null){
-                array_push($order, 'ugr_Members '.($value>0?'ASC':'DESC'));
-                $needCount = true;
-            }else{
-                $value = @$this->data['sort:ugr_ID'];
-                if($value!=null){
-                    array_push($order, 'ugr_ID '.($value>0?'ASC':'DESC'));
-                }else{
-                    $value = @$this->data['sort:ugr_Name'];
-                    if($value!=null){
-                        array_push($order, 'ugr_Name ASC');
-                    }
-                }
-            }
-        }
+        $orderby = $this->searchMgr->setOrderBy();
 
         //$is_ids_only = (count($this->data['details'])==1);
 
@@ -158,11 +138,11 @@ class DbSysGroups extends DbEntityBase
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
+         if(!empty($where)){
+            $query = $query.SQL_WHERE.implode(SQL_AND,$where);
          }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
+         if($orderby!=null){
+            $query = $query.' ORDER BY '.$orderby;
          }
 
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
@@ -181,7 +161,7 @@ class DbSysGroups extends DbEntityBase
     //
     protected function _validatePermission(){
 
-        if(!$this->system->is_dbowner() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
 
             $ugrID = $this->system->get_user_id();
 
@@ -219,16 +199,9 @@ class DbSysGroups extends DbEntityBase
             $this->records[$idx]['ugr_Password'] = 'PASSWORD NOT REQUIRED';
             $this->records[$idx]['ugr_eMail'] = 'EMAIL NOT SET FOR '.$this->records[$idx]['ugr_Name'];
 
-
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT ugr_ID FROM sysUGrps  WHERE ugr_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['ugr_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['ugr_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED,
-                        'Workgroup cannot be saved. The provided name already exists');
-                return false;
+            if(!$this->doDuplicationCheck($idx, 'ugr_Name', 'Workgroup cannot be saved. The provided name already exists')){
+                    return false;
             }
 
         }
@@ -242,14 +215,14 @@ class DbSysGroups extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             //treat group image
             foreach($this->records as $record){
                 $group_ID = @$record['ugr_ID'];
-                if($group_ID && in_array($group_ID, $ret)){
+                if($group_ID && in_array($group_ID, $savedRecIds)){
                     $thumb_file_name = @$record['ugr_Thumb'];
 
                     //rename it to recID.png
@@ -272,7 +245,7 @@ class DbSysGroups extends DbEntityBase
             }
         }
 
-        return $ret;
+        return $savedRecIds;
 
     }
 
@@ -281,21 +254,19 @@ class DbSysGroups extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
-        if(in_array(1, $this->recordIDs)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owners" group');
-            return false;
-        }
-        $mysqli = $this->system->get_mysqli();
+        $this->recordIDs = null; //reset to obtain ids from $data
 
-        //check for existing records
-        $query = 'SELECT count(rec_ID) FROM Records WHERE rec_OwnerUGrpID in ('
-                        . implode(',', $this->recordIDs) . ') AND rec_FlagTemporary=0 limit 1';
-        $res = mysql__select_value($mysqli, $query);
-        if($res>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Deleting Group with existing Records not allowed');
+        $this->foreignChecks = array(
+                    array('SELECT FIND_IN_SET(1, "#IDS#")','Cannot remove "Database Owners" group'),
+                    array('SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary=0 AND rec_OwnerUGrpID IN (#IDS#) LIMIT 1',
+                          'Deleting Group with existing Records not allowed')
+                );
+
+        if(!$this->deletePrepare()){
             return false;
         }
+
+        $mysqli = $this->system->get_mysqli();
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -303,7 +274,7 @@ class DbSysGroups extends DbEntityBase
         $query = 'SELECT rec_ID FROM Records WHERE rec_OwnerUGrpID in ('
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
-        if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
+        if(!isEmptyArray($rec_ids_to_delete)){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) {return false;}
         }
@@ -312,12 +283,13 @@ class DbSysGroups extends DbEntityBase
 
         //find affected users
         $query = 'SELECT ugl_UserID FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs);
+
         $affectedUserIds = mysql__select_list2($mysqli, $query);
 
         //remove from roles table
         $query = 'DELETE FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs);
 
         $res = $mysqli->query($query);
         if(!$res){
@@ -327,20 +299,16 @@ class DbSysGroups extends DbEntityBase
             $ret = false;
         }
         $query = 'DELETE FROM usrSavedSearches  WHERE svs_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrTags  WHERE tag_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
         $query = 'DELETE FROM usrRecPermissions  WHERE rcp_UGrpID in (' . implode(',', $this->recordIDs) . ')';
-        $res = $mysqli->query($query);
+        $mysqli->query($query);
 
         if($ret){
             $ret = parent::delete();
-        }
 
-        if($ret){
-            $mysqli->commit();
-
-            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0){
+            if(!isEmptyArray(@$affectedUserIds)){
                 foreach($affectedUserIds as $usrID)  //affected users
                 {
                     if($usrID!=$this->system->get_user_id()){
@@ -352,14 +320,9 @@ class DbSysGroups extends DbEntityBase
                     }
                 }
             }
-            //update user groups for current user
-            //$this->system->updateSessionForUser( $this->system->get_user_id() );
-            //@todo   $groups = reloadUserGroups(get_user_id());
-            //@todo   updateSessionForUser(get_user_id(), 'user_access', $groups);
-        }else{
-            $mysqli->rollback();
         }
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }
@@ -380,14 +343,14 @@ class DbSysGroups extends DbEntityBase
 
         //group ids
         $this->recordIDs = prepareIds(@$this->data['groupID']);
-        if(count($this->recordIDs)==0){
+        if(empty($this->recordIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid workgroup identificator');
             return false;
         }
 
         //user ids
         $assignIDs = prepareIds(@$this->data['userIDs']);
-        if(count($assignIDs)==0){
+        if(empty($assignIDs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid user identificators');
             return false;
         }
@@ -429,8 +392,8 @@ class DbSysGroups extends DbEntityBase
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         $query2 = 'DELETE FROM sysUsrGrpLinks'
-            . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')'
-            . ' AND ugl_UserID in (' . implode(',', $assignIDs) . ')';
+            . SQL_WHERE . predicateId('ugl_GroupID',$this->recordIDs)
+            . SQL_AND . predicateId('ugl_UserID',$assignIDs);
 
         $res = $mysqli->query($query2);
         if(!$res){
@@ -450,7 +413,6 @@ class DbSysGroups extends DbEntityBase
                 $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;
-                    $mysqli->rollback();
                     $this->system->addError(HEURIST_DB_ERROR,
                         'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
@@ -458,20 +420,8 @@ class DbSysGroups extends DbEntityBase
             }//foreach
 
         }
-        if($ret){
-            $mysqli->commit();
 
-            //save special semaphore file to trigger user refresh for other users
-            /*
-            foreach ($assignIDs as $usrID)
-            if($usrID!=$this->system->get_user_id()){
-                $fname = HEURIST_FILESTORE_DIR.$usrID;
-                fileSave('X',$fname);//change role
-            }
-            */
-        }
-
-        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }

@@ -55,9 +55,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.use_remote = true; //use HEURIST4.remote.detailtypes for import structures
         }
 
-        //this.options.edit_mode = 'popup';
+       
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_need_load_fullrecord = false;
         this.options.height = 640;
         this.options.edit_width = 850;
@@ -74,7 +74,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this.options.select_mode!='manager'){
             this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                       
             this.options.edit_mode = 'popup';    
-            //this.options.edit_mode = 'none';
+           
         }
         
         if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){ //special compact case
@@ -284,7 +284,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on( this.searchForm, {
                 "searchdefdetailtypesonfilter": this.filterRecordList,
                 "searchdefdetailtypesonadd": function() {
-                    this._onActionListener(null, 'add'); //this.addEditRecord(-1);
+                    this._onActionListener(null, 'add');
                 },
                 "searchdefdetailtypesonrectypefilter": function(event, data){
 
@@ -370,7 +370,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 style += (';width:'+col_width+'px'); 
                 
             }
-            if(style!='') style = 'style=";'+style+'"'; //border-left:1px solid gray;
+            if(style!='') style = 'style=";'+style+'"';
             
             if(!value){
                 value = '';
@@ -379,8 +379,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         let html = '';
-        //if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
-        let fields = this.visible_fields; //this.usrPreferences.fields;
+        let fields = this.visible_fields;
         
         let i = 0;
         for (;i<fields.length;i++){
@@ -396,7 +395,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     html += fld2(30,'Edit','text-align:center');
                     break;
                 case 'name':  
-                    html += '$$NAME$$';  //html += fld2('150px','Name','text-align:left');
+                    html += '$$NAME$$'; 
                     break;
                 case 'type': 
                     html += fld2(80,'Type','text-align:center');
@@ -469,7 +468,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         let html = '';
         
-        let fields = this.visible_fields; //this.usrPreferences.fields;
+        let fields = this.visible_fields;
         
         function __action_btn(action,icon,title){
             return '<div class="item" style="min-width:30px;max-width:30px;text-align:center;"><div title="'+title+'" '
@@ -481,7 +480,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         let max_width = this.recordList.find('.div-result-list-content').width() 
                             - ((this.options.select_mode=='select_multi') ?40:33);
-        let used_width = 330;//244;
+        let used_width = 330;
 
         let name_width = 200;
 
@@ -601,13 +600,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
             if(recID>0){
                 
-                let that = this;
- 
-                //if(action=='group'){}
-                    
                 if(action=='show_in_list' || action=='hide_in_list'){
                     
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    
                     let newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({dty_ID:recID, dty_ShowInLists:newVal });
                     
@@ -709,7 +704,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.searchForm.searchDefDetailTypes('startSearch');
             this._triggerRefresh('dty');
             
-            //this.updateGroupCount(this.deleted_from_group_ID, -1);
+           
     },
     
 
@@ -725,7 +720,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this._toolbar){
             this._toolbar.find('#btnRecSave').button({label:window.hWin.HR(this._currentEditID>0?'Save':'Create New Field')});
         }
-        let dty_DetailTypeGroupID = this.options.dtg_ID; //this.searchForm.find('#input_search_group').val();
+        let dty_DetailTypeGroupID = this.options.dtg_ID;
         
         if(!(this._currentEditID>0)){ //insert       
             
@@ -734,8 +729,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this._editing.setFieldValueByName('dty_DetailTypeGroupID', dty_DetailTypeGroupID);
-            //let ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
-            //ele.editing_input('setValue', dty_DetailTypeGroupID, true);
+           
+           
         }else{
             
             let ele = this._editing.getFieldByName('dty_ID');
@@ -971,8 +966,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     let dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
                                     
                                     if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
-
-                                        let changeToNewType = true;
                                         if(((dt_type==="resource") || (dt_type==="relmarker") || 
                                             (dt_type==="enum"))  && dt_type!==dt_type_new)
                                         {
@@ -1012,11 +1005,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     
                                     window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
                                                     title:'Field data type: Record pointer', 
-                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                                                    url: window.hWin.HRes('field_data_types #resource'),
                                                     position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
                                     window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
                                                     title:'Field data type: Relationship marker', 
-                                                    url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                                                    url: window.hWin.HRes('field_data_types #relmarker'),
                                                     position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
                                     
                                 }  //end open event
@@ -1133,7 +1126,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         let input_name = $(event.target);
         
-        //!!!! removeErrorClass(input_name);
+       
         
         if(this.fields_list_div == null){
             //init for the first time
@@ -1150,17 +1143,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }});
         }
         
-        let setdis = input_name.val().length<3;
-        //this._editing.setDisabled( setdis )
-        //let ele = this._editing.getFieldByName('dty_Name');
-        //ele.editing_input('setDisabled', false);
-        //window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), setdis );
       
         //find base field to suggest
         if(input_name.val().length>2){
            
             let rty_ID = this.options.newFieldForRtyID; 
-            let dty_ID, field_name, field_type;
+            let field_name, field_type;
                 
             this.fields_list_div.empty();  
             let is_added = false;
@@ -1171,7 +1159,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             .on('click', function(event){
                                 window.hWin.HEURIST4.util.stopEvent(event);
                                 that.fields_list_div.hide(); 
-                                //!!!! $('#ed_dty_HelpText').trigger('focus');
+                               
                             });
 
                             
@@ -1222,8 +1210,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             window.hWin.HEURIST4.msg.showMsgFlash('Field added to record structure');
 
-                            //that.selectedRecords( [_dty_ID] );
-                            //that._selectAndClose();
+                           
+                           
                             let rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
                                 rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
                                 rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] };
@@ -1250,7 +1238,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(is_added){
                 this.fields_list_div.show();    
                 this.fields_list_div.position({my:'left top', at:'left bottom', of:input_name})
-                    //.css({'max-width':(maxw+'px')});
+                   
                     .css({'max-width':input_name.width()+60});
             }else{
                 this.fields_list_div.hide();
@@ -1281,7 +1269,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.enum_container = ele;
             
             $('<div style="line-height:2ex;padding-top:4px">'
-                        +'<div id="enumVocabulary" style="display:inline-block;padding-bottom:10px">' //padding-left:4px;
+                        +'<div id="enumVocabulary" style="display:inline-block;padding-bottom:10px">'
                             +'<select id="selPreview"></select>'
                             +'<span style="padding:5px 3px">'
                                 +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
@@ -1311,7 +1299,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.enum_container = ele;
             
             $('<div style="line-height:2ex;padding-top:4px">'
-                    +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
+                    +'<div id="enumVocabulary" style="display:inline-block;">'
                         +'<select id="selVocab" class="sel_width"></select>'
                         +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
                             +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
@@ -1328,11 +1316,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on(this.enum_container.find('input[name="enumType"]'),{change:
                 function(event){
                     if($(event.target).val()=='individual'){
-                        this.enum_container.find('#enumIndividual').css('display','inline-block');//show();
+                        this.enum_container.find('#enumIndividual').css('display','inline-block');
                         this.enum_container.find('#enumVocabulary').hide();
                     }else{
                         this.enum_container.find('#enumIndividual').hide();
-                        this.enum_container.find('#enumVocabulary').css('display','inline-block');//show();
+                        this.enum_container.find('#enumVocabulary').css('display','inline-block');
                     }
                 }});
             this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
@@ -1342,7 +1330,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            
             
             this._recreateTermsVocabSelector();
-            //this._recreateTermsPreviewSelector();
+           
     },
     
     /**
@@ -1363,7 +1351,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
 
         let vocab_id =  this.enum_container.find("#selVocab").val();
-        let is_frist_time = true;
         let that = this;
         
         
@@ -1388,7 +1375,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                   rg_options['auxilary'] = 'vocabulary';
                   rg_options['suggested_name'] = dt_name+' vocab';
             }else if(vocab_id>0){
-                  //rg_options['title'] = 'Add term to vocabulary "'+$Db.trm(vocab_id,'trm_Label')+'"';
+                 
                   rg_options['trm_VocabularyID'] = vocab_id;
             }else{
                   window.hWin.HEURIST4.msg.showMsgFlash('Select of add vocabulary first');          
@@ -1512,7 +1499,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             opts.domain = term_type;
         }
         
-        let selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
+        window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
 
         this._off(orig_selector, 'change');
         this._on(orig_selector, {change: function(event){
@@ -1524,8 +1511,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         
         
-        //el_sel.onchange =  _changeVocabulary;
-        //el_sel.style.maxWidth = '120px';
+       
+       
         this._recreateTermsPreviewSelector();
         
     },
@@ -1540,8 +1527,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //remove old selector
         let preview_sel = this.enum_container.find("#termsPreview1");
         
-        //preview_sel.empty();
-        //this.enum_container.find('#termsPreview2').empty();
+       
+       
         
         let term_type = this._editing.getValue('dty_Type')[0];
         if(term_type=='relationtype'){
@@ -1555,7 +1542,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //append to first preview
             let new_selector = this.enum_container.find('#selPreview');
             
-            new_selector = window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
+            window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
                     {vocab_id:allTerms, topOptions:false, supressTermCode:true});
 
             preview_sel.css({'display':'inline-block'});
@@ -1597,10 +1584,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.closeDialog(true); //force to avoid warning
         }else if(this.it_was_insert){
             this.searchForm.searchDefDetailTypes('startSearch');
-            //this._triggerRefresh('dty');
+           
             
-            //let dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
-            //this.updateGroupCount(dtg_ID, 1);
+           
+           
         }else{
             //this._triggerRefresh('dty');    
         }        
@@ -1723,7 +1710,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
                             .appendTo(child_rec.find('.input-div'));
                     window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
-                                url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                                url: window.hWin.HRes('parent_child_instructions #content'),
                                 no_init:true} );
 
                     browser_filter.find('.heurist-helper1').before(
@@ -1817,7 +1804,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:password_entered},
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
-                                    //that_widget._super( fields, afterAction );
+                                   
                                     fields['pwd_ReservedChanges'] = password_entered;
                                     that_widget._saveEditAndClose( fields, afterAction );
                                 }else{
@@ -1857,16 +1844,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
                     {default_palette_class:this.options.default_palette_class});
-            }else if(this._currentEditID == -1 && res.dty_id){ // attempted to create new field, name is already used
+            }else if(this._currentEditID == -1 && res.dty_ID){ // attempted to create new field, name is already used
 
-                let cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
-                let exist_name = $Db.dty(res.dty_id, 'dty_Name');
+                let cannotEdit = $Db.dty(res.dty_ID, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
+                let exist_name = $Db.dty(res.dty_ID, 'dty_Name');
                 let msg = 'The name "<span id="field_name">'+ exist_name +'</span>" which you have specified for the new field '
-                    + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_id +'</span>).<br><br>';
+                    + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_ID +'</span>).<br><br>';
 
                 if(!cannotEdit){
 
-                    if($Db.rst_usage(res.dty_id).length == 0){ // check if in use
+                    if($Db.rst_usage(res.dty_ID).length == 0){ // check if in use
                         msg += '<span id="btnDelete">DELETE</span> <span style="margin-left: 20px">Delete the existing base field (it has not been used)</span><br><br>';
                     }
 
@@ -1887,14 +1874,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         'a'          : 'delete',
                         'entity'     : that.options.entity.entityName,
                         'request_id' : window.hWin.HEURIST4.util.random(),
-                        'recID'      : res.dty_id
+                        'recID'      : res.dty_ID
                     };
 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                $Db.dty().removeRecord( res.dty_id );
+                                $Db.dty().removeRecord( res.dty_ID );
 
                                 $dlg.dialog('close');
                                 that._saveEditAndClose();
@@ -1924,10 +1911,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         window.hWin.HEURIST4.msg.showMsgFlash('Please enter a new name', 1500);
                                         return;
                                     }
-                                    let fld_record = $Db.rst(that.options.newFieldForRtyID, res.dty_id);
+                                    let fld_record = $Db.rst(that.options.newFieldForRtyID, res.dty_ID);
 
-                                    that._currentEditID = res.dty_id;
-                                    that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_id}, 
+                                    that._currentEditID = res.dty_ID;
+                                    that._saveEditAndClose({dty_Name: new_name, dty_ID: res.dty_ID}, 
                                         function(id, flds){
 
                                             $Db.dty().setRecord(id, flds);
@@ -1942,15 +1929,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                                     entity: 'defRecStructure',
                                                     fields: {
                                                         rst_DisplayName: new_name,
-                                                        rst_DetailTypeID: res.dty_id,
+                                                        rst_DetailTypeID: res.dty_ID,
                                                         rst_RecTypeID: that.options.newFieldForRtyID
                                                     },
                                                     request_id: window.hWin.HEURIST4.util.random()
                                                 };
                                                 window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
                                                     if(response.status == window.hWin.ResponseStatus.OK){ // update cache, prepare rec structure tree for updating
-                                                        $Db.rst(that.options.newFieldForRtyID).setRecord(res.dty_id, {rst_DisplayName: new_name});
-                                                        that.updatedRstField = res.dty_id;
+                                                        $Db.rst(that.options.newFieldForRtyID).setRecord(res.dty_ID, {rst_DisplayName: new_name});
+                                                        that.updatedRstField = res.dty_ID;
                                                     }
                                                     that._currentEditID = -1;
                                                     that._saveEditAndClose();
@@ -2002,8 +1989,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 if(!fieldvalues['dty_JsonTermIDTree']){
 
                     if(dt_type=='enum'){    
-                        window.hWin.HEURIST4.msg.showMsgErr(
-                            'Please select or add a vocabulary. Vocabularies must contain at least one term.', 'Warning');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'Please select or add a vocabulary. Vocabularies must contain at least one term.',
+                            error_title: 'Missing valid vocabulary',
+                            status: window.hWin.ResponseStatus.INVALID_REQUEST
+                        });
                     }else{
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Please select or add relationship types',null, 'Warning',
@@ -2078,8 +2068,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     addEditRecord: function(recID, is_proceed){
 
         if(recID<0 && is_proceed !== true){
-            let that = this;
-
             this.coverMessage(recID);
         }else{
             this._super(recID, is_proceed); 
@@ -2144,7 +2132,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
                 + 'The base fields editing function is provided for completeness and for<br>advanced data management. Most users will not need to use it.<br><br>'
                 + '<strong>We strongly recommend NOT using this function to create new<br>base fields. It is much more intuitive to create them <em>in situ</em> while<br>designing your record structure.</strong><br></br>'
-                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" onclick="window.hWin.HAPI4.LayoutMgr.executeCommand(\'mainMenu\', \'menuActionById\', \'menu-structure-rectypes\');">Record Types</span><br><br>'
+                + 'Recommended: Design > <span style="text-decoration:underline;cursor:pointer" '
+                +'onclick="window.hWin.HAPI4.actionHandler.executeActionById(\'menu-structure-rectypes\');">Record Types</span><br><br>'
                 + 'Click outside this box for access to base fields manager'
                 + '</div></div>'); // Add message
 
@@ -2291,7 +2280,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         // Set default help text
         $ele = this._editing.getFieldByName('dty_HelpText');
         $ele.editing_input('setValue', "This field points to sub-records of the current record type.\nFields from the current record type have been moved to these sub-records");
-        //$ele.editing_input('setDisabled', true);
+       
 
         // Add required class to header
         $ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
@@ -2316,7 +2305,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             title: 'Import Base fields by CSV',
             height: 800,
             width: 1000,
-            context_help: `${window.hWin.HAPI4.baseURL}context_help/defDetailTypes.html #import`,
+            context_help: 'defDetailTypes #import',
             callback: function(context){ 
 
                 if(context && context.result){

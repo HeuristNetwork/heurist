@@ -23,8 +23,6 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        let that = this;
-        
         this.btn_search_start.css('float','right');   
         
         this.input_search_group = this.element.find('#input_search_group');
@@ -35,7 +33,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
         this._on(this.input_sort_sdate,  { change:this.startSearch });
         this._on(this.input_sort_recent,  { change:this.startSearch });
         this._on(this.input_search_group,  { change:this.startSearch });
-        //this._on( this.input_search, { keyup: this.startSearch });
+       
         
         this.startSearch();            
     },  
@@ -45,8 +43,6 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            this._super();
-            
             let request = {}
         
             let val = this.input_search_group.val();
@@ -71,25 +67,9 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
             if($.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new HRecordSet()} );
             }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'list';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                let that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new HRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
+                this._search_request = request;
+                this._super();
             }  
                      
     },

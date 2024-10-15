@@ -33,20 +33,22 @@ Select linked record button   bg:#f0ecf0 - can be changed to button light gray o
 Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
+global $ut;
 
 // arbitrary color scheme defined in script that includes this one
 // usage: websiteRecord.php takes color scheme from field of CMS_HOME record
 if(isset($site_colors) && $site_colors!=null){
 
-    $ut = json_decode($site_colors, true);
+$ut = json_decode($site_colors, true);
 
 }else{
 
     if(!isset($system)){
 
         // init main system class
-        $system = new System();
+        $system = new hserv\System();
 
         if(@$_REQUEST['db']){
             //if database is defined then connect to given database
@@ -68,6 +70,20 @@ define('CLR_ACTIVE', '#212121');
 define('CLR_LIGHTGRAY', '#999999');
 define('CLR_GRAY', '#555555');
 define('CLR_DARKGRAY', '#333333');
+define('CLR_BG_DARKGRAY', '#e0dfe0');
+define('CLR_INPUT', '#F4F2F4');
+define('CLR_HOVER_COLOR', '#2b2b2b');
+define('CLR_SP_BORDER', '#003eff'); //clickable pressed
+define('CLR_SD_BG', '#f2f2f2'); //disabled bg
+
+define('CLR_DESIGN_BG', '#DAD0E4');
+define('CLR_IMPORT_BG', '#307D96');
+define('CLR_IMPORT_FADE_BG', '#e3f0f0');
+define('CLR_PUBLISH_BG', '#627E5D');
+define('CLR_PUBLISH_FASE_BG', '#CCEAC5');
+define('CLR_ADMIN_BG', '#676E80');
+define('CLR_EXPLORE_FADE_BG', '#D4DBEA');
+define('CLR_EXPLORE_BG', '#4477B9');
 
 if(!isset($ut) || !is_array($ut)){
     $ut = array();
@@ -75,11 +91,10 @@ if(!isset($ut) || !is_array($ut)){
 
 $def_ut = array(
 //main scheme
-'cd_bg'=>'#e0dfe0',
+'cd_bg'=>CLR_BG_DARKGRAY,
 'cl_bg'=>CLR_WHITE,
-'cd_input'=>'#F4F2F4',
-'cd_color'=>'#333333',
-'cd_input'=>'#F4F2F4',
+'cd_input'=>CLR_INPUT,
+'cd_color'=>CLR_DARKGRAY,
 'cd_border'=>CLR_BORDER,
 //alt scheme
 'ca_bg'=>'#364050',
@@ -96,11 +111,11 @@ $def_ut = array(
 'cd_corner'=>'0',
 
 'sd_color' =>CLR_GRAY,
-'sd_bg'    =>'#f2f2f2',
+'sd_bg'    =>CLR_SD_BG,
 
 //clickable hover
 'sh_border' =>CLR_LIGHTGRAY,
-'sh_color'  =>'#2b2b2b',
+'sh_color'  =>CLR_HOVER_COLOR,
 'sh_bg'     =>CLR_BORDER,
 
 //clickable active
@@ -109,7 +124,7 @@ $def_ut = array(
 'sa_color'  =>CLR_ACTIVE,
 
 //clickable pressed
-'sp_border' =>'#003eff',
+'sp_border' =>CLR_SP_BORDER,
 'sp_color'  =>CLR_WHITE,
 'sp_bg'     =>'#9CC4D9'
 
@@ -128,22 +143,22 @@ function uout($idx, $def){
 .ui-dialog .ui-dialog-buttonpane button.ui-state-hover,
 .ui-dialog .ui-dialog-buttonpane button.ui-state-focus  {
     background: none;
-    background-color: <?php uout('cd_bg', '#e0dfe0');?> !important;
+    background-color: <?php uout('cd_bg', CLR_BG_DARKGRAY);?> !important;
 }
 textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
-    background: <?php uout('cd_input', '#F4F2F4');?> !important; /*0511 !important;*/
+    background: <?php uout('cd_input', CLR_INPUT);?> !important; /*0511 !important;*/
 }
 .ui-widget-content, .ui-widget-content-gray {
-    border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>;
-    background: <?php uout('cd_bg', '#e0dfe0');?>;
-    color: <?php uout('cd_color', '#333333');?>;
+    border: 1px solid <?php uout('cd_bg', CLR_BG_DARKGRAY);?>;
+    background: <?php uout('cd_bg', CLR_BG_DARKGRAY);?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ui-widget-content a {
-    color: <?php uout('cd_color', '#333333');?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ui-heurist-bg-light{
     background-color: <?php uout('cl_bg', CLR_WHITE);?> !important;
-    color: <?php uout('cd_color', '#333333');?>;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 /* BORDERS, HEADERS AND DIALOG TITLE */
 .ui-dialog {
@@ -186,7 +201,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 /* color for submenus */
 .ui-heurist-header2 .ui-menu .ui-menu a {
-    color: <?php uout('cd_color', '#333333');?> !important;
+    color: <?php uout('cd_color', CLR_DARKGRAY);?> !important;
 }
 
 /* EDITOR CONTENT */
@@ -198,7 +213,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 
 .ui-selectmenu-button{
     background:<?php uout('ce_input', CLR_WHITE);?>;
-    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?> !important;
+    border: 1px solid  <?php uout('cd_bg', CLR_BG_DARKGRAY );?> !important;
     outline: none;
     padding: 1px;
 }
@@ -210,7 +225,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 .ent_wrapper.editor .text{
     background: none repeat scroll 0 0 <?php uout('ce_input', CLR_WHITE);?>;/* 0511 !important */
-    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;
+    border: 1px solid  <?php uout('cd_bg', CLR_BG_DARKGRAY );?>;
 }
 .separator2{
     color: black; /* <?php uout('ce_helper', CLR_LIGHTGRAY);?>;*/
@@ -220,7 +235,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     border-top: 1px solid <?php uout('cd_border', CLR_BORDER);?>;
 }
 .ent_wrapper.editor .smallbutton{
-    color:<?php uout('cd_color', '#333333');?>;
+    color:<?php uout('cd_color', CLR_DARKGRAY);?>;
 }
 .ent_wrapper.editor .heurist-helper1, .prompt{
     color: <?php uout('ce_helper', CLR_LIGHTGRAY);?>;
@@ -269,8 +284,8 @@ works properly when clicked or hovered */
 html .ui-button.ui-state-disabled:hover,
 html .ui-button.ui-state-disabled:active {
     /*heurist*/
-    border: 1px solid <?php uout('sd_bg', '#f2f2f2');?>;
-    background: <?php uout('sd_bg', '#f2f2f2');?>;
+    border: 1px solid <?php uout('sd_bg', CLR_SD_BG);?>;
+    background: <?php uout('sd_bg', CLR_SD_BG);?>;
     font-weight: normal;
     color: <?php uout('sd_color', CLR_GRAY);?>;
 }
@@ -299,7 +314,7 @@ a:visited.ui-button,
     border: 1px solid <?php uout('sh_border', CLR_LIGHTGRAY);?>;
     background: <?php uout('sh_bg', CLR_BORDER);?>;
     font-weight: normal;
-    color: <?php uout('sh_color', '#2b2b2b');?>;
+    color: <?php uout('sh_color', CLR_HOVER_COLOR);?>;
 }
 .ui-state-hover a,
 .ui-state-hover a:hover,
@@ -311,7 +326,7 @@ a:visited.ui-button,
 .ui-state-focus a:visited,
 a.ui-button:hover,
 a.ui-button:focus {
-    color: <?php uout('sh_color', '#2b2b2b');?>;
+    color: <?php uout('sh_color', CLR_HOVER_COLOR);?>;
     text-decoration: none;
 }
 
@@ -333,13 +348,13 @@ a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
     background: <?php uout('sp_bg', '#9CC4D9');?>;
-    border: 1px solid <?php uout('sp_border', '#003eff');?>;
+    border: 1px solid <?php uout('sp_border', CLR_SP_BORDER);?>;
     color: <?php uout('sp_color', CLR_WHITE);?>;
     font-weight: normal;
 }
 .ui-icon-background,
 .ui-state-active .ui-icon-background {
-    border: <?php uout('sp_border', '#003eff');?>;
+    border: <?php uout('sp_border', CLR_SP_BORDER);?>;
     background-color: <?php uout('sp_color', CLR_WHITE);?>;
 }
 .ui-state-active a,
@@ -434,13 +449,13 @@ span.fancytree-node:hover{
 
 .ui-heurist-design .ui-widget-content,
 .ui-heurist-design .ui-dialog-heurist{
-    background:<?php uout('design_fade_bg', '#DAD0E4');?>
+    background:<?php uout('design_fade_bg', CLR_DESIGN_BG);?>
 }
 /*
 .ui-heurist-design .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-design .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-design .ui-fade-color{
-    color:<?php uout('design_fade_bg', '#DAD0E4')?> !important;
+    color:<?php uout('design_fade_bg', CLR_DESIGN_BG);?> !important;
 }
 */
 
@@ -452,7 +467,7 @@ span.fancytree-node:hover{
         background:<?php uout('design_active', '#A487B9');?> !important;
 }
 .ui-heurist-design .edit-form-tabs li.ui-tabs-active,
-.ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#DAD0E4');?> !important;}
+.ui-heurist-design-fade{background:<?php uout('design_fade_bg', CLR_DESIGN_BG);?> !important;}
 
 /* SECTION SCHEME: EXPLORE */
 .ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header,
@@ -462,22 +477,22 @@ span.fancytree-node:hover{
     background-color: <?php uout('explore_bg', '#305586');?> !important;
     color: white;
 }
-.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;}
-.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>}
+.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
+.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', CLR_EXPLORE_BG);?>}
 .ui-heurist-explore .ui-widget-content{
-    background:<?php uout('explore_fade_bg', '#D4DBEA');?>
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?>
 }
 /* button within menu section */
 .ui-heurist-explore .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('explore_bg', '#4477B9')?> !important;
-    color:<?php uout('explore_bg', '#4477B9')?> !important;
+    border:1px solid <?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
+    color:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
 }
 .ui-heurist-explore .ui-button-icon-only,
 .ui-heurist-explore .ui-main-color
 {
     background: none;
-    color:<?php uout('explore_bg', '#4477B9')?> !important;
+    color:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
 }
 .ui-heurist-explore .ui-state-active,
 .ui-heurist-explore .fancytree-active,
@@ -487,10 +502,10 @@ span.fancytree-node:hover{
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
 .ui-heurist-explore .ui-tabs-tab.ui-state-active{
-    background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;
+    background:<?php uout('explore_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;
 }
 .ui-heurist-explore .ui-heurist-button.ui-state-active{
-    background:<?php uout('explore_bg', '#4477B9')?> !important;
+    background:<?php uout('explore_bg', CLR_EXPLORE_BG)?> !important;
     color: #ffffff;
 }
 
@@ -504,36 +519,36 @@ span.fancytree-node:hover{
 .ui-heurist-populate .ui-dialog-titlebar,
 .ui-heurist-populate .ui-dialog-buttonpane
 {
-    background:<?php uout('import_bg', '#307D96');?> !important;
+    background:<?php uout('import_bg', CLR_IMPORT_BG);?> !important;
     color: white;
 }
 .ui-heurist-populate .edit-form-tabs li.ui-tabs-active,
-.ui-heurist-populate-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
+.ui-heurist-populate-fade{background:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG);?> !important;}
 
-.ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
+.ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', CLR_IMPORT_BG);?>}
 .ui-heurist-populate .ui-widget-content{
-    background:<?php uout('import_fade_bg', '#e3f0f0');?>
+    background:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG);?>
 }
 
 /* button within menu section */
 .ui-heurist-populate .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
-    color:<?php uout('import_bg', '#307D96')?> !important;
+    border:1px solid <?php uout('import_bg', CLR_IMPORT_BG)?> !important;
+    color:<?php uout('import_bg', CLR_IMPORT_BG)?> !important;
 }
 .ui-heurist-populate .ui-button-icon-only{
     background: none;
-    color:<?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('import_bg', CLR_IMPORT_BG)?> !important;
 }
 .ui-heurist-populate .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-populate .ui-fade-color{
-    color:<?php uout('import_fade_bg', '#e3f0f0')?> !important;
+    color:<?php uout('import_fade_bg', CLR_IMPORT_FADE_BG)?> !important;
 }
 
 .ui-menu6 .ui-menu6-container.ui-heurist-populate, .ui-heurist-populate .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('import_bg', '#307D96');?> !important;
+    border-color:<?php uout('import_bg', CLR_IMPORT_BG);?> !important;
 }
 .ui-heurist-populate .ui-state-active,
 .ui-heurist-populate .fancytree-active,
@@ -546,33 +561,33 @@ span.fancytree-node:hover{
 .ui-heurist-publish.ui-heurist-header, .ui-heurist-publish .ui-heurist-header,
 .ui-heurist-publish .ui-dialog-titlebar,
 .ui-heurist-publish .ui-dialog-buttonpane{
-    background:<?php uout('publish_bg', '#627E5D');?> !important;
+    background:<?php uout('publish_bg', CLR_PUBLISH_BG);?> !important;
     color: white;
 }
-.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> !important;}
-.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', '#627E5D');?>}
+.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG);?> !important;}
+.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', CLR_PUBLISH_BG);?>}
 .ui-heurist-publish .ui-widget-content{
-    background:<?php uout('publish_fade_bg', '#CCEAC5');?>
+    background:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG);?>
 }
 /* button within menu section */
 .ui-heurist-publish .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
-    color:<?php uout('publish_bg', '#627E5D')?> !important;
+    border:1px solid <?php uout('import_bg', CLR_IMPORT_BG)?> !important;
+    color:<?php uout('publish_bg', CLR_PUBLISH_BG)?> !important;
 }
 .ui-heurist-publish .ui-button-icon-only{
     background: none;
-    color:<?php uout('publish_bg', '#627E5D')?> !important;
+    color:<?php uout('publish_bg', CLR_PUBLISH_BG)?> !important;
 }
 .ui-heurist-publish .ui-heurist-header .ui-button-icon-only,
 .ui-heurist-publish .ui-dialog-titlebar .ui-button-icon-only,
 .ui-heurist-publish  .ui-fade-color{
-    color:<?php uout('publish_fade_bg', '#CCEAC5')?> !important;
+    color:<?php uout('publish_fade_bg', CLR_PUBLISH_FASE_BG)?> !important;
 }
 
 .ui-menu6 .ui-menu6-container.ui-heurist-publish, .ui-heurist-publish .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('publish_bg', '#627E5D');?> !important;
+    border-color:<?php uout('publish_bg', CLR_PUBLISH_BG);?> !important;
 }
 
 .ui-heurist-publish .ui-state-active,
@@ -588,31 +603,31 @@ span.fancytree-node:hover{
 .ui-heurist-admin .ui-dialog-titlebar,
 .ui-heurist-admin .ui-dialog-buttonpane
 {
-    background:<?php uout('admin_bg', '#676E80');?> !important;
+    background:<?php uout('admin_bg', CLR_ADMIN_BG);?> !important;
     color: white;
 }
-.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', '#D4DBEA');?> !important;}
-.ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', '#676E80');?>}
+.ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG);?> !important;}
+.ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', CLR_ADMIN_BG);?>}
 .ui-heurist-admin .ui-widget-content{
-    background:<?php uout('admin_fade_bg', '#D4DBEA');?>
+    background:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG);?>
 }
 
 /* button within menu section */
 .ui-heurist-admin .ui-heurist-btn-header1{
     background:none !important;
-    border:1px solid <?php uout('admin_bg', '#676E80')?> !important;
-    color:<?php uout('admin_bg', '#676E80')?> !important;
+    border:1px solid <?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
+    color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
 }
 .ui-heurist-admin .ui-button-icon-only{
     background: none;
-    color:<?php uout('admin_bg', '#676E80')?> !important;
+    color:<?php uout('admin_bg', CLR_ADMIN_BG)?> !important;
 }
 .ui-heurist-admin .ui-heurist-header .ui-button-icon-only, .ui-heurist-admin .ui-dialog-titlebar .ui-button-icon-only{
-    color:<?php uout('admin_fade_bg', '#D4DBEA')?> !important;
+    color:<?php uout('admin_fade_bg', CLR_EXPLORE_FADE_BG)?> !important;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-admin, .ui-heurist-admin .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('admin_bg', '#676E80');?> !important;
+    border-color:<?php uout('admin_bg', CLR_ADMIN_BG);?> !important;
 }
 
 <?php } ?>

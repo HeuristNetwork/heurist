@@ -26,7 +26,7 @@ wktValueToShapes
 prepareGeoJSON  json to timemap
 wktValueToDescription
 
-parseCoordinates - old way for Digital Harlem
+parseWKTCoordinates
 
 simplePointsToWKT -  coordinate pairs to WKT
 
@@ -60,7 +60,7 @@ window.hWin.HEURIST4.geo = {
             }
         }
         if(window.hWin.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
-            //alert('Incorrect GeoJSON provided');
+           
             return {};            
         }
 
@@ -102,7 +102,7 @@ window.hWin.HEURIST4.geo = {
                         function _isvalid_pnt(pnt){
                                 let isValid = (Array.isArray(pnt) && pnt.length==2 && 
                                     window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
-                                    //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
+                                   
                                 if(isValid && resdata._extent){
                                     if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
                                     if(pnt[0]>resdata._extent.xmax) resdata._extent.xmax = pnt[0];
@@ -119,12 +119,12 @@ window.hWin.HEURIST4.geo = {
                             }else if(_isvalid_pnt(coords[0])){
                                 //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
                                 let shape = [];
-                                for (let m=0; m<coords.length; m++){
-                                    const pnt = coords[m];
+                                coords.forEach((pnt)=>{
                                     if(_isvalid_pnt(pnt)){
                                         shape.push({lat:pnt[1], lng:pnt[0]});    
                                     }
-                                }
+                                });
+                                
                                 if(typeCode=='MultiPoint'){
                                     shapes = shape;
                                 }else{
@@ -185,8 +185,6 @@ window.hWin.HEURIST4.geo = {
                                                 
                             if(shapes.length>0){
 
-                                let type = null;
-
                                 if( geometry.type=="Point" || 
                                     geometry.type=="MultiPoint")
                                 {   
@@ -194,7 +192,7 @@ window.hWin.HEURIST4.geo = {
                                     for (let n=0; n<shapes.length; n++){
                                         resdata['Point'].push( [shapes[n]] );
                                     }
-                                    //resdata['Point'] = resdata['Point'].concat( shapes );
+                                   
                                 }else if(geometry.type=="LineString" ||
                                     geometry.type=="MultiLineString")
                                 {   
@@ -321,7 +319,7 @@ window.hWin.HEURIST4.geo = {
                         setstartMarker(centre);
                         createcircle(oncircle);
 
-                        //bounds = circle.getBounds();
+                       
                         */
                     }
 
@@ -402,197 +400,6 @@ window.hWin.HEURIST4.geo = {
     },
     
     //
-    // OLD WAY to parse coordinates from WKT to timemap or google
-    // it is still in use in Digital Harlem search
-    //
-    parseCoordinates: function(type, wkt, format, google) {
-
-        if(type==1 && typeof google.maps.LatLng != "function") {
-            return null;
-        }
-
-        let matches = null;
-
-        switch (type) {
-            case "p":
-            case "point":
-                matches = wkt.match(/POINT\s?\((\S+)\s+(\S+)\)/i);
-                break;
-
-            case "c":  //circle
-            case "circle":
-                matches = wkt.match(/LINESTRING\s?\((\S{1,25})\s+(\S{1,25}),\s*(\S{1,25})\s+\S{1,25},\s*\S{1,25}\s+\S{1,25},\s*\S{1,25}\s+\S{1,25}\)/i);
-                break;
-
-            case "l":  //polyline
-            case "polyline":
-            case "path":
-                matches = wkt.match(/LINESTRING\s?\((.+)\)/i);
-                if (matches){
-                    matches = matches[1].match(/\S{1,25}\s+\S{1,25}(?:,|$)/g);
-                }
-                break;
-
-            case "r":  //rectangle
-            case "rect": //matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);break;
-            case "pl": //polygon
-            case "polygon":
-                matches = wkt.match(/POLYGON\s?\(\((.+)\)\)/i);
-                if (matches) {
-                    matches = matches[1].match(/\S{1,25}\s+\S{1,25}(?:,|$)/g);
-                }
-                
-                break;
-        }
-
-
-        let bounds = null, southWest, northEast,
-        shape  = null,
-        points = []; //google points
-
-        if(matches && matches.length>0){
-
-            switch (type) {
-                case "p":
-                case "point":
-                {                
-                    const x0 = parseFloat(matches[1]),
-                          y0 = parseFloat(matches[2]);
-                    
-                    if(format==0){
-                        shape = { point:{lat: y0, lon:x0 } };
-                    }else{
-                        const point = new google.maps.LatLng(y0, x0);
-                        points.push(point);
-                        bounds = new google.maps.LatLngBounds(
-                            new google.maps.LatLng(y0 - 0.5, x0 - 0.5),
-                            new google.maps.LatLng(y0 + 0.5, x0 + 0.5));
-                    }
-                    
-                    
-
-                    break;
-
-                /*
-                case "r":  //rectangle
-                case "rect":
-
-                    if(matches.length<6){
-                        matches.push(matches[3]);
-                        matches.push(matches[4]);
-                    }
-
-                    var x0 = parseFloat(matches[0]);
-                    var y0 = parseFloat(matches[2]);
-                    var x1 = parseFloat(matches[5]);
-                    var y1 = parseFloat(matches[6]);
-
-                    if(format==0){
-                        shape  = [
-                            {lat: y0, lon: x0},
-                            {lat: y0, lon: x1},
-                            {lat: y1, lon: x1},
-                            {lat: y1, lon: x0},
-                        ];
-
-                        shape = {polygon:shape};
-                    }else{
-
-                        southWest = new google.maps.LatLng(y0, x0);
-                        northEast = new google.maps.LatLng(y1, x1);
-                        bounds = new google.maps.LatLngBounds(southWest, northEast);
-
-                        points.push(southWest, new google.maps.LatLng(y0, x1), northEast, new google.maps.LatLng(y1, x0));
-                    }
-
-                    break;
-                */
-                }
-                case "c":  //circle
-                case "circle":  //circle
-
-                    if(format==0){
-
-                        const x0 = parseFloat(matches[1]),
-                              y0 = parseFloat(matches[2]);
-                        let radius = parseFloat(matches[3]) - parseFloat(matches[1]);
-
-                        shape = [];
-                        for (let i=0; i <= 40; ++i) {
-                            const x = x0 + radius * Math.cos(i * 2*Math.PI / 40),
-                                  y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
-                            shape.push({lat: y, lon: x});
-                        }
-                        shape = {polygon:shape};
-                        /*
-                        bounds = new google.maps.LatLngBounds(
-                            new google.maps.LatLng(y0 - radius, x0 - radius),
-                            new google.maps.LatLng(y0 + radius, x0 + radius));
-                         */
-                        
-                    }else{
-                        /* ARTEM TODO
-                        var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-                        var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
-                        setstartMarker(centre);
-                        createcircle(oncircle);
-
-                        //bounds = circle.getBounds();
-                        */
-                    }
-
-                    break;
-
-                case "l":  ///polyline
-                case "path":
-                case "polyline":
-                case "r":  //rectangle
-                case "rect":
-                case "pl": //polygon
-                case "polygon":
-                {
-                    shape = [];
-
-                    let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-                    for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S{1,25})\s+(\S{1,25})(?:,|$)/);
-
-                        const point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
-
-                        if(format==0){
-                            shape.push(point);
-                        }else{
-                            points.push(new google.maps.LatLng(points.lat, points.lon));
-                        }
-                        
-                        if (point.lat < minLat) minLat = point.lat;
-                        if (point.lat > maxLat) maxLat = point.lat;
-                        if (point.lon < minLng) minLng = point.lon;
-                        if (point.lon > maxLng) maxLng = point.lon;
-                        
-                    }
-
-                    if(format==0){
-                        shape = (type=="l" || type=="polyline")?{polyline:shape}:{polygon:shape};
-                    }else{
-                        southWest = new google.maps.LatLng(minLat, minLng);
-                        northEast = new google.maps.LatLng(maxLat, maxLng);
-                        bounds = new google.maps.LatLngBounds(southWest, northEast);
-                    }
-                }   
-            }//switch
-
-        }
-        
-        if(format==0){
-            return shape; //{bounds:bounds, shape:shape};
-        }else{
-            return {bounds:bounds, points:points};
-        }
-
-    },//end parseCoordinates
-    
-    //
     // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
     // WKT to Shapes to bbox array
     //    
@@ -628,7 +435,7 @@ window.hWin.HEURIST4.geo = {
             
             let isValid = (Array.isArray(item) && item.length==2 && 
                 window.hWin.HEURIST4.util.isNumber(item[0][0]) && window.hWin.HEURIST4.util.isNumber(item[0][1]));
-                //Math.abs(item[0][1])<=360.0 && Math.abs(item[0][0])<=90.0);
+               
             
             if(isValid){
                 if (item[0][0] < minLat) minLat = item[0][0];

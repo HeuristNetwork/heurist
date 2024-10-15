@@ -17,8 +17,6 @@ function ToLL($north, $east, $utmZone, $hemisphere)
   if(strtoupper($hemisphere)=='S'){
       $FalseNorth = 10000000.0;
   }
-  //if (lat < 0.) FalseNorth = 10000000.  // South or North?
-  //else          FalseNorth = 0.
 
   $Ecc = 0.081819190842622;       // Eccentricity
   $EccSq = $Ecc * $Ecc;

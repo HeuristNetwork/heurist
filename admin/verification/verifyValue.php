@@ -87,9 +87,9 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
     if($dtyID==null || !@self::$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
 
-        self::$system->defineConstant('DT_RELATION_TYPE');
+        //self::$system->defineConstant('DT_RELATION_TYPE');
 
-        if ( $dtyID == DT_RELATION_TYPE) {
+        if ( $dtyID == self::$system->getConstant('DT_RELATION_TYPE')) {
             $parent_id = 'relation';
         }elseif(is_array($defs) && count($defs)==1){
             $parent_id = $defs[0];
@@ -197,7 +197,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
 
         //label may have fullstop in its own name - so we always search with and without hierarchy
-        $withHierarchy = true;//(strpos($label,'.')>0);
+        $withHierarchy = true;
 
         self::initialize();
         self::getTerms();
@@ -212,9 +212,6 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           /*if($withHierarchy){
-           }else{
-           }*/
            $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
            $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];
            //remove last point
@@ -241,15 +238,11 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     //check if given label among allowed
     $label = trim(mb_strtolower($label));
     $label = trim($label,'.');
-    /*if(strpos($label,'.')>0){
-        $label = explode('.',$label);
-        $label = array_pop($label);
-    }*/
 
     if(empty($allowed_labels)){
-        return false;   
+        return false;
     }
-    
+
     $term_ID = array_search($label, $allowed_labels, true);
     if(!($term_ID>0)){
         $term_ID = array_search($label, $allowed_labels_plain, true);
@@ -328,7 +321,7 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
                 $allowed_types = "all";
                 if ($constraints!=null && $constraints != "") {
                     $temp = explode(",",$constraints);//get allowed record types
-                    if (count($temp)>0) {
+                    if (!empty($temp)) {
                         $allowed_types = $temp;
                     }
                 }

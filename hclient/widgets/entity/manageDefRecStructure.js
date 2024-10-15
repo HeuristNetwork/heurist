@@ -71,14 +71,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
         
-        //this.options.select_return_mode = 'recordset';
+       
         this.options.edit_height = 640;
         this.options.edit_width = 640;
         
         this.options.width = 1200;
         this.options.height = 640;
         this.options.edit_mode = 'inline';//'popup'; //editonly
-        this.options.editClassName = 'ui-heurist-bg-light'; // was 'ui-widget-content';
+        this.options.editClassName = 'ui-heurist-bg-light';
 
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
@@ -166,7 +166,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }else{
                 title = 'Manage Record Structure';    
                 if(this.options.rty_ID>0){
-                    title = title+': '+window.hWin.HEURIST4.dbs.rtyField(this.options.rty_ID, 'rty_Name');  //rectypes.names[this.options.rty_ID];
+                    title = title+': '+window.hWin.HEURIST4.dbs.rtyField(this.options.rty_ID, 'rty_Name'); 
                 }
             }
             
@@ -268,7 +268,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._on(this.btnClose, {click:this.closeDialog});
         */
 
-        //this.btnCloseTree = this.element.find('.closeTreePanel').button({text:false,icon:'ui-icon-carat-2-w'});
+       
         this._on(this.element.find('.closeTreePanel'), {click:function(){ 
             if(this.options.external_preview){
                 this.options.external_preview.manageRecords('closeWestPanel');
@@ -367,7 +367,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         treeData = [];
         
-        let groupIdx = -1;
         let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
         let outer_group = {};
         let inner_group = {}; // simple dividers or accordions placed within tabs
@@ -450,7 +449,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let that = this;
         
         let fancytree_options = {};
-        let need_redraw = false;
         this._treeview = this.element.find('.treeView');
         
         if(this._treeview.fancytree('instance')){
@@ -473,7 +471,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 if(ele.hasClass('ui-icon') || ele.attr('data-action') == 'delete'){
                     return;
                 }else if(ele.hasClass('fancytree-expander') && ele.parent().hasClass('fancytree-has-children')){
-                    //data.node.setExpanded(!data.node.isExpanded());
+                   
                     return;
                 }
 
@@ -671,7 +669,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     }
                 },100); 
                 //window.hWin.HEURIST4.util.stopEvent(event); 
-                //return false;
+               
             });
 
             let dtyid = $(item).find('span[data-dtid]').attr('data-dtid');
@@ -695,7 +693,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     if(node) node = $(node[0]);
                 }
 
-                node.find('.svs-contextmenu3').hide();//css('visibility','hidden');
+                node.find('.svs-contextmenu3').hide();
                 node.find('.detail-count').css('display','inline-block');
                 that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
 
@@ -862,7 +860,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         */
         this._on( this.menues['menu_'+name], {
             //mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
-            mouseleave : function(){this._hideMenu(this.menues['menu_'+name])}
+            mouseleave : function(){
+                    this._hideMenu(this.menues['menu_'+name])
+            }
         });
 
     },
@@ -872,18 +872,18 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._menuTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 800);
-            //$( ele ).delay(800).hide();
+           
     },
     
     _showMenu: function(ele, parent) {
             clearTimeout(this._menuTimeoutId);
             
             $('.menu-or-popup').hide(); //hide other
-            let menu = $( ele )
+            $( ele )
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left-2 top", at: "left top", of: parent });
-            //$( document ).one( "click", function() { menu.hide(); });
+           
             return false;
     },
     
@@ -905,7 +905,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
         }
         
-        let is_narrow = true;//(this.options.edit_mode=='inline');
+        let is_narrow = true;
         
         let recID   = fld('rst_ID');
         
@@ -938,7 +938,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
 /*        
         if(false && this.options.edit_mode=='popup'){
-                //+ (showActionInList?this._rendererActionButton('edit'):'');
+               
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
@@ -1021,7 +1021,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +`<strong>${window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))}</strong>`
                 +'"</b> from this record type?<br><br>'
                 +`<span style="display:${display};">`
-                    +`<div>Permanently delete the data (${this._calculated_usages[rst_ID]} values) from this field<br>(applies to this record type only)?<div> <input type="checkbox" id="delData" />`
+                    +'<div>'
+                        +`<input type="checkbox" id="delData" style="float: left; margin: 0px 10px 0px 0px;" />`
+                        +`Permanently delete the data (${this._calculated_usages[rst_ID]} values) from this field<br>(applies to this record type only)?`
+                    +'</div>'
                 +'</span>',
                 {
                     'Proceed': function(){ 
@@ -1040,7 +1043,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     // set visibility of buttons on toolbar (depends on isModified)
     //
     onEditFormChange: function( changed_element ){
-        //this._super(changed_element);
+       
             
         //show hide buttons in treeview
         let isEditOpen = this.editForm.is(':visible');
@@ -1197,17 +1200,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 //need refresh structure - obtain from rst_Index again
                 that._cachedRecordset = $Db.rst(that.options.rty_ID);  //from  rst_Index
                 
-                if(res && res.selection){
-                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
+                if(res?.selection && 
+                    window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
                         let dty_ID = res.selection[0];
                         that.addNewFieldToStructure(dty_ID, after_dty_ID, res.rst_fields);
-                    }else
-                    if(window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                        let recordset = res.selection;
-                        let record = recordset.getFirstRecord();
-                    }
                 }
-                if(res.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
+                if(res?.updatedRstField && res.updatedRstField > 0 && $Db.rst(that.options.rty_ID, res.updatedRstField)){ // Update tree node's label
                     that._treeview.find('span[data-dtid="'+ res.updatedRstField +'"]').text($Db.rst(that.options.rty_ID, res.updatedRstField, 'rst_DisplayName'));
                 }
             };
@@ -1375,7 +1373,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
             let basefield_name = $Db.dty(id, 'dty_Name');
 
-            sel_fields['values'][id] = {dty_Name: basefield_name};
+            sel_fields['values'][id] = $.extend({dty_Name: basefield_name}, rst_fields);
         }
 
         // Request to add all new base fields to rectype structure, this will place all new fields at the top
@@ -1680,13 +1678,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
             
             let v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
-            //$Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr');
+           
             this._rst_PointerMode_Enable(v!=1);
             
             this.editForm.show();
             this._editing.setFocus();
             
-            //this.editForm.position({my:'left top', at:'left bottom', of:ed_ele}).show();
+           
             
             // Temporary Solution: Sometimes, after using the 'Add new base field' popup, the requirement type dropdown loads incorrectly
             // The menu widget is loaded behind the record editor popup and lacks the populate highlight for the hover event on menu options
@@ -1739,7 +1737,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
                 .appendTo(edit_ele.find('.input-div'));
         window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
-                    url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                    url: window.hWin.HRes('parent_child_instructions #content'),
                     no_init:true} );                
         
             
@@ -1764,7 +1762,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         edit_ele= this._editing.getFieldByName('rst_CreateChildIfRecPtr');
         if(edit_ele){
             edit_ele.editing_input('option','change', function(){
-                //let input = this.getInputs()[0];
+               
                 that.onCreateChildIfRecPtr( this );  
             }); 
         }
@@ -2130,8 +2128,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
 
         //remove old content
-        //let edit_ele = this._editing.getFieldByName('rst_TermPreview');
-        //edit_ele.find('.input-div').empty();
+       
+       
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
 
@@ -2148,7 +2146,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this._editing.setFieldValueByName('rst_DefaultValue', '', false);
         }
         let ele = this._editing.getFieldByName('rst_TermPreview');
-        //ele.editing_input('fset','dty_Type',(term_type!='relation')?'enum':'relationtype');
+       
         ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
@@ -2171,7 +2169,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //disable
         let edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
         if(edit_ele){
-            //edit_ele.editing_input('option','showclear_button',false);
+           
             let ele = this._editing.getInputs('rst_PtrFilteredIDs')
             window.hWin.HEURIST4.util.setDisabled(ele, true);
         }
@@ -2200,7 +2198,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         ele.empty();
             
             
-        //if(this.defval_container) return; //already inited
         this.defval_container = ele;
         
         let is_increment = (defval=='increment_new_values_by_1');
@@ -2425,8 +2422,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }else if(dt_type=='separator'){
             fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
             fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
-        }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
-            //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
+        //}else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                           
         }
         if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
             fields['rst_DisplayOrder'] = '0';
@@ -2492,14 +2488,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         //rare case when edited edit form reload with another record
-        let is_usual_way = (!(this._stillNeedUpdateForRecID>0)); 
         this._stillNeedUpdateForRecID = 0;
         //record is already updated in _saveEditAndClose
-        //this._super( recID, fieldvalues );
-        if(is_usual_way){
-            //window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
-        }
-
+       
         // Check if user is going to update the base field's name or help text
         if(this.editForm.find('input#alter_basefield').is(':checked')){
 
@@ -2549,7 +2540,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     let sepType = recset.fld(record, 'rst_DefaultValue');
                     let extraStyle = '';
                     if(sepType == 'group'){
-                        //padding-left:10px;
+                       
                         extraStyle = 'style="display:inline-block;';
                     }
                     if(title == '-'){
@@ -2704,7 +2695,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         
-        let that = this;
         if(recID.indexOf(this.options.rty_ID+'.')===0){
             recID = recID.substring(recID.indexOf('.')+1);
         }
@@ -2875,14 +2865,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                                 if(response.data['childMiltiplied'] && response.data['childMiltiplied'].length>0){
                                     sMsg = sMsg
-                                    +'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent (Problem)</div>'
+                                    +'<div style="color:red">'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent (** PROBLEM **)</div>'
                                     +'<br><div>You will need to edit these records and choose which record is the parent (child records can only have one parent).</div>'
                                     +'<div>To find these records use Verify > Verify integrity <new tab icon></div><br>'
                                 }
                             }
                             //sMsg = sMsg 
                             sMsg = sMsg 
-                            +'<br>Notes<br><div>We STRONGLY recommend removing - from the record structure of the child record type(s) -  any existing field which points back to the parent record</div>'
+                            +'<br>NOTES<br><br><div>We STRONGLY recommend removing - from the record structure of the child record type(s) -  any existing field which points back to the parent record</div>'
                             +'<br><div>You will also need to update the record title mask to use the new Parent Entity field to provide information (rather than existing fields which point back to the parent)</div>'
                             +'<br><div>You can do both of these changes through Structure > Modify / Extend <new tab icon> or the Modify structure <new tab icon> link when editing a record.</div>';
 
@@ -2893,7 +2883,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             that._rst_PointerMode_Enable(false);
                         }else{
                             ed_input.setValue(0, true);
-                            //$(ed_input).prop('checked', false);
+                           
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
@@ -2946,7 +2936,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _deleteBaseField: function(dtyid){
 
-        let that = this;
         if(window.hWin.HEURIST4.util.isempty(dtyid) || !$Db.dty(dtyid)){
             return;
         }
@@ -2956,7 +2945,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let is_reserved = $Db.dty(dtyid, 'dty_Status') == "reserved";
 
         if(is_reserved){
-            window.hWin.HEURIST4.msg.showMsgErr('Unable to delete field ' + label + ' as it\'s a reserved field');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Unable to delete field ${label} as it's a reserved field`,
+                error_title: 'Cannot delete field'
+            });
             return;
         }
 

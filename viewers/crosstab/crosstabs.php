@@ -60,7 +60,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
         }
 
         //database, query q, domain w
-        crosstabsAnalysis = CrosstabsAnalysis(query_main, '');
+        window.crosstabsAnalysis = CrosstabsAnalysis(query_main, '');
         //
     }
         //Used to open the crosstabs section to the full width on the initial load.

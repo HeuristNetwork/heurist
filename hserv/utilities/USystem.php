@@ -1,10 +1,14 @@
 <?php
+namespace hserv\utilities;
+
 /**
 * Library to obtain system and php config value
 *
 * getHostParams
 * isMemoryAllowed
 * getConfigBytes
+* fixIntegerOverflow
+* getUserAgent
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -37,13 +41,15 @@ class USystem {
 
         $host_params = array();
 
+        $localhost = '127.0.0.1';
+
         $installDir = '';
         $codeFolders = array('heurist','h6-alpha','h6-ao');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
             if(!isset($serverName) || !$serverName){
-                $serverName = '127.0.0.1';
+                $serverName = $localhost;
             }
 
             $k = strpos($serverName,":");
@@ -90,8 +96,8 @@ class USystem {
                         ? ":" . $_SERVER["SERVER_PORT"] : "");
                     $host_params['domain'] = $_SERVER["SERVER_NAME"];
                 }else{
-                    $host_params['server_name'] = '127.0.0.1';
-                    $host_params['domain'] = '127.0.0.1';
+                    $host_params['server_name'] = $localhost;
+                    $host_params['domain'] = $localhost;
                 }
             }else{
                 $k = strpos($serverName,":");
@@ -118,10 +124,12 @@ class USystem {
                 $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
             }
 
+            $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
+
             $matches = array();
-            preg_match("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", @$_SERVER["SCRIPT_NAME"], $matches);
+            preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
             if($matches){
-                $installDir = preg_replace("/\/([A-Za-z0-9_]+)\/(" . $rewrite_actions . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
+                $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
             }else{
 
                 // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
@@ -196,7 +204,7 @@ class USystem {
     */
     public static function isMemoryAllowed( $memoryNeeded ){
 
-        $mem_limit = USystem::getConfigBytes('memory_limit');
+        $mem_limit = self::getConfigBytes('memory_limit');
         $mem_usage = memory_get_usage();
 
         if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){
@@ -233,11 +241,17 @@ class USystem {
                 $val *= 1024; break;
             default;
         }
-        //_fix_integer_overflow
-        if ($val < 0) {
-            $val += 2.0 * (PHP_INT_MAX + 1);
+        return self::fixIntegerOverflow($val);
+    }
+    
+
+    // Fix for overflowing signed 32 bit integers,
+    // works for sizes up to 2^32-1 bytes (4 GiB - 1):
+    public static function fixIntegerOverflow($size) {
+        if ($size < 0) {
+            $size += 2.0 * (PHP_INT_MAX + 1);
         }
-        return $val;
+        return $size;
     }
 
     /**
@@ -323,5 +337,106 @@ class USystem {
 
         return $ret;
     }
+
+    //
+    //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+    //
+    public static function getHostLogoAndUrl($return_url = true){
+
+        //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+        $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.jpg");
+        $mime_type = 'jpg';
+        if(!$host_logo || !file_exists($host_logo)){
+            $host_logo = realpath(dirname(__FILE__)."/../../../organisation_logo.png");
+            $mime_type = 'png';
+        }
+        $host_url = null;
+        if($host_logo!==false && file_exists($host_logo)){
+
+            !$return_url || $host_logo = defined('HEURIST_BASE_URL') ? HEURIST_BASE_URL.'?logo=host' : null;
+
+            $host_url = realpath(dirname(__FILE__)."/../../../organisation_url.txt");
+            if($host_url!==false && file_exists($host_url)){
+                $host_url = file_get_contents($host_url);
+            }else{
+                $host_url = null;
+            }
+        }else{
+            $host_logo = null;
+        }
+
+        return array($host_logo, $host_url, $mime_type);
+    }
+
+    //======================= session routines =================================
+    //
+    //
+    // Retruns array of database where current user was logged in
+    //
+    public static function sessionRecentDatabases($current_User){
+        $dbrecent = array();
+        if($current_User && @$current_User['ugr_ID']>0){
+            foreach ($_SESSION as $db=>$session){
+
+                $user_id = @$_SESSION[$db]['ugr_ID'];
+                if($user_id == $current_User['ugr_ID']){
+                    if(strpos($db, HEURIST_DB_PREFIX)===0){
+                        $db = substr($db,strlen(HEURIST_DB_PREFIX));
+                    }
+                    array_push($dbrecent, $db);
+                }
+            }
+        }
+        return $dbrecent;
+    }
+
+    //
+    //
+    //
+    public static function sessionCheckFolder(){
+
+        if(!ini_get('session.save_handler')=='files') { return true; }
+
+        $folder = session_save_path();
+        if(file_exists($folder) && is_writeable($folder)){ return true; }
+
+        sendEmailToAdmin('Session folder access', 'The sessions folder has become inaccessible', true);
+
+        return false;
+    }
+
+    //
+    //
+    //
+    public static function sessionUpdateCookies($lifetime=null){
+
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+
+        //update cookie - to keep it alive for next 30 days
+        if($lifetime==null){
+                $lifetime = time() + 30*24*60*60;
+        }
+
+        $session_id = session_id(); //ID of current session $cookie_session_id
+
+        if (strnatcmp(phpversion(), '7.3') >= 0) {
+            $cres = setcookie('heurist-sessionid', $session_id, array(
+                'expires' => $lifetime,
+                'path' => '/',
+                'domain' => '',
+                'Secure' => $is_https,
+                'HttpOnly' => true,
+                'SameSite' => 'Strict' //'Lax'
+            ));
+        }else{
+            //workaround: header("Set-Cookie: key=value; path=/; domain=example.org; HttpOnly; SameSite=Lax")
+            $cres = setcookie('heurist-sessionid', $session_id, $lifetime, '/', '', $is_https, true );
+        }
+
+        return $cres;
+    }
+
+
+
 }
 ?>

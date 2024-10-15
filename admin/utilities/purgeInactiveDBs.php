@@ -36,7 +36,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2022 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -53,7 +53,7 @@
 
 // Default values for arguments
 $is_shell =  false;
-$arg_no_action = true;
+global $arg_no_action = true;
 $need_email = true;
 $eol = "\n";
 $tabs = "\t\t";
@@ -132,27 +132,27 @@ if (@$argv) {
 
     $eol = "</div><br>";
     $tabs0 = '<div style="min-width:300px;display:inline-block;">';
-    $tabs = "</div>".$tabs0;
-    //exit('This function must be run from the shell');
+    $tabs = DIV_E.$tabs0;
+
 }
 
+use hserv\utilities\DbUtils;
+use hserv\utilities\UArchive;
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
-//require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 
 if(!$is_shell){
-    $sysadmin_pwd = System::getAdminPwd();
+    $sysadmin_pwd = USanitize::getAdminPwd();
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-        //$response = $system->getError();
-        //print $response['message'];
+
+
         exit;
     }
 }
@@ -193,7 +193,7 @@ if(!$arg_no_action){
     if (!folderCreate($backup_sysarch, true)) {
         exit("Failed to create backup folder $backup_sysarch \n");
     }else{
-        //echo $backup_sysarch.' exists'."\n";
+
     }
 
     echo 'Deleted databases: '.$backup_root."\n";
@@ -210,9 +210,7 @@ if(!$arg_no_action){
 /*TMP
 //Arche_RECAP
 //AmateurS1
-//$databases = array('ARNMP_COMET','ArScAn_Material','arthur_base','arvin_stamps');
 $databases = array('AmateurS1');
-//$databases = array('ARNMP_COMET');
 */
 
 set_time_limit(0);//no limit
@@ -224,16 +222,11 @@ $email_list = array();
 $email_list_deleted = array();
 $email_list_failed = array();
 
-//$databases = array('osmak_3');
-
 foreach ($databases as $idx=>$db_name){
 
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
-    //if(strcmp($db_name,'crvr_eglisesXX')<=0){
-    //    continue;
-    //}
 
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
@@ -375,7 +368,7 @@ if($need_email){
                 $report .= (' ERROR: '.@$err['message']);
 
                 array_push($email_list_failed,
-                        "<tr><td>$db_name</td><td>".@$err['message']."</td></tr>");
+                        "<tr><td>$db_name</td><td>".@$err['message'].TR_E);
 
             }
         }
@@ -392,8 +385,8 @@ if($need_email){
 
             $report =  $diff.' months, n='.$vals['cnt'].' INACTIVE';
         }else{
-            //echo ' '.$vals['cnt'].' records '.$diff.' months. OK'."\n";
-            //no report for db without action echo $eol;
+
+
         }
 /*
 * Dump and bz2 import tables that are
@@ -450,7 +443,7 @@ if($need_email){
             }
 
 
-            if(count($sif_purge)>0){
+            if(!empty($sif_purge)){
 
 
             $report .= (' ... '.count($sif_purge).' import tables, archive');
@@ -459,14 +452,14 @@ if($need_email){
 
             //dump and archive
             // Do an SQL dump for import tables
-            $backup_imports2 = $backup_imports.$db_name;
+            $backup_imports2 = $backup_imports.basename($db_name);
             if (!folderCreate($backup_imports2, true)) {
                 exit("$db_name Failed to create backup folder $backup_imports2 \n");
             }
 
             $cnt_dumped = 0;
 
-            //$sif_purge = array( 3 => 'import20210531163600');
+
             $arc_cnt = 0;
             $cnt_dumped = 0;
             if(ALLOW_PURGE_IMPORTTABLES){
@@ -478,14 +471,10 @@ if($need_email){
 
                     $file_name = preg_replace('/[()]/g','',$file_name);
 
-//echo $file_name."\n";
-//echo strlen($file_name)."\n";
                     $len = strlen($file_name);
                     if($len>96){ //100 is max for tar file
                         $len = $len-100+26;
                         $file_name = substr($file_name,0,-$len).substr($file_name,-19);
-//echo $file_name."\n";
-//echo strlen($file_name)."\n";
                     }
 
                     $dumpfile = $backup_imports2."/".$file_name.'.sql';
@@ -527,7 +516,7 @@ if($need_email){
             if($cnt_dumped>0)
             {   //archive import tables
                 $archOK = true;
-                $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
+                $destination = $backup_imports.basename($db_name).' '.$datetime1->format('Y-m-d').'.tar';
                 $archOK = UArchive::createBz2($backup_imports2, null, $destination, false);
 
                 if($archOK){
@@ -559,7 +548,7 @@ if($need_email){
                     $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
 
-                $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';//.$db_name.' '
+                $dumpfile = $backup_sysarch.basename($db_name).'_'.$datetime1->format('Y-m-d').'.sql';//.$db_name.' '
                     $opts = array('include-tables' => array('sysArchive'),
                                   'default-character-set'=>'utf8',
                                   'single-transaction'=>true,
@@ -573,9 +562,9 @@ if($need_email){
                             $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
                             $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $opts);
 
-                            //echo $db_name.' purge sysArchive to '.$dumpfile;
+
                             $dump->start($dumpfile);
-                            //echo $db_name.' ... dumped ';
+
                             $res = true;
                         } catch (Exception $e) {
                             $report .= ("Error: ".$e->getMessage()."\n");
@@ -591,13 +580,13 @@ if($need_email){
                                     .$err['message']."\n");
                         if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
-                        $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
+                        $destination = $backup_sysarch.basename($db_name).'_'.$datetime1->format('Y-m-d');
 
                         if( extension_loaded('bz2') ){
 
                             $destination = $destination.'.tar';
 
-                            //echo ' ... archived to '.$destination."\n";
+
 
                             $archOK = UArchive::createBz2($dumpfile, null, $destination, false);
                         }else{
@@ -608,7 +597,6 @@ if($need_email){
 
                         if($archOK){
                             //clear table
-//                            $query = 'DELETE FROM sysArchive WHERE arc_ID>0';
                             $query = 'DROP TABLE sysArchive';
                             $mysqli->query($query);
                             $mysqli->query("CREATE TABLE sysArchive (
@@ -651,11 +639,11 @@ if(!$arg_no_action){
     //report after actual action
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;
 
-    if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
+    if( (!empty($email_list_deleted) || !empty($email_list_failed)) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;
-        $sMsg = $sTitle.' <table>'.implode("\n", $email_list_deleted).'</table>';
-        if(count($email_list_failed)>0){
-             $sMsg = $sMsg.'<br>FAILED on database drop<table>'.implode("\n", $email_list_failed).'</table>';
+        $sMsg = $sTitle.TABLE_S.implode("\n", $email_list_deleted).TABLE_E;
+        if(!empty($email_list_failed)){
+             $sMsg = $sMsg.'<br>FAILED on database drop'.TABLE_S.implode("\n", $email_list_failed).TABLE_E;
         }
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);
     }
@@ -663,7 +651,7 @@ if(!$arg_no_action){
 
 echo $tabs0.'finished'.$eol;
 
-if(is_array($email_list) && count($email_list)>0 && $need_email)
+if(!isEmptyArray($email_list) && $need_email)
 {
     sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
         "List of inactive databases for more than a year with more than 200 records:\n"
@@ -675,10 +663,10 @@ function exclusion_list(){
 
     $res = array();
     $fname_ = dirname(__FILE__)."/../../../databases_not_to_purge.txt";
-    //$fname_ = '/var/www/html/HEURIST/databases_not_to_purge.txt';
+
     $fname = realpath($fname_);
     if($fname==false || !file_exists($fname)){
-        
+
         $sMsg = 'The file with purge exclustion list (databases_not_to_purge.txt) '
             .'was not found and please create it. '.($fname?$fname:$fname_);
         if($arg_no_action){
@@ -687,17 +675,17 @@ function exclusion_list(){
         sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg);
         return false;
     }
-    
-    //ini_set('auto_detect_line_endings', 'true');
+
+
     $handle = @fopen($fname, "r");
     while (!feof($handle)) {
         $line = trim(fgets($handle, 100));
-        //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
+
         if(strpos($line,'#')!==false){
             $line = trim(strstr($line,'#',true));
         }
         if($line=='') {continue;}
-        
+
         $res[] = $line;
     }
     fclose($handle);
@@ -705,8 +693,8 @@ function exclusion_list(){
         print '<br>Exclusion list:<br>';
         print implode('<br>', $res).'<br><br>';
     }
-    
-    
+
+
     return $res;
 }
 

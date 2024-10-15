@@ -70,7 +70,7 @@ function HEditing(_options) {
         
         if(!_options.className) {
             if($container.parents('.editor').length==0){
-                //2020-12-29 _options.className = 'ui-heurist-bg-light';
+               
             }else {
                 _options.className = '';
             }
@@ -94,7 +94,7 @@ function HEditing(_options) {
        script.id = 'tiny-mce-script';
        script.onload = function(){  //() => 
          // tinymce is loaded at this point
-         //this.setState({tinymceLoaded: true});
+        
          callback.call(this);
        };
        script.src = tinyMCEPath;
@@ -148,7 +148,7 @@ function HEditing(_options) {
         recdata = _recdata;
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
-            //$('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
+           
             $container.show();
             return;     
         } 
@@ -160,7 +160,7 @@ function HEditing(_options) {
         if(window.hWin.HEURIST4.util.isRecordSet(recdata)){
             //for edit mode
                 //get record ID
-                //recID = recdata.getIds(1)[0];
+               
                 record = recdata.getFirstRecord();
                 
                 function __findRecID(fields){
@@ -251,7 +251,7 @@ function HEditing(_options) {
             let hasVisibleFields = false;
             
             //    groupEle,      //current accordion or tab control
-            //    fieldContainer, groupTabHeader;
+           
                 
             for (idx=0; idx<fields.length; idx++){
                 
@@ -463,9 +463,7 @@ function HEditing(_options) {
                             .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))
                             .addClass('heurist-helper1').appendTo(fieldContainer);
                         //see applyCompetencyLevel
-                        //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                     }else  
-                    //if(fields[idx]['dtFields']['rst_Display']!="hidden") 
                     {
                         
                         //assign values from record
@@ -482,7 +480,7 @@ function HEditing(_options) {
                                 if(!Array.isArray(val)) val = [val];
                                 fields[idx].values = val;
                             }else{
-                                fields[idx].values = null; //[''];
+                                fields[idx].values = null;
                             }  
                             
                         }else{
@@ -625,7 +623,7 @@ function HEditing(_options) {
                }
         });
         
-        //$container.find('.input-cell > .heurist-helper1').width(maxW);
+       
     }
     
 
@@ -942,7 +940,7 @@ function HEditing(_options) {
                 if(is_changed!==false){
                     ele.editing_input('isChanged', true);    
                     ele.editing_input('onChange');
-                    //_onChange();
+                   
                 }
             }
         },

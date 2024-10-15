@@ -236,7 +236,7 @@ function onPageInit(success){
 
                 // Calculates the line length
                 function getLineLength(record) {
-                    var length = getSetting(setting_linelength);
+                    var length = getSetting('setting_linelength');
                     if(record !== undefined && record.hasOwnProperty("depth")) {
                         length = length / (record.depth+1);
                     }

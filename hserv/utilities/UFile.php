@@ -1,4 +1,6 @@
 <?php
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
 
     /**
     * File library - convert to static class
@@ -25,11 +27,15 @@
     * fileCopy
     * fileSave
     * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
+    * fileDelete
     *
     * getRelativePath
     * folderRecurseCopy
     * folderSubs - list of subfolders
-    *
+    * 
+    * 
+    * fileReadByChunks - Reads a file in chunks and outputs it to the client in a memory-efficient manner.
+    * getFileSize - Retrieves the size of a file, with an optional cache-clearing mechanism.
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -330,7 +336,6 @@
 
             $files = scandir($folder);
             foreach ($files as $filename) {
-                //if (!(( $filename == '.' ) || ( $filename == '..' ) || is_dir(HEURIST_DIR.$dir . $filename)))
 
                     $path_parts = pathinfo($filename);
                     if(array_key_exists('extension', $path_parts))
@@ -616,7 +621,7 @@
             $item = array( 'key'=>$folder, 'title'=>$folder,
                         'folder'=>($folder>=0), 'issystem'=>(@$sysfolders[$folder]!=null) );
 
-            if(is_array($children) && count($children)>0){
+            if(!isEmptyArray($children)){
                 $item['children'] = folderTreeToFancyTree($children, $lvl+1);
             }
             $fancytree[] = $item;
@@ -712,6 +717,90 @@
             return 0;
         }
     }
+    
+    //
+    // Adds counter to the end of file name
+    //
+    function getUniqueFileName($folder, $filename, $ext){
+
+        $path_parts = pathinfo($filename);
+        $filename = $path_parts['filename'];
+        if(strpos($ext,'.')==false){
+            $ext = '.'.$ext;
+        }
+
+        $file_fullpath = $folder.$filename.$ext;
+
+        $k = strpos($filename,'(');
+        $k2 = strpos($filename,')');
+        if($k>0 && $k2>0){
+            $cnt = intval(substr($filename,$k+1,$k2-$k));
+            $filename = substr($filename,0,$k);
+        }else{
+            $cnt = 0;
+        }
+       
+        do{
+            if(file_exists($file_fullpath)){
+                $cnt++;
+                $file_fullpath = $folder.$filename."($cnt)$ext";
+            }
+        }while (file_exists($file_fullpath));
+
+        return $file_fullpath;
+    }  
+    
+    
+
+    /**
+     * Returns the target path as relative reference from the base path.
+     *
+     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+     * Both paths must be absolute and not contain relative parts.
+     *
+     * @param string $basePath   The base path
+     * @param string $targetPath The target path
+     *
+     * @return string The relative target path
+     */
+     /*  does not work
+    function getRelativePath($basePath, $targetPath)
+    {
+        // Normalize path separators for cross-platform compatibility
+        $basePath = str_replace('\\', '/', rtrim($basePath, '/'));
+        $targetPath = str_replace('\\', '/', rtrim($targetPath, '/'));
+
+        // If both paths are identical, return an empty string (they are the same)
+        if ($basePath === $targetPath) {
+            return '';
+        }
+
+        // Split both paths into their individual components
+        $baseDirs = explode('/', ltrim($basePath, '/'));
+        $targetDirs = explode('/', ltrim($targetPath, '/'));
+
+        // Remove identical segments from the start of both paths
+        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+            array_shift($baseDirs);
+            array_shift($targetDirs);
+        }
+
+        // Build the relative path by going up for each remaining base directory
+        $relativePath = str_repeat('../', count($baseDirs)) . implode('/', $targetDirs);
+
+        // If the relative path is empty (pointing to the same directory), return './'
+        if ($relativePath === '') {
+            return './';
+        }
+
+        // Special case: ensure the result does not start with a schema-like structure (e.g., "file:colon")
+        if (strpos($relativePath, ':') !== false && strpos($relativePath, '/') === false) {
+            return './' . $relativePath;
+        }
+
+        return $relativePath;
+    }
+    */
 
     /**
      * Returns the target path as relative reference from the base path.
@@ -739,32 +828,35 @@
         $targetPath = str_replace("\0", '', $targetPath);
         $targetPath = str_replace('\\', '/', $targetPath);
 
+        //add last one
         if( substr($targetPath, -1, 1) != '/' )  {$targetPath = $targetPath.'/';}
 
         if ($basePath === $targetPath){
             return '';
-        }elseif (substr($targetPath,0,1)!='/') { //it is already relative
+        }elseif (substr($targetPath,0,1)!='/' && !preg_match('/^[A-Z]:/i',$targetPath)) { //it is already relative
             return $targetPath;
         }
-        //else  if(strpos($basePath, $targetPath)===0){
-        //    $relative_path = $dirname;
 
-
-        $sourceDirs = explode('/', isset($basePath[0]) && '/' === $basePath[0] ? substr($basePath, 1) : $basePath);
-        $targetDirs = explode('/', isset($targetPath[0]) && '/' === $targetPath[0] ? substr($targetPath, 1) : $targetPath);
-        array_pop($sourceDirs);
+        $baseDirs = explode('/', ltrim($basePath,'/'));
+        $targetDirs = explode('/', ltrim($targetPath,'/'));
+        array_pop($baseDirs);
         $targetFile = array_pop($targetDirs);
 
-        foreach ($sourceDirs as $i => $dir) {
+        // Remove identical segments from the start of both paths
+        while (isset($baseDirs[0], $targetDirs[0]) && $baseDirs[0] === $targetDirs[0]) {
+            array_shift($baseDirs);
+            array_shift($targetDirs);
+        }/*
+        foreach ($baseDirs as $i => $dir) {
             if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
-                unset($sourceDirs[$i], $targetDirs[$i]);
+                unset($baseDirs[$i], $targetDirs[$i]);
             } else {
                 break;
             }
-        }
+        }*/
 
         $targetDirs[] = $targetFile;
-        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
+        $path = str_repeat('../', count($baseDirs)).implode('/', $targetDirs);
 
         // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
         // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
@@ -774,6 +866,7 @@
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? './'.$path : $path;
     }
+
 
 
 /**
@@ -799,7 +892,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                 if (( $file != '.' ) && ( $file != '..' )) {
                     if ( is_dir($src . $file) ) {
 
-                        if(!is_array($folders) || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        if(isEmptyArray($folders) || in_array($src.$file.'/',$folders))
                         {
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
@@ -864,7 +957,8 @@ function folderSubs($src, $exclude=null, $full_path=true) {
 
 //------------------------------------------
 //
-// Returns false if given file is not in heurist upload folder
+// Returns false if given folder is not in heurist upload folder
+// Returns null  if given folder does not exist
 // Otherwise return real path
 //
 function isPathInHeuristUploadFolder($path, $check_existance=true){
@@ -873,7 +967,9 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $r_path = realpath($path);
 
-    if($check_existance && !$r_path) {return false;} //does not exist
+    if($check_existance && !$r_path) { //does not exist
+        return null;
+    }
 
     if($r_path){
         $r_path = str_replace('\\','/',$r_path);
@@ -886,10 +982,8 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
            strpos($r_path, $heurist_dir)===0){
                return $r_path;
            }
-    }else{
-        if(strpos($path, HEURIST_FILESTORE_DIR)===0){
+    }elseif(strpos($path, HEURIST_FILESTORE_DIR)===0){
             return $path;
-        }
     }
 
     return false;
@@ -1153,9 +1247,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
         USanitize::errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
     } else {
-        //if(!$data){
-            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        //}
+        $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     }
     curl_close($ch);
 
@@ -1192,17 +1284,17 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
         $mimeType = null;
 
         if(strpos($url, 'soundcloud.com')!==false){
-            $mimeType  = 'audio/soundcloud';
+            $mimeType  = MT_SOUNDCLOUD;
             $extension = 'soundcloud';
-            $force_add = "('soundcloud','audio/soundcloud', '0','','Soundcloud','')";
+            $force_add = "('soundcloud','".MT_SOUNDCLOUD."', '0','','Soundcloud','')";
         }elseif(strpos($url, 'vimeo.com')!==false){
-            $mimeType  = 'video/vimeo';
+            $mimeType  = MT_VIMEO;
             $extension = 'vimeo';
-            $force_add = "('vimeo','video/vimeo', '0','','Vimeo Video','')";
+            $force_add = "('vimeo','".MT_VIMEO."', '0','','Vimeo Video','')";
         }else  if(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
-            $mimeType  = 'video/youtube';
+            $mimeType  = MT_YOUTUBE;
             $extension = 'youtube';
-            $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
+            $force_add = "('youtube','".MT_YOUTUBE."', '0','','Youtube Video','')";
         }else{
             //get extension from url - unreliable
             //$f_extension = getURLExtension($url)
@@ -1337,9 +1429,9 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
         $data = fread($handle, 10);
         rewind($handle);
 
-        if(substr_count($data, "\r\n")>0){
+        if(substr_count($data, "\r\n") > 0){
             $eol = "\r\n";
-        }elseif(substr_count($data, "\n")>0){
+        }elseif(substr_count($data, "\n") > 0){
             $eol = "\n";
         }else{
             $eol = "\r";
@@ -1532,6 +1624,8 @@ function uploadFileToNakala($system, $params) {
     $missing_key .= $system->is_admin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
     $missing_key .= ' Database properties';
 
+    $unknow_error_msg = 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.';
+
     if(!function_exists("curl_init"))  {
 
         $glb_curl_code = HEURIST_SYSTEM_FATAL;
@@ -1661,7 +1755,7 @@ function uploadFileToNakala($system, $params) {
 
         if(JSON_ERROR_NONE != json_last_error() || !is_array($file_details)){ // json error occurred | is not array | is missing information
             curl_close($ch);
-            $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+            $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
             return false;
         }
@@ -1741,7 +1835,7 @@ function uploadFileToNakala($system, $params) {
 
     if(JSON_ERROR_NONE != json_last_error() || !is_array($result)){ // json error occurred | is not array | is missing information
         curl_close($ch);
-        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+        $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
     }
@@ -1784,7 +1878,7 @@ function uploadFileToNakala($system, $params) {
         return false;
     }else{
         curl_close($ch);
-        $system->addError(HEURIST_ACTION_BLOCKED, 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.');
+        $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
     }
@@ -1801,4 +1895,94 @@ function flush_buffers($start=true){
     @flush();
     if($start) {@ob_start();}
 }
+
+/**
+ * Reads a file in chunks and outputs it to the client in a memory-efficient manner.
+ * 
+ * This method is particularly useful for large files, as it reads the file in 10 MB chunks
+ * and outputs it directly to the client to avoid exhausting memory.
+ * 
+ * @param string $file_path The path to the file to be read and output.
+ * 
+ * @return int|false Returns the size of the file in bytes if successful, or false on failure.
+ */
+function fileReadByChunks($file_path, $range_min=0, $range_max=0)
+{
+    // Get the size of the file
+    $file_size = getFileSize($file_path);
+
+    if($file_size==0){
+        return; //file does not exist
+    }
+    
+    // Set the chunk size to 10 MB (10 * 1024 * 1024 bytes)
+    $chunk_size = 10 * 1024 * 1024;
+
+    // Check if the file is larger than the chunk size
+    if ($range_max==0 && $file_size < $chunk_size) {
+        // If the file is smaller than the chunk size, output the entire file
+        return readfile($file_path);
+    }
+    
+    // Open the file in binary read mode
+    $handle = fopen($file_path, 'rb');
+    if(!$handle){
+        //error_log('file not found: '.htmlspecialchars($filename));
+        return 0;
+    }
+
+    if($range_max>0){ //output defined range only
+        if($range_min>0) {fseek($handle,$range_min);}
+        $chunk = fread($handle, $range_max-$range_min+1);
+        echo $chunk;
+    }else{
+        // Loop through the file and read it in chunks
+        while (!feof($handle)) {
+            echo fread($handle, $chunk_size); // Output the current chunk (was 1000)
+            @ob_flush(); // Flush the output buffer
+            @flush();    // Flush the system buffers
+        }
+    }
+    // Close the file handle
+    fclose($handle);
+
+    // Return the file size after reading
+    return $file_size;
+}
+
+/**
+ * Retrieves the size of a file, with an optional cache-clearing mechanism.
+ * 
+ * This function checks the existence of the file and returns its size in bytes. It can optionally
+ * clear the file status cache to ensure the most up-to-date file size is retrieved, which is useful
+ * if the file is being modified during runtime.
+ * 
+ * @param string $file_path The path to the file whose size is to be determined.
+ * @param bool $clear_stat_cache (Optional) If true, clears the file status cache before checking the file size. 
+ *                               Default is false.
+ * 
+ * @return int The size of the file in bytes. Returns 0 if the file does not exist.
+ */
+function getFileSize($file_path, $clear_stat_cache = false) {
+    // If cache clearing is enabled, clear the file status cache
+    if ($clear_stat_cache) {
+        if (version_compare(phpversion(), '5.3.0') >= 0) {
+            // Clear cache for the specific file (PHP 5.3.0 or higher)
+            clearstatcache(true, $file_path);
+        } else {
+            // Clear entire cache (for versions lower than 5.3.0)
+            clearstatcache();
+        }
+    }
+
+    // Check if the file exists
+    if (file_exists($file_path)) {
+        // Return the file size, handling potential integer overflow on 32-bit systems
+        return USystem::fixIntegerOverflow(filesize($file_path));
+    } else {
+        // Return 0 if the file does not exist
+        return 0;
+    }
+}
+
 ?>

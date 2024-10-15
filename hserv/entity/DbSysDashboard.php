@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to sysDashboard table
@@ -20,14 +22,16 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 
 class DbSysDashboard extends DbEntityBase
 {
+
+    public function __construct( $system, $data=null ) {
+       parent::__construct( $system, $data );
+       $this->requireAdminRights = false;
+    }
 
     /**
     *  search groups
@@ -46,85 +50,18 @@ class DbSysDashboard extends DbEntityBase
               return false;
         }
 
-        $needCheck = false;
-        $is_ids_only = false;
+        $this->searchMgr->addPredicate('dsh_ID');
+        $this->searchMgr->addPredicate('dsh_Label');
+        $this->searchMgr->addPredicate('dsh_Enabled');
+        $this->searchMgr->addPredicate('dsh_ShowIfNoRecords');
 
-        //compose WHERE
-        $where = array();
-        $from_table = array($this->config['tableName']);
-
-        $pred = $this->searchMgr->getPredicate('dsh_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dsh_Label');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dsh_Enabled');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('dsh_ShowIfNoRecords');
-        if($pred!=null) {array_push($where, $pred);}
-
-
-        //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'dsh_ID';
-            $is_ids_only = true;
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'dsh_ID,dsh_Label';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full')
-        {
-            $this->data['details'] = 'dsh_ID,dsh_Order,dsh_Label,dsh_Description,dsh_Enabled,dsh_ShowIfNoRecords,dsh_CommandToRun,dsh_Parameters';
-        }else{
-            $needCheck = true;
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('dsh_ID'); break;
+            case 'name': $this->searchMgr->setSelFields('dsh_ID,dsh_Label'); break;
+            default: $this->searchMgr->setSelFields('dsh_ID,dsh_Order,dsh_Label,dsh_Description,dsh_Enabled,dsh_ShowIfNoRecords,dsh_CommandToRun,dsh_Parameters');
         }
 
-        if(!is_array($this->data['details'])){ //user specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-
-        }
-
-        //validate names of fields
-        if($needCheck && !$this->_validateFieldsForSearch()){
-            return false;
-        }
-
-        //----- order by ------------
-        //compose ORDER BY
-        $order = array();
-
-        $value = @$this->data['sort:dsh_Order'];
-        if($value!=null){
-            array_push($order, 'dsh_Order '.($value>0?'ASC':'DESC'));
-        }else{
-            $value = @$this->data['sort:dsh_Label'];
-            if($value!=null){
-                array_push($order, 'dsh_Label ASC');
-            }
-        }
-
-        //compose query   DISTINCT
-        $query = 'SELECT SQL_CALC_FOUND_ROWS '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
-
-         if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
-            $query = $query.' ORDER BY '.implode(',',$order);
-         }
-
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-
-        $calculatedFields = null;
-
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-
-        return $result;
+        return $this->searchMgr->composeAndExecute(null);
     }
 
     //
@@ -151,19 +88,9 @@ class DbSysDashboard extends DbEntityBase
                 $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterSavedSearch'];
             }
 
-
-
             //validate duplication
-            if(@$this->records[$idx]['dsh_Label']){
-                $mysqli = $this->system->get_mysqli();
-                $res = mysql__select_value($mysqli,
-                        "SELECT dsh_ID FROM ".$this->config['tableName']."  WHERE dsh_Label='"
-                        .$mysqli->real_escape_string( $this->records[$idx]['dsh_Label'])."'");
-                if($res>0 && $res!=@$this->records[$idx]['dsh_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED,
-                            'Dashboard entry cannot be saved. The provided name already exists');
+            if(!$this->doDuplicationCheck($idx, 'dsh_Label', 'Dashboard entry cannot be saved. The provided name already exists')){
                     return false;
-                }
             }
         }
 
@@ -176,14 +103,14 @@ class DbSysDashboard extends DbEntityBase
     //
     public function save(){
 
-        $ret = parent::save();
+        $savedRecIds = parent::save();
 
-        if($ret!==false){
+        if($savedRecIds!==false){
 
             //treat group image
             foreach($this->records as $record){
                 $dsh_ID = @$record['dsh_ID'];
-                if($dsh_ID && in_array($dsh_ID, $ret)){
+                if($dsh_ID && in_array($dsh_ID, $savedRecIds)){
                     $thumb_file_name = @$record['dsh_Image'];
 
                     //rename it to recID.png
@@ -194,7 +121,7 @@ class DbSysDashboard extends DbEntityBase
             }
         }
 
-        return $ret;
+        return $savedRecIds;
 
     }
 

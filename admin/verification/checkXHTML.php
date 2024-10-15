@@ -38,7 +38,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 $mysqli = $system->get_mysqli();
 
 $woots = array();
-$res = $mysqli->query("select * from woots");// where woot_Title='record:96990'");
+$res = $mysqli->query("select * from woots");
 if($res){
     while ($row = $res->fetch_assoc()) {
         array_push($woots, $row);
@@ -46,7 +46,8 @@ if($res){
     $res->close();
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Check Wysiwyg Texts</title>
@@ -59,14 +60,14 @@ if($res){
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr></div>
 
-            <table class="wysiwygCheckTable">
+            <table class="wysiwygCheckTable" role="presentation">
                 <?php
 
                 foreach ($woots as $woot) {
 	                $valid = true;
 	                $errs = array();
 
-	                //print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
+
 
 	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . intval($woot["woot_ID"]) . " and chunk_IsLatest and not chunk_Deleted");
                     if($res){
@@ -81,7 +82,7 @@ if($res){
                     }
 
 	                if ($valid) {
-		                //print "ok\n";
+
 	                } else {
                         print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
 		                print $woot["woot_Title"] . "'>";
@@ -93,7 +94,7 @@ if($res){
                 }
 
                 function check($html) {
-                //print "text: $html\n";
+
 	                $descriptorspec = array(
 		                0 => array("pipe", "r"),
 		                2 => array("pipe", "w"),
@@ -107,8 +108,8 @@ if($res){
 	                fclose($pipes[2]);
 
 	                $rv = proc_close($proc);
-                //print "rv: $rv\n";
-                //print "out: $out\n";
+
+
 
 	                if ($rv != 0) {
 		                return $out;

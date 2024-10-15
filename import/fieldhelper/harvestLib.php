@@ -1,8 +1,11 @@
 <?php
+use hserv\utilities\USanitize;
 
-    $rep_counter = null;
-    $rep_issues = null;
-    $reg_info = array('reg'=>array(),'nonreg'=>array());
+global $rep_counter, $rep_issues, $reg_info;
+
+$rep_counter = null;
+$rep_issues = null;
+$reg_info = array('reg'=>array(),'nonreg'=>array());
 
 
 //
@@ -15,7 +18,7 @@ function getMediaFolders($mysqli) {
     $row1 = mysql__select_row($mysqli, $query1);
     if (!$row1) {
         return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
-            .'. Possibly wrong database format, please '.CONTACT_HEURIST_TEAM);
+            .'. Possibly wrong database format.'.CONTACT_HEURIST_TEAM_PLEASE);
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
@@ -28,7 +31,7 @@ function getMediaFolders($mysqli) {
     $dirs = explode(';', $mediaFolders);// get an array of folders
 
     //sanitize folder names
-    $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
+    $dirs = array_map(array('hserv\utilities\USanitize', 'sanitizePath'), $dirs);
     //$mediaFolders = implode(';', $dirs);
 
     // The defined list of file extensions for FieldHelper indexing.
@@ -52,15 +55,18 @@ function getMediaFolders($mysqli) {
 //
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
+// folders "thumbnail" will be skipped
 //
 function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
-    global $rep_counter, $rep_issues;
+    global $rep_counter, $rep_issues, $reg_info;
+
+    $reg_info = array('reg'=>array(),'nonreg'=>array());
 
     $system_folders = $system->getSystemFolders();
 
     if(@$dirs_and_exts['error']){
-        print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
+        print "<div style=\"color:red\">".$dirs_and_exts['error'].DIV_E;
         return;
     }
 
@@ -76,8 +82,14 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
         }else{
 
             $dir = USanitize::sanitizePath($dir);
-            if(isPathInHeuristUploadFolder($dir, true)===false){
-                print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
+
+            $real_path = isPathInHeuristUploadFolder($dir, true);
+
+            if(!$real_path){
+                if($is_report){
+                    print error_Div(htmlspecialchars($dir).' is ignored. Folder '
+                    (($real_path==null)?'does not exist':'must be in Heurist filestore directory'));
+                }
                 continue;
             }
 
@@ -99,7 +111,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
         {
 
             $files = scandir($dir);
-            if(is_array($files) && count($files)>0)
+            if(!isEmptyArray($files))
             {
                 $subdirs = array();
 
@@ -110,7 +122,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                     if(!($filename=="." || $filename=="..")){
                         if(is_dir($dir.$filename)){
                             $subdir = $dir.$filename."/";
-                            if(!in_array($subdir, $system_folders)){
+                            if($filename!='thumbnail' && !in_array($subdir, $system_folders)){
                                     array_push($subdirs, $subdir);
                             }
                         }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
@@ -126,7 +138,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                     }
                 }
 
-                if(count($subdirs)>0){
+                if(!empty($subdirs)){
 
                     doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
                     if($is_report) {flush();}
@@ -164,46 +176,44 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
     global $reg_info;
 
     $all_files = scandir($dir);
-    $registered = array();
-    $non_registered = array();
 
     foreach ($all_files as $filename){
-        if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
-            $filename_base = $filename;
-            $filename = $dir.$filename;
-            $flleinfo = pathinfo($filename);
-            $recordNotes = null;
+        if(is_dir($dir.$filename) || $filename=="." || $filename==".."
+            || $filename=="fieldhelper.xml" || $filename=="index.html" || $filename==".htaccess"){
+            continue;
+        }
 
-            //checks for allowed extensions
-            if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
-            {
-                if($imode==1){
+        $filename_base = $filename;
+        $filename = $dir.$filename;
+        $flleinfo = pathinfo($filename);
 
-                    $file_id = fileGetByFileName( $system, $filename);//see recordFile.php
+        //checks for allowed extensions
+        if(in_array(strtolower(@$flleinfo['extension']),$mediaExts)){
 
-                    if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
-                        //Check if this is just a thumbnail version of an image
+            if($imode==1){
 
-                        $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+                $file_id = fileGetByFileName( $system, $filename );//see recordFile.php
 
-                        if(in_array($temp_name, $reg_info['nonreg'])){
-                            continue;
-                        }
+                if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
+                    //Check if this is just a thumbnail version of an image
+
+                    $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+
+                    if(in_array($temp_name, $reg_info['nonreg'])){
+                        continue;
                     }
-
-                    if($file_id>0){
-                        array_push($reg_info['reg'], $filename);
-                    }else{
-                        array_push($reg_info['nonreg'], $filename);
-                    }
-
-                }else{
-                    array_push($reg_info, $filename);
                 }
+
+                if($file_id>0){
+                    array_push($reg_info['reg'], $filename);
+                }else{
+                    array_push($reg_info['nonreg'], $filename);
+                }
+
+            }else{
+                array_push($reg_info, $filename);
             }
-
-
         }
     }  //for all_files
 }

@@ -1,0 +1,66 @@
+<!--
+/**
+* slidersMenu.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     2
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<div class="ui-heurist-admin ui-heurist-header slocale" style="top:0px;">Admin</div>
+<div class="ui-heurist-design ui-heurist-header slocale" style="top:36px;border-top:1px solid lightgray;">Design</div>
+<div class="ui-heurist-populate ui-heurist-header slocale" style="top:72px;border-top:1px solid lightgray;">Populate</div>
+<div class="ui-heurist-explore ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">
+    <span class="slocale">Explore</span>
+    <div><img alt data-src="gs_explore_cb.png" height="29"/></div>
+</div>
+<div class="ui-heurist-publish ui-heurist-header slocale" style="top:174px;border-top:1px solid lightgray;">Publish</div>
+
+<div class="ui-heurist-quicklinks" 
+    style="top:210px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background:lightgray;color:black">
+    
+    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 0 12px">
+
+        <li class="menu-explore" data-action-popup="recordAdd" style="padding: 6px 20px 6px 0px;">
+            <span class="ui-icon ui-icon-file-plus-black"></span>
+            <span class="menu-text newrec-text slocale" style="display: inline-block;">add_new_record</span>
+            <span class="menu-text rectype-name truncate" style="display:block;text-align:left;max-width:80px;width:80px;margin:5px 0px 0px 10px;">Add Record</span>
+        </li>
+
+        <li class="menu-explore" data-action-popup="recordAddSettings" style="font-size:0.8em;width: 85px;padding: 6px 2px 6px 0px;">
+            <span style="color: #307D96 !important;" class="ui-icon ui-icon-gear"></span>
+            <span class="menu-text" style="display: inline-block;margin-left: 5px; color: #307D96 !important; text-decoration: underline !important;">Settings</span><span>&nbsp;</span>
+        </li>
+
+    </ul>
+    
+    <span style="display:none;margin:0;padding:12px 6px">
+        <span class="section-head slocale">Saved filters</span>
+    </span>                                                              
+    <ul style="display:none;list-style-type:none;margin:0;padding:0px 0px 12px 0px;position:absolute;bottom:0px;left:0px;right:30px;top:215px" 
+            id="filter_by_groups">
+    
+    </ul>
+    <!-- was 188px -->
+<!--    
+<span class="menu-text ui-icon ui-icon-arrowthick-1-ne" style="float:right;font-size:1.3em;padding-top:8px;"></span>
+<div class="svs_list_container" style="position:absolute;bottom:0px;left:0px;right:0px;top:160px;font-size:0.8em;display:none;"></div>
+-->
+</div>
+<!-- style="position:absolute;bottom:37;height:37px" -->
+
+
+ 

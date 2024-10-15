@@ -233,7 +233,7 @@ div.svs-list-container::-webkit-scrollbar {
     width: 6px;
 }
 
-div.mainMenu6 > div.ui-heurist-header:hover{
+div.slidersMenu > div.ui-heurist-header:hover{
     color:black;
     background: white !important;
     border-right: 1px solid gray;

@@ -44,7 +44,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         }
         
         this.options.use_cache = true;
-        //this.options.view_mode = 'list';
+       
         
         /*if(this.options.edit_mode=='popup'){ //only inline allowed
             this.options.edit_mode='inline'
@@ -95,7 +95,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         
         let recID   = fld('fxm_Extension');
         let recTitle = '<span style="display:inline-block;width:4em">'+fld('fxm_Extension') + '</span>  ' 
-                        + fld('fxm_FiletypeName'); //fld2('fxm_MimeType');
+                        + fld('fxm_FiletypeName');
         
         let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){

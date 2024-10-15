@@ -40,29 +40,33 @@ if (@$argv) {
         }
     }
 
-    $_REQUEST = $ARGV;
+    $req_params = $ARGV;
 
     define('HEURIST_DIR', getcwd().'/../../');
 }
 */
+    use hserv\utilities\USanitize;
+    use hserv\utilities\USystem;
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     require_once 'entityScrudSrv.php';
 
-    $dbname = filter_input(INPUT_POST,'db');//@$_REQUEST['db'];
-    if(!$dbname){
-        $dbname = filter_input(INPUT_GET,'db');
+    if(!isset($req_params)){ //if set array has been already modified in api.php
+        $req_params = USanitize::sanitizeInputArray();
     }
+
+    $dbname = @$req_params['db'];
 
     $system_init_failed = false;
 
-    $system = new System();
+    $system = new hserv\System();
 
     $dbdef_cache = null;
 
-    $db_check_result = mysql__check_dbname( $dbname );//validate db name
+    $db_check_error = mysql__check_dbname( $dbname );//validate db name
 
-    if($db_check_result===true
+    if($db_check_error==null
         && isset($defaultRootFileUploadURL)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
     {
@@ -80,19 +84,19 @@ if (@$argv) {
     // relevance - compare filetime with timestamp,
     //                      if filetime is later - returns definitions
     //                      otherwise file time
-    if( @$_REQUEST['a']=='structure'
-        && (@$_REQUEST['entity']=='all' || @$_REQUEST['entity']=='relevance')
+    if( @$req_params['a']=='structure'
+        && (@$req_params['entity']=='all' || @$req_params['entity']=='relevance')
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
-            if($db_check_result===true){
+            if($db_check_error==null){
 
                 $dbdef_cache_is_uptodate = true;
 
-                if($_REQUEST['entity']=='relevance'){
-                    $_REQUEST['entity'] = 'all';
+                if($req_params['entity']=='relevance'){
+                    $req_params['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
 
-                    if($file_time - intval($_REQUEST['timestamp']) < 10){
+                    if($file_time - intval($req_params['timestamp']) < 10){
                         //compare file time with time of db defs on client side
                         //defintions are up to date on client side
                         header(CTYPE_JSON);
@@ -112,7 +116,7 @@ if (@$argv) {
 //error_log('DEBUG '.($db_time>$file_time).'  '.$dbdef_mod->format('Y-m-d h:i').' > '.date ('Y-m-d h:i UTC',$file_time).'  '.date_default_timezone_get());
 
                             if($db_time>$file_time){ //db def cache is outdated
-                                  $_REQUEST['entity'] = 'force_all';
+                                  $req_params['entity'] = 'force_all';
                                   $dbdef_cache_is_uptodate = false;
                             }
                         }
@@ -138,7 +142,7 @@ if (@$argv) {
 
                         //rawurlencode - required for security reports only
                         $url = $url.rawurlencode($dbname).'/entity/dbdef_cache.json';
-                        header('Location: '.$url);
+                        redirectURL($url);
 
                     }else{
                         downloadFile('application/json', $dbdef_cache);
@@ -162,41 +166,41 @@ if (@$argv) {
         && ($system->is_inited() || $system->init($dbname)))
     {
 
-        //USanitize::sanitizeRequest($_REQUEST); it brokes json strings
-        USanitize::stripScriptTagInRequest($_REQUEST);//remove <script>
+        //USanitize::sanitizeRequest($req_params); it brokes json strings
+        USanitize::stripScriptTagInRequest($req_params);//remove <script>
 
         $res = array();
         $entities = array();
 
-        if(@$_REQUEST['a']=='structure'){
+        if(@$req_params['a']=='structure'){
             // see HAPI4.refreshEntityData
-            if(@$_REQUEST['entity']=='force_all'){  //recreate cache
-                $_REQUEST['entity'] = 'all';
+            if(@$req_params['entity']=='force_all'){  //recreate cache
+                $req_params['entity'] = 'all';
                 //remove cache
                 if($dbdef_cache!=null){
-                    $system->cleanDefCache();//fileDelete($dbdef_cache);
+                    $system->cleanDefCache();
                 }
-            }elseif(@$_REQUEST['entity']=='relevance'){
-                $_REQUEST['entity'] = 'all';
+            }elseif(@$req_params['entity']=='relevance'){
+                $req_params['entity'] = 'all';
             }
-            $res = entityRefreshDefs($system, @$_REQUEST['entity'], true);//, @$_REQUEST['recID']);
+            $res = entityRefreshDefs($system, @$req_params['entity'], true);
 
             //update dbdef cache
-            if(@$_REQUEST['entity']=='all' && $res!==false && $dbdef_cache!=null){
+            if(@$req_params['entity']=='all' && $res!==false && $dbdef_cache!=null){
                 $res['timestamp'] = time();//update time on client side
                 //update db defintion cache file
                 file_put_contents($dbdef_cache, json_encode($res));
             }
 
         }else {
-            $res = entityExecute($system, $_REQUEST);
+            $res = entityExecute($system, $req_params);
         }
 
         $system->dbclose();
     }
 
 
-    if(@$_REQUEST['restapi']==1){
+    if(@$req_params['restapi']==1){
 
         if( is_bool($res) && !$res ){
 
@@ -209,7 +213,7 @@ if (@$argv) {
             //$req = $entity->getData();
             $req = array();
 
-            if(@$req['a'] == 'search' && count($res)==0){
+            if(@$req['a'] == 'search' && empty($res)){
                 $code = 404;
             }elseif (@$req['a'] == 'save'){
                 $code = 201;
@@ -298,7 +302,7 @@ if (@$argv) {
 
     function find_invalid_string($val){
         if(is_string($val)){
-            $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
+            $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);/* important */
             if($stripped_val!=$val){
                 throw new Exception(mb_convert_encoding($val,'UTF-8'));
             }

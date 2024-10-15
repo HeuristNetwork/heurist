@@ -66,9 +66,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnUploadData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Upload Data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',_uploadData);
+                    .click(_uploadData);
 
-       $('#btnClearAllSessions').on('click',_doClearSession);
+       $('#btnClearAllSessions').click(_doClearSession);
         
         //upload file to server and store intemp file
         let uploadData = null;
@@ -88,7 +88,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     .button({label: window.hWin.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
                     .on('click', function(e) {
                             if( window.hWin.HAPI4.is_admin() ){
-                                uploadWidget.trigger('click');    
+                                uploadWidget.click();    
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     status:window.hWin.ResponseStatus.REQUEST_DENIED,
@@ -126,10 +126,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 let msg = textStatus+' '+errorThrown;
                 if(textStatus == 'error'){
-                    msg = 'An unknown error occurred while attempting to upload your CSV file.<br>This may be due to an unstable or slow internet connection.';
+                    msg = 'An unknown error occurred while attempting to upload your CSV file.<br>This may be due to an unstable or slow internet connection.<br><br>';
+                    msg += `Server status code ${jqXHR.status}: <strong>${errorThrown}</strong><br>`
+                        + '<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_blank" rel="noopener">List of HTTP Status Codes</a>';
                 }
 
-                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
+                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error: Server HTTP Status error', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
             }
         },
         fail: function(e, data){
@@ -279,13 +281,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), $(sel).find('option').length<2 );
                         
                         session_selector = window.hWin.HEURIST4.ui.initHSelect(sel, false);
-                        session_selector.on('change',function(event){
+                        session_selector.change(function(event){
                            if($(event.target).val()>0){
                                 imp_ID = $(event.target).val();
                                 _loadSession();    
                            }
                         });
-                        $('#selImportId-button').css('vertical-align','4'); 
+                        $('#selImportId-button').css('vertical-align',4); 
                     });
                 
         
@@ -310,11 +312,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             _doClearSession(true);
                         });
                         
-        $('#btnSetPrimaryRecType').on('click',_doSetPrimaryRecType); //reset primary rectype
+        $('#btnSetPrimaryRecType').click(_doSetPrimaryRecType); //reset primary rectype
         
         //init navigation links
         $.each($('.navigation'), function(idx, item){
-            $(item).on('click', _getValuesFromImportTable );
+            $(item).click( _getValuesFromImportTable );
         })
 
         //session id is defined - go to 3d step at once        
@@ -446,7 +448,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         window.hWin.HEURIST4.ui.createEncodingSelect($('#csv_encoding'), [{key: 'auto detect', title: 'auto detect'}]);
 
-        $(window).on('onresize', function(e)
+        $(window).resize( function(e)
         {
             _adjustTablePosition();
         });
@@ -743,7 +745,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         let initial_selection = 0;
 
-        for (let i=0;i<sequence.length;i++){
+        for (i=0;i<sequence.length;i++){
             let recTypeID = sequence[i].rectype;
             let fieldname = sequence[i].field;
             let hierarchy = sequence[i].hierarchy;
@@ -932,7 +934,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 let rectypes = response.data;
                 uniq_fieldnames = [];
                 let rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{} }, 0);    
-                //rt_fields - resource fields
+                //rt_fields - resource (record pointer) fields
                 //depend - only required dependencies 
 
                 let i, j, rt_resource, field_keys = Object.keys(rtOrder['levels']),
@@ -1232,7 +1234,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         cb.prop('checked',true);
                         if(keep_field_key!=fields_affected[i]){ //do not disable itself
                             //NO MORE DISABLITY since 2016-11-29
-                            //window.hWin.HEURIST4.util.setDisabled(cb, true);
+                            
                             //cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                         }
                     }
@@ -1244,7 +1246,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     cb.css({'opacity': 1, 'filter': 'Alpha(Opacity=100)'});
                 }//end  __rt_checkbox_click                           
 
-                treeElement.find('.rt_select').on('click',
+                treeElement.find('.rt_select').click(
                     function(event){ __rt_checkbox_click( $(event.target)) }
                 );
                 
@@ -1282,7 +1284,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 } 
 
-                treeElement.find('.rename').on('click',
+                treeElement.find('.rename').click(
                     function(event){ __idfield_rename($(event.target)) }
                 );
 
@@ -1296,7 +1298,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         }        
                 }
 
-                $('input[name="mode_view"]').on('click', __switchViewMode );
+                $('input[name="mode_view"]').click( __switchViewMode );
 
                 __switchViewMode();
 
@@ -1421,7 +1423,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // returns list of field/rectypes 
     
     //  with level (depth) 
-    //    list of resource fields
+    //    list of resource (record pointer) fields
     //    list of dependent rectype     
     //
     //  rtOrder 
@@ -1470,7 +1472,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          }  
          
                         
-         //list all resource fields
+         //list all resource (record pointer) fields
          if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeTree.children)){
              
              for (j=0;j<rectypeTree.children.length;j++){
@@ -1614,8 +1616,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // init field mapping table - main table to work with 
     //
-    function _initFieldMapppingTable( ){
-    
+    function _initFieldMapppingTable(){
+
         $('#tblFieldMapping > tbody').empty();
                         
         let sIndexes = "",
@@ -1795,8 +1797,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +'<span style="color:green;">Note: ONLY fields suitable for matching are shown in this step.</span>'
                 +'</td></tr>'
                 +sID_field+sIndexes+sAllFields
-                +'<tr height="40" style="border-bottom:1px solid lightgray"><td class="subh" colspan="5">'
-                +'<a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>');
+                +'<tr height="40" style="border-bottom:1px solid lightgray">'
+                + '<td class="subh" colspan="2"><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td>'
+                + '<td class="subh" id="add_new_col" colspan="3" style="border-left: none; padding: 10px 0px;">'
+                    + '<input id="txtColName" placeholder="Column name..." size="20">'
+                    + '<button id="btnInsertData" style="margin-left: 10px; vertical-align: bottom;">Add</button><br><br>'
+                    + '<input id="txtColData" placeholder="Value..." size="30">'
+                + '</td>'
+                +'</tr>');
+
+            $('#btnInsertData').button({icon: 'ui-icon-plus'});
+
+            $('#btnInsertData').on('click', _insertNewColumn);
+            $('#txtColName, #txtColData').on('keyup', (event) => {
+                if(event.key == 'Enter' || event.code == 'Enter'){
+                    _insertNewColumn();
+                }
+            });
         }
         
         //init listeners
@@ -1821,6 +1838,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         _initCreateFieldButtons();
         //load data
         _getValuesFromImportTable();            
+
         //
         
         if(sProcessed!=''){
@@ -1930,7 +1948,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#divStep3 > .ent_header').height(h);
 
         $('#divStep3 > .ent_content').css({top:(h+5+'px')});
-        
+
+        let $insert_col = $('#add_new_col');
+        if($insert_col.length > 0){
+            currentStep >= 3 || currentStep <= 5 ? $insert_col.find('input, button').show() : $insert_col.find('input, button').hide();
+        }
+
         /* todo - check how it works with new layout
         //adjust position of footer with action buttons  
         var content = $('#divFieldMapping');
@@ -2225,7 +2248,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             cbs.parent().hide();
         }
 
-        //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
 
         
@@ -2552,7 +2574,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 counts = [0,0,0,0,0];
                 //reccount - total records in import table
                 //uniqcnt - unique values per column
-                let idx = _getFieldIndexForIdentifier(idx); 
+                idx = _getFieldIndexForIdentifier(idx); 
                 if(idx>=0){
                     //id column already exists in import table
                     counts[2] = counts[3] = imp_session['uniqcnt'][idx];
@@ -2615,42 +2637,40 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
                 
-                    let response = response.data;
-                    
-                        $("#current_row").html(response[0]);
+                    response = response.data;
+                
+                    $("#current_row").html(response[0]);
 
-                        for(let i=1; i<response.length;i++){
-                            let sval;
-                            if(window.hWin.HEURIST4.util.isnull(response[i])){
+                    for(let i=1; i<response.length;i++){
+                        let sval;
+                        if(window.hWin.HEURIST4.util.isnull(response[i])){
+                            sval = "&nbsp;";
+                        }else{
+
+                            let idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
+                            
+                            let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
+                            
+                            sval = response[i].substr(0,100);
+
+                            if(isIndex && response[i]<0){
+                                sval = "&lt;New Record&gt;";
+                            }else if(sval==""){
                                 sval = "&nbsp;";
-                            }else{
-
-                                let idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
-                                
-                                let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
-                                
-                                sval = response[i].substr(0,100);
-
-                                if(isIndex && response[i]<0){
-                                    sval = "&lt;New Record&gt;";
-                                }else if(sval==""){
-                                    sval = "&nbsp;";
-                                }else if(response[i].length>100){ //add ... 
-                                    sval = sval + '&#8230;';
-                                }
+                            }else if(response[i].length>100){ //add ... 
+                                sval = sval + '&#8230;';
                             }
-
-                            if($("#impval"+(i-1)).length>0){
-                                
-                                if($("#impval"+(i-1)).attr('data-isindex')==1){
-                                    sval = '<span class="ui-icon ui-icon-arrowthick-1-e" style="color:#b36ae2"></span>&nbsp;' + sval;
-                                }
-                                $("#impval"+(i-1)).html(sval);
-                            }
-                                
                         }
 
-                    
+                        if($("#impval"+(i-1)).length>0){
+
+                            if($("#impval"+(i-1)).attr('data-isindex')==1){
+                                sval = '<span class="ui-icon ui-icon-arrowthick-1-e" style="color:#b36ae2"></span>&nbsp;' + sval;
+                            }
+                            $("#impval"+(i-1)).html(sval);
+                        }
+                    }
+
                 }else{
                     _showStep(1);
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -3054,7 +3074,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             let select_rectype = $("select[id^='id_rectype']");
                             $.each(select_rectype, function(idx, item){
                                 let sel = window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', false);    
-                                sel.on('change',function(evt){
+                                sel.change(function(evt){
                                     let is_disabled = __isAllRectypesSelectedForIdFields();
                                     if(is_disabled){ $('#lblParseStep2').show(); } else $('#lblParseStep2').hide();
                                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), is_disabled );
@@ -3135,7 +3155,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             if(key_idx<0){ //key field not defined
                 if($('#sa_match1').is(':checked')) $('#sa_match0').prop('checked', true);
-                //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), true);
+                
                 //$('label[for="sa_match1"]').css('color','lightgray');
                 $('#sa_match1').hide();
                 $('label[for="sa_match1"]').hide();
@@ -3143,7 +3163,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $('#sa_match1').show();
                 $('label[for="sa_match1"]').show();
                 $('#lbl_sa_match1').html('Use <i>'+imp_session['columns'][key_idx]+'</i>'); //Skip matching
-                //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), false);
+                
                 //$('label[for="sa_match1"]').css('color','');
                 
             }
@@ -3352,17 +3372,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }
             
-            
-            //if(false && sWarning){
-            //    window.hWin.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
-            //}else
             __doMatchingStart();
             
 
        function __doMatchingStart(){    
          
            
-            let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
+            
             let handle_rectype = $('#ignore_rectype').is(':checked') ? '1' : '0';
            
             let request = {
@@ -3475,8 +3492,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                 }
                                                 
                                                 //sel = window.hWin.HEURIST4.ui.initHSelect(sel, false);
-                                                sel.on('change',function(event){
-                                                    let sessionName = $(event.target).val();
+                                                sel.change(function(event){
+                                                   let sessionName = $(event.target).val();
                                                    if(sessionName && preset_mappings[sessionName]){
                                                        _initFieldMapppingSelectors( preset_mappings[sessionName] );
                                                    }
@@ -3506,7 +3523,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
         
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
         }
         
     }
@@ -3518,7 +3538,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         currentSeqIndex = Number(currentSeqIndex);
         if(!(Number(currentSeqIndex)>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
             return;
         }
 
@@ -3615,7 +3638,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         function __doPrepareStart(){
 
-            let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
             
             let request = {
                 db        : window.hWin.HAPI4.database,
@@ -3711,7 +3734,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         if(res['count_error']>0){
                             
-                            $('#mrr_error').text('Unrecognised terms: '+res['count_error']);
+                            $('#mrr_error').text('Rows with unrecognised terms: '+res['count_error']);
                             $('#prepareErrors').show();//.css('display','inline-block');
                             
                             window.hWin.HEURIST4.msg.showMsgErr({
@@ -3771,14 +3794,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         currentSeqIndex = Number(currentSeqIndex);
         if(!(Number(currentSeqIndex)>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
             return;
         }
         let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
         let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
 
         if(!(key_idx>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to define identifier field for selected record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to define identifier field for selected record type'),
+                error_title: 'Missing identifer field'
+            });
             return;
         }
         
@@ -3808,7 +3837,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             return;
         }
         
-        let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+        let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
         
         let update_mode = $("input[name='sa_upd']:checked"). val();
         let retain_existing = 0
@@ -3846,8 +3875,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             ignore_rectype: handle_rectype
         };
         
-//        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
-        
         _showStep(0);
     
         window.hWin.HAPI4.doImportAction(request, 
@@ -3880,7 +3907,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         if (imp_result['skipped']>0){
                             
                             let suggestions = 'If you see "missing data" message you may need to make fields optional.<br>'
-                            +'If record cannot be updated due wrong resource or parent links run Verify integrity to fix problems with records<br><br>';
+                            +'If record cannot be updated due to an incorrect resource or parent links, run Verify integrity to fix problems with records<br><br>';
                             
                             msg = msg 
                             +'</td></tr><tr><td colspan="2" style="color:red"><br><a href="#" onclick="'
@@ -3955,7 +3982,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(!mapping_flds || $.isEmptyObject(mapping_flds)){
             mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_keys'];
         }
-        //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
         
         let header_flds = null;
@@ -3985,15 +4011,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             s = ''
                 +'<div class="ent_wrapper"><div style="padding:8px 0 0 10px" class="ent_header">'
-                +'<a href="#" class="navigation2" style="display: inline-block;">'
-                +'<span data-dest="first" class="ui-icon ui-icon-seek-first"></span></a>'
-                +'<a href="#" class="navigation2" style="display:inline-block;">'
-                +'<span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"></span></a>'
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="first" class="ui-icon ui-icon-seek-first"/></a>'
+                +'<a href="#" class="navigation2" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>'
                 +'<div style="display: inline-block;vertical-align: super;">Range <span id="current_range"></span></div>'
-                +'<a href="#" class="navigation2" style="display: inline-block;">'
-                +'<span data-dest="1" class="ui-icon ui-icon-triangle-1-e"></span></a>'
-                +'<a href="#" class="navigation2" style="display: inline-block;">'
-                +'<span data-dest="last" class="ui-icon ui-icon-seek-end"></span></a></div>';
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>'
+                +'<a href="#" class="navigation2" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a></div>';
             
                 
             s = s + '<div class="ent_content_full"><table class="tbmain" style="font-size:0.9em" width="100%"><thead><tr>'; 
@@ -4034,7 +4056,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
             
             $.each($dlg.find('.navigation2'), function(idx, item){
-                $(item).on('click', __loadRecordsFromImportTable );
+                $(item).click( __loadRecordsFromImportTable );
             })
         
         }
@@ -4404,9 +4426,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         
                         s = s + '<th style="color:red">'+colname
-                             + '<br><font style="font-size:10px;font-weight:normal">'
+                             + '<br><span style="font-size:10px;font-weight:normal">'
                              + (dt_id>0?$Db.baseFieldType[$Db.dty(dt_id, 'dty_Type')] :dt_id)
-                             + '</th>';
+                             + '</span></th>';
                              
                         err_col = i;
                         
@@ -4487,323 +4509,291 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '</table>';
         }
         
-        if(s!=''){
-            dlg_options['window'] = window;  //current frame
-            dlg_options['element'] = container.get(0);
-            container.html(s);
-            container.css({'overflow-x':'hidden'});
-            
-            if(container.find("#tabs_records").length>0){
-                    $("#tabs_records").tabs();
-            }
-            
-            $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
-            
-            //activate add terms buttons
-            let btn_ads = $dlg.find('.add_terms');
-            btn_ads.on('click',function(event){
-                
-                //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
-                
-                let ele = $(event.target);
-                let tab_idx = ele.attr('tab_id');
-                let dt_id = ele.attr('dt_id');
-                let tabs = imp_session['validation']['error'];
-                let wrong_values = tabs[tab_idx]['values_error'];
+        if(s == ''){ return; }
 
-                _importNewTerms($dlg, dt_id, wrong_values, -1, '');
-                //alert('add '+wrong_values.join(',')); 
-            });
-            
-            //activate add ALL terms buttons
-            if(btn_ads.length>1){
-                $dlg.find('.add_all_terms').show().on('click', function(event){
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
-                    let prepared_data = [];
-                    _importNewTermsToAllFields($dlg, 0, prepared_data);
-                });
-            }
-            
+        dlg_options['window'] = window;  //current frame
+        dlg_options['element'] = container.get(0);
+        container.html(s);
+        container.css({'overflow-x':'hidden'});
+
+        if(container.find("#tabs_records").length>0){
+                $("#tabs_records").tabs();
         }
-        
-    } 
-    
-    //
-    // Import Terms
-    //
-    function _importNewTermsToAllFields($dlg, index, prepared_data){
 
+        $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+
+        const TABS = imp_session['validation']['error'];
+
+        //activate add terms buttons
         let btn_ads = $dlg.find('.add_terms');
+        btn_ads.click(function(event){
 
-        let ele = $(btn_ads[index]);
-        let tab_idx = ele.attr('tab_id');
-        let dt_id = ele.attr('dt_id');
-        let tabs = imp_session['validation']['error'];
-        let wrong_values = tabs[tab_idx]['values_error'];
-        
-        _importNewTerms($dlg, dt_id, wrong_values, -1, '', function(context, hasPeriod){
-            
-            if(context && Array.isArray(context)){
-                
-                prepared_data = prepared_data.concat(context);
-                
-                if(index<btn_ads.length-1){
-                    //gather all terms to be added
-                    index++;
-                    _importNewTermsToAllFields($dlg, index, prepared_data);
-                }else{
-                    //add all terms in prepared_data
-                    _importTerms($dlg, prepared_data, true, hasPeriod);
+            let ele = $(event.target);
+            let tab_idx = ele.attr('tab_id');
+            let dty_ID = ele.attr('dt_id');
+            let wrong_values = TABS[tab_idx]['values_error'];
+
+            let has_peroids = false;
+
+            for(const TERM of wrong_values){
+                if(TERM.indexOf('.') > 0){
+                    has_peroids = true;
+                    break;
                 }
             }
-            
+
+            _importTerms_ParentID(dty_ID, null, (trm_ParentTermID) => {
+
+                let field = [[TABS[tab_idx]['field_checked'], dty_ID, trm_ParentTermID]];
+
+                has_peroids ? _importTerms_Separator(field, $dlg, false) : _importTerms_Import(field, '', $dlg, false);
+            });
         });
         
-    }
-    
-    //
-    // add new terms
-    //
-    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel, callback){
-        
-        if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
+        //activate add ALL terms buttons
+        if(btn_ads.length>1){
+            $dlg.find('.add_all_terms').show().on('click', function(event){
 
-        let fieldname = $Db.dty(dt_id, 'dty_Name');
-        
-        if(!(trm_ParentTermID>0)){
-            //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
-                                        
-            let terms = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                let has_peroids = false;
+                let fields = [];
 
-            if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
-                trm_ParentTermID = Number(terms);
-            }else{
-                //this is a set of terms - find special vocabulary  'Auto-added terms'
-                let vocabs = $Db.trm_getVocabs('enum');
-                for (let i=0; i<vocabs.length; i++){
-                    let trmID = vocabs[i];
-                    if(trmID>0)
-                        if($Db.trm(trmID,'trm_Label')=='Auto-added terms'){
-                            trm_ParentTermID = trmID;
-                            break;
-                     }
-                }
-                if(!(trm_ParentTermID>0)){ //add new vocabulary to root
-                    
-                    let request = {
-                        'a'          : 'save',
-                        'entity'     : 'defTerms',
-                        'request_id' : window.hWin.HEURIST4.util.random(),
-                        'fields'     : [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
-                        };
-                
-                    
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
+                $dlg.find('.add_terms').each((idx, button) => {
 
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            let recIDs = response.data;
-                            trm_ParentTermID = Number(recIDs[0]);
-                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms', callback);
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });                    
-                    
-                    return;
-                }
-            }
-        }//find parent term id
-        
-        if(trm_ParentLabel==''){
-            trm_ParentLabel = $Db.trm(trm_ParentTermID,'trm_Label');
-        }
-        
-        
-        let s;
-        if(newvalues.length>5){
-            s = newvalues.slice(0,5).join(', ') + ' and '+(newvalues.length-5)+ ' more';
-        }else{
-            s = newvalues.join(', ');
-        }
+                    let tab_idx = button.getAttribute('tab_id');
+                    let dty_ID = button.getAttribute('dt_id');
+                    let wrong_values = TABS[tab_idx]['values_error'];
 
-        if(window.hWin.HEURIST4.util.isFunction(callback)){
-                
-            _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback);
-            
-        }else{
-            //window.hWin.HEURIST4.msg.sendCoverallToBack();
-            
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Terms ' + s +' will be added to the vocabulary "'
-                + trm_ParentLabel +'"'
-                , function(){
-                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname);
-                }); 
-        }
-    }
-    
-    //
-    //  continue addition of new terms
-    //            
-    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback){    
-        
-        let _prepareddata = [], record;
-        
-        let skip_dup=0, skip_long=0, skip_na=0;
-
-        let hasPeriod = false;
-        
-        //list of all children for given trm_ParentTermID in lower case
-        let trm_ParentChildren = $Db.trm_TreeData(trm_ParentTermID,'labels');
-        
-        for(let i=0;i<newvalues.length;i++){
-
-            let lbl = null;
-            
-            if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
-                lbl = newvalues[i].trim();
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(lbl)){
-
-                //verify duplication in parent term and if already added
-                /*if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
-                {
-                    skip_dup++;
-                    continue;
-                }*/
-
-
-                if(lbl.indexOf('.')<0 && lbl.length>500){
-                    skip_long++;
-                    continue;
-                }
-                
-                if(lbl.indexOf('.') >= 0){
-                    hasPeriod = '.';
-                }
-
-            _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
-                
-            }else{
-                skip_na++;
-            }
-        }//for    
-        
-        if(_prepareddata.length==0){
-            //window.hWin.HEURIST4.msg.sendCoverallToBack();
-            
-            let s = 'Nothing to import. Validation reports that among proposed terms for field "'+fieldname+'"<br>'
-                    +((skip_dup>0)?skip_dup+' already exist; ':' ')
-                    +((skip_long>0)?skip_long+' have too long label; ':' ')
-                    +((skip_na>0)?skip_na+' label is empty':'');
-            
-            setTimeout(function(){
-                window.hWin.HEURIST4.msg.showMsgErr({
-                    message: s,
-                    error_title: 'No terms imported',
-                    status: window.hWin.ResponseStatus.INVALID_REQUEST
-                });
-            }, 1000);    
-            return;
-        }
-        
-        if(window.hWin.HEURIST4.util.isFunction(callback)){
-            callback.call(this, _prepareddata, hasPeriod);
-        }else{
-            _importTerms($dlg, _prepareddata, false, hasPeriod);
-        }
-    }
-    
-    //
-    //
-    //
-    function _importTerms($dlg, _prepareddata, is_all, hasSeparator=''){
-
-        _prepareddata = JSON.stringify(_prepareddata);
-
-        //save hierarchy - label can have dots    
-        let request = {
-            'a'          : 'batch',
-            'entity'     : 'defTerms',
-            'request_id' : window.hWin.HEURIST4.util.random(),
-            'fields'     : _prepareddata,
-            'term_separator': !hasSeparator ? '' : hasSeparator
-        };
-    
-        let that = this;
-
-        if(!hasSeparator || hasSeparator == ''){
-            _importTerms_continue($dlg, request, is_all);
-        }else{
-
-            let $dlg_term_warning;
-
-            let btns = {};
-            btns['Periods as separators'] = function(){
-
-                request['term_separator'] = '.';
-                $dlg_term_warning.dialog('close');
-
-                _importTerms_continue($dlg, request, is_all);
-            };
-
-            btns['Periods as part of terms'] = function(){
-
-                request['term_separator'] = '';
-                $dlg_term_warning.dialog('close');
-
-                _importTerms_continue($dlg, request, is_all);
-            };
-
-            $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
-                'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
-                + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
-                btns, 
-                {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
-            );
-        }
-    }
-
-    function _importTerms_continue($dlg, request, is_all){
-
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-
-                    let recIDs = response.data;
-
-                    //refresh local definitions
-                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                        function(){
-                            let cnt = $dlg.find('.add_terms').length;
-                            let s = recIDs.length+' new term'
-                                    +((recIDs.length==1)?' was':'s were')+' imported. ';
-                            if(cnt==1 || is_all){
-
-                                $dlg.dialog('close');
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: `${s}Please repeat "Prepare" action`,
-                                    error_title: 'Terms imported'
-                                });
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: `${s}Check other "error" tabs `
-                                            +'to add missing terms for other enumeration fields. '
-                                            +'And finally close this dialog and repeat "Prepare" action',
-                                    error_title: 'Terms imported'
-                                });
+                    if(!has_peroids){
+                        for(const TERM of wrong_values){
+                            if(TERM.indexOf('.') > 0){
+                                has_peroids = true;
+                                break;
                             }
                         }
-                    );
-                                
+                    }
+
+                    fields.push([TABS[tab_idx]['field_checked'], dty_ID, null]);
+                });
+
+                let idx = 0;
+                let def_ParentTermID = null;
+
+                let _handle_callback = (trm_ParentTermID) => {
+
+                    fields[idx][2] = trm_ParentTermID;
+                    def_ParentTermID = !def_ParentTermID ? trm_ParentTermID : def_ParentTermID;
+                    idx ++;
+
+                    if(fields.length > idx){
+                        _importTerms_ParentID(fields[0][1], def_ParentTermID, _handle_callback);
+                        return;
+                    }
+
+                    has_peroids ? _importTerms_Separator(fields, $dlg, true) : _importTerms_Import(fields, '', $dlg, true);
+                };
+
+                _importTerms_ParentID(fields[0][1], null, _handle_callback);
+            });
+        }
+    } 
+
+    function _importTerms_ParentID(dty_ID, def_ParentTermID, callback){
+
+        if(typeof callback !== 'function'){
+            return false;
+        }
+
+        let trm_ParentTermID = def_ParentTermID;
+        let terms = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+
+        if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
+            trm_ParentTermID = Number(terms);
+        }else{
+            //this is a set of terms - find special vocabulary  'Auto-added terms'
+            let vocabs = $Db.trm_getVocabs('enum');
+            for (let i=0; i<vocabs.length; i++){
+                let trmID = vocabs[i];
+                if(trmID > 0 && $Db.trm(trmID,'trm_Label') == 'Auto-added terms'){
+                    trm_ParentTermID = trmID;
+                    break;
+                }
+            }
+
+            if(trm_ParentTermID <= 0){ //add new vocabulary to root
+
+                let request = {
+                    'a': 'save',
+                    'entity': 'defTerms',
+                    'request_id': window.hWin.HEURIST4.util.random(),
+                    'fields': [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        let recIDs = response.data;
+                        trm_ParentTermID = Number(recIDs[0]);
+                        callback.call(this, trm_ParentTermID);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });                    
+                
+                return;
+            }
+        }
+
+        callback.call(this, trm_ParentTermID);
+    }
+    function _importTerms_Separator(fields, $dlg, is_all){
+
+        let $dlg_term_warning;
+
+        let btns = {};
+        btns['Periods as separators'] = function(){
+
+            $dlg_term_warning.dialog('close');
+
+            _importTerms_Import(fields, '.', $dlg, is_all);
+        };
+
+        btns['Periods as part of terms'] = function(){
+
+            $dlg_term_warning.dialog('close');
+
+            _importTerms_Import(fields, '', $dlg, is_all);
+        };
+
+        $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
+            'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
+            + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
+            btns, 
+            {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
+        );
+    }
+    function _importTerms_Import(fields, separator, $dlg, is_all){
+
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(fields) || fields[0].length != 3){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'No terms to import',
+                error_title: 'Invalid term data',
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
+            return false;
+        }
+
+        let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
+
+        let request = {
+            db: window.hWin.HAPI4.database,
+            session: session_id,
+            imp_ID: imp_ID,
+            action: 'import_terms',
+            fields: fields,
+            trm_Separator: separator,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+
+        const RETURN_STEP = currentStep;
+        _showStep(0);
+
+        window.hWin.HAPI4.doImportAction(request, (response) => {
+
+            window.hWin.HEURIST4.msg.hideProgress();
+            
+            _showStep(RETURN_STEP);
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let cnt = $dlg.find('.add_terms').length;
+            let added_count = response.data.success.length;
+
+            let s = `${added_count} new term${(added_count==1)?' was':'s were'} imported. `;
+
+            let error = ``;
+            if(response.data.error.length > 0){
+                error = '<br><br><strong>The following errors occurred:</strong><br><br>';
+
+                for(const fld_idx in response.data.error){
+
+                    if(!Object.hasOwn(response.data.error, fld_idx)){
+                        continue;
+                    }
+
+                    error += response.data.error[fld_idx];
+                }
+            }
+
+            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm', () => {
+
+                if(cnt == 1 || is_all){
+
+                    $dlg.dialog('close');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `${s}Please repeat "Prepare" action.${error}`,
+                        error_title: 'Terms imported'
+                    });
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `${s}Check other "error" tabs `
+                                +'to add missing terms for other enumeration fields. '
+                                +`And finally close this dialog and repeat "Prepare" action.${error}`,
+                        error_title: 'Terms imported'
+                    });
                 }
             });
+        });
     }
-        
+
+    //
+    // Add new column + default data to each row
+    //
+    function _insertNewColumn(){
+
+        let col_name = $('#txtColName').val();
+        let col_data = $('#txtColData').val();
+
+        if(window.hWin.HEURIST4.util.isempty(col_name) || window.hWin.HEURIST4.util.isempty(col_data)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Both a column name and data are required...', 3000);
+            return;
+        }
+
+        let request = {
+            db: window.hWin.HAPI4.database,
+            imp_ID: imp_ID,
+            action: 'insert_column',
+            column_name: col_name,
+            column_data: col_data,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.doImportAction(request, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            switch(currentStep){
+                case 3:
+                    _loadSession();
+                    break;
+                case 4:
+                case 5:
+                    _doMatchingInit();
+                    _doPrepare();
+                    break;
+
+                default:
+                    break;
+            }
+
+        });
+    }
 
     //
     // get import line on server and show it on popup
@@ -5017,7 +5007,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#prepareWarnings').hide();
             $('#divFieldMapping2').show();
         }else{
-        //$('#mr_cnt_disamb').parent().hide();
             $('#divFieldMapping2').hide();
         }
 
@@ -5031,7 +5020,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $("#selImportId-button").css('width', sw);   
             }
             imp_ID = 0;
-            //$('#divStep2').find('fieldset').show();
+            
         }else if(page>2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();

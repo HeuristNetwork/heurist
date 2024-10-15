@@ -48,9 +48,8 @@ $mysqli = $system->get_mysqli();
     $res = $mysqli->query($query);
     if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
-    while (($row = $res->fetch_row())) {
+    while ($row = $res->fetch_row()) {
         if( strpos($row[0], 'hdb_')===0 ){
-            //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
         }
     }
@@ -108,7 +107,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         continue;
 */
 
-        //$registered[$db_name] = $ver;
+
 
         $rec_types = array();
         $det_types = array();
@@ -121,12 +120,12 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             ." FROM `$db_name`.defRecTypes "
             .' WHERE (rty_OriginatingDBID="" OR rty_OriginatingDBID IS NULL '
             .'OR rty_IDInOriginatingDB="" OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)';
-            //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
+
 
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
             $is_found = true;
             array_push($rec_types, array_map('htmlspecialchars',$row));
         }
@@ -153,7 +152,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             .$db_name.'.defRecTypes WHERE (rty_OriginatingDBID '.$dbid.' AND rty_OriginatingDBID>0)';
 
         $res = $mysqli->query($query);
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $row[1] = strtolower($row[1]);
                array_push($all_rty_regs, $row);
         }
@@ -166,12 +165,12 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             ." WHERE  dty_OriginatingDBID='' OR dty_OriginatingDBID IS NULL " //
             ."OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL ";
 
-            //.' OR dty_Name LIKE "% 2" OR dty_Name LIKE "% 3"';
+
 
         $res = $mysqli->query($query);
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-        while (($row = $res->fetch_row())) {
+        while ($row = $res->fetch_row()) {
                $is_found = true;
                array_push($det_types, array_map('htmlspecialchars',$row));
         }
@@ -184,7 +183,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             $query = "UPDATE `$db_name`.defDetailTypes SET dty_OriginatingDBID = $ver WHERE dty_OriginatingDBID = 0";
             $mysqli->query($query);
         }
-        if(count($det_types)>0){
+        if(!empty($det_types)){
 
 /*
 $query = 'UPDATE '.$db_name.'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID=2'
@@ -211,7 +210,7 @@ $mysqli->query($query);
             $res = $mysqli->query($query);
             if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
 
-            while (($row = $res->fetch_row())) {
+            while ($row = $res->fetch_row()) {
                    $is_found = true;
                    array_push($terms, array_map('htmlspecialchars',$row));
             }
@@ -225,7 +224,7 @@ $mysqli->query($query);
                 $mysqli->query($query);
             }
           /*
-        if(count($terms)>0){
+        if(!empty($terms)){
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=2'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
@@ -257,31 +256,31 @@ $mysqli->query($query);
 
             print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';
 
-            if(count($rec_types)>0){
+            if(!empty($rec_types)){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
 
                     //find options what may be code for these rectypes
                     foreach($all_rty_regs as $k=>$rty)
                     {
                         if($rty[1]==strtolower($row[0]) || ($row[1] && $rty[1]==strtolower($row[1]))){
-                            print '<tr><td colspan="2"></td><td>'.$rty[1].'</td><td>'.$rty[2].'</td><td>'.$rty[3].'</td></tr>';
+                            print '<tr><td colspan="2"></td><td>'.$rty[1].TD.$rty[2].TD.$rty[3].TR_E;
                         }
                     }
                 }
             }
-            if(count($det_types)>0){
+            if(!empty($det_types)){
                 print '<tr><td colspan=5>&nbsp;</td></tr>';
                 print '<tr><td colspan=5><i>Detail types</i></td></tr>';
                 foreach($det_types as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
                 }
             }
-            if(count($terms)>0){
+            if(!empty($terms)){
                 print '<tr><td colspan=5><i>Terms</i></td></tr>';
                 foreach($terms as $row){
-                    print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
+                    print TR_S.implode(TD,$row).TR_E;
                 }
             }
             print '</table>';
@@ -291,12 +290,12 @@ $mysqli->query($query);
     print '[end report]</div>';
 
 /*
-    print '<div><table>';
+    print DIV_S.TABLE_S;
     foreach($all_rty_regs as $k=>$rty)
     {
-        print '<tr><td>'.$rty[1].'</td><td>'.$rty[2].'</td><td>'.$rty[3].'</td></tr>';
+        print TR_S.$rty[1].TD.$rty[2].TD.$rty[3].TR_E;
     }
-    print '</table></div>';
+    print TABLE_E.DIV_E;
 */
 /*
     asort($registered);

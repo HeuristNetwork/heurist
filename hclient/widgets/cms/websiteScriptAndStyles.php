@@ -97,7 +97,8 @@
 </script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
@@ -106,6 +107,8 @@
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/ActionHandler.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
@@ -113,7 +116,7 @@
 
 <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/dropdownmenus/navigation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchInput.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>
@@ -151,7 +154,7 @@ if($_is_new_cms_editor){
 }
 
 
-if(is_array($external_files) && count($external_files)>0){
+if(!isEmptyArray($external_files)){
     foreach ($external_files as $ext_file){
         if(strpos($ext_file,'<link')===0 || strpos($ext_file,'<script')===0){
             print $ext_file."\n";
@@ -383,7 +386,7 @@ function onPageInit(success)
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 
         var itop = $('#main-header').height();
-        //MOVED to top right corner $('#btn_editor').css({top:itop-70, right:20});
+
 
     },300);
 
@@ -524,17 +527,11 @@ function loadPageContent(pageid, eventdata){
             supp_options['heurist_SearchInput'] = {suppress_default_search:true};
         }
 
-<?php
-//style from field DT_CMS_CSS of home record
-if($website_custom_css!=null){
-//        print 'supp_options = {heurist_resultListExt:{custom_css_for_frame:"'.htmlspecialchars(str_replace("\n",' ',$website_custom_css)).'"}};';
-}
-?>
-
             //after load event listener
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                $('body').find('#main-content').css('min-height', '');// remove min height
 
                 if(!window.hWin.HAPI4.is_admin()){
                     isCMS_active = false;
@@ -672,7 +669,7 @@ function loadRecordContent(url_or_record_id, target){
         is_smarty = ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            (url.indexOf('showReps.php')>0)
+            (url.indexOf('template=')>0) || (url.indexOf('showReps.php')>0)
            );
 
     }
@@ -757,8 +754,15 @@ function assignPageTitle(pageid){
 
     // if page title is visible - increase height of header
     if($('#main-header').length>0 && $('#main-content-container').length>0){
-        $('#main-header').height(is_show_pagetitle?180:144);
-        $('#main-content-container').css({top:is_show_pagetitle?190:152});
+        
+        const h  = $('#main-header').height();
+        if(h==144 || h==180){ //default values
+          $('#main-header').height(is_show_pagetitle?180:144);
+          $('#main-content-container').css({top:is_show_pagetitle?190:152});
+        }
+       
+        $('#main-menu').css('bottom',is_show_pagetitle?40:0);
+
     }
 }
 
@@ -782,7 +786,7 @@ function afterPageLoad(document, pageid, eventdata){
             setTimeout(function(){ afterPageLoad(document, pageid, eventdata) },500);
             return;
         }else{
-            //window.hWin.HEURIST4.msg.showMsgErr('Some widgets on this page may not inited properly');
+
         }
     }
 
@@ -990,7 +994,7 @@ function afterPageLoad(document, pageid, eventdata){
                             }
                         }
 
-                        eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
+                        eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
                         loadPageContent(new_pageid, eventdata);//on link or selection - execute search on different page
 
                     }else{
@@ -1052,7 +1056,7 @@ function initLinksAndImages($container, search_data){
         if($(link).attr('data-query') ){ //href && href.indexOf('q=')===0 ||
 
                 var query = $(link).attr('data-query');
-                        //? $(link).attr('data-query'): href.substring(2);
+
 
                 var current_template = '__def';
                 var request = {detail:'ids', neadall:1, w:'a', q:query};
@@ -1068,7 +1072,7 @@ function initLinksAndImages($container, search_data){
 
                 if(!href || href=='#' || href.indexOf('q=')===0){
                     //change href for right click - to open this link in new tab
-                    //href = '/' + window.hWin.HAPI4.database+'/tpl/'+current_template+'/'+encodeURIComponent(query);
+
                     href = [window.hWin.HAPI4.baseURL,window.hWin.HAPI4.database,'web',
                             home_page_record_id, current_page_id,encodeURIComponent(query)];
                     href = href.join('/');
@@ -1087,10 +1091,10 @@ function initLinksAndImages($container, search_data){
         if( ((window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
             && parts.length>3 && parts[parts.length-3]=='tpl')
             ||
-            (href && href.indexOf('showReps.php')>0))
+            (href?.indexOf('template=')>0 || href?.indexOf('showReps.php')>0))
             &&
             ($(link).attr('target')!='_blank' || record_view_target!='')
-           )
+          )
         {
                 $(link).on('click', function(event){
 
@@ -1146,9 +1150,6 @@ function initLinksAndImages($container, search_data){
                 $(link).attr('data-pageid', rec_id);
 
                 var eventdata = null;
-                //if(query!=null){
-                //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
-                //}
 
                 $(link).on('click', function(event){
 
@@ -1227,15 +1228,15 @@ function onHapiInit(success){
 
             if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
 
-                $('<div>'  //background: white;
-                    +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+
+                $('<div><a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
                             +'<span>at: </span>'
                             +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
-            //setTimeout(function(){window.hWin.HAPI4.EntityMgr.refreshEntityData('rst,trm');},1000);
+
 
 
 <?php
@@ -1316,14 +1317,14 @@ $website_languages_links ->#main-languages
     <?php } ?>
     }
     if($('#main-title-alt').length>0){
-        $('#main-title-alt').html('<?php print str_replace("'",'&#039;', $title_alt);?>');
+        $('#main-title-alt').html('<?php print str_replace("'",APOSTROPHE, $title_alt);?>');
     }
     if($('#main-title-alt2').length>0){
-        $('#main-title-alt2').html('<?php print str_replace("'",'&#039;', $title_alt2);?>');
+        $('#main-title-alt2').html('<?php print str_replace("'",APOSTROPHE, $title_alt2);?>');
     }
 
     if($('#main-languages').length>0){
-        $('#main-languages').html('<?php print str_replace("'",'&#039;', $website_languages_links);?>');
+        $('#main-languages').html('<?php print str_replace("'",APOSTROPHE, $website_languages_links);?>');
     }
 
     // Setup login button, if needed
@@ -1442,7 +1443,7 @@ function _openCMSeditor(event){
             //close
             isCMS_active = false;
             editCMS_instance2.closeCMS();
-            //btn.show();
+
         }else{
             $('#main-recordview').hide();
             $('#main-content').show();
@@ -1474,21 +1475,22 @@ var prepared_params = {guest_data:true};//allow guest login
 //
 $(document).ready(function() {
 
-        var ele = $('body').find('#main-content');
-        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
-        ele.show();
+    let ele = $('body').find('#main-content');
+    ele.css('min-height', '70px');// set min height to ensure the coverall is some what viewable
+    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    ele.show();
 
-        $('body').find('#main-menu').hide();//will be visible after menu init
+    $('body').find('#main-menu').hide();//will be visible after menu init
 
-        // Standalone check
-        if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>',
-                        onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
-        }else{
-            // Not standalone, use HAPI from parent window
-            initHeaderElements();
-            onPageInit( true );
-        }
+    // Standalone check
+    if(!window.hWin.HAPI4){
+        window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>',
+                    onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
+    }else{
+        // Not standalone, use HAPI from parent window
+        initHeaderElements();
+        onPageInit( true );
+    }
 });
 </script>
 
@@ -1529,10 +1531,6 @@ if($website_custom_css!=null){
 // javascript from field DT_CMS_SCRIPT of home record
 if($website_custom_javascript!=null){
 
-    //pass url params to custom javascript
-    //var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
-    //eventdata = {url_params:params};
-
     print '<script>function afterPageLoad'.$home_page_on_init.'(document, pageid){'."\n";
     print "try{\n".$website_custom_javascript."\n}catch(e){console.error(e)}}</script>";
 }
@@ -1550,7 +1548,7 @@ $mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';
 
 function _getFld($record,$dty_ID){
     $res = @$record['details'][$dty_ID];
-    $ret = (is_array($res)&&count($res)>0)?array_shift($res):null;
+    $ret = (!isEmptyArray($res))?array_shift($res):null;
     return $ret;
 }
 
@@ -1567,7 +1565,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                 if(in_array($page_id, $ids_was_added)){
                     //already was included - recursion
-                    //ids_recurred.push(menuitems[i]);
+
                 }else{
 
                     $record = recordSearchByID($system,$page_id,$fields,'rec_ID,rec_RecTypeID');
@@ -1578,10 +1576,10 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 
                     //target and position
                     $pageTarget = _getFld($record,DT_CMS_TARGET);
-                    //$pageStyle = _getFld($record,DT_CMS_CSS);
+
                     $showTitle = _getFld($record,DT_CMS_PAGETITLE);
 
-                    $showTitle = true; //($showTitle!==TERM_NO && $showTitle!==TERM_NO_old);
+                    $showTitle = true;
 
                     $hasContent = (_getFld($record,DT_EXTENDED_DESCRIPTION)!=null);
 
@@ -1604,7 +1602,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     //has submenu
                     if(is_array($submenu)){
 
-                        if(count($submenu)>0){
+                        if(!empty($submenu)){
 
                             $subrec = array();
                             foreach($submenu as $id=>$rec){

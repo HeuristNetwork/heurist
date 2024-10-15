@@ -74,7 +74,7 @@ $.widget( "heurist.emailForm", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-        //it prevents inputs in FF this.element.disableSelection();
+       
     }, //end _create
     
     //
@@ -105,8 +105,6 @@ $.widget( "heurist.emailForm", {
             
             this._element_form.hide()
             this._initDialog();
-        }else{
-            //this.element.addClass('ui-heurist-bg-light');
         }
         
         //init layout
@@ -160,8 +158,6 @@ $.widget( "heurist.emailForm", {
     // invoked from _init after loading of html content
     //
     _initControls:function(){
-        
-        let that = this;
         
         //verify that form has all required elements
         let missed = [];
@@ -472,8 +468,6 @@ $.widget( "heurist.emailForm", {
             
             const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
             
-            //var request = {json:1,id:id};
-            //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
             $.getJSON(url,
                 function(captcha){
                         that._element_form.find('#captcha_img').text(captcha.value)
@@ -482,8 +476,8 @@ $.widget( "heurist.emailForm", {
 
         
         // }else if(false){
-        //    const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
-        //    $dd.load(url);
+       
+       
         }else{ //image captcha
             $dd.empty();
             $('<img alt src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);

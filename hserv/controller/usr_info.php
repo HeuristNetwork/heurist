@@ -1,5 +1,4 @@
 <?php
-
     /**
     * Application interface. See HSystemMgr in hapi.js
     *    user/groups information/credentials
@@ -22,32 +21,27 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    //use hserv\utilities as utils;
+    use hserv\utilities\USanitize;
+    //use hserv\utilities\Temporal;
+
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
-    require_once dirname(__FILE__).'/../utilities/uFile.php';
-    require_once dirname(__FILE__).'/../utilities/uImage.php';
-    require_once dirname(__FILE__).'/../utilities/uSanitize.php';
 
-
-    $response = array();//"status"=>"fatal", "message"=>"OBLOM");
+    $response = array();
     $res = false;
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
+    $req_params = USanitize::sanitizeInputArray();
 
-    $action = @$req_params['a'];//$system->getError();
+    $action = @$req_params['a'];
 
-    $system = new System();
+    $system = new hserv\System();
     $dbname = @$req_params['db'];
-    $error = System::dbname_check($dbname);
+    $error = mysql__check_dbname($dbname);
 
-    $dbname = preg_replace(REGEX_ALPHANUM, "", $dbname);//for snyk
-
-    if($error){
+    if($error!=null){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;
 
@@ -208,17 +202,6 @@
 
     }elseif( !$system->init( $dbname ) ){
 
-    }elseif($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
-
-        if(isset($allowCMSCreation) && $allowCMSCreation == -1){
-
-            $msg = 'Due to security restrictions, website creation is blocked on this server.<br>Please ' . CONTACT_SYSADMIN . ' if you wish to create a website.';
-
-            $system->addError(HEURIST_ACTION_BLOCKED, $msg);
-            $res = false;
-        }else{
-            $res = 1;
-        }
     }elseif($action == 'check_for_databases'){ // check if the provided databases are available on the current server
 
         $mysqli = $system->get_mysqli();
@@ -482,7 +465,7 @@
 
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
-                  }elseif(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
+                  }elseif($op!='create' && !is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not a directory');
                   }else{
 
@@ -500,9 +483,9 @@
                       }elseif($folders[strtolower($new_name)]){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
                       }elseif(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, "Folder with name '$new_name' already exists");
                       }elseif(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, "Folder with name '$f_name' does not exist");
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);
                           if(!$res){
@@ -512,8 +495,6 @@
                       }
 
                   }elseif($op=='delete'){
-                      //if (is_dir($dir))
-
 
                       if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
@@ -597,7 +578,7 @@
                     $sp = $req_params['saml_entity'];
 
                     //check saml session
-                    require_once dirname(__FILE__).'/../utilities/uSaml.php';
+                    require_once dirname(__FILE__).'/../utilities/USaml.php';
 
                     //if currently authenticated - take username
                     $username = samlLogin($system, $sp, $system->dbname(), false);
@@ -755,7 +736,7 @@
 
                     // File
                     $params['file'] = array(
-                        'path' => HEURIST_FILESTORE_DIR . '/scratch/'
+                        'path' => HEURIST_FILESTORE_DIR . DIR_SCRATCH
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
                         'name' => htmlspecialchars($req_params['file'][0]['original_name'])
@@ -765,7 +746,7 @@
                     $params['meta']['title'] = array(
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
@@ -791,7 +772,7 @@
                             $params['meta']['alt_creator'] = array(
                                 'value' => $fullname,
                                 'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'typeUri' => XML_SCHEMA,
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             );
                         }
@@ -806,7 +787,7 @@
                         $params['meta']['created'] = array(
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'typeUri' => XML_SCHEMA,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }else{
@@ -828,7 +809,7 @@
                     $params['meta']['license'] = array(
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#license'
                     );
 
@@ -846,7 +827,7 @@
 
                 if($res !== false){
                     // delete local file after upload
-                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . basename($req_params['file'][0]['name']));
+                    fileDelete(HEURIST_FILESTORE_DIR . DIR_SCRATCH . basename($req_params['file'][0]['name']));
                     fileDelete(HEURIST_FILESTORE_DIR . '/scratch/thumbnail/' . basename($req_params['file'][0]['name']));
                 }
             } else {
