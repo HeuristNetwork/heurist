@@ -315,6 +315,12 @@ function HMapLayer2( _options ) {
 
         //obfuscated file id
         let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+        
+        if(!file_info){
+            let error = {message: 'Cant add image layer. File resource is missed or invalid'};
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+            return;
+        }
 
         let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
                 file_info[0];
