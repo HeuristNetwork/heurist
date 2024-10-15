@@ -104,7 +104,7 @@ class DbSysBugreport extends DbEntityBase
                 $this->system->doLogout();
             }
 
-            return $res;
+            return $res !== false ? $res['data'] : $res;
         }
 
         //validate values and check mandatory fields
@@ -290,7 +290,7 @@ class DbSysBugreport extends DbEntityBase
         if($res){
             // Add record ID, title & url to edit record
 
-            $rec_ID = is_array($res) && $res['status'] == HEURIST_OK ? $res['data']['recID'] : 0;
+            $rec_ID = @$res['status'] == HEURIST_OK ? $res['data']['recID'] : 0;
             $email_already_sent = $rec_ID > 0 ? $res['data']['email_sent'] : false;
 
             if($rec_ID > 0){
