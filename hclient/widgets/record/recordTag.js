@@ -28,7 +28,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
         helpContent: 'recordTags',
-        scope_types: 'selected',
+        scope_types: ['selected', 'collected', 'current'],
         groups: 'all',
         modes: ['assign','remove']       //bookmark=assign bookmark_url - just selection of tags - no real action
     },
@@ -162,7 +162,9 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             
             if(scope_val == 'selected'){
                 scope = this._currentRecordsetSelIds;
-            }else { //(scope_val == 'current'
+            }else if(scope_val == 'collected'){
+                scope = this._currentRecordsetColIds;
+            }else{ //(scope_val == 'current'
                 scope = this._currentRecordset.getIds();
                 if(scope_val  >0 ){
                     rec_RecTypeID = scope_val;

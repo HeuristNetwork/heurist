@@ -118,6 +118,13 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
             window.hWin.HEURIST4.ui.addoption(selScope,'selected',
                 window.hWin.HR('Selected results set (count=') + this._currentRecordsetSelIds.length+')');
         }
+
+        if ((is_initscope_empty || scope_types.indexOf('collected')>=0)
+            && (this._currentRecordsetColIds &&  this._currentRecordsetColIds.length > 0)){
+                
+            window.hWin.HEURIST4.ui.addoption(selScope,'selected',
+                window.hWin.HR('Collected results set (count=') + this._currentRecordsetColIds.length+')');
+        }
         
         if ((is_initscope_empty || scope_types.indexOf('current')>=0)
             && (this._currentRecordset &&  this._currentRecordset.length() > 0)){
