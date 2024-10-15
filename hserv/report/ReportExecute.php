@@ -269,7 +269,7 @@ class ReportExecute
         }
 
         if ($this->publishmode == 0 && $qresult && isset($qresult['recIDs'])) {
-            $recIDs = $this->prepareIds($qresult['recIDs']);
+            $recIDs = prepareIds($qresult['recIDs']);
             
             if($this->limit < count($recIDs) || $this->limit < $qresult['recordCount'] ){
                 $this->message_about_truncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'

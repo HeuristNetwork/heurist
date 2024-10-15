@@ -28,6 +28,7 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         scope_types: null, // [all, selected, current, rectype ids, none]
         init_scope: '',    // inital selection
         currentRecordset: null,
+        htmlContent: 'recordAction.html'
     },  
       
     _currentRecordset:null,

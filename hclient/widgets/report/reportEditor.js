@@ -28,6 +28,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         title:  'Edit Report Template',
         default_palette_class: 'ui-heurist-populate',
         actionName: 'reportEditor',
+        htmlContent: 'reportEditor.html',
         path: 'widgets/report/',
 
         is_snippet_editor: false,

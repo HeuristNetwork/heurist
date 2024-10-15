@@ -80,9 +80,8 @@ $.widget( "heurist.baseAction", {
             return;
         }
 
-        if(this.options.htmlContent==''){
+        if(this.options.htmlContent==='' && this.options.actionName!=''){ // && this.options.path===''
             this.options.htmlContent = this.options.actionName+'.html';
-                   
         }
         
         if(this.options.isdialog){  //show this widget as popup dialog

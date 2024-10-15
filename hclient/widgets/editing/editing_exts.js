@@ -26,8 +26,6 @@
 
 /* global HEditing */
 
-let _editing_symbology;
-
 //
 //  mode_edit 2 - symbology for general map draw style
 //            1 - symbology editor from map legend
@@ -61,6 +59,8 @@ function editSymbology(current_value, mode_edit, callback){
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
+    let _editing_symbology;
+    
     _editing_symbology = new HEditing({container:editForm, 
         onchange:
         function(){
