@@ -1218,7 +1218,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     // Validate WhoCanSee value
                     if(array_key_exists('ulf_WhoCanSee', $file_details)){
 
-                        $file_details['ulf_WhoCanSee'] = empty($file_details['ulf_WhoCanSee']) ? 'public' : $file_details['ulf_WhoCanSee'];
+                        $file_details['ulf_WhoCanSee'] = $file_details['ulf_WhoCanSee'] ?? 'public';
 
                         switch($file_details['ulf_WhoCanSee']){
                             case 'public':
@@ -1235,7 +1235,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 break;
                             default:
                                 $ret[] = 'Invalid visibility setting, please use either public or private';
-                                continue;
+                                break;
                         }
                     }
 
