@@ -30,7 +30,7 @@ if (!defined('PDIR')){
 <html lang="en">
 <head>
 
-<title>Heurist Academic Collaborative Database (C) 2005 - 2020, University of Sydney</title>
+<title>Heurist Academic Collaborative Database (C) 2005 - 2024, University of Sydney</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
