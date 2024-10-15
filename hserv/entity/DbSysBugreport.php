@@ -266,6 +266,8 @@ class DbSysBugreport extends DbEntityBase
         }else{
 
             $params = [
+                'a' => 'save',
+                'entity' => 'sysBugreport',
                 'db' => HEURIST_BUGREPORT_DATABASE,
                 'new_record' => $new_record,
                 'fields' => ['is_bug_report' => 1]
@@ -273,6 +275,11 @@ class DbSysBugreport extends DbEntityBase
             $url = HEURIST_MAIN_SERVER . '/h6-alpha/hserv/controller/entityScrud.php?' . http_build_query($params);
 
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
+
+            $json = json_decode($res, true);
+            $res = json_last_error() === JSON_ERROR_NONE
+                    ? $json
+                    : ['status' => HEURIST_UNKNOWN_ERROR, 'message' => 'An unknown response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
         }
 
         if($this->performLogout){
