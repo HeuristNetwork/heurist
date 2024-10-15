@@ -2642,6 +2642,8 @@ $.widget( "heurist.resultList", {
 
         if (selection == "all") {
             this.div_content.find('.recordDiv').addClass('selected');
+
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelected(true);
         }else{
 
             let recIDs_list = window.hWin.HAPI4.getSelection(selection, true); //need to rewrite since it works with global currentRecordset
