@@ -333,25 +333,10 @@ class ReportRecord
 
         foreach ($rec as $key => $value) {
             if (strpos($key, "rec_") === 0) {
-                $record['rec' . substr($key, 4)] = $value;
-
-                if ($key == 'rec_RecTypeID') {
-                    $recTypeID = $value;
-                    $record['recTypeID'] = $recTypeID;
-                    $record['recTypeName'] = $this->rty_Names[$recTypeID];
-                } elseif ($key == 'rec_Tags') {
-                    $record['rec_Tags'] = $value;
-                } elseif ($key == 'rec_ID') {
-                    $record['recWootText'] = $this->getWootText($value);
-                }
+                $this->processRecordField($record, $key, $value, $recTypeID);
             } elseif ($key == "details") {
-                foreach ($value as $dtKey => $dtValue) {
-                    $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);
-                    if ($dt != null) {
-                        $record = array_merge($record, $dt);
-                    }
-                }
-            }
+                $this->processRecordDetails($record, $value, $recTypeID, $recordID, $lang);
+            }            
         }
 
         if (count($this->loaded_recs) > 2500) {
@@ -360,6 +345,31 @@ class ReportRecord
 
         $this->loaded_recs[$recordID] = $record;
         return $record;
+    }
+    
+    private function processRecordField(&$record, $key, $value, &$recTypeID)
+    {
+        $record['rec' . substr($key, 4)] = $value;
+
+        if ($key == 'rec_RecTypeID') {
+            $recTypeID = $value;
+            $record['recTypeID'] = $recTypeID;
+            $record['recTypeName'] = $this->rty_Names[$recTypeID];
+        } elseif ($key == 'rec_Tags') {
+            $record['rec_Tags'] = $value;
+        } elseif ($key == 'rec_ID') {
+            $record['recWootText'] = $this->getWootText($value);
+        }
+    }
+
+    private function processRecordDetails(&$record, $details, $recTypeID, $recordID, $lang)
+    {
+        foreach ($details as $dtKey => $dtValue) {
+            $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);
+            if ($dt != null) {
+                $record = array_merge($record, $dt);
+            }
+        }
     }
     
     /**
