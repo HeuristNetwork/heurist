@@ -23,14 +23,14 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
 
-<link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />
+<link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/geocoder/Control.Geocoder.css" />
 <?php
 if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
-    <script src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
+    <script src="<?php echo PDIR;?>external/leaflet.plugins/geocoder/Control.Geocoder.js"></script>
 <?php
 }else{
 ?>
@@ -43,18 +43,18 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 <?php
 }
 ?>
-<script src="<?php echo PDIR;?>external/leaflet/leaflet-iiif.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <!-- leaflet plugins -->
-<script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-iiif.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-providers.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/bookmarks/Leaflet.Bookmarks.min.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/draw/leaflet.draw-src.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet.circle.topolygon-src.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/cheapRuler.js" charset="utf-8"></script>
-<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
-<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/bookmarks/leaflet.bookmarks.css">
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet.plugins/draw/leaflet.draw.css">
 
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/accessTokens.php"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_color.js"></script>
@@ -510,7 +510,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     });
 
                     }
-                $('.leaflet-control-geocoder-form > input').focus();
+                $('.leaflet-control-geocoder-form > input').trigger('focus');
 
                 is_map_inited = true;
             }

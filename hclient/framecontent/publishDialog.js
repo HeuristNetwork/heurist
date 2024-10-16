@@ -54,17 +54,17 @@ function HPublishDialog( _options )
                 _updateUrls();
             }});  
             
-            popupelement.find("#btnExportKML").button().click(_exportKML);
+            popupelement.find("#btnExportKML").button().on('click',_exportKML);
             
             _updateUrls();      
         }else{
             if(options.mode=='smarty'){
-                popupelement.find("#btnScheduleSmarty").button().click(_scheduleSmarty);
+                popupelement.find("#btnScheduleSmarty").button().on('click',_scheduleSmarty);
                 popupelement.find("#lbl_mode2").text(window.hWin.HR('javascript wrap'));
                 
                 popupelement.find('#div-content-type').show();
                 
-                popupelement.find('#select-content-type').change(_fillUrls);
+                popupelement.find('#select-content-type').on('change',_fillUrls);
             }
             
             _fillUrls();      

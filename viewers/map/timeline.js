@@ -679,7 +679,7 @@ $.widget( "heurist.timeline", {
             },text:false, label:window.hWin.HR("Timeline options")})
             .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
-        $("<label>").attr('id','lbl_timeline_filter')
+        $("<span>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);
             
         let spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);

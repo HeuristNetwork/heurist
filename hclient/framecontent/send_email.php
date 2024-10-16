@@ -70,9 +70,13 @@ if(isset($_POST['data'])) {
     <title>Bulk email sender</title>
 
     <!-- CSS -->
-    <?php include_once dirname(__FILE__).'/initPageCss.php';?>
+    <?php 
+    
+    include_once dirname(__FILE__).'/initPageCss.php';
+    includeJQuery();
+    
+    ?>
 
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 
@@ -227,8 +231,8 @@ if(isset($_POST['data'])) {
 
             // Listen to dropdown hanges
             $(dropdowns[i]).on('change', function(e) {
-                var id = $(this).attr("id");// Dropdown ID
-                var value = $(this).prop("selectedIndex");// Selected dropdown index
+                let id = $(this).attr("id");// Dropdown ID
+                let value = $(this).prop("selectedIndex");// Selected dropdown index
                 putItem("#"+id, value);// Store data
                 redo();// Message needs to be re-done
             });

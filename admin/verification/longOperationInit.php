@@ -63,23 +63,28 @@ if(@$_REQUEST['type']=='urls'){
     <head>
         <title><?php echo $sTitle; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
         <script type="text/javascript">
 
-        $(document).ready(function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var dosframe = document.getElementById('verification_output');
 
-            setTimeout(function(){
-                var $dosframe = $('#verification_output');
-                $dosframe.on('load', function(){
-                    $dosframe.css({width:'97%',height:'97%'}).show();
-                    $('#in_porgress').hide()
-                });
+                    dosframe.addEventListener('load', function() {
+                        dosframe.style.width = '97%';
+                        dosframe.style.height = '97%';
+                        dosframe.style.display = 'block';
+                        
+                        var inProgress = document.getElementById('in_porgress');
+                        if (inProgress) {
+                            inProgress.style.display = 'none';
+                        }
+                    });
 
-                $dosframe.attr("src", "<?php echo $srcURL; ?>");
-             },500);
-        });
+                    dosframe.src = "<?php echo $srcURL; ?>";
+                }, 500);
+            });
 
         </script>
         <style>

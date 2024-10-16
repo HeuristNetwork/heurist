@@ -39,8 +39,8 @@ if(isLocalHost()){
 ?>
 <!-- leaflet plugins -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+<script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-providers.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/accessTokens.php"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>

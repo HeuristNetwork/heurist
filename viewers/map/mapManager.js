@@ -286,7 +286,7 @@ function HMapManager( _options )
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
                 +'</span>')
                 .css({'line-height':'15px',height:'14px',width:'50px',background: 'none',float:'right'})
-                .click(_createNewMapDocument)
+                .on('click',_createNewMapDocument)
                 //.on('click', function(){that.filterListMapDocuments(true);})
                 .appendTo($header);
                 
@@ -886,7 +886,7 @@ function HMapManager( _options )
             }
             actionspan = $(actionspan+'</div>').appendTo(parent_span);
 
-            $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
+            $('<div class="svs-contextmenu4"></div>').appendTo(parent_span);
                 
                 
             actionspan.find('.ui-icon').on('click', function(event){
@@ -1203,8 +1203,7 @@ function HMapManager( _options )
                 ele.hide();
             }               
 
-            $(parent_span).hover(
-                function(event){
+            function _onmouseenter(event){
                     let node;
                     if($(event.target).hasClass('fancytree-node')){
                         node =  $(event.target);
@@ -1253,11 +1252,14 @@ function HMapManager( _options )
 
                         ele.css({'display':'inline-block'});//.css('visibility','visible');
                     }
-                }
-            );               
-            $(parent_span).mouseleave(
+            }
+            
+            $(parent_span).on('mouseenter',
+                _onmouseenter
+            ).on('mouseleave',
                 _onmouseexit
             );
+
         }
     }
     

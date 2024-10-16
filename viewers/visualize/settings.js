@@ -95,7 +95,7 @@ function handleSettingsInUI() {
     
     let is_advanced = getSetting('setting_advanced');
     
-    $('#setAdvancedMode').css({cursor:'hand'}).click(
+    $('#setAdvancedMode').css({cursor:'hand'}).on('click',
         function(){
               let is_advanced = getSetting('setting_advanced');
               is_advanced = (is_advanced==='false');
@@ -128,25 +128,25 @@ function handleSettingsInUI() {
     //-------------------------------
     
     $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
-        .click( function(){ window.selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
+        .on('click', function(){ selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
     $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
-        .click( function(){ window.selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
+        .on('click', function(){ selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
     $('#selectMode').controlgroup();
         
     $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
-        .click( function(){changeViewMode('icons');} );
+        .on('click', function(){changeViewMode('icons');} );
     $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info' , showLabel:false})
-        .click( function(){changeViewMode('infoboxes');} );
+        .on('click', function(){changeViewMode('infoboxes');} );
     $('#btnViewModeFull').button({icon: 'ui-icon-circle-info' , showLabel:false})
-        .click( function(){changeViewMode('infoboxes_full');} );
+        .on('click', function(){changeViewMode('infoboxes_full');} );
     $( "#setViewMode" ).controlgroup();    
 
     $('#gravityMode0').button(/*{icon: 'ui-icon-gravity0' , showLabel:false}*/)
-        .click( function(){setGravity('off');} );
+        .on('click', function(){setGravity('off');} );
     $('#gravityMode1').button(/*{icon: 'ui-icon-gravity1' , showLabel:false}*/)
-        .click( function(){setGravity('touch');} );
+        .on('click', function(){setGravity('touch');} );
     /*$('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false})
-        .click( function(){setGravity('aggressive');} );*/
+        .on('click', function(){setGravity('aggressive');} );*/
     $("#setGravityMode").controlgroup();    
     
     //------------ NODES ----------
@@ -165,11 +165,11 @@ function handleSettingsInUI() {
     //$("input[name='nodesMode'][value='" +getSetting('setting_formula')+ "']").attr("checked", true);
     
     $('#nodesMode0').button().css('width','35px')
-        .click( function(){ setFormulaMode('linear'); });
+        .on('click', function(){ setFormulaMode('linear'); });
     $('#nodesMode1').button().css('width','40px')
-        .click( function(){ setFormulaMode('logarithmic'); }); 
+        .on('click', function(){ setFormulaMode('logarithmic'); }); 
     $('#nodesMode2').button().css('width','50px')
-        .click( function(){ setFormulaMode('unweighted'); });
+        .on('click', function(){ setFormulaMode('unweighted'); });
     $( "#setNodesMode" ).controlgroup();    
 
     if($('#entityColor').length > 0){
@@ -197,18 +197,18 @@ function handleSettingsInUI() {
     //$("input[name='linksMode'][value='" +getSetting('setting_linetype')+ "']").attr("checked", true);
     
     $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false})
-        .click( function(){ setLinkMode('straight');} );
+        .on('click', function(){ setLinkMode('straight');} );
     $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
-        .click( function(){ setLinkMode('curved');} );
+        .on('click', function(){ setLinkMode('curved');} );
     $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
-        .click( function(){ setLinkMode('stepped');} );
+        .on('click', function(){ setLinkMode('stepped');} );
         
-    $('#linksEmpty').change( function(e){
+    $('#linksEmpty').on('change', function(e){
         putSetting('setting_line_empty_link', $(e.target).is(':checked')?1:0);
         visualizeData();
         _syncUI();
     });
-	$('#expand-links').change( function(){ // expand single links
+	$('#expand-links').on('change', function(){ // expand single links
         tick(); 
 	});
     if(settings.isDatabaseStructure){ // show all links by default for database structure vis
@@ -234,7 +234,7 @@ function handleSettingsInUI() {
     if(linksWidth<1) linksWidth = 1  //min
     else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth;
     
-    $('#linksWidth').val(linksWidth).change(
+    $('#linksWidth').val(linksWidth).on('change',
     function(){
         let newval = $(event.target).val();
         putSetting('setting_linewidth', newval);
@@ -326,7 +326,7 @@ function handleSettingsInUI() {
     if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
     else if(fontSize>25) fontSize = 25;
 
-    $('#fontSize').val(fontSize).change(
+    $('#fontSize').val(fontSize).on('change',
     function(){
         let newval = $(event.target).val();
         putSetting('setting_fontsize', newval);

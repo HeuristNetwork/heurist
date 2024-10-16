@@ -844,7 +844,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     let dialog_width = ele.width(); 
                     $dlg.dialog( 'option', 'width', dialog_width);
                 }
-                //$(window).resize(__adjustOneResize)
+                //$(window).on('onresize',__adjustOneResize)
                 options.container.off('resize');
                 options.container.on('resize', __adjustOneResize);
                 __adjustOneResize();

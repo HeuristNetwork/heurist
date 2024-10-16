@@ -35,7 +35,7 @@ $file_max_size = USystem::getConfigBytes('upload_max_filesize');
 $max_size = min($file_max_size,$post_max_size);
 $s_max_size = round($max_size/1024/1024).' MBytes';
 ?>
-<!DOCTYPE>
+<!DOCTYPE html>
 <html lang="en">
     <head>
 
@@ -46,23 +46,20 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Import XML or JSON</title>
 
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <?php
+            includeJQuery();
+        ?>        
 
-        <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
-
         <!-- Demo styles -->
         <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">
-        <!--[if lte IE 8]>
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo-ie8.css">
-        <![endif]-->
         <style>
             /* Adjust the jQuery UI widget font-size: */
             .ui-widget {

@@ -96,8 +96,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Merging records</title>
 
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+<?php 
+        includeJQuery();
+?>        
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
@@ -160,7 +161,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                 let $merge = $('input[name="merge"]');
                 if($merge.length == 1 && $('input[name="duplicate[]"]').length == 2){
                     // automatically merge if there is only two records listed
-                    $merge.click();
+                    $merge.trigger('click');
                     return;
                 }
 

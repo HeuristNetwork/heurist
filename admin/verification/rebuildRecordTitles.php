@@ -80,12 +80,9 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
-<?php if($init_client){ ?>
-
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
-
+<?php if($init_client){ 
+        includeJQuery();
+?>        
         <script type="text/javascript">
 
 

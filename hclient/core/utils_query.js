@@ -462,7 +462,7 @@ window.hWin.HEURIST4.query = {
             
             let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
             let target = $dlg.find('#dlg-prompt-value')[0];
-            target.focus();
+            target.trigger('focus');
             target.setSelectionRange(0, target.value.length);
             let succeed;
             try {

@@ -43,18 +43,8 @@ if (!defined('PDIR')){
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php
-if(isLocalHost()){
-    ?>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-    <?php
-}else{
-    ?>
-    <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<?php
-}
-?>
+    includeJQuery();
+?>   
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -66,13 +56,6 @@ if(isLocalHost()){
      //stub
     window.hWin.HR = function(res){ return res; }
 </script>
-
-<!-- CSS -->
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
-<?php
-//https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css
-//include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';
-?>
 
 <script type="text/javascript">
 

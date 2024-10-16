@@ -128,15 +128,16 @@ if(!$has_emails || empty($emails)) {
         <!-- Style Sheets -->
         <!--<link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />-->
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+
+<?php 
+        includeJQuery();
+?>        
 
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
         <link rel="stylesheet" type="text/css" href="../../h6styles.css">
 
         <!-- Scripts -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
-        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="../../hclient/core/utils.js"></script>
         <script type="text/javascript" src="../../hclient/core/utils_ui.js"></script>
@@ -1115,7 +1116,7 @@ if(!$has_emails || empty($emails)) {
 
                 set_element_position();
 
-                $("#btnCalRecCount").click(getRecordCount);
+                $("#btnCalRecCount").on('click',getRecordCount);
 
                 getInitDbList();
             });

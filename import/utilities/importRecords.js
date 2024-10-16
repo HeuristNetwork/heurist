@@ -54,7 +54,7 @@ function hImportRecords(_max_upload_size) {
         //buttons
         btnUploadData = $('#btn_UploadData').on('click', function(e) {
                             if( window.hWin.HAPI4.is_admin() ){
-                                uploadWidget.click();    
+                                uploadWidget.trigger('click');    
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     status:window.hWin.ResponseStatus.REQUEST_DENIED,
@@ -62,12 +62,12 @@ function hImportRecords(_max_upload_size) {
                             }
                         });
                     
-        $('#btn_ImportRt').click(_importDefinitions);
+        $('#btn_ImportRt').on('click',_importDefinitions);
 
-        $('#btn_ImportRecords').click(_importRecords);
+        $('#btn_ImportRecords').on('click',_importRecords);
         
-        $('#sa_insert').click(_onUpdateModeSet);
-        $('#sa_update').click(_onUpdateModeSet);
+        $('#sa_insert').on('click',_onUpdateModeSet);
+        $('#sa_update').on('click',_onUpdateModeSet);
 
         $('#btn_Close').on('click', function(){window.close()});
         

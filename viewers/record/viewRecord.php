@@ -107,7 +107,7 @@ if(!@$_REQUEST['popup']){
 }
 
 ?>
-<!DOCTYPE>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 	<title>HEURIST - View record</title>

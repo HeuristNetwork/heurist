@@ -858,27 +858,6 @@ if(_mapdata.limit_warning){
             $('#timeline-edit-dialog').find('input[type="checkbox"][name="time-filter-map"]').prop('checked',true);
         }
        
-            
-            
-        /*
-        $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
-        $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
-        $("#btn_timeline_labels").button({icons: {
-            primary: "ui-icon-tag"
-            },text:false, label:window.hWin.HR("Show labels")})
-            .on('click', function(){ __timelineShowLabels(); })
-            .appendTo(toolbar);
-        */
-        
-        /*
-        let el = $('<label style="padding:3px 4px;background:#DDDDDD"><input type="checkbox" checked>Stack</label>').appendTo(toolbar);
-        el.find('input').on('change', function(event){ 
-              _current_stack_setting = $(event.target).is(':checked');
-              vis_timeline.setOptions({'stack':_current_stack_setting}); //(mode!=4)
-//              vis_timeline.redraw();
-        });
-        */
-
     }
     
     //  mode 
@@ -1321,7 +1300,7 @@ if(_mapdata.limit_warning){
 
             /*let shift_draw = false;
 
-            $(document).bind('keydown', function(e) {
+            $(document).on('keydown', function(e) {
             if(e.keyCode==16 && shift_draw == false){
             map.setOptions({draggable: false, disableDoubleClickZoom: true});
             shift_draw = true; // enable drawing
@@ -1330,7 +1309,7 @@ if(_mapdata.limit_warning){
 
             });
 
-            $(document).bind('keyup', function(e) {
+            $(document).on('keyup', function(e) {
             if(e.keyCode==16){
             map.setOptions({draggable: true, disableDoubleClickZoom: true});
             shift_draw = false // disable drawing

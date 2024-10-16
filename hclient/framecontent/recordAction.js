@@ -79,7 +79,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 _onRecordScopeChange();
             }
         );
-        btn_start_action.addClass('ui-state-disabled'); //.click(_startAction);        
+        btn_start_action.addClass('ui-state-disabled'); //.on('click',_startAction);        
         
         _fillSelectRecordScope();
         
@@ -214,7 +214,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             ele.addClass('ui-state-disabled');
         }else{
             ele.removeClass('ui-state-disabled');
-            ele.click(_startAction);
+            ele.on('click',_startAction);
         }
         switch(action_type) {
             case 'add_detail':

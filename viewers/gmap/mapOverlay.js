@@ -509,7 +509,7 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
             ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
-            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+bg_color+'" />')
+            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+bg_color+'" ></div>')
         )
         + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
         + '</label>'
@@ -539,7 +539,7 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
             legend_content.append(legenditem);
         };
 
-        legenditem.find(".overlay-legend").change(_showHideOverlay);
+        legenditem.find(".overlay-legend").on('change',_showHideOverlay);
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
             .on('click', function(event){ 
@@ -585,7 +585,7 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
                     + ' data-mapdataid="'+mapdata_id+'" class="overlay-legend-depend" '+(overlay.visible?'checked="checked">':'>')
                     + mapdata_title + '</label></div>').appendTo(legenditem);        
             }            
-            legenditem.find(".overlay-legend-depend").change(_showHideLayer);
+            legenditem.find(".overlay-legend-depend").on('change',_showHideLayer);
         }
 
         _adjustLegendHeight();
@@ -1750,7 +1750,7 @@ map.data.addListener('mouseover', function(event) {
 
         let btn_mapdocs = $("#mapSelectorBtn").button({showLabel:true, label:'Select...',
                 icon:"ui-icon-triangle-1-s", iconPosition:'end'}).css('max-height',22)
-                .click( function(e) {
+                .on('click', function(e) {
                 $('.menu-or-popup').hide(); //hide other
                 
                 if(loading_mapdoc_list) return;

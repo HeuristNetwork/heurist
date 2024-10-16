@@ -646,7 +646,8 @@ console.error('Cardinal layout widget does not have proper options');
                         $cardinal_container.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
                     }
                     
-                    layout_opts['applyDefaultStyles'] = true;
+                    layout_opts['applyDefaultStyles'] = true; //remove for last version
+                    layout_opts['applyDemoStyles'] = false;
                     layout_opts['maskContents']       = true;
                     layout_opts['togglerAlign_open']  = 'center';
                     layout_opts['togglerContent_open']   = '&nbsp;';
@@ -740,7 +741,7 @@ console.error('Cardinal layout widget does not have proper options');
 					
                     if(pos == 'east'){ 
                         // Prevent east pane's tabs from navigating with arrow keys
-                        $tabs.find('.ui-tabs-anchor').keydown(function(e){
+                        $tabs.find('.ui-tabs-anchor').on('keydown',function(e){
                             e.stopPropagation();
                             e.preventDefault();
 
@@ -1272,7 +1273,7 @@ console.error('Cardinal layout widget does not have proper options');
             if(tabb.length>0){
                 
                 $(tabb).tabs({activate: function( event, ui ) { 
-                        $(window).resize(); 
+                        $(window).trigger('resize'); 
                         //change/restore z-index and background color
                         $(ui.newTab[0]).css({'z-index': ui.newTab.attr('data-zmax'),
                                        'background': 'url(hclient/assets/tab_shape_sel.png)',

@@ -89,13 +89,6 @@ if(!in_array($action_type, $allowed_actions)){
 }
 
 ?>
-<!-- date picker
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
--->
-
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>

@@ -1352,9 +1352,9 @@ window.hWin.HEURIST4.ui = {
         } 
         
         if(!hideExpLevelButton){
-            let $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
-                +'<li data-user-admin-status="1"><a><span class="ui-icon"/>Intermediate</a></li>'
-                +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
+            let $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"></span>Beginner</a></li>'
+                +'<li data-user-admin-status="1"><a><span class="ui-icon"></span>Intermediate</a></li>'
+                +'<li data-user-admin-status="0"><a><span class="ui-icon"></span>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
         let $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
@@ -1639,7 +1639,7 @@ window.hWin.HEURIST4.ui = {
                  
         if(options.is_open_at_once && options.container){
             options.container.find('.ui-helper-popup').hide();
-            $help_button.click();    
+            $help_button.trigger('click');    
         }
     },
     
@@ -1711,7 +1711,7 @@ window.hWin.HEURIST4.ui = {
             
             title: window.hWin.HR('Edit record'),
             layout_mode:'<div class="ent_wrapper editor">'
-                + '<div class="ent_content_full recordList"  style="display:none;"/>'
+                + '<div class="ent_content_full recordList"  style="display:none;"></div>'
 
                 //+ '<div class="ent_header editHeader"></div>'
                 + '<div class="editFormDialog ent_content_full">'
@@ -1722,11 +1722,11 @@ window.hWin.HEURIST4.ui = {
                 
                         + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'
                             +'</div></div>' //container for rts_editor
-                        + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                        + '<div class="ui-layout-center"><div class="editForm"></div></div>'
                         + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
-                        //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
+                        //+ '<div class="ui-layout-south><div class="editForm-toolbar"></div></div>'
                 + '</div>'
-                //+ '<div class="ent_footer editForm-toolbar"/>'
+                //+ '<div class="ent_footer editForm-toolbar"></div>'
             +'</div>',
             onInitFinished:function( last_attempt ){
                 
@@ -1907,10 +1907,10 @@ window.hWin.HEURIST4.ui = {
            
             sRelBtn = 
                 '<div style="display:table-cell;min-width:120px;text-align:right;vertical-align: middle;">'
-                +'<div class="btn-edit"/><div class="btn-rel"/><div class="btn-del"/></div>';
+                +'<div class="btn-edit"></div><div class="btn-rel"></div><div class="btn-del"></div></div>';
         }else if (!isHiddenRecord) {
             sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;vertical-align: middle;">'
-            +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            +'<div class="btn-edit"></div></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         let reltype = ''
@@ -1955,7 +1955,7 @@ window.hWin.HEURIST4.ui = {
                             
                         //triangle icon fo
                         + ((reltype!='')?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
-                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'')
+                            +'<span class="ui-icon ui-icon-triangle-1-e"></span></span>':'')
 
                         //record type icon for resource
                         + (reltype==''?rectype_icon:'')
@@ -1973,7 +1973,7 @@ window.hWin.HEURIST4.ui = {
                         
         + '</div>'
                         //record type icon for relmarker
-                        //+ (reltype==''?'': '<div class="btn-edit"/>')                        
+                        //+ (reltype==''?'': '<div class="btn-edit"></div>')                        
                         + sRelBtn
                         + '</div>')
         .appendTo($(container));
@@ -1985,9 +1985,9 @@ window.hWin.HEURIST4.ui = {
                 let triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
-                   triangle_icon.click(selector_function);
+                   triangle_icon.on('click',selector_function);
                 }
-                ele.find('span[data-recID='+info['rec_ID']+']').click(selector_function);
+                ele.find('span[data-recID='+info['rec_ID']+']').on('click',selector_function);
             }
             
             //remove button
@@ -2792,7 +2792,7 @@ window.hWin.HEURIST4.ui = {
                 
                 window.hWin.HEURIST4.msg.showMsgFlash(sWarn,700,null, trg);
                 setTimeout(function(){
-                        $(trg).focus();
+                        $(trg).trigger('focus');
                 }, 750);
                 
                 return false;
@@ -3067,7 +3067,7 @@ window.hWin.HEURIST4.ui = {
                         that.hidePlayer( id, container );            
                     }
 
-                    $(elem).find('img').click( __closePlayer );
+                    $(elem).find('img').on('click', __closePlayer );
 
                     // Display the show thumbnail anchor
                     elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
@@ -3370,7 +3370,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if(rt_checkbox>=0){
         $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
                 + ' data-id="'+item.element.attr( 'data-id' )
-                + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"/>')
+                + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"></span>')
           .appendTo( wrapper );    
     }
     

@@ -191,10 +191,9 @@ if(isLocalHost()){
         print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
 }
 ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
-        <script type="text/javascript" src="<?php echo PDIR;?>external/js/ui.tabs.paging.js"></script>
-
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
@@ -220,37 +219,6 @@ if(isLocalHost()){
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
         <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
-
-
-        <!-- loaded dynamically in editing.js
-        <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
-        -->
-
-        <!-- Calendar picker -->
-<!--
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.min.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.all.min.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css">
-
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
--->
 
         <script type="text/javascript">
             var $container;

@@ -22,6 +22,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
+if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
+
 use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../autoload.php';
@@ -179,17 +181,7 @@ if(!($is_map_popup || $without_header)){
         <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 <?php
-if(isLocalHost()){
-?>
-        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-<?php
-}else{
-?>
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<?php
-}
+        includeJQuery();
 ?>
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">

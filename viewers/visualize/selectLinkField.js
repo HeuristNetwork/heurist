@@ -32,7 +32,7 @@ function SelectLinkField()
                             url: window.hWin.HRes('link_types #content_body'),
                             position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
 	    
-        $('#btnSelect').button().addClass('ui-button-action').click( _editDetailType );
+        $('#btnSelect').button().addClass('ui-button-action').on('click', _editDetailType );
 
         //rectype new field to be added to
         rty_ID = window.hWin.HEURIST4.util.getUrlParameter("source_ID", document.location.search);
@@ -55,15 +55,15 @@ function SelectLinkField()
         $('#lt_add_new_field').text('Add new field to '+$Db.rty(rty_ID,'rty_Name'));
         $('#lt_use_existing_field').text('Add existing field to '+$Db.rty(rty_ID,'rty_Name'));
         
-        $('#t_resourse').change(_updateUI);
-        $('#t_relmarker').change(_updateUI);
-        $('#t_add_new_field').change(_updateUI);
-        $('#t_use_existing_field').change(_updateUI);
+        $('#t_resourse').on('change',_updateUI);
+        $('#t_relmarker').on('change',_updateUI);
+        $('#t_add_new_field').on('change',_updateUI);
+        $('#t_use_existing_field').on('change',_updateUI);
         
         
         let rt_selector = $('#sel_target_rectype_id');
         let rt_selector2 = window.hWin.HEURIST4.ui.createRectypeSelect(rt_selector[0], null, 'Select target record type');
-        rt_selector2.change(
+        rt_selector2.on('change',
 
                 function(){
                     let sDialogTitle = 'Creating link from '+ $Db.rty(rty_ID,'rty_Name');
@@ -116,7 +116,7 @@ function SelectLinkField()
             rt_selector.show(); 
         }
         rt_selector2.hSelect('refresh');
-        rt_selector2.change();
+        rt_selector2.trigger('change');
 
         
     //    

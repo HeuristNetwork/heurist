@@ -1092,7 +1092,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         selectBox.append('<option value="'+decimalPlaces[j]+'">'+decimalPlaces[j]+'</option>');
                     }
 
-                    selectBox.change(function(){
+                    selectBox.on('change',function(){
                         changeIntervalDecimal(name,$(this).val());
                         let changedIntervals = fields3[name].intervals
                         generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
@@ -1981,19 +1981,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             if(!_selectedRtyID || _selectedRtyID<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('Record type is not defined',1000);
-                $recTypeSelector.focus();
+                $recTypeSelector.trigger('focus');
 
                 return;
             }
             if(fields3.row.field<1){
                 window.hWin.HEURIST4.msg.showMsgDlg('Row field is not defined');
-                $('#cbRows').focus();
+                $('#cbRows').trigger('focus');
                 return;
             }
             if(fields3.row.intervals.length<1){
                 window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.row.fieldname+'" field. '
                             +'Please check the set of records you are analysing ');
-                $('#cbRows').focus();
+                $('#cbRows').trigger('focus');
                 return;
             }
 
@@ -2022,7 +2022,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(fields3.page.intervals.length<1){
                     window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.page.fieldname+'" field. '
                             +'Please check the set of records you are analysing ');
-                    $('#cbPages').focus();
+                    $('#cbPages').trigger('focus');
                     _setMode(2); //results
                     return;
                 }
@@ -2038,7 +2038,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(fields3.column.intervals.length<1){
                     window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.column.fieldname+'" field. '
                             +'Please check the set of records you are analysing ');
-                    $('#cbColumn').focus();
+                    $('#cbColumn').trigger('focus');
                     _setMode(2); //results
                     return;
                 }
@@ -2216,15 +2216,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
             tableTitle += ' ' + aggregationMode;
             //Append text box for user to enter table title.
             $divres.append('<div id="titleInput" style="margin-top: 10px;"><input type="text" class="text form-control rounded-0" style="display: inline-block;width: 75%;" id="tableTitle">'
-                    + '<button class="btn btn-success ms-2 mb-2 p-1" style="font-size: 13px;" id="titleSubmit"><i class="ui-icon ui-icon-circle-check" /> Apply</button></div>');
+                    + '<button class="btn btn-success ms-2 mb-2 p-1" style="font-size: 13px;" id="titleSubmit"><span class="ui-icon ui-icon-circle-check" ></span> Apply</button></div>');
 
             $divres.append('<div id="titleDisplay" style="margin-top: 10px;"><h2 class="crosstab-page" style="display: inline-block;" id="tableHeader">'+tableTitle+'</h2>'
-                    + '<button class="btn btn-warning ms-2" id="titleEdit"><i class="ui-button-icon ui-icon ui-icon-pencil" /></button></div>');
+                    + '<button class="btn btn-warning ms-2" id="titleEdit"><span class="ui-button-icon ui-icon ui-icon-pencil" ></span></button></div>');
             
-            $('#titleSubmit').on('click', function(){
+            $('#titleSubmit').on('click', function(event){
                 let title = $('#tableTitle').val();
 
-                if($('#tableTitle').val().length <=0 || $.trim($('#tableTitle').val()) == ''){
+                if($('#tableTitle').val().length <=0 || String($('#tableTitle').val()).trim() == ''){
                     $('#tableHeader').html(tableTitle);
                 }
                 else{

@@ -604,11 +604,11 @@ if(!$format){ $format='csv';}
                 <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>
                 <!-- last column allows step through imported data records-->
                 <th style="text-align: left;padding-left: 16px;">
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"/></a>
-                    <a href="#" class="navigation" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"/></a>
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="0" class="ui-icon ui-icon-seek-first"></span></a>
+                    <a href="#" class="navigation" style="display:inline-block;"><span data-dest="-1" class="ui-icon ui-icon-triangle-1-w"></span></a>
                     <div style="display: inline-block;">Values in row <span id="current_row"></span></div>
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"/></a>
-                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a>
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="1" class="ui-icon ui-icon-triangle-1-e"></span></a>
+                    <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"></span></a>
                 </th></tr>
             </thead>
         </table>

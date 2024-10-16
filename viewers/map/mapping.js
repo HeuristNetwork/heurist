@@ -409,7 +409,7 @@ $.widget( "heurist.mapping", {
         
         this.updateLayout();
 
-        $(window).resize(function(){
+        $(window).on('onresize',function(){
             that.adjustToolbarHeight();    
         });
         
@@ -3871,7 +3871,7 @@ $.widget( "heurist.mapping", {
                         'You will need record types '
                         +'2-101 "Map/Image Annotation" which are available as part of Heurist_Core_Definitions.',
                             function(){
-                               this_btn.click(); //call itself again 
+                               this_btn.trigger('click'); //call itself again 
                             }
                         );
 
@@ -4037,12 +4037,12 @@ $.widget( "heurist.mapping", {
         if(this.nomap){
             toolbar.find('#btn_layout_map').removeClass('ui-state-active');
         }else{
-            toolbar.find('#btn_layout_map').addClass('ui-state-active').blur();
+            toolbar.find('#btn_layout_map').addClass('ui-state-active').trigger('blur');
         }
         if(this.notimeline){
             toolbar.find('#btn_layout_timeline').removeClass('ui-state-active');
         }else{
-            toolbar.find('#btn_layout_timeline').addClass('ui-state-active').blur();
+            toolbar.find('#btn_layout_timeline').addClass('ui-state-active').trigger('blur');
         }
 
         let is_main_ui = this.options.layout_params && this.options.layout_params['ui_main'];
@@ -4640,7 +4640,6 @@ $.widget( "heurist.mapping", {
         });     
         //on save event       
         that.nativemap.on(L.Draw.Event.DELETED, function (e) {
-            //let layers = e.layers;
            if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                that.options.ondraw_editsave.call(that, e);
            }

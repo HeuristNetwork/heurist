@@ -184,19 +184,19 @@ let maxCountForNodes, maxCountForLinks;
             ele_warn.hide();
         }
 
-        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
+        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).on('click',
             function(){
                 zoomBtn(true);
             }
         );
 
-        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
+        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).on('click',
             function(){
                 zoomBtn(false);
             }
         );
 
-        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).click(
+        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).on('click',
             function(){
                 zoomToFit();
             }
@@ -419,7 +419,7 @@ function visualizeData() {
     if(settings.isDatabaseStructure || isStandAlone){
         $('#embed-export').css('visibility','hidden');//hide();
     }else{
-        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).click(
+        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).on('click',
             function(){
                  showEmbedDialog();
             }

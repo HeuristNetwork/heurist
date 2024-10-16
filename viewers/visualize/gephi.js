@@ -121,7 +121,7 @@ gexf += ' version="1.2">';
     {
         // Chrome allows the link to be clicked
         // without actually adding it to the DOM.
-        link.click();        
+        link.trigger('click');        
         link = null;
     }
     else
@@ -131,7 +131,7 @@ gexf += ' version="1.2">';
         link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
         link.style.display = "none";
         document.body.appendChild(link);
-        link.click();        
+        link.trigger('click');        
     }
 
 }

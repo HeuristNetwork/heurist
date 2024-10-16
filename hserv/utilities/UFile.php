@@ -671,7 +671,7 @@ use hserv\utilities\USystem;
     }
 
     function fileDelete( $filename ){
-        if(file_exists($filename)){
+        if(!empty($filename) && file_exists($filename)){
             unlink($filename);
         }
     }

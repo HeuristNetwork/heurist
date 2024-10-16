@@ -33,8 +33,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-        <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+        <link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
@@ -243,7 +243,7 @@ function onPageInit(success){
                     return length;
                 }
 
-                $(window).resize(onVisualizeResize);
+                $(window).on('onresize',onVisualizeResize);
                 onVisualizeResize();
 
                 $("#visualize").visualize({
