@@ -3899,6 +3899,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 
                             }else if(afterAction=='newrecord'){
                                 that._initEditForm_step3(-1);
+                            }else if(afterAction=='close_rst'){
+                                that._switchToDataMode(true);
                             }else{
                                 //reload after save
                                 that._initEditForm_step3(that._currentEditID)
@@ -4513,16 +4515,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //init back button - if there is opened rts editor
             let btn_close_editor = this.element.find('.btn-edit-rt-back');
                 
-            if(btn_close_editor){
+            if(btn_close_editor.length > 0){
                 if(that.options.edit_structure){
                     btn_close_editor.hide();
                 }else{
+                    btn_close_editor.off('click');
                     btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
-                        .one('click', function(){
-                            that.editFormPopup.layout().hide('west');
-                            that.options.rts_editor = null;
-                            that.reloadEditForm( true );
-                        });
+                        .on('click', () => {this._switchToDataMode(false)});
                     if(btn_css) btn_close_editor.css(btn_css);
 
                     // Flash button
@@ -7089,5 +7088,54 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 message: `Heurist failed to load the necessary scripts for the external lookup ${lookup_name}.`
             });
         });
+    },
+
+    /**
+     * Switch record editor back to data entry mode, closing the structure tree and any field definition editing
+     *
+     * @param {boolean} force_close - whether to ignore any changes when switching
+     */
+    _switchToDataMode: function(force_close = false){
+
+        let that = this;
+
+        let struct_changes = this.options.rts_editor.manageDefRecStructure('checkIfEditing');
+        let data_changes = this._editing.isModified();
+
+        if(!force_close && (struct_changes || data_changes)){
+
+            let $dlg;
+            let msg = (struct_changes
+                        ? 'You have un-saved structure changes which will be lost if not saved'
+                        : 'You have un-saved changes in your record data which will be lost if not saved')
+                    + '.<br>Would you like to save them before returning the data mode?';
+
+            let btns = {};
+            btns[window.hWin.HR('Save changes')] = () => {
+                $dlg.dialog('close');
+
+                if(struct_changes){
+                    $('#btnRecSaveAndClose_rts').click();
+                    setTimeout(() => {that._switchToDataMode(true);}, 2500);
+                }else{
+                    that._saveEditAndClose(null, 'close_rst');
+                }
+            };
+            btns[window.hWin.HR('Switch without saving')] = () => {
+                $dlg.dialog('close');
+                that._switchToDataMode(true);
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns,
+                {title: `Un-saved ${struct_changes ? 'structure' : 'data'} changes`, yes: window.hWin.HR('Save changes'), no: window.hWin.HR('Switch without saving')},
+                {default_palette_class: 'ui-heurist-design'}
+            );
+
+            return;
+        }
+
+        this.editFormPopup.layout().hide('west');
+        this.options.rts_editor = null;
+        this.reloadEditForm( true );
     }
 });
