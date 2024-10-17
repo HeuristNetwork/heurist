@@ -29,7 +29,7 @@ use hserv\utilities\USanitize;
 /**
  * Class ReportController
  *
- * This class handles report-related actions such as executing, updating, listing, 
+ * This class handles report-related actions such as executing, updating, listing,
  * importing, and exporting report templates.
  *
  * @package hserv\controller
@@ -64,7 +64,7 @@ class ReportController
      *
      * @param System $system The system instance.
      * @param array|null $params Optional array of request parameters.
-     * 
+     *
      * @return void
      */
     public function __construct($system, $params = null)
@@ -94,7 +94,7 @@ class ReportController
      * Handles different actions related to report management based on the input action.
      *
      * @param string|null $action The action to be performed such as 'execute', 'update', 'list', etc.
-     * 
+     *
      * @return void
      */
     public function handleRequest($action)
@@ -180,7 +180,7 @@ class ReportController
      *
      * @param string $template_body The body of the template.
      * @param string $template_file The file name of the template.
-     * 
+     *
      * @return mixed The result of the template save operation.
      */
     private function saveTemplate($template_body, $template_file)
@@ -288,9 +288,9 @@ class ReportController
                 }
 
                 $repExec->setParameters($params);
-                
+
                 //result: 0 - error, 1 - created, 2 - updated, 3 - intakted
-                //check that report is already exists                
+                //check that report is already exists
                 $result = 1;
 
                 if ($publishmode == 3) {

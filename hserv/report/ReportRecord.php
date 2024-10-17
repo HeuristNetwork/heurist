@@ -70,7 +70,7 @@ class ReportRecord
      *
      * @return string The base URL of the system (HEURIST_BASE_URL).
      */
-    public function baseURL()                      
+    public function baseURL()
     {
         return HEURIST_BASE_URL;
     }
@@ -236,7 +236,7 @@ class ReportRecord
         if (!($rec_ID > 0 && $relRT > 0 && $relSrcDT > 0 && $relTrgDT > 0)) {
              return $res;
         }
-            
+
         $mysqli = $this->system->get_mysqli();
         $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=' . $rec_ID);
         $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=' . $rec_ID);
@@ -244,7 +244,7 @@ class ReportRecord
         if (!($from_res && $to_res && ($from_res->num_rows > 0 || $to_res->num_rows > 0))) {
              return $res;
         }
-    
+
         while ($reln = $from_res->fetch_assoc()) {
             $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], true);
             array_push($rel_records, $bd);
@@ -267,11 +267,11 @@ class ReportRecord
                 array_push($res, $record);
             }
         }
-    
+
         $from_res->close();
         $to_res->close();
 
-        
+
         return $res;
     }
 
@@ -338,7 +338,7 @@ class ReportRecord
                 $this->processRecordField($record, $key, $value, $recTypeID);
             } elseif ($key == "details") {
                 $this->processRecordDetails($record, $value, $recTypeID, $recordID, $lang);
-            }            
+            }
         }
 
         if (count($this->loaded_recs) > 2500) {
@@ -348,7 +348,7 @@ class ReportRecord
         $this->loaded_recs[$recordID] = $record;
         return $record;
     }
-    
+
     private function processRecordField(&$record, $key, $value, &$recTypeID)
     {
         $record['rec' . substr($key, 4)] = $value;
@@ -373,7 +373,7 @@ class ReportRecord
             }
         }
     }
-    
+
     /**
     *
     */
@@ -644,8 +644,8 @@ class ReportRecord
         }
 
     }
-    
-    
+
+
     /**
      * Retrieves Woot text associated with a record.
      *
@@ -676,7 +676,7 @@ class ReportRecord
         }elseif (@$woot["errorType"]) {
             $res = "WootText: ".$woot["errorType"];
         }
-*/        
+*/
     }
 
     /**
@@ -693,8 +693,8 @@ class ReportRecord
         if(is_array($query)){
             $query = json_encode($query);
         }
-        
-        
+
+
         if ($rec_ID > 0 && strpos($query, '[ID]') !== false) {
             $query = str_replace('[ID]', strval($rec_ID), $query);
         } elseif (strpos($query, '[ID]') !== false) {
@@ -734,8 +734,8 @@ class ReportRecord
 
         if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
-        }        
-        
+        }
+
         foreach ($functions as $func) {
             $dty_ID = $func[0];
             $func_type = $func[1];
@@ -755,7 +755,7 @@ class ReportRecord
         if (empty($select) || empty($ids)) {
             return null;
         }
-        
+
         $query = 'SELECT ' . implode(',', $select) . ' FROM ' . implode(' ', $from) . ' WHERE rec_ID IN (' . implode(',', $ids) . ')';
         $res = mysql__select_row($this->system->get_mysqli(), $query);
 

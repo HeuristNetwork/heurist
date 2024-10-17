@@ -9,7 +9,7 @@ use hserv\System;
 /**
  * Class DatabaseController
  *
- * This class handles various database-related actions such as listing databases, 
+ * This class handles various database-related actions such as listing databases,
  * creating databases, restoring, deleting, cloning, and verifying databases in the Heurist system.
  */
 class DatabaseController
@@ -44,7 +44,7 @@ class DatabaseController
     /**
      * Handle the request based on the action parameter.
      *
-     * It processes actions such as 'list', 'check_newdefs', 'create', 'restore', 'delete', 'clear', 'rename', 
+     * It processes actions such as 'list', 'check_newdefs', 'create', 'restore', 'delete', 'clear', 'rename',
      * 'clone', and 'verify'. Each action is directed to a corresponding method.
      *
      * @return mixed The response of the handled request, which can be an array or error message.
@@ -122,7 +122,7 @@ class DatabaseController
     {
         $create_pwd = USanitize::getAdminPwd('create_pwd');
         $passwordForDatabaseCreation = @$this->req_params['passwordForDatabaseCreation'];
-        
+
         if (!$this->system->verifyActionPassword($create_pwd, $passwordForDatabaseCreation, 6)) {
             return $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid action password");
         }

@@ -34,44 +34,44 @@ define('HEAD_E','</head>');
 /**
  * Class ReportExecute
  *
- * This class manages the execution of Smarty templates for reports, handling the 
+ * This class manages the execution of Smarty templates for reports, handling the
  * output of reports in various formats (HTML, JS, etc.) and dealing with records
  * fetched from the system.
  */
 class ReportExecute
 {
     private $smarty;
-    
+
     private $template_file = null; //basename of template file
-    
+
     private $outputfile;
     private $outputmode; //output format
     private $is_void = false;   //if true - not browser output
     private $max_allowed_depth = 2; //not used
-    
+
     // 0 in UI (including tests in editor)
     // 1 saves into generated-reports and produces info page (user report) only
     // 2 downloads ONLY it under given output name (no file save, no browser output)
     // 3 saves into generated-reports and outputs report into browser (without UI limits)
     // 4 calculation field
-    private $publishmode; 
-    
+    private $publishmode;
+
     private $smarty_session_id;
     private $execution_counter;
     private $execution_total_counter;
-    
+
     private $is_included = false;   // true if this report is included into anpther one - NOT USED
-    
+
     private $is_jsallowed;
     private $record_with_custom_styles;
     private $is_headless; //output without html header and styles - for snippet (loading as content of existing html element) and xml output
-    
+
     private $limit;
     private $replevel;
 
     private $system;
     private $params;
-    
+
     private $message_about_truncation;
     private $error_msg;
 
@@ -89,9 +89,9 @@ class ReportExecute
 *             4 calculation field
 *
 * other parameters are hquery's
-*/    
-    
-    
+*/
+
+
     /**
      * Constructor
      *
@@ -101,7 +101,7 @@ class ReportExecute
     public function __construct($system, $params=null)
     {
         $this->system = $system;
-        
+
         if ($params!=null) {
             // Initialize properties from parameters or set defaults
             $this->setParameters($params);
@@ -115,31 +115,31 @@ class ReportExecute
      */
     public function execute()
     {
-        
+
         if (!isset($this->system) || !$this->system->is_inited()) {
             $this->smarty_error_output();
             return false;
-        }                
+        }
         if (!isset($this->params)){
             $this->smarty_error_output('Parameters for smarty executions are not defined');
             return false;
         }
-        
-        
+
+
         set_time_limit(0); // No script execution time limit
 
         // Initialize Smarty if necessary
         if(!$this->initSmarty()){
             return false;
         }
-        
+
         // Loads template file or template body
         $content = $this->loadTemplateContent();
-        
+
         if(!$content){
             return false;
         }
-        
+
         // Fetch record IDs based on search query
         $query_result = $this->fetchRecordIDs();
 
@@ -161,59 +161,59 @@ class ReportExecute
      */
     public function setParameters($params=null)
     {
-        
+
         if($params!=null){
             $this->params = $params;
-        }        
-        
+        }
+
         $this->publishmode = isset($params['publish']) ? intval($params['publish']) : 1; //by default full recordset execution
-        
+
         $this->publishmode = max(min($this->publishmode,4),0);
-        
+
         $this->record_with_custom_styles = isset($params['cssid']) ? intval($params['cssid']) : null;
-        
+
         $this->smarty_session_id = isset($params['session']) ? $params['session'] : null;
 
-        
+
         $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
         $allowed_exts = array('html','js','txt','text','csv','xml','json','css');
         $idx = array_search($this->outputmode, $allowed_exts);
         $this->outputmode = ($idx>=0)?$allowed_exts[intval($idx)]:'html';
-        
+
         if ($this->outputmode === 'text') {
             $this->outputmode = 'txt';
         }
-        
+
         $this->is_headless = isset($params['snippet']) && $params['snippet'] == 1; //html output with header or not
 
         $this->is_void = isset($params["void"]) && $params["void"] == true;  //fetch into file
-        
+
         $this->is_jsallowed = $this->system->isJavaScriptAllowed();
 
         $this->replevel = 0;
         if (@$params['template_body']){
-        
+
             if ($this->publishmode != 4) {
-                $this->publishmode = 0; 
+                $this->publishmode = 0;
             }
             $this->outputmode = 'html'; //always html in test or snippet mode
-            
+
             $this->replevel = isset($params['replevel']) ? intval($params['replevel']) : 0;
         }
     }
-    
+
     /**
      * Prepares and sanitizes the output file name.
      *
      * @return string The sanitized output file name.
      */
     private function _prepareOutputFile(){
-        $this->outputfile = $this->params["output"] ?? $this->template_file ?? 'heurist_output';    
+        $this->outputfile = $this->params["output"] ?? $this->template_file ?? 'heurist_output';
         $path_parts = pathinfo($this->outputfile);
         $this->outputfile = USanitize::sanitizeFileName($path_parts['filename']) . '.' . $this->outputmode;
         return $this->outputfile;
     }
-    
+
 
     /**
      * Fetch record IDs based on the provided query parameters.
@@ -253,11 +253,11 @@ class ReportExecute
             }
         }
         $this->limit = intval($this->params["limit"]);
-    }  
-    
+    }
+
     /**
     * recordset (list of record ids) is already defined
-    *     
+    *
     * @param mixed $recordset
     */
     private function handleRecordset($recordset)
@@ -270,18 +270,18 @@ class ReportExecute
 
         if ($this->publishmode == 0 && $qresult && isset($qresult['recIDs'])) {
             $recIDs = prepareIds($qresult['recIDs']);
-            
+
             if($this->limit < count($recIDs) || $this->limit < $qresult['recordCount'] ){
                 $this->message_about_truncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'
                     .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
             }
-            
+
             if ($this->limit < count($recIDs)) {
                 $qresult = [
                     'records' => array_slice($recIDs, 0, $this->limit),
                     'reccount' => count($recIDs)
                 ];
-                
+
             } else {
                 $qresult = [
                     'records' => $recIDs,
@@ -291,8 +291,8 @@ class ReportExecute
         }
 
         return $qresult;
-    }  
-    
+    }
+
     /**
     *  get recordset from query/search results
     */
@@ -311,8 +311,8 @@ class ReportExecute
             $this->params['emptysetmessage'] = $msg;
             return null;
         }
-    }    
-         
+    }
+
     /**
      * Handles empty result sets and outputs an appropriate error message or info.
      *
@@ -324,9 +324,9 @@ class ReportExecute
         $emptysetmessage = $this->params['emptysetmessage'] ?? null;
 
         if (isset($qresult['records']) && intval(@$qresult['reccount']) > 0) {
-            return true;    
+            return true;
         }
-            
+
         if ($this->publishmode == 4) {
             //for calculation field
             echo USanitize::sanitizeString($emptysetmessage && $emptysetmessage != 'def' ? $emptysetmessage : '');
@@ -339,7 +339,7 @@ class ReportExecute
             $this->smarty_error_output($error);
         }
         return false;
-        
+
     }
 
     /**
@@ -358,18 +358,18 @@ class ReportExecute
             $content = $template_body;
         }
 
-        
+
         if(!isset($this->params["output"]) && $this->publishmode != 2){
             $this->outputfile = null;
             if($this->publishmode==1 ){
                 //if output is not defined - output to browser by default
-                $this->publishmode = 3;   
+                $this->publishmode = 3;
             }
             $this->outputfile = null;
         }else{
             $this->outputfile = $this->_prepareOutputFile();
         }
-        
+
         if($content!==false && ($content==null || strlen(trim($content))==0)){
             $this->smarty_error_output('Template content is empty');
             return false;
@@ -377,10 +377,10 @@ class ReportExecute
 
         return $content;
     }
-    
+
     /**
     * Loads template content from file
-    * 
+    *
     * @param mixed $template_file
     */
     private function loadTemplateFile($template_file)
@@ -395,7 +395,7 @@ class ReportExecute
             $this->smarty_error_output($error);
             return false;
         }
-        
+
         $this->template_file = $template_file;
         return file_get_contents($template_path);
     }
@@ -411,21 +411,21 @@ class ReportExecute
         if (!$force_init && isset($this->smarty)) {
             return true; //already inited
         }
-            
+
         $errorMsg = '';
-        
+
         try{
             $this->smarty = smartyInit($this->system->getSysDir('smarty-templates'));
         } catch (\Exception $e) {
             $errorMsg  = $e->getMessage();
         }
-                    
+
 
         if (!isset($this->smarty) || $this->smarty === null) {
             $this->smarty_error_output('Cannot init Smarty report engine. '.$errorMsg);
             return false;
         }
-        
+
         $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'progressCallback', [$this, 'progressCallback']);
         $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'out', [$this, 'printLabelValuePair']);
         $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'wrap', [$this, 'printProcessedValue']);
@@ -447,7 +447,7 @@ class ReportExecute
         $heuristRec = new ReportRecord($this->system);
 
         if (method_exists($this->smarty, 'assignByRef')) {
-            $this->smarty->assignByRef('heurist', $heuristRec); //deprecated 
+            $this->smarty->assignByRef('heurist', $heuristRec); //deprecated
         } else {
             $this->smarty->assign('heurist', $heuristRec);
         }
@@ -492,17 +492,17 @@ class ReportExecute
         $result = true;
         $need_output_filter = true;
         $temp_template_file = null;
-        
+
         $this->setupErrorReporting($this->replevel);
 
         if ($this->template_file==null){  //execution from $this->params['template_body']
-            
+
                 $temp_template_file = $this->saveTemporaryTemplate($content);
-                
+
                 if($this->publishmode == 4){
                     //assign the only record for calculation field
                     $this->smarty->assign('r', (new ReportRecord($this-system))->getRecord($results[0]));
-                    
+
                     try{
                         $output = $this->smarty->fetch($temp_template_file);
                     } catch (\Exception $e) {
@@ -510,13 +510,13 @@ class ReportExecute
                     }
                     fileDelete($this->smarty->getTemplateDir().$temp_template_file);
                     echo $output;
-                    return true;                    
+                    return true;
                 }
 
                 $this->template_file = $temp_template_file;
         }
-        
-        
+
+
         $this->smarty->registerFilter('pre', [$this, 'translateTerms']);  //smarty_pre_filter
         if ($this->publishmode == 0 && $this->smarty_session_id > 0) {
             $this->execution_counter = 0;
@@ -526,18 +526,18 @@ class ReportExecute
             $this->smarty_session_id = 0;
         }
 
-        //$this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']); 
+        //$this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']);
 
         $this->smarty->assign('template_file', $this->template_file);
         try {
-            
+
             $this->handleTemplateOutput( $this->smarty->fetch($this->template_file) );
 
             /*
             $this->setOutputHeaders(); //define content type in http header
 
             if ($this->is_fetch) {
-                $this->smarty->fetch($template_file);       
+                $this->smarty->fetch($template_file);
             } else {
                 $this->smarty->display($template_file); //browser output
             }
@@ -550,28 +550,28 @@ class ReportExecute
         if ($this->smarty_session_id > 0) {
             mysql__update_progress(null, $this->smarty_session_id, false, 'REMOVE');
         }
-        
-        
+
+
         if($this->publishmode==0 && isset($this->message_about_truncation)){
             echo $this->message_about_truncation;
         }
 
-        //remove temporary file        
+        //remove temporary file
         if($temp_template_file){
             fileDelete($this->smarty->getTemplateDir().$temp_template_file);
         }
-        
+
         return $result;
     }
 
     //
     //
-    //    
+    //
     private function setupErrorReporting($replevel){
-        
+
         $this->smarty->debugging = false;
         $this->smarty->error_reporting = 0;
-        
+
         if($replevel==1 || $replevel==2){
             ini_set( 'display_errors' , 'true');// 'stdout' );
             if($replevel==2){
@@ -586,7 +586,7 @@ class ReportExecute
         if($replevel>0){
             $this->smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
         }
-        
+
     }
 
     //
@@ -603,15 +603,15 @@ class ReportExecute
         $file = fopen ($template_folder.$template_file, "w");
         fwrite($file, $content);
         fclose ($file);
-        
+
         return $template_file;
     }
-    
+
     //
     //
     //
     private function smarty_error_output($error_msg=null){
-        
+
         if(!isset($error_msg)){
             $error_msg = $this->system->getErrorMsg();
             if($error_msg==''){
@@ -624,8 +624,8 @@ class ReportExecute
         $this->error_msg = $error_msg;
 
         if($this->outputmode=='html'){
-            $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';    
-        }        
+            $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';
+        }
         $this->handleTemplateOutput($error_msg);
 
         /*
@@ -640,14 +640,14 @@ class ReportExecute
         }
         */
     }
-    
+
     public function getError(){
         return $this->error_msg;
     }
 
-    //SMARTY FILTERS    
-    
-    // 
+    //SMARTY FILTERS
+
+    //
     // Convert short form term translations (before Smarty processes the report)
     //
     public function translateTerms($tpl_source, \Smarty\Template $template){
@@ -660,7 +660,7 @@ class ReportExecute
 
         // Handle shorthand term translations {trm_id \Language_1 \Language_2 ...}
         if(!preg_match_all('/{\\d*\\s*(?:\\\\\\w{3}\\s*)+}/', $tpl_source, $matches)){
-            return $tpl_source;  
+            return $tpl_source;
         }
 
         $mysqli = $this->system->get_mysqli();
@@ -699,7 +699,7 @@ class ReportExecute
             $tpl_source = str_replace($match, $str_replace, $tpl_source);
             array_push($done, $match);
         }
-        
+
 
         return $tpl_source;
     }
@@ -711,7 +711,7 @@ class ReportExecute
     {
         //find fist foreach and insert as first operation
         $offset = strpos($tpl_source,'foreach ($_from ?? [] as $_smarty_tpl->getVariable(');//'foreach ($_from as $_smarty_tpl');
-        
+
         if($offset>0){
             $pos = strpos($tpl_source,'{',$offset);
 
@@ -722,12 +722,12 @@ class ReportExecute
 
             return $res;
         }
-        
+
         return $tpl_source;
     }
-    
+
     private function removeHeadAndBodyTags($content){
-        
+
             $dom = new \DOMDocument();
             $dom->preserveWhiteSpace = false;
             //$dom->formatOutput       = true;
@@ -749,9 +749,9 @@ class ReportExecute
     //
     //
     private function getFontStyles(){
-        
+
         $font_styles = '';
-        
+
             $formats = $this->system->getDatabaseSetting('TinyMCE formats');
             if(is_array($formats) && array_key_exists('formats', $formats)){
                 foreach($formats['formats'] as $key => $format){
@@ -771,15 +771,15 @@ class ReportExecute
                     $font_styles .= "} ";
                 }
             }
-        
+
         return $font_styles;
     }
-    
+
     //
     //
     //
     private function getWebFonts(){
-            
+
             $webfonts = $this->system->getDatabaseSetting('Webfonts');
 
             $import_webfonts = '';
@@ -800,10 +800,10 @@ class ReportExecute
                     $font_styles = 'body{font-family: '.implode(',',$font_families).'} '.$font_styles;
                 }
             }
-            
-            return $import_webfonts;     
+
+            return $import_webfonts;
     }
-     
+
 
     /**
      * Adds custom styles and scripts from CMS settings.
@@ -823,10 +823,10 @@ class ReportExecute
          if(empty($css_fields)){
              return '';
          }
-         
+
          $record = recordSearchByID($this->system, $this->record_with_custom_styles, $css_fields, 'rec_ID');
          if(!@$record['details']){
-            return '';    
+            return '';
          }
 
          if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
@@ -840,15 +840,15 @@ class ReportExecute
              if(!is_array($external_files)){
                      $external_files = array($external_files);
              }
-             
+
              foreach ($external_files as $ext_file){
                 $head .= $ext_file;
              }
          }
-         
+
          return $head;
     }
-    
+
     /**
      * Handles the case where JavaScript is allowed.
      *
@@ -875,7 +875,7 @@ class ReportExecute
              //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
              if ($this->record_with_custom_styles > 0) {
                     $head .= $this->addCustomStylesAndScripts();
-             }             
+             }
 
              //check if need to init mediaViewer
              if(strpos($tpl_source,'fancybox-thumb')>0){
@@ -1008,7 +1008,7 @@ class ReportExecute
      * @return string The sanitized template content.
      */
     private function sanitizeHtml($tpl_source, $font_styles)
-    {    
+    {
 
                 //if javascript not allowed, use html purifier to remove suspicious code
                 $config = \HTMLPurifier_Config::createDefault();
@@ -1074,9 +1074,9 @@ class ReportExecute
 
                 //$styles = $purifier->context->get('StyleBlocks');
 
-                return $tpl_source;        
+                return $tpl_source;
     }
-        
+
     /**
      * Strips JavaScript and sanitizes HTML output.
      * This function is called before other output filters.
@@ -1091,8 +1091,8 @@ class ReportExecute
                 //other than html or js output - it removes html and body tags
                 return $this->removeHeadAndBodyTags($tpl_source);
             }
-        
-        
+
+
             $font_styles = $this->getFontStyles();
             $import_webfonts = $this->getWebFonts();
 
@@ -1104,18 +1104,18 @@ class ReportExecute
                 $font_styles = "<style>$import_webfonts</style>".$font_styles;
             }
 
-                    
+
             // Allow JavaScript or sanitize HTML
             if ($this->is_jsallowed) {
                 $tpl_source = $this->handleJsAllowed($tpl_source, $font_styles);
             } else {
                 $tpl_source = $this->sanitizeHtml($tpl_source, $font_styles);
-            }    
-            
-        //replace relative path for images that are in blocktext fields                
+            }
+
+        //replace relative path for images that are in blocktext fields
         $tpl_source = str_replace(' src="./?db='.$this->system->dbname().'&',
             ' src="'.HEURIST_BASE_URL.'?db='.$this->system->dbname().'&',$tpl_source);
-                    
+
 
 
         $onclick = '';
@@ -1147,24 +1147,24 @@ class ReportExecute
 
     //
     //
-    //    
+    //
     private function saveOutputAsJavascript( $tpl_source ){
 
         $tpl_source = str_replace("\n","",$tpl_source);
         $tpl_source = str_replace("\r","",$tpl_source);
         $tpl_source = str_replace("'","&#039;",$tpl_source);
-        return "document.write('". $tpl_source."');";        
+        return "document.write('". $tpl_source."');";
     }
-    
+
     //
     //
-    //    
+    //
     private function saveOutputToFile($file_name, $tpl_source){
 
         $errors = null;
-        
+
         try{
-            //output to generated-reports only 
+            //output to generated-reports only
             $dirname = $this->system->getSysDir('generated-reports');
             if(!folderCreate($dirname, true)){
                 return 'Failed to create folder for generated reports';
@@ -1200,7 +1200,7 @@ class ReportExecute
                     $errors = "Can't rename temporary file $temp_file to $res_file. Check permissions";
                 }
             }
-    
+
 
         }catch(\Exception $e)
         {
@@ -1210,70 +1210,70 @@ class ReportExecute
         return $errors;
 
     }
-    
+
 
     /**
      * Handles the output from the Smarty template, saving or outputting it as required.
      *
      * @param string $smarty_output The rendered Smarty output.
      * @param bool $need_sanitize Whether or not to sanitize the output.
-     */    
+     */
     private function handleTemplateOutput($smarty_output, $need_sanitize=true){ // ,  \Smarty\Template $template=null
 
         $errors = null;
         $res_file = null;
         $file_name = null;
 
-        //sanitize        
+        //sanitize
         if($need_sanitize){
             $smarty_output = $this->stripJavascriptAndSantize($smarty_output);
-            
+
             if($this->outputmode=='js'){
                 $smarty_output = $this->saveOutputAsJavascript($smarty_output);
             }
-        }                            
-        
-        
-        if($this->publishmode!=1){
-            $this->setOutputHeaders();    
         }
-        
+
+
+        if($this->publishmode!=1){
+            $this->setOutputHeaders();
+        }
+
         // if param "output" ($outputfile) is defined it saves smarty report into file
         // and
         // $publishmode - 1 saving into file and produces info page (user report) only
         //                2 downloads ONLY it under given output name (no file save, no browser output)
         //                3 saving into file and outputs smarty report into browser
-       
+
         if ($this->publishmode==2) {//download
-            
+
                 header('Pragma: public');
                 header('Content-Disposition: attachment; filename="'.$this->outputfile.'"');
                 header(CONTENT_LENGTH . strlen($smarty_output));
                 echo $smarty_output;
-                             
+
         }elseif ($this->publishmode==0) {    //browser output only
-            
+
             echo $smarty_output;
-        }else { 
+        }else {
             //3 - save into file and browser output
             //1 - save into file and info page
-            
+
             if($this->outputfile!=null){
-                $errors = $this->saveOutputToFile($this->outputfile, $smarty_output);    
+                $errors = $this->saveOutputToFile($this->outputfile, $smarty_output);
             }
-            if($this->is_void){            
-                return;   
+            if($this->is_void){
+                return;
             }
             if($this->publishmode==3){
                 echo $smarty_output;
             }else{
                 $this->generateInfoPage($this->outputfile, $errors);
             }
-                
+
         }
-        
+
     }
-    
+
 
     /**
      * Outputs appropriate headers for the content type based on the output mode.
@@ -1282,30 +1282,30 @@ class ReportExecute
 
             if($this->publishmode!=1){
                 switch ($this->outputmode) {
-                    case 'js': $mimetype = 'text/javascript'; break;    
-                    case 'txt': $mimetype = 'text/plain'; break;    
-                    case 'json': $mimetype = 'application/json'; break;    
-                    default: $mimetype = 'text/'.$this->outputmode  ; break; //text/xml text/html   
+                    case 'js': $mimetype = 'text/javascript'; break;
+                    case 'txt': $mimetype = 'text/plain'; break;
+                    case 'json': $mimetype = 'application/json'; break;
+                    default: $mimetype = 'text/'.$this->outputmode  ; break; //text/xml text/html
                 }
                 header("Content-type: $mimetype;charset=UTF-8");
             }
-        
+
     }
-        
+
     //
     //
     //
     private function generateInfoPage($file_name, $errors){
-        
+
         header(CTYPE_HTML);
-        
+
         if(isset($errors)){
             print $errors;
             return;
         }
 
         $gparams = $this->params;
-        
+
         $url = htmlspecialchars(HEURIST_FILESTORE_URL . 'generated-reports/' . $file_name);
 ?>
 <!DOCTYPE>
@@ -1374,12 +1374,12 @@ Javascript wrap:<br>
                     <?php
     }
 
-    
+
     //
     // Runtime tag - smarty plugin function
     //
     // progress call back
-    //        
+    //
     public function progressCallback($params, &$smarty){
 
         if($this->publishmode!=0 || $this->smarty_session_id==null){ //check that this call from ui
@@ -1414,11 +1414,11 @@ Javascript wrap:<br>
             }
 
         return $res;
-        
-        
+
+
     }
-    
-    
+
+
     // Runtime tag - smarty plugin function
     //
     //  prints <div>label: value</div>
@@ -1451,7 +1451,7 @@ Javascript wrap:<br>
     public function printProcessedValue($params, &$smarty)
     {
         if(!isset($params['var'])){
-            return '';    
+            return '';
         }
 
 
@@ -1650,7 +1650,7 @@ Javascript wrap:<br>
                 return $label.$content.'<br>';
             }
     }
-    
+
     //
     //  Replace relative path to absolute
     //
@@ -1679,9 +1679,9 @@ Javascript wrap:<br>
         }
 
         return $cnt;
-            
+
     }
-    
+
     private function prepareCMSgroup($content){
         $cnt = '';
         foreach($content as $grp){
@@ -1689,22 +1689,22 @@ Javascript wrap:<br>
             if($res){
                 $cnt = $cnt.'<br>'.$res;
             }
-        }        
+        }
         return $cnt;
     }
-    
+
     //
     // setParameters must be executed beforehand
     // $update_interval - in minutes
     //
     public function outputGeneratedReport($update_interval){
-        
+
         $dir = $this->system->getSysDir('generated-reports');
- 
+
         $this->outputfile = $this->_prepareOutputFile();
-        
+
         $generated_report = $dir.$this->outputfile;
- 
+
         if(file_exists($generated_report)){
 
             if($update_interval>0){
@@ -1719,21 +1719,21 @@ Javascript wrap:<br>
                     return 2; //existing and outdated
                 }
             }
-            
+
             $result = 3; //existing and up to date
-                
+
             //request for current files (without smarty execution)
             $content = file_get_contents($generated_report);
-                
+
             $this->outputfile = null; //to avoid save to file
             $this->handleTemplateOutput($content, false);
-            
-            
+
+
         }else{
             $result = 1; //need to create new report
         }
-        
+
         return $result;
     }
-    
+
 }

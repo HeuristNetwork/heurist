@@ -57,7 +57,7 @@ class FrontController
     public function __construct()
     {
         // Take from GET or POST
-        $this->req_params = USanitize::sanitizeInputArray();    
+        $this->req_params = USanitize::sanitizeInputArray();
 
         $system = new System();
         if (!$system->init(@$this->req_params['db'])) {
@@ -66,7 +66,7 @@ class FrontController
         }
 
         $this->system = $system;
-        
+
         ConceptCode::setSystem($system);
     }
 
@@ -87,7 +87,7 @@ class FrontController
         }
 
         if (@$_REQUEST['controller'] == 'ReportController'  // $this->req_params['controller']
-            || @$this->req_params['template'] 
+            || @$this->req_params['template']
             || @$this->req_params['template_body']
             || @$this->req_params['template_id']) {
 
