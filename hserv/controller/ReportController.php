@@ -185,7 +185,6 @@ class ReportController
      */
     private function saveTemplate($template_body, $template_file)
     {
-        $template_body = urldecode($template_body);
         return $this->repAction->saveTemplate($template_body, $template_file);
     }
 

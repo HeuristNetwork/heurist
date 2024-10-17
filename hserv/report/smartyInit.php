@@ -132,3 +132,8 @@ function heuristModifierTranslate($input, $lang, $field=null)
 {
     return getTranslation($input, $lang, $field);//see ULocale
 }
+
+//do not remove - for backward capability
+function smarty_function_progress(){
+    return false;
+}
