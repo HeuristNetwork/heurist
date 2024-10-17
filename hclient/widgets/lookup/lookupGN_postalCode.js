@@ -35,6 +35,9 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
 
         return this._super();
     },
+
+    baseURL: 'http'+'://api.geonames.org/postalCodeLookupJSON?', // external url base
+    serviceName: 'geonames', // service name
     
     /**
      * Result list rendering function called for each record
@@ -81,20 +84,11 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
             return;
         }
 
-        let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?';
-
-        if(this.element.find('#inpt_postalcode').val()!=''){
-            sURL += `&postalcode=${this.element.find('#inpt_postalcode').val()}`; 
-        }
-        if(this.element.find('#inpt_placename').val()!=''){
-            sURL += `&placename=${encodeURIComponent(this.element.find('#inpt_placename').val())}`;
-        }
-        if(this.element.find('#inpt_country').val()!=''){
-            let _countryCode = this._getCountryCode(this.element.find('#inpt_country').val());
-            _countryCode += _countryCode ? `&country=${_countryCode}` : '';
-        }
-
-        this._super(sURL, false);
+        this._super({
+            postalcode: this.element.find('#inpt_postalcode').val(),
+            placename: this.element.find('#inpt_placename').val(),
+            country: this._getCountryCode(this.element.find('#inpt_country').val())
+        });
     },
 
     /**

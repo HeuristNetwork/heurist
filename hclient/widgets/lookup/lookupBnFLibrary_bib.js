@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
+$.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 
     // default options
     options: {
@@ -33,12 +33,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         height: 700,
         width:  800,
         
-        title:  "Search the Bibliothèque nationale de France's bibliographic records",
-        
-        htmlContent: 'lookupBnFLibrary_bib.html'
+        title:  "Search the Bibliothèque nationale de France's bibliographic records"
     },
 
-    _forceClose: false, // skip saving additional mapping and close dialog
+    baseURL: 'https://catalogue.bnf.fr/api/SRU?', // external url base
+    serviceName: 'bnflibrary_bib', // service name
 
     //  
     // invoked from _init after loading of html content
@@ -49,20 +48,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
         this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'});
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '7.5px'});
 
-        let $select = this.element.find('#rty_flds');
-        let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
-        let sel_options = {
-            useHtmlSelect: false
-        };
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
-
-        this._on(this.element.find('input[name="dump_field"]'), {
-            change: function(){
-                let opt = this.element.find('input[name="dump_field"]:checked').val();
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
-            }
-        });
-
         return this._super();
     },
 
@@ -71,48 +56,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
      */
     _setupSettings: function(){
 
-        let options = this.options.mapping?.options;
-        let need_save = false;
-
-        if(!options || window.hWin.HEURIST4.util.isempty(options)){
-            options = {
-                author_codes: '',
-                dump_record: true,
-                dump_field: 'rec_ScratchPad'
-            };
-
-            need_save = true;
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(options['author_codes'])){
-            this.element.find('#author-codes').text(options['author_codes']);
-           
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
-            this.element.find('input[name="dump_record"]').prop('checked', options['dump_field']);
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_field'])){
-            const selected = options['dump_field'];
-
-            if(selected === 'rec_ScratchPad'){
-                this.element.find('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
-            }else{
-                this.element.find('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
-                this.element.find('#rty_flds').val(selected);
-
-                if(this.element.find('#rty_flds').hSelect('instance') !== undefined){
-                    this.element.find('#rty_flds').hSelect('refresh');
-                }
-            }
-
-            window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), selected == 'rec_ScratchPad');
-        }
-
-        if(need_save){
-            this._saveExtraSettings(true, false);
-        }
+        this._super({
+            author_codes: '',
+            dump_record: true,
+            dump_field: 'rec_ScratchPad'
+        });
     },
 
     /**
@@ -122,7 +70,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
         let author_codes = this.element.find('#author_codes').text();
         let contributor_codes = '';//this.element.find('#contributor-codes').text()
-        const regex = /\d+/;
+        const regex = /\d+/g;
 
         author_codes = regex.test(author_codes) ? author_codes.match(regex).join(',') : '';
 
@@ -130,35 +78,16 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
     },
 
     /**
-     * Get record dump settings
-     */
-    _getRecDumpSetting: function(){
-
-        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
-        let recdump_fld = '';
-        
-        if(get_recdump){
-
-            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
-            if(recdump_fld === 'dty_ID'){
-                recdump_fld = this.element.find('#rty_flds').val();
-            }
-        }
-
-        return [ get_recdump, recdump_fld ];
-    },
-
-    /**
      * Save extra settings
      * @param {boolean} settings - whether to get settings for saving
      * @param {boolean} close_dlg - whether to close the dialog after saving 
      */
-    _saveExtraSettings: function(settings = true, close_dlg = false){
+    _saveExtraSettings: function(settings = false, close_dlg = false){
 
         const codes = this._getRoleCodes();
         const rec_dump_settings = this._getRecDumpSetting();
 
-        if(settings === null){
+        if(settings !== null){
             settings = {
                 author_codes: codes[0],
                 dump_record: rec_dump_settings[0],
@@ -180,6 +109,8 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Get field details for displaying
          * 
@@ -195,11 +126,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
             if(fldname == 'author'){
 
-                s = this.getAuthorHTML(recordset, record);
+                s = that.getAuthorHTML(recordset, record);
 
             }else if(fldname == 'publisher'){
 
-                s = this.getPublisherHTML(s);
+                s = that.getPublisherHTML(s);
 
             }else{
                 s = Array.isArray(s) ? s.join('; ') : s;
@@ -215,7 +146,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
             return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
-        
+
         const recTitle = fld('author', 25) + fld('publisher', 20) + fld('date', 10) + fld('title', 70) + fld('biburl', 12); 
         recordset.setFld(record, 'rec_Title', recTitle);
 
@@ -260,7 +191,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
         let value = '', search = '';
 
-        value = value['firstname'] ?? '';
+        value = cur_value['firstname'] ?? '';
 
         if(!window.hWin.HEURIST4.util.isempty(cur_value['surname'])){
             value = !window.hWin.HEURIST4.util.isempty(value) ? `${value} ${cur_value['surname']}` : cur_value['surname'];
@@ -297,7 +228,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
             let cur_string = cur_obj;
 
             if(window.hWin.HEURIST4.util.isObject(cur_obj)){
-                cur_string = this._extractPublisherValue(cur_obj);
+                [cur_string] = this._extractPublisherValue(cur_obj);
             }
 
             pub_val += !cur_string || typeof cur_string !== 'string' ? 'Missing author; ' : `${cur_string}; `;
@@ -319,7 +250,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
             search = (search != '') ? search : value;
         }
 
-        return returning_search ? [value, search] : value;
+        return returning_search ? [value, search] : [value, null];
     },
 
     /**
@@ -366,12 +297,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
             let field_type = $Db.dty(dty_ID, 'dty_Type');
 
-            if(window.hWin.HEURIST4.util.isObject(val)){
-                val = Object.values(val).filter((value) => !window.hWin.HEURIST4.util.isempty(value));
-            }else if(!Array.isArray(val)){
-                val = window.hWin.HEURIST4.util.isempty(val) ? '' : val;
-                val = [val];
-            }
+            val = this.valueToArray(val);
 
             if(window.hWin.HEURIST4.util.isempty(val)){
                 continue;
@@ -487,25 +413,27 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
      */
     _doSearch: function(){
 
-        let that = this;
-
         /**
          * recordSchema: XML structure for record details (changing this will require changes to the php code in record_lookup.php)
          * maximumRecords: maximum number of records returned from the search (api default: 100)
          * startRecord: starting point, complete searches in batches (api default: 1)
          * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
          */
-
-        //let recordType = $('#inpt_doctype').val(); // which record type is requested
         let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
-        maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
+        let params = {
+            version: '1.2',
+            operation: 'searchRetrieve',
+            recordSchema: 'unimarcxchange',
+            maximumRecords: !maxRecords || maxRecords <= 0 ? 20 : maxRecords,
+            startRecord: 1
+        };
 
-        let sURL = `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=${maxRecords}&startRecord=1&recordSchema=unimarcxchange`; // base URL
+        let has_filter = this.element.find('input.text:not(type)').filter((idx, input) => {
+            return !window.hWin.HEURIST4.util.isempty($(input).val());
+        });
 
         // Check that something has been entered
-        if(this.element.find('#inpt_any').val()=='' && this.element.find('#inpt_title').val()=='' 
-            && this.element.find('#inpt_author').val()=='' && this.element.find('#inpt_recordid').val()==''){
-
+        if(has_filter.length == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
             return;
         }
@@ -552,8 +480,6 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
             // no combination logic as record id is the last field
         }
 
-        // requested record type bib.doctype
-
         // Remove last logic connection
         if(!window.hWin.HEURIST4.util.isempty(last_logic)){
             let regex = new RegExp(`${last_logic}$`);
@@ -562,83 +488,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBase, {
 
         // Close off and encode query portion, then add to request url
         query += ')';
-        query = encodeURIComponent(query);
-
-        sURL += `&query=${query}`;
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element); // show loading cover
+        params['query'] = query;
 
         const codes = this._getRoleCodes();
 
-        // for record_lookup.php
-        let request = {
-            service: sURL, // request url
-            serviceType: 'bnflibrary_bib', // requesting service, otherwise no
-            author_codes: codes[0]
-            //, contributor_codes: codes[1]
-        };
-
-        // calls /heurist/hserv/controller/record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
-
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-
-            that._onSearchResult(response);
-        });
-    },
-
-    /**
-     * Prepare json for displaying via the Heuirst resultList widget
-     *
-     * @param {json} json_data - search response
-     */
-    _onSearchResult: function(json_data){
-
-        let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
-        maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
-
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data);
-
-        if(!json_data?.result){
-            this._super(false);
-        }
-
-        let res_records = {}, res_orders = [];
-
-        // Prepare fields for mapping
-        // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
-        let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-        let map_flds = Object.keys(this.options.mapping.fields);
-        fields = fields.concat(map_flds, 'BnF_ID');
-
-        // Parse json to Record Set
-        let i = 1;
-        for(const record of json_data.result){
-
-            let recID = i++;
-            let values = [recID, this.options.mapping.rty_ID];
-
-            // Add current record details, field by field
-            for(const fld_Name of map_flds){
-                values.push(record[fld_Name]);
-            }
-
-            values.push(record['BnF_ID']);
-
-            res_orders.push(recID);
-            res_records[recID] = values;
-        }
-
-        this.checkResultSize(json_data.numberOfRecords, maxRecords);
-
-        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
-        this._super(res);
+        this._super(params, {author_codes: codes[0]});
     }
 });

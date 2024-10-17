@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
+$.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
 
     // default options
     options: {
@@ -38,7 +38,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         htmlContent: 'lookupBnFLibrary_aut.html'
     },
 
-    _forceClose: false, // skip saving additional mapping and close dialog
+    baseURL: 'https://catalogue.bnf.fr/api/SRU?', // external url base
+    serviceName: 'bnflibrary_aut', // service name
 
     //  
     // invoked from _init after loading of html content
@@ -49,83 +50,15 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         this.element.find('.header.recommended').css({width: '100px', 'min-width': '100px', display: 'inline-block'}).addClass('truncate');
         this.element.find('.bnf_form_field').css({display:'inline-block', 'margin-top': '2.5px'});
 
-        let $select = this.element.find('#rty_flds');
-        let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
-        let sel_options = {
-            useHtmlSelect: false
-        };
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
-
-        this._on(this.element.find('input[name="dump_field"]'), {
-            change: function(){
-                let opt = this.element.find('input[name="dump_field"]:checked').val();
-                window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), opt == 'rec_ScratchPad');
-            }
-        });
-
         return this._super();
     },
-    
-    /**
-     * Set up additional settings tab
-     */
+
     _setupSettings: function(){
 
-        let options = this.options.mapping?.options;
-        let need_save = false;
-
-        if(!options || window.hWin.HEURIST4.util.isempty(options)){
-            options = {
-                dump_record: true,
-                dump_field: 'rec_ScratchPad'
-            };
-
-            need_save = true;
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_record'])){
-            this.element.find('input[name="dump_record"]').prop('checked', options['dump_field']);
-        }
-
-        if(!window.hWin.HEURIST4.util.isempty(options['dump_field'])){
-            const selected = options['dump_field'];
-
-            if(selected === 'rec_ScratchPad'){
-                this.element.find('input[name="dump_field"][value="rec_ScratchPad"]').prop('checked', true);
-            }else{
-                this.element.find('input[name="dump_field"][value="dty_ID"]').prop('checked', true);
-                this.element.find('#rty_flds').val(selected);
-
-                if(this.element.find('#rty_flds').hSelect('instance') !== undefined){
-                    this.element.find('#rty_flds').hSelect('refresh');
-                }
-            }
-
-            window.hWin.HEURIST4.util.setDisabled(this.element.find('#rty_flds'), selected == 'rec_ScratchPad');
-        }
-
-        if(need_save){
-            this._saveExtraSettings();
-        }
-    },
-
-    /**
-     * Get record dump settings
-     */
-    _getRecDumpSetting: function(){
-
-        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
-        let recdump_fld = '';
-        
-        if(get_recdump){
-
-            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
-            if(recdump_fld === 'dty_ID'){
-                recdump_fld = this.element.find('#rty_flds').val();
-            }
-        }
-
-        return [ get_recdump, recdump_fld ];
+        this._super({
+            dump_record: true,
+            dump_field: 'rec_ScratchPad'
+        });
     },
 
     /**
@@ -133,7 +66,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
      * @param {boolean} settings - whether to get settings for saving 
      * @param {boolean} close_dlg - whether to close the dialog after saving 
      */
-    _saveExtraSettings: function(settings = true, close_dlg = false){
+    _saveExtraSettings: function(settings = false, close_dlg = false){
 
         const rec_dump_settings = this._getRecDumpSetting();
 
@@ -260,19 +193,20 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
      */
     _doSearch: function(){
 
-        let that = this;
-
         /**
          * recordSchema: XML structure for record details (changing this will require changes to the php code in record_lookup.php)
          * maximumRecords: maximum number of records returned from the search (api default: 100)
          * startRecord: starting point, complete searches in batches (api default: 1)
          * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
          */
-
-        let maxRecords = $('#rec_limit').val(); // limit number of returned records
-        maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
-
-        let sURL = `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=${maxRecords}&startRecord=1`; // base URL
+        const maxRecords = $('#rec_limit').val(); // limit number of returned records
+        let params = {
+            version: '1.2',
+            operation: 'searchRetrieve',
+            recordSchema: 'unimarcxchange',
+            maximumRecords: !maxRecords || maxRecords <= 0 ? 20 : maxRecords,
+            startRecord: 1
+        };
 
         let accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
         let typeHasValue = this.element.find('#inpt_type').val() != '';
@@ -281,9 +215,12 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
         let domainHasValue = this.element.find('#inpt_domain').val() != '';
         let recidHasValue = this.element.find('#inpt_recordid').val() != '';
 
-        // Check that something has been entered
-        if(this.element.find('#inpt_any').val()=='' && !accesspointHasValue && !typeHasValue && !isniHasValue && !isnidateHasValue && !domainHasValue && !recidHasValue){
+        let has_filter = this.element.find('input.text:not(type)').filter((idx, input) => {
+            return !window.hWin.HEURIST4.util.isempty($(input).val());
+        });
 
+        // Check that something has been entered
+        if(has_filter.length == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter a value in any of the search fields...', 1000);
             return;
         }
@@ -351,80 +288,8 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBase, {
 
         // Close off and encode query portion, then add to request url
         query += ')';
-        query = encodeURIComponent(query);
+        params['query'] = query;
 
-        sURL += `&query=${query}`;
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-
-        // for record_lookup.php
-        let request = {
-            service: sURL, // request url
-            serviceType: 'bnflibrary_aut' // requesting service, otherwise no
-        };
-
-        // calls /heurist/hserv/controller/record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
-
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-
-            that._onSearchResult(response);
-        });
-    },
-
-    /**
-     * Prepare json for displaying via the Heuirst resultList widget
-     *
-     * @param {json} json_data - search response
-     */
-    _onSearchResult: function(json_data){
-
-        let maxRecords = $('#rec_limit').val(); // limit number of returned records
-        maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
-
-        json_data = window.hWin.HEURIST4.util.isJSON(json_data);
-
-        if(!json_data?.result){
-            this._super(false);
-        }
-
-        let res_records = {}, res_orders = [];
-
-        // Prepare fields for mapping
-        // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
-        let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-        let map_flds = Object.keys(this.options.mapping.fields);
-        fields = fields.concat(map_flds);            
-        fields = fields.concat('BnF_ID');
-
-        // Parse json to Record Set
-        let i = 1;
-        for(const record of json_data.result){
-
-            let recID = i++;
-            let values = [recID, this.options.mapping.rty_ID];
-
-            // Add current record details, field by field
-            for(const fld_Name of map_flds){
-                values.push(record[fld_Name]);
-            }
-
-            values.push(record['BnF_ID']);
-
-            res_orders.push(recID);
-            res_records[recID] = values;
-        }
-
-        this.checkResultSize(json_data.numberOfRecords, maxRecords);
-
-        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
-        this._super(res);
+        this._super(params);
     }
 });

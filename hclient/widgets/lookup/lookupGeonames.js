@@ -92,28 +92,5 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
 
         // Pass mapped values and close dialog
         this.closingAction(res);
-    },
-
-    _doSearch: function(sURL, xml_Response = false){
-
-        let that = this;
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-        let request = {service:sURL, serviceType:'geonames', is_XML: xml_Response};
-        //loading as geojson  - see controller record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
-            function(response){
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    return;
-                }
-
-                that._onSearchResult(response);
-            }
-        );
     }
 });
