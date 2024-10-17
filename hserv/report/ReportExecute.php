@@ -42,12 +42,12 @@ class ReportExecute
 {
     private $smarty;
 
-    private $template_file = null; //basename of template file
+    private $templateFile = null; //basename of template file
 
     private $outputfile;
     private $outputmode; //output format
-    private $is_void = false;   //if true - not browser output
-    private $max_allowed_depth = 2; //not used
+    private $isVoid = false;   //if true - not browser output
+    //private $maxAllowedDepth = 2; not used
 
     // 0 in UI (including tests in editor)
     // 1 saves into generated-reports and produces info page (user report) only
@@ -56,15 +56,15 @@ class ReportExecute
     // 4 calculation field
     private $publishmode;
 
-    private $smarty_session_id;
-    private $execution_counter;
-    private $execution_total_counter;
+    private $smartySessionId;
+    private $executionCounter;
+    private $executionCounterTotal;
 
-    private $is_included = false;   // true if this report is included into anpther one - NOT USED
+    //private $is_included = false;    true if this report is included into anpther one - NOT USED
 
-    private $is_jsallowed;
-    private $record_with_custom_styles;
-    private $is_headless; //output without html header and styles - for snippet (loading as content of existing html element) and xml output
+    private $isJsAllowed;
+    private $recordWithCustomCSS;
+    private $isHeadless; //output without html header and styles - for snippet (loading as content of existing html element) and xml output
 
     private $limit;
     private $replevel;
@@ -72,8 +72,8 @@ class ReportExecute
     private $system;
     private $params;
 
-    private $message_about_truncation;
-    private $error_msg;
+    private $messageAboutTruncation;
+    private $messageError;
 
 /*
 * parameters
@@ -117,11 +117,11 @@ class ReportExecute
     {
 
         if (!isset($this->system) || !$this->system->is_inited()) {
-            $this->smarty_error_output();
+            $this->outputError();
             return false;
         }
         if (!isset($this->params)){
-            $this->smarty_error_output('Parameters for smarty executions are not defined');
+            $this->outputError('Parameters for smarty executions are not defined');
             return false;
         }
 
@@ -170,9 +170,9 @@ class ReportExecute
 
         $this->publishmode = max(min($this->publishmode,4),0);
 
-        $this->record_with_custom_styles = isset($params['cssid']) ? intval($params['cssid']) : null;
+        $this->recordWithCustomCSS = isset($params['cssid']) ? intval($params['cssid']) : null;
 
-        $this->smarty_session_id = isset($params['session']) ? $params['session'] : null;
+        $this->smartySessionId = isset($params['session']) ? $params['session'] : null;
 
 
         $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
@@ -184,11 +184,11 @@ class ReportExecute
             $this->outputmode = 'txt';
         }
 
-        $this->is_headless = isset($params['snippet']) && $params['snippet'] == 1; //html output with header or not
+        $this->isHeadless = isset($params['snippet']) && $params['snippet'] == 1; //html output with header or not
 
-        $this->is_void = isset($params["void"]) && $params["void"] == true;  //fetch into file
+        $this->isVoid = isset($params['void']) && $params['void'];  //fetch into file
 
-        $this->is_jsallowed = $this->system->isJavaScriptAllowed();
+        $this->isJsAllowed = $this->system->isJavaScriptAllowed();
 
         $this->replevel = 0;
         if (@$params['template_body']){
@@ -207,8 +207,8 @@ class ReportExecute
      *
      * @return string The sanitized output file name.
      */
-    private function _prepareOutputFile(){
-        $this->outputfile = $this->params["output"] ?? $this->template_file ?? 'heurist_output';
+    private function prepareOutputFile(){
+        $this->outputfile = $this->params["output"] ?? $this->templateFile ?? 'heurist_output';
         $path_parts = pathinfo($this->outputfile);
         $this->outputfile = USanitize::sanitizeFileName($path_parts['filename']) . '.' . $this->outputmode;
         return $this->outputfile;
@@ -223,7 +223,7 @@ class ReportExecute
     private function fetchRecordIDs()
     {
         $this->setLimit();
-        $this->message_about_truncation = null;
+        $this->messageAboutTruncation = null;
 
         if (isset($this->params['recordset'])) {
             // Handle predefined recordset
@@ -272,7 +272,7 @@ class ReportExecute
             $recIDs = prepareIds($qresult['recIDs']);
 
             if($this->limit < count($recIDs) || $this->limit < $qresult['recordCount'] ){
-                $this->message_about_truncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'
+                $this->messageAboutTruncation = '<div><b>Report preview has been truncated to '.intval($this->limit).' records.<br>'
                     .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
             }
 
@@ -336,7 +336,7 @@ class ReportExecute
                 : ($this->publishmode > 0
                     ? 'Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility'
                     : 'Search records to see template output');
-            $this->smarty_error_output($error);
+            $this->outputError($error);
         }
         return false;
 
@@ -349,11 +349,11 @@ class ReportExecute
      */
     private function loadTemplateContent()
     {
-        $template_file = isset($this->params['template']) ? basename($this->params['template']) : null;
+        $templateFile = isset($this->params['template']) ? basename($this->params['template']) : null;
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
 
-        if ($template_file) {
-            $content = $this->loadTemplateFile($template_file);
+        if ($templateFile) {
+            $content = $this->loadTemplateFile($templateFile);
         } else {
             $content = $template_body;
         }
@@ -367,11 +367,11 @@ class ReportExecute
             }
             $this->outputfile = null;
         }else{
-            $this->outputfile = $this->_prepareOutputFile();
+            $this->outputfile = $this->prepareOutputFile();
         }
 
         if($content!==false && ($content==null || strlen(trim($content))==0)){
-            $this->smarty_error_output('Template content is empty');
+            $this->outputError('Template content is empty');
             return false;
         }
 
@@ -381,22 +381,22 @@ class ReportExecute
     /**
     * Loads template content from file
     *
-    * @param mixed $template_file
+    * @param mixed $templateFile
     */
-    private function loadTemplateFile($template_file)
+    private function loadTemplateFile($templateFile)
     {
-        if (substr($template_file, -4) !== ".tpl") {
-            $template_file .= ".tpl";
+        if (substr($templateFile, -4) !== ".tpl") {
+            $templateFile .= ".tpl";
         }
 
-        $template_path = $this->system->getSysDir('smarty-templates') . $template_file;
+        $template_path = $this->system->getSysDir('smarty-templates') . $templateFile;
         if (!file_exists($template_path)) {
-            $error = 'Template file ' . htmlspecialchars($template_file) . ' does not exist';
-            $this->smarty_error_output($error);
+            $error = 'Template file ' . htmlspecialchars($templateFile) . ' does not exist';
+            $this->outputError($error);
             return false;
         }
 
-        $this->template_file = $template_file;
+        $this->templateFile = $templateFile;
         return file_get_contents($template_path);
     }
 
@@ -422,7 +422,7 @@ class ReportExecute
 
 
         if (!isset($this->smarty) || $this->smarty === null) {
-            $this->smarty_error_output('Cannot init Smarty report engine. '.$errorMsg);
+            $this->outputError('Cannot init Smarty report engine. '.$errorMsg);
             return false;
         }
 
@@ -443,7 +443,7 @@ class ReportExecute
     public function executeTemplate($qresult, $content)
     {
         $results = $qresult["records"];  //reocrd ids
-        $this->execution_total_counter = count($results);
+        $this->executionCounterTotal = count($results);
         $heuristRec = new ReportRecord($this->system);
 
         if (method_exists($this->smarty, 'assignByRef')) {
@@ -464,20 +464,18 @@ class ReportExecute
             $this->smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']);
         } catch (\Exception $e) {
             if (strpos($e, 'already registered') === false) {
-                $this->smarty_error_output('Cannot register smarty plugin. '.$e->getMessage());
+                $this->outputError('Cannot register smarty plugin. '.$e->getMessage());
                 return false;
             }
         }
 
-        // Execute the template and handle output filtering
-        $result = $this->executeTemplateContinue($content, $results);
-
         // Handle activity logging if required
-        //if (!$this->is_headless && !isset($this->params['template_body']) && !$this->is_fetch) {
+        //if (!$this->isHeadless && !isset($this->params['template_body']) && !$this->is_fetch) {
         //    log_smarty_activity($this->system, $results);
         //}
 
-        return $result;
+        // Execute the template and handle output filtering
+        return $this->executeTemplateContinue($content, $results);
     }
 
     /**
@@ -490,75 +488,74 @@ class ReportExecute
     private function executeTemplateContinue($content, $results)
     {
         $result = true;
-        $need_output_filter = true;
-        $temp_template_file = null;
+        $temp_templateFile = null;
 
         $this->setupErrorReporting($this->replevel);
 
-        if ($this->template_file==null){  //execution from $this->params['template_body']
+        if ($this->templateFile==null){  //execution from $this->params['template_body']
 
-                $temp_template_file = $this->saveTemporaryTemplate($content);
+                $temp_templateFile = $this->saveTemporaryTemplate($content);
 
                 if($this->publishmode == 4){
                     //assign the only record for calculation field
                     $this->smarty->assign('r', (new ReportRecord($this-system))->getRecord($results[0]));
 
                     try{
-                        $output = $this->smarty->fetch($temp_template_file);
+                        $output = $this->smarty->fetch($temp_templateFile);
                     } catch (\Exception $e) {
                         $output = 'Exception on calculation field execution: '.$e->getMessage();
                     }
-                    fileDelete($this->smarty->getTemplateDir().$temp_template_file);
+                    fileDelete($this->smarty->getTemplateDir().$temp_templateFile);
                     echo $output;
                     return true;
                 }
 
-                $this->template_file = $temp_template_file;
+                $this->templateFile = $temp_templateFile;
         }
 
 
         $this->smarty->registerFilter('pre', [$this, 'translateTerms']);  //smarty_pre_filter
-        if ($this->publishmode == 0 && $this->smarty_session_id > 0) {
-            $this->execution_counter = 0;
+        if ($this->publishmode == 0 && $this->smartySessionId > 0) {
+            $this->executionCounter = 0;
 
             $this->smarty->registerFilter('post', [$this, 'addProgressCallback']);  //smarty_post_filter
         }else{
-            $this->smarty_session_id = 0;
+            $this->smartySessionId = 0;
         }
 
         //$this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']);
 
-        $this->smarty->assign('template_file', $this->template_file);
+        $this->smarty->assign('template_file', $this->templateFile);
         try {
 
-            $this->handleTemplateOutput( $this->smarty->fetch($this->template_file) );
+            $this->handleTemplateOutput( $this->smarty->fetch($this->templateFile) );
 
             /*
             $this->setOutputHeaders(); //define content type in http header
 
             if ($this->is_fetch) {
-                $this->smarty->fetch($template_file);
+                $this->smarty->fetch($templateFile);
             } else {
-                $this->smarty->display($template_file); //browser output
+                $this->smarty->display($templateFile); //browser output
             }
             */
         } catch (\Exception $e) {
-            $this->smarty_error_output('Exception on execution: ' . $e->getMessage());
+            $this->outputError('Exception on execution: ' . $e->getMessage());
             $result = false;
         }
 
-        if ($this->smarty_session_id > 0) {
-            mysql__update_progress(null, $this->smarty_session_id, false, 'REMOVE');
+        if ($this->smartySessionId > 0) {
+            mysql__update_progress(null, $this->smartySessionId, false, 'REMOVE');
         }
 
 
-        if($this->publishmode==0 && isset($this->message_about_truncation)){
-            echo $this->message_about_truncation;
+        if($this->publishmode==0 && isset($this->messageAboutTruncation)){
+            echo $this->messageAboutTruncation;
         }
 
         //remove temporary file
-        if($temp_template_file){
-            fileDelete($this->smarty->getTemplateDir().$temp_template_file);
+        if($temp_templateFile){
+            fileDelete($this->smarty->getTemplateDir().$temp_templateFile);
         }
 
         return $result;
@@ -594,23 +591,23 @@ class ReportExecute
     //
     private function saveTemporaryTemplate($content){
         //save temporary template
-        //this is user name $template_file = "_temp.tpl";
+        //this is user name $templateFile = "_temp.tpl";
         $user = $this->system->getCurrentUser();
 
-        $template_file = '_'.basename(USanitize::sanitizeFileName($user['ugr_Name'])).'.tpl';
+        $templateFile = '_'.basename(USanitize::sanitizeFileName($user['ugr_Name'])).'.tpl';
         $template_folder = $this->smarty->getTemplateDir();
         if(is_array($template_folder)) {$template_folder = $template_folder[0];}
-        $file = fopen ($template_folder.$template_file, "w");
+        $file = fopen ($template_folder.$templateFile, "w");
         fwrite($file, $content);
         fclose ($file);
 
-        return $template_file;
+        return $templateFile;
     }
 
     //
     //
     //
-    private function smarty_error_output($error_msg=null){
+    private function outputError($error_msg=null){
 
         if(!isset($error_msg)){
             $error_msg = $this->system->getErrorMsg();
@@ -621,7 +618,7 @@ class ReportExecute
         if($this->publishmode>0 && $this->publishmode<4){
             //$error_msg = $error_msg.'<div style="padding:20px;font-size:110%">Currently there are no results</div>';
         }
-        $this->error_msg = $error_msg;
+        $this->messageError = $error_msg;
 
         if($this->outputmode=='html'){
             $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';
@@ -642,7 +639,7 @@ class ReportExecute
     }
 
     public function getError(){
-        return $this->error_msg;
+        return $this->messageError;
     }
 
     //SMARTY FILTERS
@@ -678,7 +675,7 @@ class ReportExecute
             $parts = explode('\\', trim($match, ' {}'));
             $str_replace = '';
 
-            if(count($parts) == 0 || intval($parts[0]) < 1){ // ignore
+            if(empty($parts) || intval($parts[0]) < 1){ // ignore
                 continue;
             }
 
@@ -715,12 +712,11 @@ class ReportExecute
         if($offset>0){
             $pos = strpos($tpl_source,'{',$offset);
 
-            $res = substr($tpl_source,0,$pos+1)
+            return substr($tpl_source,0,$pos+1)
 ."\n".'$_smarty_tpl->getSmarty()->getFunctionHandler("progressCallback")->handle(array(), $_smarty_tpl);'."\n"
 //old way            ."\n".'{ if(progressCallback(array(), $_smarty_tpl)){ return; }'."\n"
             .substr($tpl_source,$pos+1);
 
-            return $res;
         }
 
         return $tpl_source;
@@ -754,7 +750,7 @@ class ReportExecute
 
             $formats = $this->system->getDatabaseSetting('TinyMCE formats');
             if(is_array($formats) && array_key_exists('formats', $formats)){
-                foreach($formats['formats'] as $key => $format){
+                foreach($formats['formats'] as $format){
 
                     $styles = $format['styles'];
 
@@ -824,7 +820,7 @@ class ReportExecute
              return '';
          }
 
-         $record = recordSearchByID($this->system, $this->record_with_custom_styles, $css_fields, 'rec_ID');
+         $record = recordSearchByID($this->system, $this->recordWithCustomCSS, $css_fields, 'rec_ID');
          if(!@$record['details']){
             return '';
          }
@@ -860,7 +856,7 @@ class ReportExecute
 
          $script_tag = '<script type="text/javascript" src="'.HEURIST_BASE_URL;
 
-         if(!$this->is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
+         if(!$this->isHeadless){ //full html output. inside iframe - add all styles and scripts to header at once
 
              //adds custom scripts and styles to html head
 
@@ -873,7 +869,7 @@ class ReportExecute
              }
 
              //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
-             if ($this->record_with_custom_styles > 0) {
+             if ($this->recordWithCustomCSS > 0) {
                     $head .= $this->addCustomStylesAndScripts();
              }
 
@@ -942,7 +938,7 @@ class ReportExecute
              }
 
              //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
-             if($this->record_with_custom_styles>0){
+             if($this->recordWithCustomCSS>0){
                  //find record with css fields
                  $css_fields = array();
                  if($this->system->defineConstant('DT_CMS_CSS')){
@@ -952,7 +948,7 @@ class ReportExecute
                      array_push($css_fields, DT_CMS_EXTFILES);
                  }
                  if(!empty($css_fields)){
-                     $record = recordSearchByID($this->system, $this->record_with_custom_styles, $css_fields, 'rec_ID');
+                     $record = recordSearchByID($this->system, $this->recordWithCustomCSS, $css_fields, 'rec_ID');
                      if($record && @$record['details']){
 
                          if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
@@ -1043,7 +1039,7 @@ class ReportExecute
                     'type' => 'Text',
                 ));
 
-                /* @todo test it
+                /* to test it
                 if ($def = $config->maybeGetRawHTMLDefinition()) {
                     // http://developers.whatwg.org/the-video-element.html#the-video-element
                     $def->addElement('video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', array(
@@ -1106,7 +1102,7 @@ class ReportExecute
 
 
             // Allow JavaScript or sanitize HTML
-            if ($this->is_jsallowed) {
+            if ($this->isJsAllowed) {
                 $tpl_source = $this->handleJsAllowed($tpl_source, $font_styles);
             } else {
                 $tpl_source = $this->sanitizeHtml($tpl_source, $font_styles);
@@ -1221,8 +1217,6 @@ class ReportExecute
     private function handleTemplateOutput($smarty_output, $need_sanitize=true){ // ,  \Smarty\Template $template=null
 
         $errors = null;
-        $res_file = null;
-        $file_name = null;
 
         //sanitize
         if($need_sanitize){
@@ -1261,7 +1255,7 @@ class ReportExecute
             if($this->outputfile!=null){
                 $errors = $this->saveOutputToFile($this->outputfile, $smarty_output);
             }
-            if($this->is_void){
+            if($this->isVoid){
                 return;
             }
             if($this->publishmode==3){
@@ -1382,31 +1376,30 @@ Javascript wrap:<br>
     //
     public function progressCallback($params, &$smarty){
 
-        if($this->publishmode!=0 || $this->smarty_session_id==null){ //check that this call from ui
+        if($this->publishmode!=0 || $this->smartySessionId==null){ //check that this call from ui
             return false;
         }
 
         $res = false;
 
             if(@$params['done']==null){//not set, this is execution from smarty
-                $this->execution_counter++;
+                $this->executionCounter++;
             }else{
-                $this->execution_counter = @$params['done'];
+                $this->executionCounter = @$params['done'];
             }
 
-            if(isset($this->execution_total_counter) && $this->execution_total_counter>0){
-                $tot_count = $this->execution_total_counter;
-            }else
-                if(@$params['tot_count']>=0){
-                    $tot_count = $params['tot_count'];
-                }else{
-                    $tot_count = count(@$smarty->getVariable('results')->value);
+            if(isset($this->executionCounterTotal) && $this->executionCounterTotal>0){
+                $tot_count = $this->executionCounterTotal;
+            }elseif(@$params['tot_count']>=0){
+                $tot_count = $params['tot_count'];
+            }else{
+                $tot_count = count(@$smarty->getVariable('results')->value);
             }
 
-            if($this->execution_counter<2 || $this->execution_counter % 10==0 || $this->execution_counter>$tot_count-3){
+            if($this->executionCounter<2 || $this->executionCounter % 10==0 || $this->executionCounter>$tot_count-3){
 
-                $session_val = $this->execution_counter.','.$tot_count;
-                $current_val = mysql__update_progress(null, $this->smarty_session_id, false, $session_val);
+                $session_val = $this->executionCounter.','.$tot_count;
+                $current_val = mysql__update_progress(null, $this->smartySessionId, false, $session_val);
                 if($current_val && $current_val=='terminate'){
                     $session_val = '';//remove from db
                     $res = true;
@@ -1425,8 +1418,6 @@ Javascript wrap:<br>
     //
     public function printLabelValuePair($params, &$smarty)
     {
-        $dt = null;
-
         if($params['var']){
             return '<div><div class="tlbl">'.$params['lbl'].': </div><b>'.$params['var'].'</b></div>';
         }else{
@@ -1496,12 +1487,12 @@ Javascript wrap:<br>
                         $mapsize = $mapsize."&height=".$height;
                     }
                 }
-                if(!(strpos($mapsize,"&")>0)){
-                    $mapsize = $mapsize."&height=200";
+                if(strpos($mapsize,'&')===false){
+                    $mapsize = $mapsize.'&height=200';
                 }
 
-                $size = "";
-                if($width=="" && $height==""){
+                $size = '';
+                if($width=='' && $height==''){
                     if($mode!='thumbnail'){
                         $size = "width=".(($dt=='geo')?"200px":"'300px'");
                     }
@@ -1539,9 +1530,8 @@ Javascript wrap:<br>
                     $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
                     $mimeType = $fileinfo['fxm_MimeType'];
                     $file_Ext= $fileinfo['ulf_MimeExt'];
-                    $sourceType = $fileinfo['ulf_PreferredSource'];
 
-                    $file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
+                    //$file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&thumb='.$file_nonce;
                     $file_URL   = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce; //download
 
@@ -1557,8 +1547,7 @@ Javascript wrap:<br>
                             $sres = $sres."<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
                         }
 
-                    }else
-                    if($mode=="thumbnail"){
+                    }elseif($mode=="thumbnail"){
 
                         if(@$params['fancybox']){
                             $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
@@ -1573,7 +1562,7 @@ Javascript wrap:<br>
 
                     }
 
-                    if(@$params['fancybox'] && $this->is_jsallowed){
+                    if(@$params['fancybox'] && $this->isJsAllowed){
 
                         $mode_3d_viewer = detect3D_byExt($file_Ext);
 
@@ -1701,7 +1690,7 @@ Javascript wrap:<br>
 
         $dir = $this->system->getSysDir('generated-reports');
 
-        $this->outputfile = $this->_prepareOutputFile();
+        $this->outputfile = $this->prepareOutputFile();
 
         $generated_report = $dir.$this->outputfile;
 

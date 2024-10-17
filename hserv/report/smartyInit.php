@@ -110,30 +110,25 @@ function smartyInit($smarty_templates_dir=null){
             $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $fname, $fname);
         }
 
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heurist_modifier_array_key_exists');
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heurist_modifier_array_column');
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'heurist_smarty_modifier_translate');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heuristModifierArrayKeyExists');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heuristModifierArrayColumn');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'heuristModifierTranslate');
 
         return $smarty;
 }
 
-function heurist_modifier_array_key_exists($key, $arr){
+function heuristModifierArrayKeyExists($key, $arr){
     return is_array($arr) && array_key_exists($key, $arr);
 }
 
-function heurist_modifier_array_column($arr, $column){
+function heuristModifierArrayColumn($arr, $column){
     if(is_array($arr)){ // && array_key_exists($column, $arr[0])
         return array_column($arr, $column);
     }else{
         return '';
     }
 }
-function heurist_smarty_modifier_translate($input, $lang, $field=null)
+function heuristModifierTranslate($input, $lang, $field=null)
 {
     return getTranslation($input, $lang, $field);//see ULocale
 }
-
-function smarty_function_progress($params, &$smarty){
-    return false;
-}
-?>

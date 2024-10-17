@@ -273,7 +273,7 @@ class ReportTemplateMgr
                             if(substr($part, -1)=='s'){
                                     $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
-                            }elseif(__endsWith($part,'_originalvalue')){
+                            }elseif(ReportTemplateMgr::endsWith($part,'_originalvalue')){
                                     $suffix = '_originalvalue';
                                     $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
@@ -313,7 +313,7 @@ class ReportTemplateMgr
             }//for vars
 
             if(!empty($replacements)){
-                   $new_exp = "{".$this->array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
+                   $new_exp = "{".$this->arrayStrReplace(array_keys($replacements), array_values($replacements), $exp)."}";
                    if($matches[0][$i] != $new_exp){
                         $replacements_exp[$matches[0][$i]] = $new_exp;
                    }
@@ -322,7 +322,7 @@ class ReportTemplateMgr
 
 
         if(!empty($replacements_exp)){
-             $template = $this->array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
+             $template = $this->arrayStrReplace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
 
         return $mode == 1 ? ["template" => $template, "details_not_found" => $not_found_details] : $template;
@@ -423,7 +423,7 @@ class ReportTemplateMgr
      * @param string $subject The string in which to perform replacements.
      * @return string The modified string with replacements applied.
      */
-    private function array_str_replace($search, $replace, $subject)
+    private function arrayStrReplace($search, $replace, $subject)
     {
         $result = '';
 
@@ -468,10 +468,13 @@ class ReportTemplateMgr
 
         return [$match_idx, $match_offset];
     }
-}
+    
+    //
+    // in php v8 use str_ends_with
+    //
+    private static function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+    }
 
-// in php v8 use str_ends_with
-function __endsWith($haystack, $needle) {
-    // search forward starting from end minus needle length characters
-    return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }

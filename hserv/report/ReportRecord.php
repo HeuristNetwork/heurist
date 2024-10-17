@@ -20,9 +20,9 @@ require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
  */
 class ReportRecord
 {
-    protected $loaded_recs;  // Cache for loaded records
-    protected $rty_Names;    // Record type names
-    protected $dty_Types;    // Detail types
+    protected $recordsCache;  // Cache for loaded records
+    protected $rtyNames;    // Record type names
+    protected $dtyTypes;    // Detail types
     protected $dtTerms = null;    // Detail terms
     protected $dbsTerms;     // Database terms object
     protected $system;       // System object
@@ -38,9 +38,9 @@ class ReportRecord
     public function __construct($system)
     {
         $this->system = $system;
-        $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
-        $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
-        $this->loaded_recs = array(); // Cache for loaded records
+        $this->rtyNames = dbs_GetRectypeNames($system->get_mysqli());
+        $this->dtyTypes = dbs_GetDetailTypes($system, null, 4);
+        $this->recordsCache = array(); // Cache for loaded records
         $this->translations = array('trm' => array());
     }
 
@@ -112,7 +112,7 @@ class ReportRecord
      */
     public function rty_Name($rty_ID)
     {
-        return $this->rty_Names[$rty_ID];
+        return $this->rtyNames[$rty_ID];
     }
 
     /**
@@ -162,8 +162,8 @@ class ReportRecord
     {
         $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
 
-        if (@$this->loaded_recs[$rec_ID]) {
-            return $this->loaded_recs[$rec_ID];
+        if (@$this->recordsCache[$rec_ID]) {
+            return $this->recordsCache[$rec_ID];
         }
 
         $rec = recordSearchByID($this->system, $rec_ID);
@@ -325,8 +325,8 @@ class ReportRecord
 
         $recordID = $rec['rec_ID'];
 
-        if (@$this->loaded_recs[$recordID]) {
-            return $this->loaded_recs[$recordID]; //form cache
+        if (@$this->recordsCache[$recordID]) {
+            return $this->recordsCache[$recordID]; //form cache
         }
 
         $record = array();
@@ -341,11 +341,11 @@ class ReportRecord
             }
         }
 
-        if (count($this->loaded_recs) > 2500) {
-            $this->loaded_recs = array(); // Reset cache if too many records are loaded
+        if (count($this->recordsCache) > 2500) {
+            $this->recordsCache = array(); // Reset cache if too many records are loaded
         }
 
-        $this->loaded_recs[$recordID] = $record;
+        $this->recordsCache[$recordID] = $record;
         return $record;
     }
 
@@ -356,7 +356,7 @@ class ReportRecord
         if ($key == 'rec_RecTypeID') {
             $recTypeID = $value;
             $record['recTypeID'] = $recTypeID;
-            $record['recTypeName'] = $this->rty_Names[$recTypeID];
+            $record['recTypeName'] = $this->rtyNames[$recTypeID];
         } elseif ($key == 'rec_Tags') {
             $record['rec_Tags'] = $value;
         } elseif ($key == 'rec_ID') {
@@ -377,7 +377,7 @@ class ReportRecord
     /**
     *
     */
-    private function _add_term_val($res, $val){
+    private function addTermValue($res, $val){
 
         if($val){
             if(strlen($res)>0) {$res = $res.", ";}
@@ -394,13 +394,11 @@ class ReportRecord
 
         $issingle = false;
 
-        if($dtKey<1 || $this->dty_Types[$dtKey]){
+        if($dtKey<1 || $this->dtyTypes[$dtKey]){
 
             if($dtKey<1){
-                $dt_label = "Relationship";
                 $dtname = "Relationship";
                 $issingle = false;
-                $dtDef = "dummy";
 
             }else{
                 $dtname = "f".$dtKey;
@@ -413,7 +411,7 @@ class ReportRecord
                 if($dtKey<1){
                     $detailType =  "relmarker";
                 }else{
-                    $detailType =  $this->dty_Types[ $dtKey  ];
+                    $detailType =  $this->dtyTypes[ $dtKey  ];
                     /*
                     //detect single or repeatable - if repeatable add as array for enum and pointers
                     $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
@@ -436,7 +434,7 @@ class ReportRecord
                                 $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
                             }
 
-                            $domain = ($detailType=="enum")?"enum":"relation";
+                            //$domain = ($detailType=="enum")?"enum":"relation";
 
                             $fi = $this->dtTerms['fieldNamesToIndex'];
 
@@ -449,7 +447,7 @@ class ReportRecord
                             $res = array();
 
 
-                            foreach ($dtValue as $key => $value){
+                            foreach ($dtValue as $value){
 
                                 $term = $this->dbsTerms->getTerm($value);
                                 if($term){
@@ -460,13 +458,13 @@ class ReportRecord
                                     $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
                                     $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
 
-                                    $res_id = $this->_add_term_val($res_id, $value);
-                                    $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
-                                    $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
+                                    $res_id = $this->addTermValue($res_id, $value);
+                                    $res_cid = $this->addTermValue($res_cid, $term[ $fi['trm_ConceptID'] ]);
+                                    $res_code = $this->addTermValue($res_code, $term[ $fi['trm_Code'] ]);
 
-                                    $res_label_full = $this->_add_term_val($res_label_full, $term_full);
-                                    $res_label = $this->_add_term_val($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
-                                    $res_desc = $this->_add_term_val($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
+                                    $res_label_full = $this->addTermValue($res_label_full, $term_full);
+                                    $res_label = $this->addTermValue($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
+                                    $res_desc = $this->addTermValue($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
                                     //original value
@@ -520,11 +518,10 @@ class ReportRecord
                             foreach ($dtValue as $key => $value){
 
                                 $external_url = @$value['file']['ulf_ExternalFileReference'];
-                                if($external_url && strpos($external_url,'http://')!==0){
+                                if ($external_url && strpos($external_url,'http://')!==0) {
                                     array_push($res, $external_url);//external
 
-                                }else
-                                if(@$value['file']['ulf_ObfuscatedFileID']){
+                                }elseif (@$value['file']['ulf_ObfuscatedFileID']) {
                                     //local
                                     array_push($res, HEURIST_BASE_URL."?db=".$this->system->dbname()
                                             ."&file=".$value['file']['ulf_ObfuscatedFileID']);
@@ -654,8 +651,8 @@ class ReportRecord
      */
     public function getWootText($recID)
     {
-        $res = ""; // Woot is disabled in this version.
-        return $res;
+        // Woot is disabled in this version.
+        return '';
 
 /* woot is disabled in this version
         $woot = loadWoot(array("title"=>"record:".$recID));
@@ -815,7 +812,7 @@ class ReportRecord
             }
         }
 
-        if (count($ids) == 0) {
+        if (empty($ids)) {
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
         } else {
             $ids = prepareIds($ids);
