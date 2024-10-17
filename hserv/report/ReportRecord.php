@@ -70,7 +70,7 @@ class ReportRecord
      *
      * @return string The base URL of the system (HEURIST_BASE_URL).
      */
-    public function baseURL()
+    public function baseURL()                      
     {
         return HEURIST_BASE_URL;
     }
@@ -93,6 +93,8 @@ class ReportRecord
         } elseif ($param == 'lang') {
             $res = $_REQUEST['lang'] ?? $this->system->user_GetPreference('layout_language', '');
             $res = getLangCode3($res);
+        } elseif ($param == 'dbname') {
+            $res = $this->system->dbname();
         } elseif ($param == 'user') {
             $usr = $this->system->getCurrentUser();
             unset($usr['ugr_Preferences']);
