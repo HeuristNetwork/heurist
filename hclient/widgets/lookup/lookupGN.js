@@ -24,6 +24,9 @@
 
 $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
 
+    baseURL: 'http'+'://api.geonames.org/', // external url base
+    serviceName: 'geonames', // service name
+
     /**
      * Result list rendering function called for each record
      * 
@@ -69,25 +72,26 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
             return;
         }
 
-        let sURL = 'http'+'://api.geonames.org/';
+        let URL = 'http'+'://api.geonames.org/';
         let is_id_lookup = !window.hWin.HEURIST4.util.isempty(this.element.find('#inpt_id').val());
+        let params = {};
+        let base_request = {};
 
         if(is_id_lookup){
-            sURL += `get?geonameId=${encodeURIComponent(this.element.find('#inpt_id').val())}`;
+            URL += 'get?';
+            params['geonameId'] = this.element.find('#inpt_id').val();
+            base_request['is_XML'] = true;
         }else{
 
-            sURL += 'searchJSON?';
+            URL += 'searchJSON?';
 
-            if(this.element.find('#inpt_query').val()!=''){
-                sURL += `&q=${encodeURIComponent(this.element.find('#inpt_query').val())}`;
-            }
-            if(this.element.find('#inpt_country').val()!=''){
-                let _countryCode = this._getCountryCode(this.element.find('#inpt_country').val());
-                _countryCode += _countryCode ? `&country=${_countryCode}` : '';
-            }
+            params['q'] = this.element.find('#inpt_query').val();
+            params['country'] = this._getCountryCode(this.element.find('#inpt_country').val());
         }
 
-        this._super(sURL, is_id_lookup);
+        this.baseURL = URL;
+
+        this._super(params, base_request);
     },
 
     /**

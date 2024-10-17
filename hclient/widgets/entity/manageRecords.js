@@ -7066,12 +7066,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let is_estc = lookup_name.indexOf('ESTC') > -1 || lookup_name.indexOf('LRC18C') > -1;
 
-        if(lookup_name.indexOf('GN') === -1 && !is_estc){// or BnF
+        if(lookup_name.indexOf('GN') === -1 && lookup_name.indexOf('BnF') === -1 && !is_estc){
             window.hWin.HEURIST4.ui.showRecordActionDialog(lookup_name, dialog_options);
             return;
         }
 
         let parent = lookup_name.indexOf('GN') > -1 ? 'lookupGeonames' : '';
+        parent = lookup_name.indexOf('BnF') > -1 ? 'lookupBnF' : parent;
         parent = is_estc ? 'lookupESTC' : parent;
 
         if(window.hWin.HEURIST4.util.isFunction($('body')[parent])){
