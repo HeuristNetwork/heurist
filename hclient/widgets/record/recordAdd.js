@@ -213,6 +213,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         
         if(this.options.is_h6style){
             this.doExpand( this.options.isExpanded );
+        }else{
+            this._super(); // to use a normal dialog
         }
         
         return true;
