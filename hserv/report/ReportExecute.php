@@ -115,42 +115,41 @@ class ReportExecute
      */
     public function execute()
     {
-
+        $result = false;
+        
+        // Check if the system is initialized
         if (!isset($this->system) || !$this->system->is_inited()) {
             $this->outputError();
-            return false;
-        }
-        if (!isset($this->params)){
+        } elseif (!isset($this->params)) {
+            // Check if parameters are defined
             $this->outputError('Parameters for smarty executions are not defined');
-            return false;
+        } elseif (!$this->initSmarty()) {
+            // Initialize Smarty if necessary
+            // Do nothing as the error was already handled
+        } else {
+            set_time_limit(0); // No script execution time limit
+            
+            // Load template content
+            $content = $this->loadTemplateContent();
+
+            if ($content) {
+                // Fetch record IDs based on search query
+                $query_result = $this->fetchRecordIDs();
+                
+                $result = true;
+
+                // Handle empty result set
+                if ($this->handleEmptyResultSet($query_result)) {
+                    // Process the fetched records and execute the template with Smarty
+                    $result = $this->executeTemplate($query_result, $content);
+                }
+            }
         }
 
-
-        set_time_limit(0); // No script execution time limit
-
-        // Initialize Smarty if necessary
-        if(!$this->initSmarty()){
-            return false;
-        }
-
-        // Loads template file or template body
-        $content = $this->loadTemplateContent();
-
-        if(!$content){
-            return false;
-        }
-
-        // Fetch record IDs based on search query
-        $query_result = $this->fetchRecordIDs();
-
-        // Handle empty result set and output message if no records found
-        if (!$this->handleEmptyResultSet($query_result)) {
-            return true;
-        }
-
-        // Process the fetched records and execute the template with Smarty
-        return $this->executeTemplate($query_result, $content);
+        return $result;
     }
+    
+    
 
     /**
      * Initializes properties from parameters or sets defaults.
@@ -322,6 +321,10 @@ class ReportExecute
     private function handleEmptyResultSet($qresult)
     {
         $emptysetmessage = $this->params['emptysetmessage'] ?? null;
+        
+        if($emptysetmessage=='def'){
+            $emptysetmessage = null;
+        }
 
         if (isset($qresult['records']) && intval(@$qresult['reccount']) > 0) {
             return true;
@@ -329,11 +332,9 @@ class ReportExecute
 
         if ($this->publishmode == 4) {
             //for calculation field
-            echo USanitize::sanitizeString($emptysetmessage && $emptysetmessage != 'def' ? $emptysetmessage : '');
+            echo USanitize::sanitizeString($emptysetmessage ?? '');
         } else {
-            $error = $emptysetmessage && $emptysetmessage != 'def'
-                ? $emptysetmessage
-                : ($this->publishmode > 0
+            $error = $emptysetmessage ?? ($this->publishmode > 0
                     ? 'Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility'
                     : 'Search records to see template output');
             $this->outputError($error);
@@ -530,15 +531,8 @@ class ReportExecute
 
             $this->handleTemplateOutput( $this->smarty->fetch($this->templateFile) );
 
-            /*
-            $this->setOutputHeaders(); //define content type in http header
-
-            if ($this->is_fetch) {
-                $this->smarty->fetch($templateFile);
-            } else {
-                $this->smarty->display($templateFile); //browser output
-            }
-            */
+            /* Apparently need to use $this->smarty->display($templateFile) for huge reprot to direct output to browser*/
+            
         } catch (\Exception $e) {
             $this->outputError('Exception on execution: ' . $e->getMessage());
             $result = false;
