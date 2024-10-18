@@ -2686,6 +2686,8 @@ window.hWin.HEURIST4.ui = {
             }else if(actionName=='dbCreate'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/baseAction.js', 
                            window.hWin.HAPI4.baseURL + 'hclient/widgets/database/dbAction.js'];
+            }else if((actionName=='lookupConfig' || actionName=='repositoryConfig') && !window.hWin.HEURIST4.util.isFunction(doc_body['baseConfig'])){
+                scripts.unshift(`${window.hWin.HAPI4.baseURL}hclient/widgets/baseConfig.js`);
             }
             
             $.getMultiScripts(scripts)
