@@ -55,9 +55,9 @@ class ReportRecord
     {
         if (defined($name)) {
             return constant($name);
-        } elseif ( (strpos($name, 'RT_') === 0 || strpos($name, 'DT_') === 0)  
+        } elseif ( (strpos($name, 'RT_') === 0 || strpos($name, 'DT_') === 0)
                 && $this->system->defineConstant($name)
-                 ) 
+                 )
         {
             return constant($name);
         }
@@ -225,7 +225,7 @@ class ReportRecord
     {
         $rec_ID = $rec['recID'] ?? $rec;
 
-        $relRT = $this->rty_id('2-1'); //RT_RELATION 
+        $relRT = $this->rty_id('2-1'); //RT_RELATION
         $relSrcDT =  $this->dty_id('2-7');  //DT_PRIMARY_RESOURCE
         $relTrgDT = $this->dty_id('2-5'); //DT_TARGET_RESOURCE
 
@@ -402,11 +402,11 @@ class ReportRecord
         }else{
             return null;//name is not defined
         }
-        
-        if(!is_array($dtValue)){ 
+
+        if(!is_array($dtValue)){
                 return array( $dtname=>$dtValue );
         }
-        
+
         //complex type - need more analize
 
         $res = null;
@@ -414,7 +414,7 @@ class ReportRecord
         switch ($detailType) {
             case 'enum':
             case 'relationtype':
-            
+
                 $res = $this->getDetailForEnum($dtname, $dtValue, $lang);
                 break;
 
@@ -442,7 +442,7 @@ class ReportRecord
                 $res = array();//list of urls
                 $origvalues = array();
 
-                foreach ($dtValue as $key => $value){
+                foreach ($dtValue as $value){
 
                     $external_url = @$value['file']['ulf_ExternalFileReference'];
                     if ($external_url && strpos($external_url,'http://')!==0) {
@@ -496,7 +496,6 @@ class ReportRecord
                     $res = null;
                 }else{
                     $res = array_merge($arres, array($dtname=>$res));
-                    //$res = array( $dtname=>$res );
                 }
 
                 break;
@@ -521,7 +520,7 @@ class ReportRecord
                 }
 
                 $res = array( $dtname =>$res[0], $dtname."s" =>$res );
-                
+
                 break;
 
             default:
@@ -551,18 +550,18 @@ class ReportRecord
         }//end switch
 
         return $res;
-            
+
     }
 
     /**
-    * Converts enum field value for smarty 
-    * 
+    * Converts enum field value for smarty
+    *
     * @param mixed $dtname
     * @param mixed $dtValue
     * @param mixed $lang
     */
     private function getDetailForEnum($dtname, $dtValue, $lang){
-        
+
         if($this->dtTerms==null){
             $this->dtTerms = dbs_GetTerms($this->system);
             $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
@@ -609,14 +608,11 @@ class ReportRecord
                 ));
             }
         }
-        $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code,
-            "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
-        );
 
         if(!empty($res)){
             $res = array( $dtname =>$res[0], $dtname."s" =>$res );
         }
-        
+
         return $res;
     }
 
@@ -734,18 +730,18 @@ class ReportRecord
         $res = mysql__select_row($this->system->get_mysqli(), $query);
 
         if ($res == null) {
-               return null;    
+               return null;
         }
-        
+
         if (count($res) == 1) {
             return $res[0];
         }
-            
+
         foreach ($res as $idx => $val) {
             $result[$idx][2] = $val;
         }
         return $result;
-            
+
     }
 
     /**
@@ -794,16 +790,16 @@ class ReportRecord
         if (empty($ids)) {
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
         }
-        
+
         $ids = prepareIds($ids);
         $id_clause = predicateId('trn_Code', $ids, SQL_AND);
-        
+
         if ($id_clause != '') {
-            
+
             if ($entity == 'trm') {
-                $def_values = $this->fillTermNames($ids);
+                $def_values = $this->fillTermNames($ids, $field);
             }
-            
+
             $mysqli = $this->system->get_mysqli();
             $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Source = '$field' AND trn_LanguageCode = '$language_code' $id_clause";
             $res = mysql__select_assoc2($mysqli, $query);
@@ -820,13 +816,13 @@ class ReportRecord
 
     /**
     * fill array with term labels for given set of term ids
-    * 
+    *
     * @param mixed $ids
     */
-    private function fillTermNames($ids){            
-        
+    private function fillTermNames($ids, $field){
+
         $def_values = array();
-        
+
         if ($this->dtTerms == null) {
             $this->dtTerms = dbs_GetTerms($this->system);
         }
@@ -839,8 +835,8 @@ class ReportRecord
             $def_values[$trm_id] = $term ? $term[$this->dtTerms['fieldNamesToIndex'][$field]] : '';
         }
         return $def_values;
-    }            
-    
+    }
+
     /**
      * Returns the specific field for uploaded media information.
      *
@@ -880,7 +876,7 @@ class ReportRecord
             }
             return count($results) == 1 ? $results[0] : $results;
         }
-        
+
         $files = explode(',', $file_details);
         foreach ($files as $f_url) {
             $url_params = [];

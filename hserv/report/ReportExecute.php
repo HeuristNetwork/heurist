@@ -116,7 +116,7 @@ class ReportExecute
     public function execute()
     {
         $result = false;
-        
+
         // Check if the system is initialized
         if (!isset($this->system) || !$this->system->is_inited()) {
             $this->outputError();
@@ -128,14 +128,14 @@ class ReportExecute
             // Do nothing as the error was already handled
         } else {
             set_time_limit(0); // No script execution time limit
-            
+
             // Load template content
             $content = $this->loadTemplateContent();
 
             if ($content) {
                 // Fetch record IDs based on search query
                 $query_result = $this->fetchRecordIDs();
-                
+
                 $result = true;
 
                 // Handle empty result set
@@ -148,8 +148,8 @@ class ReportExecute
 
         return $result;
     }
-    
-    
+
+
 
     /**
      * Initializes properties from parameters or sets defaults.
@@ -321,7 +321,7 @@ class ReportExecute
     private function handleEmptyResultSet($qresult)
     {
         $emptysetmessage = $this->params['emptysetmessage'] ?? null;
-        
+
         if($emptysetmessage=='def'){
             $emptysetmessage = null;
         }
@@ -534,7 +534,7 @@ class ReportExecute
             $this->handleTemplateOutput( $this->smarty->fetch($this->templateFile) );
 
             /* Apparently need to use $this->smarty->display($templateFile) for huge reprot to direct output to browser*/
-            
+
         } catch (\Exception $e) {
             $this->outputError('Exception on execution: ' . $e->getMessage());
             $result = false;
@@ -611,7 +611,7 @@ class ReportExecute
                 $error_msg = 'Undefined smarty error';
             }
         }
-        
+
         $this->messageError = $error_msg;
 
         if($this->outputmode=='html'){
@@ -1029,7 +1029,7 @@ class ReportExecute
                 }
                 $config->set('HTML.Trusted', true);
                 $config->set('Filter.ExtractStyleBlocks', true);
-                
+
                 */
 
                 $purifier = new \HTMLPurifier($config);
@@ -1479,7 +1479,7 @@ Javascript wrap:<br>
                     }
                 }
             }
-            
+
             switch ($dt){
                 case 'url':
                     $result = "<a href='{$params['var']}' target=_blank rel=noopener $style>{$params['var']}</a>";
@@ -1542,20 +1542,20 @@ Javascript wrap:<br>
 
                     if($label!="") {$label = $label.": ";}
                     $result = $label.$content.'<br>';
-            }        
+            }
 
             return $result;
     }
 
     /**
     * Process file field and output img or player/viewer output
-    * 
+    *
     * @param mixed $params
     * @param mixed $mode
     * @param mixed $style
     * @param mixed $size
     */
-    private function processFieldFile($params, $mode, $style, $size){                    
+    private function processFieldFile($params, $mode, $style, $size){
         //insert image or link
         $values = $params['var'];
 
@@ -1576,7 +1576,9 @@ Javascript wrap:<br>
             $mimeType = $fileinfo['fxm_MimeType'];
             $file_Ext= $fileinfo['ulf_MimeExt'];
 
-            //$file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
+            /*in this version we use player tag  see fileGetPlayerTag
+                $file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
+            */
             $file_thumbURL  = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&thumb='.$file_nonce;
             $file_URL   = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce; //download
 
@@ -1625,7 +1627,7 @@ Javascript wrap:<br>
         return $sres;
     }
 
-    
+
     //
     //  Replace relative path to absolute
     //
