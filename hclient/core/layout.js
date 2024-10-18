@@ -646,6 +646,7 @@ console.error('Cardinal layout widget does not have proper options');
                         $cardinal_container.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
                     }
                     
+                    layout_opts['applyDefaultStyles'] = true; //remove for last version
                     layout_opts['applyDemoStyles'] = false;
                     layout_opts['maskContents']       = true;
                     layout_opts['togglerAlign_open']  = 'center';

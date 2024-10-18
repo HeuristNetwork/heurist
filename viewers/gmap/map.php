@@ -46,8 +46,6 @@ $system->defineConstants();
 -->
 
 <!-- Timemap -->
-<!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
-
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/markerclusterer.js"></script>

@@ -41,6 +41,9 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         htmlContent: 'lookupNomisma.html'
     },
 
+    baseURL: '', // external url base
+    serviceName: 'nomisma', // service name
+
     search_button_selector: '#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch',
 
     //  
@@ -128,7 +131,6 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     //
     _doSearch: function(event){
 
-        let that = this;
         let search_type = $(event.target).val();
 
         if(this.element.find('#inpt_any').val()==''){
@@ -136,42 +138,21 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
             return;
         }
 
-        let sURL = '';
-
         switch(search_type){
             case 'mint':
-                sURL = 'https://nomisma.org/apis/getMints?id=';
+                this.baseURL = 'https://nomisma.org/apis/getMints?id=';
                 break;
             case 'hoard':
-                sURL = 'https://nomisma.org/apis/getHoards?id=';
+                this.baseURL = 'https://nomisma.org/apis/getHoards?id=';
                 break;
             case 'findspots':
-                sURL = 'https://nomisma.org/apis/getFindspots?id=';
+                this.baseURL = 'https://nomisma.org/apis/getFindspots?id=';
                 break;
             default:
                 return;
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-        
-        sURL += encodeURI(this.element.find('#inpt_any').val());
-
-        let request = {service:sURL, serviceType:'nomisma', 'search_type': search_type};
-
-        // calls /heurist/hserv/controller/record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
-            function(response){
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    return;
-                }
-    
-                that._onSearchResult(response);
-            }
-        );
+        this._super({id: this.element.find('#inpt_any').val()});
     },
     
     /**

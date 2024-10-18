@@ -45,7 +45,7 @@
             unset($req_params['remote']);
             $req_params['db'] = $match[1];
        }else{
-           
+
                 if(@$match[1]==null || $match[1]==''){
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
                      $data = json_encode($data);

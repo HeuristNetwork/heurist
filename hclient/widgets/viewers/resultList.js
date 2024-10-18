@@ -4589,6 +4589,10 @@ $.widget( "heurist.resultList", {
             // open export menu in dialog/popup
             let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
 
+            if(typeof this.options.export_options !== 'string'){
+                this.options.export_options = 'all';
+            }
+            
             let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
             if(handle_formats){
                 url += `&output=${this.options.export_options}`

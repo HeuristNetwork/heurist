@@ -129,10 +129,9 @@ if(!$has_emails || empty($emails)) {
         <!--<link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />-->
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<?php 
+        includeJQuery();
+?>        
 
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
         <link rel="stylesheet" type="text/css" href="../../h6styles.css">

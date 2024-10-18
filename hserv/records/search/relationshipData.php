@@ -3,7 +3,7 @@
 //legacy of h3 - used in reportRecord and renderRecordData
 //@todo ??? 1) use recLinks  2) move to recordSearch use recordGetRelationship?
 
-$inverses = null;
+global $inverses;
 
 /**
 * get related record data for a given relationship record ID
@@ -127,7 +127,7 @@ function reltype_inverse($system, $relTermID) { //saw Enum change - find inverse
     $mysqli = $system->get_mysqli();
 
     if (!$relTermID) {return;}
-    if (isset($inverses)) {
+    if (!isset($inverses)) {
         $inverses = mysql__select_assoc2($mysqli,
                 "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"
                 ." WHERE A.trm_Label is not null and B.trm_Label is not null");

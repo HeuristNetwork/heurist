@@ -1201,64 +1201,64 @@ function HMapManager( _options )
                 }
                 let ele = node.find('.svs-contextmenu3');
                 ele.hide();
-            }   
-            
+            }               
+
             function _onmouseenter(event){
-                let node;
-                if($(event.target).hasClass('fancytree-node')){
-                    node =  $(event.target);
-                }else{
-                    node = $(event.target).parents('.fancytree-node');
-                }
-                if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-
-                    let ele = $(node).find('.svs-contextmenu3');
-
-                    let mapdoc_id = ele.attr('data-mapdoc');
-                    let rec_id = ele.attr('data-recid');
-
-                    // Get bounds
-                    let bounds = null;
-                    let zooms = null;
-                    if(rec_id > 0 && (mapdoc_id>=0 || mapdoc_id=='temp')){ // layer
-
-                        let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
-                        bounds = (layer_rec['layer']).getBounds();
-                    }else if(mapdoc_id > 0){ // map document
-                        bounds = mapDocuments.getMapDocumentBounds(mapdoc_id);
-                    }
-
-                    // Get zoom details
-                    if(bounds){
-                        zooms = options.mapwidget.mapping('getBoundsZooms', bounds); // possible zoom level and current zoom
-                    }
-
-                    // Update zoom icon
-                    let $zoom = ele.find('.zoom-to-extent');
-                    $zoom.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
-                    if(zooms){
-
-                        zooms = (zooms.zoom > zooms.cur_zoom) ? 'ui-icon-zoomin' : zooms;
-
-                        zooms = (window.hWin.HEURIST4.util.isJSON(zooms) && zooms.zoom < zooms.cur_zoom) ? 
-                        'ui-icon-zoomout' : zooms;
-
-                        zooms = (window.hWin.HEURIST4.util.isJSON(zooms)) ? 'ui-icon-zoom' : zooms;
-
+                    let node;
+                    if($(event.target).hasClass('fancytree-node')){
+                        node =  $(event.target);
                     }else{
-                        zooms = 'ui-icon-zoom';
+                        node = $(event.target).parents('.fancytree-node');
                     }
-                    $zoom.addClass(zooms);
+                    if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
 
-                    ele.css({'display':'inline-block'});//.css('visibility','visible');
-                }
-            }            
+                        let ele = $(node).find('.svs-contextmenu3');
 
+                        let mapdoc_id = ele.attr('data-mapdoc');
+                        let rec_id = ele.attr('data-recid');
+
+                        // Get bounds
+                        let bounds = null;
+                        let zooms = null;
+                        if(rec_id > 0 && (mapdoc_id>=0 || mapdoc_id=='temp')){ // layer
+
+                            let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                            bounds = (layer_rec['layer']).getBounds();
+                        }else if(mapdoc_id > 0){ // map document
+                            bounds = mapDocuments.getMapDocumentBounds(mapdoc_id);
+                        }
+
+                        // Get zoom details
+                        if(bounds){
+                            zooms = options.mapwidget.mapping('getBoundsZooms', bounds); // possible zoom level and current zoom
+                        }
+
+                        // Update zoom icon
+                        let $zoom = ele.find('.zoom-to-extent');
+                        $zoom.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
+                        if(zooms){
+
+                            zooms = (zooms.zoom > zooms.cur_zoom) ? 'ui-icon-zoomin' : zooms;
+
+                            zooms = (window.hWin.HEURIST4.util.isJSON(zooms) && zooms.zoom < zooms.cur_zoom) ? 
+                                        'ui-icon-zoomout' : zooms;
+
+                            zooms = (window.hWin.HEURIST4.util.isJSON(zooms)) ? 'ui-icon-zoom' : zooms;
+
+                        }else{
+                            zooms = 'ui-icon-zoom';
+                        }
+                        $zoom.addClass(zooms);
+
+                        ele.css({'display':'inline-block'});//.css('visibility','visible');
+                    }
+            }
+            
             $(parent_span).on('mouseenter',
                 _onmouseenter
             ).on('mouseleave',
                 _onmouseexit
-            );             
+            );
 
         }
     }

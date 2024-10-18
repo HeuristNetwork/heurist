@@ -26,43 +26,42 @@ use Smarty\Smarty;
 use Smarty\Security;
 use Smarty\Template;
 
-//require_once dirname(__FILE__).'/../../vendor/smarty/smarty/libs/Smarty.class.php';
-class Heurist_Security_Policy extends Security {
+class HeuristSecurityPolicy extends Security {
 
   // disable acess to static classes
   public $static_classes = null;
 
   public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
-                    'array_key_exists', 'array_column', 'array_multisort', 
+                    'array_key_exists', 'array_column', 'array_multisort',
                     'array_diff', 'array_count_values', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'array_values', 'cat',
-                    'capitalize', 
+                    'capitalize',
                     'count',
                     'count_characters','count_words','count_paragraphs',
                     'date_format',
                     'floatval','indent','json_encode',
-                    'lower','nl2br', 
+                    'lower','nl2br',
                     'preg_match_all','print_r', 'printf','replace',
                     'range', 'regex_replace',
-                    'setlocale','sort', 'spacify', 'strip', 'strstr', 'substr', 'strpos', 'string_format', 'strlen', 'strip_tags', 
+                    'setlocale','sort', 'spacify', 'strip', 'strstr', 'substr', 'strpos', 'string_format', 'strlen', 'strip_tags',
                     'time','translate','truncate',
-                    'out','wrap',                    
+                    'out','wrap',
                     'upper','utf8_encode','wordwrap');
-                    
-  public $allow_super_globals = true; //default true  
+
+  public $allow_super_globals = true; //default true
 
   public $allowed_tags = false;
-  
+
 }
-    
+
 function smartyInit($smarty_templates_dir=null){
-    
-    
+
+
     if($smarty_templates_dir==null && defined('HEURIST_SMARTY_TEMPLATES_DIR')){
         $smarty_templates_dir = HEURIST_SMARTY_TEMPLATES_DIR;
     }
-    
+
     if(!file_exists($smarty_templates_dir)){
         throw new \Exception('Smarty templates folder does not exist');
     }
@@ -81,59 +80,59 @@ function smartyInit($smarty_templates_dir=null){
     }
 
         $smarty = new Smarty();
-        
+
 
         $smarty->setTemplateDir($smarty_templates_dir);
         $smarty->setCompileDir($smarty_templates_dir.'compiled');
         $smarty->setCacheDir($smarty_templates_dir.'cache');
         $smarty->setConfigDir($smarty_templates_dir.'configs');
-        
+
         // enable security
-        $smarty->enableSecurity('Heurist_Security_Policy');
-        
+        $smarty->enableSecurity('HeuristSecurityPolicy');
+
         //allowed php functions
-        $php_functions = array( 'constant', 'count', 
+        $php_functions = array( 'constant', 'count',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
-                    //'array_key_exists', 'array_column', 
-                    'array_count_values', 'array_multisort', 
+                    //'array_key_exists', 'array_column',
+                    'array_count_values', 'array_multisort',
                     'array_diff', 'array_merge', 'array_slice', 'array_unique',
-                    'array_values', 'asort', 
+                    'array_values', 'asort',
                     'floatval','json_encode',
-                    'ksort', 'nl2br', 
+                    'ksort', 'nl2br',
                     'preg_match_all','print_r','printf', 'range',
-                    'setlocale', 'sort', 'strpos', 'strstr', 'substr', 'strlen', 
+                    'setlocale', 'sort', 'strpos', 'strstr', 'substr', 'strlen',
                     'time',
                     'utf8_encode');
-                    
+
         //register php functions
         foreach($php_functions as $fname){
-            $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $fname, $fname);    
+            $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $fname, $fname);
         }
-        
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heurist_modifier_array_key_exists');
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heurist_modifier_array_column');
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'heurist_smarty_modifier_translate');
+
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', 'heuristModifierArrayKeyExists');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', 'heuristModifierArrayColumn');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'heuristModifierTranslate');
 
         return $smarty;
 }
 
-function heurist_modifier_array_key_exists($key, $arr){
+function heuristModifierArrayKeyExists($key, $arr){
     return is_array($arr) && array_key_exists($key, $arr);
 }
 
-function heurist_modifier_array_column($arr, $column){
+function heuristModifierArrayColumn($arr, $column){
     if(is_array($arr)){ // && array_key_exists($column, $arr[0])
         return array_column($arr, $column);
     }else{
         return '';
     }
 }
-function heurist_smarty_modifier_translate($input, $lang, $field=null)
+function heuristModifierTranslate($input, $lang, $field=null)
 {
     return getTranslation($input, $lang, $field);//see ULocale
 }
 
-function smarty_function_progress($params, &$smarty){
+//do not remove - for backward capability
+function smarty_function_progress(){
     return false;
 }
-?>

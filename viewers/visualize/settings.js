@@ -204,7 +204,7 @@ function handleSettingsInUI() {
         .on('click', function(){ setLinkMode('stepped');} );
         
     $('#linksEmpty').on('change', function(e){
-        putSetting(setting_line_empty_link, $(e.target).is(':checked')?1:0);
+        putSetting('setting_line_empty_link', $(e.target).is(':checked')?1:0);
         visualizeData();
         _syncUI();
     });

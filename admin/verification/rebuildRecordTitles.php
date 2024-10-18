@@ -80,13 +80,9 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
-<?php if($init_client){ ?>
-
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-       
+<?php if($init_client){ 
+        includeJQuery();
+?>        
         <script type="text/javascript">
 
 

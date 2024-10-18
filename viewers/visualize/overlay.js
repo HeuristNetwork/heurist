@@ -342,7 +342,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     // Title
     info[0].text = window.hWin.HEURIST4.util.stripTags(info[0].text);
     let rollover = info[0].text;
-    
     if(type=='record'){
         if(settings.isDatabaseStructure){
             rty_ID = selector.substr(2);
@@ -561,7 +560,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 .attr("class", 'info-mode')
                 .attr("x", iconSize+2)
                 .attr("y", function(d, i) { // calculate position
-                    return position + (iconSize * (info[k].subheader == 1 ? 0.8 : 1.2));
+                    return position + (iconSize * ( k + 1 ) * (info[k].subheader == 1 ? 0.8 : 1.2));
                 })
                 .attr("fill", function(d){
                     return info[k].subheader == 1 ? 'gray' : fontColor;
@@ -569,8 +568,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 .attr("font-weight", info[k].style)
                 .style("font-style", info[k].style, "important")
                 .style("font-size", info[k].size, "important");
-
+                
             text[0].push(linkline[0][0]);
+            
         }//for
     }
         

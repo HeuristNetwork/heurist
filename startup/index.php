@@ -43,10 +43,8 @@ if (!defined('PDIR')){
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php
-if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')){
-    //@todo load localcopy of jquery for offline mode
-}
-?>
+    includeJQuery();
+?>   
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
@@ -57,6 +55,12 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+
+<script>
+    window.hWin = window;
+     //stub
+    window.hWin.HR = function(res){ return res; }
+</script>
 
 <script type="text/javascript">
 

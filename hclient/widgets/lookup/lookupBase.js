@@ -28,7 +28,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         title:  "External lookup",
         
         htmlContent: 'lookupBase.html', // in hclient/widgets/lookup folder
-        helpContent: false,
+        helpContent: null, // in context_help folder
 
         mapping: null, // configuration from record_lookup_config.json
         edit_fields: null, // realtime values from edit form fields
@@ -54,6 +54,9 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             empty_remark: '<div style="padding:1em 0 1em 0">No records match the search</div>' // For empty results
         }
     },
+
+    baseURL: '', // external url base
+    serviceName: '', // service name
 
     recordList: null, // Result list
 
@@ -93,7 +96,10 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         this.recordList = this.element.find('#div_result');
         if(this.recordList.length > 0){
 
-            this.options.resultList['renderer'] = this._rendererResultList // Record render function, is called on resultList updateResultSet
+            let context = this;
+
+            // Record render function, is called on resultList updateResultSet
+            this.options.resultList['renderer'] = (recordset, record) => { return context._rendererResultList(recordset, record); };
 
             this.recordList.resultList(this.options.resultList);
             this.recordList.resultList('option', 'pagesize', this.options.resultList.pagesize); // so the pagesize doesn't get set to a different value
@@ -307,14 +313,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     prepareValue: function(values, dty_ID, extra_settings){
 
-        if(window.hWin.HEURIST4.util.isObject(values)){
-            values = Object.values(values);
-        }
-        if(!Array.isArray(values)){
-            values = window.hWin.HEURIST4.util.isempty(values) ? '' : values;
-            values = [values];
-        }
-        values = values.filter((value) => !window.hWin.HEURIST4.util.isempty(value)); // remove empty values
+        values = this.valueToArray(values);
 
         if(window.hWin.HEURIST4.util.isempty(values)){
             return;
@@ -683,11 +682,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _getCountryCode: function(country_code){
 
+        if(window.hWin.HEURIST4.util.isempty(country_code)){
+            return '';
+        }
+
         let term_label = $Db.trm(country_code, 'trm_Label');
         let _countryCode = $Db.trm(country_code, 'trm_Code');
 
-        if(!window.hWin.HEURIST4.util.isempty(_countryCode)){
-            return _countryCode;
+        if(typeof term_label === 'object' || typeof _countryCode === 'object'){
+            return '';
         }
 
         switch (term_label) {
@@ -783,5 +786,84 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         return `${typeCode} ${wkt}`;
+    },
+
+    _doSearch: function(parameters, request = {}){
+
+        let that = this;
+
+        let full_url = this.baseURL;
+        if(!full_url.endsWith('?') && !full_url.endsWith('&')){
+            full_url += full_url.indexOf('?') === false ? '?' : '&';
+        }
+
+        // Add parameters
+        let has_params = false;
+        if(!window.hWin.HEURIST4.util.isempty(parameters) && window.hWin.HEURIST4.util.isObject(parameters)){
+            let params = {};
+            for(let key in parameters){
+                if(Object.hasOwn(parameters, key) && !window.hWin.HEURIST4.util.isempty(parameters[key])){
+                    params[key] = parameters[key];
+                }
+            }
+            has_params = Object.keys(params).length > 0;
+            full_url += has_params ? new URLSearchParams(params).toString() : '';
+        }
+
+        if(!has_params){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                status: window.hWin.ResponseStatus.ACTION_BLOCKED,
+                message: 'Please enter a value into one of the input fields'
+            });
+            return;
+        }
+
+        request = $.extend({
+            service: full_url,
+            serviceType: this.serviceName
+        }, request);
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+
+        // calls /heurist/hserv/controller/record_lookup.php
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (response) => {
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
+
+            response = window.hWin.HEURIST4.util.isJSON(response);
+
+            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }else if(!response){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                    message: 'Service data was returned in an unhandled format.'
+                });
+                return;
+            }
+
+            that._handleSearchResult(response);
+
+        });
+    },
+
+    _handleSearchResult: function(response){
+        this._onSearchResult(response);
+    },
+
+    valueToArray: function(values){
+
+        if(window.hWin.HEURIST4.util.isObject(values)){
+            values = Object.values(values);
+        }
+        if(!Array.isArray(values)){
+            values = window.hWin.HEURIST4.util.isempty(values) ? '' : values;
+            values = [values];
+        }
+
+        values = values.filter((val) => !window.hWin.HEURIST4.util.isempty(val));
+
+        return values;
     }
 });

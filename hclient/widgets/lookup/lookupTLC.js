@@ -37,6 +37,9 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
         htmlContent: 'lookupTLC.html' // in hclient/widgets/lookup folder
     },
 
+    baseURL: '', // external url base
+    serviceName: 'tlcmap', // service name
+
     //  
     // invoked from _init after loading of html content
     //
@@ -117,13 +120,16 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     //
     _doSearch: function(){
         
-        let sURL;
+        let params = {
+            format: 'json',
+            paging: 100
+        };
 
         // get base url
         if(this.options.mapping.service=='tlcmap'){
-            sURL = 'https://tlcmap.org/ghap/search?format=json&paging=100';
+            this.baseURL = 'https://tlcmap.org/ghap/search?';
         }else if(this.options.mapping.service=='tlcmap_old'){
-            sURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
+            this.baseURL = 'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?';  
         }else{
             window.hWin.HEURIST4.msg.showMsgFlash('Name of service not defined...', 500);
             return;
@@ -139,37 +145,20 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
         // add input to request url
         if(this.element.find('#inpt_name').val()!=''){
-            sURL += `&${this.element.find('#inpt_exact').is(':checked')?'name':'fuzzyname'}=${encodeURIComponent(this.element.find('#inpt_name').val())}`;
+            let fld_name = this.element.find('#inpt_exact').is(':checked') ? 'name' : 'fuzzyname';
+            params[fld_name] = this.element.find('#inpt_name').val();
         }
         if(this.element.find('#inpt_anps_id').val()!=''){
-            sURL += `&anps_id=${this.element.find('#inpt_anps_id').val()}`;
+            params['anps_id'] = this.element.find('#inpt_anps_id').val();
         }
         if(this.element.find('#inpt_lga').val()!=''){
-            sURL += `&lga=${encodeURIComponent(this.element.find('#inpt_lga').val())}`;
+            params['lga'] = this.element.find('#inpt_lga').val()
         }
         if(this.element.find('#inpt_state').val()!=''){
-            sURL += `&state=${this.element.find('#inpt_state').val()}`;
+            params['state'] = this.element.find('#inpt_state').val()
         }
 
-        let that = this;
-        let request = {service:sURL, serviceType: 'tlcmap'};             
-
-        // performing request - see controller hserv/controller/record_lookup.php for service external lookups
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
-            function(response){
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack(); // remove cover
-
-                if(response){
-                    // check response
-                    if(response.status && response.status != window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }else{
-                        that._onSearchResult(response); // begin processing
-                    }
-                }
-            }
-        );
+        this._super(params);
     },
 
     /**

@@ -22,6 +22,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
+if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
+
 use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../autoload.php';
@@ -178,11 +180,9 @@ if(!($is_map_popup || $without_header)){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
-    
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-        
+<?php
+        includeJQuery();
+?>
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
 

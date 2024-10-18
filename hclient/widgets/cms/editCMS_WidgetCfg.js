@@ -389,8 +389,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                     }
                     
-                    $dlg.find('#empty_remark').val(opts['emptysetmessage']);
-                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                    $dlg.find('#empty_remark').val(opts['empty_remark']?opts['empty_remark']:opts['emptysetmessage']); //for empty selection
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']); //for empty result
 
                     if(!opts['selection_mode']){
 
@@ -481,6 +481,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 if(opts['export_options']){
 
                     let export_options = [];
+                    
+                    if(opts['export_options']===true){
+                        opts['export_options'] = 'all';
+                    }
 
                     if(!window.hWin.HEURIST4.util.isempty(opts['export_options']) && opts['export_options'] != 'all'){
                         export_options = opts['export_options'].split(',');
@@ -1347,7 +1351,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         if(widget_name=='heurist_resultListExt'){
             opts['template'] = $dlg.find('select[name="rep_template"]').val();
             opts['reload_for_recordset'] = true;
-            opts['emptysetmessage'] = empty_remark;
+            opts['emptysetmessage'] = empty_remark; //to remove
+            opts['empty_remark'] = empty_remark;
 
             let selection_mode = opts['selection_mode'];
 
@@ -1359,7 +1364,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
             if(opts['template'] != ''){
                 opts['url'] = '?template='+encodeURIComponent(opts['template'])
-                +'&emptysetmessage='+encodeURIComponent(opts['emptysetmessage'])
+                +'&emptysetmessage='+encodeURIComponent(opts['empty_remark'])
                 +'&[query]';
             }else{
                 opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&recID=[recID]';

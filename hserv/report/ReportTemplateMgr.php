@@ -27,7 +27,7 @@ use hserv\utilities\USanitize;
 /**
  * Class ReportTemplateMgr
  *
- * Handles operations with Smarty template files, including saving, deleting, 
+ * Handles operations with Smarty template files, including saving, deleting,
  * retrieving, listing, exporting, and converting between local and global codes.
  */
 class ReportTemplateMgr
@@ -56,7 +56,7 @@ class ReportTemplateMgr
         global $system;
 
         $this->system = $_system ?: $system;
-        $this->dir = $_dir ?: (defined('HEURIST_SMARTY_TEMPLATES_DIR') ? HEURIST_SMARTY_TEMPLATES_DIR : null);
+        $this->dir = $_dir ?? (defined('HEURIST_SMARTY_TEMPLATES_DIR') ? HEURIST_SMARTY_TEMPLATES_DIR : null);
     }
 
     /**
@@ -75,25 +75,25 @@ class ReportTemplateMgr
         foreach ($files as $filename) {
             $path_parts = pathinfo($filename);
             if (!array_key_exists('extension', $path_parts)) {
-                continue;    
+                continue;
             }
-            
+
             $ext = strtolower($path_parts['extension']);
             $ind = strpos($filename, "_");
             $isnot_temp = (!(is_numeric($ind) && $ind == 0));
 
-            if (file_exists($this->dir . $filename) && $ext == "gpl") {  
-                
+            if (file_exists($this->dir . $filename) && $ext == "gpl") {
+
                 $processed_template = $this->processGplFile($filename);
                 if ($processed_template) {
                     $results[] = $processed_template;
                 }
-                
+
             } elseif (file_exists($this->dir . $filename) && $ext == "tpl" && $isnot_temp) {
                 $name = substr($filename, 0, -4);
                 $results[] = ['filename' => $filename, 'name' => $name];
             }
-            
+
         }
 
         return $results;
@@ -101,7 +101,7 @@ class ReportTemplateMgr
 
     /**
     * Converts gpl file to tpl
-    *     
+    *
     * @param mixed $filename
     */
     private function processGplFile($filename)
@@ -121,8 +121,8 @@ class ReportTemplateMgr
         }
 
         return null;
-    }    
-    
+    }
+
 
     /**
      * Returns the content of a specified template file.
@@ -134,7 +134,7 @@ class ReportTemplateMgr
     {
         try {
             if ($template_file == null || $template_file == '') {
-                $template_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template.tpl';            
+                $template_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template.tpl';
                 if (!file_exists($template_file)) {
                     throw new \Exception("Template example file not found");
                 }
@@ -144,11 +144,11 @@ class ReportTemplateMgr
 
             header(CTYPE_HTML);
             $res = readfile($template_file);
-        
+
             if (!$res) {
                 throw new \Exception("Cannot read template file " . basename($template_file));
             }
-        
+
         } catch (\Exception $e) {
             print $e->getMessage();
         }
@@ -166,10 +166,10 @@ class ReportTemplateMgr
         $path_parts = pathinfo($template_file);
         $template_file = $path_parts['filename'] . '.tpl';
         $template_file_fullpath = $this->dir . $template_file;
-        
+
         $res = folderExists($this->dir, true);
         if ($res > 0) {
-            $res = fileSave($template_body, $template_file_fullpath);    
+            $res = fileSave($template_body, $template_file_fullpath);
         }
         if ($res <= 0) {
             throw new \Exception('Cannot write file. Check permissions for the Smarty template directory');
@@ -273,7 +273,7 @@ class ReportTemplateMgr
                             if(substr($part, -1)=='s'){
                                     $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
-                            }elseif(__endsWith($part,'_originalvalue')){
+                            }elseif(ReportTemplateMgr::endsWith($part,'_originalvalue')){
                                     $suffix = '_originalvalue';
                                     $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
@@ -313,7 +313,7 @@ class ReportTemplateMgr
             }//for vars
 
             if(!empty($replacements)){
-                   $new_exp = "{".$this->array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
+                   $new_exp = "{".$this->arrayStrReplace(array_keys($replacements), array_values($replacements), $exp)."}";
                    if($matches[0][$i] != $new_exp){
                         $replacements_exp[$matches[0][$i]] = $new_exp;
                    }
@@ -322,7 +322,7 @@ class ReportTemplateMgr
 
 
         if(!empty($replacements_exp)){
-             $template = $this->array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
+             $template = $this->arrayStrReplace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
 
         return $mode == 1 ? ["template" => $template, "details_not_found" => $not_found_details] : $template;
@@ -352,9 +352,9 @@ class ReportTemplateMgr
 
         if ($template_body && strlen($template_body) > 0) {
             $filename = str_replace(".tpl", ".gpl", basename($filename));
-            
+
             if ($is_check_only) {
-                return 'ok';                    
+                return 'ok';
             } else {
                 $content = $this->convertTemplate($template_body, 0);
                 header('Content-type: html/text');
@@ -379,7 +379,7 @@ class ReportTemplateMgr
         if (!$params || !$params['size']) {
             throw new \Exception('Error occurred during upload - file is zero size');
         }
-        
+
         $origfilename = basename($params['name']);
         $filename = null;
 
@@ -402,16 +402,16 @@ class ReportTemplateMgr
         if (isset($res['error'])) {
             throw new \Exception($res['error']);
         }
-         
+
         $origfilename = getUniqueFileName($this->dir, $origfilename, 'tpl');
-        
+
         $save_res = [];
         $save_res['filename'] = $this->saveTemplate($res['template'], $origfilename);
-        
+
         if (!empty($res['details_not_found'])) {
             $save_res['details_not_found'] = $res['details_not_found'];
         }
-                
+
         return $save_res;
     }
 
@@ -423,7 +423,7 @@ class ReportTemplateMgr
      * @param string $subject The string in which to perform replacements.
      * @return string The modified string with replacements applied.
      */
-    private function array_str_replace($search, $replace, $subject)
+    private function arrayStrReplace($search, $replace, $subject)
     {
         $result = '';
 
@@ -468,10 +468,13 @@ class ReportTemplateMgr
 
         return [$match_idx, $match_offset];
     }
-}
+    
+    //
+    // in php v8 use str_ends_with
+    //
+    private static function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+    }
 
-// in php v8 use str_ends_with
-function __endsWith($haystack, $needle) {
-    // search forward starting from end minus needle length characters
-    return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }

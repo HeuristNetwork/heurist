@@ -46,9 +46,9 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Import XML or JSON</title>
 
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <?php
+            includeJQuery();
+        ?>        
 
         <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
@@ -58,12 +58,8 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
-
         <!-- Demo styles -->
         <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">
-        <!--[if lte IE 8]>
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo-ie8.css">
-        <![endif]-->
         <style>
             /* Adjust the jQuery UI widget font-size: */
             .ui-widget {

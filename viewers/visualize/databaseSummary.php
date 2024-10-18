@@ -107,6 +107,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
         <link type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet"/>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
+
         <!-- D3 -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/d3.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
@@ -425,9 +427,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                         //localStorage.clear();
                     }
-                    
+
                     $(window).on('onresize',onVisualizeResize);
-                    
+
                     onVisualizeResize();
                     initVisualizeData();
 

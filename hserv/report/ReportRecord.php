@@ -20,9 +20,9 @@ require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
  */
 class ReportRecord
 {
-    protected $loaded_recs;  // Cache for loaded records
-    protected $rty_Names;    // Record type names
-    protected $dty_Types;    // Detail types
+    protected $recordsCache;  // Cache for loaded records
+    protected $rtyNames;    // Record type names
+    protected $dtyTypes;    // Detail types
     protected $dtTerms = null;    // Detail terms
     protected $dbsTerms;     // Database terms object
     protected $system;       // System object
@@ -38,9 +38,9 @@ class ReportRecord
     public function __construct($system)
     {
         $this->system = $system;
-        $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
-        $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
-        $this->loaded_recs = array(); // Cache for loaded records
+        $this->rtyNames = dbs_GetRectypeNames($system->get_mysqli());
+        $this->dtyTypes = dbs_GetDetailTypes($system, null, 4);
+        $this->recordsCache = array(); // Cache for loaded records
         $this->translations = array('trm' => array());
     }
 
@@ -55,14 +55,13 @@ class ReportRecord
     {
         if (defined($name)) {
             return constant($name);
-        } else {
-            if (strpos($name, 'RT_') === 0 || strpos($name, 'DT_') === 0) {
-                if ($this->system->defineConstant($name)) {
-                    return constant($name);
-                }
-            }
-            return null;
+        } elseif ( (strpos($name, 'RT_') === 0 || strpos($name, 'DT_') === 0)  
+                && $this->system->defineConstant($name)
+                 ) 
+        {
+            return constant($name);
         }
+        return null;
     }
 
     /**
@@ -93,6 +92,8 @@ class ReportRecord
         } elseif ($param == 'lang') {
             $res = $_REQUEST['lang'] ?? $this->system->user_GetPreference('layout_language', '');
             $res = getLangCode3($res);
+        } elseif ($param == 'dbname') {
+            $res = $this->system->dbname();
         } elseif ($param == 'user') {
             $usr = $this->system->getCurrentUser();
             unset($usr['ugr_Preferences']);
@@ -110,7 +111,7 @@ class ReportRecord
      */
     public function rty_Name($rty_ID)
     {
-        return $this->rty_Names[$rty_ID];
+        return $this->rtyNames[$rty_ID];
     }
 
     /**
@@ -160,8 +161,8 @@ class ReportRecord
     {
         $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
 
-        if (@$this->loaded_recs[$rec_ID]) {
-            return $this->loaded_recs[$rec_ID];
+        if (@$this->recordsCache[$rec_ID]) {
+            return $this->recordsCache[$rec_ID];
         }
 
         $rec = recordSearchByID($this->system, $rec_ID);
@@ -224,9 +225,9 @@ class ReportRecord
     {
         $rec_ID = $rec['recID'] ?? $rec;
 
-        $relRT = $this->rty_id('2-1'); //$this->system->defineConstant('RT_RELATION') ? RT_RELATION : 0;
-        $relSrcDT =  $this->dty_id('2-7');  //$this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0;
-        $relTrgDT = $this->dty_id('2-5'); //$this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0;
+        $relRT = $this->rty_id('2-1'); //RT_RELATION 
+        $relSrcDT =  $this->dty_id('2-7');  //DT_PRIMARY_RESOURCE
+        $relTrgDT = $this->dty_id('2-5'); //DT_TARGET_RESOURCE
 
         $res = array();
         $rel_records = array();
@@ -234,7 +235,7 @@ class ReportRecord
         if (!($rec_ID > 0 && $relRT > 0 && $relSrcDT > 0 && $relTrgDT > 0)) {
              return $res;
         }
-            
+
         $mysqli = $this->system->get_mysqli();
         $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID=' . $rec_ID);
         $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID=' . $rec_ID);
@@ -242,7 +243,7 @@ class ReportRecord
         if (!($from_res && $to_res && ($from_res->num_rows > 0 || $to_res->num_rows > 0))) {
              return $res;
         }
-    
+
         while ($reln = $from_res->fetch_assoc()) {
             $bd = fetch_relation_details($this->system, $reln['dtl_RecID'], true);
             array_push($rel_records, $bd);
@@ -265,11 +266,11 @@ class ReportRecord
                 array_push($res, $record);
             }
         }
-    
+
         $from_res->close();
         $to_res->close();
 
-        
+
         return $res;
     }
 
@@ -323,8 +324,8 @@ class ReportRecord
 
         $recordID = $rec['rec_ID'];
 
-        if (@$this->loaded_recs[$recordID]) {
-            return $this->loaded_recs[$recordID]; //form cache
+        if (@$this->recordsCache[$recordID]) {
+            return $this->recordsCache[$recordID]; //form cache
         }
 
         $record = array();
@@ -336,17 +337,17 @@ class ReportRecord
                 $this->processRecordField($record, $key, $value, $recTypeID);
             } elseif ($key == "details") {
                 $this->processRecordDetails($record, $value, $recTypeID, $recordID, $lang);
-            }            
+            }
         }
 
-        if (count($this->loaded_recs) > 2500) {
-            $this->loaded_recs = array(); // Reset cache if too many records are loaded
+        if (count($this->recordsCache) > 2500) {
+            $this->recordsCache = array(); // Reset cache if too many records are loaded
         }
 
-        $this->loaded_recs[$recordID] = $record;
+        $this->recordsCache[$recordID] = $record;
         return $record;
     }
-    
+
     private function processRecordField(&$record, $key, $value, &$recTypeID)
     {
         $record['rec' . substr($key, 4)] = $value;
@@ -354,7 +355,7 @@ class ReportRecord
         if ($key == 'rec_RecTypeID') {
             $recTypeID = $value;
             $record['recTypeID'] = $recTypeID;
-            $record['recTypeName'] = $this->rty_Names[$recTypeID];
+            $record['recTypeName'] = $this->rtyNames[$recTypeID];
         } elseif ($key == 'rec_Tags') {
             $record['rec_Tags'] = $value;
         } elseif ($key == 'rec_ID') {
@@ -371,11 +372,11 @@ class ReportRecord
             }
         }
     }
-    
+
     /**
     *
     */
-    private function _add_term_val($res, $val){
+    private function addTermValue($res, $val){
 
         if($val){
             if(strlen($res)>0) {$res = $res.", ";}
@@ -390,260 +391,235 @@ class ReportRecord
     */
     private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
-        $issingle = false;
+        $dtname = null;
 
-        if($dtKey<1 || $this->dty_Types[$dtKey]){
+        if($dtKey<1){
+            $dtname = 'Relationship';
+            $detailType =  'relmarker';
+        }elseif (@$this->dtyTypes[$dtKey]) {
+            $dtname = 'f'.$dtKey;
+            $detailType =  $this->dtyTypes[ $dtKey ];
+        }else{
+            return null;//name is not defined
+        }
+        
+        if(!is_array($dtValue)){ 
+                return array( $dtname=>$dtValue );
+        }
+        
+        //complex type - need more analize
 
-            if($dtKey<1){
-                $dt_label = "Relationship";
-                $dtname = "Relationship";
-                $issingle = false;
-                $dtDef = "dummy";
+        $res = null;
 
-            }else{
-                $dtname = "f".$dtKey;
-            }
+        switch ($detailType) {
+            case 'enum':
+            case 'relationtype':
+            
+                $res = $this->getDetailForEnum($dtname, $dtValue, $lang);
+                break;
 
+            case 'date':
 
-            if(is_array($dtValue)){ //complex type - need more analize
-                $res = null;
-
-                if($dtKey<1){
-                    $detailType =  "relmarker";
+                $res = "";
+                $origvalues = array();
+                foreach ($dtValue as $value){
+                    if(strlen($res)>0) {$res = $res.", ";}
+                    $res = $res.\Temporal::toHumanReadable($value, true, 0, '|', 'native');
+                    array_push($origvalues, $value);
+                }
+                if(strlen($res)==0){ //no valid terms
+                    $res = null;
                 }else{
-                    $detailType =  $this->dty_Types[ $dtKey  ];
-                    /*
-                    //detect single or repeatable - if repeatable add as array for enum and pointers
-                    $dt_maxvalues = @$rt_structure[$dtKey][$dtmaxval_index];
-                    if($dt_maxvalues){
-                        $issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)===1);
-                    }else{
-                        $issingle = false;
+                    $res = array( $dtname=>$res, $dtname."_originalvalue"=>$origvalues);
+                }
+                break;
+
+            case 'file':
+                //get url for file download
+
+                //if image - special case
+
+                $res = array();//list of urls
+                $origvalues = array();
+
+                foreach ($dtValue as $key => $value){
+
+                    $external_url = @$value['file']['ulf_ExternalFileReference'];
+                    if ($external_url && strpos($external_url,'http://')!==0) {
+                        array_push($res, $external_url);//external
+
+                    }elseif (@$value['file']['ulf_ObfuscatedFileID']) {
+                        //local
+                        array_push($res, HEURIST_BASE_URL."?db=".$this->system->dbname()
+                                ."&file=".$value['file']['ulf_ObfuscatedFileID']);
                     }
-                    */
-                    $issingle = false;
+                    //keep reference to record id
+                    $value['file']['rec_ID'] = $recID;
+
+                    //original value keeps the whole 'file' array
+                    array_push($origvalues, $value['file']);
+                }
+                if(empty($res)){
+                    $res = null;
+                }else{
+                    $res = array($dtname=>implode(', ',$res), $dtname."_originalvalue"=>$origvalues);
+                }
+
+                break;
+
+            case 'geo':
+
+                $res = "";
+                $arres = array();
+                foreach ($dtValue as $key => $value){
+
+                    //original value keeps whole geo array
+                    $dtname2 = $dtname."_originalvalue";
+                    $value['geo']['recid'] = $recID;
+                    $arres = array_merge($arres, array($dtname2=>$value['geo']));
+
+                    $geom = \geoPHP::load($value['geo']['wkt'], 'wkt');
+                    if(!$geom->isEmpty()){
+                        $geojson_adapter = new \GeoJSON();
+                        $json = $geojson_adapter->write($geom, true);
+                    }
+                    if(!$json) {$json = array();}
+                    $dtname2 = $dtname."_geojson";
+                    $arres = array_merge($arres, array($dtname2=>$json));
+
+
+                    $res = $value['geo']['wkt'];
+                    break; //only one geo location at the moment
+                }
+
+                if(strlen($res)==0){
+                    $res = null;
+                }else{
+                    $res = array_merge($arres, array($dtname=>$res));
+                    //$res = array( $dtname=>$res );
+                }
+
+                break;
+
+            case 'separator':
+            case 'calculated':
+            case 'fieldsetmarker':
+                break;
+
+            case 'relmarker': // NOT USED
+                break;
+            case 'resource': // link to another record type
+
+                $res = array();
+                if(empty($dtValue)){
+                   break;
+                }
+
+                foreach ($dtValue as $key => $value){
+                    $recordID = $value['id'];
+                    array_push($res, $recordID);
+                }
+
+                $res = array( $dtname =>$res[0], $dtname."s" =>$res );
+                
+                break;
+
+            default:
+                // repeated basic detail types
+                $res = "";
+                $origvalues = array();
+                foreach ($dtValue as $key => $value){
+                    if(strlen($res)>0) {$res = $res.", ";}
+                    $res = $res.$value;
+                    array_push($origvalues, $value);
+                }
+
+                if(count($dtValue)>1 && ($detailType=='freetext' || $detailType=='blocktext')){
+                    $translated_value = getCurrentTranslation($dtValue, $lang);
+                    if($translated_value!=null){
+                        $res = $translated_value;
+                    }
+                }
+
+                if(strlen($res)==0){ //no valid value
+                    $res = null;
+                }else{
+                    $res = array( $dtname=>$res, $dtname."s" =>$origvalues, $dtname."_originalvalue"=>$origvalues);
                 }
 
 
-                switch ($detailType) {
-                        case 'enum':
-                        case 'relationtype':
+        }//end switch
 
-                            if($this->dtTerms==null){
-                                $this->dtTerms = dbs_GetTerms($this->system);
-                                $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
-                            }
+        return $res;
+            
+    }
 
-                            $domain = ($detailType=="enum")?"enum":"relation";
-
-                            $fi = $this->dtTerms['fieldNamesToIndex'];
-
-                            $res_id = "";
-                            $res_cid = "";
-                            $res_code = "";
-                            $res_label = "";
-                            $res_label_full = '';
-                            $res_desc = "";
-                            $res = array();
-
-
-                            foreach ($dtValue as $key => $value){
-
-                                $term = $this->dbsTerms->getTerm($value);
-                                if($term){
-
-                                    //IJ wants to show terms for all parents
-                                    $term_full = $this->dbsTerms->getTermLabel($value, true);
-
-                                    $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
-                                    $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
-
-                                    $res_id = $this->_add_term_val($res_id, $value);
-                                    $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
-                                    $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
-
-                                    $res_label_full = $this->_add_term_val($res_label_full, $term_full);
-                                    $res_label = $this->_add_term_val($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
-                                    $res_desc = $this->_add_term_val($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
-
-                                    //NOTE id and label are for backward
-                                    //original value
-                                    array_push($res, array("id"=>$value, "internalid"=>$value,
-                                        "code"=>$term[ $fi['trm_Code'] ],
-                                        "label"=>$term_label,
-                                        "term"=>$term_full,
-                                        "conceptid"=>$term[ $fi['trm_ConceptID'] ],
-                                        "desc"=>$term_desc
-                                    ));
-                                }
-                            }
-                            $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code,
-                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
-                            );
-
-                            if(!empty($res)){
-                                if($issingle){//no used
-                                    $res = array( $dtname =>$res_united );
-                                }else{
-                                    $res = array( $dtname =>$res[0], $dtname."s" =>$res );
-                                }
-                            }
-
-                            break;
-
-                        case 'date':
-
-                            $res = "";
-                            $origvalues = array();
-                            foreach ($dtValue as $key => $value){
-                                if(strlen($res)>0) {$res = $res.", ";}
-                                $res = $res.\Temporal::toHumanReadable($value, true, 0, '|', 'native');
-                                array_push($origvalues, $value);
-                            }
-                            if(strlen($res)==0){ //no valid terms
-                                $res = null;
-                            }else{
-                                $res = array( $dtname=>$res, $dtname."_originalvalue"=>$origvalues);
-                            }
-                            break;
-
-                        case 'file':
-                            //get url for file download
-
-                            //if image - special case
-
-                            $res = array();//list of urls
-                            $origvalues = array();
-
-                            foreach ($dtValue as $key => $value){
-
-                                $external_url = @$value['file']['ulf_ExternalFileReference'];
-                                if($external_url && strpos($external_url,'http://')!==0){
-                                    array_push($res, $external_url);//external
-
-                                }else
-                                if(@$value['file']['ulf_ObfuscatedFileID']){
-                                    //local
-                                    array_push($res, HEURIST_BASE_URL."?db=".$this->system->dbname()
-                                            ."&file=".$value['file']['ulf_ObfuscatedFileID']);
-                                }
-                                //keep reference to record id
-                                $value['file']['rec_ID'] = $recID;
-
-                                //original value keeps the whole 'file' array
-                                array_push($origvalues, $value['file']);
-                            }
-                            if(empty($res)){
-                                $res = null;
-                            }else{
-                                $res = array($dtname=>implode(', ',$res), $dtname."_originalvalue"=>$origvalues);
-                                //array_merge($arres, array($dtname=>$res));
-                            }
-
-                            break;
-
-                        case 'geo':
-
-                            $res = "";
-                            $arres = array();
-                            foreach ($dtValue as $key => $value){
-
-                                //original value keeps whole geo array
-                                $dtname2 = $dtname."_originalvalue";
-                                $value['geo']['recid'] = $recID;
-                                $arres = array_merge($arres, array($dtname2=>$value['geo']));
-
-                                $geom = \geoPHP::load($value['geo']['wkt'], 'wkt');
-                                if(!$geom->isEmpty()){
-                                    $geojson_adapter = new \GeoJSON();
-                                    $json = $geojson_adapter->write($geom, true);
-                                }
-                                if(!$json) {$json = array();}
-                                $dtname2 = $dtname."_geojson";
-                                $arres = array_merge($arres, array($dtname2=>$json));
-
-
-                                $res = $value['geo']['wkt'];
-                                break; //only one geo location at the moment
-                            }
-
-                            if(strlen($res)==0){
-                                $res = null;
-                            }else{
-                                $res = array_merge($arres, array($dtname=>$res));
-                                //$res = array( $dtname=>$res );
-                            }
-
-                            break;
-
-                        case 'separator':
-                        case 'calculated':
-                        case 'fieldsetmarker':
-                            break;
-
-                        case 'relmarker': // NOT USED
-                            break;
-                        case 'resource': // link to another record type
-
-                            $res = array();
-                            if(!empty($dtValue)){
-
-                            foreach ($dtValue as $key => $value){
-                                $recordID = $value['id'];
-                                array_push($res, $recordID);
-                            }
-
-                            if($issingle){
-                                $res = array( $dtname =>$res[0] );
-                            }else{
-                                $res = array( $dtname =>$res[0], $dtname."s" =>$res );
-                            }
-
-
-                            }
-                            break;
-
-                        default:
-                            // repeated basic detail types
-                            $res = "";
-                            $origvalues = array();
-                            foreach ($dtValue as $key => $value){
-                                //$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-                                if(strlen($res)>0) {$res = $res.", ";}
-                                $res = $res.$value;
-                                array_push($origvalues, $value);
-                            }
-
-                            if(count($dtValue)>1 && ($detailType=='freetext' || $detailType=='blocktext')){
-                                $translated_value = getCurrentTranslation($dtValue, $lang);
-                                if($translated_value!=null){
-                                    $res = $translated_value;
-                                }
-                            }
-
-                            if(strlen($res)==0){ //no valid value
-                                $res = null;
-                            }else{
-                                $res = array( $dtname=>$res, $dtname."s" =>$origvalues, $dtname."_originalvalue"=>$origvalues);
-                            }
-
-
-                    }//end switch
-
-                return $res;
-            }
-            else {
-                return array( $dtname=>$dtValue );
-                //return array( $dtname=>htmlspecialchars($dtValue, ENT_QUOTES, 'UTF-8') );
-            }
-
-        }else{ //name is not defined
-            return null;
+    /**
+    * Converts enum field value for smarty 
+    * 
+    * @param mixed $dtname
+    * @param mixed $dtValue
+    * @param mixed $lang
+    */
+    private function getDetailForEnum($dtname, $dtValue, $lang){
+        
+        if($this->dtTerms==null){
+            $this->dtTerms = dbs_GetTerms($this->system);
+            $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
         }
 
+        $fi = $this->dtTerms['fieldNamesToIndex'];
+
+        $res_id = "";
+        $res_cid = "";
+        $res_code = "";
+        $res_label = "";
+        $res_label_full = '';
+        $res_desc = "";
+        $res = array();
+
+
+        foreach ($dtValue as $value){
+
+            $term = $this->dbsTerms->getTerm($value);
+            if($term){
+
+                //IJ wants to show terms for all parents
+                $term_full = $this->dbsTerms->getTermLabel($value, true);
+
+                $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
+                $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
+
+                $res_id = $this->addTermValue($res_id, $value);
+                $res_cid = $this->addTermValue($res_cid, $term[ $fi['trm_ConceptID'] ]);
+                $res_code = $this->addTermValue($res_code, $term[ $fi['trm_Code'] ]);
+
+                $res_label_full = $this->addTermValue($res_label_full, $term_full);
+                $res_label = $this->addTermValue($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
+                $res_desc = $this->addTermValue($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
+
+                //NOTE id and label are for backward
+                //original value
+                array_push($res, array("id"=>$value, "internalid"=>$value,
+                    "code"=>$term[ $fi['trm_Code'] ],
+                    "label"=>$term_label,
+                    "term"=>$term_full,
+                    "conceptid"=>$term[ $fi['trm_ConceptID'] ],
+                    "desc"=>$term_desc
+                ));
+            }
+        }
+        $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code,
+            "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
+        );
+
+        if(!empty($res)){
+            $res = array( $dtname =>$res[0], $dtname."s" =>$res );
+        }
+        
+        return $res;
     }
-    
-    
+
     /**
      * Retrieves Woot text associated with a record.
      *
@@ -652,8 +628,8 @@ class ReportRecord
      */
     public function getWootText($recID)
     {
-        $res = ""; // Woot is disabled in this version.
-        return $res;
+        // Woot is disabled in this version.
+        return '';
 
 /* woot is disabled in this version
         $woot = loadWoot(array("title"=>"record:".$recID));
@@ -674,7 +650,7 @@ class ReportRecord
         }elseif (@$woot["errorType"]) {
             $res = "WootText: ".$woot["errorType"];
         }
-*/        
+*/
     }
 
     /**
@@ -691,8 +667,8 @@ class ReportRecord
         if(is_array($query)){
             $query = json_encode($query);
         }
-        
-        
+
+
         if ($rec_ID > 0 && strpos($query, '[ID]') !== false) {
             $query = str_replace('[ID]', strval($rec_ID), $query);
         } elseif (strpos($query, '[ID]') !== false) {
@@ -720,7 +696,7 @@ class ReportRecord
     public function getRecordsAggr($functions, $query_or_ids, $current_rec = null)
     {
         $ids = prepareIds($query_or_ids);
-        if (count($ids) < 1) {
+        if (empty($ids)) {
             $ids = $this->getRecords($query_or_ids, $current_rec);
         }
 
@@ -732,8 +708,8 @@ class ReportRecord
 
         if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
-        }        
-        
+        }
+
         foreach ($functions as $func) {
             $dty_ID = $func[0];
             $func_type = $func[1];
@@ -753,22 +729,23 @@ class ReportRecord
         if (empty($select) || empty($ids)) {
             return null;
         }
-        
+
         $query = 'SELECT ' . implode(',', $select) . ' FROM ' . implode(' ', $from) . ' WHERE rec_ID IN (' . implode(',', $ids) . ')';
         $res = mysql__select_row($this->system->get_mysqli(), $query);
 
-        if ($res != null) {
-            if (count($res) == 1) {
-                return $res[0];
-            } else {
-                foreach ($res as $idx => $val) {
-                    $result[$idx][2] = $val;
-                }
-                return $result;
-            }
+        if ($res == null) {
+               return null;    
         }
-
-        return null;
+        
+        if (count($res) == 1) {
+            return $res[0];
+        }
+            
+        foreach ($res as $idx => $val) {
+            $result[$idx][2] = $val;
+        }
+        return $result;
+            
     }
 
     /**
@@ -806,6 +783,7 @@ class ReportRecord
             $field = $entity . '_Name';
         }
 
+        //take translation from cache
         foreach ($ids as $idx => $id) {
             if (array_key_exists($id, $cache) && @$cache[$id][$field]) {
                 $rtn[$id] = $cache[$id][$field];
@@ -813,30 +791,21 @@ class ReportRecord
             }
         }
 
-        if (count($ids) == 0) {
+        if (empty($ids)) {
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
-        } else {
-            $ids = prepareIds($ids);
-            $id_clause = count($ids) == 1 ? ' =' . intval($ids[0]) : ' IN (' . implode(',', $ids) . ')';
         }
-
-        if ($entity == 'trm') {
-            if ($this->dtTerms == null) {
-                $this->dtTerms = dbs_GetTerms($this->system);
-            }
-            if ($this->dbsTerms == null) {
-                $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
-            }
-
-            foreach ($ids as $trm_id) {
-                $term = $this->dbsTerms->getTerm($trm_id);
-                $def_values[$trm_id] = $term ? $term[$this->dtTerms['fieldNamesToIndex'][$field]] : '';
-            }
-        }
-
+        
+        $ids = prepareIds($ids);
+        $id_clause = predicateId('trn_Code', $ids, SQL_AND);
+        
         if ($id_clause != '') {
+            
+            if ($entity == 'trm') {
+                $def_values = $this->fillTermNames($ids);
+            }
+            
             $mysqli = $this->system->get_mysqli();
-            $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Code $id_clause AND trn_Source = '$field' AND trn_LanguageCode = '$language_code'";
+            $query = "SELECT trn_Code, trn_Translation FROM defTranslations WHERE trn_Source = '$field' AND trn_LanguageCode = '$language_code' $id_clause";
             $res = mysql__select_assoc2($mysqli, $query);
 
             foreach ($ids as $id) {
@@ -849,6 +818,29 @@ class ReportRecord
         return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
 
+    /**
+    * fill array with term labels for given set of term ids
+    * 
+    * @param mixed $ids
+    */
+    private function fillTermNames($ids){            
+        
+        $def_values = array();
+        
+        if ($this->dtTerms == null) {
+            $this->dtTerms = dbs_GetTerms($this->system);
+        }
+        if ($this->dbsTerms == null) {
+            $this->dbsTerms = new \DbsTerms($this->system, $this->dtTerms);
+        }
+
+        foreach ($ids as $trm_id) {
+            $term = $this->dbsTerms->getTerm($trm_id);
+            $def_values[$trm_id] = $term ? $term[$this->dtTerms['fieldNamesToIndex'][$field]] : '';
+        }
+        return $def_values;
+    }            
+    
     /**
      * Returns the specific field for uploaded media information.
      *
@@ -881,20 +873,22 @@ class ReportRecord
         }
 
         $results = [];
-        if (!is_array($file_details) && is_string($file_details)) {
-            $files = explode(',', $file_details);
-            foreach ($files as $f_url) {
-                $url_params = [];
-                parse_str(parse_url(trim($f_url), PHP_URL_QUERY), $url_params);
-                $ulf_ObfuscatedFileID = $url_params['file'] ?? null;
-                if ($ulf_ObfuscatedFileID && preg_match('/^[a-z0-9]+$/', $ulf_ObfuscatedFileID)) {
-                    $result = mysql__select_value($mysqli, "SELECT $field FROM recUploadedFiles WHERE ulf_ObfuscatedFileID = '$ulf_ObfuscatedFileID'");
-                    $results[] = $result ?: '';
-                }
-            }
-        } else {
+
+        if (is_array($file_details)){
             foreach ($file_details as $file_dtls) {
                 $results[] = $file_dtls[$field] ?? '';
+            }
+            return count($results) == 1 ? $results[0] : $results;
+        }
+        
+        $files = explode(',', $file_details);
+        foreach ($files as $f_url) {
+            $url_params = [];
+            parse_str(parse_url(trim($f_url), PHP_URL_QUERY), $url_params);
+            $ulf_ObfuscatedFileID = $url_params['file'] ?? null;
+            if ($ulf_ObfuscatedFileID && preg_match('/^[a-z0-9]+$/', $ulf_ObfuscatedFileID)) {
+                $result = mysql__select_value($mysqli, "SELECT $field FROM recUploadedFiles WHERE ulf_ObfuscatedFileID = '$ulf_ObfuscatedFileID'");
+                $results[] = $result ?: '';
             }
         }
 

@@ -63,25 +63,28 @@ if(@$_REQUEST['type']=='urls'){
     <head>
         <title><?php echo $sTitle; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
         <script type="text/javascript">
 
-        $(document).ready(function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var dosframe = document.getElementById('verification_output');
 
-            setTimeout(function(){
-                var $dosframe = $('#verification_output');
-                $dosframe.on('load', function(){
-                    $dosframe.css({width:'97%',height:'97%'}).show();
-                    $('#in_porgress').hide()
-                });
+                    dosframe.addEventListener('load', function() {
+                        dosframe.style.width = '97%';
+                        dosframe.style.height = '97%';
+                        dosframe.style.display = 'block';
+                        
+                        var inProgress = document.getElementById('in_porgress');
+                        if (inProgress) {
+                            inProgress.style.display = 'none';
+                        }
+                    });
 
-                $dosframe.attr("src", "<?php echo $srcURL; ?>");
-             },500);
-        });
+                    dosframe.src = "<?php echo $srcURL; ?>";
+                }, 500);
+            });
 
         </script>
         <style>

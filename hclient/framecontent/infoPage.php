@@ -97,15 +97,8 @@ if(!isset($message)){
     <?php
     if(isset($try_login) && $try_login === true){ // Does a login link need to be handled
 
-        if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))  {
-            
-        }
-        ?>
-        
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-        
+            includeJQuery();
+    ?>
 
         <script>window.hWin = window;</script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>

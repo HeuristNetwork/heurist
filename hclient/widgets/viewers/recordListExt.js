@@ -50,7 +50,7 @@ $.widget( "heurist.recordListExt", {
         onLoadComplete: null,  //callback
 
         empty_remark: null, //html content for empty message  (search returns empty result)
-        placeholder_text: null, //text to display while no record/recordset is loaded  (search is not prefromed)
+        placeholder_text: null, //text to display while no record/recordset is loaded  (search is not performed)
         
         show_export_button: false, // show button to export current record set
         show_print_button: false, // show button to print current record set
@@ -217,6 +217,10 @@ $.widget( "heurist.recordListExt", {
 
                     // open export menu in dialog/popup
                     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
+                    
+                    if(typeof this.options.export_options !== 'string'){
+                        this.options.export_options = 'all';
+                    }
 
                     let handle_formats = !window.hWin.HEURIST4.util.isempty(this.options.export_options) && this.options.export_options != 'all';
                     if(handle_formats){
@@ -353,7 +357,7 @@ $.widget( "heurist.recordListExt", {
             this.doSearch( this.options.search_initial );
             this.options.search_initial = null;
         }        
-
+        
         if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
         || !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
             this.placeholder_ele = $('<div>')

@@ -1038,6 +1038,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 {default_palette_class:this.options.default_palette_class});        
         }
     },
+
+    checkIfEditing: function(){
+        let tree = this._treeview.fancytree('getTree');
+        let node = tree.getActiveNode();
+        return (node || this.editForm.is(':visible')) && this._editing.isModified();
+    },
     
     //
     // set visibility of buttons on toolbar (depends on isModified)

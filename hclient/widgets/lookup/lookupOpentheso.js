@@ -33,6 +33,9 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         htmlContent: 'lookupOpentheso.html'
     },
 
+    baseURL: '', // external url base
+    serviceName: 'opentheso', // service name
+
     _servers: {},
 
     _thesauruses: {},
@@ -438,9 +441,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      */
     _doSearch: function(){
 
-        let that = this;
-
-        let sURL = this._servers[this._sel_elements['server'].val()]['uri'];
+        this.baseURL = this._servers[this._sel_elements['server'].val()]['uri'];
+        let params = {};
         let th_id = this._sel_elements['theso'].val();
 
         let search = this.element.find('#inpt_search').val();
@@ -458,42 +460,24 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         }
 
         // Add thesaurus
-        sURL += `concept/${th_id}/search?`;
+        this.baseURL += `concept/${th_id}/search?`;
 
         // Add search
-        sURL += `q=${encodeURIComponent(search)}`;
+        params['q'] = search;
 
         // Add language
         if(!window.hWin.HEURIST4.util.isempty(language)){
 
             language = window.hWin.HAPI4.sysinfo.common_languages[language]['a2']; // use 2 char version
-            sURL += `&lang=${language}`;
+            params['lang'] = language;
         }
         // Add groupings
         if(!window.hWin.HEURIST4.util.isempty(grouping) && !window.hWin.HEURIST4.util.isempty(grouping[0])){
-            sURL += `&group=${grouping.join(',')}`;
+            params['group'] = grouping.join(',');
         }
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Performing search...</span>'); // show loading cover
-
-        // for record_lookup.php
-        let request = {
-            service: sURL, // request url
-            serviceType: 'opentheso', // requesting service, otherwise no
+        this._super(params, {
             preferred_lang: window.hWin.HEURIST4.util.isempty(language) || language.length != 2 ? 'fr' : language
-        };
-        // calls /heurist/hserv/controller/record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
-            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element); // hide loading cover
-
-            response = window.hWin.HEURIST4.util.isJSON(response);
-
-            if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                return;
-            }
-
-            that._onSearchResult(response);
         });
     },
 

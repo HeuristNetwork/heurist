@@ -35,7 +35,6 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <!-- Colpick -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
-        
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/overlay.js"></script>
@@ -242,7 +241,6 @@ function onPageInit(success){
                     }
                     return length;
                 }
-                
                 $(window).on('onresize',onVisualizeResize);
                 onVisualizeResize();
 

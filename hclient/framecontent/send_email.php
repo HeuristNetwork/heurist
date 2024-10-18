@@ -70,11 +70,12 @@ if(isset($_POST['data'])) {
     <title>Bulk email sender</title>
 
     <!-- CSS -->
-    <?php include_once dirname(__FILE__).'/initPageCss.php';?>
-
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <?php 
+    
+    include_once dirname(__FILE__).'/initPageCss.php';
+    includeJQuery();
+    
+    ?>
 
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>

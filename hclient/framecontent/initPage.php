@@ -222,9 +222,11 @@ if(defined('IS_INDEX_PAGE')){
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-<?php 
-$isUpgrade = true;
+<?php
+    includeJQuery();
 ?>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.fileupload.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/9.5.7/jquery.iframe-transport.min.js"></script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
@@ -396,6 +398,42 @@ $isUpgrade = true;
                 return true;
             }
             return false;
+
+    }
+
+    //
+    // it itakes name of theme from preferences , oherwise default theme is heurist
+    //
+    function applyTheme(){
+
+        var prefs = window.hWin.HAPI4.get_prefs();
+        /* unfortunately dynamic addition of theme and style is not applied properly.
+        Browser takes some time on its parsing while we have already created some ui elements, need timeout.
+        So, its better to detecct current theme on server side
+        if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
+        //load one of standard themes from jquery web resource
+        cssLink = $('<link rel="stylesheet" type="text/css" href="http:......./themes/'+
+        prefs['layout_theme']+'/jquery-ui.css" />');
+        }else{
+        //default BASE or HEURIST theme
+        cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-....../themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
+        }
+        $("head").append(cssLink);
+        $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
+        */
+        var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
+
+        if(window.hWin.HEURIST4.util.isempty(layoutid)){
+            layoutid = "H6Default";
+            /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');
+            if(window.hWin.HEURIST4.util.isempty(layoutid)){
+            layoutid = "H5Default";
+            }*/
+        }
+        if(!window.hWin.HAPI4.sysinfo['layout']){
+            window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
+        }
+        //add version to title
 
     }
 </script>

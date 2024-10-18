@@ -1955,7 +1955,7 @@ window.hWin.HEURIST4.ui = {
                             
                         //triangle icon fo
                         + ((reltype!='')?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
-                            +'<span class="ui-icon ui-icon-triangle-1-e"></span></span>':'') //padding-top:3px;
+                            +'<span class="ui-icon ui-icon-triangle-1-e"></span></span>':'')
 
                         //record type icon for resource
                         + (reltype==''?rectype_icon:'')

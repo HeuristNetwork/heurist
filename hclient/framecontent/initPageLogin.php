@@ -44,9 +44,7 @@ $hasAccess = ($system->is_admin());
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <?php
-if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))  {
-    //@todo load localcopy of jquery for offline mode
-}
+    includeJQuery();
 ?>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
