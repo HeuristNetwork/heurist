@@ -123,25 +123,23 @@ $.widget("heurist.baseConfig", {
 
         let that = this;
 
-        return [
-            {
-                text:window.hWin.HR('Close'), 
-                id:'btnClose',
-                css:{'float':'right','margin-left':'30px'}, 
-                click: function() { 
-                    that._closeHandler(false, false, null);
-                }
-            },
-            {
-                text:window.hWin.HR('Save'),
-                id:'btnSave',
-                css:{'float':'right'},
-                click: function() {
-                    that._closeHandler(true, false, null);
-                },
-                class: "ui-button-action"
+        return [{
+            text:window.hWin.HR('Close'), 
+            id:'btnClose',
+            css:{'float':'right','margin-left':'30px'}, 
+            click: function() { 
+                that._closeHandler(false, false, null);
             }
-        ];
+        },
+        {
+            text:window.hWin.HR('Save'),
+            id:'btnSave',
+            css:{'float':'right'},
+            click: function() {
+                that._closeHandler(true, false, null);
+            },
+            class: "ui-button-action"
+        }];
     },
 
     //
@@ -233,7 +231,7 @@ $.widget("heurist.baseConfig", {
     //
     // on close 
     //
-    _closeHandler: function(isSave=false, isMouseLeave=false, trigger){
+    _closeHandler: function(isSave=false, isMouseLeave=false, trigger = null){
 
         let that = this;
 
@@ -265,16 +263,14 @@ $.widget("heurist.baseConfig", {
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'}, {default_palette_class: 'ui-heurist-design'});
+        }else if(isSave){
+            this.saveConfigrations();
+        }else if(isMouseLeave){
+
+        }else if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
+            this._as_dialog.dialog('close');
         }else{
-            if(isSave){
-                this.saveConfigrations();
-            }else{
-                if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
-                    this._as_dialog.dialog('close');
-                }else{
-                    this.element.empty().hide();
-                }
-            }
+            this.element.empty().hide();
         }
     },
 
