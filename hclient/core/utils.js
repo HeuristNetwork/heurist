@@ -112,6 +112,9 @@ window.hWin.HEURIST4.util = {
     },
     
     isPositiveInt: function (n) {
+        if(window.hWin.HEURIST4.util.isempty(n)){
+            return false;
+        }
         n = parseInt(n);
         return !isNaN(n) && n>0;
     },

@@ -230,7 +230,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         let template_body = this.codeEditor.getValue();
 
-        if(!(template_body?.length>10)){
+        if(template_body?.length<=10){
             window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define code');
             return;            
         }
@@ -253,7 +253,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 request['publish'] = 4;
                 recset = JSON.stringify({records:[rec_ID], reccount:1});
                 
-        }else if(!(window.hWin.HAPI4.currentRecordset?.length()>0)){
+        }else if(window.hWin.HAPI4.currentRecordset?.length()==0){
             window.hWin.HEURIST4.msg.showMsgFlash('Perform search to get record set to test against');
             return;
         }else{
@@ -497,7 +497,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         }
 
         s =  window.hWin.HEURIST4.util.stripTags(s);
-        if(_nodep.parent && _nodep.parent.data.codes ){ //!_nodep.parent.isRootNode()
+        if(_nodep.parent?.data.codes ){ //!_nodep.parent.isRootNode()
             s = window.hWin.HEURIST4.util.stripTags(_nodep.parent.title) + ' >> ' + s;
         }
         return s;
@@ -744,7 +744,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             treediv.fancytree("destroy");
         }
         
-        if(!(rty_ID>0)){
+        if(!window.hWin.HEURIST4.util.isPositiveInt(rty_ID)){
             treediv.text('Please select a record type from the pulldown above');
             return;
         }
@@ -953,7 +953,7 @@ this_id       : "term"
                     
                         codes = codes.split(':');
                         
-                        if(key.indexOf('rec_')===0){
+                        if(key.startsWith('rec_')){
                             _varname = key.replace('_','');
                         }
                         
@@ -974,7 +974,7 @@ this_id       : "term"
                             if(_nodep.data.type == 'rectype'){
                                 rectypeId = _nodep.data.rtyID_local;
                                 _varname = '';
-                            }else if(key.indexOf('rec_')!==0)
+                            }else if(!key.startsWith('rec_'))
                             {
                                 if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
                                     if( inloop!=1 ){
@@ -1097,7 +1097,7 @@ this_id       : "term"
 
 
     _closeInsertPopup: function(){
-        if(this._addVariableDlg && this._addVariableDlg.dialog('instance')){
+        if(this._addVariableDlg?.dialog('instance')){
             this._addVariableDlg.dialog('close');
         }
     },
@@ -1134,7 +1134,7 @@ this_id       : "term"
             field_name = 'field';
         }
         
-        if(this._addVariableDlg && this._addVariableDlg.dialog('instance')){
+        if(this._addVariableDlg?.dialog('instance')){
             this._addVariableDlg.dialog('close');
         }
         
@@ -1151,46 +1151,53 @@ this_id       : "term"
             let file_data = $dlg2.find('#selFileData').val();
             
             let bid = $ele.attr('id');
+            let inloop = 0;
             
-            let inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
+            if(bid=='btn_insert_loop'){
+                inloop = 1;
+            }else if(bid.indexOf('_loop')>0){
+                inloop = 2;
+            }
             
             that._insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
             //this._addVariableDlg.dialog('close');
         }
         
+        
+        function __on_add(event){
+
+            let $dlg2 = $(event.target).parents('.ui-dialog-content');
+            let sel = $dlg2.find("#selInsertModifiers")
+            let modname = sel.val();
+
+            if(modname !== ''){
+                that._insertAtCursor("|"+modname);
+            }
+
+            sel.val('');
+        }           
         // init buttons
         let $ele_popup = $('#insert-popup');
         $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click', __on_add);
         $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click', __on_add);
             
         $ele_popup.find('#btn_insert_loop').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click', __on_add);
         $ele_popup.find('#btn_insert_loop_var').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click', __on_add);
         $ele_popup.find('#btn_insert_loop_if').attr('onclick',null).button()
             .off('click')
-            .click(__on_add);
+            .on('click', __on_add);
             
         $ele_popup.find('#selInsertModifiers').attr('onchange',null)
             .off('change')
-            .on('change', function __on_add(){
-        
-                let $dlg2 = $(event.target).parents('.ui-dialog-content');
-                let sel = $dlg2.find("#selInsertModifiers")
-                let modname = sel.val();
-
-                if(modname !== ''){
-                    that._insertAtCursor("|"+modname);
-                }
-
-                sel.val('');
-            });
+            .on('change', __on_add);
 
         let $langSel = $ele_popup.find('#selLanguage');
         if($langSel.find('option').length == 1){ // fill select with available languages

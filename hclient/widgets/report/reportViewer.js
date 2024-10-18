@@ -239,9 +239,7 @@ $.widget( "heurist.reportViewer", {
                 'Are you sure you wish to delete template "'+this._currentTemplate+'"?', 
                 function(){ that.onTemplateDelete(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
-            return;
         }
-
     },
 
     //
@@ -302,8 +300,7 @@ $.widget( "heurist.reportViewer", {
     //
     onTemplateExport: function() {
         
-        let dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
-        if(!(dbId > 0)){
+        if(!window.hWin.HEURIST4.util.isPositiveInt(  window.hWin.HAPI4.sysinfo['db_registeredid'] )){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: 'Database must be registered to allow translation of local template to global template.',
                 error_title: 'Cannot convert to global template'
@@ -408,7 +405,7 @@ $.widget( "heurist.reportViewer", {
     
     _updateTemplatesList: function(template_to_select) {
         
-        this._currentTemplate = template_to_select ?template_to_select :window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
+        this._currentTemplate = template_to_select || window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
         
         let sel = this._$('#selTemplates');
         sel.empty();
