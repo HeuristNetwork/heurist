@@ -43,7 +43,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 <?php
 }
 ?>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js" integrity="sha384-w7CXHFrOIXSmCXYnTQGa05l+TdEU+qxHtOaPqyTojic8o3wGz3rfRGuNNOKU0uDW" crossorigin="anonymous"></script>
 <!-- leaflet plugins -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-iiif.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-providers.js"></script>
