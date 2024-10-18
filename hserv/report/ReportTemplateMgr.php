@@ -56,7 +56,7 @@ class ReportTemplateMgr
         global $system;
 
         $this->system = $_system ?: $system;
-        $this->dir = $_dir ?: (defined('HEURIST_SMARTY_TEMPLATES_DIR') ? HEURIST_SMARTY_TEMPLATES_DIR : null);
+        $this->dir = $_dir ?? (defined('HEURIST_SMARTY_TEMPLATES_DIR') ? HEURIST_SMARTY_TEMPLATES_DIR : null);
     }
 
     /**

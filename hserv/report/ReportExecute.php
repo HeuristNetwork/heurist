@@ -524,7 +524,9 @@ class ReportExecute
             $this->smartySessionId = 0;
         }
 
-        //$this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']);
+        /* smarty output filter is not used in this version since we fetch output to variable
+            $this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']);
+        */
 
         $this->smarty->assign('template_file', $this->templateFile);
         try {
@@ -609,27 +611,13 @@ class ReportExecute
                 $error_msg = 'Undefined smarty error';
             }
         }
-        if($this->publishmode>0 && $this->publishmode<4){
-            //$error_msg = $error_msg.'<div style="padding:20px;font-size:110%">Currently there are no results</div>';
-        }
+        
         $this->messageError = $error_msg;
 
         if($this->outputmode=='html'){
             $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';
         }
         $this->handleTemplateOutput($error_msg);
-
-        /*
-        if($this->outputmode=='js'){
-            $error_msg = $this->saveOutputAsJavascript($error_msg);
-        }
-
-        if($this->publishmode>0 && $this->publishmode<4 && $this->outputfile!=null){ //save empty output into file
-            $this->saveOutputToFile($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
-        }else{
-            echo USanitize::sanitizeString($error_msg);
-        }
-        */
     }
 
     public function getError(){
@@ -642,10 +630,6 @@ class ReportExecute
     // Convert short form term translations (before Smarty processes the report)
     //
     public function translateTerms($tpl_source, \Smarty\Template $template){
-        /* Original pre filter - remove all <script> tags from template
-        $s = preg_replace("/<!--#.*-->/U",'',$tpl_source);
-        return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
-        */
 
         $matches = array();
 
@@ -720,7 +704,7 @@ class ReportExecute
 
             $dom = new \DOMDocument();
             $dom->preserveWhiteSpace = false;
-            //$dom->formatOutput       = true;
+            //disable this feature $dom->formatOutput       = true;
             @$dom->loadHTML($content);
             $body = $dom->getElementsByTagName('body');
             if($body){
@@ -977,8 +961,6 @@ class ReportExecute
 
              //
              if($head!=''){
-                 //$tpl_source = removeHeadAndBodyTags($tpl_source);
-
                  if(strpos($tpl_source, '<head>')>0){
                      $tpl_source = str_replace(HEAD_E, $head.HEAD_E, $tpl_source);
                  }else{
@@ -1007,7 +989,6 @@ class ReportExecute
                 $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
                 $config->set('HTML.DefinitionRev', 1);
 
-                //$config = HTMLPurifier_Config::createDefault();
                 $config->set('Cache', 'SerializerPath', $this->system->getSysDir('scratch'));
                 $config->set('CSS.Trusted', true);
                 $config->set('Attr.AllowedFrameTargets','_blank');
@@ -1046,10 +1027,11 @@ class ReportExecute
                         'controls' => 'Bool',
                     ));
                 }
+                $config->set('HTML.Trusted', true);
+                $config->set('Filter.ExtractStyleBlocks', true);
+                
                 */
 
-                //$config->set('HTML.Trusted', true);
-                //$config->set('Filter.ExtractStyleBlocks', true);
                 $purifier = new \HTMLPurifier($config);
 
                 $tpl_source = $purifier->purify($tpl_source);
@@ -1061,8 +1043,6 @@ class ReportExecute
                         $tpl_source = $font_styles.$tpl_source;
                     }
                 }
-
-                //$styles = $purifier->context->get('StyleBlocks');
 
                 return $tpl_source;
     }
@@ -1499,141 +1479,153 @@ Javascript wrap:<br>
                     }
                 }
             }
+            
+            switch ($dt){
+                case 'url':
+                    $result = "<a href='{$params['var']}' target=_blank rel=noopener $style>{$params['var']}</a>";
+                    break;
+                case 'file':
+                    $result = $this->processFieldFile($params, $mode, $style, $size);
+                    break;
+                case 'geo':
+                    $value = $params['var'];
+                    $result = '';
 
-            if($dt=="url"){
+                    if($value && $value['wkt']){
+                        $geom = \geoPHP::load($value['wkt'],'wkt');
+                        if(!$geom->isEmpty()){
+                                $point = $geom->centroid();
+                                if($label=="") {$label = "on map";}
+                                $result = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
 
-                return "<a href='{$params['var']}' target=_blank rel=noopener $style>{$params['var']}</a>";
-
-            }elseif($dt=="file"){
-                //insert image or link
-                $values = $params['var'];
-
-                $limit = intval(@$params['limit']);
-
-                $sres = "";
-
-                if(!is_array($values) || !array_key_exists(0,$values)) {$values = array($values);}
-
-                foreach ($values as $idx => $fileinfo){
-
-                    if($limit>0 && $idx>=$limit) {break;}
-
-                    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
-                    $originalFileName = $fileinfo['ulf_OrigFileName'];
-                    $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
-                    $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
-                    $mimeType = $fileinfo['fxm_MimeType'];
-                    $file_Ext= $fileinfo['ulf_MimeExt'];
-
-                    //$file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
-                    $file_thumbURL  = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&thumb='.$file_nonce;
-                    $file_URL   = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce; //download
-
-                    if($mode=="link") {
-
-                        $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || strpos($originalFileName,ULF_IIIF)===0)
-                            ?$external_url:$originalFileName;
-
-                        if(@$params['fancybox']){
-                            $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
-                                .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>$sname</a>";
-                        }else{
-                            $sres = $sres."<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
+                            /* static maps by third party service is blocked 2024-09-29
+                            if(array_key_exists('mode',$params) && $params['mode']=="link"){
+                            }else{
+                                $recid = $value['recid'];
+                                $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$this->system->dbname();//"&t="+d;
+                                return "<img src=\"".$url."\" ".$size."/>";
+                            }
+                            */
                         }
+                    }
+                    break;
+                case 'date':
+                    if($mode==null) {$mode = 1;}
 
-                    }elseif($mode=="thumbnail"){
-
-                        if(@$params['fancybox']){
-                            $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
-                        }else{
-                            $sres = $sres."<a href='$file_URL' target=_blank rel=noopener>".
-                            "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
-                        }
-
-                    }else{ //player is default
-
-                        $sres = $sres.fileGetPlayerTag($this->system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
-
+                    $calendar = null;
+                    if(array_key_exists('calendar',$params)){
+                        $calendar = $params['calendar'];
+                    }
+                    if(is_array($params['var']) && array_key_exists(0,$params['var'])){
+                        $params['var'] = $params['var'][0];
                     }
 
-                    if(@$params['fancybox'] && $this->isJsAllowed){
+                    $content = \Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
 
-                        $mode_3d_viewer = detect3D_byExt($file_Ext);
-
-                        $sres .= ('<script>if(rec_Files)rec_Files.push({'
-                                .'rec_ID:'.$fileinfo['rec_ID']
-                                .',id:"'.$file_nonce
-                                .'",mimeType:"'.$mimeType
-                                .'",mode_3d_viewer:"'.$mode_3d_viewer
-                                .'",filename:"'.htmlspecialchars($originalFileName)
-                                .'",external:"'.htmlspecialchars($external_url).'"});</script>');
+                    if($label!="") {$label = $label.": ";}
+                    $result = $label.$content.'<br>';
+                    break;
+                default:
+                    //if this is CMS content
+                    // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
+                    // 2. Convert relative paths to absolute
+                    if(is_string(@$params['var'])){
+                        $content = json_decode($params['var'], true);
+                    }else{
+                        $content = @$params['var'];
+                    }
+                    if(is_array($content)){
+                        $content = $this->prepareCMScontent($content);
+                    }else{
+                        $content = $this->prepareCMScontent($params['var']);
                     }
 
-                }
+                    if($label!="") {$label = $label.": ";}
+                    $result = $label.$content.'<br>';
+            }        
 
-                return $sres;
-
-            }elseif($dt=='geo'){
-
-                $value = $params['var'];
-                $res = "";
-
-                if($value && $value['wkt']){
-                    $geom = \geoPHP::load($value['wkt'],'wkt');
-                    if(!$geom->isEmpty()){
-                            $point = $geom->centroid();
-                            if($label=="") {$label = "on map";}
-                            $res = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
-
-                        /* static maps by third party service is blocked 2024-09-29
-                        if(array_key_exists('mode',$params) && $params['mode']=="link"){
-                        }else{
-                            $recid = $value['recid'];
-                            $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$this->system->dbname();//"&t="+d;
-                            return "<img src=\"".$url."\" ".$size."/>";
-                        }
-                        */
-                    }
-                }
-                return $res;
-            }
-            elseif($dt=='date'){
-
-                if($mode==null) {$mode = 1;}
-
-                $calendar = null;
-                if(array_key_exists('calendar',$params)){
-                    $calendar = $params['calendar'];
-                }
-                if(is_array($params['var']) && array_key_exists(0,$params['var'])){
-                    $params['var'] = $params['var'][0];
-                }
-
-                $content = \Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
-
-                if($label!="") {$label = $label.": ";}
-                return $label.$content.'<br>';
-            }
-            else{
-                //if this is CMS content
-                // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
-                // 2. Convert relative paths to absolute
-                if(is_string(@$params['var'])){
-                    $content = json_decode($params['var'], true);
-                }else{
-                    $content = @$params['var'];
-                }
-                if(is_array($content)){
-                    $content = $this->prepareCMScontent($content);
-                }else{
-                    $content = $this->prepareCMScontent($params['var']);
-                }
-
-                if($label!="") {$label = $label.": ";}
-                return $label.$content.'<br>';
-            }
+            return $result;
     }
 
+    /**
+    * Process file field and output img or player/viewer output
+    * 
+    * @param mixed $params
+    * @param mixed $mode
+    * @param mixed $style
+    * @param mixed $size
+    */
+    private function processFieldFile($params, $mode, $style, $size){                    
+        //insert image or link
+        $values = $params['var'];
+
+        $limit = intval(@$params['limit']);
+
+        $sres = "";
+
+        if(!is_array($values) || !array_key_exists(0,$values)) {$values = array($values);}
+
+        foreach ($values as $idx => $fileinfo){
+
+            if($limit>0 && $idx>=$limit) {break;}
+
+            $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
+            $originalFileName = $fileinfo['ulf_OrigFileName'];
+            $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
+            $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
+            $mimeType = $fileinfo['fxm_MimeType'];
+            $file_Ext= $fileinfo['ulf_MimeExt'];
+
+            //$file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
+            $file_thumbURL  = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&thumb='.$file_nonce;
+            $file_URL   = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce; //download
+
+            if($mode=="link") {
+
+                $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || strpos($originalFileName,ULF_IIIF)===0)
+                ?$external_url:$originalFileName;
+
+                if(@$params['fancybox']){
+                    $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
+                    .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>$sname</a>";
+                }else{
+                    $sres = $sres."<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
+                }
+
+            }elseif($mode=="thumbnail"){
+
+                if(@$params['fancybox']){
+                    $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
+                }else{
+                    $sres = $sres."<a href='$file_URL' target=_blank rel=noopener>".
+                    "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
+                }
+
+            }else{ //player is default
+
+                $sres = $sres.fileGetPlayerTag($this->system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
+
+            }
+
+            if(@$params['fancybox'] && $this->isJsAllowed){
+
+                $mode_3d_viewer = detect3D_byExt($file_Ext);
+
+                $sres .= ('<script>if(rec_Files)rec_Files.push({'
+                    .'rec_ID:'.$fileinfo['rec_ID']
+                    .',id:"'.$file_nonce
+                    .'",mimeType:"'.$mimeType
+                    .'",mode_3d_viewer:"'.$mode_3d_viewer
+                    .'",filename:"'.htmlspecialchars($originalFileName)
+                    .'",external:"'.htmlspecialchars($external_url).'"});</script>');
+            }
+
+        }
+
+        return $sres;
+    }
+
+    
     //
     //  Replace relative path to absolute
     //

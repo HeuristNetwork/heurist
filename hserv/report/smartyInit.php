@@ -26,8 +26,7 @@ use Smarty\Smarty;
 use Smarty\Security;
 use Smarty\Template;
 
-//require_once dirname(__FILE__).'/../../vendor/smarty/smarty/libs/Smarty.class.php';
-class Heurist_Security_Policy extends Security {
+class HeuristSecurityPolicy extends Security {
 
   // disable acess to static classes
   public $static_classes = null;
@@ -89,7 +88,7 @@ function smartyInit($smarty_templates_dir=null){
         $smarty->setConfigDir($smarty_templates_dir.'configs');
 
         // enable security
-        $smarty->enableSecurity('Heurist_Security_Policy');
+        $smarty->enableSecurity('HeuristSecurityPolicy');
 
         //allowed php functions
         $php_functions = array( 'constant', 'count',
