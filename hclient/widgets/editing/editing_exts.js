@@ -1259,7 +1259,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         }
     }
 
-    $inpt.focus();
+    $inpt.trigger('focus');
 }
 
 //

@@ -45,7 +45,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
             }        
         ).appendTo(ent_header);
 
-        $('<div>').button({label:window.hWin.HR('New subfolder')}).click(
+        $('<div>').button({label:window.hWin.HR('New subfolder')}).on('click',
             function() {
 
                 let node = that._treeview.fancytree("getActiveNode");
@@ -61,7 +61,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
             }        
         ).appendTo(ent_header);
 
-        $('<div>').button({label:window.hWin.HR('Delete')}).click(
+        $('<div>').button({label:window.hWin.HR('Delete')}).on('click',
             function() {
 
                 let node = that._treeview.fancytree("getActiveNode");

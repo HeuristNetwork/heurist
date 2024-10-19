@@ -54,8 +54,8 @@ $.widget( "heurist.selectMultiValues", {
         this.element.addClass('ui-heurist-bg-light');
 
         $('<div class="ent_wrapper">'
-                +'<div class="ent_header"/>'
-                +'<div class="ent_content_full recordList"/>'
+                +'<div class="ent_header"></div>'
+                +'<div class="ent_content_full recordList"></div>'
                 +'</div>').appendTo( this.element );
                 
         //hide toolbar by default                

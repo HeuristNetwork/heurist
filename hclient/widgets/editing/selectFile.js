@@ -73,7 +73,7 @@ $.widget( "heurist.selectFile", {
 
         $('<div class="ent_wrapper">'
                 +sFilter
-                +'<div class="ent_content_full recordList"/>'
+                +'<div class="ent_content_full recordList"></div>'
                 +'</div>').appendTo( this.element );
 
         if(this.options.showFilter){

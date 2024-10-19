@@ -396,14 +396,14 @@ $.widget( "heurist.editing_input", {
             if(this.options.dtID != 'rst_DefaultValue_resource'){
                 if(this.detailType=="resource" && this.configMode.entity=='records'){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"></span></div>')                
                         .appendTo( this.header );
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
                         
                 }else if(this.detailType=="relmarker"){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"></span></div>')                
                         .appendTo( this.header )
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
@@ -1717,7 +1717,7 @@ $.widget( "heurist.editing_input", {
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
 
-                            $input.click();
+                            $input.trigger('click');
                             $input.hSelect('close');
                         }
                     });
@@ -1923,7 +1923,7 @@ $.widget( "heurist.editing_input", {
             if(value){
                 $input.val(value);
             }
-            $input.change(function(){that.onChange();})
+            $input.on('change',function(){that.onChange();})
 
         }
         else if(this.detailType=="user"){ //special case - only groups of current user
@@ -2517,7 +2517,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
-            .keyup(function(){that.onChange();})
+            .on('keyup', function(){that.onChange();})
             .on('change', function(){
                     that.onChange();
             })
@@ -2528,7 +2528,7 @@ $.widget( "heurist.editing_input", {
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
                  this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
                      
-                $input.keydown(function(e){  //Ctrl+A - select all
+                $input.on('keydown',function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
                     }    
@@ -2545,7 +2545,7 @@ $.widget( "heurist.editing_input", {
                     function __url_input_state(force_edit){
                     
                         if($input.val()=='' || force_edit===true){
-                            $input.removeClass('rec_URL').addClass('text').removeAttr("readonly");
+                            $input.removeClass('rec_URL').addClass('text').attr("readonly",false);
                             that._off( $input, 'click');
                             if(!window.hWin.HEURIST4.util.isnull( $btn_extlink)){
                                 
@@ -2557,7 +2557,7 @@ $.widget( "heurist.editing_input", {
                                 }
                             }
                             if(force_edit===true){
-                                $input.focus();   
+                                $input.trigger('focus');   
                             }
                         }else if(window.hWin.HEURIST4.util.isnull($btn_extlink)){
                             
@@ -2592,7 +2592,7 @@ $.widget( "heurist.editing_input", {
             else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                  
-                $input.keypress(function (e) {
+                $input.on('keypress', function (e) {
                     let code = e.charCode || e.keyCode;
                     let charValue = String.fromCharCode(code);
                     let valid = false;
@@ -2640,8 +2640,8 @@ $.widget( "heurist.editing_input", {
             }else
             if(this.detailType=="float"){//----------------------------------------------------
 
-                $input.keypress(function (e) {
-                    let code = e.charCode || e.keyCode;
+                $input.on('keypress', function (e) {
+                    let code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
                     let charValue = String.fromCharCode(code);
                     let valid = false;
 
@@ -4150,7 +4150,7 @@ $.widget( "heurist.editing_input", {
         btn_field_visibility.hide();
                     
                     
-        let chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
+                let chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
                     +'Hide this value from public<div>', 
                     {title: 'Per record visibility'})
                     .addClass('field-visibility2 graytext')
@@ -5024,7 +5024,7 @@ $.widget( "heurist.editing_input", {
                                                 
                                                 $input.val(trm_id);
                                                 $input.hSelect('refresh');
-                                                $input.change();
+                                                $input.trigger('change');
                                                 
                                             }else{
                                                 $('#div_result').hide();
@@ -5563,7 +5563,7 @@ $.widget( "heurist.editing_input", {
 
                 if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || 
                     ($.isPlainObject(ress[0]) &&  $.isEmptyObject(ress[0])) || 
-                    ($.type(ress[0])=='string' && ress[0].trim()=='')) {
+                    ( (typeof ress[0] ==='string') && ress[0].trim()=='')) {
                     
                     
                     if( data_type=='file' && !this.isFileForRecord && this.entity_image_already_uploaded){
@@ -5648,7 +5648,7 @@ $.widget( "heurist.editing_input", {
             && $(this.inputs[0]).is(':visible') 
             && !$(this.inputs[0]).hasClass('ui-state-disabled') )
         {
-            $(this.inputs[0]).focus();   
+            $(this.inputs[0]).trigger('focus');   
             return $(this.inputs[0]).is(':focus');
         } else {
             return false;
@@ -6672,7 +6672,7 @@ $.widget( "heurist.editing_input", {
 
                             that.new_value = changed_val;
 
-                            that.btn_add.click();
+                            that.btn_add.trigger('click');
                         }
                     }
 

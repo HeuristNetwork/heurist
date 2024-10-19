@@ -41,7 +41,7 @@ $.widget( "heurist.editTranslations", {
         let that = this;
 
         
-        this._container = $('<div class="ent_content_full" style="top:0;padding:10px"/>')
+        this._container = $('<div class="ent_content_full" style="top:0;padding:10px"></div>')
                     .appendTo( $('<div class="ent_wrapper">').appendTo(this.element) );
 
         if(this.options.is_dialog){

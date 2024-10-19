@@ -242,7 +242,7 @@ let TemporalPopup = (function () {
         
 	
 
-        $(".withCalendarsPicker").change(_updateGeorgianDate);
+        $(".withCalendarsPicker").on('change',_updateGeorgianDate);
         _updateGeorgianDate();
         
         
@@ -608,6 +608,9 @@ let TemporalPopup = (function () {
 
         calendar = $.calendars.instance(calendar_type);
 
+        let calendarsPicker = $.calendarsPicker || $.calendars.picker; //v2 or v1
+
+
         let calendar_options = {
             calendar: calendar,
             showOnFocus: false,
@@ -674,8 +677,8 @@ let TemporalPopup = (function () {
 	                _updateSimpleRange(true);
                 }
             },
-            renderer: $.extend({}, $.calendars.picker.defaultRenderer,
-                    {picker: $.calendars.picker.defaultRenderer.picker.
+            renderer: $.extend({}, calendarsPicker.defaultRenderer,
+                    {picker: calendarsPicker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
             showTrigger: '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/cal.gif" alt="Popup" class="trigger">'
