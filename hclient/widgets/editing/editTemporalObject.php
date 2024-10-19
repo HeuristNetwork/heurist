@@ -71,6 +71,7 @@
 <?php
     define('IS_INDEX_PAGE', false);
     if(!defined('PDIR')) {define('PDIR','../../../');}
+    require_once dirname(__FILE__).'/../../../autoload.php';
 
     includeJQuery();            
 ?>        
