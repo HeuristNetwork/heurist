@@ -524,7 +524,7 @@ console.log( JSON.stringify(that.options.service_config) );
         // empty control variables
         this._fillConfigForm('new');
         
-        let ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
+        this._reloadServiceList_item( 'new', 'assign on right ...' );
     },
     
     //
@@ -625,7 +625,6 @@ console.log( JSON.stringify(that.options.service_config) );
                 if(!this._is_modified){
 
                     let inputs = this.element.find('input[data-field]');
-                    let fields = {};
                     let that = this;
                     $.each(inputs, function(i, ele){ // get mapped fields
                 
@@ -680,7 +679,6 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _changeService: function( service_name ){
 
-        const that = this;
         let cfg0 = null;
 
         $.each(this._available_services, function(i, srv){ // get new service info
@@ -699,8 +697,6 @@ console.log( JSON.stringify(that.options.service_config) );
     _onUserGroupChange: function(){
      
         let usr_ID = this.selectUserGroups.val();   
-        
-        let that = this;
         
         if(usr_ID>=0){
             this.element.find('#service_params').show();
@@ -758,11 +754,14 @@ console.log( JSON.stringify(that.options.service_config) );
             this._reloadServiceList_item( idx, s ); //add to list
         }
         
-        this.serviceList.find('li').hover(function(event){ // service list hover event
+        
+        this.serviceList.find('li')
+        .on( 'mouseenter', function(event){ // service list hover event
             let ele = $(event.target);
             if(!ele.is('li')) ele = ele.parent();
             ele.addClass('ui-state-hover');
-        }, function(event){
+        })
+        .on( 'mouseleave', function(event){
             let ele = $(event.target);
             if(!ele.is('li')){ 
                 ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
@@ -812,7 +811,6 @@ console.log( JSON.stringify(that.options.service_config) );
 
         }else if(usr_ID>=0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
-            let that = this;
             let is_field_assigned = false;
 
             let inputs = this.element.find('input[data-field]');

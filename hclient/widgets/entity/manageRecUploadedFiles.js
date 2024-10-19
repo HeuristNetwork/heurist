@@ -557,7 +557,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                         primary: 'ui-icon-upload'
                     }})
-                    .click((e) => {
+                    .on('click',(e) => {
                         if(that._edit_dialog.find('#external_repos').val() != ''){
                             that._edit_dialog.find('#upload_file_repository').trigger('click');
                         }
@@ -1439,7 +1439,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         if(err_msg != ''){
                             window.hWin.HEURIST4.msg.showMsgFlash(err_msg, 3000);
-                            $dlg.find('#created').focus();
+                            $dlg.find('#created').trigger('focus');
                             return;
                         }
                     }else{
@@ -1494,7 +1494,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Prepare file metadata'}, {default_palette_class: 'ui-heurist-publish', dialogId: 'nakala_metadata'});
 
                 // Click handler for author search
-                $dlg.find('#lookup_author').click(() => {
+                $dlg.find('#lookup_author').on('click',() => {
                     let dlg_opts = {
                         mapping: {
                             dialog: 'lookupNakalaAuthor',

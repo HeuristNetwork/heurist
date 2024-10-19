@@ -34,7 +34,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
 
         this._on(this.input_search,  { keydown: window.hWin.HEURIST4.ui.preventNonAlphaNumeric, keyup:this.startSearch });
         
-        this.input_search.focus();         
+        this.input_search.trigger('focus');         
         
         
         if(this.options.subtitle){

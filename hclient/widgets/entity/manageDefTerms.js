@@ -107,7 +107,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.recordList.is(':visible') && this.options.auxilary=='term' && this.options.select_mode == 'manager')
         this.space_for_drop = $('<span class="space_for_drop heurist-helper3" '
                         +'style="position:absolute;top:90px;text-align:left;left:0;right:0;font-size: 0.8em;display:block;margin:0px;padding:5px 0 0 3px;background:white">'
-                        +'<span class="ui-icon ui-icon-arrowthick-1-e"/>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
+                        +'<span class="ui-icon ui-icon-arrowthick-1-e"></span>&nbsp;top</span>') //drop here to move term to top level&nbsp;<span class="ui-icon ui-icon-arrowthick-1-w"/>
                             .insertBefore(this.recordList);
         
 
@@ -412,7 +412,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
                 this._defineActionButton2(del_multi_btn, c1_btns);
 
-                $('<br><span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked/>move as sub-term<label> '
+                $('<br><span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked></span>move as sub-term<label> '
                     +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge into target term<label></span>')
                 .appendTo(c1_btns);
 
@@ -589,7 +589,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
 
                                     let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
-                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
+                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-size:contain; background-repeat:no-repeat; background-image: url("${icon}")' height=64 width=64 />`;
                                 }
 
                                 callback.call(ele_context, content);
@@ -925,7 +925,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     let treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
                     
                    
-                    let tree = this.recordTree.fancytree('getTree');
+                    let tree = $.ui.fancytree.getTree( this.recordTree );
                     tree.reload(treedata);
                 }
 
@@ -1082,7 +1082,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
             +sLabel+'&nbsp;&nbsp;'
-            +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); vertical-align:bottom;' />`
+            +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); background-size:contain; background-repeat:no-repeat; vertical-align:bottom;' />`
             +'&nbsp;&nbsp;<span class="term_usage"></span></div>';
 
             let html_thumb = '';
@@ -1103,7 +1103,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let alt_btn_content = '&nbsp;';
             if(this.options.edit_mode == 'popup'){
-                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" />';
+                alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" ></span>';
             }
 
             html = '<div class="recordDiv densed '+sclass+(!(ref_lvl>0)?' rt_draggable':'')
@@ -1665,7 +1665,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 setTimeout(function(){that._editing.setFocus();},1000);
             }
             return;
-        }else if(this.it_was_insert && this.options.auxilary=='vocabulary' && this.options.edit_mode=='popup'){
+//        }else if(this.it_was_insert && this.options.auxilary=='vocabulary' && this.options.edit_mode=='popup'){
             
         }else if(this.it_was_insert && this.options.auxilary=='term' && this.options.edit_mode=='popup'){
 
@@ -2548,7 +2548,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else if(action=='viewmode-tree'){ //NOT USED - @todo rempove all recordTree mentions
 
                 if(!this.recordTree){
-                    this.recordTree = $('<div class="ent_content_full" style="display:none;"/>')
+                    this.recordTree = $('<div class="ent_content_full" style="display:none;"></div>')
                     .addClass('ui-heurist-bg-light')
                     .css({'font-size':'0.8em'})
                     .insertAfter(this.recordList);
@@ -2701,7 +2701,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         ele.attr('trm_IDs',ids.join(','))
 						.css({'padding-bottom':'5px'})
                         .html(` ${s} <strong>${term_name}</strong> ${(term_code?(' ('+term_code+')'):'')} `)
-                        .click( function(event){
+                        .on('click', function(event){
                             //start search the particular term
                             
                             window.hWin.HEURIST4.util.stopEvent(event);
@@ -2741,7 +2741,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
 
-                                input_name.val('').focus();
+                                input_name.val('').trigger('focus');
                             }
                         });
                     }

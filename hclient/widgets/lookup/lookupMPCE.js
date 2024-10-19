@@ -226,7 +226,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         this.element.dialog('widget').find('.ui-dialog-titlebar-close').button().hide();
 
         // Detects the popup being resized, disable the mouseup as resize fires constantly
-        this.element.parent().resize(function(){
+        this.element.parent().on('onresize',function() {
             that.element.parent().off("mouseup");
 
             that.element.parent().one("mouseup", function(){

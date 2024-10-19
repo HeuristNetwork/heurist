@@ -193,7 +193,7 @@ $.widget( "heurist.searchBuilder", {
     , adjustDimension: function(){
         
         if(this.field_array.length==0){
-            this.btnAddFieldItem.click();
+            this.btnAddFieldItem.trigger('click');
         }else{
             this.pnl_Items.find('.field_header:first').css('visibility','visible');
         }
@@ -882,7 +882,7 @@ $.widget( "heurist.searchBuilder", {
                                 that.pnl_Tree.hide();
 
                                 if(treediv.fancytree('instance') !== undefined){
-                                    const tree = treediv.fancytree('getTree');
+                                    const tree = $.ui.fancytree.getTree( treediv );
                                     const node = tree.getNodeByKey(key);
 
                                     node.setActive(true);
@@ -1075,7 +1075,7 @@ $.widget( "heurist.searchBuilder", {
         
         let showrev = $('#fsw_showreverse').is(":checked");
         let treediv = $('#field_treeview');
-        let tree = treediv.fancytree("getTree");
+        let tree = $.ui.fancytree.getTree(treediv);
         let that = this;
         tree.visit(function(node){
 

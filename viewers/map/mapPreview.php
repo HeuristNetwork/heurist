@@ -25,7 +25,6 @@ if(isLocalHost()){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
 <?php
 }else{
 ?>
@@ -33,14 +32,12 @@ if(isLocalHost()){
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <!-- link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" /-->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
 <?php
 }
 ?>
 <!-- leaflet plugins -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-providers.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/accessTokens.php"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>

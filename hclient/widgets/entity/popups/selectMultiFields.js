@@ -176,18 +176,6 @@ function HMultiSelect(){
 	}
 
 	/*
-	 * Retrieve dty_Type using it's ID before continuing
-	 *
-	 * Param: (int) id => detail type's ID
-	 *
-	 * Return: (string) response from getTypeName()
-	 */
-
-	function getTypeById(id){ // not currently used
-		return getTypeName($Db.dty(id, 'dty_Type'));
-	}
-
-	/*
 	 * Get list of already assigned fields, to disable from master list
 	 *
 	 * Param: (int) rty_ID => current record type's ID
@@ -280,7 +268,7 @@ function HMultiSelect(){
 				let cb = $(ele.parent('div').find('input')[0]);
 				
 				if(!cb.prop('disabled')){
-					cb.click();
+					cb.trigger('click');
 				}
 			}
 		});

@@ -409,8 +409,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             ele.hide();
                         }               
 
-                        $(parent_span).hover(
-                            function(event){
+                        function _onmouseenter(event){
                                 let node;
                                 if($(event.target).hasClass('fancytree-node')){
                                     node =  $(event.target);
@@ -419,14 +418,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                 }
                                 if(! ($(node).hasClass('fancytree-loading') )){
                                     let ele = $(node).find('.svs-contextmenu3');
-                                    ele.css({'display':'inline-block'});
+                                    ele.css({'display':'inline-block'});//.css('visibility','visible');
                                 }
                             }
-                        );               
-                        $(parent_span).mouseleave(
+
+                        $(parent_span).on('mouseenter',
+                            _onmouseenter
+                        ).on('mouseleave',
                             _onmouseexit
-                        );                                                  
-                        
+                        );               
                         
                     }
                     
@@ -678,7 +678,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _addThemeField: function( nodekey )
     {
-        let tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( this.element.find('.rtt-tree') );
         
         let node = tree.getNodeByKey(nodekey);
         
@@ -1137,7 +1137,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         try{
                             that.popele.find('#int_min').val(response.data[0][0]);
                             that.popele.find('#int_max').val(response.data[0][1]);
-                        }catch(e){
+                        }catch{
+                            console.error('cannot assign min max values');
                         }
                     }
 

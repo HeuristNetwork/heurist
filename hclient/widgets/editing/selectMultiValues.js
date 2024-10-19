@@ -108,7 +108,7 @@ $.widget( "heurist.selectMultiValues", {
             let buttons = {};
             buttons[window.hWin.HR('Select')]  = function() {
                 
-                let wtrr = that._treeview.fancytree("getTree");
+                let wtrr = $.ui.fancytree.getTree(that._treeview);
                 // Get a list of all selected TOP nodes
                 let snodes = wtrr.getSelectedNodes(true);
                 // ... and convert to a key array:
@@ -244,7 +244,7 @@ $.widget( "heurist.selectMultiValues", {
         }
         
         if(this.options.selectedValues.length>0){
-            let wtrr = that._treeview.fancytree("getTree");
+            let wtrr = $.ui.fancytree.getTree(that._treeview);
             
             wtrr.visit(function(node){
                     if(!node.data.issystem){

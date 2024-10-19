@@ -212,8 +212,6 @@ $.widget( "heurist.ruleBuilder", {
         // b. relation types for relmarkers
         // c. all recordtypes contrained in pointer and relmarkers fields
 
-        let source_rt_name = $Db.rty(rt_ID,'rty_Name');
-
         let vocab_id;
         let arr_direct = {};
         let arr_reverse = [];
@@ -245,7 +243,7 @@ $.widget( "heurist.ruleBuilder", {
                         vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
                     }    
                     arr_direct[dtyID] = {key:dtyID, 
-                                title: (vocab_id>0?'>> ':'> ')+name,  //source_rt_name
+                                title: (vocab_id>0?'>> ':'> ')+name, 
                                 terms:vocab_id, rectypes:constraints};
                     
                     arr_rectypes = arr_rectypes.concat(constraints);

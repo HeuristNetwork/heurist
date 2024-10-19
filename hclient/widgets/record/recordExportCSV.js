@@ -177,7 +177,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     _assignSelectedFields: function(rnode){
         
             let that = this;
-            let tree = that.element.find('.rtt-tree').fancytree("getTree");           
+            let tree = $.ui.fancytree.getTree( that.element.find('.rtt-tree') );           
 
             if(rnode==null){
                 rnode = tree.getRootNode();  
@@ -212,18 +212,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
-        /*
-        res.push({text:window.hWin.HR('Export'),
-                    id:'btnDoAction2',
-                    disabled:'disabled',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction( 1 ); 
-                    }});
-       */ 
         return res;
     },    
         
@@ -237,8 +227,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         this.selectRecordScope.empty();
 
         let selScope = this.selectRecordScope.get(0);
-        
-        let scope_types = [];   
         
         let rectype_Ids = this._currentRecordset.getRectypes();
         
@@ -441,7 +429,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         //get selected fields from treeview
         let selectedFields = mode_action?{}:[];
-        let tree = this._$('.rtt-tree').fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
         let fieldIds = tree.getSelectedNodes(false);
         const len = fieldIds.length;
         
@@ -713,7 +701,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
 
                     let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-                    let setDefaults = !data.node.isExpanded();
 
                     if($(e.originalEvent.target).is('span') && !isExpander && data.node.children && data.node.children.length > 0){
                         data.node.setExpanded(!data.node.isExpanded());
@@ -730,13 +717,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             }
                         }
                     }
-                    let selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    let selected_nodes = $.ui.fancytree.getTree( treediv ).getSelectedNodes();
                     for(let j = 0; j < selected_nodes.length; j++){
                         that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }
                 },
                 collapse: function(e, data) {
-                    let selected_nodes = treediv.fancytree('getTree').getSelectedNodes();
+                    let selected_nodes = $.ui.fancytree.getTree( treediv ).getSelectedNodes();
                     for(let j = 0; j < selected_nodes.length; j++){
                         that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }

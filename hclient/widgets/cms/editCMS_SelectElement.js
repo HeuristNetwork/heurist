@@ -155,7 +155,7 @@ function editCMS_SelectElement( callback ){
 
                 });
 
-                sel.change(function(e){
+                sel.on('change',function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
                     let sel = e.target;
                     let t_name = $(sel).val();

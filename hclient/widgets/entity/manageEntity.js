@@ -181,32 +181,32 @@ $.widget( "heurist.manageEntity", {
         if(this.options.layout_mode=='basic'){  //common tooolbar on top, list on left, edit form on right side
             layout = 
                 '<div class="ent_wrapper">'
-                    +'<div class="ent_header editForm-toolbar"/>'
+                    +'<div class="ent_header editForm-toolbar"></div>'
                     +'<div class="ent_content_full" style="width:250px">'
-                        +    '<div class="ent_header searchForm"/>'     
-                        +    '<div class="ent_content_full recordList"/>'
+                        +    '<div class="ent_header searchForm"></div>'     
+                        +    '<div class="ent_content_full recordList"></div>'
                     +'</div>'
-                    +'<div class="ent_content_full editForm" style="left:251px"/>'
+                    +'<div class="ent_content_full editForm" style="left:251px"></div>'
                 +'</div>';
         }else if(this.options.layout_mode=='short'){ //the same as above, short toolbar above edit on right side
         
             layout = 
                 '<div class="ent_wrapper">'
                         +'<div class="ent_wrapper" style="width:320px">'
-                        +    '<div class="ent_header searchForm"/>'     
-                        +    '<div class="ent_content_full recordList"/>'
+                        +    '<div class="ent_header searchForm"></div>'     
+                        +    '<div class="ent_content_full recordList"></div>'
                         +'</div>'
                         +'<div class="ent_wrapper editFormContainer" style="left:321px">'
-                        //+    '<div class="ent_header editForm-toolbar"/>'
-                        +    '<div class="ent_content_full editForm" style="top:0"/>'
+                        //+    '<div class="ent_header editForm-toolbar"></div>'
+                        +    '<div class="ent_content_full editForm" style="top:0"></div>'
                         +'</div>'
                 +'</div>';
                 
         }else if(this.options.layout_mode=='listonly'){
 
             layout = '<div class="ent_wrapper">'
-                                +    '<div class="searchForm" style="display:none;"/>'     
-                                +    '<div class="ent_content_full recordList" style="top:0"/>'
+                                +    '<div class="searchForm" style="display:none;"></div>'     
+                                +    '<div class="ent_content_full recordList" style="top:0"></div>'
                             +'</div>'
 
         }else if(this.options.layout_mode=='tabbed'){ //for terms - REMOVE
@@ -214,14 +214,14 @@ $.widget( "heurist.manageEntity", {
             layout = 
                 '<div class="ent_wrapper">'
                         +'<div class="ent_wrapper">'
-                        +    '<div class="ent_header searchForm"/>'     
+                        +    '<div class="ent_header searchForm"></div>'     
                         +    '<div class="ent_content_full" style="top:4.4em">'
-                                +'<div class="ent_content_full recordList" style="width:320px"/>' //treeview
+                                +'<div class="ent_content_full recordList" style="width:320px"></div>' //treeview
                                 +'<div class="ent_wrapper" style="top:4em;left:321px">'
-                                +    '<div class="ent_header editForm-toolbar"/>'
-                                +    '<div class="ent_content_full editForm"/>'
+                                +    '<div class="ent_header editForm-toolbar"></div>'
+                                +    '<div class="ent_content_full editForm"></div>'
                                 +'</div>'
-                                +'<div class="ent_content_full recordList2" style="display:none;left:321px"/>' //image list
+                                +'<div class="ent_content_full recordList2" style="display:none;left:321px"></div>' //image list
                         +'</div>'
                 +'</div>';
                 
@@ -229,9 +229,9 @@ $.widget( "heurist.manageEntity", {
 
             layout = 
                 '<div class="ent_wrapper">'
-                        + '<div class="recordList" style="display:none;"/>'
-                        + '<div class="ent_content editForm ui-widget" style="top:15px;bottom:0"/>'
-                        //+ '<div class="ent_footer editForm-toolbar"/>'
+                        + '<div class="recordList" style="display:none;"></div>'
+                        + '<div class="ent_content editForm ui-widget" style="top:15px;bottom:0"></div>'
+                        //+ '<div class="ent_footer editForm-toolbar"></div>'
                 +'</div>';
         
         }else{ //custom layout - must contain valid html snippet
@@ -239,7 +239,7 @@ $.widget( "heurist.manageEntity", {
         }
         try{
             $(layout).appendTo(this.element);
-        }catch(e){
+        }catch{
             this.element.html('Cannot init layout. Please contact developers')
             return;
         }
@@ -658,7 +658,7 @@ $.widget( "heurist.manageEntity", {
         let btn_opts = {label:options.text, icons:options.icons, title:options.title, showLabel:options.showText!==false};
         
         let btn = $('<button>').button(btn_opts)
-                    .click(options.click)
+                    .on('click',options.click)
                     .appendTo(container);
         if(options.id){
             btn.attr('id', options.id);
@@ -1394,7 +1394,7 @@ $.widget( "heurist.manageEntity", {
                 }
             }
 
-            $first_ele.focus();
+            $first_ele.trigger('focus');
 
             this.editForm.find('.ui-tabs-anchor.ui-state-error, .input-div.ui-state-error').removeClass('ui-state-error');
             $.each(eles, (idx, ele) => {
@@ -1556,13 +1556,8 @@ $.widget( "heurist.manageEntity", {
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been deleted'), 2000);
             if(this.options.edit_mode=='popup'){
                 //hide popup edit form 
-                if(this._edit_dialog){
-                    try{
-                        const isOpenAready = this._edit_dialog.dialog('isOpen');
-                        if(isOpenAready){
-                            this._edit_dialog.dialog('close');
-                        }
-                    }catch(e){}
+                if(this._edit_dialog?.dialog('instance') && this._edit_dialog.dialog('isOpen')){
+                    this._edit_dialog.dialog('close');
                 }
             }else if(this.options.edit_mode=='editonly'){
                 //close itself
@@ -1742,11 +1737,7 @@ $.widget( "heurist.manageEntity", {
         
         let isOpenAready = false;
         if(this.options.edit_mode=='popup'){
-            if(this._edit_dialog){
-                try{
-                    isOpenAready = this._edit_dialog.dialog('isOpen');
-                }catch(e){}
-            }
+            isOpenAready = this._edit_dialog?.dialog('instance') && this._edit_dialog.dialog('isOpen');
         } else if(this.options.edit_mode=='inline') { //inline 
             isOpenAready = this._toolbar && !this._toolbar.is(':empty');
         }

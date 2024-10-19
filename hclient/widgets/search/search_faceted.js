@@ -487,7 +487,7 @@ $.widget( "heurist.search_faceted", {
             if(window.hWin.HEURIST4.util.isnull(new_title)) new_title='';
             else if(this.options.is_h6style && !this.options.is_publication){
                 new_title = '<span style="font-size:smaller">'
-                +'<span class="ui-icon ui-icon-filter" style="width:16px;height:16px;background-size:contain;"/>'
+                +'<span class="ui-icon ui-icon-filter" style="width:16px;height:16px;background-size:contain;"></span>'
                 + window.hWin.HR('filter_facet_titleprefix') + '</span>'
                 + new_title;
             }
@@ -2464,7 +2464,7 @@ $.widget( "heurist.search_faceted", {
                             }else{
                                 //add placeholder in place of reset button
                                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    $('<span style="display: inline-block; width:18px"/>')
+                                    $('<span style="display: inline-block; width:18px"></span>')
                                                             .appendTo($facet_values);
                                 }
                                 
@@ -2510,7 +2510,7 @@ $.widget( "heurist.search_faceted", {
                                 btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
                             }
                             btn_dropdown.find('.ui-selectmenu-icon').css('right', '0px');
-                            $sel.change(function(event){ that._onDropdownSelect(event); });
+                            $sel.on('change',function(event){ that._onDropdownSelect(event); });
                         }
                         
                     }else 
@@ -3217,8 +3217,8 @@ $.widget( "heurist.search_faceted", {
                                     
                                     that._date_range_dialog = $(
                                     '<div><div style="padding:10px 0 5px 5px;" id="date-range"></div>'                      
-                                    +'<fieldset class="narrow"><div id="date-start"/>'
-                                    +'<div id="date-end"/>'
+                                    +'<fieldset class="narrow"><div id="date-start"></div>'
+                                    +'<div id="date-end"></div>'
                                     +'</fieldset></div>')
                                     .hide()
                                     .appendTo(this.element);
@@ -3313,16 +3313,16 @@ $.widget( "heurist.search_faceted", {
                             let btn_w = 10; //12
                             let ele2 = $('<div>'
                                 +'<span class="ui-icon ui-icon-triangle-1-w-stop" title="Reset to minimum date"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"></span>'
                                 +'<span class="ui-icon ui-icon-triangle-1-w" title="Half step"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
-                                +'<div style="height:0.4em;margin:2px 2px 0px 2px;float:left;width:'+(w - rwidth)+'px"/>'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"></span>'
+                                +'<div style="height:0.4em;margin:2px 2px 0px 2px;float:left;width:'+(w - rwidth)+'px"></div>'
                                 +'<span class="ui-icon ui-icon-triangle-1-e" title="Half step"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"></span>'
                                 +'<span class="ui-icon ui-icon-triangle-1-e-stop" title="Reset to maximum date"'
-                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"/>'
-                                //+'<span class="heurist-helper1 min-val" title="Original minimum value" style="font-size:smaller;cursor:default;" />'
-                                //+'<span class="heurist-helper1 max-val" title="Original maximum value" style="font-size:smaller;cursor:default;" />'
+                                    +'style="cursor:pointer;font-size:smaller;float:left;color:gray;width:'+btn_w+'px;"></span>'
+                                //+'<span class="heurist-helper1 min-val" title="Original minimum value" style="font-size:smaller;cursor:default;" ></span>'
+                                //+'<span class="heurist-helper1 max-val" title="Original maximum value" style="font-size:smaller;cursor:default;" ></span>'
                             +'</div>'
                             ).appendTo($facet_values);
                                         
@@ -3498,7 +3498,7 @@ $.widget( "heurist.search_faceted", {
                             }else{
                                 //add placeholder in place of reset button
                                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    $('<span style="display: inline-block; width:18px"/>')
+                                    $('<span style="display: inline-block; width:18px"></span>')
                                                             .appendTo($facet_values);
                                 }
                                 
@@ -3541,7 +3541,7 @@ $.widget( "heurist.search_faceted", {
                             }                            
                             
 
-                            $sel.change(function(event){ that._onDropdownSelect(event); });
+                            $sel.on('change',function(event){ that._onDropdownSelect(event); });
                         }
                     }
 
@@ -4289,12 +4289,13 @@ $.widget( "heurist.search_faceted", {
             let $count_lbl = current_facet[1];
             let ext_count = `+${response.data.count}`;
 
-            if(!$count_lbl && 
-                $parent_container.find('.tree.facet-item').length > 0 && $parent_container.find('.tree.facet-item').fancytree('getTree')){ // tree
+            let treediv = $parent_container.find('.tree.facet-item');
+            
+            if(!$count_lbl && treediv.length > 0 && treediv.fancytree('instance')){ // tree
 
-                let $tree = $parent_container.find('.tree.facet-item');
+                let tree = $.ui.fancytree.getTree( treediv );
 
-                let node = $tree.fancytree('getTree').getNodeByKey('' + current_facet[0]);
+                let node = tree.getNodeByKey('' + current_facet[0]);
 
                 let $title = $($(node.title)[0]);
                 let $count_lbl = $($(node.title)[1]);

@@ -366,12 +366,12 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 }
             }
                 
-            if(action=='btnSavePreferences'){
+            
                 
-            }else if(action=='btnAddRecordInNewWin'){
+            if(action=='btnAddRecordInNewWin'){
                 let url = this._onRecordScopeChange();
                window.open(url, '_blank');
-            }else{
+            }else if(action!='btnSavePreferences'){
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});    
             }
         }

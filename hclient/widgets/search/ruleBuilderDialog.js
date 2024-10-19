@@ -50,10 +50,6 @@ function onPageInit(success) //callback function of hAPI initialization
 
        
         
-        let ishelp_on = window.hWin.HAPI4.get_prefs('help_on');
-        ishelp_on = (ishelp_on==1 || ishelp_on==true || ishelp_on=='true');
-        
-        //@todo - use common helper/competency level functionality
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
             autoOpen: false, width:800,

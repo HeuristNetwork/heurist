@@ -51,8 +51,6 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         
     _initControls: function() {
 
-        let that = this;
-
         this._super();    
 
         //add header and action buttons for container/inline mode
@@ -102,7 +100,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        let opt, selScope = this.selectRecordScope.get(0);
+        let selScope = this.selectRecordScope.get(0);
         
         this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
         {
@@ -248,7 +246,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
             //get selected fields from treeview
             let selectedFields = mode_action?{}:[];
-            let tree = this._$('.rtt-tree').fancytree("getTree");
+            let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
             let fieldIds = tree.getSelectedNodes(false);
             const len = fieldIds.length;
             
@@ -402,7 +400,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 }
             });
             
-            let tree = treediv.fancytree('getTree');
+            let tree = $.ui.fancytree.getTree( treediv );
             tree.visit(function(node){
                 if(node.lazy){
                     node.folder = false;
@@ -602,7 +600,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     _fillSortField: function(){
         
-        let tree = this._$('.rtt-tree').fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
         

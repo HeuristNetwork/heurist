@@ -34,10 +34,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
 
     _initControls: function() {
 
-        let that = this;
-
         this._super();    
-        
                     
         this.options.title += (' '+ this.options.format.toUpperCase());     
 
@@ -92,7 +89,6 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
         return res;

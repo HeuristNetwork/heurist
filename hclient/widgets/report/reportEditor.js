@@ -1164,7 +1164,7 @@ this_id       : "term"
         }
         
         
-        function __on_add(event){
+        function __on_add2(event){
 
             let $dlg2 = $(event.target).parents('.ui-dialog-content');
             let sel = $dlg2.find("#selInsertModifiers")
@@ -1197,7 +1197,7 @@ this_id       : "term"
             
         $ele_popup.find('#selInsertModifiers').attr('onchange',null)
             .off('change')
-            .on('change', __on_add);
+            .on('change', __on_add2);
 
         let $langSel = $ele_popup.find('#selLanguage');
         if($langSel.find('option').length == 1){ // fill select with available languages

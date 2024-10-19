@@ -312,8 +312,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
 
                 }
-                this.recordList.find('.adminSelector').change( __onRoleSelectorClick );
-                this.recordList.find('.memberSelector').change( __onRoleSelectorClick );
+                this.recordList.find('.adminSelector').on('change', __onRoleSelectorClick );
+                this.recordList.find('.memberSelector').on('change', __onRoleSelectorClick );
 
 
         }});

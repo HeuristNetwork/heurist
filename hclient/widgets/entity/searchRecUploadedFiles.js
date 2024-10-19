@@ -138,7 +138,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
 
         this.startSearch();   
         
-        this.input_search.focus();         
+        this.input_search.trigger('focus');         
         
         that._trigger( "oninit" );
     },  

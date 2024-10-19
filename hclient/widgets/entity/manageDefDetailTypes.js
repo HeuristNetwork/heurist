@@ -1156,7 +1156,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             let that = this;
             //add current value as first
             let first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(this.fields_list_div)
-                            .click( function(event){
+                            .on('click', function(event){
                                 window.hWin.HEURIST4.util.stopEvent(event);
                                 that.fields_list_div.hide(); 
                                
@@ -1197,7 +1197,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     is_added = true;
                     ele.attr('dty_ID',dty_ID)
                     .text(field_name+' ['+ $Db.baseFieldType[field_type] +']')
-                    .click( function(event){
+                    .on('click', function(event){
                         window.hWin.HEURIST4.util.stopEvent(event);
 
                         let ele = $(event.target).hide();
@@ -1206,7 +1206,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                         if(_dty_ID>0){
                             that.fields_list_div.hide();
-                            input_name.val('').focus();
+                            input_name.val('').trigger('focus');
 
                             window.hWin.HEURIST4.msg.showMsgFlash('Field added to record structure');
 
@@ -1707,7 +1707,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }); 
                     
                     // Setup help button
-                    let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
+                    let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
                             .appendTo(child_rec.find('.input-div'));
                     window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
                                 url: window.hWin.HRes('parent_child_instructions #content'),

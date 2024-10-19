@@ -974,8 +974,8 @@ function hLayoutMgr(){
                     while (i--)
                     {
                         style = styles[i].split(':');
-                        k = $.trim(style[0]);
-                        v = $.trim(style[1]);
+                        k = String(style[0]).trim();
+                        v = String(style[1]).trim();
                         if (k.length > 0 && v.length > 0)
                         {
                             css[k] = v;

@@ -115,7 +115,6 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
             
-            let that = this;                                                
             let dlged = editForm._getEditDialog();
             if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
 

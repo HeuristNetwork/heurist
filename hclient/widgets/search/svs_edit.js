@@ -176,7 +176,7 @@ function HSvsEdit(args) {
             svs_rules_only.on('change',function(e){
                 $dlg.find('#divRulesOnly').css('display',$(e.target).is(':checked')?'block':'none');    
             });
-            svs_rules_only.change();
+            svs_rules_only.trigger('change');
                 
             
             let isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
@@ -423,7 +423,7 @@ function HSvsEdit(args) {
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
                         title:'Gety query string for Mappable Query'})
-                .click(__getFilterString);
+                .on('click',__getFilterString);
                 */
 
                 let allFields = $dlg.find('input, textarea');
@@ -481,7 +481,7 @@ function HSvsEdit(args) {
                                       }},
                                       {text:'Cancel', click: function(){ 
                                             $mdlg.dialog( "close" ); 
-                                            svs_name.focus();
+                                            svs_name.trigger('focus');
                                             if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                                 menu_locked.call( this, false, false); //unlock
                                             }

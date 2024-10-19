@@ -58,15 +58,12 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         let scope_types = this.options.scope_types;
         this.selectRecordScope.empty();
         
-        let useHtmlSelect = false;
-        
         if(scope_types=='none'){
             this.selectRecordScope.parent().hide();
             return;    
         }
 
-        let opt, selScope = this.selectRecordScope.get(0); //selector
-        
+        let selScope = this.selectRecordScope.get(0); //selector
 
         let rty_ID = 0;
         let rectype_Ids = this._currentRecordset.getRectypes();

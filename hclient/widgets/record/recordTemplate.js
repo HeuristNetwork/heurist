@@ -40,18 +40,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
-        /*
-        res.push({text:window.hWin.HR('Export'),
-                    id:'btnDoAction2',
-                    disabled:'disabled',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction( 1 ); 
-                    }});
-       */ 
         return res;
     },    
         
@@ -99,7 +89,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             //get selected fields from treeview
             let selectedFields = {};
-            let tree = this._$('.rtt-tree').fancytree("getTree");
+            let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
             let fieldIds = tree.getSelectedNodes(false);
             const len = fieldIds.length;
             
@@ -165,7 +155,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             let check_status = $(e.target).is(":checked");
 
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                let tree = treediv.fancytree("getTree");
+                let tree = $.ui.fancytree.getTree(treediv);
                 tree.visit(function(node){
                     if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
                         && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))

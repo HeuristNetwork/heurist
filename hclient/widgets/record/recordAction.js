@@ -102,7 +102,7 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
             return;    
         }
 
-        let opt, selScope = this.selectRecordScope.get(0);
+        let selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope,'',window.hWin.HR('recordAction_select_hint'));
         
@@ -186,7 +186,6 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         }
         let that = this;
        
-        let progressCounter = 0;        
         let progress_url = window.hWin.HAPI4.baseURL + "hserv/controller/progress.php";
 
         this._$('#div_fieldset').hide();
@@ -238,8 +237,6 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
                             pbar.progressbar( "value", 0 );
                         }
                     }
-                    
-                    progressCounter++;
                     
                 }
             },'text');

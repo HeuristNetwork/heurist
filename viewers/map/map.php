@@ -36,13 +36,11 @@ if(isLocalHost()){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
 <?php
 }else{
 ?>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
 <?php
 }
 ?>
@@ -65,8 +63,6 @@ if(isLocalHost()){
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/wise-leaflet-pip.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet.circle.topolygon-src.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet.plugins/leaflet-iiif.js"></script>
-
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 

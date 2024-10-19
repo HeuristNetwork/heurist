@@ -179,11 +179,13 @@ $.widget( "heurist.searchBuilderItem", {
             .appendTo( this.sel_container );
         
 
-        this.sel_container.hover(function(){
-                   that.remove_token.css({visibility:'visible'});  },
-        function(){
+        this.sel_container
+        .on( 'mouseenter', function(event){ 
+            that.remove_token.css({visibility:'visible'});
+        } )
+        .on( 'mouseleave', function(event){
                    that.remove_token.css({visibility:'hidden'});
-        });
+        } );
         
         this._refresh();
         

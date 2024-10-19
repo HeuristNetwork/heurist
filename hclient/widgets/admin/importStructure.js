@@ -104,8 +104,8 @@ $.widget( "heurist.importStructure", {
         
         //1. database selector
         +'<div class="ent_wrapper" id="panel_dbs">'
-        +    '<div class="ent_header searchForm"/>'     
-        +    '<div class="ent_content_full recordList"/>'
+        +    '<div class="ent_header searchForm"></div>'     
+        +    '<div class="ent_content_full recordList"></div>'
         +'</div>'
         
         //2. List of record types to be imported
@@ -114,7 +114,7 @@ $.widget( "heurist.importStructure", {
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
         +'<h4  style="margin:0;padding:4 0 0 4" id="h_source"></h4>'     
-        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"/>'
+        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"></div>'
         +'</div>'
 
         //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
@@ -152,8 +152,8 @@ $.widget( "heurist.importStructure", {
         //target
         +'<div id="panel_def_list_target" '
         +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
-        +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"/>'
-        +'<select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;"/>'
+        +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"></select>'
+        +'<select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;"></select>'
         +'<div id="select_trm_list_target" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">'
             + 'Due to the potentially numerous amount of vocabulary and terms,<br>existing local vocabulary and terms are not displayed here'
         +'</div>'
@@ -163,8 +163,8 @@ $.widget( "heurist.importStructure", {
 
         //3. report after completion of import
         +'<div class="ent_wrapper" id="panel_report" style="display:none">'
-        +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"/>'
-        +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"/></div>'
+        +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"></div>'
+        +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"></div></div>'
         +'</div>'
 
         +'</div>';
@@ -809,7 +809,7 @@ $.widget( "heurist.importStructure", {
         }
 
         let recID = fld('rec_ID');
-        let recURL = fld('rec_URL');
+        
         let dbName = fld('rec_Title');
         let recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
 
@@ -857,7 +857,7 @@ $.widget( "heurist.importStructure", {
             + '<div title="Click to open database in new window" '
             + 'class="rec_edit_link_ext ui-button action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
             + 'role="button" aria-disabled="false" data-key="open">'
-            + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
+            + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"></span><span class="ui-button-text"></span>'
             + '</div>';
         }
 
@@ -873,7 +873,6 @@ $.widget( "heurist.importStructure", {
     _initDialog: function(){
 
         let options = this.options,
-        btn_array = [], 
         position = null;
         
         const that = this;

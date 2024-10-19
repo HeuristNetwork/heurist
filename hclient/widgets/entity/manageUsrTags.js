@@ -256,7 +256,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 //ADD button        
                 $('<div class="recordDiv tagDiv tagDiv-fixed-width" style="display:block;text-decoration:none">'
                 + '<label>Add a tag</label> <input type="text" style="width:15ex" size="60"/>'
-                + '<div class="rec_action_link" data-key="add" style="margin-left:4px;visibility:visible !important"/>'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:4px;visibility:visible !important"></div>'
              /*   
                 + '<div title="Click to add tag" class="rec_action_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="add" >'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span><span class="ui-button-text"></span>'
@@ -306,7 +306,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 +usage
 //+'<span class="ui-icon ui-icon-link" style="font-size:0.8em;float:right;top:2px;right:2px"></span>
 +'</span>')                                                  
-                            +'<div class="rec_action_link" data-key="delete" style="float:right"/>'
+                            +'<div class="rec_action_link" data-key="delete" style="float:right"></div>'
                             +'</div>';
                
                 if(!maxlen[groupid] || label.length>maxlen[groupid]) {
@@ -373,7 +373,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             let items = this.recordList.find('div.recordDiv');
             this._on(items, {'click':this.onTagItemClick});
             
-            this.element.find('#input_search').focus();
+            this.element.find('#input_search').trigger('focus');
     },
 
     //
@@ -417,7 +417,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                             }else{
                                 this._addTagToPicked(recID);
                             }
-                            inpt.val('').focus();
+                            inpt.val('').trigger('focus');
                         }else{
                         /*
                         inpt.addClass( "ui-state-error" );*/
@@ -431,12 +431,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     that._currentEditID = -1;
                     fields['tag_ID'] = -1;
                     that._saveEditAndClose( fields );
-                    inpt.val('').focus();
+                    inpt.val('').trigger('focus');
                     return;
                 }
             }
         }
-        inpt.focus(); 
+        inpt.trigger('focus'); 
     },
     
     onDeleteTag: function(event){
@@ -515,7 +515,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                     let ele = $('<div class="recordDiv tagDiv tagDiv-fixed-width" recid="'+recID
                     +'"><label>'+ fields['tag_Text']
-                    +'</label><div class="rec_action_link" data-key="delete" style="float:right"/>'
+                    +'</label><div class="rec_action_link" data-key="delete" style="float:right"></div>'
                     +'</div>')
                             .appendTo(content);
                             
@@ -674,7 +674,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         +'<label>Find/assign:</label></div>'):'')
                 + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;'
                 + '<select style="max-width:220px"></select>&nbsp;'
-                + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"/>'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"></div>'
                 + '</div>').appendTo(panel);
                 
         //3. top and recent tags        
@@ -697,7 +697,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         window.hWin.HEURIST4.ui.createUserGroupsSelect(sel_group[0], this.options.groups, topOpt);
         
-        sel_group.change(function(){
+        sel_group.on('change',function(){
               input_tag.val('');
               if(that.list_div) that.list_div.hide();  //drop down list
 
@@ -724,14 +724,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         +'<label for="cbShowAutoTags" style="font-style:italic;font-size:0.9em">Show automatically-added tags </label>'
                         +'<input id="cbShowAutoTags" type="checkbox" '+(that._showAutoTags?'checked':'')
                         +'/></div>').appendTo(top_n_recent);
-                    top_n_recent.find('#cbShowAutoTags').click( __renderTags );    
+                    top_n_recent.find('#cbShowAutoTags').on('click', __renderTags );    
                 }    
                                     
                 __renderTags( null );
               }
         });
         
-        sel_group.change();
+        sel_group.trigger('change');
         
         window.hWin.HEURIST4.ui.initHSelect(sel_group, false);
         
@@ -883,7 +883,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
                 
                     $('<a recid="'+recID+'" href="#">'+label+'</a>')
-                        .click( function(event){
+                        .on('click', function(event){
                             let recID = $(event.target).attr('recid');
                             that._addTagToPicked(recID);
                             return false;
@@ -948,8 +948,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             //delete button
             ele.find('span').on('click', function(event){
-                 let recID = Number($(event.target).attr('recid'));
-                 let idx = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
+                 const recID = Number($(event.target).attr('recid'));
+                 const idx = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
                  that.options.selection_ids.splice(idx, 1);
                  $(event.target).parents('.tagDiv2').remove();
                  that._trigger( "onselect", null, {selection:that.options.selection_ids, 
@@ -1248,7 +1248,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         let tagID = item.attr('recid');
         this.edit_replace_input.val(this._getTagLabel(tagID));
-        this.edit_replace_input.focus();
+        this.edit_replace_input.trigger('focus');
         
     },
     

@@ -216,9 +216,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
 
         //4b. listeners for styles (border,bg,margin)
-        cont.find('input[data-type="css"]').change(_getCss);
-        cont.find('input[data-type="css"]').on('keyup', _getCss);
-        cont.find('input[name="background"]').change(_getCss);
+        cont.find('input[data-type="css"]').on('change',_getCss);
+        cont.find('input[data-type="css"]').on('keyup',_getCss);
+        cont.find('input[name="background"]').on('change',_getCss);
         /*
             var css = _getCss();
            
@@ -235,9 +235,9 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         });
         
         cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
-        cont.find('.cb_sync').change(_onMarginSync);
-        cont.find('input[name="padding-left"]').change(_onMarginSyncVal);
-        cont.find('input[name="margin-left"]').change(_onMarginSyncVal);
+        cont.find('.cb_sync').on('change',_onMarginSync);
+        cont.find('input[name="padding-left"]').on('change',_onMarginSyncVal);
+        cont.find('input[name="margin-left"]').on('change',_onMarginSyncVal);
 
         function __saveWidgetConfig(){
             if(widget_cfg){
@@ -281,7 +281,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         _assignCssTextArea();
         
-        textAreaCss.change(function(){
+        textAreaCss.on('change',function(){
 
             let vals = textAreaCss.val();
            
@@ -313,7 +313,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         let btnDirectEdit = cont.find('div.btn-html-edit');
         if(etype=='text'){
              btnDirectEdit.parent().show();               
-             btnDirectEdit.button().click(_initCodeEditor);
+             btnDirectEdit.button().on('click',_initCodeEditor);
         }else{
              btnDirectEdit.parent().hide();               
         }
@@ -695,15 +695,15 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             margin_mode_full = true;
             //init file picker
             cont.find('input[name="bg-image"]')
-                    .click(_selecHeuristMedia);
+                    .on('click',_selecHeuristMedia);
             cont.find('#btn-background-image').button()
                     .css({'font-size':'0.7em'})
-                    .click(_selecHeuristMedia);
+                    .on('click',_selecHeuristMedia);
 
             cont.find('#btn-background-image-clear')
                     .button() //{icon:'ui-icon-close',showLabel:false})
                     .css({'font-size':'0.7em'})
-                    .click(_clearBgImage);
+                    .on('click',_clearBgImage);
             
             //init color pickers
             cont.find('input[name$="-color"]').colorpicker({

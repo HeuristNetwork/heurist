@@ -91,7 +91,7 @@ title: "Overview"
 */
         if(tree_element.fancytree('instance')){
             
-            let tree = tree_element.fancytree('getTree');
+            let tree = $.ui.fancytree.getTree( tree_element );
 
             //keep_expanded_nodes
             let keep_expanded_nodes = [];
@@ -233,7 +233,7 @@ title: "Overview"
 
             tree_element.fancytree(fancytree_options).addClass('tree-cms');
             
-            let tree = tree_element.fancytree('getTree');
+            let tree = $.ui.fancytree.getTree( tree_element );
             tree.visit(function(node){
                 node.setExpanded(true);
             });            
@@ -271,7 +271,7 @@ title: "Overview"
                         +'" title="Remove menu entry from website"></span>'
                         +'</div>').appendTo(parent_span);
 
-                    $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
+                    $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
 
                     actionspan.find('.ui-icon').on('click', function(event){
                         let ele = $(event.target);
@@ -323,7 +323,7 @@ title: "Overview"
                                                     if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
 
                                                     // Update tree nodes
-                                                    $container.fancytree('getTree').visit((node) => {
+                                                    $.ui.fancytree.getTree( $container ).visit((node) => {
 
                                                         let old_name = node.title;
                                                         if(node.data.page_id == page_id){
@@ -427,8 +427,7 @@ title: "Overview"
                         ele.hide();
                     }               
 
-                    $(parent_span).hover(
-                        function(event){
+                    function _onmouseenter(event){
                             let node;
                             if($(event.target).hasClass('fancytree-node')){
                                 node =  $(event.target);
@@ -440,10 +439,14 @@ title: "Overview"
                                 ele.css({'display':'inline-block'});
                             }
                         }
-                    );               
-                    $(parent_span).mouseleave(
+                    }
+
+                    $(parent_span).on('mouseenter',
+                        _onmouseenter
+                    ).on('mouseleave',
                         _onmouseexit
                     );                                                  
+                    
                 }
     } //end _defineActionIcons
 
@@ -462,7 +465,7 @@ title: "Overview"
             if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
                 if($container.fancytree('instance')){                                 
-                    let node = $container.fancytree('getTree').getNodeByKey(''+rec_id);
+                    let node = $.ui.fancytree.getTree( $container ).getNodeByKey(''+rec_id);
                     if(node){
                         $(node.span).removeClass("pending");
                         node.setTitle( newvalue ); 
@@ -490,7 +493,7 @@ title: "Overview"
             $('.btn-website-homepage').css({'text-decoration':'underline'});
         }else
         if( $container.fancytree('instance')){
-                let tree = $container.fancytree('getTree');
+                let tree = $.ui.fancytree.getTree( $container );
                 
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
@@ -774,7 +777,7 @@ title: "Overview"
             return page_id;
         }
 
-        let tree = $container.fancytree('getTree');
+        let tree = $.ui.fancytree.getTree( $container );
         let page_node = tree.getNodeByKey(''+page_id);
         let parent_id = window.hWin.home_page_record_id;
 

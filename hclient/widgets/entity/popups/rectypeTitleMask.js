@@ -81,7 +81,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                 let check_status = $(e.target).is(":checked");
 
                 if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                    let tree = treediv.fancytree("getTree");
+                    let tree = $.ui.fancytree.getTree(treediv);
                     tree.visit(function(node){ 
 
                         if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
@@ -160,7 +160,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         _text = '';
 
         
-        let tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( this.element.find('.rtt-tree') );
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
         

@@ -202,16 +202,9 @@ if(!defined('PDIR')) {define('PDIR','');}
 
 require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
-if($isLocalHost){
-    print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
-}else{
-    print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
-}
 ?>
 
 <!-- it is needed in preference dialog -->
-<link rel="stylesheet" type="text/css" href="external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
-
 <script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
 
 <script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>

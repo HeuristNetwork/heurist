@@ -158,7 +158,7 @@ function editCMS2(website_document){
                             +`<a href="#" class="btn-website-url" style="display:inline-block;padding-left:10px;font-size: ${isWebPage ? '12' : '9'}px;color: black;">Get website URL</a>`
 
                             +'<span style="position:absolute;top:22px;width:32px;height:24px;font-size:29px;cursor:pointer;'+(options.editor_pos=='west'?'right:5px':'')+'" '
-                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"/>'
+                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"></span>'
 
                             +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px;font-size:9px;">'
                                 +'<li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>'
@@ -178,14 +178,14 @@ function editCMS2(website_document){
                                     +'<div style="padding:10px 8px;">'
                                         +'<a href="#" title="Edit website home page" '
                                             +'class="btn-website-homepage" style="text-decoration:none;">'
-                                            +'<span class="ui-icon ui-icon-home"/>&nbsp;Home page</a>'
+                                            +'<span class="ui-icon ui-icon-home"></span>&nbsp;Home page</a>'
                                         +'<span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
                                             +'style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>'
                                     +'</div>'     
                                         
                                 +'</div>'
                                 
-                                +'<div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"/>' //treeview - edit website menu
+                                +'<div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"></div>' //treeview - edit website menu
                             +'</div>'
                             +'<div id="treePage" style="font-size:0.9em;top:70px;" class="ent_wrapper ui-widget-content">'
                             
@@ -193,7 +193,7 @@ function editCMS2(website_document){
                                     
                                     +(isWebPage
                                     ?('<div style="font-size: 10px; display: inline-block;"><a href="#" class="btn-website-edit">'
-                                        +'<span class="ui-icon ui-icon-pencil"/>&nbsp;Configure webpage</a></div>')
+                                        +'<span class="ui-icon ui-icon-pencil"></span>&nbsp;Configure webpage</a></div>')
                                     :'<h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>')
                                     +'<span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
                                         +'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
@@ -202,9 +202,9 @@ function editCMS2(website_document){
                                         
                                 +'</div>'
                             
-                                +'<div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"/>' //treeview - edit page
+                                +'<div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"></div>' //treeview - edit page
                                 +'<div class="propertyView ent_content_full ui-widget-content-gray" '
-                                    +' style="top:190px;padding:10px 0px;display:none;"/>' //edit properties for element
+                                    +' style="top:190px;padding:10px 0px;display:none;"></div>' //edit properties for element
                                 
                             +'</div>'
                         +'</div></div>').appendTo(_ws_body);
@@ -305,7 +305,7 @@ function editCMS2(website_document){
         }
         
         //swtich to page tab automatically
-        _layout_container.click(function(event){
+        _layout_container.on('click',function(event){
             if(current_edit_mode!='page'){
                 //switch to page mode                
                 _switchMode('page');
@@ -327,16 +327,16 @@ function editCMS2(website_document){
             _editor_panel = $(innerDoc.body);
         }
        
-        _editor_panel.find('.btn-website-homepage').click(_editHomePage);
+        _editor_panel.find('.btn-website-homepage').on('click',_editHomePage);
         if(!isWebPage){
             _editor_panel.find('.btn-website-edit')
                          .button({classes:{'ui-button': 'ui-button-action'}})
                          .css({'padding':'5px','font-size':'9px'})
                          .click(_editHomePageRecord);
         }else{
-            _editor_panel.find('.btn-website-edit').click(_editHomePageRecord);
+            _editor_panel.find('.btn-website-edit').on('click',_editHomePageRecord);
         }
-        _editor_panel.find('.btn-website-addpage').click(_addNewRootMenu); // button({icon:'ui-icon-plus'}).
+        _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
         _editor_panel.find('.btn-website-url').on('click', function(){ // save website url to clipboard
 
             let url_part = window.hWin.HAPI4.sysinfo.use_redirect ? 
@@ -349,12 +349,14 @@ function editCMS2(website_document){
 
         _editor_panel.find('.btn-website-homepage').parent()
         .addClass('fancytree-node')
-        .hover(
-            function(e){_editor_panel.find('.btn-website-addpage').show()},
-            function(e){_editor_panel.find('.btn-website-addpage').hide()});
-
+        .on( 'mouseenter', function(event){ 
+            _editor_panel.find('.btn-website-addpage').show();
+        } )
+        .on( 'mouseleave', function(event){
+            _editor_panel.find('.btn-website-addpage').hide();
+        } );
         
-        _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).click(_showWebSiteMenu);
+        _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click',_showWebSiteMenu);
         
         _editor_panel.find('.bnt-cms-hidepanel').on('click', function(){ _ws_body.layout().close(options.editor_pos); } );
      
@@ -711,7 +713,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
 
                         //highlight editing element in tree
                         let key = $(tinymce.activeEditor.targetElm).attr('data-hid');
-                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(key);
                         _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                     
@@ -927,7 +929,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         
         if(_panel_treePage){
             
-            _panel_treePage.fancytree('getTree').reload(treeData);
+            $.ui.fancytree.getTree( _panel_treePage ).reload(treeData);
             
         }else{
         
@@ -993,9 +995,9 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                 }
             };
 
+            //create tree
             _panel_treePage = _editor_panel.find('.treePage').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
-                                
                                 
             $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
@@ -1007,13 +1009,13 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
             
             _toolbar_Page = _editor_panel.find('.toolbarPage').hide();
                                 
-                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).click(_saveLayoutCfg)
-                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).click(
+                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',_saveLayoutCfg)
+                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
                         function(){
                             _startCMS({record_id:options.record_id, container:'#main-content', content:null});
                         }
                     );
-                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).click(_closeCMS); //{icon:'ui-icon-close'}
+                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click',_closeCMS); //{icon:'ui-icon-close'}
 
         }
         
@@ -1096,7 +1098,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
            
            
             if(init_tinymce!==false){
-                _panel_treePage.fancytree('getTree').visit(function(node){
+                $.ui.fancytree.getTree( _panel_treePage ).visit(function(node){
                     node.setSelected(false); //reset
                     node.setExpanded(true);
                 });            
@@ -1167,7 +1169,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
             ele_ID = ''+ele_ID;
-            let node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+            let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_ID);
 
             if(node==null){
                 return;
@@ -1192,22 +1194,21 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
             //+ (true || is_root || is_cardinal?'':
             + ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"/>Drag</span>')
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>')
                                    
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
-            +'<span class="ui-icon ui-icon-pencil"/>Style</span>';               
+            +'<span class="ui-icon ui-icon-pencil"></span>Style</span>';               
             
             //hide element for cardinal and delete for its panes                     
             if(node.data.type!='cardinal'){
-                actionspan += '<span data-action="element" style="display:block;padding:4px" title="Add a new element/widget">'
-                    +'<span class="ui-icon ui-icon-plus"/>Insert</span>';
+                actionspan += '<span data-action="element" style="display:block;padding:4px" title="Add a new element/widget"><span class="ui-icon ui-icon-plus"></span>Insert</span>';
             }
-            if(!(is_last_root || is_cardinal)){
-                actionspan += ('<span data-action="delete" style="display:block;padding:4px" title="Remove element from layout">'
-                    +'<span class="ui-icon ui-icon-close"/>Delete</span>');
+            if(!is_cardinal){
+                actionspan += ('<span data-action="delete" style="display:block;padding:4px" title="Remove element from layout"><span class="ui-icon ui-icon-close" title="'
+                    +'Remove element from layout"></span>Delete</span>');
             }else if(is_last_root){ // display delete, but block action
                 actionspan += ('<span data-action="none" style="display:block;padding:4px" title="Cannot have an empty tree">'
-                    +'<span class="ui-icon ui-icon-delete"/>Delete</span>');
+                    +'<span class="ui-icon ui-icon-delete"></span>Delete</span>');
             }
 
             if(node.data.type=='text'){
@@ -1226,7 +1227,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                     }
                 }
                 actionspan = actionspan + '<span data-action="translate_header" style="display:block;padding:4px" title="'
-                        +stitle+'"><span class="ui-icon ui-icon-translate" />Translate</span>'
+                        +stitle+'"><span class="ui-icon ui-icon-translate"></span>Translate</span>'
                         +codes;
                         
             }
@@ -1329,7 +1330,7 @@ function(value){
 
                     }else if(action=='delete'){
                         //different actions for separator and field
-                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_ID);
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+ele_ID);
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Are you sure you wish to delete element "'+node.title+'"?', 
@@ -1352,7 +1353,7 @@ function(value){
             */
 
             //hide gear icon and overlay on mouse exit
-            function _onmouseexit(event){
+            function __onmouseexit(event){
                 
                 if(_panel_propertyView.is(':visible')) return;
 
@@ -1406,10 +1407,9 @@ function(value){
                     }
                     
                 }
-            }               
+            };             
 
-            $(item).hover ( // mousemove  mouseover
-                function(event){
+            function __onmouseenter(event){
 
                     if (current_edit_mode != 'page') return;
                     if(_panel_propertyView.is(':visible')) return;
@@ -1487,7 +1487,7 @@ function(value){
                         
                         if(is_in_page){
                             //highlight in preview/page
-                            node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+                            node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_ID);
                             if(node) node.setActive(true);
 
                             _layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
@@ -1506,13 +1506,12 @@ function(value){
 
                     }
 
-                },
-                //mouseleave handler
-                _onmouseexit
-            );  
+            };
+                
+            $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
 
             /*                            
-            $(item).mouseleave(
+            $(item).on('mouseleave',
 
             );
             */
@@ -1550,7 +1549,7 @@ function(value){
     //
     function _layoutRemoveElement(ele_id){
 
-        let tree = _panel_treePage.fancytree('getTree');
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
         let node = tree.getNodeByKey(''+ele_id);
         let parentnode = node.getParent();
         let parent_container, parent_children, parent_element;
@@ -1634,7 +1633,7 @@ function(value){
         parent_children.splice(idx, 1); //remove from children
         
         //add to new parent  ---------------
-        let tree = _panel_treePage.fancytree('getTree');
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
         let node = tree.getNodeByKey(''+ele_id);
         let prevnode = node.getPrevSibling();
         let parentnode = node.getParent();
@@ -1730,7 +1729,7 @@ function(value){
         }
 
         //scroll tree that selected element will be visible
-        let node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
+        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_id);
         let top1 = $(node.li).position().top;
         _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
@@ -1756,7 +1755,7 @@ function(value){
             
         if(is_cardinal){
              //find parent
-             const node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
+             const node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+ele_id);
              const parentnode = node.getParent();
              ele_id = parentnode.key;
              element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
@@ -1779,7 +1778,7 @@ function(value){
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
-                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+new_cfg.key);
                         node.setTitle(new_cfg.title);
                         _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
@@ -1961,7 +1960,7 @@ function(value){
     //    
     function _layoutInsertElement_continue(ele_id, new_element_json){
 
-        let tree = _panel_treePage.fancytree('getTree');
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
         let parentnode = tree.getNodeByKey(ele_id);
         let parent_container, parent_children, parent_element;
 

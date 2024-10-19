@@ -142,7 +142,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         menu_entries.push({key:'menu-profile-preferences',title:'Preferences'});
         menu_entries.push({key:'menu-structure-refresh',title:'Refresh memory'});
         menu_entries.push({key:'menu-structure-verify',title:'Verify integrity'});
-
         //get all saved searches
         let saved_searches = [{key:0, title:'select saved filter....'}];
         let ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;

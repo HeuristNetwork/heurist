@@ -77,9 +77,7 @@ $.widget( "heurist.search", {
             this.options.button_class = '';
         }
 
-        let sz_search = '600px',
-        sz_input = '450px',
-        sz_search_padding = this.options.is_h6style?'5px':'20px';
+        let sz_search_padding = this.options.is_h6style?'5px':'20px';
 
         //------------------------------------------- filter by entities
         this.options.btn_entity_filter = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
@@ -118,7 +116,7 @@ $.widget( "heurist.search", {
         //------------------------------------------- filter inputs                        
 
         // Search functions container
-        //'height':'100%', 'float':'left'   , 'min-width':sz_search  ,  
+        //'height':'100%', 'float':'left'  
         this.div_search   = $('<div>').css({ 'width':'100%', display:'table' }).appendTo( this.element ); //was table-row
 
 
@@ -172,7 +170,7 @@ $.widget( "heurist.search", {
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em;padding:3px;display:inline-block;">'+window.hWin.HR("filter")
-            +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
+            +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"></span>')
         .css({ height:isNotFirefox?28:24, 'margin':'1px '+(isNotFirefox?'4px':'7px')+' 1px 2px',
             'position':'absolute', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
@@ -281,13 +279,8 @@ $.widget( "heurist.search", {
                         this.input_search.height(23);
                     }else{
 
-                        let pt;
                         if(this.input_search.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
                             this.input_search.height(that.element.height()-menu_h-10);
-                            pt = '2px';
-                        }else{
-                            //parseFloat(that.div_search.css('padding-top'))
-                            pt =  (that.element.height() - this.input_search.height())/2 - menu_h;
                         }
                     }
 
@@ -336,7 +329,7 @@ $.widget( "heurist.search", {
                 title:window.hWin.HR('filter_builder_hint')})
             .css({display:'inline-block'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
-            .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" />')
+            .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Filter builder') 
             +'</span>')
@@ -348,7 +341,7 @@ $.widget( "heurist.search", {
                 title:window.hWin.HR('filter_facetbuilder_hint')})
             .css({display:'inline-block',padding:'0px 15px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
-            .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
+            .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Facet builder') +'</span>')
             .appendTo(this.div_buttons);
@@ -366,7 +359,7 @@ $.widget( "heurist.search", {
             this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('filter_save_hint')})
             .addClass('ui-main-color btn-aux logged-in-only')
             .css({display:'inline-block'})  //width:'70px',
-            .append('<span class="ui-icon ui-icon-save" />')
+            .append('<span class="ui-icon ui-icon-save" ></span>')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Save filter for re-use') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
@@ -474,13 +467,13 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
             .addClass('truncate')
-            .click( function(){ 
+            .on('click', function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                             {new_record_params:{RecTypeID:that.select_rectype_addrec.val()}});
                     }else{
-                        that.btn_select_rt.click();
+                        that.btn_select_rt.trigger('click');
                     }
                 }); 
             });
@@ -498,7 +491,7 @@ $.widget( "heurist.search", {
                 +window.hWin.HR('Define Parameters') +'<br>'+window.hWin.HR('Add Record')+'</div>', 
                 icon: "ui-icon-carat-1-s", iconPosition:'end',
                 title:'Click to define parameters and add new record'})
-            .click( function(){ 
+            .on('click', function(){ 
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');            
             });
 
@@ -524,9 +517,6 @@ $.widget( "heurist.search", {
 
             this._on( this.btn_select_owner, {
                 click:  function(){
-
-                    let btn_select_owner = this.btn_select_owner;
-
                     let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                     if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                         add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
@@ -874,7 +864,7 @@ $.widget( "heurist.search", {
             //data is search query request
             if(data.reset){
                 that.input_search.val('');
-                that.input_search.change();
+                that.input_search.trigger('change');
             }else            
                 //topids not defined - this is not rules request
                 if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
@@ -915,7 +905,7 @@ $.widget( "heurist.search", {
                         }
                     }
 
-                    that.input_search.change();
+                    that.input_search.trigger('change');
 
                 }
 
@@ -953,7 +943,7 @@ $.widget( "heurist.search", {
                     }
                 }
 
-                if(that.btn_save_filter.is(':visible')){ // 'flash' save filter button
+                if(that.btn_save_filter?.is(':visible')){ // 'flash' save filter button
 
                     that.btn_save_filter.fadeOut(100)
                                         .fadeIn(100)
@@ -978,9 +968,7 @@ $.widget( "heurist.search", {
     _setFocus: function(){
 
         if(this.input_search.is(':visible')) {
-            try{
-                this.input_search.focus();
-            }catch(e){}
+                this.input_search.trigger('focus');
         }
 
     },
@@ -1018,15 +1006,6 @@ $.widget( "heurist.search", {
             // q - query string
             // w  all|bookmark
             // stype  key|all   - key-search tags, all-title and pointer record title, by default rec_Title
-
-            let that = this;
-
-            /* concatenation with previos search  -- NOT USED
-            if(this.options.search_domain=="c" && !window.hWin.HEURIST4.util.isnull(this.query_request)){ 
-            this.options.search_domain = this.query_request.w;
-            qsearch = this.query_request.q + ' AND ' + qsearch;
-            }
-            */
 
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
 

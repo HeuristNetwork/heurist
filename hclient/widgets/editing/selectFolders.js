@@ -95,7 +95,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
         function(event){
         that._show_system_folders = $(event.target).is(':checked');
 
-        var wtrr = that._treeview.fancytree("getTree");
+        var wtrr = $.ui.fancytree.getTree(that._treeview);
         wtrr.filterBranches(function(node){
         return that._show_system_folders || !node.data.issystem;
         }, {mode: "hide"});

@@ -454,7 +454,7 @@ function HMapManager( _options )
 
         //mapdoc_treeview.find('.ui-fancytree').show();
         mapdoc_treeview.find('.empty_msg').remove();
-        let tree = mapdoc_treeview.fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( mapdoc_treeview );
         tree.getRootNode().addChildren( [$res] ).setSelected(true);
     }
     
@@ -1535,7 +1535,7 @@ function HMapManager( _options )
             
             if(window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
             
-                let tree = mapdoc_treeview.fancytree("getTree");
+                let tree = $.ui.fancytree.getTree( mapdoc_treeview );
                 let selected = 0;
 
                 tree.visit(function(node){
@@ -1610,7 +1610,7 @@ function HMapManager( _options )
         // 
         getMapDocumentsIds: function( mode ) {
             let res = [];
-            let tree = mapdoc_treeview.fancytree("getTree");
+            let tree = $.ui.fancytree.getTree( mapdoc_treeview );
             tree.visit(function(node){
                 if(node.data.type=='mapdocument'){
                     if((mode=='visible'&& node.isSelected()) ||
@@ -1753,7 +1753,7 @@ function HMapManager( _options )
         
                 let mapdoc_ids = visible_mapdocuments?visible_mapdocuments.split(';'):[];
                 
-                let tree = mapdoc_treeview.fancytree("getTree");
+                let tree = $.ui.fancytree.getTree( mapdoc_treeview );
                 if(mapdoc_ids && mapdoc_ids.length>0){
                     tree.filterBranches(function(node){  //filterNodes
                         let res = mapdoc_ids.indexOf(node.key)>=0;
@@ -1818,7 +1818,7 @@ function HMapManager( _options )
         //
         getActiveMapDocumentLegend(){
         
-            let tree = mapdoc_treeview.fancytree("getTree");
+            let tree = $.ui.fancytree.getTree( mapdoc_treeview );
             
             let res = null;
 
@@ -1848,7 +1848,7 @@ function HMapManager( _options )
                     if(val==TRM_LEGEND_OUT_ZOOM_HIDDEN || val==TRM_LEGEND_OUT_ZOOM_DISABLED){
 
                         //find node
-                        let tree = mapdoc_treeview.fancytree("getTree");
+                        let tree = $.ui.fancytree.getTree( mapdoc_treeview );
                         tree.visit(function(node){
                                 if(node.data.type=='layer' && node.key==layer_id && node.data.mapdoc_id===mapdoc_id){
         

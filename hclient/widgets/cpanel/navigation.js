@@ -194,14 +194,13 @@ $.widget( "heurist.navigation", {
         let resdata = this.menuData;
         parent_id = ''+parent_id;
         
-        let RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
-            DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+        
+        let DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
             DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
-            DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'],//target element on page or popup
             DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
             DT_CMS_TOPMENUSELECTABLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE'],//top menu selectable, if a submenu is available
@@ -311,8 +310,6 @@ $.widget( "heurist.navigation", {
                     menuIcon = menuIcon.filter((icon) => !window.hWin.HEURIST4.util.isempty(icon));
                 }
 
-                let recType = resdata.fld(record, 'rec_RecTypeID');
-                
                 //target and position
                 let pageTarget = resdata.fld(record, DT_CMS_TARGET);
                 let pageStyle = resdata.fld(record, DT_CMS_CSS);
@@ -502,7 +499,7 @@ $.widget( "heurist.navigation", {
         //
         if(this.options.orientation=='treeview'){
             
-            let tree = this.element.fancytree('getTree');
+            let tree = $.ui.fancytree.getTree( this.element );
             tree.reload( menu_content );
             this.element.find('.ui-fancytree').show();
             
@@ -534,31 +531,25 @@ $.widget( "heurist.navigation", {
                 
             }
 
+            
+            opts['icons'] = {submenu: "ui-icon-carat-1-e" }; 
+            //init jquery menu widget
+            this.divMainMenuItems.menu( opts );
+
+/*            
             let myTimeoutId = 0;
             //show hide function
             let _hide = function(ele) {
                 myTimeoutId = setTimeout(function() {
                     $( ele ).hide();
                     }, 800);
-            },
-            _show = function(ele, parent) {
+            };
+            
+            let _show = function(ele, parent) {
                 clearTimeout(myTimeoutId);
-                /*
-                $('.menu-or-popup').hide(); //hide other
-                let menu = $( ele )
-                //.css('width', this.btn_user.width())
-                .show()
-                .position({my: "left-2 top", at: "left bottom", of: parent });
-                */
                 return false;
             };
 
-            opts['icons'] = {submenu: "ui-icon-carat-1-e" }; 
-            
-            //init jquery menu widget
-            this.divMainMenuItems.menu( opts );
-
-/*            
             let all_menues = this.divMainMenuItems.find('ul.ui-menu');
             this._on( all_menues, {
                 mouseenter : function(){ _show(); },
@@ -567,18 +558,17 @@ $.widget( "heurist.navigation", {
                 }
             });
 */
-            //prevents default jquery delay         
-            
-            this.divMainMenuItems.children('li.ui-menu-item').hover(function(event) {
+          //prevents default jquery delay         
+          this.divMainMenuItems.children('li.ui-menu-item')
+            .on( "mouseenter", function(event) {
                     event.preventDefault();
                     $(this).children('.ui-menu').show();  
-                },
-                function(event) {
+                } )
+            .on( "mouseleave", function(event) {
                     event.preventDefault();
                     $(this).find('.ui-menu').hide();
-                }
-            );        
-
+                } );
+ 
             if(this.options.toplevel_css!==null){
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
             }
@@ -649,7 +639,6 @@ $.widget( "heurist.navigation", {
         }else if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
-
         if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
             

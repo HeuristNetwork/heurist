@@ -79,7 +79,7 @@ if($is_not_inited){
 
 define('EDIR','../../../external/3DHOP/');
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta content="charset=UTF-8"/>

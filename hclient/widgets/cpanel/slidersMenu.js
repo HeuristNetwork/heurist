@@ -1462,7 +1462,7 @@ $.widget( "heurist.slidersMenu", {
                             action_label = action.text;
                         }
                     
-                        $('<span class="ui-icon '+action_icon+'"/>'
+                        $('<span class="ui-icon '+action_icon+'"></span>'
                          +'<span class="menu-text truncate" style="max-width: 109px;">'+action_label+'</span>')
                         .appendTo(item);
 
@@ -1526,7 +1526,7 @@ $.widget( "heurist.slidersMenu", {
                 
                 let btn = this.containers['publish'].find('#'
                                                     +li.attr('data-cms-action'));
-                if(btn.length>0) btn.click();
+                if(btn.length>0) btn.trigger('click');
                 
             }});
         }else if (section=='populate'){
@@ -1833,7 +1833,7 @@ $.widget( "heurist.slidersMenu", {
                 +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
 
                 +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
-                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>'
+                    +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>'
 
                 +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
             +'</div></div>')
@@ -2248,7 +2248,7 @@ $.widget( "heurist.slidersMenu", {
 
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="start-hints" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' ).on('click', function(){ that._loadStartHints(null); });					
+                                +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' ).on('click', function(){ that._loadStartHints(null); });					
 
                     that.introductions[section].find('.gs-box')
                         .css({position:'absolute', left:'10px', right:'10px', top:'10px', 'min-width':'700px', margin:0}) //,'padding-left':20

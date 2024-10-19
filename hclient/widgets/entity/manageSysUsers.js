@@ -582,7 +582,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
             this._editing.setModified(0); // avoid triggering modified flag
 
-            saml_sel.change();
+            saml_sel.trigger('change');
 
         }else{
             let content = saml_sel.parents('.ui-accordion-content');

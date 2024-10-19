@@ -84,7 +84,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 let check_status = $(e.target).is(":checked");
 
                 if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                    let tree = treediv.fancytree("getTree");
+                    let tree = $.ui.fancytree.getTree(treediv);
                     tree.visit(function(node){
                         if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
                             && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
@@ -102,7 +102,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
                 let treediv = that.element.find('.rtt-tree');
                 if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                    const tree = treediv.fancytree('getTree');
+                    const tree = $.ui.fancytree.getTree( treediv );
                     const selected = tree.getSelectedNodes();
 
                     for(const node of selected){
@@ -140,7 +140,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             this._selectedRtyID = null;
             this._loadRecordTypesTreeView( id );
             
-            let tree = that.element.find('.rtt-tree').fancytree("getTree");           
+            let tree = $.ui.fancytree.getTree( that.element.find('.rtt-tree') );           
            
             tree.visit(function(node){
                 node.setSelected(false); //reset
@@ -169,8 +169,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         if(this.selectedFields && this.selectedFields.length>0){
         
-            let list = this._$('div.rtt-list');
-            let tree = this._$('div.rtt-tree').fancytree("getTree");
+            let tree = $.ui.fancytree.getTree( this._$('div.rtt-tree') );
             let that = this;
 
             tree.visit(function(node){
@@ -272,18 +271,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         let res = this._super();
-        let that = this;
         res[1].text = window.hWin.HR('Apply');
         res[0].text = window.hWin.HR('Close');
-        /*
-        res.push({text:window.hWin.HR('Export'),
-                    id:'btnDoAction2',
-                    disabled:'disabled',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction( 1 ); 
-                    }});
-       */ 
         return res;
     },    
         
@@ -295,8 +284,6 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         this.selectRecordScope.empty();
 
         let  selScope = this.selectRecordScope.get(0);
-        
-        let scope_types = [];   
         
         let rectype_Ids = this._currentRecordset.getRectypes();
         
@@ -379,7 +366,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         //get selected fields from treeview
         let selectedFields = [];
-        let tree = this._$('.rtt-tree').fancytree("getTree");
+        let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
         let fieldIds = tree.getSelectedNodes(false);
         let k, len = fieldIds.length;
 

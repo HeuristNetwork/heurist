@@ -122,8 +122,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         let scope_types = this.options.scope_types;
         this.selectRecordScope.empty();
         
-        let useHtmlSelect = false;
-        
         if(scope_types=='none' || this.options.source_ID>0){
             this.selectRecordScope.parent().hide();
             return;    
@@ -389,7 +387,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
         if(this.options.relmarker_dty_ID>0){
             //hide radio and field name - since it is the only one field in list
-            let ele = this._$('#source_field').find('.field_item').css('padding-left',0);
+            this._$('#source_field').find('.field_item').css('padding-left',0);
             this._$('#source_field').find('.field_item > div').css('padding-left',0);
             this._$('#source_field').find('.field_item > label').hide();
             this._$('#source_field').find('input[type=radio]').hide().trigger('click'); //prop('checked',true).
@@ -416,7 +414,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         let ele = this._$('#source_field').find('input[type=radio]');
         if(ele.length==1){
-            ele.click();
+            ele.trigger('click');
         }
         
 
@@ -433,7 +431,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         let isEnabled = ((this.options.target_ID>0 || this.getFieldValue('target_record')>0) && 
                             sel_field.val()>0);
-        let isEnabled2 = false;
                             
         if(isEnabled && sel_field.attr('data-type')=='relmarker'){
             //in case relmarker check if reltype selected
@@ -441,7 +438,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             let dtyID = sel_field.val()
             let termID = this.getFieldValue('rt_'+(isReverce?'target':'source')+'_sel_'+dtyID);        
             isEnabled = (termID>0);
-            isEnabled2 = isEnabled;
         }                
                         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), !isEnabled );
@@ -520,10 +516,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
 
-        
-        let rectypeID = this.source_RecTypeID; //selectRecordScope.val(); 
-        //typedefs[rectypeID].dtFields[dtID
-       
         
         let ptr_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
@@ -662,8 +654,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 let resdata = new HRecordSet(response.data);
         
                 //add SELECT and fill it with values
-                let idx, dty, rec_titles = [];
-                let records = resdata.getRecords();
+                let rec_titles = [];
             
                 let record = resdata.getById(rec_id);
                 let rec_title = window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title'));

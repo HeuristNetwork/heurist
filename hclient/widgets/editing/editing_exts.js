@@ -718,7 +718,7 @@ function editSymbology(current_value, mode_edit, callback){
                     {text:window.hWin.HR('Apply'),
                         click: function(){
                             
-                            let tree = treediv.fancytree("getTree");
+                            let tree = $.ui.fancytree.getTree(treediv);
                             let fieldIds = tree.getSelectedNodes(false);
                             let k, len = fieldIds.length;
                             let selectedFields = [], titles = [];

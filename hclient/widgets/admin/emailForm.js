@@ -229,7 +229,7 @@ $.widget( "heurist.emailForm", {
         let btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
         let btn = $('<button>').button(btn_opts)
-                    .click(options.click)
+                    .on('click',options.click)
                     .appendTo(container);
         if(options.id){
             btn.attr('id', options.id);

@@ -177,7 +177,7 @@ $manifest_url = str_replace('&amp;','&',htmlspecialchars($url));
 
 $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3/dist/main.js');
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta http-equiv="Pragma" content="no-cache">

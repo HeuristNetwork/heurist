@@ -91,8 +91,6 @@ $.widget( "heurist.searchByEntity", {
             //------------------------------------------- filter by entities
             this.options.by_favorites = this.options.by_favorites && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
             
-            let sz_search_padding = '0px';
-            
             //container for buttons
             this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons') //to show on/off in preferences
                                     .css({ 'display':(this.options.is_publication?'none':'block'),
@@ -327,7 +325,7 @@ $.widget( "heurist.searchByEntity", {
                     
                 }else{
             
-                    let btn = $('<div>').button({label:
+                    $('<div>').button({label:
                     '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '" height="12">'
                     +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:8px">'
                             + $Db.rty(rty_ID,'rty_Name') + '</span>'
@@ -416,8 +414,6 @@ $.widget( "heurist.searchByEntity", {
         
             let that = this;
 
-            let exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-            
             let select_rectype = opts['select_name'];
             
             opts.useIds = true;

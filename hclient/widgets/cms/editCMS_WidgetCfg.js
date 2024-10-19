@@ -598,7 +598,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             }
                         }
 
-                        ele.button().click(
+                        ele.button().on('click',
                             function(){
                                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
                                     title: 'Select type and other parameters for new record',
@@ -802,7 +802,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 __restFilterForInitSearch();
 
-                ele_rb.change();
+                ele_rb.trigger('change');
 
                 $dlg.find('input[name="simple_search_allowed"]').on('change', function(){
                     let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
