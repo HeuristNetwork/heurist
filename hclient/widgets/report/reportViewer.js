@@ -520,8 +520,7 @@ $.widget( "heurist.reportViewer", {
         this._tempForm.html(inputs);
         
         this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
-        
-        this._tempForm.submit();
+        this._tempForm.trigger('submit');
     },
     
     

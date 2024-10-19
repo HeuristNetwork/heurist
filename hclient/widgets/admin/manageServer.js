@@ -55,7 +55,7 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
                     }
                     subform.find('input[name="db"]').val(window.hWin.HAPI4.database);
                     subform.attr('action',surl);
-                    subform.submit();
+                    subform.trigger('submit');
 
                     window.hWin.HEURIST4.util.stopEvent(event);   
                     return false;

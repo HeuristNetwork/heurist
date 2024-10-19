@@ -31,7 +31,7 @@ class HeuristSecurityPolicy extends Security {
   // disable acess to static classes
   public $static_classes = null;
 
-  public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
+  public $allowed_modifiers = array('isset', 'empty', 'escape', //'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     'array_key_exists', 'array_column', 'array_keys', 'array_multisort',
                     'array_diff', 'array_count_values', 'array_unique',
@@ -91,7 +91,7 @@ function smartyInit($smarty_templates_dir=null){
         $smarty->enableSecurity('HeuristSecurityPolicy');
 
         //allowed php functions
-        $php_functions = array( 'constant', 'count',
+        $php_functions = array( 'count', //'constant', 
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
                     //'array_key_exists', 'array_column',
                     'array_count_values', 'array_keys', 'array_multisort',

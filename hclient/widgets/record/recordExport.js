@@ -170,7 +170,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                 //posting via form allows send large list of ids
                 this._$('#postdata').val( JSON.stringify(request) );
                 this._$('#postform').attr('action', url);
-                this._$('#postform').submit();
+                this._$('#postform').trigger('submit');
             }else{
                 
                 url = url + q;

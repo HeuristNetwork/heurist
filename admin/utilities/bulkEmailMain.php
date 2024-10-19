@@ -332,7 +332,7 @@ if(!$has_emails || empty($emails)) {
                 $("#exportData").val(data);
                 */
                 getDbList();
-                $("#emailOptions").submit();
+                $("#emailOptions").trigger('submit');
 
 
                 $("input[name='exportCSV']").val('');
@@ -732,7 +732,7 @@ if(!$has_emails || empty($emails)) {
                     if(validateForm(event)){
                         getDbList();
                         $("input[name='exportCSV']").val('');
-                        $("#emailOptions").submit();
+                        $("#emailOptions").trigger('submit');
                     }
                 });
 
@@ -1066,7 +1066,7 @@ if(!$has_emails || empty($emails)) {
                             if(response.data == true){
 
                                 getDbList();
-                                $("#emailOptions").submit();
+                                $("#emailOptions").trigger('submit');
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgFlash("The System Administrator password is incorrect.<br>Please re-enter it.", 5000);
                             }

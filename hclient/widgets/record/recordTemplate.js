@@ -134,7 +134,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             this._$('#postdata').val( JSON.stringify(request) );
             this._$('#postform').attr('action', url);
-            this._$('#postform').submit();
+            this._$('#postform').trigger('submit');
     },
     
     _initControls: function(){
