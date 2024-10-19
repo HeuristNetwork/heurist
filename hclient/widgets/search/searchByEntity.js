@@ -286,7 +286,7 @@ $.widget( "heurist.searchByEntity", {
                         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                             + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+item.attr('icon-url')+ '&quot;);"/>'
                         //+'<img src="'+item.attr('icon-url')+'"/>'
-                        +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
+                        +'<div class="menu-text truncate" style="max-width:80%;display:inline-block;">'
                         +item.text()+'</div>'
                         +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
                        +'</li>').appendTo(container);    
@@ -317,7 +317,7 @@ $.widget( "heurist.searchByEntity", {
                         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                             + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'
                             + window.hWin.HAPI4.iconBaseURL + rty_ID+ '&quot;);"/>'
-                        +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
+                        +'<div class="menu-text truncate" style="max-width:80%;display:inline-block;">'
                         + $Db.rty(rty_ID,'rty_Name')+'</div>'
                         +'<span style="float:right;">'
                         +(cnt>=0?cnt:'')+'</span>'
