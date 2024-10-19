@@ -411,7 +411,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
     
         $dlg.parent().css({background: '#7092BE', 'border-radius': "6px", 'border-color': '#7092BE !important',
-                    'outline-style':'none', outline:'hidden'})
+                    'outline-style':'none', outline:'none'})
         $dlg.css({color:'white', border:'none', overflow:'hidden' });
         
         if(timeout!==false){

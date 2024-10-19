@@ -109,7 +109,7 @@ $.widget( "heurist.searchByEntity", {
                 this.usage_btn = $('<span title="Show list of entities to filter">'
                 +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')  
                 .addClass('graytext')
-                .css({'text-decoration':'none','padding':'0 10px','outline':0,'font-weight':'bold','font-size':'1.1em', cursor:'pointer'})
+                .css({'text-decoration':'none','padding':'0 10px','outline':'none','font-weight':'bold','font-size':'1.1em', cursor:'pointer'})
                 .appendTo( $d2 ); //was div_search_help_links
         
                 //click on label "by usage" - opens selector

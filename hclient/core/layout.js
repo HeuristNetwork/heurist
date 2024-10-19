@@ -1293,12 +1293,12 @@ console.error('Cardinal layout widget does not have proper options');
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'5.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
-                tabheader.find('a').css({'width':'100%','outline':0}); 
+                tabheader.find('a').css({'width':'100%','outline':'none'}); 
                 
                 let lis = tabheader.children('li');
                 let count_lis = lis.length;
                     lis.css({
-                            'outline':0,
+                            'outline':'none',
                             'border':'none',
                             'font-weight': 'bold',
                             //A11 'font-size': '1.4em',

@@ -626,7 +626,7 @@ body {
     overflow:hidden;
 }
 a{
-    outline: 0;
+    outline: none;
 }
 .ui-widget {
     font-size: 0.9em;

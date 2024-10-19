@@ -182,7 +182,7 @@ $.widget( "heurist.controlPanel", {
             
             let wasCtrl = false;
             let selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
-            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline:0,
+            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline: 'none',
                            'min-width':'150px', 'margin-left':'25px', })
             .on('click', function(event){
                 wasCtrl = event.shiftKey;
