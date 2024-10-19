@@ -17,61 +17,21 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-$.widget( "heurist.repositoryConfig", {
+$.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
     // default options
     options: {
-    
-        //DIALOG section       
-        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
-        height: 640,
-        width:  900,
-        modal:  true,
-        title:  '',
+        title: 'External repositories configuration',
         htmlContent: 'repositoryConfig.html',
         helpContent: null,
-        
-        //parameters
-        service_config: {}, // all assigned services
-        service_remove: [], // services to be removed
-        
-        //listeners
-        onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
-        beforeClose:null,     //to show warning before close
-        onClose:null       
+
+        type: 'repository'
     },
-    
-    _as_dialog:null, //reference to itself as dialog (see options.isdialog)
-    
-    _need_load_content:true,
-    
-    _current_cfg: null, // current set service details
-    _is_modified: false, // is current service modified
-    _available_services:null, // list of available services
-    _services_modified: false, // has any service been removed/added
-    _isNewCfg: false,
 
-    //controls
-    selectUserGroups:null, //selector user and groups
-    selectServiceType: null, //selector for lookup service/repository
-    serviceList: null, //left panel list
-
-    example_results: {},    
-    
-    save_btn: null,
-    close_btn: null,
-    
-    // the widget's constructor                            
-    _create: function() {
-        // prevent double click to select text
-       
-    }, //end _create
-    
     //
     //  load configuration and call _initControls
     //
     _init: function() {
-        
 
         let _services = ['Nakala','Flickr','Zenodo','Isidore','MediHAL','DSpace'];
         this._available_services = [];
@@ -86,162 +46,10 @@ $.widget( "heurist.repositoryConfig", {
             });
             return;
         }
-        
-        let that = this;
-        
-        this.element.addClass('ui-heurist-design');
-        
-        if(this.options.isdialog){  //show this widget as popup dialog
-            this._initDialog();
-        }
-        
-        //load html content from file
-        if(this._need_load_content && this.options.htmlContent){        
-            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/admin/'+this.options.htmlContent
-                            +'?t='+window.hWin.HEURIST4.util.random(), 
-            function(response, status, xhr){
-                that._need_load_content = false;
-                if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr({
-                        message: response,
-                        error_title: 'Failed to load HTML content',
-                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                    });
-                }else{
-                    that.getConfigurations();
-                }
-            });
-            return;
-        }else{
-            this.getConfigurations();
-        }
-    },
-    
-    // 
-    // custom, widget-specific, cleanup.
-    //
-    _destroy: function() {
-        // remove generated elements
-        if(this.selectServiceType) this.selectServiceType.remove();
-        if(this.selectUserGroups) this.selectUserGroups.remove();
-        if(this.serviceList) this.serviceList.remove();
 
-    },
-    
-    //
-    // array of button defintions
-    //
-    _getActionButtons: function(){
-
-        let that = this;
-
-        return [
-            {
-                text:window.hWin.HR('Close'), 
-                id:'btnClose',
-                css:{'float':'right','margin-left':'30px'}, 
-                click: function() { 
-                    that._closeHandler(false, false, null);
-                }
-            },
-            {
-                text:window.hWin.HR('Save'),
-                id:'btnSave',
-                css:{'float':'right'},
-                click: function() {
-                    that._closeHandler(true, false, null);
-                },
-                class: "ui-button-action"
-            }
-        ];
+        this.getConfigurations(this._super());
     },
 
-    //
-    // init dialog widget
-    // see also popupDialog, closeDialog 
-    //
-    _initDialog: function(){
-        
-        let options = this.options,
-            btn_array = this._getActionButtons(), 
-            position = null,
-                that = this;
-    
-        if(!options.beforeClose){
-                options.beforeClose = function(){
-                    return true;
-                };
-        }
-        
-        if(position==null) position = { my: "center", at: "center", of: window };
-        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
-        if(options['width']>maxw) options['width'] = maxw*0.95;
-        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
-        if(options['height']>maxh) options['height'] = maxh*0.95;
-        
-        
-        let $dlg = this.element.dialog({
-            autoOpen: false ,
-            //element: this.element[0],
-            height: options['height'],
-            width:  options['width'],
-            modal:  (options['modal']!==false),
-            title: 'External repositories configuration',
-            position: position,
-            beforeClose: options.beforeClose,
-            resizeStop: function( event, ui ) {//fix bug
-                that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
-            },
-            close:function(){
-                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
-                  //that.options.onClose(that._currentEditRecordset);  
-                  that.options.onClose( that.options.service_config );
-                } 
-                that._as_dialog.remove();    
-                    
-            },
-            buttons: btn_array
-        }); 
-        this._as_dialog = $dlg; 
-        
-        $dlg.parent().addClass('ui-dialog-heurist ui-heurist-design');
-    },
-    
-    //
-    // show itself as popup dialog
-    //
-    popupDialog: function(){
-        if(this.options.isdialog){
-
-            this._as_dialog.dialog("open");
-            
-            if(this.options.helpContent){
-                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
-                window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
-            }
-            
-            this.save_btn = this._as_dialog.find('#btnSave');
-            this.close_btn = this._as_dialog.find('#btnClose');
-        }
-    },
-    
-    //
-    // close dialog
-    //
-    closeDialog: function(is_force){
-        if(this.options.isdialog){
-            
-            if(is_force===true){
-                this._as_dialog.dialog('option','beforeClose',null);
-            }
-            
-            this._as_dialog.dialog("close");
-        }
-    },
-    
-    
-    
-     
     //  
     // invoked from _init after loading of html content
     //
@@ -251,9 +59,7 @@ $.widget( "heurist.repositoryConfig", {
 
         //fill record type selector
         this.selectUserGroups = this.element.find('#sel_usergroup').css({'list-style-type': 'none'});
-        
-       
-        
+
         window.hWin.HEURIST4.ui.createUserGroupsSelect(this.selectUserGroups.get(0), null, //show groups for current user only
             [{key:-1, title:'select group or user...'},
              {key:0, title:'Any logged-in user'}, 
@@ -326,16 +132,28 @@ $.widget( "heurist.repositoryConfig", {
             this.element.find('.ui-heurist-header').text(this.options.title);
 
             // bottom bar buttons
-            this.save_btn = this.element.find('#btnSave').button().on('click', function() {that._closeHandler(true, false, null);} );
-            this.close_btn = this.element.find('#btnClose').button().on('click', function() {that._closeHandler(false, false, null);} );
+            this.save_btn = this.element.find('#btnSave').button();
+            this.close_btn = this.element.find('#btnClose').button();
+
+            this._on(this.save_btn, {
+                click: () => {
+                    that._closeHandler(true, false, null);
+                }
+            });
+            this._on(this.close_btn, {
+                click: () => {
+                    that._closeHandler(false, false, null);
+                }
+            });
 
             // mouse leaves container
-            this.element.find('.ent_wrapper:first').on('mouseleave', function(event) {
-
-                if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
-                    that._closeHandler(false, true, $(event.target));
+            this._on(this.element.find('.ent_wrapper:first'), {
+                mouseleave: (event) => {
+                    if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
+                        that._closeHandler(false, true, $(event.target));
+                    }
                 }
-            } );
+            });
         }
         
         window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
@@ -351,30 +169,30 @@ $.widget( "heurist.repositoryConfig", {
     //
     // get configurations from server for current user
     //
-    getConfigurations: function(){
+    getConfigurations: function(callback){
 
         let that = this;
 
         window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'get'}, function(response){
+
             if(response.status == window.hWin.ResponseStatus.OK){
                 that.options.service_config = window.hWin.HEURIST4.util.isJSON(response.data);
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
-            
+
             that.options.service_remove = []; //reset
             if(!that.options.service_config || that.options.service_config.length==0){ // Invalid value / None
                 that.options.service_config = {};    
             } 
+
             that._is_modified = false;
             that._services_modified = false;
 
-            if(that._initControls()){
-                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
-                    that.options.onInitFinished.call(that);
-                }        
+            if(typeof callback === 'function'){
+                callback.call(that);
             }
-            
+
             window.hWin.HEURIST4.util.setDisabled(that.save_btn, true);
         });        
         
@@ -392,14 +210,12 @@ $.widget( "heurist.repositoryConfig", {
             'delete': that.options.service_remove, //to be deleted                
             'edit': JSON.stringify(that.options.service_config)   //to be updted
         };
-//JSON.stringify        
-console.log( JSON.stringify(that.options.service_config) );        
-        
+
         window.hWin.HAPI4.SystemMgr.repositoryAction(request, function(response){
 
             if(response.status == window.hWin.ResponseStatus.OK){
+
                 that.options.service_remove = []; //reset
-                //window.hWin.HAPI4.sysinfo['repository_config'] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config); // update local copy
 
                 that._is_modified = false;
                 that._services_modified = false;
@@ -414,120 +230,6 @@ console.log( JSON.stringify(that.options.service_config) );
     },
 
     //
-    // on close 
-    //
-    _closeHandler: function(isSave=false, isMouseLeave=false, trigger){
-
-        let that = this;
-
-        let hasChanges = (this._is_modified || this._services_modified);
-
-        let $dlg, buttons = {};
-
-        buttons['Save'] = function(){
-            
-            if(that._is_modified){
-                that._applyConfig();
-            }
-
-            $dlg.dialog('close');
-
-            // Update sysIdentification record
-            that.saveConfigrations();
-        };
-
-        buttons['Ignore and close'] = function(){ 
-            $dlg.dialog('close');
-            that.element.empty().hide();
-        };
-
-        if(!isSave && trigger && !trigger.is('button') && hasChanges){
-
-            let wording = this._is_modified ? 'current configuration' : 'available services';
-            let button = this._is_modified ? '"Apply"' : '"Save"'
-
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
-                buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'});
-        }else{
-            if(isSave){
-                this.saveConfigrations();
-            }else{
-                if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
-                    this._as_dialog.dialog('close');
-                }else{
-                    this.element.empty().hide();
-                }
-            }
-        }
-    },
-
-    //
-    // Get list of available services
-    //
-    _getServiceSelectmenu: function(){
-
-        let options = [];
-
-        let values = {};
-
-        for(let idx in this._available_services){
-
-            values = {
-                title: this._available_services[idx].label,
-                key: this._available_services[idx].service,
-                disabled: false,
-                selected: false,
-                hidden: false
-            };
-
-            options.push(values);
-        }
-
-        options.sort((a, b) => { return a.title > b.title; });
-
-        values = {
-            title: 'select a repository...',
-            key: '',
-            disabled: true,
-            selected: true,
-            hidden: true
-        }; // top option
-
-        options.unshift(values);
-
-        this.selectServiceType = window.hWin.HEURIST4.ui.createSelector(this.selectServiceType.get(0), options); // create dropdown
-        this.selectServiceType = $(this.selectServiceType);
-        window.hWin.HEURIST4.ui.initHSelect(this.selectServiceType, false); // initial selectmenu
-
-        if(this.selectServiceType.hSelect('instance')!=undefined){
-
-            this.selectServiceType.hSelect('widget').css('width', 'auto');
-            this.selectServiceType.hSelect('menuWidget').css('max-height', ''); // remove to force dropdown to scroll
-        }
-
-    },    
-
-    //
-    // prepare forms for new service
-    //
-    _addNewService: function(){
-
-        if(this._isNewCfg){
-            window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
-            return;
-        }
-        
-        // empty all inputs
-        this.serviceList.find('li').removeClass('ui-state-active');
-        
-
-        // empty control variables
-        this._fillConfigForm('new');
-        
-        this._reloadServiceList_item( 'new', 'assign on right ...' );
-    },
-    
-    //
     // fill in contents of right panel
     //    
     // {service_id:'nakala_0', service:'nakala', usr_ID:0, params:{readApiKey:,readUser:,readPwd...}}
@@ -541,9 +243,7 @@ console.log( JSON.stringify(that.options.service_config) );
         if( cfg0 ){
 
             this._current_cfg = cfg0;
-            
-           
-            
+
             //fill values
             this.element.find('input[data-field]').val('');
 
@@ -679,14 +379,7 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _changeService: function( service_name ){
 
-        let cfg0 = null;
-
-        $.each(this._available_services, function(i, srv){ // get new service info
-          if(srv.service==service_name){
-              cfg0 = window.hWin.HEURIST4.util.cloneJSON(srv);
-              return false;
-          }
-        });
+        let cfg0 = this.getServiceDefInfo(service_name, false);
 
         this._fillConfigForm(null, cfg0);
     },
@@ -720,82 +413,7 @@ console.log( JSON.stringify(that.options.service_config) );
         }
         
     },
-    
-    //
-    // refresh assigned service list, popup's left panel
-    //
-    _reloadServiceList: function(){
-      
-        let that = this;
 
-        this._off(this.serviceList.find('span[data-service-id]'),'click');
-        this.serviceList.empty(); // empty list
-
-        for(let idx in this.options.service_config){ // display all assigned services
-
-            let cfg = this.options.service_config[idx];
-
-            if(window.hWin.HEURIST4.util.isempty(cfg)){
-                continue;
-            }
-
-            let name = cfg.label;
-            
-            for(let j in this._available_services){
-                if(cfg.service == this._available_services[j].service){
-                    name = this._available_services[j].label;
-                }
-            }
-
-            let s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
-                    + window.hWin.HAPI4.SystemMgr.getUserNameLocal(cfg.usr_ID);
-            s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
-
-            this._reloadServiceList_item( idx, s ); //add to list
-        }
-        
-        
-        this.serviceList.find('li')
-        .on( 'mouseenter', function(event){ // service list hover event
-            let ele = $(event.target);
-            if(!ele.is('li')) ele = ele.parent();
-            ele.addClass('ui-state-hover');
-        })
-        .on( 'mouseleave', function(event){
-            let ele = $(event.target);
-            if(!ele.is('li')){ 
-                ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
-                ele = ele.parent();
-            }
-            ele.removeClass('ui-state-hover');
-        });
-
-        let eles = this.serviceList.find('span[data-service-id]');
-        this._on(eles,{'click':function(event)
-        { // remove service button
-            that._removeConfig($(event.target).attr('data-service-id'));
-        }}); 
-        
-        
-
-    },
-    
-    //
-    //
-    //
-    _reloadServiceList_item: function( service_id, s ){
-        
-            let s_active = '';
-            if(service_id=='new' || (this._current_cfg && this._current_cfg.service_id==service_id)){
-                s_active = ' ui-state-active';
-            }
-
-            return $('<li class="ui-widget-content'+s_active+'" data-service-id="'+service_id+'">'+s+'</li>')  
-                .css({margin: '5px 2px 2px', padding: '0.4em', cursor:'pointer', background:'#e0dfe0'}) 
-                .appendTo(this.serviceList);    
-    
-    },
-    
     //
     // save current service details
     //
@@ -873,46 +491,10 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _removeConfig: function(service_id){
 
-        let is_del = false;
-        if(window.hWin.HEURIST4.util.isempty(service_id)) { // check if a service was provided
-            if(this._isNewCfg){
-                this._isNewCfg = false;
-                is_del = true;
-            }
+        if(this.options.service_config[service_id] != null && this.options.service_remove.indexOf(service_id) < 0){
+            this.options.service_remove.push(service_id);
         }
 
-        if(this.options.service_config[service_id]!=null) { // check if service has been assigned
-        
-            if(this.options.service_remove.indexOf(service_id)<0){
-                this.options.service_remove.push(service_id);
-            }
-        
-            delete this.options.service_config[service_id]; // remove assigned service
-            is_del = true;
-
-            this._services_modified = true;
-            window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
-        }
-
-        if(is_del){
-            this._reloadServiceList();
-            this._current_cfg = null;
-            this._updateStatus();
-        }else if(this._current_cfg){
-            //reload
-            this._fillConfigForm(this._current_cfg.service_id);
-        }
-        
-    },
-
-    //
-    // Refresh the element if it is an instance of selectmenu/hSelect
-    //
-    selectMenuRefresh: function(selectMenu){
-
-        if(selectMenu.hSelect('instance')){
-            selectMenu.hSelect('refresh');
-        }
-    },    
-
+        return this._super(service_id);
+    }
 });

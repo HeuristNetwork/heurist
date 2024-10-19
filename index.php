@@ -217,6 +217,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="layout_default.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/baseAction.js"></script>
+<script type="text/javascript" src="hclient/widgets/baseConfig.js"></script>
 <script type="text/javascript" src="hclient/widgets/database/dbAction.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
