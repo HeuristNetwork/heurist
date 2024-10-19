@@ -2254,12 +2254,12 @@ abstract class LinkedPredicate extends Predicate {
 
             $add_where = predicateId($this->fromField,$rty_IDs, SQL_AND);
 
-            $add_where .= $this->toRLink;
+            $add_where = $this->toRLink . $add_where;
             if($rty_ID!=1){
                 $add_where .= SQL_AND;
 
                 if(!empty($dty_IDs)){
-                    $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs);
+                    $add_where = predicateId('rl.rl_DetailTypeID',$dty_IDs, SQL_AND);
                 }else{
                     $add_where = $add_where.SQL_RELATION_IS_NULL;
                 }
