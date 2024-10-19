@@ -194,14 +194,17 @@ window.hWin.HEURIST4.util = {
                 element = [element];
             }
             $.each(element, function(idx, ele){
-                ele = $(ele);
                 
-                if( ($.heurist.hSelect !=="undefined") && window.hWin.HEURIST4.util.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
+                if (!ele.jquery) {
+                    ele = $(ele);    
+                }
+                
+                if( ($.heurist.hSelect !=='undefined') && window.hWin.HEURIST4.util.isFunction($.heurist.hSelect) && ele.hSelect('instance')!=undefined){              
 
                     if (mode) {
-                        ele.hSelect( "disable" );
+                        ele.hSelect( 'disable' );
                     }else{
-                        ele.hSelect( "enable" );    
+                        ele.hSelect( 'enable' );    
                     }
 
                 }else{
