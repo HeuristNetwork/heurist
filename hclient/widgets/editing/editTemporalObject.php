@@ -1,4 +1,4 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -67,33 +67,15 @@
 
         <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
         <link rel="stylesheet" type="text/css" href="../../../h6styles.css">
-        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
-        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        
+<?php
+    define('IS_INDEX_PAGE', false);
+    if(!defined('PDIR')) {define('PDIR','../../../');}
+
+    includeJQuery();            
+?>        
         <script type="text/javascript" src="../../core/detectHeurist.js"></script>
         
-        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="../../../external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-        <script type="text/javascript" src="../../../external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-        
-
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-        <script src="../../../external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-        <script src="../../core/jquery.calendars.japanese.js"></script>
-
         <style type="text/css">
         	.display-tab{
         		padding-top: 10px !important;

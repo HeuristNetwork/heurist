@@ -205,9 +205,12 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 ?>
 
 <!-- it is needed in preference dialog -->
-<script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.ui-contextmenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+<link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
-<script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>
 
 <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
 <script type="text/javascript" src="ext/js/date.format.js"></script>
@@ -268,9 +271,6 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/CmsManager.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/ui.tabs.paging.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
@@ -311,31 +311,11 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
 <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
-<!-- Calendar picker -->
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-<script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
-
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
 
 <?php
-if($isLocalHost){
+if(false && $isLocalHost){
     ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>
@@ -353,7 +333,12 @@ if($isLocalHost){
     <link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js"></script>
+    <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/
+    
+    
+    +
+    
+    "></script>
 
     <?php
 }
@@ -587,7 +572,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         <div class='logo'></div>
         <h4>Heurist Academic Knowledge Management System</h4>
         <p style="margin-top:1em;">version <?=HEURIST_VERSION?></p>
-        <p style="margin-top: 1em;">Copyright (C) 2005-2023 <a href="https://sydney.edu.au/arts/" style="outline:0;" target="_blank" rel="noopener">University of Sydney</a></p>
+        <p style="margin-top: 1em;">Copyright (C) 2005-2023 <a href="https://sydney.edu.au/arts/" style="outline:none;" target="_blank" rel="noopener">University of Sydney</a></p>
     </div>
 
     <div id="heurist-platform-warning" style="display:none;">

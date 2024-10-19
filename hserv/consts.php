@@ -606,8 +606,32 @@ function includeJQuery(){
         <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha384-v0gmY8lRWAAaI20hT2ehyGAhsZiQpB+ZMpRHg/ipfVinhY4zxJXPjV8zaVW3kq4W" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+        
+        <!-- Calendar picker -->
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker-1.2.1.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
+
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
+        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
 <?php       
-   }else if(isLocalHost()){
+   }else{
+   
+   
+   if(isLocalHost()){
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
@@ -620,6 +644,28 @@ function includeJQuery(){
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         
 <?php        
+   }
+?>
+        <!-- Calendar picker -->
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
+        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
+<?php   
    }
 ?>   
    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js"></script>

@@ -546,7 +546,7 @@ $.widget( "heurist.editing_input", {
         if(this.f('rst_MayModify') == 'discouraged'){ // && !window.hWin.HAPI4.is_admin()
 
             this.block_editing = true;
-
+console.log('!!! disable');
             that.setDisabled(true);
 
             this.input_cell.find('.ui-state-disabled').removeClass('ui-state-disabled'); // remove gray 'cover'
@@ -574,7 +574,7 @@ $.widget( "heurist.editing_input", {
 
                         that.block_editing = false;
                         //that._off($eles, 'click'); - Also removes click from repeat button
-
+console.log('!!! enable');
                         that.setDisabled(false);
                         if(that.input_cell.sortable('instance') !== undefined){ // re-enable sorting inputs
                             that.input_cell.sortable('enable');
@@ -6264,7 +6264,7 @@ $.widget( "heurist.editing_input", {
                 if(that.is_disabled) return;
 
                 let url = window.hWin.HAPI4.baseURL 
-                    + 'hclient/widgets/editing/editTemporalObject.html?'
+                    + 'hclient/widgets/editing/editTemporalObject.php?'
                     + encodeURIComponent(that.newvalues[$input.attr('id')]
                                 ?that.newvalues[$input.attr('id')]:$input.val());
                 
