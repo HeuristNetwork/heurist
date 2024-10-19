@@ -1185,14 +1185,16 @@ $mysqli->kill($thread_id);
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
 
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE '.predicateId('dtl_DetailTypeID',$fld_dates);
+            $whereDateFields = predicateId('dtl_DetailTypeID',$fld_dates);
+            
+            $query = 'SELECT count(dtl_ID) FROM recDetails '.SQL_WHERE.$whereDateFields;
             $cnt_dates = mysql__select_value($mysqli, $query);
             if($offset>0){
                 $cnt_dates = $cnt_dates - $offset;
             }
 
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
-            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';
+            .SQL_WHERE.$whereDateFields;
             if($offset>0){
                 $query = $query.' LIMIT '.$offset.', 18446744073709551615';
             }
