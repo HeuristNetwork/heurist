@@ -112,10 +112,14 @@ window.hWin.HEURIST4.util = {
     },
     
     isPositiveInt: function (n) {
-        if(window.hWin.HEURIST4.util.isempty(n)){
+        if(window.hWin.HEURIST4.util.isempty(n) || !(typeof n === 'string' || typeof n === 'number')){
             return false;
         }
-        n = parseInt(n);
+
+        if(typeof n === 'string'){
+            n = parseInt(n);    
+        }
+        
         return !isNaN(n) && n>0;
     },
 

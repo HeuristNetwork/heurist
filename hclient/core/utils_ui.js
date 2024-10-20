@@ -542,7 +542,7 @@ window.hWin.HEURIST4.ui = {
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
             
             if(!Array.isArray(rectypeList)){
-                if(window.hWin.HEURIST4.util.isPositiveInt(rectypeList)){
+                if(rectypeList>0){
                     rectypeList = [rectypeList];
                 }else{
                     rectypeList = rectypeList.split(',');
