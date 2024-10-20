@@ -2805,7 +2805,8 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 /* Change Handler */
-                $input.change(function(event){
+                this._on($input,{change: 
+                function(event){
 					
                     /* new file values */
                     let val = that.newvalues[$input.attr('id')];
@@ -2856,7 +2857,7 @@ $.widget( "heurist.editing_input", {
                     }
 
                     that.onChange(); 
-                });//input change
+                } });//input change
                 
                 /* Handler Variables */
                 let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
@@ -2928,7 +2929,8 @@ $.widget( "heurist.editing_input", {
                 };
 
                 /* Thumbnail's click handler */
-                $input_img.click(function(event){
+                this._on($input_img,{click:
+                function(event){
 
                     let elem = event.target;
                     
@@ -2981,7 +2983,7 @@ $.widget( "heurist.editing_input", {
                             $input_img.css('cursor', 'zoom-in');
                         }
                     }
-                }); 
+                }}); 
 
 				// for closing inline image when 'frozen'
                 let $hide_thumb = $('<span class="hideTumbnail" style="padding-right:10px;color:gray;cursor:pointer;" title="Hide image thumbnail">'
@@ -3244,7 +3246,7 @@ $.widget( "heurist.editing_input", {
                             $('<br><br>').appendTo( ele );
 
                             $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
-                                .on('click', function(){ $input.click() }).appendTo( ele );
+                                .on('click', function(){ $input.trigger('click') }).appendTo( ele );
                         }
                             
                         //set input as file and hide
@@ -3462,7 +3464,7 @@ $.widget( "heurist.editing_input", {
                         //init click handlers
                        
                         $input_img.on({click: function(e){ //find('a')
-                            $input.click(); //open file browse
+                            $input.trigger('click'); //open file browse
                         }});
             }
             else //------------------------------------------------------------------------------------
@@ -6225,7 +6227,7 @@ $.widget( "heurist.editing_input", {
 
                     },
                     dblclick: function(){
-                        $btn_datepicker.click();
+                        $btn_datepicker.trigger('click');
                     }
                 });
 
@@ -6326,7 +6328,7 @@ $.widget( "heurist.editing_input", {
 
         }//temporal allowed
         
-        this._on($input, {'change', __onDateChange});
+        this._on($input, {'change':__onDateChange});
     },
 
     //
