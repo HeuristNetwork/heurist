@@ -6735,7 +6735,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         const rty_ID = this._currentEditRecTypeID;
-        const current_fields = $Db.rst(rty_ID).getRecords(); // current fields in rectype
+        const current_fields = $Db.rst(rty_ID)?.getRecords(); // current fields in rectype
         const rty_ConceptCode = $Db.getConceptID('rty', rty_ID); // complete concept code
         org_DBID = org_DBID == -1 ? $Db.rty(rty_ID, 'rty_OriginatingDBID') : org_DBID; // database ID for source
         const org_ID = $Db.rty(rty_ID, 'rty_IDInOriginatingDB'); // ID in source database
