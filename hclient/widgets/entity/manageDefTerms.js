@@ -193,13 +193,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 let btn_array = [
 
-                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Vocab
+                    {showLabel:true, icon:'ui-icon-plus', text:window.hWin.HR('Add'), //Add Vocab
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                         click: function() { that._onActionListener(null, 'add'); }},
-                    {showText:false, icons:{primary:'ui-icon-download'}, text:window.hWin.HR('Export Vocabularies'),
+                    {showLabel:false, icon:'ui-icon-download', text:window.hWin.HR('Export Vocabularies'),
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                         click: function() { that._onActionListener(null, 'term-export'); }},
-                    {showText:false, icons:{primary:'ui-icon-upload',padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
+                    {showLabel:false, icon:'ui-icon-upload', padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                         click: function() { that._onActionListener(null, 'term-import'); }}
                 ];
@@ -335,35 +335,35 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //show particular terms for vocabulary 
                 let btn_array = [
 
-                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Term
+                    {showLabel:true, icon:'ui-icon-plus', text:window.hWin.HR('Add'), //Add Term
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                         class: 'ui-button-action',click: function() { that._onActionListener(null, 'add'); }},
 
-                    {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Ref'), //Add Term
+                    {showLabel:true, icon:'ui-icon-link', text:window.hWin.HR('Ref'), //Add Term
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
                         click: function() { that._onActionListener(null, 'add-reference'); }},
 
-                    {showText:false, icons:{primary:'ui-icon-download'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
+                    {showLabel:false, icon:'ui-icon-download', text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                         click: function() { that._onActionListener(null, 'term-export'); }},
 
-                    {showText:false, icons:{primary:'ui-icon-upload',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
+                    {showLabel:false, icon:'ui-icon-upload', text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w  padding:'2px',
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                         click: function() { that._onActionListener(null, 'term-import'); }},
                         
-                    {showText:false, icons:{primary:'ui-icon-translate',padding:'2px'}, text:window.hWin.HR('Import Translations'),
+                    {showLabel:false, icon:'ui-icon-translate', text:window.hWin.HR('Import Translations'),  //padding:'2px'
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportTranslations',
                         click: function() { that._onActionListener(null, 'term-import-translations'); }}
                 ];
 
                 let btn_array2 = [
-                    {showText:false, icons:{primary:'ui-icon-menu'}, text:window.hWin.HR('Show as plain list'),
+                    {showLabel:false, icon:'ui-icon-menu', text:window.hWin.HR('Show as plain list'),
                         css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                         click: function() { that._onActionListener(null, 'viewmode-list'); }},
-                    /*{showText:false, icons:{primary:'ui-icon-structure'}, text:window.hWin.HR('Show as tree'),
+                    /*{showLabel:false, icon:'ui-icon-structure', text:window.hWin.HR('Show as tree'),
                     css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_Tree',
                     click: function() { that._onActionListener(null, 'viewmode-tree'); }},*/
-                    {showText:false, icons:{primary:'ui-icon-view-icons'}, text:window.hWin.HR('Show as images'),
+                    {showLabel:false, icon:'ui-icon-view-icons', text:window.hWin.HR('Show as images'),
                         css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                         click: function() { that._onActionListener(null, 'viewmode-thumbs'); }}
                 ];
@@ -407,7 +407,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 }
 
-                let del_multi_btn = {showText:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
+                let del_multi_btn = {showLabel:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
                                     css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnDelMulti',
                                     click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
                 this._defineActionButton2(del_multi_btn, c1_btns);

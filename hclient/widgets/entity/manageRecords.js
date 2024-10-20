@@ -920,10 +920,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                     btns = [
 
-                        {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
+                        {showLabel:false, icon:'ui-icon-circle-triangle-w',title:window.hWin.HR('Previous'),
                               css:{'display':'none','margin-right':'0.5em',}, id:'btnPrev',
                               click: function() { that._navigateToRec(-1); }},
-                        {showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},title:window.hWin.HR('Next'),
+                        {showLabel:false, icon:'ui-icon-circle-triangle-e',iconPosition:'end',title:window.hWin.HR('Next'),
                               css:{'display':'none','margin-left':'0.5em','margin-right':'1.5em'}, id:'btnNext',
                               click: function() { that._navigateToRec(1); }},
                               
@@ -1152,8 +1152,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             let recset = this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
                 if(this._toolbar){
-                    this._toolbar.find('#btnPrev').css({'display':'inline-block'});
-                    this._toolbar.find('#btnNext').css({'display':'inline-block'});
+                    this._toolbar.find('#btnPrev').css({'display':'inline-block','height':'2.1em','background':'#f2f2f2'});
+                    this._toolbar.find('#btnNext').css({'display':'inline-block','height':'2.1em','background':'#f2f2f2'});
                     if(this._toolbar.find('#divNav').length===0){
                         $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
                         .insertBefore(this._toolbar.find('#btnPrev'));
@@ -1509,16 +1509,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 //activate buttons
                 /* moved to top of editForm 2017-12-21
-                panel.find('.btn-config2').button({text:false,label:top.HR('Modify record type structure in new window'),
-                        icons:{primary:'ui-icon-extlink'}})
+                panel.find('.btn-config2').button({showLabel:false,label:top.HR('Modify record type structure in new window'),
+                        icon:'ui-icon-extlink'})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
                     .on('click', function(){
                         that.editRecordTypeOnNewTab();
                     });
                     
-                panel.find('.btn-config').button({text:false,label:top.HR('Modify record type structure'),
-                        icons:{primary:'ui-icon-gear'}})
+                panel.find('.btn-config').button({showLabel:false,label:top.HR('Modify record type structure'),
+                        icon:'ui-icon-gear'})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
                     .on('click', function(){that.editRecordType();});
@@ -1526,20 +1526,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 */
                     
                 let btn_change_rt = panel.find('.btn-modify');                        
-                btn_change_rt.button({text:false, label:top.HR('Change record type'),
-                        icons:{primary:'ui-icon-triangle-1-s'}})
+                btn_change_rt.button({showLabel:false, label:top.HR('Change record type'),
+                        icon:'ui-icon-triangle-1-s'})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'left','font-size': '0.8em', height: '14px', width: '14px'})
                     .on('click', function(){
                          let selRt = panel.find('.rectypeSelect');
                          let selHd = panel.find('.rectypeHeader');
                          if(selRt.is(':visible')){
-                             btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-s'}});
+                             btn_change_rt.button('option',{icon:'ui-icon-triangle-1-s'});
                              selRt.hide();
                             
                              
                          }else{
-                             btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-n'}});
+                             btn_change_rt.button('option',{icon:'ui-icon-triangle-1-n'});
                              selRt.show();
                              //
                              if(selRt.is(':empty')){
@@ -1573,7 +1573,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         },
                                         {title:'Warning',yes:'Proceed',no:'Cancel'});
                                     } 
-                                    btn_change_rt.button('option',{icons:{primary:'ui-icon-triangle-1-s'}});
+                                    btn_change_rt.button('option',{icon:'ui-icon-triangle-1-s'});
                                    
                                     selRt.hide();
                                     
@@ -1632,8 +1632,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                     
                     
-            panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access rights'),
-                        icons:{primary:'ui-icon-pencil'}})
+            panel.find('.btn-access').button({showLabel:false,label:top.HR('Change ownership and access rights'),
+                        icon:'ui-icon-pencil'})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .on('click', function(){
@@ -2011,8 +2011,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             pnl.append(sContent);
 
             //append/manage button
-            $('<div>').button({label:top.HR('Manage reminders'), text:false,
-                icons:{primary:'ui-icon-pencil'}})  //ui-icon-mail
+            $('<div>').button({label:top.HR('Manage reminders'), showLabel:false,
+                icon:'ui-icon-pencil'})  //ui-icon-mail
                 .css({position:'absolute',right:'13px', height: '18px'})
                 .addClass('non-owner-disable')
                 .on('click', function(){
@@ -2042,8 +2042,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             pnl.empty().css({'font-size': '0.9em'});
 
             //append/manage button
-            $('<div>').button({label:top.HR('Manage bookmark info'), text:false,
-                icons:{primary:'ui-icon-pencil'}})  //ui-icon-bookmark
+            $('<div>').button({label:top.HR('Manage bookmark info'), showLabel:false,
+                icon:'ui-icon-pencil'})  //ui-icon-bookmark
                 .addClass('non-owner-disable')
                 .css({float: 'right', height: '18px'}) //position:'absolute',right:'13px',
                 .on('click', function(){
@@ -2149,8 +2149,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             //append manage button
-            $('<div>').button({label:top.HR('Manage record tags'), text:false,
-                icons:{primary:'ui-icon-tag'}})
+            $('<div>').button({label:top.HR('Manage record tags'), showLabel:false,
+                icon:'ui-icon-tag'})
                 .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
                 .on('click', function(){

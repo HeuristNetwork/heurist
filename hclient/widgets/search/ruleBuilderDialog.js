@@ -50,7 +50,7 @@ function onPageInit(success) //callback function of hAPI initialization
 
        
         
-        $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
+        $('#btn_help').button({icon:"ui-icon-help", showLabel:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
             autoOpen: false, width:800,
             position: { my: "right bottom", at: "right top", of: $('#btn_help') },

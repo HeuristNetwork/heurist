@@ -67,8 +67,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 //expand and show tag details and usage
                 this.btn_show_usage = $('<div>').css({'position':'absolute', top:3, right:3}).appendTo(this.element);
                 this.btn_show_usage.css({'min-width':'9m','z-index':2})
-                        .button({label: window.hWin.HR("Usage"), icons: {
-                                secondary: "ui-icon-carat-1-w"}});
+                        .button({label: window.hWin.HR("Usage"), icon:"ui-icon-carat-1-w", iconPosition:'end'});
                         
                 this._on( this.btn_show_usage, {"click": this.showHideUsage});
             */
@@ -179,10 +178,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             this.recordList.parent().css({'width':'100%'});
             this.recordList.css({'top':'2.8em'});
             this.searchForm.css({'height':'2.2em'});
-            this.btn_show_usage.button('option','icons', {secondary: "ui-icon-carat-1-w"});
+            this.btn_show_usage.button('option','icon', 'ui-icon-carat-1-w');
+            this.btn_show_usage.button('option','iconPosition','end');
         }else{
             this._showRightHandPanel();
-            this.btn_show_usage.button('option','icons', {secondary: "ui-icon-carat-1-e"});
+            this.btn_show_usage.button('option','icon', 'ui-icon-carat-1-e');
+            this.btn_show_usage.button('option','iconPosition','end');
         }
     },
     
@@ -342,8 +343,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             //add buttons
             let btns = this.recordList.find('div.rec_action_link[data-key="add"]').button(
-                            {icons: {primary: 'ui-icon-circle-plus'}, 
-                             text: false, 
+                            {icon: 'ui-icon-circle-plus', 
+                             showLabel: false, 
                              label: window.hWin.HR('Click to add tag')});
 
             let inputs = this.recordList.find('input');                             
@@ -362,8 +363,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             if(this.options.select_mode=='manager'){
                 //delete buttons        
                 btns = this.recordList.find('div.rec_action_link[data-key="delete"]').button(
-                            {icons: {primary: 'ui-icon-circle-close'}, 
-                             text: false, 
+                            {icon: 'ui-icon-circle-close', 
+                             showLabel: false, 
                              label: window.hWin.HR('Click to delete tag')});
 
                 this._on(btns, {'click':this.onDeleteTag});
@@ -522,8 +523,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                             
                     if(this.options.select_mode=='manager'){
                         let btns = ele.find('div.rec_action_link').button(
-                                        {icons: {primary: 'ui-icon-circle-close'}, 
-                                         text: false, 
+                                        {icon: 'ui-icon-circle-close', 
+                                         showLabel: false, 
                                          title: window.hWin.HR('Click to delete tag')});
                         this._on(btns, {'click':this.onDeleteTag});
                     }
@@ -740,8 +741,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         let btn_add = mdiv.find('div.rec_action_link')
                         .css({'vertical-align': 'bottom', height:'10px', 'font-size': '0.8em'}).hide()
                         .button({
-                        //icons: {primary: 'ui-icon-circle-plus'}, 
-                        //text: false, 
+                        //icon: 'ui-icon-circle-plus', 
+                        //showLabel: false, 
                          title: window.hWin.HR('Click to add tag to selection'),
                          label: window.hWin.HR('ADD')});
 

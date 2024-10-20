@@ -153,7 +153,7 @@ $.widget( "heurist.reportViewer", {
     _initToolbar: function() {
         let that = this;
         $.each(this._$('.toolbar > button'), (i, item)=>{
-            that._on($(item).button({text:false, icons: { primary: "ui-icon-"+$(item).attr('data-icon')}}),
+            that._on($(item).button({showLabel:false, icon: "ui-icon-"+$(item).attr('data-icon')}),
                 {click: that._handleToolbarAction});
         });
         this._$('button[data-action="import"]').find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});        

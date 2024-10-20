@@ -226,7 +226,7 @@ $.widget( "heurist.profile_edit", {
                 //init captcha
                 this.edit_form.find('#imgdiv').show();
                 /*that.edit_form.find('#btnCptRefresh')
-                .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
+                .button({showLabel:false, iconPosition:'end', icon:'ui-icon-refresh'})
                 .show()
                 .on('click', __refreshCaptcha );*/
 

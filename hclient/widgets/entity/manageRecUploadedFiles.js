@@ -431,18 +431,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
                 this._edit_dialog.find('#btn_upload_file').css({'min-width':'9em','z-index':2})
                     .button({label: window.hWin.HR((this._additionMode=='tiled')?'Choose zip or mbtiles file':'Choose file')
-                    ,icons: {
-                            primary: "ui-icon-upload"
-                    }})
+                    ,icon:'ui-icon-upload'})
                     .on('click', function(e) {
                         that._uploadFileAndRegister(false);
                     }); 
 
                 this._edit_dialog.find('#btn_upload_file_stack').css({'min-width':'9em','z-index':2})
                     .button({label: window.hWin.HR('Choose zip or mbtiles file')
-                    ,icons: {
-                            primary: "ui-icon-upload"
-                    }})
+                    ,icon:"ui-icon-upload"})
                     .on('click', function(e) {
                         that._uploadFileAndRegister( true );
                     }); 
@@ -539,9 +535,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this._edit_dialog.find('#btn_select_file').css({'min-width':'9em','z-index':2})
                     .button({label: window.hWin.HR('Choose previously referenced '
                             +(this._additionMode=='tiled'?'image stack or IIIF':'file'))
-                    ,icons: {
-                            primary: "ui-icon-grid"
-                    }})
+                    ,icon:"ui-icon-grid"})
                     .on('click', function(e) {
                          that._currentEditID = null;
                          that.editFormPopup.dialog('close');
@@ -554,9 +548,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 // Handle for file upload - to be uploaded to a repository
                 this._edit_dialog.find('#btn_upload_file_repository').css({'min-width':'9em','z-index':2})
                     .button({label: window.hWin.HR('Choose file')
-                    ,icons: {
-                        primary: 'ui-icon-upload'
-                    }})
+                    ,icon:'ui-icon-upload'})
                     .on('click',(e) => {
                         if(that._edit_dialog.find('#external_repos').val() != ''){
                             that._edit_dialog.find('#upload_file_repository').trigger('click');
@@ -570,9 +562,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     this._edit_dialog.find('#btn_register_stack')
                         .css({'min-width':'9em','z-index':2,'margin-left':'5px'})
                         .button({label: window.hWin.HR('Tielstack directory (eg. Zoomify)')
-                        ,icons: {
-                                primary: "ui-icon-grid"
-                        }})
+                        ,icon:"ui-icon-grid"})
                         .on('click', function(e) {
                             
                             if(!that.select_folder_dlg){
@@ -617,9 +607,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     this._edit_dialog.find('#btn_register_single_file_stack')
                         .css({'min-width':'9em','z-index':2,'margin-left':'5px'})
                         .button({label: window.hWin.HR('Single file tilestack (eg. MBtiles)')
-                        ,icons: {
-                                primary: "ui-icon-grid"
-                        }})
+                        ,icon:"ui-icon-grid"})
                         .on('click', function(e) {
                             
                             if(!that.select_file_dlg){

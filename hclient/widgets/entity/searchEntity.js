@@ -110,9 +110,7 @@ $.widget( "heurist.searchEntity", {
             // summary button - to show various counts for entity 
             // number of group members, records by rectypes, tags usage
             this.btn_summary = this.element.find('#btn_summary')
-                .button({label: window.hWin.HR("Show/refresh counts"), text:false, icons: {
-                    secondary: "ui-icon-retweet"
-                }});
+                .button({label: window.hWin.HR("Show/refresh counts"), showLabel:false, iconPosition:'end', icon:'ui-icon-retweet'});
             if(this.btn_summary.length>0){
                 this._on( this.btn_summary, { click: this.startSearch });
             }

@@ -199,7 +199,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         this._on(this._$('#btnInsertPattern').button(), {click:this._insertPattern});
 
         //init test panel
-        this._on(this._$('.btnStartTest').button({icons: { primary: 'ui-icon-circle-arrow-s'}}), 
+        this._on(this._$('.btnStartTest').button({icon: 'ui-icon-circle-arrow-s'}), 
             {click:()=>{this._doTest();}});
         
 

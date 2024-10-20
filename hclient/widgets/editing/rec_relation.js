@@ -93,7 +93,7 @@ $.widget( "heurist.rec_relation", {
         this.btn_rec_search_dialog = $( "<button>", {title: "Click to search target record"})
         .addClass("smallbutton")
         .appendTo( this.wcontainer )
-        .button({icons:{primary: "ui-icon-link"},text:false});
+        .button({icon: "ui-icon-link",showLabel:false});
 
         function __show_select_dialog(event){
             event.preventDefault();
@@ -119,7 +119,7 @@ $.widget( "heurist.rec_relation", {
         this._on( this.w_recpointer, { keypress: __show_select_dialog, click: __show_select_dialog } );
 
 
-        this.btn_add_relationship = $( "<button>", {text:"Add", title: "Create relationship"})
+        this.btn_add_relationship = $( "<button>", {label:"Add", title: "Create relationship"})
         .css('float','right')
         .appendTo( this.wcontainer )
         .button();

@@ -508,7 +508,7 @@ this._dout('reload datatable '+this.options.serverSide);
                 
                 //add button to configure columns
                 /*
-                var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', text:false})
+                var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', showLabel:false})
                         .css({height:'20px'}).appendTo(sel_container);
                 
                 this._on( btn_cfg, {

@@ -659,8 +659,7 @@ $.widget( "heurist.resultList", {
                     else if(key=='edit_ext') btn_icon = 'ui-icon-newwin'
                         else if(key=='delete') btn_icon = 'ui-icon-minus';
 
-                btn_icon = {primary: btn_icon};
-                $('<div>',{'data-key':key}).button({icons: btn_icon, text:true, label:window.hWin.HR(title) })
+                $('<div>',{'data-key':key}).button({icon: btn_icon, showLabel:true, label:window.hWin.HR(title) })
                 .appendTo(this.action_buttons_div)
                 .on('click', function( event ) {
                     let key = $(event.target).parent().attr('data-key');
@@ -690,7 +689,7 @@ $.widget( "heurist.resultList", {
 
             this.btn_actions = $( "<button>" )
             .appendTo( this.action_buttons_div )
-            .button({icons: { secondary: "ui-icon-triangle-1-s"}, text:true, label: window.hWin.HR("Actions")});
+            .button({iconPosition:'end', icon:'ui-icon-triangle-1-s', showLabel:true, label: window.hWin.HR("Actions")});
 
             this._on( this.btn_actions, {
                 click: function() {
@@ -861,11 +860,7 @@ $.widget( "heurist.resultList", {
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
                 class: 'btnExportRecords ui-button-action', style: 'margin: 6px 10px 2px 0px; float: right;'
-            }).button({
-                icons: {
-                    primary: 'ui-icon-download'
-                }
-            }).prependTo(this.div_toolbar);
+            }).button({icon: 'ui-icon-download'}).prependTo(this.div_toolbar);
 
             this.export_button[0].style.setProperty('color', '#FFF', 'important');
 
@@ -877,11 +872,7 @@ $.widget( "heurist.resultList", {
             this.export_button = $('<button>', {
                 text: window.hWin.HR('CSV'), title: 'Export current results in CSV format',
                 class: 'ui-main-color', style: 'padding: 8px; float: right; margin-right: 10px;'
-            }).button({
-                icons: {
-                    primary: 'ui-icon-arrowthick-1-s'
-                }
-            }).insertBefore(this.view_mode_selector);
+            }).button({icon: 'ui-icon-arrowthick-1-s'}).insertBefore(this.view_mode_selector);
 
             this._on(this.export_button, {
                 click: this._exportRecords
@@ -3002,27 +2993,21 @@ $.widget( "heurist.resultList", {
                     this.btn_page_prev = $( "<button>", {text:currentPage} )
                     .appendTo( span_pages )
                     .css({'font-size':'0.7em', 'width':'1.6em'})
-                    .button({icons: {
-                        primary: "ui-icon-triangle-1-w"
-                        }, text:false});
+                    .button({icon:"ui-icon-triangle-1-w", showLabel:false});
 
                     this.btn_page_menu = $( "<button>", {
                         text: (currentPage+1)
                     })
                     .appendTo( span_pages )
                     .css({'font-size':'0.7em'})
-                    .button({icons: {
-                        secondary: "ui-icon-triangle-1-s"
-                    }});
+                    .button({iconPosition:'end', icon:'ui-icon-triangle-1-s'});
 
                     this.btn_page_menu.find('.ui-icon-triangle-1-s').css({'font-size': '1.3em', right: 0});
 
                     this.btn_page_next = $( "<button>", {text:currentPage} )
                     .appendTo( span_pages )
                     .css({'font-size':'0.7em', 'width':'1.6em'})
-                    .button({icons: {
-                        primary: "ui-icon-triangle-1-e"
-                        }, text:false});
+                    .button({icon:"ui-icon-triangle-1-e", showLabel:false});
 
 
                     this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">

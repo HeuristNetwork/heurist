@@ -3840,13 +3840,13 @@ $.widget( "heurist.mapping", {
         toolbar.find('#mapDocumentSel').parent().hide();
         /* Hidden since 2023-03-16
         var $mapdocSel = toolbar.find('#mapDocumentSel');
-        this._on(toolbar.find('#btn_layout_map').button({text:'Map'}),
+        this._on(toolbar.find('#btn_layout_map').button({label:'Map'}),
             {click:function(e){  
                 this.nomap = !this.nomap;
                 if(this.notimeline && this.nomap) this.notimeline = false;
                 this._updatePanels()
             }});
-        this._on(toolbar.find('#btn_layout_timeline').button({text:'Timeline'}),
+        this._on(toolbar.find('#btn_layout_timeline').button({label:'Timeline'}),
             {click:function(e){  
                 this.notimeline = !this.notimeline;
                 if(this.notimeline && this.nomap) this.nomap = false;

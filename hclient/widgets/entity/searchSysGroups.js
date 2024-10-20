@@ -38,9 +38,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             this.btn_add_record.hide();
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Add New Group"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
+                    .button({label: window.hWin.HR("Add New Group"), icon:"ui-icon-plus"})
                 .on('click', function(e) {
                     that._trigger( "onadd" );
                 }); 

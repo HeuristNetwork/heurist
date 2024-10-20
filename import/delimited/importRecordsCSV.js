@@ -65,7 +65,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //buttons
         $('#btnUploadData')
                     .css({'width':'120px'})
-                    .button({label: window.hWin.HR('Upload Data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Upload Data'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .click(_uploadData);
 
        $('#btnClearAllSessions').click(_doClearSession);
@@ -85,7 +85,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         let btnUploadFile = $('#btnUploadFile')
                     .css({'width':'120px'})
-                    .button({label: window.hWin.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
+                    .button({label: window.hWin.HR('Upload File'), iconPosition:'end', icon: "ui-icon-circle-arrow-n"})
                     .on('click', function(e) {
                             if( window.hWin.HAPI4.is_admin() ){
                                 uploadWidget.click();    
@@ -248,7 +248,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //init STEP 2  - preview, select field roles and parse
         $('#btnBackToStart2')
                     .css({'width':'160px'})
-                    .button({label: window.hWin.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: window.hWin.HR('Back to start'), icon: "ui-icon-circle-arrow-w"})
                     .on('click', function(e) {
                             //@todo - remove temp file
                             _showStep(1);
@@ -257,14 +257,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
         $('#btnParseStep1')
                     .css({'width':'160px'})
-                    .button({label: window.hWin.HR('Analyse data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Analyse data'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _doParse(1);
                         });
 
         $('#btnParseStep2')
                     .css({'width':'180px'})
-                    .button({label: window.hWin.HR('Continue'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Continue'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                            _doParse(2); 
                         });
@@ -295,19 +295,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //init STEP 3 - matching and import
         $('#btnBackToStart')
                     .css({'width':'160px'})
-                    .button({label: window.hWin.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: window.hWin.HR('Back to start'), icon: "ui-icon-circle-arrow-w"})
                     .on('click', function(e) {
                             _showStep(1);
                         });
         $('#btnDownloadFile')
                     .css({'width':'180px'})
-                    .button({label: window.hWin.HR('Download data to file'), icons:{secondary: "ui-icon-circle-arrow-s"}})
+                    .button({label: window.hWin.HR('Download data to file'), iconPosition:'end', icon: "ui-icon-circle-arrow-s"})
                     .on('click', function(e) {
                             _showRecords2('all', true)  
                         });
         $('#btnClearFile')
                     .css({'width':'160px'})
-                    .button({label: window.hWin.HR('Clear uploaded file'), icons:{secondary: "ui-icon-circle-close"}})
+                    .button({label: window.hWin.HR('Clear uploaded file'), iconPosition:'end', icon: "ui-icon-circle-close"})
                     .on('click', function(e) {
                             _doClearSession(true);
                         });
@@ -332,20 +332,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnMatchingStart')
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})  //Match against existing records
-                    .button({icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _doMatchingInit();
                         });
 /*
         $('#btnMatchingSkip')
-                    .button({icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _doMatching( 2, null );
                         });
 */                        
         $('#btnBackToMatching')
                     //.css({'width':'250px'})
-                    .button({label: window.hWin.HR('step 1: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: window.hWin.HR('step 1: Match Again'), icon: "ui-icon-circle-arrow-w"})
                     .on('click', function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
@@ -353,7 +353,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         $('#btnBackToMatching2')
                     //.css({'width':'250px'})
-                    .button({label: window.hWin.HR('Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
+                    .button({label: window.hWin.HR('Match Again'), icon: "ui-icon-circle-arrow-w"})
                     .on('click', function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
@@ -369,19 +369,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
         $('#btnShowErrors')
                     .css({'font-weight':'bold'})
-                    .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
+                    .button({label: window.hWin.HR('Show'), icon: "ui-icon-alert"})
                     .on('click', function(e) {
                             _showRecords('error');
                         });
         $('#btnShowWarnings')
                     .css({'font-weight':'bold'})
-                    .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
+                    .button({label: window.hWin.HR('Show'), icon: "ui-icon-alert"})
                     .on('click', function(e) {
                             _showRecords('warning');
                         });
         $('#btnShowUTMWarnings')
                     .css({'font-weight':'bold'})
-                    .button({label: window.hWin.HR('UTM coords?'), icons:{primary: "ui-icon-alert"}})
+                    .button({label: window.hWin.HR('UTM coords?'), icon: "ui-icon-alert"})
                     .on('click', function(e) {
                         
                 $('#btnShowUTMWarnings').text('UTM coords?');
@@ -420,7 +420,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnPrepareStart')
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
-                    .button({label: window.hWin.HR('Prepare'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Prepare'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _doPrepare();
                         });
@@ -428,20 +428,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnImportStart')
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
-                    .button({label: window.hWin.HR('Start Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Start Insert/Update'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _doImport();
                         });
 
 /* repalced to help text                        
         $('#btnNextRecType1')
-                    .button({label: window.hWin.HR('Skip to next record type'), icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Skip to next record type'), iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _skipToNextRecordType();
                         });
 */                                                
         $('#btnNextRecType2')
-                    .button({label: window.hWin.HR('Skip update')}) //icons:{secondary: "ui-icon-circle-arrow-e"}})
+                    .button({label: window.hWin.HR('Skip update')}) //iconPosition:'end', icon: "ui-icon-circle-arrow-e"})
                     .on('click', function(e) {
                             _skipToNextRecordType();
                         });
@@ -1929,9 +1929,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#helper1').show();    
         }
         if(headerdiv.width()<1000){
-            $('#btnClearFile').button({text: false}).css({'width':'auto'})
+            $('#btnClearFile').button({showLabel:false}).css({'width':'auto'})
         }else{
-            $('#btnClearFile').button({text: true}).css({'width':'160px'})
+            $('#btnClearFile').button({showLabel:true}).css({'width':'160px'})
         }
 
         _redrawArrow();
@@ -4973,7 +4973,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-populate');
             if(container.find('.ui-helper-popup').is(':visible')){
                 container.find('.ui-helper-popup').hide();    
-                //container.find('.ui-helper-popup-button').button({icons:{primary:"ui-icon-circle-help"}});
+                //container.find('.ui-helper-popup-button').button({icon:"ui-icon-circle-help"});
                 container.find('.ui-helper-popup-button').find('.ui-button-icon')
                     .removeClass('ui-icon-carat-2-e').addClass('ui-icon-circle-help');
                 container.find('.ent_content_full').css({right:1,width:'auto'});

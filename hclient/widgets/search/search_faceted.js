@@ -1015,7 +1015,7 @@ $.widget( "heurist.search_faceted", {
                               'min-width':'100px'});
                         
            /*ele.find(".start-search") class="input-cell"
-                        .button({icons: {primary: "ui-icon-search"}, text:false})
+                        .button({icon:"ui-icon-search", showLabel:false})
                         .attr('title', window.hWin.HR('Start search'))
                         .css({'height':'16px', 'width':'16px'})*/
                         
@@ -1258,7 +1258,7 @@ $.widget( "heurist.search_faceted", {
                     let btn_add = $( "<button>",{title:window.hWin.HR('filter_facet_resetall_hint')})
                         .addClass("smallbutton")
                         .insertBefore( inpt.find('.input-cell .heurist-helper1') )
-                        .button({icons:{primary: "ui-icon-search"}, text:false});
+                        .button({icon: "ui-icon-search", showLabel:false});
 
                     that._on( btn_add, { click: "doSearch" });
              }

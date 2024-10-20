@@ -149,10 +149,10 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
                                     
             let that = this;        
             
-            let btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+            let btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icon:'ui-icon-refresh',
                 click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                       
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New File Type'),
+                {showLabel:true, icon:'ui-icon-plus',text:window.hWin.HR('Add New File Type'),
                       css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
                       

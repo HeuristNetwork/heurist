@@ -1357,8 +1357,8 @@ window.hWin.HEURIST4.ui = {
                 +'<li data-user-admin-status="0"><a><span class="ui-icon"></span>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
-        let $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
-                    label:'Set experience level for user interface', text:false})
+        let $help_button = $('<div>').button({icon: "ui-icon-book" , 
+                    label:'Set experience level for user interface', showLabel:false})
                     .addClass('dialog-title-button')
                     .css({'right':hasContextHelp?'48px':'26px'})
                     .appendTo(titlebar)
@@ -1486,7 +1486,7 @@ window.hWin.HEURIST4.ui = {
         let $help_button = $(options.button);
 
         if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info  carat-2-e
-            $help_button.button({icons:{primary:"ui-icon-circle-help"}, label:window.hWin.HR('Show context help'), text:false});
+            $help_button.button({icon:"ui-icon-circle-help", label:window.hWin.HR('Show context help'), showLabel:false});
         }
         
         let is_popup = false;
@@ -1499,7 +1499,7 @@ window.hWin.HEURIST4.ui = {
         function __closeHelpDiv($helper_div){
             oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1, width:'auto'}); };
             $helper_div.hide(oEffect);
-            $help_button.button({icons:{primary:"ui-icon-circle-help"}});
+            $help_button.button({icon:"ui-icon-circle-help"});
         }
         
         $help_button.on('click', function(event){
@@ -1594,7 +1594,7 @@ window.hWin.HEURIST4.ui = {
                             if($helper_div.is(':visible')){
                                 __closeHelpDiv($helper_div);         
                             }else{
-                                $help_button.button({icons:{primary:"ui-icon-carat-2-e"}});
+                                $help_button.button({icon:"ui-icon-carat-2-e"});
                                 //find('.ent_wrapper')
                                 $helper_div.load(options.url, function(response, status, xhr){
 
@@ -1991,8 +1991,8 @@ window.hWin.HEURIST4.ui = {
             }
             
             //remove button
-            ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
-                            icons:{primary:'ui-icon-circlesmall-close'}})
+            ele.find('.btn-del').button({showLabel:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
+                            icon:'ui-icon-circlesmall-close'})
             .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
             .on('click', function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
@@ -2038,7 +2038,7 @@ window.hWin.HEURIST4.ui = {
                             + top.HAPI4.iconBaseURL + '1\');"/>'
             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
             
-            //.button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),icons:{primary:'ui-icon-pencil'}})
+            //.button({showLabel:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),icon:'ui-icon-pencil'})
             
             bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
                 'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
@@ -2140,8 +2140,8 @@ window.hWin.HEURIST4.ui = {
                             
                 }else{
                     
-                    btn_edit.button({text:false, label:top.HR('Edit linked record'),
-                                    icons:{primary:'ui-icon-pencil'}})
+                    btn_edit.button({showLabel:false, label:top.HR('Edit linked record'),
+                                    icon:'ui-icon-pencil'})
                                 .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
                     
                 }

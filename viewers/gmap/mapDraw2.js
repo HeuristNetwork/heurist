@@ -1043,9 +1043,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         //geocoding ------------------------------------------------------               
         $('#btn_search_start')
-        .button({label: window.hWin.HR("Start search"), text:false, icons: {
-            secondary: "ui-icon-search"
-        }})
+        .button({label: window.hWin.HR("Start search"), showLabel:false, iconPosition:'end', icon:'ui-icon-search'})
         .on('click',_startGeocodingSearch);
 
         $('#input_search')

@@ -354,9 +354,7 @@ $.widget( "heurist.app_storymap", {
                 class: 'btnPrintStory'
             })
             .button({
-                icons: {
-                    primary: 'ui-icon-print'
-                }, 
+                icon: 'ui-icon-print', 
                 showLabel: false
             })
             .hide()

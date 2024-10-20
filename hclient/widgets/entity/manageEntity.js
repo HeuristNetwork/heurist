@@ -623,8 +623,8 @@ $.widget( "heurist.manageEntity", {
             }else{
                 
                     btn = $('<div>',{'data-key':action.key,'data-recid':action.recid}).button(
-                            {icons: {primary: action.icon}, 
-                             text: (mode!='small'), 
+                             {icon: action.icon, 
+                             showLabel: (mode!='small'), 
                              title: action.title, 
                              label: window.hWin.HR(action.label) })
                     .css(style)         
@@ -654,8 +654,10 @@ $.widget( "heurist.manageEntity", {
     // define action buttons for edit toolbar
     //
     _defineActionButton2: function(options, container){        
-        
-        let btn_opts = {label:options.text, icons:options.icons, title:options.title, showLabel:options.showText!==false};
+    
+        //for dialog buttons jquery still uses "text"        
+        let btn_opts = {label:options.label || options.text, icon:options.icon || options.icons, 
+                        title:options.title, showLabel:options.showLabel!==false};
         
         let btn = $('<button>').button(btn_opts)
                     .on('click',options.click)

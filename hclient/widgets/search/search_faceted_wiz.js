@@ -502,7 +502,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         */
                                 
                         $dlg.find("#svs_Rules_edit")
-                        .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                        .button({icon:"ui-icon-pencil", showLabel:false})
                         .attr('title', window.hWin.HR('Edit RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .on('click', function( event ) {
@@ -511,7 +511,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         });
 
                         $dlg.find("#svs_Rules_clear")
-                        .button({icons: {primary: "ui-icon-close"}, text:false})
+                        .button({icon:"ui-icon-close", showLabel:false})
                         .attr('title', window.hWin.HR('Clear RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .on('click', function( event ) {
@@ -526,7 +526,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         */
 
                         $dlg.find("#svs_getCurrentFilter")
-                        .button({'label':window.hWin.HR('Get current query')}) //{icons: {primary: "ui-icon-search"}, text:false}
+                        .button({'label':window.hWin.HR('Get current query')}) //{icon: "ui-icon-search", showLabel:false}
                         .css({'height':'16px','font-size':'0.8em',width:'45px'})
                         .on('click', function( event ) {
                             let res = window.hWin.HEURIST4.query.hQueryStringify(window.hWin.HEURIST4.current_query_request, true);

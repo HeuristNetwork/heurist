@@ -229,7 +229,8 @@ $.widget( "heurist.baseAction", {
     //
     _defineActionButton2: function(options, container){        
         
-        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        //for dialog buttons jquery still uses "text"
+        let btn_opts = {label:options.label || options.text, icon:options.icon || options.icons, title:options.title};
         
         let btn = $('<button>').button(btn_opts)
                     .click(options.click)

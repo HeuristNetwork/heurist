@@ -97,25 +97,25 @@ $.widget( "heurist.ruleBuilder", {
         .attr('title', 'Add an additional Heurist query string which will filter the set of records retrieved by this rule' )
         .appendTo( $('<div>').css({'width':'220px'}).appendTo(this.element) );
 
-        /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
-        this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
+        /*this.btn_save   = $( "<button>", {label:'Save'} ).appendTo(this.element);
+        this.btn_cancel = $( "<button>", {label:'Cancel'} ).appendTo(this.element);*/
 
         //(this.options.level<3)?'12em':
         this.div_btn2 =  $('<div>').css({'width':'60px'}).appendTo(this.element); //,'margin-left':'0.5em'
 
-        this.btn_edit = $( "<button>", {text:'Filter'})
+        this.btn_edit = $( "<button>", {label:'Filter'})
         .attr('title', 'Create additional filter' )
         .css('font-size','0.8em')
-        .button({icons: { primary: "ui-icon-pencil" }, text:false}).appendTo(this.div_btn2);
+        .button({icon: "ui-icon-pencil", showLabel:false}).appendTo(this.div_btn2);
         
-        this.btn_delete = $( "<button>", {text:'Delete'})
+        this.btn_delete = $( "<button>", {label:'Delete'})
         .attr('title', 'Delete this step in the rule' )
         .css('font-size','0.8em')
-        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn2);
+        .button({icon: "ui-icon-closethick", showLabel:false}).appendTo(this.div_btn2);
 
         if(this.options.level<3)
             this.div_btn =  $('<div>').css({'display':'block','margin': '4px 0 0 '+this.options.level*25+'px'}).appendTo(this.element); //,'margin-left':'0.5em'
-            this.btn_add_next_level = $( "<button>", {text:'Add Step '+this.options.level} )
+            this.btn_add_next_level = $( "<button>", {label:'Add Step '+this.options.level} )
             .attr('title', 'Adds another step to this rule' )
             .css('font-size','0.8em')
             .button().appendTo(this.div_btn);

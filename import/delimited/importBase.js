@@ -109,7 +109,7 @@ class HImportBase{
 
         $('#btnParseData')
                     .css('width', '120px')
-                    .button({label: window.hWin.HR('Analyse'), icons: {secondary: 'ui-icon-circle-arrow-e'}})
+                    .button({label: window.hWin.HR('Analyse'), iconPosition:'end', icon:'ui-icon-circle-arrow-e'})
                     .on('click', () => {
                         this.doParse();
                     });
@@ -117,7 +117,7 @@ class HImportBase{
         let $btnStartImport = $('#btnImportData')
                     .css('width', '110px')
                     .addClass('ui-button-action')
-                    .button({label: window.hWin.HR('Import'), icons: {secondary: 'ui-icon-circle-arrow-e'}})
+                    .button({label: window.hWin.HR('Import'), iconPosition:'end', icon:'ui-icon-circle-arrow-e'})
                     .on('click', () => {
                         this.doPost();
                     });

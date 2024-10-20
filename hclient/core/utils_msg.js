@@ -967,7 +967,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if( options["context_help"] && window.hWin.HEURIST4.ui ){
                     
                     $info_button = $('<button>')
-                            .button({icons:{primary:'ui-icon-circle-help'}, showLabel:false, label:'Help'})
+                            .button({icon:'ui-icon-circle-help', showLabel:false, label:'Help'})
                             .addClass('ui-helper-popup-button')
                             .css({'position':'absolute', 'right':'34px', 'top':'6px', height:24, width:24})
                             .appendTo(_innerTitle);

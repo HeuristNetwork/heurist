@@ -606,7 +606,7 @@ $.widget( "heurist.searchBuilder", {
                 });
 
                 this.rulesetSection.find("#svs_Rules_edit")
-                .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                .button({icon:"ui-icon-pencil", showLabel:false})
                 .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .on('click', function( event ) {
@@ -614,7 +614,7 @@ $.widget( "heurist.searchBuilder", {
                 });
 
                 this.rulesetSection.find("#svs_Rules_clear")
-                .button({icons: {primary: "ui-icon-close"}, text:false})
+                .button({icon:"ui-icon-close", showLabel:false})
                 .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .on('click', function( event ) {

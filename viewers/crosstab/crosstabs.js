@@ -826,7 +826,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .appendTo($rightColDiv);
 
                 $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
-                    //.button({icons: {primary: "ui-icon-plus"}} )
+                    //.button({icon:"ui-icon-plus"} )
                     .on('click', function( event ) {
                         editInterval( name, -1);
                     })

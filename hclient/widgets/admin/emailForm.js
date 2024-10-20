@@ -100,7 +100,7 @@ $.widget( "heurist.emailForm", {
         if(this.options.isdialog){  //show this widget as popup dialog
             
             this._open_button = $('<button>').button(
-                {label:window.hWin.HR('Email Us')}) //, icons:options.icons})
+                {label:window.hWin.HR('Email Us')}) //, icon:options.icon})
             .appendTo(this.element);
             
             this._element_form.hide()
@@ -226,7 +226,8 @@ $.widget( "heurist.emailForm", {
     //
     _defineActionButton2: function(options, container){        
         
-        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        //for dialog buttons jquery still uses "text"
+        let btn_opts = {label:options.label || options.text, icon:options.icon, title:options.title};
         
         let btn = $('<button>').button(btn_opts)
                     .on('click',options.click)

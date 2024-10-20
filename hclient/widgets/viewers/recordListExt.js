@@ -118,9 +118,7 @@ $.widget( "heurist.recordListExt", {
                 class: 'btnPrintRecords', style: `height:25px;float:right;${this.options.show_export_button ? 'margin-right:15px;' : ''}`
             })
             .button({
-                icons: {
-                    primary: 'ui-icon-print'
-                },
+                icon: 'ui-icon-print',
                 showLabel: false
             })
             .prependTo(this.div_content)
@@ -178,9 +176,7 @@ $.widget( "heurist.recordListExt", {
                 class: 'btnExportRecords ui-button-action', style: 'height:25px;float:right;'
             })
             .button({
-                icons: {
-                    primary: 'ui-icon-download'
-                }
+                icon: 'ui-icon-download'
             })
             .prependTo(this.div_content)
             .hide();

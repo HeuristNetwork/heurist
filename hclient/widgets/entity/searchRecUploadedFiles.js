@@ -35,9 +35,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.element.find('#div_add_record').hide();
         }else{
             this.btn_edit_mimetypes
-                    .button({label: window.hWin.HR("Define mime types"),icons: {
-                            primary: "ui-icon-pencil"
-                    }})
+                    .button({label: window.hWin.HR("Define mime types"),icon:'ui-icon-pencil'})
                 .on('click', function(e) {
                     window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});

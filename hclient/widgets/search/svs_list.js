@@ -190,15 +190,14 @@ $.widget( "heurist.svs_list", {
                 if(this.options.btn_visible_save){
 
                     this.btn_search_save = $( "<button>", {
-                        text: window.hWin.HR('Save Filter'),
+                        label: window.hWin.HR('Save Filter'),
                         title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
                     })
                     .css({'min-width': '110px','vertical-align':'top','margin-left': '32px','font-size':'1.2em', 'font-weight': 'bold'})
                     .addClass('ui-state-focus')
                     .appendTo(this.div_header)
-                    .button({icons: {
-                        primary: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
-                    }})
+                    .button({icon: 'ui-icon-circle-arrow-s'  //"ui-icon-disk"
+                    })
                     .hide();
 
                     this._on( this.btn_search_save, {  click: function(){
@@ -231,21 +230,17 @@ $.widget( "heurist.svs_list", {
                 .css('width','100px').appendTo(this.filter_div);
                 this.btn_reset = $( "<button>" )
                 .appendTo( this.filter_div )
-                .button({icons: {
-                    primary: "ui-icon-close"
-                    },
+                .button({icon:"ui-icon-close",
                     title: window.hWin.HR("Reset"),
-                    text:false})
+                    showLabel:false})
                 .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
                 .attr("disabled", true);
                 
                 this.btn_save = $( "<button>" )
                 .appendTo( this.filter_div )
-                .button({icons: {
-                    primary: "ui-icon-disk"
-                    },
+                .button({icon: "ui-icon-disk",
                     title: window.hWin.HR("Save"),
-                    text:false})
+                    showLabel:false})
                 .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
 
             }
@@ -967,10 +962,10 @@ $.widget( "heurist.svs_list", {
 
                 let shint = window.hWin.HRJ('ui_notes', params, this.options.language);
 
-                $('<button>', {text: sname, 'data-svs-id':svsID})
+                $('<button>', {label: sname, 'data-svs-id':svsID})
                 .attr('title', shint)
                 .css({'width':'100%','margin-top':'0.8em','max-width':'300px','text-align':'left'})
-                .button({icons:{primary: iconBtn}}).on("click", function(event){
+                .button({icon: iconBtn}).on("click", function(event){
 
                     let svs_ID = $(this).attr('data-svs-id');
                     if (svs_ID){
@@ -2894,7 +2889,7 @@ $.widget( "heurist.svs_list", {
             });
 
             let btn_search = this.direct_search_div.find('#search_button')
-            .button({icons:{primary:'ui-icon-search'},text:false})
+            .button({icon:'ui-icon-search',showLabel:false})
             .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
             this._on( btn_search, {
                 click:  function(){

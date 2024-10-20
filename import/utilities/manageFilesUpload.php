@@ -739,7 +739,7 @@ if(!($max_size>0)) {$max_size = 0;}
 
                 //cancel and close window
                 $('#btnFinished')
-                        .button({icons:{primary: 'ui-icon-check'}})
+                        .button({icon: 'ui-icon-check'})
                         .click( function(e){
                             e.preventDefault();
                             closeCheck(e);

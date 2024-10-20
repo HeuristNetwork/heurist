@@ -129,11 +129,11 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             let btn_array = [
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
+                {showLabel:true, icon:'ui-icon-plus',label:window.hWin.HR('Add'),
                       css:{'margin':'5px','float':'left',padding:'3px'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
-                {text:window.hWin.HR('Save'),
+                {label:window.hWin.HR('Save'),
                           css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }}
                       ];

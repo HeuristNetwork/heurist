@@ -184,25 +184,25 @@ let maxCountForNodes, maxCountForLinks;
             ele_warn.hide();
         }
 
-        $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).on('click',
+        $('#btnZoomIn').button({icon:'ui-icon-plus',showLabel:false}).on('click',
             function(){
                 zoomBtn(true);
             }
         );
 
-        $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).on('click',
+        $('#btnZoomOut').button({icon:'ui-icon-minus',showLabel:false}).on('click',
             function(){
                 zoomBtn(false);
             }
         );
 
-        $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).on('click',
+        $('#btnFitToExtent').button({icon:'ui-icon-fullscreen',showLabel:false}).on('click',
             function(){
                 zoomToFit();
             }
         );
 
-        $('#btnRefreshData').button({icons:{primary:'ui-icon-refresh'}}).click(
+        $('#btnRefreshData').button({icon:'ui-icon-refresh'}).click(
             function(){
                 location.reload();
             }
@@ -419,7 +419,7 @@ function visualizeData() {
     if(settings.isDatabaseStructure || isStandAlone){
         $('#embed-export').css('visibility','hidden');//hide();
     }else{
-        $('#embed-export').button({icons:{primary:'ui-icon-globe'},text:false}).on('click',
+        $('#embed-export').button({icon:'ui-icon-globe',showLabel:false}).on('click',
             function(){
                  showEmbedDialog();
             }
