@@ -955,12 +955,12 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .addClass('text ui-widget-content ui-corner-all')
             .css({'overflow-x':'hidden'})
-            .keydown(function(e){
+            .on('keydown',function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
                     e.target.select();
                 }    
             })
-            .keyup(function(){that.onChange();})
+            .on('keyup',function(){that.onChange();})
             .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
 
@@ -2223,7 +2223,7 @@ $.widget( "heurist.editing_input", {
                    //define explicit add relationship button
                    let $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
                         .addClass("rel_link") //.css({display:'block'})
-                        .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'
+                        .button({icon: "ui-icon-circle-plus",label:'&nbsp;&nbsp;&nbsp;Add Relationship'
                                 +rty_names});
                        
                    let rheader = that.element.find('.reverse-relation-header');     
@@ -2693,7 +2693,7 @@ $.widget( "heurist.editing_input", {
                 this._createDateInput($input, $inputdiv);
                 
                 $input.val(value);    
-                $input.change(); 
+                $input.trigger('change'); 
 
                 let css = 'display: block; font-size: 0.8em; color: #999999; padding: 0.3em 0px;';
 
@@ -3607,7 +3607,7 @@ $.widget( "heurist.editing_input", {
                                         $input.val(geovalue.summary).trigger('change');
                                     }else{
                                         $input.val(geovalue.type+'  '+geovalue.summary);
-                                        $input.change();
+                                        $input.trigger('change');
 
                                         $inputdiv.find('span.geo-badvalue').remove();
                                     }
@@ -4509,7 +4509,7 @@ $.widget( "heurist.editing_input", {
                         ele.parent().find('.hideTumbnail').trigger('click');
                     }
 
-                    ele.change();
+                    ele.trigger('change');
                 }else{ // check if image that can be rendered
 
                     window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
@@ -4577,7 +4577,7 @@ $.widget( "heurist.editing_input", {
                             }
                             
                             
-                            ele.change();
+                            ele.trigger('change');
                         }
                     });
                 }
@@ -5159,7 +5159,7 @@ $.widget( "heurist.editing_input", {
                     }
                 }
                 if(that.detailType=='date' || that.detailType=='file'){
-                    $input.change();
+                    $input.trigger('change');
                 }else{
                     that.onChange();
                 }
@@ -6023,6 +6023,8 @@ $.widget( "heurist.editing_input", {
             }
 
             fixCalendarPickerCMDs();
+            
+            let calendarsPicker = $.calendarsPicker || $.calendars.picker; //v2 or v1
 
             $tinpt.calendarsPicker({
                 calendar: calendar,
@@ -6134,8 +6136,8 @@ $.widget( "heurist.editing_input", {
                         setMinMaxDatesJPN(cur_cal, value_era, date);
                     }
                 },
-                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
-                        {picker: $.calendars.picker.defaultRenderer.picker.
+                renderer: $.extend({}, calendarsPicker.defaultRenderer,
+                        {picker: calendarsPicker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
@@ -6274,7 +6276,7 @@ $.widget( "heurist.editing_input", {
                     callback: function(str){
                         if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
                             $input.val(str);    
-                            $input.change();
+                            $input.trigger('change');
                         }
 
                         if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
@@ -6324,7 +6326,7 @@ $.widget( "heurist.editing_input", {
 
         }//temporal allowed
         
-        $input.change(__onDateChange);
+        this._on($input, {'change', __onDateChange});
     },
 
     //
