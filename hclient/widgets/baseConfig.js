@@ -110,10 +110,93 @@ $.widget("heurist.baseConfig", {
 
     _initControls: function(){
 
+        let that = this;
+
+        //fill service configuration list
+        this.serviceList = this.element.find('#sel_service');
+        this._reloadServiceList();
+
+        // on selected handler
+        this.serviceList.selectable( {
+            cancel: '.ui-icon-circle-b-close',  // service delete "button"
+            selected: function( event, ui ) {
+                if($(ui.selected).is('li')){
+                    
+                    if($(ui.selected).hasClass('unfinished')){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
+                        return;  
+                    }
+
+                    that.serviceList.find('li').removeClass('ui-state-active');
+                    that.serviceList.find('div').removeClass('ui-state-active');
+                    $(ui.selected).addClass('ui-state-active');
+
+                    //load configuration into right hand form
+                    that._fillConfigForm( $(ui.selected).attr('data-service-id') );
+                }
+            }
+        });
+
+        //fill service types
+        this.selectServiceType = this.element.find('#sel_servicetype').css({'list-style-type': 'none'});
+        this._getServiceSelectmenu();
+
+        // on change handler
+        this._on(this.selectServiceType[0], {
+            change: function(event, ui){
+                let service = that.selectServiceType.val(); // selected service
+                that._changeService( service ); // setup
+            }
+        });
+
+        if(this.options.isdialog){
+            
+            this.element.find('.popup_buttons_div, .ui-heurist-header').hide();
+            this.element.find('div.ent_content').toggleClass(['ent_content', 'ent_content_full']).css('top', '-0.2em');
+
+            this.popupDialog();
+        }else{
+
+            // add title/heading
+            this.element.find('.ui-heurist-header').text(this.options.title);
+
+            // bottom bar buttons
+            this.save_btn = this.element.find('#btnSave').button();
+            this.close_btn = this.element.find('#btnClose').button();
+
+            this._on(this.save_btn, {
+                click: () => {
+                    that._closeHandler(true, false, null);
+                }
+            });
+            this._on(this.close_btn, {
+                click: () => {
+                    that._closeHandler(false, false, null);
+                }
+            });
+
+            // mouse leaves container
+            this._on(this.element.find('.ent_wrapper:first'), {
+                mouseleave: (event) => {
+                    if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
+                        that._closeHandler(false, true, $(event.target));
+                    }
+                }
+            });
+        }
+
+        this._updateStatus();
+
+        window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
+
+        let rpanel_width = this.element.find('#editing_panel').width() - 40;
+        this.element.find('#service_mapping').width(rpanel_width);
 
         if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
             that.options.onInitFinished.call(that);
         }
+
+        return true;
     },
 
     //
@@ -261,12 +344,12 @@ $.widget("heurist.baseConfig", {
             let wording = this._is_modified ? 'current configuration' : 'available services';
             let button = this._is_modified ? '"Apply"' : '"Save"'
 
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(`You have made changes to the ${wording}. Click ${button} otherwise all changes will be lost.`, 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'}, {default_palette_class: 'ui-heurist-design'});
         }else if(isSave){
             this.saveConfigrations();
         }else if(isMouseLeave){
-
+            return;
         }else if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
             this._as_dialog.dialog('close');
         }else{
@@ -402,13 +485,12 @@ $.widget("heurist.baseConfig", {
 
         let config = null;
 
-        $.each(this._available_services, function(i, srv){ // get new service info
+        for(const srv of Object.values(this._available_services)){ // get new service info
             if(srv.service == service_id){
                 config = window.hWin.HEURIST4.util.cloneJSON(srv);
-                return false;
+                break;
             }
-        });
-
+        }
         return config;
     },
 
@@ -494,5 +576,24 @@ $.widget("heurist.baseConfig", {
         if(selectMenu.hSelect('instance')){
             selectMenu.hSelect('refresh');
         }
+    },
+
+    _checkModification: function(){
+
+        let tbl = this.element.find('#tbl_matches');
+        let that = this;
+
+        let values = this.options.type === 'service' ? that._current_cfg.fields : that._current_cfg.params;
+
+        $.each(tbl.find('input, select'), function(i, ele){ // get mapped fields
+
+            let field = $(ele).attr('data-field');
+            let value = $(ele).val();
+
+            if(values[field] != value && (values[field] !== null || value !== "")){
+                that._is_modified = true;
+                return false; //break
+            }
+        });
     }
 });
