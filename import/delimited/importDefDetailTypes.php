@@ -25,7 +25,7 @@
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     ?>
-	    <script type="text/javascript" src="importDefinitions.js"></script>
+	    <script type="text/javascript" src="importBase.js"></script>
 	    <script type="text/javascript" src="importDefDetailTypes.js"></script>
 
 	    <script type="text/javascript">
