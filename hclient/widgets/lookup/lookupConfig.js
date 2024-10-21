@@ -32,6 +32,12 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
     _urls: null,
 
+    _estc_response: { // whether the ESTC/LRC18C lookups can be used
+        ESTC: null,
+        ESTC_works: null,
+        ESTC_editions: null
+    },
+
     //
     //  load configuration and call _initControls
     //
@@ -89,8 +95,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config);
         if(!this.options.service_config){ // Invalid value / None
             this.options.service_config = {};    
-        } 
-        
+        }
+
         return this._super();
     },
 
@@ -98,7 +104,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
     // invoked from _init after loading of html content
     //
     _initControls:function(){
-        
+
         let that = this;
 
         // check that all assigned services contain valid details
@@ -108,61 +114,9 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this.selectRecordType = this.element.find('#sel_rectype').css({'list-style-type': 'none'});
         this.selectRecordType = window.hWin.HEURIST4.ui.createRectypeSelectNew(this.selectRecordType.get(0),
             {topOptions:'select record type'});
+
         // on change handler
         this._on(this.selectRecordType, { change: this._onRectypeChange });
-        
-        //fill service configuration list
-        this.serviceList = this.element.find('#sel_service');
-        this._reloadServiceList();
-        // on selected handler
-        this.serviceList.selectable( {
-            cancel: '.ui-icon-circle-b-close',  // service delete "button"
-            selected: function( event, ui ) {
-                if($(ui.selected).is('li')){
-                    
-                    if($(ui.selected).hasClass('unfinished')){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Complete or discard unfinished one',700);
-                        return;  
-                    }
-
-                    that.serviceList.find('li').removeClass('ui-state-active');
-                    that.serviceList.find('div').removeClass('ui-state-active');
-                    $(ui.selected).addClass('ui-state-active');
-
-                    //load configuration into right hand form
-                    that._fillConfigForm( $(ui.selected).attr('data-service-id') );
-                }
-            }
-        });
-
-        //fill service types   (selector)
-        this.selectServiceType = this.element.find('#sel_servicetype').css({'list-style-type': 'none'});
-        this._getServiceSelectmenu();
-        // on change handler
-        this._on(this.selectServiceType[0], {
-            change: function(event, ui){
-
-                let service = that.selectServiceType.val(); // selected service
-
-                if(service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC'){
-                    let req = {
-                        a: 'check_allow_estc',
-                        db: window.hWin.HAPI4.database,
-                        ver: service
-                    };
-                    window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._changeService( service ); // setup
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                            return false;
-                        }
-                    });
-                }else{
-                    that._changeService( service ); // setup
-                }
-            }
-        });
 
         let ele = this.element.find('#inpt_label');
         this._on(ele, {input: this._updateStatus });
@@ -174,49 +128,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this._on(this.btnApply, {click: this._applyConfig});            
 
         this.btnDiscard = this.element.find('#btnDiscard').button().hide();
-        this._on(this.btnDiscard, {click: function(){this._removeConfig(null)}});            
-
-        this._updateStatus();
-        
-        if(this.options.isdialog){
-            
-            this.element.find('.popup_buttons_div, .ui-heurist-header').hide();
-            this.element.find('div.ent_content').toggleClass(['ent_content', 'ent_content_full']).css('top', '-0.2em');
-
-            this.popupDialog();
-        }else{
-
-            // add title/heading
-            this.element.find('.ui-heurist-header').text(this.options.title);
-
-            // bottom bar buttons
-            this.save_btn = this.element.find('#btnSave').button();
-            this.close_btn = this.element.find('#btnClose').button();
-
-            this._on(this.save_btn, {
-                click: () => {
-                    that._closeHandler(true, false, null);
-                }
-            });
-            this._on(this.close_btn, {
-                click: () => {
-                    that._closeHandler(false, false, null);
-                }
-            });
-
-            // mouse leaves container
-            this._on(this.element.find('.ent_wrapper:first'), {
-                mouseleave: (event) => {
-                    if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
-                        that._closeHandler(false, true, $(event.target));
-                    }
-                }
-            });
-        }
-        
-        window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
-        //show hide hints and helps according to current level
-        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+        this._on(this.btnDiscard, {click: function(){this._removeConfig(null)}});
 
         this._on(this.element.find('#example_records .ui-icon'), {
             'click': function(event){
@@ -244,10 +156,21 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             }
         });
 
-        let rpanel_width = this.element.find('#editing_panel').width() - 40;
-        this.element.find('#service_mapping').width(rpanel_width);
+        let req = {
+            a: 'check_allow_estc',
+            db: window.hWin.HAPI4.database,
+            ver: 'ESTC'
+        };
+        window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+            that._estc_response.ESTC = response;
+        });
+        req['ver'] = 'ESTC_works';
+        window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
+            that._estc_response.ESTC_works = response;
+            that._estc_response.ESTC_editions = response;
+        });
 
-        return true;
+        return this._super();
     },
 
     updateOldConfigurations: function(){
@@ -255,115 +178,27 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         let that = this;
         let has_changes = false;
 
-        $.each(this.options.service_config, function(key, value){
+        for(let key of Object.keys(this.options.service_config)){
 
-            // Check that the service property has been defined
-            if(that.options.service_config[key]['service'] == null){
-
-                // Likely has service_name instead
-                if(that.options.service_config[key]['service_name'] != null){
-                    that.options.service_config[key]['service'] = that.options.service_config[key]['service_name'];
-                    delete that.options.service_config[key]['service_name'];
-                }else{ // invalid configuration, missing a service name
-                    delete that.options.service_config[key];
-                }
-
-                has_changes = true;
-            }else if(that.options.service_config[key]['service_name'] != null){
-                delete that.options.service_config[key]['service_name'];
-
-                has_changes = true;
-            }
-
-            // Check that the service id (serviceName_rtyID) has been defined
-            if(value.service_id == null){
-                that.options.service_config[key]['service_id'] = that.options.service_config[key]['service'] + '_' + that.options.service_config[key]['rty_ID'];
-
-                has_changes = true;
-            }
-
-            if(that.options.service_config[key]['dialog'] == 'recordLookup' || that.options.service_config[key]['dialog'] == 'lookupTCL'){
-                that.options.service_config[key]['dialog'] = 'lookupTLC';
-
-                has_changes = true;
-            }else if(that.options.service_config[key]['dialog'] == 'recordLookupBnFLibrary' || that.options.service_config[key]['dialog'] == 'lookupBnFLibrary'){
-                that.options.service_config[key]['dialog'] = 'lookupBnFLibrary_bib';
-
-                has_changes = true;
-            }else if(that.options.service_config[key]['dialog'].includes('recordLookup')){
-                that.options.service_config[key]['dialog'] = that.options.service_config[key]['dialog'].replace('recordLookup', 'lookup');
-
-                has_changes = true;
-            }
-
-            // Update configurations (Add missing fields, additional options, remove fields no longer handled)
-            let n_fields = that.options.service_config[key]['fields'];
-            let service_details = that._available_services.find((service) => service['service'] == that.options.service_config[key]['service']);
-
-            let fld_removes = Object.keys(n_fields).filter((key) => !Object.hasOwn(service_details['fields'], key));
-
-            if(fld_removes.length > 0){ // remove fields not part of configuration
-
-                for(let field of fld_removes){
-                    delete n_fields[field];
-                }
-
-                that.options.service_config[key]['fields'] = n_fields;
-
-                has_changes = true;
-            }
-
-            // Add missing fields
-            let has_field_changes = false;
-            for(let field in service_details['fields']){
-                if(Object.hasOwn(n_fields, field)){
-                    continue;
-                }
-
-                n_fields[field] = service_details['fields'][field];
-
-                has_field_changes = true;
-            }
-
-            if(has_field_changes){
-                that.options.service_config[key]['fields'] = n_fields;
-
-                has_changes = true;
-            }
-
-            if(that.options.service_config[key]['service'] == 'bnfLibrary'){
-
-                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
-
-                    that.options.service_config[key]['options'] = {
-                        'author_codes': '', //'contributor_codes': ''
-                        'dump_receord': true,
-                        'dump_field': 'rec_ScratchPad'
-                    };
-                    has_changes = true;
-                }
-            }else if(that.options.service_config[key]['service'] == "bnfLibraryAut"){
-
-                if(!Object.hasOwn(that.options.service_config[key], 'options')){ // add default options
-                    that.options.service_config[key]['options'] = {
-                        'dump_receord': true,
-                        'dump_field': 'rec_ScratchPad'
-                    };
-                    has_changes = true;
-                }
-            }
-
-            // Correct service's key (to allow the service to be assigned to multiple record types)
-            if(key.includes("_") === false){
-
-                let new_key = that.options.service_config[key]['service_id'];
-                that.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(that.options.service_config[key]);
-
+            // Verify lookup is still basically valid (record type and service still exists)
+            if(!that._verifyService(key)){
                 delete that.options.service_config[key];
-
                 has_changes = true;
+                return;
             }
-        });
+    
+            // Update basic details
+            let info_changes = false;
+            [info_changes, key] = that._updateServiceInfo(key);
+    
+            // Update fields (add and/or remove)
+            let field_changes = that._updateServiceFields(key);
+    
+            // Update additional settings/options
+            let settings_changes = that._updateServiceOptions(key);
+    
+            has_changes = info_changes || field_changes || settings_changes || has_changes;
+        }
 
         // Update with new changes
         if(has_changes){
@@ -419,17 +254,17 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             this._current_cfg = cfg0;
             
             this.element.find('#service_name').html(cfg0.label);
-            this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
+            this.element.find('#service_description').html(`<strong>${cfg0.service}</strong>: ${cfg0.description}`);
             this.element.find('#inpt_label').val(cfg0.label);
             
             let tbl = this.element.find('#tbl_matches');
             tbl.empty();
 
-            $.each(this._current_cfg.fields, function(field, code){
-                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"></select></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
-            });
+            for(const field of this._current_cfg.fields){
+                $(`<tr><td>${field}</td><td><select data-field="${field}"></select></td><td class="lookup_data" data-field="${field}"></td></tr>`).appendTo(tbl);
+            }
 
-            let rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
+            let rty_ID = this._current_cfg.rty_ID > 0 ? $Db.getLocalID('rty',this._current_cfg.rty_ID) : '';
             
             //select service and type
             if(cfg0.service) {
@@ -471,43 +306,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             
         }else{
             this.element.find('#service_config').show();
-            
-            if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
 
-                this.element.find('#assign_fieldset').show();
-                this._is_modified = true;
-            }else{
-
-                this.element.find('#assign_fieldset').hide();  //hide service selector
-                this.element.find('.service_details').show();
-                
-                //verify if modified
-                this._is_modified =  (this._current_cfg.rty_ID != this.selectRecordType.val())
-                               || (this._current_cfg.label != this.element.find('#inpt_label').val()); 
-                if(!this._is_modified){
-
-                    let tbl = this.element.find('#tbl_matches');
-                    let fields = {};
-                    let that = this;
-                    $.each(tbl.find('select'), function(i, ele){ // get mapped fields
-                
-                        let field = $(ele).attr('data-field');
-                        let dty_ID = $(ele).val();
-
-                        if(dty_ID == ""){
-                           
-                        }
-                        
-                        if(that._current_cfg.fields[field]!=dty_ID){
-
-                            if(!(that._current_cfg.fields[field] == null && dty_ID == "")){
-                                that._is_modified = true;
-                                return false; //break
-                            }
-                        }
-                    });
-                }
-            }
+            this._checkModification();
 
             if(!$.isEmptyObject(this._current_cfg) || this.selectServiceType.val()){
                 this.element.find('.service_details').show();
@@ -527,7 +327,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 this.element.find('#example_records').hide();
             }
         }
-            
+
         // refresh dropdowns
         this.selectMenuRefresh(this.selectServiceType);
         this.selectMenuRefresh(this.selectRecordType);
@@ -542,11 +342,41 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             this.btnApply.removeClass('ui-button-action');
         }
     },
+
+    _checkModification: function(){
+
+        if($.isEmptyObject(this._current_cfg) || this._isNewCfg){ //new cfg
+
+            this.element.find('#assign_fieldset').show();
+            this._is_modified = true;
+        }else{
+
+            this.element.find('#assign_fieldset').hide();  //hide service selector
+            this.element.find('.service_details').show();
+
+            //verify if modified
+            this._is_modified = (this._current_cfg.rty_ID != this.selectRecordType.val())
+                             || (this._current_cfg.label != this.element.find('#inpt_label').val());
     
+            if(!this._is_modified){
+                this._super();
+            }
+        }
+
+    },
+
     //
     // prepare form for service type change
     //
     _changeService: function( service_name ){
+
+        // Check ESTC service
+        if((service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC')
+         && this._estc_response[service].status != window.hWin.ResponseStatus.OK){
+
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return false;
+        }
 
         const that = this;
         let cfg0 = this.getServiceDefInfo(service_name, false);
@@ -662,7 +492,6 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 that.example_results[service_name] = response;
 
                 that._displayTestResults(service_name);
-                return;
             });
 
             return;
@@ -680,165 +509,166 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             data = this.example_results[service_name][idx];
         }
 
-        if(data){
+        if(!data){
+            return;
+        }
 
-            $.each($tbl_cells, function(idx, cell){
-                let $cell = $(cell);
-                let field = $cell.attr('data-field');
-                let value = null;
+        $.each($tbl_cells, function(idx, cell){
+            let $cell = $(cell);
+            let field = $cell.attr('data-field');
+            let value = null;
 
-                if(!field){
+            if(!field){
+                return;
+            }
+
+            if(field.indexOf('.') != -1){
+
+                let fld_parts = field.split('.');
+                value = data[fld_parts[0]];
+
+                if(window.hWin.HEURIST4.util.isempty(value)){
                     return;
                 }
 
-                if(field.indexOf('.') != -1){
+                for(let i = 1; i < fld_parts.length; i++){
 
-                    let fld_parts = field.split('.');
-                    value = data[fld_parts[0]];
+                    if(window.hWin.HEURIST4.util.isempty(value[fld_parts[i]]) && !window.hWin.HEURIST4.util.isempty(value[0])){
+                        value = value[0];
+                    }
+
+                    value = value[fld_parts[i]];
 
                     if(window.hWin.HEURIST4.util.isempty(value)){
-                        return;
+                        break;
                     }
-
-                    for(let i = 1; i < fld_parts.length; i++){
-
-                        if(window.hWin.HEURIST4.util.isempty(value[fld_parts[i]]) && !window.hWin.HEURIST4.util.isempty(value[0])){
-                            value = value[0];
-                        }
-
-                        value = value[fld_parts[i]];
-
-                        if(window.hWin.HEURIST4.util.isempty(value)){
-                            break;
-                        }
-                    }
-
-                }else{
-                    value = data[field];
                 }
 
-                if(value){
-
-                    if(service_name == 'bnfLibrary'){
-
-                        if(field == 'author'){
-
-                            let creator_val = '';
-            
-                            for(let idx in value){
-            
-                                let cur_string = '';
-                                let cur_obj = value[idx];
-            
-                                if($.isPlainObject(cur_obj)){
-                                    if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
-                                        cur_string = cur_obj['firstname'];
-                                    }
-                                    if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
-                                        cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
-                                    }
-                                    if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
-                                        cur_string += ' (' + cur_obj['active'] + ')';
-                                    }
-            
-                                    if(cur_string == ''){
-                                        Object.values(cur_obj);
-                                    }
-                                }else{
-                                    cur_string = cur_obj;
-                                }
-            
-                                if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
-                                    creator_val += 'Missing author; ';
-                                }else{
-                                    creator_val += cur_string + '; ';
-                                }
-                            }
-            
-                            value = creator_val;
-                        }else if(field == 'publisher'){
-
-                            let pub_val = '';
-            
-                            for(let idx in value){
-            
-                                let cur_string = '';
-                                let cur_obj = value[idx];
-            
-                                if($.isPlainObject(cur_obj)){
-                                    if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
-                                        cur_string = cur_obj['name'];
-                                    }
-                                    if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
-                                        cur_string = cur_obj['location'];
-                                    }
-            
-                                    if(cur_string == ''){
-                                        Object.values(cur_obj);
-                                    }
-                                }else{
-                                    cur_string = cur_obj;
-                                }
-            
-                                if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
-                                    pub_val += 'Missing publisher; ';
-                                }else{
-                                    pub_val += cur_string + '; ';
-                                }
-                            }
-            
-                            value = pub_val;
-                        }
-                    }else if(service_name == 'tlcmap' || service_name == 'nomisma'){
-
-                        if(field == 'geometry'){
-
-                            value = {"type": "Feature", "geometry": value};
-                            let wkt = stringifyMultiWKT(value);    
-                            if(window.hWin.HEURIST4.util.isempty(wkt)){
-                                value = '';
-                            }else{
-                                let typeCode = 'm';
-                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                    if(wkt.indexOf('LINESTRING')>=0){
-                                        typeCode = 'l';
-                                    }else if(wkt.indexOf('POLYGON')>=0){
-                                        typeCode = 'pl';
-                                    }else {
-                                        typeCode = 'p';
-                                    }
-                                }
-                                value = typeCode+' '+wkt;
-                            }
-                        }
-                    }
-
-                    if($.isPlainObject(value)){
-                        value = window.hWin.HEURIST4.util.htmlEscape(Object.values(value).join(' '));
-                    }else if(Array.isArray(value) && value.length >= 1){
-                        value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
-                    }else{
-                        value = window.hWin.HEURIST4.util.htmlEscape(value?value:'');
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(value)){
-                        $cell.html('<span style="display: inline-block;">&lArr;</span><span title="'+value+'" class="truncate">'+value+'</span>');
-                    }
-                }else{
-                    $cell.html('');
-                }
-            });
-
-            if(service_name == 'nomisma'){
-                let type = this.example_results[service_name][idx]['properties']['type'];
-                this.element.find('#extra_fluff').html('Currently showing a <strong>'+ type +'</strong> record');
             }else{
-                this.element.find('#extra_fluff').html('');
+                value = data[field];
             }
 
-            this.element.find('#example_fluff').text('Search example records: ');
-            this.element.find('#example_records').show();
+            if(!value){
+                $cell.html('');
+                return;
+            }
+
+            if(service_name == 'bnfLibrary'){
+
+                if(field == 'author'){
+
+                    let creator_val = '';
+    
+                    for(let idx in value){
+    
+                        let cur_string = '';
+                        let cur_obj = value[idx];
+    
+                        if($.isPlainObject(cur_obj)){
+                            if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
+                                cur_string = cur_obj['firstname'];
+                            }
+                            if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
+                                cur_string = (cur_string != '') ? `${cur_obj['surname']}, ${cur_string}` : cur_obj['surname'];
+                            }
+                            if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
+                                cur_string += ` (${cur_obj['active']})`;
+                            }
+    
+                            if(cur_string == ''){
+                                Object.values(cur_obj);
+                            }
+                        }else{
+                            cur_string = cur_obj;
+                        }
+    
+                        if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
+                            creator_val += 'Missing author; ';
+                        }else{
+                            creator_val += `${cur_string}; `;
+                        }
+                    }
+    
+                    value = creator_val;
+                }else if(field == 'publisher'){
+
+                    let pub_val = '';
+    
+                    for(let idx in value){
+    
+                        let cur_string = '';
+                        let cur_obj = value[idx];
+    
+                        if($.isPlainObject(cur_obj)){
+                            if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
+                                cur_string = cur_obj['name'];
+                            }
+                            if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
+                                cur_string = cur_obj['location'];
+                            }
+    
+                            if(cur_string == ''){
+                                Object.values(cur_obj);
+                            }
+                        }else{
+                            cur_string = cur_obj;
+                        }
+    
+                        if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
+                            pub_val += 'Missing publisher; ';
+                        }else{
+                            pub_val += `${cur_string}; `;
+                        }
+                    }
+    
+                    value = pub_val;
+                }
+            }else if(service_name == 'tlcmap' || service_name == 'nomisma'){
+
+                if(field == 'geometry'){
+
+                    value = {"type": "Feature", "geometry": value};
+                    let wkt = stringifyMultiWKT(value);    
+                    if(window.hWin.HEURIST4.util.isempty(wkt)){
+                        value = '';
+                    }else{
+                        let typeCode = 'm';
+                        if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
+                            if(wkt.indexOf('LINESTRING')>=0){
+                                typeCode = 'l';
+                            }else if(wkt.indexOf('POLYGON')>=0){
+                                typeCode = 'pl';
+                            }else {
+                                typeCode = 'p';
+                            }
+                        }
+                        value = `${typeCode} ${wkt}`;
+                    }
+                }
+            }
+
+            if($.isPlainObject(value)){
+                value = window.hWin.HEURIST4.util.htmlEscape(Object.values(value).join(' '));
+            }else if(Array.isArray(value) && value.length >= 1){
+                value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
+            }else{
+                value = window.hWin.HEURIST4.util.htmlEscape(value??'');
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(value)){
+                $cell.html(`<span style="display: inline-block;">&lArr;</span><span title="${value}" class="truncate">${value}</span>`);
+            }
+        });
+
+        if(service_name == 'nomisma'){
+            let type = this.example_results[service_name][idx]['properties']['type'];
+            this.element.find('#extra_fluff').html(`Currently showing a <strong>${type}</strong> record`);
+        }else{
+            this.element.find('#extra_fluff').html('');
         }
+
+        this.element.find('#example_fluff').text('Search example records: ');
+        this.element.find('#example_records').show();
     },
 
     //
@@ -870,7 +700,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             return;
         }
 
-        let url = 'https://nomisma.org/apis/'+ type +'?id=denarius';
+        let url = `https://nomisma.org/apis/${type}?id=denarius`;
 
         let request = {
             service: url,
@@ -891,8 +721,6 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             }else{
                 that._runTestNomisma('');
             }
-
-            return;
         });
     },
 
@@ -972,7 +800,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         
         if(this._isNewCfg && this._current_cfg.label){
 
-            let s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
+            let s = `${this._current_cfg.label}<span class="ui-icon ui-icon-arrowthick-1-e"></span> ` 
                     +  (rty_ID>0?$Db.rty(rty_ID, 'rty_Name'):'select record type');
             this.serviceList.find('li[data-service-id="new"]').html(s);
         }
@@ -989,71 +817,210 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         let service_name = this.selectServiceType.val();
         let label = this.element.find('#inpt_label').val();
 
-        if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
+        let service_ready = rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name); // check if a service and table have been selected
 
+        if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
             // no service and no service information is available
             window.hWin.HEURIST4.msg.showMsgFlash('Select or define new service first');
-
-        }else if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
-
-            let that = this;
-            let tbl = this.element.find('#tbl_matches');
-            let is_field_mapped = false;
-
-            let fields = {};
-
-            $.each(tbl.find('select'), function(i, ele){ // get mapped fields
-
-                let field = $(ele).attr('data-field');
-                let dty_ID = $(ele).val();
-                fields[field] = dty_ID; 
-
-                if(dty_ID>0) is_field_mapped = true;
-
-            });
-
-            if(is_field_mapped){
-
-                this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config); // get existing assigned services
-                if(!this.options.service_config){ // Invalid value / None
-                    this.options.service_config = {};    
-                } 
-
-                let t_name = service_name + '_' + rty_ID;
-
-                if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
-                    label = service_name;
-                }
-
-                // save changes
-
-                //if rectype has been changed - remove previous one                
-                if(t_name != this._current_cfg.service_id && this.options.service_config[t_name]){
-                    delete this.options.service_config[t_name];
-                }
-
-                this._current_cfg.service_id = t_name;
-                this._current_cfg.rty_ID = rty_ID;
-                this._current_cfg.label = label;
-                this._current_cfg.service = service_name;
-                this._current_cfg.fields = fields;
-
-                this.options.service_config[t_name] = this._current_cfg;
-
-                this._isNewCfg = false;
-
-                this._services_modified = true;
-                window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
-
-                this._reloadServiceList(); // reload left panel
-
-                this._updateStatus(); // update is modified
-
-            }else{
-                window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
-            }
-        }else{ 
+            return;
+        }else if(!service_ready){
             window.hWin.HEURIST4.msg.showMsgFlash('Select a service and a record type to map', 2000);
+            return;
         }
+
+        let tbl = this.element.find('#tbl_matches');
+        let is_field_mapped = false;
+
+        let fields = {};
+
+        $.each(tbl.find('select'), function(i, ele){ // get mapped fields
+
+            let field = $(ele).attr('data-field');
+            let dty_ID = $(ele).val();
+            fields[field] = dty_ID; 
+
+            if(dty_ID > 0) is_field_mapped = true;
+
+        });
+
+        if(!is_field_mapped){
+            window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
+            return;
+        }
+
+        this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config); // get existing assigned services
+        if(!this.options.service_config){ // Invalid value / None
+            this.options.service_config = {};    
+        } 
+
+        let t_name = `${service_name}_${rty_ID}`;
+
+        if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
+            label = service_name;
+        }
+
+        // save changes
+
+        //if rectype has been changed - remove previous one                
+        if(t_name != this._current_cfg.service_id && this.options.service_config[t_name]){
+            delete this.options.service_config[t_name];
+        }
+
+        this._current_cfg.service_id = t_name;
+        this._current_cfg.rty_ID = rty_ID;
+        this._current_cfg.label = label;
+        this._current_cfg.service = service_name;
+        this._current_cfg.fields = fields;
+
+        this.options.service_config[t_name] = this._current_cfg;
+
+        this._isNewCfg = false;
+
+        this._services_modified = true;
+        window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified);
+
+        this._reloadServiceList(); // reload left panel
+
+        this._updateStatus(); // update is modified
+    },
+
+    //
+    // Check whether the config is still valid, i.e. record type still exists and service is still available
+    //
+    _verifyService: function(key){
+
+        let config = this.options.service_config[key];
+        let def_config = this._available_services.find((service) => service['service'] == config.service);
+
+        if(!def_config || Object.keys(def_config).length == 0){
+            return false;
+        }
+
+        return config.rty_ID > 0 && $Db.rty(config.rty_ID) !== null;
+    },
+
+    _updateServiceInfo: function(key){
+
+        let has_changes = false;
+
+        // Check that the service property has been defined
+        if(this.options.service_config[key]['service'] == null){
+
+            // Likely has service_name instead
+            if(this.options.service_config[key]['service_name'] != null){
+                this.options.service_config[key]['service'] = that.options.service_config[key]['service_name'];
+                delete this.options.service_config[key]['service_name'];
+            }else{ // invalid configuration, missing a service name
+                delete this.options.service_config[key];
+            }
+
+            has_changes = true;
+        }else if(this.options.service_config[key]['service_name'] != null){
+            delete this.options.service_config[key]['service_name'];
+
+            has_changes = true;
+        }
+
+        // Check that the service id (serviceName_rtyID) has been defined
+        if(this.options.service_config[key]['service_id'] == null){
+            this.options.service_config[key]['service_id'] = `${this.options.service_config[key]['service']}_${this.options.service_config[key]['rty_ID']}`;
+
+            has_changes = true;
+        }
+
+        // Check that the script name is correct, e.g. replace recordLookup with lookup
+        if(this.options.service_config[key]['dialog'] == 'recordLookup' || this.options.service_config[key]['dialog'] == 'lookupTCL'){
+            this.options.service_config[key]['dialog'] = 'lookupTLC';
+
+            has_changes = true;
+        }else if(this.options.service_config[key]['dialog'] == 'recordLookupBnFLibrary' || this.options.service_config[key]['dialog'] == 'lookupBnFLibrary'){
+            this.options.service_config[key]['dialog'] = 'lookupBnFLibrary_bib';
+
+            has_changes = true;
+        }else if(this.options.service_config[key]['dialog'].includes('recordLookup')){
+            this.options.service_config[key]['dialog'] = this.options.service_config[key]['dialog'].replace('recordLookup', 'lookup');
+
+            has_changes = true;
+        }
+
+        // Correct service's key (to allow the service to be assigned to multiple record types)
+        if(key.includes("_") === false){
+
+            let new_key = this.options.service_config[key]['service_id'];
+            this.options.service_config[new_key] = window.hWin.HEURIST4.util.cloneJSON(this.options.service_config[key]);
+
+            delete this.options.service_config[key];
+            key = new_key;
+
+            has_changes = true;
+        }
+
+        return [has_changes, key];
+    },
+
+    _updateServiceFields: function(key){
+
+        let has_changes = false;
+
+        // Update configurations (Add missing fields and remove fields no longer handled)
+        let n_fields = this.options.service_config[key]['fields'];
+        let service_details = this._available_services.find((service) => service['service'] == this.options.service_config[key]['service']);
+
+        // Add missing fields
+        for(const fld_name of Object.keys(service_details['fields'])){
+            if(Object.hasOwn(n_fields, fld_name)){
+                continue;
+            }
+
+            n_fields[fld_name] = null;
+            has_changes = true;
+        }
+
+        // Remove fields
+        for(const fld_name of Object.keys(n_fields)){
+            if(Object.hasOwn(service_details['fields'], fld_name)){
+                continue;
+            }
+
+            delete n_fields[fld_name];
+            has_changes = true;
+        }
+
+        if(has_changes){
+            this.options.service_config[key]['fields'] = n_fields;
+        }
+
+        return has_changes;
+    },
+
+    _updateServiceOptions: function(key){
+
+        let has_changes = false;
+
+        // Check for missing settings/additional options
+        if(this.options.service_config[key]['service'] == 'bnfLibrary'
+        && !Object.hasOwn(this.options.service_config[key], 'options')){
+            // add default options
+
+            this.options.service_config[key]['options'] = {
+                'author_codes': '', //'contributor_codes': ''
+                'dump_receord': true,
+                'dump_field': 'rec_ScratchPad'
+            };
+            has_changes = true;
+
+        }else if(this.options.service_config[key]['service'] == "bnfLibraryAut"
+             && !Object.hasOwn(this.options.service_config[key], 'options')){
+            // add default options
+            
+            this.options.service_config[key]['options'] = {
+                'dump_receord': true,
+                'dump_field': 'rec_ScratchPad'
+            };
+            has_changes = true;
+
+        }
+
+        return has_changes;
     }
 });
