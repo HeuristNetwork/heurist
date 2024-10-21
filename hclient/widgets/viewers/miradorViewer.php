@@ -55,7 +55,8 @@ $rec_ID = intval(@$_REQUEST['recID']);
 $canvasUri = null;
 $baseUrl = null;
 //if database and record id are defined we take manifest url from database
-if(!preg_match('[\W]', $dbname) && $rec_ID>0){
+
+if(!preg_match('[\W]', $dbname) && $rec_ID>0 && @$_REQUEST['iiif_image']==null){
 
 require_once dirname(__FILE__).'/../../../autoload.php';
 
@@ -98,6 +99,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
 
             }
         }elseif(defined('DT_URL')){
+
             //find linked annotations
             //find CanvasURI linked annotation - to activate this page on mirador load
             $query = 'SELECT dtl_Value, count(*) as cnt FROM recDetails, recLinks, Records '
@@ -159,9 +161,16 @@ if(@$_REQUEST['url']) { //direct url to manifest
 }else{
     if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
-
+        $url = str_replace($_SERVER['QUERY_STRING'],
+            'db='.$_REQUEST['db']
+            .'&iiif_image='.$_REQUEST['iiif_image'], $url);
+        
     }elseif(!@$_REQUEST['q']){ //query not defined
-        exit('Need to define either query or file ID');
+        if($rec_ID>0){
+             $url = $url.'&format=iiif&q=ids:'.$rec_ID;
+        }else{
+            exit('Need to define either query or file ID');
+        }
     }else{
         if(strpos('format=iiif',$url)===false){
                 $url = $url.'&format=iiif';
@@ -180,6 +189,7 @@ $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

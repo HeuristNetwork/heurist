@@ -307,14 +307,13 @@ $.widget( "heurist.mediaViewer", {
                                 let evt = e;
 
                                 if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
-                                    if(!window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+                                    window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
                                         'In order to add Annotation to image you have to import "Annotation" record type',
                                         function(){
                                             evt.already_checked = true;
                                             __openMiradorViewer(evt);
-                                    })){
-                                        return;
-                                    }
+                                    });
+                                    return;
                                 }
 
                                 let ele = $(e.target)

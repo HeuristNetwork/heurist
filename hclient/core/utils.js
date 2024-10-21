@@ -895,7 +895,7 @@ window.hWin.HEURIST4.util = {
         {
             // Chrome allows the link to be clicked
             // without actually adding it to the DOM.
-            link.trigger('click');        
+            link.click();
             link = null;
         }
         else
@@ -905,7 +905,7 @@ window.hWin.HEURIST4.util = {
             link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link
             link.style.display = "none";
             document.body.appendChild(link);
-            link.trigger('click');        
+            link.click();
         }
 
     },    
