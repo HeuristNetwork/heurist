@@ -1638,10 +1638,18 @@ HEADER;
 
                 if($cnt_dates > $cnt_index || $cnt_empty>0){
                     if($cnt_dates > $cnt_index){
-                        $resMsg .= '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b>'.DIV_E;
+
+                        $query = "SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID IN ($fld_dates) AND dtl_ID NOT IN (SELECT rdi_DetailID FROM recDetailsDateIndex)";
+                        $rec_IDs = mysql__select_list2($mysqli, $query);
+                        $resMsg .= '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b>&nbsp;&nbsp;&nbsp;'
+                                 . '<a href="' . $this->getAllURL($rec_IDs) . '" target="_blank" rel="noopener">view as search</a>'.DIV_E;
                     }
                     if($cnt_empty > 0){
-                        $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b>'.DIV_E;
+
+                        $query = "SELECT rdi_RecID FROM recDetailsDateIndex WHERE rdi_estMinDate = 0 AND rdi_estMaxDate = 0";
+                        $rec_IDs = mysql__select_list2($mysqli, $query);
+                        $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b>&nbsp;&nbsp;&nbsp;'
+                                 . '<a href="' . $this->getAllURL($rec_IDs) . '" target="_blank" rel="noopener">view as search</a>'.DIV_E;
                     }
 
                     $resMsg .= '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';
