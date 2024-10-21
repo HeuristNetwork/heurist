@@ -199,7 +199,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     {showLabel:false, icon:'ui-icon-download', text:window.hWin.HR('Export Vocabularies'),
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                         click: function() { that._onActionListener(null, 'term-export'); }},
-                    {showLabel:false, icon:'ui-icon-upload', padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
+                    {showLabel:false, icon:'ui-icon-upload', padding:'2px', text:window.hWin.HR('Import Vocabularies'),
                         css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                         click: function() { that._onActionListener(null, 'term-import'); }}
                 ];
