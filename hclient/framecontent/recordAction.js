@@ -168,11 +168,18 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
                 inititally_selected = 'Current';
-            }            
+            }
+            //collected count option
+            if((action_type=='rectype_change' || is_initscope_empty || init_scope_type=='collected') &&
+                window.hWin.HAPI4?.currentRecordsetCollected?.length > 0)
+            {
+                opt = new Option("Collected results set (count=" + window.hWin.HAPI4.currentRecordsetCollected.length+")", "Collected");
+                selScope.appendChild(opt);
+                inititally_selected = 'Collected';
+            }
             //selected count option
-            if( (action_type=='rectype_change') || 
-               ((is_initscope_empty || init_scope_type=='selected') &&
-               (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0))) 
+            if((action_type=='rectype_change' || is_initscope_empty || init_scope_type=='selected') &&
+                window.hWin.HAPI4?.currentRecordsetSelection?.length > 0)
             {
                 opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
                 selScope.appendChild(opt);
@@ -188,6 +195,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 });
             }
         }
+
         //$(selScope)
         selectRecordScope.val(inititally_selected);
         
@@ -270,14 +278,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = null; //show all details
             }else if(scope_type=="Current"){
                 rtyIDs = window.hWin.HAPI4.currentRecordset.getRectypes();
-            }else if(scope_type=="Selected"){
+            }else if(scope_type=="Selected" || scope_type=="Collected"){
                 rtyIDs = [];
 
+                let rec_IDs = scope_type == 'Selected' ? window.hWin.HAPI4.currentRecordsetSelection : window.hWin.HAPI4.currentRecordsetCollected;
+
                 //loop all selected records
-                for(let i in window.hWin.HAPI4.currentRecordsetSelection){
+                for(const recID of rec_IDs){
 
                     let rty_total_count = window.hWin.HAPI4.currentRecordset.getRectypes().length;
-                    const recID = window.hWin.HAPI4.currentRecordsetSelection[i];
                     const record  = window.hWin.HAPI4.currentRecordset.getById(recID) ;
                     let rty = window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
 
@@ -875,8 +884,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         let scope_type = selectRecordScope.val();
         let scope;
 
-        if(scope_type=="Selected"){
-            scope = window.hWin.HAPI4.currentRecordsetSelection;
+        if(scope_type=="Selected" || scope_type=="Collected"){
+            scope = scope_type == 'Selected' ? window.hWin.HAPI4.currentRecordsetSelection : window.hWin.HAPI4.currentRecordsetCollected;
         }else{
             scope = window.hWin.HAPI4.currentRecordset.getIds();
             if(scope_type!="Current"){

@@ -2723,15 +2723,8 @@ $.widget( "heurist.resultList", {
             }
 
             // update local cache
-            /* Since 2024-03-09 - collection is independent on current record set 
-            if(this._currentRecordset && this._currentRecordset.length() > 0 && hasCollection){
-                let collected = this._currentRecordset.getSubSetByIds(collection);
-                this._collection = collected && collected.length() > 0 ? collected.getIds() : [];
-            }else{
-                this._collection = [];
-            }
-            */
-            this._collection = hasCollection?collection:[];
+            this._collection = hasCollection ? collection : [];
+            window.hWin.HAPI4.currentRecordsetCollected = hasCollection ? collection : [];
 
             // update 'cart' count
             this._updateInfo();
