@@ -304,7 +304,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!treediv.is(':empty') && treediv.fancytree("instance")){
                     let tree = $.ui.fancytree.getTree(treediv);
                     tree.visit(function(node){
-                        if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" && node.data.type != "separator"
+                        if(!node.hasChildren() && node.type != "relmarker" && node.type != "resource" && node.type != "separator"
                             && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
                         ){    
                             node.setSelected(check_status);
@@ -1256,23 +1256,23 @@ $.widget( "heurist.search_faceted_wiz", {
 
                     let order = $(that.step2).find('[name="tree_order"]:checked').val();
 
-                    if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.data.type != 'separator'){ // top level only, add usage container
+                    if(data.node.data.dtyID_local && data.node.data.code.includes(rectype+':')!==false && data.node.type != 'separator'){ // top level only, add usage container
                         $(data.node.span.childNodes[3]).append(
                             '<span style="display:inline-block;margin-left: 10px;" data-dtid="'+ data.node.data.dtyID_local +'" class="usage_count">&nbsp;</span>');
                     }
 
                     if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
                         $(data.node.span.childNodes[1]).hide();
-                    }else if(data.node.data.type == 'separator'){
+                    }else if(data.node.type == 'separator'){
                         $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
                         $(data.node.span.childNodes[1]).hide(); //checkbox for separators
 
                         if(order == 1){
                             $(data.node.li).addClass('fancytree-hidden');
                         }
-                    }else if(data.node.data.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
+                    }else if(data.node.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
                         $(data.node.span.childNodes[3]).css('color', '#871F78');
-                    }else if(data.node.data.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
+                    }else if(data.node.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
                         $(data.node.span.childNodes[3]).css('color', 'darkgreen');
                     }
                 },
@@ -1332,7 +1332,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 },
                 click: function(e, data){
 
-                    if(data.node.data.type == 'separator'){
+                    if(data.node.type == 'separator'){
                         return false;
                     }
 
@@ -1349,7 +1349,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
                 },
                 dblclick: function(e, data) {
-                    if(data.node.data.type == 'separator'){
+                    if(data.node.type == 'separator'){
                         return false;
                     }
                     data.node.toggleSelected();
@@ -1679,7 +1679,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             groupby: old_facet.groupby,
                             orderby: old_facet.orderby,
                             srange: old_facet.srange,
-                            type: node.data.type,
+                            type: node.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new,
                             trm_tree: (old_facet.trm_tree && old_facet.trm_tree === true)
                         };
@@ -1704,7 +1704,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             groupby: null,
                             orderby: null,
                             srange: null,
-                            type:node.data.type,
+                            type:node.type,
                             order: order_for_new
                         } );
                         
@@ -1775,7 +1775,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 + '<div class="ent_search_cb" style="font-style:italic;padding-top:10px">'
                 + '<span id="buttonset'+idd+'">';
-                
                 
                 let sMultiSel = '';
                 let sGroupBy = '';
