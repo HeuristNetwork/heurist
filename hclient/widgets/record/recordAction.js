@@ -25,7 +25,7 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         path: 'widgets/record/',
         
         //parameters
-        scope_types: null, // [all, selected, current, rectype ids, none]
+        scope_types: null, // [all, selected, collected, current, rectype ids, none]
         init_scope: '',    // inital selection
         currentRecordset: null,
         htmlContent: 'recordAction.html'

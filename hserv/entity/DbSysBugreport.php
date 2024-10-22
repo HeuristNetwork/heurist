@@ -215,11 +215,12 @@ class DbSysBugreport extends DbEntityBase
         array_push($ext_info, "   Report type: $types");
 
         $url = @$record['3-1058'];
+        $cur_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
         if(!empty($url)){
-            array_push($ext_info, "   Provided url: $url");
-            $new_record['details']['993'] = $url;
+            array_push($ext_info, "   Provided url: $url   Base url: $cur_url");
+            $new_record['details']['993'] = [$url,$cur_url];
         }else{
-            $new_record['details']['993'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
+            $new_record['details']['993'] = $cur_url;
         }
 
         $user_info = $this->system->getCurrentUser();
@@ -386,12 +387,12 @@ class DbSysBugreport extends DbEntityBase
 
             $title = "Heurist tracker #$res: {$record['details']['1']}";
             $msg = "Your bug report has been successfully added to the Heurist Job Tracker database.<br>"
-                 . "You can view your report at: " . HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
+                 . "You can view your report at: " . HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
             $admin_emails = mysql__select_list2($mysqli, $user_query);
 
-            $sent_email = sendPHPMailer(null, 'Bug reporter', ['to' => $record['details']['956'], 'bcc' => $admin_emails], $title, $msg, null, false);
+            $sent_email = sendPHPMailer(null, 'Bug reporter', ['to' => $record['details']['956'], 'bcc' => $admin_emails], $title, $msg, null, true);
         }
 
         return ['status' => HEURIST_OK, 'data' => ['recID' => $res, 'email_sent' => $sent_email]];

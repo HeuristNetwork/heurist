@@ -180,22 +180,24 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         for(let key of Object.keys(this.options.service_config)){
 
+            let service_key = key;
+
             // Verify lookup is still basically valid (record type and service still exists)
-            if(!that._verifyService(key)){
-                delete that.options.service_config[key];
+            if(!that._verifyService(service_key)){
+                delete that.options.service_config[service_key];
                 has_changes = true;
-                return;
+                continue;
             }
     
             // Update basic details
             let info_changes = false;
-            [info_changes, key] = that._updateServiceInfo(key);
+            [info_changes, service_key] = that._updateServiceInfo(service_key);
     
             // Update fields (add and/or remove)
-            let field_changes = that._updateServiceFields(key);
+            let field_changes = that._updateServiceFields(service_key);
     
             // Update additional settings/options
-            let settings_changes = that._updateServiceOptions(key);
+            let settings_changes = that._updateServiceOptions(service_key);
     
             has_changes = info_changes || field_changes || settings_changes || has_changes;
         }
