@@ -136,6 +136,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                    //that.baseURL_pro = window.hWin.HAPI4.sysinfo['baseURL_pro'];
                     
                     //loads list of actions                 window.hWin.document
                     if(typeof ActionHandler !== 'undefined'){
@@ -184,15 +185,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
                 if(installDir=='/') installDir = '/h6-alpha/';/* to change back to '/heurist/'; */
             }else{
-                installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+                //removed top folders: applications|common|search|records|
+                installDir = script_name.replace(/(((\?|admin|context_help|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
             }
         }
 
-        //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.
         that.installDir = installDir; //to detect development or production version 
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
-
+        
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             //replace devlopment folder to production one (ie h6-ij to heurist)

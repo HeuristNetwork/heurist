@@ -117,30 +117,31 @@ class USystem {
             $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
             if(!$is_own_domain){
 
-            $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
+                $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
 
-            if(@$_SERVER["SCRIPT_NAME"] &&
-                (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
-                $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
-            }
-
-            $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
-
-            $matches = array();
-            preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
-            if($matches){
-                $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
-            }else{
-
-                // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-                $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external';// Upddate in 3 places if changed
-
-                $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
-                if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
+                if(@$_SERVER["SCRIPT_NAME"] &&
+                    (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
+                    $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
                 }
 
-            }
+                $regex_actions = "/\/([A-Za-z0-9_]+)\/($rewrite_actions)\/.*/";
+
+                $matches = array();
+                preg_match($regex_actions, @$_SERVER["SCRIPT_NAME"], $matches);
+                if($matches){
+                    $installDir = preg_replace($regex_actions, '', @$_SERVER["SCRIPT_NAME"]);
+                }else{
+
+                    // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
+                    // removed root folders: pi|applications|common|search|records|
+                    $topdirs = 'admin|context_help|export|hapi|hclient|hserv|import|startup|redirects|viewers|help|ext|external';
+
+                    $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
+                    if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
+                        $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
+                    }
+
+                }
 
             }
 
