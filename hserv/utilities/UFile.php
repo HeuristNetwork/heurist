@@ -874,9 +874,9 @@ use hserv\utilities\USystem;
 *
 * @param mixed $src
 * @param mixed $dst
-* @param array $folders - zero level folders to copy
+* @param array $folders - folders to copy (first level only)
 */
-function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true, $file_prefix='') {
+function folderRecurseCopy($src, $dst, $folders=null, $copy_files_in_root=true) {
     $res = false;
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -894,17 +894,13 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 
                         if(isEmptyArray($folders) || in_array($src.$file.'/',$folders))
                         {
-                            if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
-                            {
-                                $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
+                                $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, true);
                                 if(!$res) {break;}
-                            }
                         }
 
                     }
-                    elseif($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
-                        copy($src.$file,  $dst . '/' . $file_prefix . $file);
-                        if($file_to_copy!=null) {return false;}
+                    elseif ($copy_files_in_root) {
+                        copy($src.$file,  $dst . '/' . $file);
                     }
                 }
             }

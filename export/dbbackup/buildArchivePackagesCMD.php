@@ -210,7 +210,7 @@ foreach ($arg_database as $idx=>$db_name){
 
 
     if($arg_include_docs || !$arg_skip_files){
-        folderRecurseCopy( $database_folder, $folder, $folders_to_copy, null, $copy_files_in_root);
+        folderRecurseCopy( $database_folder, $folder, $folders_to_copy, $copy_files_in_root);
     }
 
     // Export database definitions as readable text

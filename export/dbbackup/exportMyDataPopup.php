@@ -503,8 +503,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, false);
             }
 
-            $folders_to_copy = null;
+            $folders_to_copy = [];
 
+            $copy_uploaded_files = (@$_REQUEST['includeresources']=='1');
+            
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR,
@@ -513,37 +515,52 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                           'term-images', 'webimagecache', 'blurredimagescache'));//except these folders - some of them may exist in old databases only
 
                 //limited set
-
-
                 echo_flush2("<br><br>Exporting system folders<br>");
             }
 
-            if(@$_REQUEST['includeresources']=='1'){ //uploaded images
-                if($folders_to_copy==null) {$folders_to_copy = array();}
+            //custom user upload folders
+            $user_media_folders = $system->get_system('sys_MediaFolders');
+            $user_media_folders = explode(';', $user_media_folders);
+            foreach($user_media_folders as $dir){
+               
+                $path = HEURIST_FILESTORE_DIR . $dir;
+                if(file_exists($path)){
+                    if(substr($path, -1, 1) != '/'){
+                        $path = $path. '/';
+                    }
+                    if($copy_uploaded_files){
+                        folderRecurseCopy( $path, FOLDER_BACKUP.'/'.$dir );
+                    }
+                    //exclude from full list of folders
+                    $key = array_search($path, $folders_to_copy);
+                    if($key!==false){
+                       unset($folders_to_copy[$key]); 
+                    }
+                }
+            }//for
+            
+            if($copy_uploaded_files){ //uploaded images in standard folder
+
                 $folders_to_copy[] = HEURIST_FILES_DIR;
                 $folders_to_copy[] = HEURIST_THUMB_DIR;
-
                 $copy_files_in_root = true; //copy all files within database folder
+                
             }else{
                 $copy_files_in_root = false;
             }
+            
             if(@$_REQUEST['include_tilestacks']=='1' && defined('HEURIST_TILESTACKS_DIR')){
-                if($folders_to_copy==null) {$folders_to_copy = array();}
                 $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
             }
-            if($folders_to_copy==null){
-                $folders_to_copy = array('no copy folders');
+
+            if(@$_REQUEST['include_docs']=='1' || $copy_uploaded_files){
+               folderRecurseCopy( HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, $copy_files_in_root);
             }
 
-
-           if(@$_REQUEST['include_docs']=='1' || @$_REQUEST['includeresources']=='1'){
-               folderRecurseCopy( HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, null, $copy_files_in_root);
-           }
-
-           if(@$_REQUEST['include_docs']=='1'){// 2016-10-25
+            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25
                 echo_flush2('Copy context_help folder<br>');
-                folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/', null);
-           }
+                folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/');
+            }
 
 
            //remove dbdef_cache.json (database definitions cache) from entity folder
