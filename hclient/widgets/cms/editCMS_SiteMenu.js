@@ -251,203 +251,204 @@ title: "Overview"
         
         let tree_element = $container;
         
-                let item_li = $(item.li), 
-                menu_id = item.data.page_id,
+        let item_li = $(item.li), 
+        menu_id = item.data.page_id,
 
-                is_top = (item.data.parent_id==window.hWin.home_page_record_id);
+        is_top = (item.data.parent_id==window.hWin.home_page_record_id);
 
-                if($(item).find('.svs-contextmenu3').length==0){
+        if($(item).find('.svs-contextmenu3').length==0){
 
-                    let parent_span = item_li.children('span.fancytree-node');
+            let parent_span = item_li.children('span.fancytree-node');
 
-                    //add,edit menu,edit page,remove
-                    let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
-                        +item.data.parent_id+'" data-menuid="'+menu_id+'">'
-                        //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
-                        +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
-                        +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
-                        //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
-                        +'<span class="ui-icon ui-icon-trash" '
-                        +'" title="Remove menu entry from website"></span>'
-                        +'</div>').appendTo(parent_span);
+            //add,edit menu,edit page,remove
+            let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                +item.data.parent_id+'" data-menuid="'+menu_id+'">'
+                //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
+                +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
+                +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
+                //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
+                +'<span class="ui-icon ui-icon-trash" '
+                +'" title="Remove menu entry from website"></span>'
+                +'</div>').appendTo(parent_span);
 
-                    $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
+            $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
 
-                    actionspan.find('.ui-icon').on('click', function(event){
-                        let ele = $(event.target);
-                        window.hWin.HEURIST4.util.stopEvent(event);
+            actionspan.find('.ui-icon').on('click', function(event){
+                let ele = $(event.target);
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                let parent_span = ele.parents('span.fancytree-node');
+                
+                function __in_progress(){
+                    parent_span.find('.svs-contextmenu4').show();
+                    parent_span.find('.svs-contextmenu3').hide();
+                }
+
+                //timeout need to activate current node    
+                setTimeout(function(){                         
+                    let ele2 = ele.parents('.svs-contextmenu3');
+                    let menuid = ele2.attr('data-menuid');
+                    let parent_id = ele2.attr('data-parentid');
+
+                    if(ele.hasClass('ui-icon-plus')){ //add new menu to 
+
+                        _selectMenuRecord(menuid);
+
+                    }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
+
+                        function __editPageRecord(record_id){
+                            __in_progress();
+                            //edit menu item
+                            window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
+                                {selectOnSave:true,
+                                    onClose: function(){ 
+                                        parent_span.find('.svs-contextmenu4').hide();
+                                    },
+                                    onselect:function(event, data){
+                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                            
+                                            let recordset = data.selection;
+                                            let page_id = recordset.getOrder()[0];
+                                            page_cache[page_id] = null; //remove from cache
+                                            delete page_cache[page_id];
+                                            
+                                            if(page_id == window.hWin.current_page_id){
+                                                _refreshCurrentPage(window.hWin.current_page_id);
+                                            }
+
+                                            // Update website tree and in site menu
+                                            let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                            let refresh_menus = false;
+
+                                            if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
+
+                                            // Update tree nodes
+                                            $.ui.fancytree.getTree( $container ).visit((node) => {
+
+                                                let old_name = node.title;
+                                                if(node.data.page_id == page_id){
+
+                                                    if(old_name == new_name){ return false; } // name wasn't updated
+
+                                                    node.setTitle( new_name );
+                                                    _defineActionIcons(node);
+                                                    refresh_menus = true;
+                                                }
+
+                                            });
+
+                                            if(refresh_menus){ _refreshMainMenu(false); } // update menu
+                                        }
+                                    }
+                                }
+                            );
+                        }
                         
-                        let parent_span = ele.parents('span.fancytree-node');
-                        
-                        function __in_progress(){
-                            parent_span.find('.svs-contextmenu4').show();
-                            parent_span.find('.svs-contextmenu3').hide();
+                        if( (menuid == window.hWin.current_page_id)
+                            && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
+                        {                                    
+                                return;
+                        }else{
+                                __editPageRecord(menuid);
                         }
 
-                        //timeout need to activate current node    
-                        setTimeout(function(){                         
-                            let ele2 = ele.parents('.svs-contextmenu3');
-                            let menuid = ele2.attr('data-menuid');
-                            let parent_id = ele2.attr('data-parentid');
+                    }
+                    else if(ele.hasClass('ui-icon-structure')){ //not used - now any click on tree opens edit page
 
-                            if(ele.hasClass('ui-icon-plus')){ //add new menu to 
+                        editCMS2.switchMode('page');
+                        //open page structure 
+                        if( menuid != window.hWin.current_page_id ){
+                            _refreshCurrentPage( menuid );
+                        }
 
-                                _selectMenuRecord(menuid);
+                    }else 
+                        if(ele.hasClass('ui-icon-trash')){    //remove menu entry
 
-                            }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
+                            function __doRemove(){
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let isDelete = $dlg.find('#del_menu').is(':checked');
+                                $dlg.dialog( "close" );
 
-                                function __editPageRecord(record_id){
-                                    __in_progress();
-                                    //edit menu item
-                                    window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
-                                        {selectOnSave:true,
-                                            onClose: function(){ 
-                                                parent_span.find('.svs-contextmenu4').hide();
-                                            },
-                                            onselect:function(event, data){
-                                                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                    
-                                                    let recordset = data.selection;
-                                                    let page_id = recordset.getOrder()[0];
-                                                    page_cache[page_id] = null; //remove from cache
-                                                    delete page_cache[page_id];
-                                                    
-                                                    if(page_id == window.hWin.current_page_id){
-                                                        _refreshCurrentPage(window.hWin.current_page_id);
-                                                    }
+                                let to_del = [];
+                                item.visit(function(node){
+                                    to_del.push(node.data.page_id);
+                                },true);
 
-                                                    // Update website tree and in site menu
-                                                    let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                                    let refresh_menus = false;
-
-                                                    if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
-
-                                                    // Update tree nodes
-                                                    $.ui.fancytree.getTree( $container ).visit((node) => {
-
-                                                        let old_name = node.title;
-                                                        if(node.data.page_id == page_id){
-
-                                                            if(old_name == new_name){ return false; } // name wasn't updated
-
-                                                            node.setTitle( new_name );
-                                                            _defineActionIcons(node);
-                                                            refresh_menus = true;
-                                                        }
-
-                                                    });
-
-                                                    if(refresh_menus){ _refreshMainMenu(false); } // update menu
-                                                }
-                                    }});
+                                if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
+                                    to_del = null;
                                 }
                                 
-                                if( (menuid == window.hWin.current_page_id)
-                                    && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
-                                {                                    
-                                     return;
-                                }else{
-                                     __editPageRecord(menuid);
-                                }
-
-                            }
-                            else if(ele.hasClass('ui-icon-structure')){ //not used - now any click on tree opens edit page
-
-                                editCMS2.switchMode('page');
-                                //open page structure 
-                                if( menuid != window.hWin.current_page_id ){
-                                    _refreshCurrentPage( menuid );
-                                }
-
-                            }else 
-                                if(ele.hasClass('ui-icon-trash')){    //remove menu entry
-
-                                    function __doRemove(){
-                                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                        let isDelete = $dlg.find('#del_menu').is(':checked');
-                                        $dlg.dialog( "close" );
-
-                                        let to_del = [];
-                                        item.visit(function(node){
-                                                to_del.push(node.data.page_id);
-                                                },true);
-
-                                        if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
-                                            to_del = null;
-                                        }
-                                        
-                                        editCMS2.resetModified();
-                                        
-                                        _removeMenuEntry(parent_id, menuid, to_del, function(){
-                                            item.remove();    
-                                            
-                                            //after deletion select home page
-                                            window.hWin.current_page_id = window.hWin.home_page_record_id;
-                                            _refreshMainMenu( false ); //after delete
-                                        });
-                                    }
-
-                                    let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+                                editCMS2.resetModified();
+                                
+                                _removeMenuEntry(parent_id, menuid, to_del, function(){
+                                    item.remove();    
                                     
-                                    let buttons = {};
-                                    buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
-                                        __doRemove();
-                                    };
-                                    buttons[window.hWin.HR('Cancel')]  = function() {
-                                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                                        $dlg.dialog( "close" );
-                                    };
-
-                                    window.hWin.HEURIST4.msg.showMsgDlg(
-                                        'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
-                                        + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
-                                        + '<input type="checkbox" id="del_menu">'
-                                        + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
-                                        + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
-                                        'Remove "'+ menu_title +'" Menu');
-
-                                }
-
-                            },500);
-                    });
-
-                    //hide icons on mouse exit
-                    function _onmouseexit(event){
-                        let node;
-                        if($(event.target).is('li')){
-                            node = $(event.target).find('.fancytree-node');
-                        }else if($(event.target).hasClass('fancytree-node')){
-                            node =  $(event.target);
-                        }else{
-                            //hide icon for parent 
-                            node = $(event.target).parents('.fancytree-node');
-                            if(node) node = $(node[0]);
-                        }
-                        let ele = node.find('.svs-contextmenu3');
-                        ele.hide();
-                    }               
-
-                    function _onmouseenter(event){
-                            let node;
-                            if($(event.target).hasClass('fancytree-node')){
-                                node =  $(event.target);
-                            }else{
-                                node = $(event.target).parents('.fancytree-node');
+                                    //after deletion select home page
+                                    window.hWin.current_page_id = window.hWin.home_page_record_id;
+                                    _refreshMainMenu( false ); //after delete
+                                });
                             }
-                            if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-                                let ele = $(node).find('.svs-contextmenu3');
-                                ele.css({'display':'inline-block'});
-                            }
-                        }
-                    }
 
-                    $(parent_span).on('mouseenter',
-                        _onmouseenter
-                    ).on('mouseleave',
-                        _onmouseexit
-                    );                                                  
-                    
+                            let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+                            
+                            let buttons = {};
+                            buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
+                                __doRemove();
+                            };
+                            buttons[window.hWin.HR('Cancel')]  = function() {
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                $dlg.dialog( "close" );
+                            };
+
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
+                                + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
+                                + '<input type="checkbox" id="del_menu">'
+                                + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
+                                + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
+                                'Remove "'+ menu_title +'" Menu');
+
+                        }
+
+                },500);
+            });
+
+            //hide icons on mouse exit
+            function _onmouseexit(event){
+                let node;
+                if($(event.target).is('li')){
+                    node = $(event.target).find('.fancytree-node');
+                }else if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    //hide icon for parent 
+                    node = $(event.target).parents('.fancytree-node');
+                    if(node) node = $(node[0]);
                 }
+                let ele = node.find('.svs-contextmenu3');
+                ele.hide();
+            }               
+
+            function _onmouseenter(event){
+                let node;
+                if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    node = $(event.target).parents('.fancytree-node');
+                }
+                if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
+                    let ele = $(node).find('.svs-contextmenu3');
+                    ele.css({'display':'inline-block'});
+                }
+            }
+
+            $(parent_span).on('mouseenter',
+                _onmouseenter
+            ).on('mouseleave',
+                _onmouseexit
+            );                                                  
+            
+        }
     } //end _defineActionIcons
 
     
@@ -722,7 +723,7 @@ title: "Overview"
                             }
                         }      
                     );
-//
+
                 }else{
                     //refresh treeview
                     if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
