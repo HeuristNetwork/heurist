@@ -1458,47 +1458,47 @@ class System {
             return false;
         }
 
-            if(@$_SESSION[$this->dbname_full]['need_refresh']) {
-                unset($_SESSION[$this->dbname_full]['need_refresh']);
+        if(@$_SESSION[$this->dbname_full]['need_refresh']) {
+            unset($_SESSION[$this->dbname_full]['need_refresh']);
+        }
+
+        $fname = HEURIST_FILESTORE_DIR.basename($userID);
+        if(file_exists($fname)){  //user info was updated by someone else
+            unlink($fname);
+            //marker for usr_info.verify_credentials to be sure that client side is also up to date
+            if($user!==true) {$_SESSION[$this->dbname_full]['need_refresh'] = 1;}
+            $reload_user_from_db = true;
+        }
+
+        if($reload_user_from_db){ //from database
+
+            if(!$this->updateSessionForUser( $userID )){
+                return false; //not logged in
             }
 
-            $fname = HEURIST_FILESTORE_DIR.basename($userID);
-            if(file_exists($fname)){  //user info was updated by someone else
-                unlink($fname);
-                //marker for usr_info.verify_credentials to be sure that client side is also up to date
-                if($user!==true) {$_SESSION[$this->dbname_full]['need_refresh'] = 1;}
-                $reload_user_from_db = true;
+            if($is_guest_allowed && @$_SESSION[$this->dbname_full]['ugr_Permissions']['disabled']){
+                $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
+                $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
             }
 
-            if($reload_user_from_db){ //from database
+            //always restore from db
+            $this->current_User = ['ugr_ID' => intval($userID)]; // set user ID to avoid resetting preferences
+            $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
+        }//$reload_user_from_db from db
 
-                if(!$this->updateSessionForUser( $userID )){
-                    return false; //not logged in
-                }
+        $this->current_User = array('ugr_ID'=>intval($userID),
+                        'ugr_Name'        => @$_SESSION[$this->dbname_full]['ugr_Name'],
+                        'ugr_FullName'    => $_SESSION[$this->dbname_full]['ugr_FullName'],
+                        'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
+                        'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
 
-                if($is_guest_allowed && @$_SESSION[$this->dbname_full]['ugr_Permissions']['disabled']){
-                    $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
-                    $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
-                }
+        $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
 
-                //always restore from db
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
-            }//$reload_user_from_db from db
-
-            $this->current_User = array('ugr_ID'=>intval($userID),
-                            'ugr_Name'        => @$_SESSION[$this->dbname_full]['ugr_Name'],
-                            'ugr_FullName'    => $_SESSION[$this->dbname_full]['ugr_FullName'],
-                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
-                            'ugr_Permissions' => $_SESSION[$this->dbname_full]['ugr_Permissions']);
-
-
-            $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
-
-            //remove credentials for remote repositories
-            if(@$this->current_User['ugr_Preferences']['externalRepositories']){
-                $this->current_User['ugr_Preferences']['externalRepositories'] = null;
-                unset($this->current_User['ugr_Preferences']['externalRepositories']);
-            }
+        //remove credentials for remote repositories
+        if(@$this->current_User['ugr_Preferences']['externalRepositories']){
+            $this->current_User['ugr_Preferences']['externalRepositories'] = null;
+            unset($this->current_User['ugr_Preferences']['externalRepositories']);
+        }
 
 
         return $islogged;
