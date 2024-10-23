@@ -2350,10 +2350,20 @@ $.widget( "heurist.svs_list", {
                     after_save_callback.call( this, svs_ID );
                 }
             }
-                
-            
-            
-            
+
+            let favourite_filters = window.hWin.HAPI4.get_prefs_def('favourite_filters', false);
+            if(!window.hWin.HEURIST4.util.isArrayNotEmpty(favourite_filters) || window.hWin.HEURIST4.util.isempty(favourite_filters[0])){
+                return;
+            }
+
+            // Update label
+            const idx = favourite_filters.findIndex((filter) => filter[0] == svs_ID);
+            if(idx >= 0){
+                favourite_filters[idx][1] = response.svs_Name;
+                window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters);
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {refresh_favourites: true});
+            }
+
         };
 
         const svs_edit_js_loaded = true;

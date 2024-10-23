@@ -286,11 +286,8 @@ $.widget( "heurist.slidersMenu", {
         }else{
             this._updateDefaultAddRectype();
         }
-        if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
-//console.log('ON_CREDENTIALS', e);
-            /* later: update visibility of menu items
+        if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS || data?.refresh_favourites){
             this.populateFavouriteFilters();
-            */
         }        
     },               
 
@@ -919,15 +916,28 @@ $.widget( "heurist.slidersMenu", {
     populateFavouriteFilters: function(favourite_filters, resize_only = false){
 
         const that = this;
+        const explore_loaded = this.menues?.explore && this.menues.explore.find('ul.favourite-filters').length != 0;
+        const savedsearches_loaded = window.hWin.HAPI4.currentUser.usr_SavedSearch;
 
-        if(!(this.menues?.explore && this.menues.explore.find('ul.favourite-filters').length != 0)){
+        if(!explore_loaded){
             setTimeout(function(){ that.populateFavouriteFilters(favourite_filters); }, 1000);
+        }else if(!savedsearches_loaded){
+
+            window.hWin.HAPI4.SystemMgr.ssearch_get(null, (response) => {
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    that.populateFavouriteFilters(favourite_filters, resize_only);
+                }
+            });
+        }
+
+        let $favourite_container = explore_loaded ? this.menues.explore.find('ul.favourite-filters') : [];
+        if($favourite_container.length==0 || !explore_loaded || !savedsearches_loaded){
             return;
         }
 
-        let $favourite_container = this.menues.explore.find('ul.favourite-filters');
-        if($favourite_container.length==0){
-            return;
+        function updateHeight(height){
+            $favourite_container.css('height', `${height}px`);
         }
 
         if(resize_only){ // just resize container
@@ -935,13 +945,9 @@ $.widget( "heurist.slidersMenu", {
             let cont_height = this.menues.explore.height() - $favourite_container.position().top;
             cont_height -= $favourite_container.find('li').length > 0 ? 60 : 110;
 
-            $favourite_container.css('height', cont_height + 'px');
+            updateHeight(cont_height);
 
             return;
-        }
-
-        if(!favourite_filters){
-            favourite_filters = window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
         }
 
         if($favourite_container.find('li').length > 0){ // clear list
@@ -950,138 +956,146 @@ $.widget( "heurist.slidersMenu", {
         }
 
         let cont_height = this.menues.explore.height() - $favourite_container.position().top;
-        $favourite_container.css('height', cont_height + 'px');
+        updateHeight(cont_height);
 
         if(this.menues.explore[0].clientHeight <= this.menues.explore[0].scrollHeight){ 
             cont_height -= (this.menues.explore[0].scrollHeight - this.menues.explore[0].clientHeight) + 40;
-            $favourite_container.css('height', cont_height + 'px');
+            updateHeight(cont_height);
         }
+
+        favourite_filters = favourite_filters ?? window.hWin.HAPI4.get_prefs_def('favourite_filters', ['']);
 
         if(favourite_filters[0] == ''){
             return;   
         }
 
-            if(!this.svs_list){
-                this.getSvsList();
+        if(!this.svs_list){
+            this.getSvsList();
+        }
+
+        for(let idx = 0; idx < favourite_filters.length; idx++){
+
+            const filter = favourite_filters[idx];
+
+            if(window.hWin.HEURIST4.util.isempty(filter) || !Object.hasOwn(window.hWin.HAPI4.currentUser.usr_SavedSearch, filter[0])){
+                // remove missing filters
+                favourite_filters.splice(idx, 1);
+                --idx;
+                continue;
             }
 
-            for(const filter of favourite_filters){
+            // Update label
+            let name = window.hWin.HAPI4.currentUser.usr_SavedSearch[filter[0]][0];
+            name = typeof name !== 'string' ? filter[1] : name;
+            favourite_filters[idx][1] = name;
 
-                let $remove_btn = $('<span>')
-                                 .addClass('smallbutton ui-icon ui-icon-redo')
-                                 .attr('title', 'Remove filter from favourites')
-                                 .attr('data-fid', filter[0])
-                                 .css({
-                                    'display': 'none',
-                                    'float': 'right',
-                                    'margin-top': '1px',
-                                    'color': 'black'
-                                 });
+            let $remove_btn = $('<span>', {
+                class: 'smallbutton ui-icon ui-icon-redo',
+                style: 'display: none; float: right; margin-top: 1px; color: black',
+                title: 'Remove filter from favourites',
+                'data-fid': filter[0]
+            });
 
-                let $txt = $('<span>')
-                            .addClass('truncate')
-                            .css({
-                                'font-size': '13px',
-                                'display': 'inline-block',
-                                'max-width': '85%',
-                                'vertical-align': 'text-top'
-                            })
-                            .attr('title', filter[1])
-                            .text(filter[1]);
+            let $txt = $('<span>', {
+                class: 'truncate',
+                style: 'font-size: 12px; display: inline-block; max-width: 85%; vertical-align: text-top',
+                title: name,
+                text: name
+            });
 
 
-                $('<li>')
-                .addClass('fancytree-node')
-                .attr('data-fid', filter[0])
-                .css({
-                    'padding': '6px',
-                    'cursor': 'pointer'
-                })
-                .append($txt) // attach text
-                .append($remove_btn) // attach remove btn
-                .appendTo($favourite_container);
-            }
+            $('<li>', {
+                class: 'fancytree-node',
+                style: 'padding: 6px; cursor: pointer;',
+                'data-fid': filter[0]
+            })
+            .append($txt) // attach text
+            .append($remove_btn) // attach remove btn
+            .appendTo($favourite_container);
+        }
 
-            if($favourite_container.find('li').length > 0){
+        window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters);
 
-                let block_filter = false;
+        if($favourite_container.find('li').length == 0){
+            cont_height = this.menues.explore.height() - $favourite_container.position().top - 110;
+            updateHeight(cont_height);
+            return;
+        }
 
-                this._on($favourite_container.find('li'), {
-                    click: function(event){
+        let block_filter = false;
 
-                        if(block_filter) { return; } // user current re-ordering favourite filters
+        this._on($favourite_container.find('li'), {
+            click: function(event){
 
-                        let $ele = $(event.target);
-                        if($ele.is('span') && !$ele.hasClass('smallbutton')){ // filter text clicked
-                            $ele = $ele.parents('li.fancytree-node');
-                        }
-                        let id = $ele.attr('data-fid');
+                if(block_filter) { return; } // user current re-ordering favourite filters
 
-                        if($ele.is('li.fancytree-node')){
+                let $ele = $(event.target);
+                if($ele.is('span') && !$ele.hasClass('smallbutton')){ // filter text clicked
+                    $ele = $ele.parents('li.fancytree-node');
+                }
+                let id = $ele.attr('data-fid');
 
-                            this.hideDatabaseOverview();
+                if($ele.is('li.fancytree-node')){
 
-                            this.svs_list.svs_list('doSearchByID', id, $ele.text()); // perform filter
-                        }else if($ele.is('span')){
+                    this.hideDatabaseOverview();
 
-                            // remove from list and preferences
-                            $ele.parent().remove(); // remove from list
+                    this.svs_list.svs_list('doSearchByID', id, $ele.text()); // perform filter
+                }else if($ele.is('span')){
 
-                            if(favourite_filters.length > 1){
-                                // remove from prefs
-                                let idx = favourite_filters.findIndex(filter => filter[0] == id);
-                                favourite_filters.splice(idx, 1);
-                            }else{
-                                favourite_filters = [''];
-                                this.menues.explore.find('.favour-help').show();
-                            }
+                    // remove from list and preferences
+                    $ele.parent().remove(); // remove from list
 
-                            window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters); // save prefs
-                        }
-                    },
-                    mouseover: function(event){
-
-                        if($(event.target).hasClass('smallbutton')){
-                            $(event.target).show();
-                        }else if($(event.target).hasClass('truncate')){
-                            $(event.target).parent().find('span.smallbutton').show();
-                        }else{
-                            $(event.target).find('span.smallbutton').show();
-                        }
-                    },
-                    mouseout: function(event){
-                        $favourite_container.find('span.smallbutton').hide();
+                    if(favourite_filters.length > 1){
+                        // remove from prefs
+                        let idx = favourite_filters.findIndex(filter => filter[0] == id);
+                        favourite_filters.splice(idx, 1);
+                    }else{
+                        favourite_filters = [''];
+                        this.menues.explore.find('.favour-help').show();
                     }
+
+                    window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters); // save prefs
+                    this.populateFavouriteFilters(null, true); // fix container height
+                }
+            },
+            mouseover: function(event){
+
+                if($(event.target).hasClass('smallbutton')){
+                    $(event.target).show();
+                }else if($(event.target).hasClass('truncate')){
+                    $(event.target).parent().find('span.smallbutton').show();
+                }else{
+                    $(event.target).find('span.smallbutton').show();
+                }
+            },
+            mouseout: function(event){
+                $favourite_container.find('span.smallbutton').hide();
+            }
+        });
+
+        $favourite_container.sortable({
+            start: function(event, ui){
+                block_filter = true; // disable filtering
+            },
+            stop: function(event, ui){
+                
+                let new_order = [];
+
+                $favourite_container.find('li').each(function(idx, ele){
+                    let $ele = $(ele);
+                    new_order.push([$ele.attr('data-fid'), $ele.find('span.truncate').text()]);
                 });
 
-                $favourite_container.sortable({
-                    start: function(event, ui){
-                        block_filter = true; // disable filtering
-                    },
-                    stop: function(event, ui){
-                        
-                        let new_order = [];
+                window.hWin.HAPI4.save_pref('favourite_filters', new_order); // save prefs
 
-                        $favourite_container.find('li').each(function(idx, ele){
-                            let $ele = $(ele);
-                            new_order.push([$ele.attr('data-fid'), $ele.find('span.truncate').text()]);
-                        });
-
-                        window.hWin.HAPI4.save_pref('favourite_filters', new_order); // save prefs
-
-                        setTimeout(function(){ block_filter = false; }, 1000); // re-enable filtering
-                    }
-                });
-
-                cont_height = this.menues.explore.height() - $favourite_container.position().top - 60;
-                $favourite_container.css('height', cont_height + 'px');
-
-                this.menues.explore.find('.favour-help').hide();
-            }else{
-                cont_height = this.menues.explore.height() - $favourite_container.position().top - 110; 
-                $favourite_container.css('height', cont_height + 'px');
+                setTimeout(function(){ block_filter = false; }, 1000); // re-enable filtering
             }
-        
+        });
+
+        cont_height = this.menues.explore.height() - $favourite_container.position().top - 60;
+        $favourite_container.css('height', cont_height + 'px');
+
+        this.menues.explore.find('.favour-help').hide();
     },
 
     //
