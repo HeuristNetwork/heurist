@@ -158,19 +158,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
      * Param: None
      */
     doAction: function(){
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-        let [recset, record] = this._getSelection(true);
-        if(recset?.length() < 0 || !record){
-            return;
-        }
-
-        let res = {};
-        res['ext_url'] = recset.fld(record, 'rec_url');
-        res = this.prepareValues(recset, record, res);
-
-        this.closingAction(res);
+        this._super('rec_url');
     },
 
     /**

@@ -255,6 +255,26 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         return html;
     },
 
+    doAction: function(url_fld = ''){
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() < 0 || !record){
+            return;
+        }
+
+        let res = {};
+
+        if(!window.hWin.HEURIST4.util.isempty(url_fld) && recordset.getFields().indexOf(url_fld) !== -1){
+            res['ext_url'] = recset.fld(record, url_fld);
+        }
+
+        res = this.prepareValues(recset, record, res);
+
+        this.closingAction(res);
+    },
+
     /**
      * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
      * For multi-values, [dty_ID: [value1, value2, ...], ...]
