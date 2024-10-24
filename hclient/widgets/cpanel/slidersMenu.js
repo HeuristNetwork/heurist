@@ -941,19 +941,14 @@ $.widget( "heurist.slidersMenu", {
         }
 
         if(resize_only){ // just resize container
-
-            let cont_height = this.menues.explore.height() - $favourite_container.position().top;
-            cont_height -= $favourite_container.find('li').length > 0 ? 60 : 110;
-
+            let cont_height = this.menues.explore.height() - $favourite_container.position().top - 60;
             updateHeight(cont_height);
-
             return;
         }
 
-        if($favourite_container.find('li').length > 0){ // clear list
-            $favourite_container.find('li').remove();
-            this.menues.explore.find('.favour-help').show();
-        }
+        // clear list
+        $favourite_container.find('li').remove();
+        this.menues.explore.find('.favour-help').show();
 
         let cont_height = this.menues.explore.height() - $favourite_container.position().top;
         updateHeight(cont_height);
@@ -973,14 +968,14 @@ $.widget( "heurist.slidersMenu", {
             this.getSvsList();
         }
 
-        for(let idx = 0; idx < favourite_filters.length; idx++){
+        let idx = 0;
+        while(idx < favourite_filters.length){
 
             const filter = favourite_filters[idx];
 
             if(window.hWin.HEURIST4.util.isempty(filter) || !Object.hasOwn(window.hWin.HAPI4.currentUser.usr_SavedSearch, filter[0])){
                 // remove missing filters
                 favourite_filters.splice(idx, 1);
-                --idx;
                 continue;
             }
 
@@ -1003,7 +998,6 @@ $.widget( "heurist.slidersMenu", {
                 text: name
             });
 
-
             $('<li>', {
                 class: 'fancytree-node',
                 style: 'padding: 6px; cursor: pointer;',
@@ -1012,12 +1006,14 @@ $.widget( "heurist.slidersMenu", {
             .append($txt) // attach text
             .append($remove_btn) // attach remove btn
             .appendTo($favourite_container);
+
+            idx++;
         }
 
         window.hWin.HAPI4.save_pref('favourite_filters', favourite_filters);
 
         if($favourite_container.find('li').length == 0){
-            cont_height = this.menues.explore.height() - $favourite_container.position().top - 110;
+            cont_height = this.menues.explore.height() - $favourite_container.position().top - 60;
             updateHeight(cont_height);
             return;
         }
