@@ -898,6 +898,8 @@ function afterPageLoad(document, pageid, eventdata){
         if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
+            const org_spath = spath;
+
             //remove after web
             if(spath.indexOf('/website/')>0){
                 spath = spath.substring(0,spath.indexOf('/website/')+9);
@@ -910,14 +912,24 @@ function afterPageLoad(document, pageid, eventdata){
                 surl = surl + '/' + pageid;
             }
 
-            if(eventdata &&
-                eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART &&
-                eventdata.q){
-                surl =  surl + '/?q=' + eventdata.q;
+            let remaining_path = org_spath.replace(surl, '');
+            remaining_path = remaining_path.length > 0 ? remaining_path.split('/') : [];
+
+            const handle_query = eventdata?.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
+                              && eventdata?.q;
+            const handle_recids = remaining_path.length > 0;
+
+            if(handle_query){
+                surl += `/?q=${eventdata.q}`;
+            }
+
+            if(handle_recids){
+                remaining_path = remaining_path.filter((rec_id) => !window.hWin.HEURIST4.util.isempty(rec_id) && rec_id > 0);
+                surl += `${(handle_query ? '/?' : '&')}rec_id=${remaining_path.join(',')}`;
             }
 
             if(current_language && current_language!='def'){ //!= current_language_def
-                surl =  surl + (surl.indexOf('/?q')<0?'/?':'&')+'lang='+current_language;
+                surl += `${!handle_query && !handle_recids ? '/?' : '&'}lang=${current_language}`;
             }
 
         }else{

@@ -227,15 +227,17 @@ $.widget( "heurist.resultList", {
         let rec_ids = window.hWin.HEURIST4.util.getUrlParameter('rec_id', location.href);
         if(!rec_ids && window.hWin.HAPI4.sysinfo.use_redirect){
 
-            let url = location.href;
+            let url = location.pathname;
 
             rec_ids = url.indexOf('/website/') > 0 ? url.substring(url.indexOf('/website/')+9) : url.substring(url.indexOf('/web/')+5);
             rec_ids = rec_ids.split('/');
+            rec_ids.pop(); // last entry is empty
             rec_ids = rec_ids.length > 2 ? rec_ids.splice(0, 2) : null;
         }
 
         if(!window.hWin.HEURIST4.util.isempty(rec_ids)){
             this._auto_select_record = Array.isArray(rec_ids) ? rec_ids : rec_ids.split(',');
+            this._auto_select_record = this._auto_select_record.filter((rec_ID) => !window.hWin.HEURIST4.util.isempty(rec_ID) && rec_ID > 0);
         }
 
         this._initControls();
