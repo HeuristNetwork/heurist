@@ -207,11 +207,11 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
             let target_dty_ID = that.options.mapping.fields['properties.edition']
 
             let ids = response.data.ids; //all
-            this._reportResults(ids.concat(ids_ex), response.data);
+            that._reportResults(ids, response.data);
 
             window.hWin.HEURIST4.dbs.vocabs_already_synched = true;
 
-            this.closingAction({[target_dty_ID]: ids[0]});
+            that.closingAction({[target_dty_ID]: ids[0]});
         });
     },
 
@@ -379,7 +379,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         const ids = data.ids; //all
 
         let ids_ex = data.exists; //skipped
-        if(!ids_ex) ids_ex = [];
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids_ex)) ids_ex = [];
 
         const imported_extra = cnt > 1 ? 's are' : ' is';
         const existed_extra = cnt_ex > 1 ? 's are' : ' is';
@@ -388,7 +388,10 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         const sIgnored = cnt_i > 0 
             ? `${cnt_i} record${skipped_extra} skipped. Either record type is not set in mapping or is missing from this database` : '';
 
-        rec_IDs = Array.isArray(rec_IDs) ? rec_IDs.join(',') : rec_IDs;
+        rec_IDs = !Array.isArray(rec_IDs) ? rec_IDs.split(',') : rec_IDs;
+        rec_IDs = rec_IDs.concat(ids_ex);
+
+        rec_IDs = rec_IDs.filter((rec_ID) => !window.hWin.HEURIST4.util.isempty(rec_ID) && rec_ID > 0);
 
         let query_request = { 
             serviceType: 'ESTC',
@@ -417,14 +420,14 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
                 let rec = recordset.getById(rec_ID);
                 sImported += ids_ex.indexOf(rec_ID) < 0 ? `<li>${rec_ID}: ${recordset.fld(rec, 'rec_Title')}</li>` : '';
             }
-            sImported = cnt > 0 ? `<ul>${sImported}</ul>` : '';
+            sImported = cnt > 0 ? `<ul>${sImported}</ul>` : 'None';
             sImported = `${cnt} record${imported_extra} imported:<br>${sImported}`;
 
             for(const rec_ID of ids_ex){
                 let rec = recordset.getById(rec_ID);
                 sExisted += `<li>${rec_ID}: ${recordset.fld(rec, 'rec_Title')}</li>`;
             }
-            sExisted = cnt_ex > 0 ? `${cnt_ex} record${existed_extra} already in database<br><ul>${sExisted}</ul>` : '';
+            sExisted = cnt_ex > 0 ? `${cnt_ex} record${existed_extra} already in database<br><ul>${sExisted}</ul>` : 'None';
 
             window.hWin.HEURIST4.msg.showMsgDlg(`<p>Lookup has been completed.</p>${sImported}${sExisted}${sIgnored}`);
         });

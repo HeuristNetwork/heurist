@@ -266,7 +266,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         let res = {};
 
-        if(!window.hWin.HEURIST4.util.isempty(url_fld) && recordset.getFields().indexOf(url_fld) !== -1){
+        if(!window.hWin.HEURIST4.util.isempty(url_fld) && recset.getFields().indexOf(url_fld) !== -1){
             res['ext_url'] = recset.fld(record, url_fld);
         }
 

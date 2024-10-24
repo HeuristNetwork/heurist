@@ -374,13 +374,13 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         // Check ESTC service
         if((service_name == 'ESTC_editions' || service_name == 'ESTC_works' || service_name == 'ESTC')
-         && this._estc_response[service].status != window.hWin.ResponseStatus.OK){
+         && this._estc_response[service_name].status != window.hWin.ResponseStatus.OK){
 
-            window.hWin.HEURIST4.msg.showMsgErr(response);
+            window.hWin.HEURIST4.msg.showMsgErr(this._estc_response[service_name]);
             return false;
         }
 
-        const that = this;
+        let that = this;
         let cfg0 = this.getServiceDefInfo(service_name, false);
 
         if(this._urls[service_name]){
@@ -910,7 +910,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
             // Likely has service_name instead
             if(this.options.service_config[key]['service_name'] != null){
-                this.options.service_config[key]['service'] = that.options.service_config[key]['service_name'];
+                this.options.service_config[key]['service'] = this.options.service_config[key]['service_name'];
                 delete this.options.service_config[key]['service_name'];
             }else{ // invalid configuration, missing a service name
                 delete this.options.service_config[key];
