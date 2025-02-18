@@ -3020,6 +3020,161 @@ window.hWin.HEURIST4.dbs = {
 
         return dty_IDs;
 
+    },
+
+    rst_InterpretEntryMask: function(mask){
+        
+        let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
+        let rtn = ['', ''];
+
+        if(!matches){
+            return rtn;
+        }
+
+        let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
+
+        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2][0] == '(' ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
+        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3][0] == '(' ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
+
+        let temp = null;
+        if(range?.length == 2 && range[0] > range[1]){
+            temp = range[0];
+            range[0] = range[1];
+            range[1] = temp;
+        }
+
+        switch(matches[1]){
+
+            case 'a':
+                rtn[0] = `a string${length > 0 ? ` with a maximum of ${length} characters` : ''}`;
+                break;
+                
+            case 'd':
+                rtn[0] = `a decimal${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}${length > 0 ? `, rounded to ${length} decimal places` : ''}`;
+                break;
+
+            case 'i':
+                rtn[0] = `an integer${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}`;
+                break;
+
+            case 'm':
+                rtn[0] = `a mixed (alphanumeric) value`;
+                break;
+
+            case 'n':
+                rtn[0] = `a numeric value${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}${length > 0 ? `, rounded to ${length} decimal places` : ''}`;
+                break;
+
+            default:
+                break;
+        }
+
+        rtn[1] = mask.replace(matches[0], '&lt;value&gt;');
+
+        return rtn;
+    },
+
+    rst_RunEntryMask: function(mask, value, true_on_success = false){
+
+        function handleNumbers(type, mask, to_replace, value, length, range){
+
+            if(value.match(/[^\d\.]/) !== null){
+                return 'Input contains non-numeric characters';
+            }
+
+            let output_length = value.length;
+            let output = type === 'i' ? Number.parseInt(value) : Number.parseFloat(value);
+            output = type !== 'i' && length > 0 ? Number(output).toFixed(length) : output;
+
+            let as_int = Number.parseInt(output);
+
+            let type_text = type === 'i' ? 'an integer' : 'numeric';
+            type_text = type === 'd' ? 'decimal' : type_text;
+
+            if(output === 'NaN'){
+                output = `Input is not ${type_text}`;
+            }else if(range?.length == 2 && (as_int < range[0] || as_int > range[1])){
+                output = `Input is out of range ${range[0]} - ${range[1]}`;
+            }else if(type === 'i' && length > 0 && output_length > length){
+                output = `Input has too many digits, limited to ${length} digits`;
+            }else{
+                output = mask.replace(to_replace, output);
+            }
+
+            return output;
+        }
+
+        function getTestOutput(to_replace, mask, mask_type, value, length, range){
+
+            let output = '';
+            let regex = null;
+            let regex_results = null;
+            let regex_size = '';
+
+            switch(mask_type){
+
+                case 'a':
+
+                    regex = new RegExp(String.raw`^[\w.,'"?!()[\]-\`:;\/ ]+$`);
+                    regex_results = value.match(regex);
+
+                    output = regex_results === null ? 'Input is not alphabetic' : mask.replace(to_replace, regex_results[0]);
+                    output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
+
+                    break;
+
+                case 'd':
+                case 'i':
+                case 'n':
+
+                    output = handleNumbers(mask_type, mask, to_replace, value, length, range);
+
+                    break;
+
+                case 'm':
+
+                    regex = new RegExp(String.raw`^[\w\d.,'"?!()[\]-\`:;\/ ]+$`);
+                    regex_results = value.match(regex);
+
+                    output = regex_results === null ? 'Input contains non-alphaetic letters or numbers' : mask.replace(to_replace, regex_results[0]);
+                    output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
+
+                    break;
+
+                default:
+                    output = `Mask's format is invalid, unknown type`;
+                    break;
+            }
+
+            return output;
+        }
+
+        let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
+
+        if(!matches){
+            return 'Invalid entry mask provided';
+        }
+
+        let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
+
+        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2][0] == '(' ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
+        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3][0] == '(' ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
+
+        let temp = null;
+        if(range?.length == 2 && range[0] > range[1]){
+            temp = range[0];
+            range[0] = range[1];
+            range[1] = temp;
+        }
+
+        let output = getTestOutput(matches[0], mask, matches[1], value, length, range);
+
+        let mask_parts = mask.split(matches[0]);
+
+        let bool_output = output.startsWith(mask_parts[0])
+            && (mask_parts.length == 1 || window.hWin.HEURIST4.util.isempty(mask_parts[1]) || output.endsWith(mask_parts[1]));
+
+        return true_on_success && bool_output === true ? true : output;
     }
 
 }//end dbs

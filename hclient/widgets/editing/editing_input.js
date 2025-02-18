@@ -91,6 +91,8 @@ $.widget( "heurist.editing_input", {
 
     _isForRecords: false, // is the current entity Records (i.e. the Record Editor)
 
+    _entryMaskedValue: '', // for freetext fields that had an entry mask applied to it
+
     // the constructor
     _create: function() {
 
@@ -4016,19 +4018,20 @@ $.widget( "heurist.editing_input", {
         }
 
         // Freetext value that is a url
-        let freetext_url = this.detailType=="freetext" && ($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0);
+        let freetext_url = this.detailType=="freetext" && $input.val().match(/^https?:\/\//) !== null;
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
         let semantic_uri = this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
                             && this.options.dtID.indexOf('ReferenceURL') !== -1;
         if($inputdiv.find('.ui-icon-extlink').length == 0 && (freetext_url || semantic_uri)){
 
-            let $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
-                .addClass('smallicon ui-icon ui-icon-extlink')
+            let $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window', class: 'smallicon ui-icon ui-icon-extlink', style: 'color: blue;'})
                 .appendTo( $inputdiv );
 
             that._on($btn_extlink, { 
                 click: function(){
-                    let cur_val = $input.val();
+
+                    let cur_val = !window.hWin.HEURIST4.util.isempty(that._entryMaskedValue) ? that._entryMaskedValue : $input.val();
+
                     if(!window.hWin.HEURIST4.util.isempty(cur_val)){ // check for value
                         let urls = cur_val.split(';');
                         urls = urls.map((url, idx) => { 
@@ -4071,21 +4074,53 @@ $.widget( "heurist.editing_input", {
                         
                     } );
             }});
-                            
         }
-        if(window.hWin.HAPI4.is_admin() && this._isForRecords && this.options.dtID > 0 && (this.detailType == 'freetext' || this.detailType == 'integer' || this.detailType == 'float')){
 
-            let $btn_entrymask = $('<span>', {title: 'Edit value entry mask', class: 'smallicon ui-icon ui-icon-input btn_entry_mask show-onhover', style: 'margin-top: 2px; cursor: pointer;'});
+        let entryMaskAllowed = this.detailType == 'freetext';
+        if(window.hWin.HAPI4.is_admin() && this._isForRecords && this.options.dtID > 0 && entryMaskAllowed){
+
+            let $btn_entrymask = $('<span>', {title: 'Edit value entry mask', class: 'smallicon ui-icon ui-icon-input btn_entry_mask show-onhover', style: 'cursor: pointer;'});
             $btn_entrymask.appendTo($inputdiv);
 
             this._on($btn_entrymask, {
                 click: () => {
                     this._editEntryMask();
                 }
-            })
+            });
+
+            let mask = this.f('rst_EntryMask') ?? '';
+            let val = $input.val();
+
+            if(!window.hWin.HEURIST4.util.isempty(mask) && !window.hWin.HEURIST4.util.isempty(val)){
+
+                let mask_parts = mask.split(/\$[adimn]\d*(?:\(\d,?\d*\))*\$/);
+
+                this._entryMaskedValue = val.startsWith(mask_parts[0]) && val.endsWith(mask_parts[1])
+                    ? val.substring(mask_parts[0].length, val.length - mask_parts[1].length)
+                    : '';
+
+                $input.val(this._entryMaskedValue);
+            }
+
+            if(this.element.find('.extra_help').length == 0){
+
+                let underline = 'text-decoration: underline;';
+                let display = window.hWin.HEURIST4.util.isempty(mask) ? 'none' : 'block';
+                let filter = '';
+
+                [filter, mask] = display == 'none' ? ['', ''] : $Db.rst_InterpretEntryMask(this.f('rst_EntryMask'));
+
+                $('<div>', {style: `display: ${display}; font-size: 0.8em; color: #999999; padding: 0.3em 0px;`, class: 'extra_help'})
+                    .html(
+                        `Enter 
+                        <span style="${underline}" class="value_filter">${filter}</span> 
+                        <span class="ui-icon ui-icon-arrow-1-e" style="vertical-align: -0.3em; padding: 0px 3px;"></span> 
+                        <span style="${underline}" class="mask">${mask}</span>`
+                    )
+                    .insertAfter(this.input_prompt);
+            }
         }
-        
-        
+
         this.inputs.push($input);
         
         const dwidth = this.f('rst_DisplayWidth');
@@ -6665,7 +6700,6 @@ $.widget( "heurist.editing_input", {
                 
                 if(window.hWin.HEURIST4.util.isempty(that.f('rst_FieldConfig'))) {
 
-
                     if(that.selObj) {
                         that.selObj.remove();    
                         that.selObj = null;
@@ -7091,72 +7125,6 @@ $.widget( "heurist.editing_input", {
 
     _editEntryMask: function(){
 
-        function handleNumbers(type, to_replace, value, length, range){
-
-            let output = type === 'i' ? Number.parseInt(value) : Number.parseFloat(value);
-            output = length > 0 ? Number(output).toFixed(length) : output;
-
-            let as_int = Number.parseInt(output);
-
-            let type_text = type === 'i' ? 'integer' : 'numeric';
-            type_text = type === 'd' ? 'decimal' : type_text;
-
-            if(output === 'NaN'){
-                output = `Input is not a ${type_text}`;
-            }else if(range?.length == 2 && (as_int < range[0] || as_int > range[1])){
-                output = `Input is out of range ${range[0]} - ${range[1]}`;
-            }else{
-                output = mask.replace(to_replace, output);
-            }
-
-            return output;
-        }
-
-        function getTestOutput(to_replace, mask_type, value, length){
-
-            let output = '';
-            let regex = null;
-            let regex_results = null;
-            let regex_size = '';
-
-            switch(mask_type){
-
-                case 'a':
-
-                    regex_size = length > 0 ? `{1,${length}}` : '';
-                    regex = new RegExp(String.raw`[\w]${regex_size}`);
-                    regex_results = value.match(regex);
-
-                    output = regex_results === null ? 'Input is not alphabetic' : mask.replace(to_replace, regex_results[0]);
-
-                    break;
-
-                case 'd':
-                case 'i':
-                case 'n':
-
-                    output = handleNumbers(mask_type, to_replace, value, length, range);
-
-                    break;
-
-                case 'm':
-                    
-                    regex_size = length > 0 ? `{1,${length}}` : '';
-                    regex = new RegExp(String.raw`[\w\d]${regex_size}`);
-                    regex_results = value.match(regex);
-
-                    output = regex_results === null ? 'Input contains non-alphaetic letters or numbers' : mask.replace(to_replace, regex_results[0]);
-
-                    break;
-
-                default:
-                    output = 'Mask\'s format is invalid';
-                    break;
-            }
-
-            return output;
-        }
-
         let that = this;
         let current_mask = this.f('rst_EntryMask') ?? '';
 
@@ -7184,6 +7152,7 @@ $.widget( "heurist.editing_input", {
             const dty_ID = that.f('rst_DetailTypeID');
             const rty_ID = that.f('rst_RecTypeID');
             const mask = $dlg.find('#inp_Mask').val();
+
             let req = {
                 a: 'save',
                 entity: 'defRecStructure',
@@ -7212,6 +7181,12 @@ $.widget( "heurist.editing_input", {
                     width: 600
                 });
 
+                let parts = $Db.rst_InterpretEntryMask(mask);
+                if(parts[0] !== '' && parts[1] !== ''){
+                    that.input_cell.find('.extra_help .value_filter').text(parts[0]);
+                    that.input_cell.find('.extra_help .mask').text(parts[1]);
+                }
+
                 $dlg.dialog('close');
             });
 
@@ -7238,19 +7213,7 @@ $.widget( "heurist.editing_input", {
                     return;
                 }
 
-                let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
-
-                let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2][0] == '(' ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
-                range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3][0] == '(' ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
-
-                let temp = null;
-                if(range?.length == 2 && range[0] > range[1]){
-                    temp = range[0];
-                    range[0] = range[1];
-                    range[1] = temp;
-                }
-
-                let output = getTestOutput(matches[0], matches[1], test_value, length);
+                let output = $Db.rst_RunEntryMask(mask, test_value, false);
 
                 $output.text(output);
             }

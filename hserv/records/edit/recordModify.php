@@ -812,13 +812,14 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $stage_name = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID='.$new_swf_stage);
         $user = $system->getCurrentUser();
         $user = @$user['ugr_FullName'];
+        $user = $user ?: $system->getUserId();
 
         $title = HEURIST_DBNAME . ", ID: $recID >> workflow: $stage_name";
         $msg = !empty($swf_body) ? $swf_body : '<b>'.$title.'</b> '
         .'<a href="'.HEURIST_BASE_URL.'hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$recID.'">Record #'.$recID
         .'  "'.USanitize::sanitizeString($newTitle, false).'"</a><br>'
         .' has been changed to "'.$stage_name
-        .'"<br><br> by user: '.($user?$user:$system->getUserId());
+        .'"<br><br> by user: '.$user;
 
         if($total_record_count > 1){
             $msg = $msg . '<br><br><i>This is the first of multiple records'. ($modeImport > 0 ? ' imported' : '') .'. Please visit database for additional records.</i>';
@@ -3631,7 +3632,7 @@ function recordUpdateMaskFields($system, $recID, $rtyID = 0, $verbose = false){
                 continue;
             }elseif(!empty($reason)){ // value doesn't match the mask, leave value unchanged
                 if(!array_key_exists($dtyID, $result)){
-                    $result[$dtyID] = [ 'mask' => $mask ];
+                    $result[$dtyID] = [];
                 }
 
                 $result[$dtyID][] = ['value' => $org_value, 'reason' => $reason];
@@ -3647,7 +3648,7 @@ function recordUpdateMaskFields($system, $recID, $rtyID = 0, $verbose = false){
             $res = mysql__insertupdate($mysqli, 'recDetails', 'dtl', ['dtl_ID' => $dtl_ID, 'dtl_Value' => $value]);
             if(!$res){ // failed to update record detail
                 if(!array_key_exists($dtyID, $result)){
-                    $result[$dtyID] = [ 'mask' => $mask ];
+                    $result[$dtyID] = [];
                 }
 
                 $result[$dtyID][] = ['value' => $value, 'reason' => 'Failed to update record detail'];
@@ -3688,7 +3689,8 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
     $type_text = $type === 'd' ? 'a decimal number' : $type_text;
 
     if(is_numeric($value)){
-        $value = $type === 'i' ? intval($value) : floatval($value);
+        $value_str = strval($value);
+        $value = ($type === 'n' && substr_count($value_str, '.') == 1) || $type === 'd' ? intval($value) : intval($value);
     }
 
     $reason = '';
@@ -3698,7 +3700,7 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
     }elseif(count($range) === 2 && ($value < $range[0] || $value > $range[1])){
         $reason = "Out of range: {$range[0]} - {$range[1]}";
     }elseif(is_float($value)){
-        $value = number_format($value, $length);
+        $value = number_format($value, $length, '.', '');
     }
 
     return [$value, $reason];
@@ -3717,18 +3719,18 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
 function updateMaskFields($type, $value, $length, $range){
 
     $reason = '';
+    $PUNCTUATION = '.,\'"?!()\[\]-`:;/ ';
 
     switch($type){
 
         case 'a': // alphabetic, letters only
 
-            $leng_regex = $length > 0 ? "{{1,$length}}" : '';
-            $leng_regex = "~\w{$leng_regex}~";
+            $validate_alpha = "[^\w{$PUNCTUATION}]";
 
-            if(preg_match($leng_regex, $value, $word) === 1){
-                $value = $word[0];
-            }else{
-                $reason = 'Not alphabetic';
+            if(mb_ereg_match($validate_alpha, $value)){
+                $reason = 'Contains non-alphabetic characters';
+            }elseif($length > 0 && strlen($value) > $length){
+                $reason = "Size exceeds set length {$length}";
             }
 
             break;
@@ -3743,14 +3745,12 @@ function updateMaskFields($type, $value, $length, $range){
 
         case 'm': // mixed, alphanumeric no special characters
 
-            $mixed_regex = '~[^\w\d]~';
-            $leng_regex = $length > 0 ? "{{1,$length}}" : '';
-            $leng_regex = "~[\w\d]{$leng_regex}~";
+            $validate_mixed = "[^\w\d{$PUNCTUATION}]";
 
-            if(preg_match($mixed_regex, $value) !== 1){
+            if(mb_ereg_match($validate_mixed, $value)){
                 $reason = 'Contains non-alphanumeric characters';
-            }elseif(preg_match($leng_regex, $value, $mixed) === 1){
-                $value = $mixed[0];
+            }elseif($length > 0 && strlen($value) > $length){
+                $reason = "Size exceeds set length {$length}";
             }
 
             break;
