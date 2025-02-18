@@ -3947,6 +3947,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let contents = '';
         let handlers = {};
 
+        let parent = null;
+        let readded_parents = null;
+
         for(const issue_type in response.issues){
 
             const issues = response.issues[issue_type];
@@ -3961,7 +3964,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 case 'parents':
 
-                    let parent = Object.keys(issues)[0];
+                    parent = Object.keys(issues)[0];
                     issues[parent]['restored'] = [{
                         field: issues[parent]['field'],
                         type: this._currentEditRecTypeID,
@@ -3969,7 +3972,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         title: response.rec_Title
                     }];
 
-                    let readded_parents = window.hWin.HEURIST4.msg.prepareParentRecordMsg(response.issues['parents']);
+                    readded_parents = window.hWin.HEURIST4.msg.prepareParentRecordMsg(response.issues['parents']);
                     if(typeof readded_parents === 'object'){
 
                         handlers = $.extend({}, handlers, readded_parents.handlers);

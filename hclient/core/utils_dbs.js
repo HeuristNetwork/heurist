@@ -3022,7 +3022,89 @@ window.hWin.HEURIST4.dbs = {
 
     },
 
+    /**
+     * Interpret entry mask into human readable text, to be shown to users
+     *
+     * @param {string} mask - Entry mask to interpret
+     *
+     * @returns {[string, string]} [mask in human readable text, mask with "vaule" inserted]
+     */
     rst_InterpretEntryMask: function(mask){
+
+        /**
+         * Mask as help text
+         *
+         * @param {string} type - single character representing the mask's type
+         * @param {string|integer} length - value length
+         * @param {[string|integer, string|integer]} range - [min, max] value for number values
+         *
+         * @returns {string} help text
+         */
+        function getHelpText(type, length, range){
+
+            let help_text = '';
+
+            switch(type){
+
+                case 'a':
+                    help_text = 'a string';
+                    break;
+
+                case 'd':
+                    help_text = `a decimal`;
+                    break;
+
+                case 'i':
+                    help_text = `an integer`;
+                    break;
+
+                case 'm':
+                    help_text = `a mixed (alphanumeric) value`;
+                    break;
+
+                case 'n':
+                    help_text = `a numeric value`;
+                    break;
+
+                default:
+                    break;
+            }
+            
+            if(range?.length == 2){
+                
+                switch(type){
+
+                    case 'd':
+                    case 'i':
+                    case 'n':
+                        help_text = ` ${range[0]} to ${range[1]}`;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if(length > 0){
+
+                switch(type){
+
+                    case 'a':
+                        help_text += ` with a maximum of ${length} characters`;
+                        break;
+
+                    case 'd':
+                    case 'n':
+                        help_text += `, rounded to ${length} decimal places`;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            return help_text;
+        }
         
         let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
         let rtn = ['', ''];
@@ -3043,42 +3125,27 @@ window.hWin.HEURIST4.dbs = {
             range[1] = temp;
         }
 
-        switch(matches[1]){
-
-            case 'a':
-                rtn[0] = `a string${length > 0 ? ` with a maximum of ${length} characters` : ''}`;
-                break;
-                
-            case 'd':
-                rtn[0] = `a decimal${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}${length > 0 ? `, rounded to ${length} decimal places` : ''}`;
-                break;
-
-            case 'i':
-                rtn[0] = `an integer${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}`;
-                break;
-
-            case 'm':
-                rtn[0] = `a mixed (alphanumeric) value`;
-                break;
-
-            case 'n':
-                rtn[0] = `a numeric value${range?.length == 2 ? ` ${range[0]} to ${range[1]}` : ''}${length > 0 ? `, rounded to ${length} decimal places` : ''}`;
-                break;
-
-            default:
-                break;
-        }
+        rtn[0] = getHelpText(matches[1], length, range);
 
         rtn[1] = mask.replace(matches[0], '&lt;value&gt;');
 
         return rtn;
     },
 
+    /**
+     * Test entry mask against provided value
+     *
+     * @param {string} mask - entry mask
+     * @param {string} value - value to test
+     * @param {boolean} true_on_success - returns true on success instead of the actual answer
+     *
+     * @returns whether the value is valid for the provided mask
+     */
     rst_RunEntryMask: function(mask, value, true_on_success = false){
 
         function handleNumbers(type, mask, to_replace, value, length, range){
 
-            if(value.match(/[^\d\.]/) !== null){
+            if(value.match(/[^\d.]/) !== null){
                 return 'Input contains non-numeric characters';
             }
 
@@ -3107,16 +3174,13 @@ window.hWin.HEURIST4.dbs = {
         function getTestOutput(to_replace, mask, mask_type, value, length, range){
 
             let output = '';
-            let regex = null;
             let regex_results = null;
-            let regex_size = '';
 
             switch(mask_type){
 
                 case 'a':
 
-                    regex = new RegExp(String.raw`^[\w.,'"?!()[\]-\`:;\/ ]+$`);
-                    regex_results = value.match(regex);
+                    regex_results = value.match(/^[\w.,'"?!()[\]-\`:;\/ ]+$/);
 
                     output = regex_results === null ? 'Input is not alphabetic' : mask.replace(to_replace, regex_results[0]);
                     output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
@@ -3133,8 +3197,7 @@ window.hWin.HEURIST4.dbs = {
 
                 case 'm':
 
-                    regex = new RegExp(String.raw`^[\w\d.,'"?!()[\]-\`:;\/ ]+$`);
-                    regex_results = value.match(regex);
+                    regex_results = value.match(/^[\w\d.,'"?!()[\]-\`:;\/ ]+$/);
 
                     output = regex_results === null ? 'Input contains non-alphaetic letters or numbers' : mask.replace(to_replace, regex_results[0]);
                     output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;

@@ -693,7 +693,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     _setupRecordEmailField: function(has_freetext){
 
         let rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
-        ele = this._editing.getFieldByName('swf_RecEmailField');
+        let ele = this._editing.getFieldByName('swf_RecEmailField');
 
         if(!has_freetext){
             ele.hide();

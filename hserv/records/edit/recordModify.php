@@ -3719,13 +3719,13 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
 function updateMaskFields($type, $value, $length, $range){
 
     $reason = '';
-    $PUNCTUATION = '.,\'"?!()\[\]-`:;/ ';
+    $_PUNCTUATION = '.,\'"?!()\[\]-`:;/ ';
 
     switch($type){
 
         case 'a': // alphabetic, letters only
 
-            $validate_alpha = "[^\w{$PUNCTUATION}]";
+            $validate_alpha = "[^\w{$_PUNCTUATION}]";
 
             if(mb_ereg_match($validate_alpha, $value)){
                 $reason = 'Contains non-alphabetic characters';
@@ -3745,7 +3745,7 @@ function updateMaskFields($type, $value, $length, $range){
 
         case 'm': // mixed, alphanumeric no special characters
 
-            $validate_mixed = "[^\w\d{$PUNCTUATION}]";
+            $validate_mixed = "[^\w\d{$_PUNCTUATION}]";
 
             if(mb_ereg_match($validate_mixed, $value)){
                 $reason = 'Contains non-alphanumeric characters';
