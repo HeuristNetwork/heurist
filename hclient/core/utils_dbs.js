@@ -3115,8 +3115,8 @@ window.hWin.HEURIST4.dbs = {
 
         let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
 
-        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2][0] == '(' ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
-        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3][0] == '(' ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
+        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2].startsWith('(') ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
+        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3].startsWith('(') ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
 
         let temp = null;
         if(range?.length == 2 && range[0] > range[1]){
@@ -3180,7 +3180,7 @@ window.hWin.HEURIST4.dbs = {
 
                 case 'a':
 
-                    regex_results = value.match(/^[\w.,'"?!()[\]-\`:;\/ ]+$/);
+                    regex_results = value.match(/^[\w.,'"?!()[\]\-`:;/ ]+$/);
 
                     output = regex_results === null ? 'Input is not alphabetic' : mask.replace(to_replace, regex_results[0]);
                     output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
@@ -3197,7 +3197,7 @@ window.hWin.HEURIST4.dbs = {
 
                 case 'm':
 
-                    regex_results = value.match(/^[\w\d.,'"?!()[\]-\`:;\/ ]+$/);
+                    regex_results = value.match(/^[\w\d.,'"?!()[\]\-`:;/ ]+$/);
 
                     output = regex_results === null ? 'Input contains non-alphaetic letters or numbers' : mask.replace(to_replace, regex_results[0]);
                     output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
@@ -3220,8 +3220,8 @@ window.hWin.HEURIST4.dbs = {
 
         let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
 
-        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2][0] == '(' ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
-        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3][0] == '(' ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
+        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2].startsWith('(') ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
+        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3].startsWith('(') ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
 
         let temp = null;
         if(range?.length == 2 && range[0] > range[1]){

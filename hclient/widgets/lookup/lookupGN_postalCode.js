@@ -83,7 +83,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
     /**
      * Prepare json for displaying via the Heuirst resultList widget
      *
-     * @param {Object} json_data - search response
+     * @param {json} json_data - search response
      */
     _onSearchResult: function(json_data){
 
@@ -94,22 +94,9 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
         }
 
         let res_records = {}, res_orders = [];
+        let map_flds, fields;
 
-        let fields = ['rec_ID', 'rec_RecTypeID'];
-
-        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-        if(!Object.hasOwn(this.options.mapping.fields, 'location')
-        && (Object.hasOwn(this.options.mapping.fields, 'lng') || Object.hasOwn(this.options.mapping.fields, 'lat'))){
-
-            const same_field = this.options.mapping.fields['lng'] == this.options.mapping.fields['lat'];
-            const default_fld = this.options.mapping.fields['lng'] || this.options.mapping.fields['lat'] || DT_GEO_OBJECT;
-            this.options.mapping.fields['location'] = same_field ? this.options.mapping.fields['lng'] : default_fld;
-        }
-
-        let map_flds = Object.keys(this.options.mapping.fields);
-
-        fields = fields.concat(map_flds);
-        fields = fields.concat('googlemap_link');
+        [map_flds, fields] = this._prepareMappableFields('googlemap_link');
 
         if(!json_data.postalcodes) json_data.postalcodes = json_data;
 

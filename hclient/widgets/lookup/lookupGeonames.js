@@ -88,9 +88,9 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
     /**
      * Corrects the geospatial fields (lat and long) before returning the results back to the record editor
      *
-     * @param {Object} res - Assigned field values, containing the keys lat and long
+     * @param {json} res - Assigned field values, containing the keys lat and long
      *
-     * @returns {Object} updated assigned field values
+     * @returns {json} updated assigned field values
      */
     handleGeoValue: function(res){
 
@@ -132,5 +132,29 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
         res[geo_keys[1]] = longitude;
 
         return res;
+    },
+
+    _prepareMappableFields: function(link_field){
+
+        let fields = ['rec_ID', 'rec_RecTypeID'];
+
+        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        if(!Object.hasOwn(this.options.mapping.fields, 'location')
+        && (Object.hasOwn(this.options.mapping.fields, 'lng') || Object.hasOwn(this.options.mapping.fields, 'lat'))){
+
+            const same_field = this.options.mapping.fields['lng'] == this.options.mapping.fields['lat'];
+            const default_fld = this.options.mapping.fields['lng'] || this.options.mapping.fields['lat'] || DT_GEO_OBJECT;
+            this.options.mapping.fields['location'] = same_field ? this.options.mapping.fields['lng'] : default_fld;
+        }
+
+        let map_flds = Object.keys(this.options.mapping.fields);
+
+        fields = fields.concat(map_flds);
+
+        if(!window.hWin.HEURIST4.util.isempty(link_field)){
+            fields = fields.concat('geoname_link');
+        }
+
+        return [map_flds, fields];
     }
 });
