@@ -1,0 +1,63 @@
+/**
+* RecordList - classes for widget
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     7.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+.recordList-icon {
+    position: absolute; /*static;*/
+    height: 1.1rem;
+    width: 1.1rem;
+    background-repeat: no-repeat;
+}
+.recordList-item {
+    height: 12rem;
+    width: 10rem;
+    padding: .25rem;
+}
+.recordList-item:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+.recordList-item.selected {
+    
+}
+.recordList-thumb {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain; 
+    min-height:50%;
+}        
+.recordList-text {
+    max-height:45%;
+    overflow:hidden;
+}
+
+/* @todo to avoid !important put these classes at the very end of styles , div.selected:hover */
+div.selected{
+    background: -moz-linear-gradient(top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent !important;
+    background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8)) !important;
+    border-color: #62A7F8;
+}
+div.selected_col{
+    width: 100%;
+}
+/* make card wider for full record view */
+div.selected_col > div.selected{
+    width: 100%;
+    height: auto;
+    min-height:12rem;
+}
+

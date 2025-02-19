@@ -1762,6 +1762,9 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 
     $rec_IDs = array();
 
+    $system->defineConstant('DT_CMS_MENU');
+    $system->defineConstant('DT_CMS_TOP_MENU');
+    
     foreach ($menuitems as $rec_ID){
         if(!in_array($rec_ID, $result)){ //to avoid recursion
             array_push($result, $rec_ID);
@@ -1804,6 +1807,75 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
     }
 
 }
+
+//
+// $menuitems - ids for current level
+// $resultIds - all ids in menu
+//
+function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
+
+    $resultTree = array();
+    
+    $menuitems = prepareIds($menuitems, true);
+    $rec_IDs = array();
+    foreach ($menuitems as $rec_ID){
+        if(!in_array($rec_ID, $resultIds)){ //to avoid recursion
+            array_push($resultIds, $rec_ID);
+            array_push($rec_IDs, $rec_ID);
+            
+            if($isRoot){
+                $resultTree[$rec_ID] = [];
+            }
+        }
+    }
+    
+    if(!empty($rec_IDs)){
+        $query = 'SELECT rl_TargetID FROM recLinks WHERE rl_SourceID in ('
+        .implode(',',$rec_IDs).') AND (rl_DetailTypeID='.DT_CMS_MENU
+        .' OR rl_DetailTypeID='.DT_CMS_TOP_MENU.')';
+
+        $menuitems2 = mysql__select_list2($system->getMysqli(), $query);
+        
+        $menuitems2 = prepareIds( $menuitems2 ); //next level
+
+        if(!isEmptyArray($menuitems2)){
+            recordSearchMenuItems2($system, $menuitems2, $resultIds, false);
+        }
+    }
+
+    if($isRoot){
+            //find details
+            $records = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU), false);
+            
+            foreach($resultTree as $rec_ID=>$subs){
+                recordSearchMenuItemsTree($rec_ID, $resultTree[$rec_ID], $records);
+            }
+            
+            $resultIds = $records;
+            
+            return $resultTree; 
+    }    
+}
+
+function recordSearchMenuItemsTree($item_ID, &$resultTree, $records){
+    
+    //find in result
+    $record = $records[$item_ID];
+    $subitems = @$record[DT_CMS_TOP_MENU]??@$record[DT_CMS_MENU];
+    
+    if(is_array($subitems)){
+        
+        //add subitems
+        foreach($subitems as $subitem_ID){
+            //$resultTree[] = $subitem_ID;
+            if(!@$resultTree[$subitem_ID]){
+                $resultTree[$subitem_ID] = array();
+            }
+            recordSearchMenuItemsTree($subitem_ID, $resultTree[$subitem_ID], $records);
+        }
+    }
+}
+
 
 //-----------------------------------------------------------------------
 /**
@@ -3338,26 +3410,28 @@ for geo   geo => array(type=> , wkt=> )
 * @param mixed $record - record array - details to be added
 * @param mixed $detail_types - array of dty_ID or dty_Type or true (all details)
 */
-function recordSearchDetails($system, &$record, $detail_types) {
+function recordSearchDetails($system, &$record, $detail_types, $expanded=true) {
 
     $mysqli = $system->getMysqli();
 
     $recID = $record['rec_ID'];
 
     $squery =
-    "select dtl_ID,
+    'select dtl_ID,
     dtl_DetailTypeID,
     dtl_Value,
     ST_asWKT(dtl_Geo) as dtl_Geo,
     dtl_UploadedFileID,
-    dty_Type,
-    rec_ID,
-    rec_Title,
-    rec_RecTypeID,
-    rec_Hash
-    from recDetails
-    left join defDetailTypes on dty_ID = dtl_DetailTypeID
-    left join Records on rec_ID = dtl_Value and dty_Type = 'resource' ";
+    dty_Type ';
+    
+    if($expanded){
+        $squery .= ', rec_ID,rec_Title,rec_RecTypeID,rec_Hash ';
+    }
+    $squery .= ' from recDetails left join defDetailTypes on dty_ID = dtl_DetailTypeID';
+    
+    if($expanded){
+        $squery .= " left join Records on rec_ID = dtl_Value and dty_Type = 'resource'";
+    }
 
     $swhere = " WHERE dtl_RecID = $recID";
 
@@ -3462,12 +3536,16 @@ function recordSearchDetails($system, &$record, $detail_types) {
                     break;
 
                 case "resource":
-                    $detailValue = array(
-                        "id" => $rd["rec_ID"],
-                        "type"=>$rd["rec_RecTypeID"],
-                        "title" => $rd["rec_Title"],
-                        "hhash" => $rd["rec_Hash"]
-                    );
+                    if($expanded){
+                        $detailValue = array(
+                            "id" => $rd["rec_ID"],
+                            "type"=>$rd["rec_RecTypeID"],
+                            "title" => $rd["rec_Title"],
+                            "hhash" => $rd["rec_Hash"]
+                        );
+                    }else{
+                        $detailValue = $rd["dtl_Value"];
+                    }
                     break;
 
                 case "geo":
@@ -3732,14 +3810,16 @@ function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
 //
 // Search details for list of records
 //
-function recordSearchDetailsForRecIds($system, $recIDs, $dty_IDs) {
+// returns [rec_ID:{dty_ID:[dtl_ID=>value,.....],dty_ID:{},.... }]
+//
+function recordSearchDetailsForRecIds($system, $recIDs, $dty_IDs, $expanded=true) {
 
     $dty_IDs = prepareIds($dty_IDs);
 
     $res2 = array();
     foreach($recIDs as $recid){
         $rec = array('rec_ID'=>$recid);
-        recordSearchDetails($system, $rec, $dty_IDs);
+        recordSearchDetails($system, $rec, $dty_IDs, $expanded);
 
         $res = array();
         foreach($rec['details'] as $dty_ID=>$field_details){

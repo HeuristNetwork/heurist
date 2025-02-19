@@ -1,0 +1,94 @@
+<div data-heurist-role="recordList">
+
+    <!-- record navigation -->
+    <nav class="navbar navbar-light bg-light sticky-top container-fluid mb-2 py-1 px-2">
+        <div data-heurist-role="recordList-selection" aria-label="Selected items"> 
+        
+            <div class="dropdown">
+              <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                selected = 0
+              </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Select All</a></li>
+                  <li><a class="dropdown-item" href="#">Select None</a></li>
+                  <li><a class="dropdown-item" href="#">Show selected</a></li>
+                </ul>
+            </div>        
+<!--
+            <span data-heurist-role="recordList-selection-count">selected = 0</span>
+            
+            <input type="checkbox" class="btn-check" autocomplete="off" id="recordList-selection-show" data-heurist-role="recordList-selection-show">
+            <label class="btn btn-sm btn-outline-secondary" for="recordList-selection-show">
+                <i class="fas fa-filter"></i>
+            </label>            
+            
+            <button class="btn btn-sm btn-light" data-heurist-role="recordList-selection-clear"><i class="far fa-times-circle"></i></button>
+-->            
+        </div>
+
+        <div style="height:2rem">
+            <div class="me-2 d-inline-block" data-heurist-role="recordList-count"> 
+                n = 0
+            </div>
+            <div class="d-inline-block" aria-label="Page navigation" data-heurist-role="recordList-pagination">
+                <ul class="pagination pagination-sm">
+<!--                
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">«</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item">
+                        <select class="form-select form-select-sm" tabindex="-1" aria-label="Page select" aria-disabled="disabled">
+                            <option value="1">1</option>
+                        </select>                    
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">»</span>
+                        </a>
+                    </li>
+-->                    
+                </ul>
+            </div>             
+        </div>             
+    </nav>
+
+    <!-- container for record table or cards -->
+    <div data-heurist-role="recordList-content">
+    </div>
+</div>
+
+<div class="offcanvas" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="recordList-offcanvas">
+  <div class="offcanvas-header py-1 justify-content-end">
+    <!-- <h6 class="offcanvas-title">Selected record</h6> -->
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" id="recordList-modal">
+  <div class="modal-dialog modal-dialog-scrollable"> 
+    <div class="modal-content">
+      <div class="modal-header justify-content-end">
+        <!-- <h6 class="modal-title" id="modalScrollableLabel">Modal title</h6> -->
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer py-1">
+        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<template id="recordList-item-template">
+<div class="col" ${this.record_id_attr}="${recID}"><div class="recordList-item shadow-sm">
+    <div class="recordList-icon" style="background-image:url(${recTypeIcon})"></div>
+    <div class="recordList-thumb" style="background-image: url(&quot;${recThumb}&quot;);${hasThumb?'':'opacity:0.5;'}"></div>
+    <div class="recordList-text">${recID}: ${recTitle}</div>
+</div></div>
+</template>
