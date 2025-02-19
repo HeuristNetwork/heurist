@@ -30,7 +30,9 @@ if (!window.hWin.HEURIST4){
 //init only once
 if (!window.hWin.HEURIST4.util) 
 {
-
+    
+window.hWin.HEURIST4.cssFilesAdded = [];
+    
 window.hWin.HEURIST4.util = {
 
 
@@ -1323,6 +1325,22 @@ if (!Array.prototype.unique){
 */
 }
 
+
+$.getStyles = function(path){
+
+    if(window.hWin.HEURIST4.cssFilesAdded.indexOf(path) !== -1) {
+       return    
+    }
+    window.hWin.HEURIST4.cssFilesAdded.push(path);
+
+    var head = document.getElementsByTagName('head')[0] 
+    // Creating link element 
+    var style = document.createElement('link');
+    style.href = path;
+    style.type = 'text/css';
+    style.rel = 'stylesheet';
+    head.append(style); 
+}
 
 $.getMultiScripts2 = function(arr, path) {
     

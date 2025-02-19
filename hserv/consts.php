@@ -229,6 +229,7 @@ define('DIR_FILEUPLOADS','file_uploads/');
 define('DIR_WEBIMAGECACHE','webimagecache/');
 define('DIR_BLURREDIMAGECACHE','blurredimagescache/');
 define('DIR_GENERATED_REPORTS','generated-reports/');
+define('DIR_GENERATED_HTML','html-output/');
 define('DIR_SMARTY_TEMPLATES', 'smarty-templates/');
 
 

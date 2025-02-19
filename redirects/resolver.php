@@ -185,19 +185,19 @@ RewriteEngine On
 RewriteRule ^heurist/web/(.*)$ /heurist/redirects/resolver.php
 RewriteRule ^web/(.*)$ /heurist/redirects/resolver.php
 
-https://HeuristRef.net/web/johns_test_63/1463/2382
-→ https://heuristref.net/heurist/?db=johns_test_063&website&id=1463&pageid=2382
+https://HeuristRef.net/johns_test_63/web/1463/2382
+→ https://heuristref.net/heurist/?db=johns_test_063&website=1463&pageid=2382
 
 The IDs for the website and the pageid are optional, so in most cases, w
 here the website is the first or only one for the database,
 all that is needed is the database name like this:
 
-https://HeuristRef.net/web/johns_test_63
+https://HeuristRef.net/johns_test_63/web
 
 $requestUri:
 0 - "heurist"
-1 - "web"
-2 - database
+1 - database
+2 - "web"
 3 - website id
 4 - page id
 */

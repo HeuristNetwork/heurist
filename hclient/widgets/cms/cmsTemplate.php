@@ -157,7 +157,7 @@
 </style>
 
     <?php
-        include_once $websiteScriptAndStyles_php;  //include heurist scripts and styles
+        include_once $websiteScriptAndStyles_php;  //it includes heurist scripts and styles
     ?>
 
 </head>

@@ -144,15 +144,16 @@ if(isPositiveInt(@$_REQUEST['recID'])) {
     $rec_id = intval(@$_REQUEST['website']);
 }
 
-//find default website
-$res = recordSearch($system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));
-$def_rec_id = 0;
-if(@$res['status']==HEURIST_OK){
-    $def_rec_id = @$res['data']['records'][0];
-}
-
 if(!isPositiveInt($rec_id)){
     // if recID is not defined - use fist available "CMS home" record
+    
+    //find default website
+    $res = recordSearch($system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));
+    $def_rec_id = 0;
+    if(@$res['status']==HEURIST_OK){
+        $def_rec_id = @$res['data']['records'][0];
+    }
+    
     $rec_id = $def_rec_id;
     if(!isPositiveInt($rec_id)){
         $try_login = $system->getCurrentUser() == null;
@@ -164,7 +165,7 @@ if(!isPositiveInt($rec_id)){
     }
 }
 
-// check if this record has been replaced (merged)
+//static url in external links may have outdated id - check if this record has been replaced (merged)
 $rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 
 $rec = recordSearchByID($system, $rec_id, true);

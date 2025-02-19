@@ -65,24 +65,32 @@ if( @$_REQUEST['isalive']==1){
         $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
     }elseif(@$_REQUEST['format']){
         $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
+        
     }elseif (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
     || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) )
     {
         $format = 'website';
 
-        //embed - when heurist is run on page on non-heurist server
-        if(array_key_exists('embed', $_REQUEST)){
-            //require_once dirname(__FILE__).'/hserv/System.php';
-            define('PDIR', HEURIST_INDEX_BASE_URL);
+        if(@$_REQUEST['ver']==3){
+            $controller = new FrontController();
+            $controller->run();
         }else{
-            if(!defined('PDIR')) {define('PDIR','');}
+            //embed - when heurist is run on page on non-heurist server
+            if(array_key_exists('embed', $_REQUEST)){
+                //require_once dirname(__FILE__).'/hserv/System.php';
+                define('PDIR', HEURIST_INDEX_BASE_URL);
+            }else{
+                if(!defined('PDIR')) {define('PDIR','');}
+            }
+            include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         }
-        include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
+        
         exit;
 
-        if(intval(@$_REQUEST['field'])>0){
-            $redirect = $redirect.'&field='.intval($_REQUEST['field']);
-        }
+        // old way to retrieve the content of particular page
+        //if(intval(@$_REQUEST['field'])>0){
+        //    $redirect = $redirect.'&field='.intval($_REQUEST['field']);
+        //}
 
 
     }elseif (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {

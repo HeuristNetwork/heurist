@@ -64,7 +64,7 @@ class ReportExecute
     //private $is_included = false;    true if this report is included into anpther one - NOT USED
 
     private $isJsAllowed;
-    private $recordWithCustomCSS;
+    private $recordWithCustomCSS; //record that contains CSS
     private $isHeadless; //output without html header and styles - for snippet (loading as content of existing html element) and xml output
 
     private $limit;
