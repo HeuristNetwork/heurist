@@ -2074,14 +2074,26 @@ public methods
         }
 
         $rec_count = count($record_ids);// this is to avoid multiple swf emails when creating records
+        $cur_count = 0;
+        if($this->session_id != null){
+            mysql__update_progress($mysqli, $this->session_id, true, "0,{$rec_count}");
+        }
 
-        $new_records = array();// final array of newly created records
+        $new_records = [];// final array of newly created records
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         foreach($record_ids as $rec_id){
 
+            $cur_count ++;
             $rec_id = intval($rec_id);//snyk does not see intval in mysql__select_list2
+
+            if($this->session_id != null){
+                $current_val = mysql__update_progress($mysqli, $this->session_id, true, "{$cur_count},{$rec_count}");
+                if($current_val == 'terminate'){
+                    break;
+                }
+            }
 
             // 1. Get values -----
             $details_to_transfer = array();
@@ -2120,14 +2132,14 @@ public methods
 
             // 2. Create new sub-records -----
             // Include references to the parent record
-            $record = array(
+            $record = [
                 'ID' => 0,
                 'no_validation' => 'ignore_all',
                 'rec_RecTypeID' => $target_rty,
-                'details' => array(
-                    DT_PARENT_ENTITY => array($rec_id)
-                )
-            );
+                'details' => [
+                    DT_PARENT_ENTITY => [$rec_id]
+                ]
+            ];
 
             $new_rec_ids = array();
             if($split_values == 0){
@@ -2226,7 +2238,7 @@ public methods
 
         $final_count = count($new_records);// get final count of new records
 
-        return array('count' => $final_count, 'record_ids' => implode(',', $new_records));
+        return ['count' => $final_count, 'record_ids' => implode(',', $new_records)];
     }
 
     /**

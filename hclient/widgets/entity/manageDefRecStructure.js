@@ -3371,8 +3371,57 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         msg += '</div></div>';
 
+        function _continueSubRecords($dlg, request, proceed){
+
+            if(!proceed){
+
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'The process for creating sub records can take quite some time, halting the use of Heurist until it has been completed or aborted.<br>'
+                  + 'Also, ensure that the details you have entered on the previous popup are correct as reversing this process can be complicated and time consuming.<br><br>'
+                  + 'Would you like to proceed with the creation of sub records?',
+                    () => { _continueSubRecords($dlg, request, true) },
+                    {title: 'Continue sub record creation', yes: 'Proceed', no: 'Cancel'},
+                    {default_palette_class: 'ui-heurist-design'}
+                );
+
+                return;
+            }
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+            request['session'] = window.hWin.HEURIST4.msg.showProgress({interval: 500, content: progress_msg});
+
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+
+                window.hWin.HEURIST4.msg.hideProgress();
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                let count = response.data.count;
+                let new_rec_ids = response.data.record_ids;
+
+                if(count == 0){
+                    window.hWin.HEURIST4.msg.showMsgFlash('No sub records created...', 3000);
+                }else{
+                    let url = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:'+new_rec_ids;
+                    let $res_dlg = window.hWin.HEURIST4.msg.showMsgDlg(`Created ${count} ${cur_target_name} records (view new records <a href="${url}" target="_blank">here</a>)`, 
+                        null, {title: 'Sub-records created'}, {default_palette_class: 'ui-heurist-populate', close: function(){
+
+                            $dlg.dialog('close');
+                            $res_dlg.dialog('close');
+                            that.previewEditor.manageRecords('reloadEditForm', true); 
+                        }
+                    });
+                }
+            });
+        }
+
         let btns = {};
         btns[window.HR('Create sub records')] = function(){
+
             let $selected_fields = $dlg.find('.rty_fields:checked');
 
             if($selected_fields.length < 1){
@@ -3398,34 +3447,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 }
             });
 
-            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-
-            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-
-                if(response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                    return;
-                }
-
-                let count = response.data.count;
-                let new_rec_ids = response.data.record_ids;
-
-                if(count == 0){
-                    window.hWin.HEURIST4.msg.showMsgFlash('No sub records created...', 3000);
-                }else{
-                    let url = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:'+new_rec_ids;
-                    let $res_dlg = window.hWin.HEURIST4.msg.showMsgDlg(`Created ${count} ${cur_target_name} records (view new records <a href="${url}" target="_blank">here</a>)`, 
-                        null, {title: 'Sub-records created'}, {default_palette_class: 'ui-heurist-populate', close: function(){
-
-                            $dlg.dialog('close');
-                            $res_dlg.dialog('close');
-                            that.previewEditor.manageRecords('reloadEditForm', true); 
-                        }
-                    });
-                }
-            });
+            _continueSubRecords($dlg, request, false);
         };
         btns[window.HR('Cancel')] = function(){
             $dlg.dialog('close');
