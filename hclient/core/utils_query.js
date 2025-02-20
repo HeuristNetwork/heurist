@@ -575,11 +575,52 @@ window.hWin.HEURIST4.query = {
         return result;
     },
 
+    stringQueryToPlainText: function(query){
+
+        query = typeof query === 'string' ? query = query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
+        let is_invalid = typeof query !== 'string' || query.match(/^[^\w\d]/) !== null;
+
+        if(window.hWin.HEURIST4.util.isJSON(query) || is_invalid){
+            return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
+        }
+
+        let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract via spaces, not within double quotes
+
+        // Convert plain query to json query, validation will be performed within jsonQueryToPlainText
+        let json_query = [];
+        for(const part of parts){
+
+            if(part?.length == 0 || part[0].indexOf(':') <= 0){
+                continue;
+            }
+
+            let pieces = part[0].split(':');
+            if(pieces.length == 2){
+                json_query.push({ [pieces[0]]: pieces[1] });
+                continue;
+            }else if(pieces.length == 1){
+                continue;
+            }else{
+
+                let key = Number.isNaN(pieces[1]) ? pieces.shift() : `${pieces.shift()}:${pieces.shift()}`;
+                let search = pieces.join(':').replaceAll(/^"|"$/g, '');
+
+                json_query.push({ [key]: search });
+            }
+        }
+
+        if(json_query.length == 0){
+            return '';
+        }
+
+        return window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
+    },
+
     jsonQueryToPlainText: function(query, is_sub_query = false, use_or = false){
 
         let plain_text = '';
         if(window.hWin.HEURIST4.util.isempty(query) || !window.hWin.HEURIST4.util.isJSON(query)){
-            return plain_text;
+            return window.hWin.HEURIST4.util.isempty(query) ? plain_text : window.hWin.HEURIST4.query.stringQueryToPlainText(query);
         }
 
         query = window.hWin.HEURIST4.util.isJSON(query);
@@ -613,6 +654,11 @@ window.hWin.HEURIST4.query = {
             if(field.indexOf(':') > 0){
                 field = field.split(':');
                 field = field[field.length-1];
+            }else if(key.startsWith('f')){
+                let match = key.match(/\d/);
+                field = match === null ? 'Any field' : key.substring(1);
+            }else if(window.hWin.HEURIST4.util.isPositiveInt(key)){
+                field = value;
             }
 
             if(window.hWin.HEURIST4.util.isPositiveInt(field)){
@@ -728,7 +774,7 @@ window.hWin.HEURIST4.query = {
                     cond = `Records last modified ${field_key} the ${value}`;
                     break;
                 case 'sortby':
-                    value = window.hWin.HEURIST4.query.sortbyValue(value, rty_ID);
+                    value = typeof value !== 'string' ? '' : window.hWin.HEURIST4.query.sortbyValue(value, rty_ID);
                     !value || sortby.push(value);
                     break;
                 case 't':

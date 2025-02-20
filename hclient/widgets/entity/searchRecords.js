@@ -70,7 +70,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         let is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
         let is_addonly = (that.options.pointer_mode == 'addonly');
-        let show_selected = false;
         
         if(that.options.pointer_mode != 'addorbrowse'){
             $('#addrec_helper > .heurist-helper1').css('visibility','hidden');
@@ -85,23 +84,57 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 !window.hWin.HEURIST4.util.isempty(this.options.pointer_filter));
         }
         if(window.hWin.HEURIST4.util.isempty(this.options.pointer_filter)){
-            this.element.find('#cb_initial_filter').text('');
+            this.element.find('#lbl_initial_filter').text('');
             this.element.find('.i-filter').hide();
-            show_selected = true;
         }else{
             //initial pre-filter (see rst_PointerBrowseFilter)
-            this.element.find('#cb_initial_filter').text(this.options.pointer_filter);    
+
+            let plain_text = window.hWin.HEURIST4.query.jsonQueryToPlainText(this.options.pointer_filter);
+
+            this.element.find('#lbl_initial_filter').text(this.options.pointer_filter).attr('title', plain_text);
+            this.element.find('#lbl_filter_text').attr('title', plain_text);
             this.element.find('.i-filter').show();
+
+            this._on(this.element.find('#lbl_filter_text'), {
+                click: () => {
+                    window.hWin.HEURIST4.msg.showMsgDlg(plain_text, null, {title: 'Preset filter'});
+                }
+            });
+
+            let $tooltip = null;
+            this._on(this.element.find('.i-filter'), {
+                mouseenter: () => {
+
+                    if(window.hWin.HEURIST4.util.isempty(plain_text)){
+                        return;
+                    }
+
+                    $tooltip = this.element.find('#lbl_filter_text').tooltip({
+                        show: {
+                            delay: 500,
+                            duration: 0
+                        },
+                        content: plain_text,
+                        open: (event, ui) => {
+                            ui.tooltip.css({
+                                'font-size': '12px',
+                                'background-color': '#D4DBEA'
+                            })
+                        }
+                    });
+                    $tooltip.tooltip('open');
+                },
+                mouseleave: () => {
+                    if($tooltip && $tooltip.tooltip('instance') !== undefined){
+                        $tooltip.tooltip('destroy');
+                    }
+                }
+            });
         }
         if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
             this.element.find('.i-counts').show();
-            show_selected = true;
         }else{
             this.element.find('.i-counts').hide();
-        }
-
-        if(!show_selected){
-            this.element.find('.show-filters').hide();
         }
 
         this.btn_add_record
