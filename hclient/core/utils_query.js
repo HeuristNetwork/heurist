@@ -577,8 +577,8 @@ window.hWin.HEURIST4.query = {
 
     stringQueryToPlainText: function(query){
 
-        query = typeof query === 'string' ? query = query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
-        let is_invalid = typeof query !== 'string' || query.match(/^[^\w\d]/) !== null;
+        query = typeof query === 'string' ? query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
+        let is_invalid = typeof query !== 'string' || /^[^\w\d]/.exec(query) !== null;
 
         if(window.hWin.HEURIST4.util.isJSON(query) || is_invalid){
             return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
@@ -600,13 +600,12 @@ window.hWin.HEURIST4.query = {
                 continue;
             }else if(pieces.length == 1){
                 continue;
-            }else{
-
-                let key = Number.isNaN(pieces[1]) ? pieces.shift() : `${pieces.shift()}:${pieces.shift()}`;
-                let search = pieces.join(':').replaceAll(/^"|"$/g, '');
-
-                json_query.push({ [key]: search });
             }
+
+            let key = Number.isNaN(pieces[1]) ? pieces.shift() : `${pieces.shift()}:${pieces.shift()}`;
+            let search = pieces.join(':').replaceAll(/(?:^")|(?:"$)/g, '');
+
+            json_query.push({ [key]: search });
         }
 
         if(json_query.length == 0){

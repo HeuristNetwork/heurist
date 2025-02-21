@@ -273,7 +273,7 @@ $template_page = <<<EXP
             .dtl_head{ display: table-cell; width: 175px; }
             .dtl_value{ display: table-cell; width: 800px; }
             .dtl_row > span{ padding-bottom: 10px; }
-            . 'img{ vertical-align:middle; }
+            .img{ vertical-align:middle; }
             .db_logo{ max-width: 120px; max-height: 120px; padding-left: 20px; }
             .heurist_logo{ background-color: #364050; max-width: 150px; max-height: 40px; margin-right: 10px; border-radius: 25px; }
         </style>

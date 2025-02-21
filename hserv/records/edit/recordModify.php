@@ -3690,7 +3690,7 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
 
     if(is_numeric($value)){
         $value_str = strval($value);
-        $value = ($type === 'n' && substr_count($value_str, '.') == 1) || $type === 'd' ? intval($value) : intval($value);
+        $value = ($type === 'n' && substr_count($value_str, '.') == 1) || $type === 'd' ? floatval($value) : intval($value);
     }
 
     $reason = '';
