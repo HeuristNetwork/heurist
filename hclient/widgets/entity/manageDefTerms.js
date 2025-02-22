@@ -2706,7 +2706,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         is_added = true;
                         ele.attr('trm_IDs',ids.join(','))
 						.css({'padding-bottom':'5px'})
-                        .html(` ${s} <strong>${term_name}</strong> ${(term_code?(' ('+term_code+')'):'')} `)
+                        .html(` ${s} <strong>${term_name}</strong> ${(term_code?(' (Std Code '+term_code+')'):'')} `)
                         .on('click', function(event){
                             //start search the particular term
                             
@@ -3212,7 +3212,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         return this._cachedRecordset;
     }
-
 });
 
 /**
@@ -3322,55 +3321,68 @@ function showWarningAboutTermUsage(recID, refs){
 }
 
 function onTermSaveError(response){
-  
-        if(response.sysmsg && response.sysmsg.reccount){
 
-            //children detailtypes reccount records
-            let res = response.sysmsg;    
-            const recID = response.sysmsg.recID;
+    let has_sysmsg = response.sysmsg;
 
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.detailtypes)){
-                showWarningAboutTermUsage( recID, res.detailtypes );                                  
-                return;
-            }
+    if(has_sysmsg && response.sysmsg.reccount){
 
-            const is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
-            let s = '';
-            if(res['fields']){
-                $.each(res['fields'],function(i,dty_ID){
-                    s = s + $Db.dty(dty_ID,'dty_Name'); 
-                });
-                s = ' in fields ('+s+')';
-            }
-            
+        //children detailtypes reccount records
+        let res = response.sysmsg;    
+        const recID = response.sysmsg.recID;
 
-            let sMsg = '<p>'+(res.children==0?'Term':('Terms in '+(is_vocab?'Vocabulary':'Branch'))) 
-            + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
-            + (res.children==0?'is':'are') +  ' in use'+s
-            + ' by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
-
-            +'<p>Before you can move or delete the '
-            +(res.children==0?'term':(is_vocab?'vocabulary':'branch')+' and its child terms')
-            +', you will need to delete the records which use '+(res.children==0?'this term':'these terms')
-            +', or delete the values from the records.</p>';
-
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
-                sMsg += '<p><a href="#" class="records-list"'
-                +'>List of '+response.sysmsg.reccount+' records which use '+(res.children==0?'this term':'these terms')+'</a></p>';
-            }
-            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
-                {default_palette_class: 'ui-heurist-design'});        
-
-            let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&w=a&q=ids:' + res.records.join(',') + '&nometadatadisplay=true';
-            $dlg.find('a.records-list').attr('href', url);
-            $dlg.find('a.records-list').on({click:function(e){
-                $dlg.dialog('close');
-            }});
-
-        }else{
-            window.hWin.HEURIST4.msg.showMsgErr(response);    
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.detailtypes)){
+            showWarningAboutTermUsage( recID, res.detailtypes );                                  
+            return;
         }
+
+        const is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
+        let s = '';
+        if(res['fields']){
+            $.each(res['fields'],function(i,dty_ID){
+                s = s + $Db.dty(dty_ID,'dty_Name'); 
+            });
+            s = ' in fields ('+s+')';
+        }
+        
+
+        let sMsg = '<p>'+(res.children==0?'Term':('Terms in '+(is_vocab?'Vocabulary':'Branch'))) 
+        + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
+        + (res.children==0?'is':'are') +  ' in use'+s
+        + ' by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
+
+        +'<p>Before you can move or delete the '
+        +(res.children==0?'term':(is_vocab?'vocabulary':'branch')+' and its child terms')
+        +', you will need to delete the records which use '+(res.children==0?'this term':'these terms')
+        +', or delete the values from the records.</p>';
+
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
+            sMsg += '<p><a href="#" class="records-list"'
+            +'>List of '+response.sysmsg.reccount+' records which use '+(res.children==0?'this term':'these terms')+'</a></p>';
+        }
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
+            {default_palette_class: 'ui-heurist-design'});        
+
+        let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&w=a&q=ids:' + res.records.join(',');
+        $dlg.find('a.records-list').attr('href', url);
+        $dlg.find('a.records-list').on({click:function(e){
+            $dlg.dialog('close');
+        }});
+
+    }else{
+
+        if(has_sysmsg && response.sysmsg.detailtypes){
+
+            let base_fields = [];
     
+            for(const dty_ID in sysmsg.detailtypes){
+                base_fields.push(`${$Db.dty(dty_ID, 'dty_Name')} (#${dty_ID})`);
+            }
+
+            response.sysmsg = `The term is used by the following fields: ${base_fields.join(', ')}`;
+        }
+
+        window.hWin.HEURIST4.msg.showMsgErr(response);    
+    }
 }
 
 

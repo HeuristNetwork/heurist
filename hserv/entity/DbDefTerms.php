@@ -836,8 +836,9 @@ class DbDefTerms extends DbEntityBase
             //check usage
             $ret = $this->isTermNotInUse($merge_id, true, false);//check detailtypes, do not check in records
             if(is_array($ret)){
+                $trm_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $merge_id]);
                 $this->system->addError(HEURIST_ACTION_BLOCKED,
-                    'Cannot merge '.$merge_id.'. This term has references', $ret);
+                    "Cannot merge {$trm_Label} (#{$merge_id}). This term has references", $ret);
                 $ret = false;
             }
 
@@ -1105,13 +1106,15 @@ class DbDefTerms extends DbEntityBase
             }
 
             $children = array();
+            $mysqli = $this->system->getMysqli();
 
             foreach($this->recordIDs as $trm_ID)
             {
                 $ret = $this->isTermNotInUse($trm_ID, true, true);//check both records and defs
                 if(is_array($ret)){
+                    $trm_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $trm_ID]);
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
-                        'Cannot delete '.$trm_ID.'. This term has references', $ret);//$ret
+                        "Cannot delete {$trm_Label} (#{$trm_ID}). This term has references", $ret);//$ret
                     return false;
                 }elseif($ret===false){ //mysql error
                     return false;

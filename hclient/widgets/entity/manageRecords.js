@@ -3801,7 +3801,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     let swf_mode = this.element.find('.sel_workflow_stages').val();
                     if(swf_mode=='on' || (swf_mode=='new' && this._isInsert)){
                         
-                        this._showSwfPopup(fields);
+                        this._showSwfPopup(fields, afterAction);
                         return;
                     }
                 } //END assign workflow stage field 2-9453
