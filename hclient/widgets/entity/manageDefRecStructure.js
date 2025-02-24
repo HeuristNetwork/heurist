@@ -1329,17 +1329,14 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         let that = this;
         this._saveEditAndClose(fields, function( recID, fields ){
-            
-            if(updateCache){
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
 
-                    that._cachedRecordset = $Db.rst(that.options.rty_ID);
+            // Update local, global, and server caches
+            window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', function(){
 
-                    that._updateRtStructureTree(recID, after_dty_ID);
-                });
-            }else{
+                that._cachedRecordset = $Db.rst(that.options.rty_ID);
+
                 that._updateRtStructureTree(recID, after_dty_ID);
-            }           
+            });
         });
     },
     
@@ -1376,44 +1373,32 @@ console.log('onEditFormChange @todo check buttons!!!');
             sel_fields['values'][id] = $.extend({dty_Name: basefield_name}, rst_fields);
         }
 
+        let order = $Db.rst(this.options.rty_ID, after_dty_ID, 'rst_DisplayOrder');
+        order = parseInt(order) + 1;
+
         // Request to add all new base fields to rectype structure, this will place all new fields at the top
         let request = {
             'a': 'action',
             'entity': 'defRecStructure',
             'newfields': sel_fields,
-            'order': 0,
+            'order': order,
             'rtyID': this.options.rty_ID,
             'request_id': window.hWin.HEURIST4.util.random()
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(save_response){
-                if(save_response.status == window.hWin.ResponseStatus.OK){ //save_response.data == array of ids
-
-                    if(updateCache){
-
-                        window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
-
-                            that._cachedRecordset = $Db.rst(that.options.rty_ID);
-
-                            // re-structure tree to place new fields at the place the user requested
-                            for(let j = 0; j < save_response.data.length; j++){
-
-                                let dtyID = save_response.data[j]; //recID == save_response.data[j]
-                                that._updateRtStructureTree(dtyID, after_dty_ID);
-                            }
-                        });
-                    }else{
-                        // re-structure tree to place new fields at the place the user requested
-                        for(let j = 0; j < save_response.data.length; j++){
-
-                            let dtyID = save_response.data[j]; //recID == save_response.data[j]
-                            that._updateRtStructureTree(dtyID, after_dty_ID);
-                        }
-                    }
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(save_response);
+            function(response){
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
                 }
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', function(){
+
+                    that._cachedRecordset = $Db.rst(that.options.rty_ID);
+
+                    that._initTreeView(); // reload tree
+                    that._showRecordEditorPreview();
+                });
             }
         );
     },
@@ -2322,46 +2307,49 @@ console.log('onEditFormChange @todo check buttons!!!');
     // trigger to update rst_DisplayOrder
     //
     _saveRtStructureTree: function(){
-        
-            let recset = this._cachedRecordset;
-            let order = 0;
-            let that = this;
-            let dtyIDs = [];
-            let orders = [];
-            this._tree.visit(function(node){
-            
-                
-                
-                let dty_ID = node.key;
-                recset.setFldById(dty_ID, 'rst_DisplayOrder', order);
-                
-                dtyIDs.push( dty_ID );
-                orders.push( order );
-                order++;
-            });
-            //update order on server
-            let request = {};
-            request['a']        = 'action'; //batch action
-            request['entity']   = this._entityName;
-            request['rtyID']    = this.options.rty_ID;
-            request['recID']    = dtyIDs.join(',');
-            request['orders']   = orders.join(',');
-            request['request_id'] = window.hWin.HEURIST4.util.random();
-            
-            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
+
+        let recset = this._cachedRecordset;
+        let order = 0;
+        let that = this;
+        let dtyIDs = [];
+        let orders = [];
+        this._tree.visit(function(node){
+
+            let dty_ID = node.key;
+            recset.setFldById(dty_ID, 'rst_DisplayOrder', order); // update local cache
+            $Db.rst(this.options.rty_ID, dty_ID, 'rst_DisplayOrder', order); // update global cache
+
+            dtyIDs.push( dty_ID );
+            orders.push( order );
+            order++;
+        });
+
+        //update order on server
+        let request = {};
+        request['a']        = 'action'; //batch action
+        request['entity']   = this._entityName;
+        request['rtyID']    = this.options.rty_ID;
+        request['recID']    = dtyIDs.join(',');
+        request['orders']   = orders.join(',');
+        request['request_id'] = window.hWin.HEURIST4.util.random();
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    // Update server cache
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('rst',function(){
+
                         that._initTreeView(); // on save structure (after add or dnd)
-                        
                         that._dragIsAllowed = true;
-                        
-                        that._showRecordEditorPreview();  
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);      
-                    }
-                });
-        
+                        that._showRecordEditorPreview();
+                    });
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                }
+            }
+        );
     },
     
     //
@@ -3223,8 +3211,8 @@ console.log('onEditFormChange @todo check buttons!!!');
                 $div.find('span:first-child').text(count);
 
                 if($div.find('.ui-icon').length == 0){
-                    $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:12px;" ></span>'))
-                        .append($('<span class="ui-icon" title="Find records WITHOUT field" style="color:gray;font-size:2em;text-indent:6px;">\\</span>'));
+                    $div.append($('<span class="ui-icon ui-icon-check" title="Find records WITH field" style="color:gray;margin-left:5px;font-size:1.2em;" ></span>'))
+                        .append($('<span class="ui-icon ui-icon-cancel" title="Find records WITHOUT field" style="color:gray;font-size:1.2em;"></span>'));
 
                     $div.contextmenu({
                         delegate: 'span',

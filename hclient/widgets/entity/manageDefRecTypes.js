@@ -1222,7 +1222,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
             let $s = $('<div style="margin: 15px 0 20px 175px;'
             +'padding: 10px 10px 5px;display: block;">'
-            +'<div class="input-cell"><span style="display:inline-block"><button></button></span>'
+            +'<div class="input-cell"><span style="display: inline-block; padding-left: 20px; padding-bottom: 10px;"><button></button></span>'
             +'<span class="heurist-helper3" style="display:inline-block;vertical-align: middle;padding-left: 20px;">'
             + window.hWin.HR('manageDefRectypes_edit_fields_hint')
             +'</span>'

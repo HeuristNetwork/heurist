@@ -316,7 +316,7 @@ class DbDefRecStructure extends DbEntityBase
      */
     private function addNewFields(){
 
-        $rty_ID = $this->data['rtyID'];
+        $rty_ID = intval($this->data['rtyID']);
         $newfields = @$this->data['newfields'];
 
         if (isEmptyArray($newfields) && !$this->addDefaultFields($rty_ID)){
@@ -325,61 +325,76 @@ class DbDefRecStructure extends DbEntityBase
         }
 
         $fields = prepareIds($newfields['fields'], false);
-        $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
-        $newfields_values  = @$newfields['values']?$newfields['values']:array();
-        $order = 0;
-        if(isset($this->data['order'])){ $order = $this->data['order'];}
+        $reqs   = @$newfields['reqs'] ? $newfields['reqs'] : [];
+        $newfields_values  = @$newfields['values'] ? $newfields['values'] : [];
+
+        $provided_order = is_numeric($this->data['order']) ? intval($this->data['order']) : -1;
+        $order = $provided_order >= 0 ? $provided_order : 0;
 
         $dt_fields = dbs_GetDetailTypes($this->system, $fields);
         $dt_fields = $dt_fields['typedefs'];
         $di = $dt_fields['fieldNamesToIndex'];
 
-        $records = array();
+        $records = [];
         foreach($fields as $dty_ID){
-                if(!@$dt_fields[$dty_ID]) {
-                    continue; //field not found defDetailTypes
-                }
 
-                $dt = $dt_fields[$dty_ID]['commonFields'];
+            if(!@$dt_fields[$dty_ID]) {
+                continue; //field not found defDetailTypes
+            }
 
-                $recvalues = array(
+            $dt = $dt_fields[$dty_ID]['commonFields'];
+
+            $recvalues = [
                 'rst_ID'=> $dty_ID,
                 'rst_RecTypeID'=> $rty_ID,
                 'rst_DisplayOrder'=> $order,
                 'rst_DetailTypeID'=> $dty_ID,
                 'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
-                                         ?$newfields_values[$dty_ID]['dty_Name']
-                                         :$dt[$di['dty_Name']],
+                                            ? $newfields_values[$dty_ID]['dty_Name']
+                                            : $dt[$di['dty_Name']],
                 'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
-                                         ?$newfields_values[$dty_ID]['dty_HelpText']
-                                         :$dt[$di['dty_HelpText']],
-                'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
+                                            ? $newfields_values[$dty_ID]['dty_HelpText']
+                                            : $dt[$di['dty_HelpText']],
+                'rst_RequirementType'=> in_array($dty_ID,$reqs) ? 'required' : 'recommended',
                 'rst_MaxValues'=> 1,
-                'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
+                'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date') ? 20 : 100
+            ];
 
 
-                if(@$dt[$di['dty_SemanticReferenceURL']]){
-                    $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
-                }
-                if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
-                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
-                }elseif(@$newfields_values[$dty_ID]['rst_DefaultValue']){
-                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
-                }
+            if(@$dt[$di['dty_SemanticReferenceURL']]){
+                $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+            }
+            if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
+                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
+            }elseif(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
+            }
 
-                $records[] = $recvalues;
+            $records[] = $recvalues;
 
-                // Increment the order
-                $order = isset($this->data['order']) ? $this->data['order'] : $order + 10;
+            // Increment the order
+            $order = $provided_order >= 0 ? $order + 1 : $order + 10;
         }
 
-        if(!empty($records)){
-            $this->data['fields'] = $records;
-            $this->is_addition = true;
-            return $this->save();
-        }
-        return false;
+        if($provided_order){
 
+            $query = "SELECT rst_DetailTypeID, rst_RecTypeID, rst_DisplayName FROM defRecStructure WHERE rst_RecTypeID = {$rty_ID} AND rst_DisplayOrder >= {$provided_order} ORDER BY rst_DisplayOrder";
+            $rst_fields = mysql__select_assoc($this->system->getMysqli(), $query, 0);
+
+            foreach($rst_fields as $rst_field){
+                $rst_field['rst_DisplayOrder'] = $order;
+                $records[] = $rst_field;
+                $order = $provided_order >= 0 ? $order + 1 : $order + 10;
+            }
+        }
+
+        if(empty($records)){
+            return false;
+        }
+
+        $this->data['fields'] = $records;
+        $this->is_addition = true;
+        return $this->save();
     }
 
 
