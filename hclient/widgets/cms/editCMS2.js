@@ -23,8 +23,6 @@
     editCMS_instance2, editCMS_SiteMenu, editCMS_ElementCfg, editCMS_SelectElement, 
     website_languages, default_language,current_language*/
 
-//  window.hWin.layoutMgr - global variable defined in hLayoutMgr
-
 /*
 
 group:
@@ -170,7 +168,7 @@ function editCMS2(website_document){
                             +'<div id="treeWebSite" style="display:none;top:2.5em" class="ent_wrapper ui-cms-mainmenu">'
                                 +'<div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
 
-                                    +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">'
+                                    +'<span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;"></span>'
 
                                     +'<span style="display:inline-block;padding-top:7px" class="heurist-helper1" '
                                         +'title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">'

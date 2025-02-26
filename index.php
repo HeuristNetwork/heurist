@@ -72,7 +72,7 @@ if( @$_REQUEST['isalive']==1){
         $format = 'website';
 
         if(@$_REQUEST['ver']==3){
-            $controller = new FrontController();
+            $controller = new FrontController(isset($params)?$params:null);
             $controller->run();
         }else{
             //embed - when heurist is run on page on non-heurist server
@@ -298,7 +298,6 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/CmsManager.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>

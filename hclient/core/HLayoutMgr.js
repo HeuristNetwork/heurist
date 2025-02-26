@@ -51,7 +51,38 @@ class HLayoutMgr {
       this.pnl_counter++;
     }
   }
+  
+  #layoutInitFromHTML(container){
 
+      container = $(container);
+
+      //find all elements with data-heurist-widget
+      $.each(container.find('[data-heurist-widget]'), (idx, ele) => {
+          ele = $(ele);
+          
+          let widget_cfg = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-widget'));
+          
+          if(!widget_cfg){
+              widget_cfg = window.hWin.HEURIST4.util.isJSON(ele.text());
+              if(!widget_cfg){
+                    widget_cfg = {};
+              }
+              widget_cfg.appid = ele.attr('data-heurist-widget');
+          }
+          
+          if(widget_cfg && widget_cfg.appid){
+               if(!widget_cfg.options){
+                   widget_cfg = {appid:widget_cfg.appid, options:widget_cfg};
+               }
+               widget_cfg.key = this.pnl_counter;
+               this.pnl_counter++;
+               ele.attr('data-hid', widget_cfg.key);
+               this.#layoutInitWidget(widget_cfg, ele);
+          }
+      });
+
+  }
+  
   //
   //
   //
@@ -67,26 +98,28 @@ class HLayoutMgr {
 
     container.empty();
 
-    const res = window.hWin.HEURIST4.util.isJSON(layout);
-    if (res === false) {
-      if (forStorage) {
-        return layout;
-      } else if (typeof layout === "string" && layout.indexOf("data-heurist-app-id") > 0) {
-//old format v1: html with some widgets
-        container.html(layout);
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
-        return false;
-      }
+    const res = layout!==null && window.hWin.HEURIST4.util.isJSON(layout);
+    if (res === false) 
+    {
+        if (forStorage) {
+            return layout;
+        } else if (typeof layout === "string" && layout.indexOf("data-heurist-app-id") > 0) {
+            
+            //old format v1: html with some widgets
+            container.html(layout);
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
+            return false;
+        }
 
-      layout = [
-        {
-          name: "Page",
-          type: "group",
-          children: [{ name: "Content", type: "text", css: {}, content: layout }],
-        },
-      ];
+        layout = [
+            {
+                name: "Page",
+                type: "group",
+                children: [{ name: "Content", type: "text", css: {}, content: layout }],
+            },
+        ];
     } else {
-      layout = res;
+        layout = res; //json array
     }
 
     if (!Array.isArray(layout)) {
@@ -258,9 +291,9 @@ class HLayoutMgr {
   }
   
  //
-    // layout - json configuration
-    // container - if not defined - it tries to find current one
-    //
+ // layout - json configuration
+ // container - if not defined - it tries to find current one
+ //
  #layoutAddWidget(layout, container, forStorage){
 
         let $d = this.#layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
@@ -328,9 +361,9 @@ class HLayoutMgr {
     #getWidgetById(id){
 
         let i;
-        for(i=0; i<cfg_widgets.length; i++){
-            if(cfg_widgets[i].id==id){
-                return cfg_widgets[i];
+        for(i=0; i<window.hWin.cfg_widgets.length; i++){
+            if(window.hWin.cfg_widgets[i].id==id){
+                return window.hWin.cfg_widgets[i];
             }
         }
         return null;
@@ -1198,10 +1231,25 @@ class HLayoutMgr {
   layoutInit(layout, container, supp_options) 
   {
 //console.log(layout, supp_options);  
-   
     this._supp_options = supp_options || {};
-    return this.#layoutInitFromJSON(layout, container, false, true);
+  
+    //main content
+    if(layout && window.hWin.HEURIST4.util.isJSON(layout)){ //init from json
+        return this.#layoutInitFromJSON(layout, container, false, true);
+    }else{
+        if(layout){
+            $(container).html(layout);
+        }
+        return this.#layoutInitFromHTML(container);
+    }
+    
   }
+  
+  
+  layoutInitFromHTML(container, supp_options)
+  {
+    this._supp_options = supp_options || {};
+    return this.#layoutInitFromHTML(container);
+  }
+  
 }
-
-//window.layoutMgr = new HLayoutMgr();

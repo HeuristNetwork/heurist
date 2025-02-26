@@ -236,6 +236,8 @@ $requestUri:
             
             $redirect .= '?db='.$database.'&website';
 
+            $params['db'] = $database;    
+            
             if(intval(@$requestUri[3])>0){
                 $redirect .= '&website='.intval($requestUri[3]);
                 $params['website'] = intval($requestUri[3]);
@@ -248,6 +250,9 @@ $requestUri:
             }
             if(@$_REQUEST['edit']){
                 $params['edit'] = $_REQUEST['edit'];    
+            }
+            if(@$_REQUEST['ver']){
+                $params['ver'] = $_REQUEST['ver'];    
             }
             if(@$_REQUEST['newlycreated']){
                 $params['newlycreated'] = $_REQUEST['newlycreated'];    

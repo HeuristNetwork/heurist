@@ -2612,9 +2612,13 @@ window.hWin.HEURIST4.ui = {
         
         const mode = options.mode??'production';
         
+        const version = options.version??'';
+        
         const use_redirect = options.use_redirect??window.hWin.HAPI4.sysinfo.use_redirect;
         
         let surl = window.hWin.HAPI4[(mode=='production')?'baseURL_pro':'baseURL'];
+        
+        let params = [];
         
         if(use_redirect){
             
@@ -2630,24 +2634,33 @@ window.hWin.HEURIST4.ui = {
                     surl += '/'+pageid;
                 }
                 if(mode=='edit'){
-                    surl += '?edit=2';
+                    params.push('edit=2');
                 }            
             }
             
         }else{
 
-            surl += `?db=${window.hWin.HAPI4.database}&website`;
+            params.push(`db=${window.hWin.HAPI4.database}`);
             
             if(websiteid>0){
-                surl += `=${websiteid}`;
+                params.push(`website=${websiteid}`);
                 if(pageid>0){
-                    surl += `&pageid=${pageid}`;
+                    params.push(`pageid=${pageid}`);
                 }
                 if(mode=='edit'){
-                    surl += '&edit=2';
+                    params.push('edit=2');
                 }            
             }
         }
+        if(version>0){
+            params.push('ver='+version);
+        }
+        
+        if(params.length>0){
+            surl += '?'+params.join('&');    
+        }
+        
+        console.log(surl);
         
         return surl;
     },

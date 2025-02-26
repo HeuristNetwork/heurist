@@ -18,8 +18,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global hLayoutMgr */
-
 /**
  * Class: CmsManager
  * 
@@ -75,10 +73,17 @@ class CmsManager {
      * 
      * @param {string} actionid - The ID of the action to execute.
      */
-    executeAction(actionid) {
+    executeAction(actionid, options) {
         if (!this.isCmsAllowedOnThisServer()) {
             return;
         }
+        
+        if(actionid=='data-heurist-pageid'){
+            this.#initDefCodes();
+            this.#loadWebPage(options);
+            return;
+        }
+        
 
         if (!this.checkRequiredRecordTypes(() => {
             this.executeAction(actionid);
@@ -584,11 +589,8 @@ class CmsManager {
         let sURL = window.hWin.HAPI4.baseURL + 'hclient/widgets/cms/templates/snippets/' + template_name + '.json';
 
         $.getJSON(sURL, function(new_element_json) {
-            if (!window.layoutMgr) {
-                hLayoutMgr();
-            }
 
-            window.layoutMgr.prepareTemplate(new_element_json, function(updated_json) {
+            window.hWin.HAPI4.layoutMgr.prepareTemplate(new_element_json, function(updated_json) {
                 let request = {
                     a: 'replace',
                     recIDs: affected_page_id,
@@ -602,5 +604,61 @@ class CmsManager {
                 });
             });
         });
+    }
+    
+    /**
+    * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
+    */
+    #loadWebPage(options){
+        
+        console.log(options);
+        
+        let page_target = $(options.container??'main');
+        if(page_target.length==0){
+            page_target = $('#main-content');
+        }
+        if(page_target.length==0){
+            window.hWin.HEURIST4.msg.showMsgErr('Web Page can not be loaded. Targer element not found');
+            return;
+        }
+        
+        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        
+        const server_request = {
+                        q: 'ids:'+options.pageid,
+                        restapi: 1,
+                        columns: ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
+                        zip: 1,
+                        format:'json'};
+                        
+        //perform search see record_output.php       
+        window.hWin.HAPI4.RecordMgr.search_new(server_request,
+            function(response){
+              
+                if(window.hWin.HEURIST4.util.isJSON(response)) {
+                    if(response['records'] && response['records'].length>0){
+                        let res = response['records'][0]['details'];
+                        let keys = Object.keys(res);
+                        for(let idx in keys){
+                            let key = keys[idx];
+                            res[key] = res[key][ Object.keys(res[key])[0] ];
+                        }
+                        //res[DT_NAME] = res[DT_NAME]
+                        //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
+                        window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target); // that.options.supp_options ); 
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: `Web Page not found (record #${options.pageid})`,
+                            error_title: 'Failed to load page'
+                        });
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+        
+
     }
 }

@@ -863,5 +863,12 @@
         "user_experience_level": "1",
         "header": "Import > Records from bookmakrs file or web page hyperlinks"
       }
+    },
+    {
+      "id": "data-heurist-pageid",
+      "text": "Load Web Page",
+      "data": {
+        "container": "main"
+      }
     }
 ]

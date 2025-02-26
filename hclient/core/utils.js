@@ -334,6 +334,7 @@ window.hWin.HEURIST4.util = {
                 }
             }
             catch (err) {
+//console.log(err);                
                 res = false;
             } 
             
@@ -1328,10 +1329,12 @@ if (!Array.prototype.unique){
 
 $.getStyles = function(path){
 
+    /*
     if(window.hWin.HEURIST4.cssFilesAdded.indexOf(path) !== -1) {
        return    
     }
     window.hWin.HEURIST4.cssFilesAdded.push(path);
+    */
 
     var head = document.getElementsByTagName('head')[0] 
     // Creating link element 
@@ -1341,6 +1344,30 @@ $.getStyles = function(path){
     style.rel = 'stylesheet';
     head.append(style); 
 }
+
+function selectorExists(selector) { 
+    
+    function getAllSelectors() { 
+        var ret = [];
+        for(var i = 0; i < document.styleSheets.length; i++) {
+            if(document.styleSheets[i].href!=null) continue;
+            try{
+                var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+                for(var x in rules) {
+                    if(typeof rules[x].selectorText == 'string') ret.push(rules[x].selectorText);
+                }
+            }catch(e){} //to avoid security error
+        }
+        return ret;
+    }
+    
+    var selectors = getAllSelectors();
+    for(var i = 0; i < selectors.length; i++) {
+        if(selectors[i] == selector) return true;
+    }
+    return false;
+}
+
 
 $.getMultiScripts2 = function(arr, path) {
     

@@ -87,7 +87,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     function _init(_db, _oninit, _baseURL) { //, _currentUser) {
 
         that.SystemMgr = new HSystemMgr(that);
-        //2024-12-08 that.LayoutMgr2 = new HLayoutMgr();
 
         //@todo - take  database from URL
         if (_db) {
@@ -109,9 +108,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
+       
         if (typeof HLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HLayout)
-            && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
-            that.LayoutMgr = new HLayout();
+            && typeof window.hWin.cfg_widgets !== 'undefined' && typeof window.hWin.cfg_layouts !== 'undefined') {
+            that.LayoutMgr = new HLayout(); //old layout manager
+        }
+        if (typeof HLayoutMgr !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HLayoutMgr)
+            && typeof window.hWin.cfg_widgets !== 'undefined') {
+            that.layoutMgr = new HLayoutMgr(); //new layout manager
         }
         if (typeof HRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HRecordSearch)) {
             that.RecordSearch = new HRecordSearch();

@@ -30,11 +30,9 @@ require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPu
 define('HEAD_E','</head>');
 
 /**
- * Class ReportExecute
+ * Class WebSite
  *
- * This class manages the execution of Smarty templates for reports, handling the
- * output of reports in various formats (HTML, JS, etc.) and dealing with records
- * fetched from the system.
+ * This class generates web page content as browser output, file, or returns as string 
  */
 class WebSite
 {
@@ -61,6 +59,9 @@ class WebSite
     private $pageRecord;
     
     private $currentLang = 'en';
+    
+    private $menuTree = null;
+    private $menuRecords = null;
 
     /**
      * Constructor
@@ -228,7 +229,7 @@ class WebSite
             $this->loadWebHomePage();
             
             ob_start();
-            include 'cmsTemplate.php';
+            include 'WebSiteTemplate.php';
             $output = ob_get_contents();
             ob_end_clean();            
             
@@ -262,7 +263,7 @@ class WebSite
     }
         
     //
-    // Move to class HRecord
+    // Move to new class HRecord
     //
     private function getValue($record, $field_id, $is_safe=false, $lang=null){
         
@@ -282,7 +283,7 @@ class WebSite
     }
     
     //
-    // Move to class HRecord
+    // Move to new class HRecord
     //
     private function getFile($record, $field_id, $def=''){
 
@@ -290,7 +291,7 @@ class WebSite
             $field_id = ConceptCode::getDetailTypeLocalID($field_id);
         }
 
-        $val = @$record['details'][$field_id];
+        $val = @$record['details']?@$record['details'][$field_id]:@$record[$field_id];
 
         if(is_array($file)){
             $file = array_shift($file);
@@ -302,7 +303,12 @@ class WebSite
         return $file;
     }
     
-    
+    /**
+    * Returns values defined in siteRecord for website header meta tags
+    *     
+    * @param mixed $field
+    * @param mixed $is_out
+    */
     public function meta($field, $is_out=true){
 
         $codes = array('title'=>DT_NAME, 
@@ -327,7 +333,7 @@ class WebSite
     }
     
     //
-    //
+    // Returns page main content (stored in DT_EXTENDED_DESCRIPTION)
     //
     public function getPageContent($is_out=true){
         
@@ -352,7 +358,7 @@ class WebSite
     }
     
     //
-    //
+    // Loads header template and replace values from siteRecord
     //
     public function getPageHeader($is_out=true){
         
@@ -390,14 +396,14 @@ class WebSite
     }
     
     //
-    //
+    // For header - language selector
     //
     private function getLanguageSelector(){
         
         return '<select class="form-select me-2 w-auto">'
                             .'<option value="en">English</option>'
                             .'<option value="fr">Français</option>'
-                .'</select>';
+               .'</select>';
     }
     
     //
@@ -412,7 +418,7 @@ class WebSite
     }
 
     //
-    //
+    // For header - submenu 
     //
     private function getMainSubMenu($menu, $records){
         
@@ -431,7 +437,8 @@ class WebSite
                 $res .= '</li>';
                 
             }else{
-                $res .= '<li><a class="dropdown-item" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
+                $res .= '<li><a class="dropdown-item" data-heurist-pageid="'
+                          .$id.'" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
             }
             
         }
@@ -441,9 +448,44 @@ class WebSite
     }
     
     //
-    //
+    // For header - navbar with first level of menu
     //
     private function getMainMenu(){
+        
+        $this->fillMenuTree();
+        
+        $siteID = $this->siteRecord['rec_ID'];
+        $menu_tree = $this->menuTree[$siteID];
+        
+        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all" data-heurist-role="Menu">';
+        
+        foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
+        
+            $menu_title = $this->getValue($this->menuRecords[$id], DT_NAME, true, $this->currentLang);
+            
+            $has_subs = !empty($subs);
+            if($has_subs){
+
+                $res .= '<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'.$menu_title.'</a>';
+                
+                $res .= $this->getMainSubMenu($subs, $this->menuRecords);
+                
+                $res .= '</li>';
+                
+            }else{
+                $res .= '<li class="nav-item"><a class="nav-link" data-heurist-pageid="'
+                        .$id.'" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
+            }
+        }
+        $res.'</ul>';
+        return $res;
+                
+    }
+    
+    //
+    //
+    //
+    private function fillMenuTree(){
         
         $this->system->defineConstant('DT_CMS_TOP_MENU');
         $this->system->defineConstant('DT_CMS_MENU');
@@ -451,33 +493,55 @@ class WebSite
         //$this->system->defineConstant('DT_CMS_TARGET');
         
         $siteID = $this->siteRecord['rec_ID'];
-        $records = array();
-        $menu_tree = recordSearchMenuItems2($this->system, array($siteID), $records, true );
+        if($this->menuTree==null){
+            $this->menuRecords = array();
+            $this->menuTree = recordSearchMenuItems2($this->system, array($siteID), $this->menuRecords, true );
+        }
+    }
+
+    //
+    //
+    //
+    public function getMenuTree($menu_tree=null, $parentKey=null){
         
-        $menu_tree = $menu_tree[$siteID];
+        if($menu_tree==null){ //root
+            $this->fillMenuTree();
         
-        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all" data-heurist-role="Menu">';
+            $parentID = $this->siteRecord['rec_ID'];
+            $parentKey = $parentID;
+            $menu_tree = $this->menuTree[$parentID];
+        }
+        $res = array();
+
+        foreach($menu_tree as $page_id=>$subs){ //first level is list of buttons with dropdowns
         
-        foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
-        
-            $menu_title = $this->getValue($records[$id], DT_NAME, true, $this->currentLang);
+            $menuName = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
             
+            $key = $parentKey.','.$page_id;
+            
+            $item = array();
+            $item['key'] = $key; // set unique key
+            $item['title'] = $menuName;
+            $item['parent_id'] = $parentKey; //reference to parent menu(or home)
+            $item['page_id'] = $page_id;
+            /*
+            $item['page_showtitle'] = 1;
+            $item['page_target'] = ''; //(this.options.target=='popup')?'popup':pageTarget;
+            //$res['expanded'] = (this.options.expand_levels>0 || lvl<this.options.expand_levels); 
+            $item['has_access'] = true;
+                        //(window.hWin.HAPI4.is_admin() 
+                        //|| window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
+            */
+                               
             $has_subs = !empty($subs);
             if($has_subs){
-
-                $res .= '<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'.$menu_title.'</a>';
-                
-                $res .= $this->getMainSubMenu($subs, $records);
-                
-                $res .= '</li>';
-                
-            }else{
-                $res .= '<li class="nav-item"><a class="nav-link" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
+                $item['children'] = $this->getMenuTree($subs, $key);
             }
+            
+            array_push($res, $item);
         }
-        $res.'</ul>';
+        
         return $res;
-                
     }
     
     //
@@ -493,19 +557,7 @@ class WebSite
         return $val;
     }
     
-    //
-    // includes min required set of heurist scripts and styles
-    //
-    public function getScriptsAndStyles(){
-        
-        include_once 'cmsScriptsAndStyles.php';
-
-        if($this->isEditMode){
-            include_once 'cmsEditScriptsAndStyles.php';
-        }
-    }
-
-    //
+    // TBD
     // includes publisher's custom scripts and styles AND links to external resources
     //
     public function getPublisherScriptsAndStyles(){
@@ -597,6 +649,63 @@ class WebSite
     }
   
 
+  
+    //
+    //
+    //
+    private function saveOutputToFile($file_name, $web_output){
+
+        $errors = null;
+
+        try{
+            //output to generated-reports only
+            $dirname = $this->system->getSysDir(DIR_GENERATED_HTML);
+            if(!folderCreate($dirname, true)){
+                return 'Failed to create folder for generated reports';
+            }
+
+            $res_file = $dirname."/".$file_name; // acutal file
+            $temp_file = $dirname."/_".$file_name; // temporary file, if needed
+
+            $file = false; // file handler
+            $use_temp = false; // using temporary file
+
+            if(!file_exists($res_file) || is_writable($res_file)){ // open existing file
+                $file = fopen ($res_file, "w");
+            }else{ // create temp file to replace original
+                $file = fopen($temp_file, "w");
+                $use_temp = true;
+            }
+
+            if(!$file){
+                $errors = "Can't write file $res_file. Check permission for directory";
+            }else{
+                fwrite($file, $web_output);
+                fclose($file);
+            }
+
+            if($use_temp){
+
+                if(unlink($res_file) === false){ // Delete old file
+                    unlink($temp_file);// on error, remove temp file
+                    $errors = "Can't delete old webpage file $res_file. Check permission for file";
+                }elseif(rename($temp_file, $res_file) === false){ // Rename temp file
+                    unlink($temp_file);// on error, remove temp file
+                    $errors = "Can't rename webpage file $temp_file to $res_file. Check permissions";
+                }
+            }
+
+
+        }catch(\Exception $e)
+        {
+            $errors = $e->getMessage();
+        }
+
+        return $errors;
+
+    }
+
+    //------------------------
     /**
      * Adds custom styles and scripts from CMS settings.
      *
@@ -739,64 +848,7 @@ class WebSite
      * @return string The sanitized template content.
      */
     private function stripJavascriptAndSantize($web_output){
-
         return $web_output;
-
-    }
-
-    //
-    //
-    //
-    private function saveOutputToFile($file_name, $web_output){
-
-        $errors = null;
-
-        try{
-            //output to generated-reports only
-            $dirname = $this->system->getSysDir(DIR_GENERATED_HTML);
-            if(!folderCreate($dirname, true)){
-                return 'Failed to create folder for generated reports';
-            }
-
-            $res_file = $dirname."/".$file_name; // acutal file
-            $temp_file = $dirname."/_".$file_name; // temporary file, if needed
-
-            $file = false; // file handler
-            $use_temp = false; // using temporary file
-
-            if(!file_exists($res_file) || is_writable($res_file)){ // open existing file
-                $file = fopen ($res_file, "w");
-            }else{ // create temp file to replace original
-                $file = fopen($temp_file, "w");
-                $use_temp = true;
-            }
-
-            if(!$file){
-                $errors = "Can't write file $res_file. Check permission for directory";
-            }else{
-                fwrite($file, $web_output);
-                fclose($file);
-            }
-
-            if($use_temp){
-
-                if(unlink($res_file) === false){ // Delete old file
-                    unlink($temp_file);// on error, remove temp file
-                    $errors = "Can't delete old webpage file $res_file. Check permission for file";
-                }elseif(rename($temp_file, $res_file) === false){ // Rename temp file
-                    unlink($temp_file);// on error, remove temp file
-                    $errors = "Can't rename webpage file $temp_file to $res_file. Check permissions";
-                }
-            }
-
-
-        }catch(\Exception $e)
-        {
-            $errors = $e->getMessage();
-        }
-
-        return $errors;
-
     }
 
 }

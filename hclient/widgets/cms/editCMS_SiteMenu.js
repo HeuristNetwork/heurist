@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global page_cache */
+/* global page_cache, current_page_id, home_page_record_id */
 //
 //
 //
@@ -73,7 +73,16 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         let tree_element = $container;        
         
         //get treedata from main menu
-        let treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
+        let treedata;
+        if(window.hWin.HEURIST4.util.isJSON(editCMS2.menuContentJSON)){
+            treedata = editCMS2.menuContentJSON;
+        }else{
+            treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
+        }
+        
+console.log(treedata);        
+
+console.log(JSON.stringify(treedata));
         
         //add node for home page
 /*
@@ -129,7 +138,7 @@ title: "Overview"
                     preventRecursiveMoves: true,
                     autoExpandMS: 400,
                     dragStart: function(node, data) {
-                        return data.has_access;
+                        return true; //data.has_access;
                     },
                     dragEnter: function(node, data) {
                         //data.otherNode - dragging node
@@ -241,6 +250,7 @@ title: "Overview"
         
         setTimeout(_highlightCurrentPage, 1000);
     }  
+   
    
     //
     //

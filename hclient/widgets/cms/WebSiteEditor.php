@@ -1,0 +1,193 @@
+<?php
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
+
+    /**
+    *  Website generator based on CMS records 99-51,52,53
+    *
+    *  It is either generate home page from cmsTemplate file (inits main menu, header, footer)
+    *  or returns content for particular page
+    *
+    *  Parameters
+    *  recID - home page record (99-51) or web page (99-53)
+    *          if is is not defined it takes first record of type 'Home page'
+    *
+    * if home page has defined as template file it is loaded as body, otherwise default template
+    * that includes header with main-logo, main-title, main-menu and
+    * main-content where content of particular page will be loaded
+    *
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
+
+if(!defined('PDIR')) {
+    define('PDIR','../../../');//need for proper path to js and css
+}
+
+//require_once dirname(__FILE__).'/autoload.php';
+
+require_once dirname(__FILE__).'/../../framecontent/initPage.php';
+
+includeJQuery();
+
+//parse_str($_SERVER['QUERY_STRING'], $vars);
+//$query_string = http_build_query($vars);
+
+$req_params = USanitize::sanitizeInputArray();
+$website_id = @$req_params['website'];
+$page_id = @$req_params['pageid'];
+if(!isPositiveInt($page_id)){
+    $page_id = $website_id;
+}
+
+$editor_options = "{website_id:$website_id, page_id:$page_id}";
+?>
+
+<script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditor.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
+
+<!--
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>
+-->
+
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
+
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
+
+    <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
+
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/lib/util/formatting.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/xml/xml.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
+    <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
+
+<style>
+.tox-toolbar{
+    background-color: #b4eeff !important;
+}
+.ui-cms-mainmenu{
+    background: rgb(135, 205, 118) !important;
+}
+</style>
+
+<script type="text/javascript">
+
+    let editCMS_instance3, tinymce;
+    
+    let isWebPage = false;
+
+    function onPageInit(success){
+
+        if(!success) {return;}
+        
+        //editCMS_instance3 = editCMS3();//editCMS_Init
+        //editCMS_instance3.startCMS({});
+        
+        let options = <?php echo $editor_options;?>;
+        
+        editCMS_instance3 = new HCmsEditor(options);
+        
+    }
+</script>
+</head>
+<body style="background-color:#c9c9c9;">
+
+
+    <div class="ui-layout-west">
+        <div class="ent_wrapper editStructure" id="tabsEditCMS">
+            <div class="ent_header" style="height:5.5em"> 
+
+                <div class="btn-website-edit" style="font-weight:normal !important; width: fit-content;margin:0.7em 0px;">Website layout / properties</div>
+
+                <div style="line-height: 1em;font-size: smaller;"><span class="btn-website-url" style="display:inline-block;color:black;padding-right:5px;">Website URL</span>
+                    <a href="#" class="website-url truncate" style="color: blue;display: inline-block;width:70%;vertical-align: -1px;"></a>
+                </div>
+
+                <span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;right:0.05em" 
+                    class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-w"></span>
+
+            </div>
+            <div class="ent_content_full" style="top:5.5em">
+
+                <ul style="margin-right:40px;font-size:9px;">
+                    <li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>
+                </ul>      
+
+                <div id="treeWebSite" style="display:none;top:2.5em" class="ent_wrapper ui-cms-mainmenu">
+                    <div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">
+
+                        <span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;"></span>
+
+                        <span style="display:inline-block;padding-top:7px" class="heurist-helper1" title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">
+                            Drag menu items to re-order
+                        </span>
+                        <br>
+                        <span style="display:inline-block;padding-top:3px" class="heurist-helper1">
+                            Click to edit the page
+                        </span>
+
+                        <div style="padding:10px 8px;">
+                            <a href="#" title="Edit website home page" 
+                                class="btn-website-homepage" style="text-decoration:none;">
+                                <span class="ui-icon ui-icon-home"></span>&nbsp;Home page
+                            </a>
+                            <span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" 
+                                style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
+                        </div>     
+
+                    </div>
+
+                    <div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"></div>
+                </div>                                   
+
+                <div id="treePage" style="font-size:0.9em;top:2.5em;" class="ent_wrapper ui-widget-content">
+
+                    <div class="treePageHeader ent_header" style="height:85px;line-height:normal;">
+
+                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>
+
+                        <span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">
+                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">TODO website help</a>
+                        </span>
+
+                    </div>
+
+                    <div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"></div>
+
+                    <div class="propertyView ent_content_full ui-widget-content-gray" 
+                        style="top:190px;padding:10px 0px;display:none;"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-layout-center">
+<!--  src="<?php echo HEURIST_BASE_URL.'?ver=3&db='.$system->dbname().'&website='.$website_id.'&pageid='.$page_id; ?>" -->    
+        <iframe id="webPageFrame" width="100%" height="100%"></iframe>
+    </div>
+    
+</body>
+</html>

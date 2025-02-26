@@ -19,7 +19,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global layoutMgr, hLayoutMgr */
 
 $.widget( "heurist.app_storymap", {
 
@@ -205,8 +204,7 @@ $.widget( "heurist.app_storymap", {
             }]
         }];
         
-        if(!layoutMgr) hLayoutMgr();
-        layoutMgr.layoutInit(layout, this.element);
+        window.hWin.HAPI4.layoutMgr.layoutInit(layout, this.element);
 
         let placeholder = !window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && this.options.storyPlaceholder != 'def' ? 
                             this.options.storyPlaceholder : '';

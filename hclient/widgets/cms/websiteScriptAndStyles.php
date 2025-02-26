@@ -153,7 +153,6 @@ if($_is_new_cms_editor){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 
-<!-- script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/hLayoutMgr.js"></script -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
@@ -304,7 +303,7 @@ var timeout_count = 0;
 // Inits page for publication version
 // It is invoked from onHapiInit
 //
-//  1. Inits hLayoutMgr
+//  1. Inits layout
 //  2. Calls initMainMenu
 //
 function onPageInit(success)
@@ -335,11 +334,8 @@ function onPageInit(success)
     
     window.hWin.HAPI4.is_publish_mode = true;
     
-    //hLayoutMgr();//init global var layoutMgr
-    window.layoutMgr = new HLayoutMgr();
-
     //cfg_widgets is from layout_defaults.js
-    window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
+    window.hWin.HAPI4.LayoutMgr.init(window.hWin.cfg_widgets, null);
 
     //reload website by click on logo or title, opens first page with content
     $("#main-logo,#custom-logo,#main-title").on('click', function(event){
@@ -579,7 +575,7 @@ function loadPageContent(pageid, eventdata){
                     }
 
                 }else{
-                    layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
+                    window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
                 }
 
                 current_page_id = pageid;
@@ -803,7 +799,7 @@ function assignPageTitle(pageid){
 function afterPageLoad(document, pageid, eventdata){
 
     //waiting till all widgets are inited
-    var is_inited = layoutMgr.layoutCheckWidgets();
+    var is_inited = window.hWin.HAPI4.layoutMgr.layoutCheckWidgets();
     if (is_inited===false) {
         timeout_count++;
         if(timeout_count<100){

@@ -1086,25 +1086,6 @@ $.widget( "heurist.editing_input", {
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
                             
-
-                        /*DEBUG  
-                        let btn_debug = $('<span>debug</span>')
-                            .addClass('smallbutton')
-                            .css({cursor: 'pointer', 'margin-left': '10px'})
-                            .appendTo($btn_edit_switcher);
-                            
-                        this._on( btn_debug, {       
-                            click:function(event){
-                            
-                            if(!window.hWin.layoutMgr){
-                                hLayoutMgr(); //init global variable layoutMgr
-                            }
-                                    
-                            //cfg_widgets is from layout_defaults.js
-                            window.hWin.layoutMgr.convertJSONtoHTML(that.getValues()[0]);
-                        }});
-                        */
-                            
                     }
                         
                     $('<span>table</span>')

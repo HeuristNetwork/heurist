@@ -18,7 +18,7 @@
 */
 
 
-$.widget( 'heurist.recordList', {
+$.widget( 'heurist.HRecordList', {
 
     //roles in content
     // heurist-role-count
@@ -29,7 +29,7 @@ $.widget( 'heurist.recordList', {
     options: {
         hapi: null,
         
-        path: 'hclient/widgets/recordList/',
+        path: 'hclient/widgets/HRecordList/',
         htmlContent: null, // custom content
         uiLibrary: null,   // 'bootstrap','jqueryui'
         
@@ -42,7 +42,7 @@ $.widget( 'heurist.recordList', {
         showMediaViewer: false,   // TBD show gallery on thumbnail click - data-heurist-media
         
         //default action of record item click  ????
-        selectAction: 'none', // none, select, view
+        selectAction: 'view', // none, select, view
         
         selectMode: 'none',   // none, single, multi
 
@@ -57,6 +57,7 @@ $.widget( 'heurist.recordList', {
         templateView: null,     //(if not defined it uses entity default template)
 
         searchDomain: null,     // reference to entity HSearchDomains
+        searchInitial: null,
         
         //event listeners
         onInitFinished: null,
@@ -100,7 +101,7 @@ $.widget( 'heurist.recordList', {
         
         //debug
         this.options.templateView = null; 
-        this.options.viewMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
+        //this.options.viewMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
         
     
         let that = this;    
@@ -113,10 +114,17 @@ $.widget( 'heurist.recordList', {
         if(this.options.pageSize>1000){
             this.options.pageSize = 1000;
         }
+
+        const isCssLoaded = selectorExists('.recordList-icon');
+
+        if(!isCssLoaded){
+            //add widget classes
+            let css_url = this.options.hapi.baseURL + this.options.path + 'HRecordList.css';
+            $.getStyles(css_url);
+        }
         
-        //add widget classes
-        let css_url = this.options.hapi.baseURL + this.options.path + 'recordList.css';
-        $.getStyles(css_url);
+        
+        
             
         if(this.$H.isempty(this.options.htmlContent)){ 
             //load default content
@@ -127,7 +135,7 @@ $.widget( 'heurist.recordList', {
             
             //this.options.htmlContent.indexOf(this.options.hapi.baseURL)===0?this.options.htmlContent:
             let url = this.options.hapi.baseURL
-                        + this.options.path + 'recordList.html'
+                        + this.options.path + 'HRecordList.html'
                         + '?t='+this.$H.random();
                         
             // +(this.options.hapi.getLocale()=='FRE'?'_fre':'')+'.html';                         
@@ -192,6 +200,16 @@ $.widget( 'heurist.recordList', {
         
         if(this.options.recordSet){
             this.setRecordSet(this.options.recordSet);
+        }else if(this.options.searchInitial){
+            
+            let request = {q:this.options.searchInitial, w: 'a', detail: 'ids', needall: 1};
+            
+            window.hWin.HAPI4.RecordMgr.search(request, function(response){
+                let resp = new HRecordSet( response.data );
+                that.setRecordSet(resp);
+            });
+            
+        
         }
         
     },

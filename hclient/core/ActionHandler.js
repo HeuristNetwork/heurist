@@ -209,6 +209,7 @@ class ActionHandler {
              container = dialog_options['container'];
          } else if (action_container) {
              let section = action_container;
+             
              $('.ui-menu6').slidersMenu('switchContainer', section, true);
              container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
              container.removeClass('ui-suppress-border-and-shadow');
@@ -408,6 +409,15 @@ class ActionHandler {
         if (action_log) {
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }
+        
+        if (actionid == 'data-heurist-pageid') {
+            if (!this.cmsManager) {
+                this.cmsManager = new CmsManager();
+            }
+            this.cmsManager.executeAction(actionid, dialog_options);
+            return true;
+        }
+        
 
         if (actionid.indexOf('menu-cms') == 0) {
             if (!this.cmsManager) {
@@ -419,7 +429,7 @@ class ActionHandler {
 
         // Prepare dialog options
         let popup_dialog_options = this.#prepareDialogOptions(action, dialog_options);
-
+        
         let is_supported = true;
         let contentURL;
 
