@@ -176,10 +176,10 @@ class HSystemMgr {
                   //
                   window.hWin.HEURIST4.msg.showPrompt(
                       '<div style="padding:20px 0px">'
-                      + 'Only an administrator (server manager) or the owner (for<br>'
-                      + 'actions on a single database) can carry out this action.<br>'
-                      + 'This action requires a special system administrator password (not a normal login password)'
-                      + '</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
+                      + 'Only the System Administrator (server manager) can access the Manage Databases function.<br>'
+                      + 'This action requires a special system administrator password (NOT a normal login password).<br>'
+                      + 'If you receive this message elsewhere the function is only available to the OWNER of the database (user #2)<br>'
+                      + '</div><span style="display: inline-block;padding: 10px 0px;">Enter system administrator password:&nbsp;</span>',
                       (password_entered)=>{
 
                           let on_passwordcheck = 
