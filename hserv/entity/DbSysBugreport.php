@@ -41,8 +41,8 @@ class DbSysBugreport extends DbEntityBase
     For current and resolved issues list see: <a href="https://heuristref.net/Heurist_Job_Tracker/web/64/1526">https://heuristref.net/Heurist_Job_Tracker</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
-    Database: __DBLINK__<br>
-    Bug description:<br>__DESC__
+    Database: __DBLINK__<br><br>
+    Bug description:__DESC__
     EMAIL;
 
     private $bugReportType = 56;
