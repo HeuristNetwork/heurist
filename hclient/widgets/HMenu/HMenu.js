@@ -35,7 +35,8 @@ $.widget( 'heurist.HMenu', {
     
         //menuTreeJSON: null,
         viewMode: 'bootstrap', // none, horizontal or vertical buttonsMenu, tree    
-        menuActionHandler: null
+        menuActionHandler: null,  // replacment of default event handler via ActionHandler
+        onActionComplete: null    // invoked in ActionHandler after action execution
     },
     
     $H: window.hWin.HEURIST4.util,
@@ -120,6 +121,25 @@ $.widget( 'heurist.HMenu', {
                         e.stopPropagation(); // do not need pop in multi level mode
                     });
                 });                
+
+                /*
+                document.querySelectorAll('.dropdown-hover-all .dropdown').forEach(function(dd) { //.dropdown-hover,  .dropdown-toggle
+                dd.addEventListener('mouseenter', function(e) {
+                let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
+                if (!toggle?.classList.contains('show')) {
+                $bs.Dropdown.getOrCreateInstance(toggle).toggle();
+                dd.classList.add(CLASS_NAME);
+                $bs.Dropdown.clearMenus(e);
+                }
+                });
+                dd.addEventListener('mouseleave', function(e) {
+                let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
+                if (toggle?.classList.contains('show')) {
+                $bs.Dropdown.getOrCreateInstance(toggle).toggle();
+                }
+                });                
+                });        
+                */
         }
         
         //init action event listener
@@ -156,18 +176,19 @@ $.widget( 'heurist.HMenu', {
         let action_id = ele.attr('data-heurist-action');
         if(!action_id){
             action_id = ele.attr('data-heurist-pageid');
-            opts.pageid = action_id;
+            opts.page_id = action_id;
             action_id = 'data-heurist-pageid';
+        }
+        if(this.options.onActionComplete){
+            opts.callback = this.options.onActionComplete;
         }
         
         // Call user-defined action handler
         if(this.options.menuActionHandler){
             this.options.menuActionHandler.call(this, action_id, opts);
         }else{
-            this.actionHandler.executeActionById(action_id, opts);    
+            this.actionHandler.executeActionById(action_id, opts);
         }
-        
-        
         
         return false; 
     },

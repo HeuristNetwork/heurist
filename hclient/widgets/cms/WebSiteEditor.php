@@ -59,6 +59,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditor.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorPage.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
@@ -94,7 +95,8 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
 <script type="text/javascript">
 
-    let editCMS_instance3, tinymce;
+    window.editCMS_instance3 = null; 
+    let tinymce;
     
     let isWebPage = false;
 
@@ -107,7 +109,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
         
         let options = <?php echo $editor_options;?>;
         
-        editCMS_instance3 = new HCmsEditor(options);
+        window.editCMS_instance3 = new HCmsEditor(options);
         
     }
 </script>
@@ -135,8 +137,8 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                     <li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>
                 </ul>      
 
-                <div id="treeWebSite" style="display:none;top:2.5em" class="ent_wrapper ui-cms-mainmenu">
-                    <div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">
+                <div id="treeWebSite" style="display:none;top:2em" class="ent_wrapper ui-cms-mainmenu">
+                    <div class="toolbarWebSite ent_header" style="height:85px;padding-top:2px;">
 
                         <span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;"></span>
 
@@ -162,7 +164,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                     <div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"></div>
                 </div>                                   
 
-                <div id="treePage" style="font-size:0.9em;top:2.5em;" class="ent_wrapper ui-widget-content">
+                <div id="treePage" style="font-size:0.9em;top:2em;" class="ent_wrapper ui-widget-content">
 
                     <div class="treePageHeader ent_header" style="height:85px;line-height:normal;">
 

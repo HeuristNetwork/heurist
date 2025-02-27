@@ -331,6 +331,18 @@ class WebSite
         }
         return $val;
     }
+
+    //
+    // Return JSON for page record
+    //
+    public function getPageRecord(){
+        
+        $rec = $this->pageRecord??$this->siteRecord;
+        $res = array('rec_ID'=>$rec['rec_ID'], 
+                    DT_NAME=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION, false, $this->currentLang),
+                    DT_EXTENDED_DESCRIPTION=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION));
+        return json_encode($res);
+    }
     
     //
     // Returns page main content (stored in DT_EXTENDED_DESCRIPTION)

@@ -120,33 +120,26 @@ if($useOldCode){
 
                 //init layout - init Heurist widgets on this page
 
-
-                /*
-                document.querySelectorAll('.dropdown-hover-all .dropdown').forEach(function(dd) { //.dropdown-hover,  .dropdown-toggle
-                dd.addEventListener('mouseenter', function(e) {
-                let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
-                if (!toggle?.classList.contains('show')) {
-                $bs.Dropdown.getOrCreateInstance(toggle).toggle();
-                dd.classList.add(CLASS_NAME);
-                $bs.Dropdown.clearMenus(e);
-                }
-                });
-                dd.addEventListener('mouseleave', function(e) {
-                let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
-                if (toggle?.classList.contains('show')) {
-                $bs.Dropdown.getOrCreateInstance(toggle).toggle();
-                }
-                });                
-                });        
-                */
-
                 //init layout
                 window.hWin.HAPI4.layoutMgr.layoutInit(pageContentJSON, 'main', {});
 
                 //init header
-                window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', {});
+                window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', {HMenu:{onActionComplete:onPageLoad}});
                 
+                onPageLoad(<?php echo $this->getPageRecord()?>);
             }
         }
+        
+        //
+        // for edit
+        //        
+        function onPageLoad(record){
+            if(window.parent && window.parent.editCMS_instance3){
+                window.parent.editCMS_instance3.onLoadPageContent(record);
+            }
+
+
+        }
+        
     </script>
     

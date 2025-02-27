@@ -1245,6 +1245,11 @@ class HLayoutMgr {
     
   }
   
+  layoutInitFromJSON(layout, container, supp_options)
+  {
+    this._supp_options = supp_options || {};
+    return this.#layoutInitFromJSON(layout, container, false, true);
+  }
   
   layoutInitFromHTML(container, supp_options)
   {

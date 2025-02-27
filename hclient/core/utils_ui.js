@@ -2660,8 +2660,6 @@ window.hWin.HEURIST4.ui = {
             surl += '?'+params.join('&');    
         }
         
-        console.log(surl);
-        
         return surl;
     },
 

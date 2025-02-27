@@ -78,7 +78,7 @@ class CmsManager {
             return;
         }
         
-        if(actionid=='data-heurist-pageid'){
+        if(actionid=='data-heurist-pageid'){ //load webpage
             this.#initDefCodes();
             this.#loadWebPage(options);
             return;
@@ -611,8 +611,6 @@ class CmsManager {
     */
     #loadWebPage(options){
         
-        console.log(options);
-        
         let page_target = $(options.container??'main');
         if(page_target.length==0){
             page_target = $('#main-content');
@@ -624,9 +622,10 @@ class CmsManager {
         
         const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        const supp_options = options.supp_options;
         
         const server_request = {
-                        q: 'ids:'+options.pageid,
+                        q: 'ids:'+options.page_id,
                         restapi: 1,
                         columns: ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
                         zip: 1,
@@ -637,20 +636,26 @@ class CmsManager {
             function(response){
               
                 if(window.hWin.HEURIST4.util.isJSON(response)) {
-                    if(response['records'] && response['records'].length>0){
-                        let res = response['records'][0]['details'];
+                    let record = response['records'];
+                    if(record && record.length>0){
+                        record = record[0];
+                        let res = record['details'];
                         let keys = Object.keys(res);
                         for(let idx in keys){
                             let key = keys[idx];
                             res[key] = res[key][ Object.keys(res[key])[0] ];
                         }
+                        res['rec_ID'] = record['rec_ID'];
                         //res[DT_NAME] = res[DT_NAME]
                         //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-                        window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target); // that.options.supp_options ); 
+                        window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options )
+                        
+                        if (window.hWin.HEURIST4.util.isFunction(options.callback)) options.callback.call(this, res);
+                         
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
-                            message: `Web Page not found (record #${options.pageid})`,
+                            message: `Web Page not found (record #${options.page_id})`,
                             error_title: 'Failed to load page'
                         });
                     }

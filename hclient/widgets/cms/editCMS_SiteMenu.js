@@ -33,6 +33,9 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
         DT_CMS_PAGETITLE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
         DT_CMS_PAGETYPE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+    let isVersion3 = false;
+    let home_page_record_id;
 
     function _init(){
 
@@ -65,6 +68,14 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         _initControls();
     }
     
+    function _currentPageId(){
+        if(isVersion3){
+            return editCMS2.page_id;
+        }else{
+            return window.hWin.current_page_id;            
+        }
+    }
+    
     //
     // Init/reload treeview
     //
@@ -75,14 +86,17 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         //get treedata from main menu
         let treedata;
         if(window.hWin.HEURIST4.util.isJSON(editCMS2.menuContentJSON)){
+            isVersion3 = true;
             treedata = editCMS2.menuContentJSON;
+            home_page_record_id = editCMS2.website_id;
+
+            //stub
+            if(!window.hWin.page_cache) window.hWin.page_cache = {};
+
         }else{
+            home_page_record_id = window.hWin.home_page_record_id
             treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
         }
-        
-console.log(treedata);        
-
-console.log(JSON.stringify(treedata));
         
         //add node for home page
 /*
@@ -114,7 +128,7 @@ title: "Overview"
                     if(keep_expanded_nodes.indexOf(node.key)>=0){
                         node.setExpanded(true);
                     }
-                    node.setSelected((node.data.page_id==window.hWin.current_page_id));
+                    node.setSelected((node.data.page_id==_currentPageId()));
             });
 
         }else{
@@ -150,13 +164,13 @@ title: "Overview"
                         //node - target node
                         let source_parent = data.otherNode.parent.data.page_id;
                         if(!(source_parent>0))
-                            source_parent = window.hWin.home_page_record_id;
+                            source_parent = home_page_record_id;
 
                         data.otherNode.moveTo(node, data.hitMode);
 
                         let target_parent = data.otherNode.parent.data.page_id;
                         if(!(target_parent>0))
-                            target_parent = window.hWin.home_page_record_id;
+                            target_parent = home_page_record_id;
                         data.otherNode.data.parent_id = target_parent;
 
                         let request = {actions:[]};
@@ -165,7 +179,7 @@ title: "Overview"
                             request.actions.push(
                                 {a: 'delete',
                                     recIDs: source_parent,
-                                    dtyID: source_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
                                     sVal:data.otherNode.data.page_id}); 
 
                         }
@@ -176,7 +190,7 @@ title: "Overview"
                         request.actions.push(
                             {a: 'delete',
                                 recIDs: target_parent,
-                                dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
+                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
 
                         //add children in new order        
                         for (let i=0; i<data.otherNode.parent.children.length; i++){
@@ -185,7 +199,7 @@ title: "Overview"
                             request.actions.push(
                                 {a: 'add',
                                     recIDs: target_parent,
-                                    dtyID: target_parent==window.hWin.home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
                                     val:menu_node.data.page_id}                                                   
                             );
                         }                    
@@ -214,7 +228,9 @@ title: "Overview"
 
                         editCMS2.switchMode('page');
 
-                        $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
+                        if(!isVersion3){
+                            $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
+                        }
                     }
                 },
                 edit:{
@@ -263,7 +279,7 @@ title: "Overview"
         let item_li = $(item.li), 
         menu_id = item.data.page_id,
 
-        is_top = (item.data.parent_id==window.hWin.home_page_record_id);
+        is_top = (item.data.parent_id==home_page_record_id);
 
         if($(item).find('.svs-contextmenu3').length==0){
 
@@ -318,18 +334,18 @@ title: "Overview"
                                             
                                             let recordset = data.selection;
                                             let page_id = recordset.getOrder()[0];
-                                            page_cache[page_id] = null; //remove from cache
-                                            delete page_cache[page_id];
+                                            window.hWin.page_cache[page_id] = null; //remove from cache
+                                            delete window.hWin.page_cache[page_id];
                                             
-                                            if(page_id == window.hWin.current_page_id){
-                                                _refreshCurrentPage(window.hWin.current_page_id);
+                                            if(page_id == _currentPageId()){
+                                                _refreshCurrentPage(page_id);
                                             }
 
                                             // Update website tree and in site menu
                                             let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
                                             let refresh_menus = false;
 
-                                            if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
+                                            if(window.hWin.page_cache[page_id]) window.hWin.page_cache[page_id][DT_NAME] = new_name;
 
                                             // Update tree nodes
                                             $.ui.fancytree.getTree( $container ).visit((node) => {
@@ -353,7 +369,7 @@ title: "Overview"
                             );
                         }
                         
-                        if( (menuid == window.hWin.current_page_id)
+                        if( (menuid == _currentPageId())
                             && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
                         {                                    
                                 return;
@@ -366,7 +382,7 @@ title: "Overview"
 
                         editCMS2.switchMode('page');
                         //open page structure 
-                        if( menuid != window.hWin.current_page_id ){
+                        if( menuid != _currentPageId() ){
                             _refreshCurrentPage( menuid );
                         }
 
@@ -393,8 +409,7 @@ title: "Overview"
                                     item.remove();    
                                     
                                     //after deletion select home page
-                                    window.hWin.current_page_id = window.hWin.home_page_record_id;
-                                    _refreshMainMenu( false ); //after delete
+                                    _refreshMainMenu( false, home_page_record_id); //after delete
                                 });
                             }
 
@@ -482,7 +497,7 @@ title: "Overview"
                         _defineActionIcons( node );   
                     }
                 }                                
-                if(page_cache[rec_id]) page_cache[rec_id][DT_NAME] = newvalue;
+                if(window.hWin.page_cache[rec_id]) window.hWin.page_cache[rec_id][DT_NAME] = newvalue;
                 _refreshMainMenu( false ); //after Rename   
                 
                 
@@ -499,7 +514,7 @@ title: "Overview"
     //
     function _highlightCurrentPage(){
         
-        if(window.hWin.current_page_id==window.hWin.home_page_record_id){
+        if(_currentPageId()==home_page_record_id){
             $('.btn-website-homepage').css({'text-decoration':'underline'});
         }else
         if( $container.fancytree('instance')){
@@ -508,7 +523,7 @@ title: "Overview"
                 $('.btn-website-homepage').css({'text-decoration':'none'});
                 
                 tree.visit(function(node){
-                    if(node.data.page_id==window.hWin.current_page_id){
+                    if(node.data.page_id==_currentPageId()){
                         $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
                     }else{
                         $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
@@ -538,8 +553,7 @@ title: "Overview"
             }
             if(!window.hWin.HEURIST4.util.isFunction(callback)){
                 callback = function(new_page_id){
-                    window.hWin.current_page_id = new_page_id;
-                    _refreshMainMenu(); //after addition of new page
+                    _refreshMainMenu(true, new_page_id); //after addition of new page
                 };
             }
 
@@ -568,7 +582,7 @@ title: "Overview"
             }
             
             if(template_name=='blog'){
-                window.hWin.layoutMgr.prepareTemplate(template_json, ___continue_addition);
+                window.hWin.HAPI4.layoutMgr.prepareTemplate(template_json, ___continue_addition);
             }else{
                 ___continue_addition(template_json)
             }
@@ -676,8 +690,7 @@ title: "Overview"
         
         if(!callback){
                 callback = function(new_page_id){
-                        window.hWin.current_page_id = new_page_id;
-                        _refreshMainMenu(); //after addition of new page
+                        _refreshMainMenu(true, new_page_id); //after addition of new page
                 };
         }
 
@@ -692,7 +705,7 @@ title: "Overview"
 
         let request = {a: 'add',
             recIDs: parent_id,
-            dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             val:    menu_id};
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
@@ -714,7 +727,7 @@ title: "Overview"
         //delete detail from parent menu
         let request = {a: 'delete',
             recIDs: parent_id,
-            dtyID:  (parent_id==window.hWin.home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
             sVal:   menu_id};
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
@@ -747,14 +760,14 @@ title: "Overview"
     //
     // refresh main menu and reload current page
     //
-    function _refreshMainMenu( need_refresh_tree ){
+    function _refreshMainMenu( need_refresh_tree, new_page_id ){
         
         //call global function from websiteScriptAndStyles
         window.hWin.initMainMenu( function(){
             if(need_refresh_tree!==false){
                 _initControls();
             }
-            _refreshCurrentPage();
+            _refreshCurrentPage(new_page_id);
         });  
     }
 
@@ -763,11 +776,16 @@ title: "Overview"
     // reload current (or given page)
     //
     function _refreshCurrentPage(page_id){
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)) page_id = _currentPageId();
         
-        if(!(page_id>0)) page_id = window.hWin.current_page_id;
+        if(isVersion3){
+            editCMS2.loadPageContent(page_id);
+        }else{
+            //call global function from websiteScriptAndStyles
+            window.hWin.loadPageContent(page_id); 
+        }
         
-        //call global function from websiteScriptAndStyles
-        window.hWin.loadPageContent(page_id); 
     
     }
 
@@ -783,13 +801,13 @@ title: "Overview"
     //
     function _getParentPage(page_id){
 
-        if(window.hWin.HEURIST4.util.isempty(page_id) || page_id <= 0 || window.hWin.home_page_record_id == page_id){
+        if(window.hWin.HEURIST4.util.isempty(page_id) || page_id <= 0 || home_page_record_id == page_id){
             return page_id;
         }
 
         let tree = $.ui.fancytree.getTree( $container );
         let page_node = tree.getNodeByKey(''+page_id);
-        let parent_id = window.hWin.home_page_record_id;
+        let parent_id = home_page_record_id;
 
         if(page_node == null){
             tree.visit((node) => {
