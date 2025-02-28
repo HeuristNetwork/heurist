@@ -722,7 +722,6 @@ $.widget( "heurist.resultListMenu", {
     //-------------------------------------- RELATION, MERGE -------------------------------
     fixDuplicatesPopup: function(){
 
-
         let recIDs_list = this.getSelectionIds(null);
         if(window.hWin.HEURIST4.util.isempty(recIDs_list) || recIDs_list.length<2){
             window.hWin.HEURIST4.msg.showMsg('resultList_select_record2',{default_palette_class:'ui-heurist-explore'});

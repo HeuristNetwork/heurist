@@ -4540,6 +4540,8 @@ $.widget( "heurist.resultList", {
         }
 
         const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';
+        
+        window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {
             recordset: this._currentRecordset,
