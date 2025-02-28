@@ -489,9 +489,10 @@ $.widget( "heurist.searchBuilderItem", {
                 ]);
             
         }else if(dty_ID == 'exists'){
-            eqopts = [{key: 'any', title: 'exists'}];
-                      //{key:'NULL', title:'no data (missing)'},
-                      //{key:'count', title:'count of values'}];
+            eqopts = [
+                {key: 'any', title: 'exists'},
+                {key: 'NULL', title: 'missing value'}
+            ];
         }else{
 
 /*        
@@ -663,7 +664,7 @@ Whole value = EQUAL
             ed_options['detailtype'] = 'resource';
             ed_options['dtID'] = dty_ID;
             ed_options['dtFields'] = null;
-            
+
         }else if(field_type=='resource'){ 
             
             if(this.options.reverse_RtyID>0){
@@ -822,7 +823,7 @@ Whole value = EQUAL
             }else 
             if(this.options.dty_ID.indexOf('r.')==0){
                 key = 'r:'+this.options.dty_ID.substr(2); 
-            }else    
+            }else
             if(this.options.dty_ID>0){
                 key = (org_op!='count' ? 'f:' : 'fc:') + this.options.dty_ID;
                 

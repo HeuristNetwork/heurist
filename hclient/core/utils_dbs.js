@@ -469,6 +469,13 @@ window.hWin.HEURIST4.dbs = {
                             
                         });
 
+                        if($mode == 5){ // for search builder only
+                            const rty_Name = $Db.rty($recTypeId, 'rty_Name');
+                            $grouped.push(
+                                {title: `${rty_Name} relationship records`, code: `${$recTypeId}:exists`, key: 'exists', type: 'freetext', name: rty_Name}
+                            );
+                        }
+
                         $grouped.push(
                             {title:'<span style="font-style:italic">Relationship Fields</span>', folder:true, 
                                         is_generic_fields:true, children:$rl_children});
