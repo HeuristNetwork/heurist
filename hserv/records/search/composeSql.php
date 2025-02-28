@@ -978,7 +978,7 @@ class HLimb {
                         break;
                     }
                 }
-                $cnt = count($this->limbs)-1;
+
                 foreach ($this->limbs as $ind=>$limb){
                     $limb->is_relationship = $is_relationship;
                     $res = $limb->makeSQL();
@@ -1192,9 +1192,9 @@ class HPredicate {
 
                                 $this->relation_fields[$rel_field2] = $val[$rel_field];
                             }
-                        }else{
-                            $this->value[$idx] = $val;
                         }
+
+                        $this->value[$idx] = $val;
                     }
                     $value = $this->value;
 
@@ -3298,7 +3298,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $rty_count == 0 || $where[] = $rty_where;
         $rel_count == 0 || $where[] = $rel_where;
 
-        $where = count($where) == 0 ? '' : 'WHERE ' . implode(' AND ', $where);
+        $where = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
 
         if($to){
             $to_query = "SELECT DISTINCT rl_SourceID FROM recLinks INNER JOIN Records ON rec_ID = rl_TargetID {$where}";

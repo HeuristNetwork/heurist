@@ -114,8 +114,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         let $img_div = this._editing.getFieldByName('bug_Image');
         $img_div.find('img').each((idx, img) => {
             let matches = img.src.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)/);
-            if(matches?.length == 2){
-                res['bug_Image'].push(matches[1]);
+            if(matches?.length == 1){
+                res['bug_Image'].push(matches[0]);
             }
         });
 
