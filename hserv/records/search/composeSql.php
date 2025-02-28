@@ -473,6 +473,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     // set is_admin
     $is_admin = true; //2023-11-28 TEMPORARY DISABLE field visibility check  $is_admin = $currUserID == 2
+    //$is_admin = ($currUserID == 2);
     if(!$is_admin && $currUserID > 0){
         // Check if user is part of db admin group
         $db_admin_id = mysql__select_value($mysqli, 'SELECT sys_OwnerGroupID FROM sysIdentification');
@@ -1339,7 +1340,13 @@ class HPredicate {
             case 'f':
 
                 if(!$this->field_id){ //field type not defined
-                    return $this->predicateAnyField();
+                
+                    $this->pred_type='title';
+                    $res1 = $this->predicateField(); //search for rec_Title
+                    
+                    $this->pred_type='field'; //restore
+                    $res2 = $this->predicateAnyField(); //search for any field
+                    return array("where"=>"({$res1['where']}) OR ({$res2['where']})");
                 }else{
                     return $this->predicateField();
                 }
