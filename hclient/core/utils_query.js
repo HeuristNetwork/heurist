@@ -776,6 +776,9 @@ window.hWin.HEURIST4.query = {
                     value = typeof value !== 'string' ? '' : window.hWin.HEURIST4.query.sortbyValue(value, rty_ID);
                     !value || sortby.push(value);
                     break;
+                case 'exists':
+                    cond = `Search for ${window.hWin.HEURIST4.util.isempty(value) ? 'existing' : 'missing'} connected records`;
+                    break;
                 case 't':
                 case 'type':
                     handleRectype(value);

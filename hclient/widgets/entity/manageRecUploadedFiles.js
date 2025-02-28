@@ -924,6 +924,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         let view_mode = this.recordList.resultList('option', 'view_mode');
         let left_pos = view_mode == 'list' ? 102 : 86;
+        left_pos = view_mode.startsWith('thumbs') ? 6 : left_pos;
 
         let html = '<div class="'+classes+'" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb

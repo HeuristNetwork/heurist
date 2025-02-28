@@ -3370,11 +3370,11 @@ $.widget( "heurist.editing_input", {
     paste: function(e, data){
         upload_count = that.f('rst_DefaultValue') != 1 ? data.files.length : 1;
     },
-    drag: function(e, data){
+    drop: function(e, data){
         upload_count = that.f('rst_DefaultValue') != 1 ? data.files.length : 1;
     },
     always: function(){
-        if(uploaded_urls.length === upload_count){
+        if(upload_count > 0 && uploaded_urls.length === upload_count){
             let values = Object.values(that.newvalues).concat(...uploaded_urls);
             that.setValue(values);
         }
