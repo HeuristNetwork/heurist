@@ -218,6 +218,9 @@ class DbSysBugreport extends DbEntityBase
             $new_record['details']['38'] = [];
             foreach ($attachment_temp_name as $file) {
 
+                // replace encoded space, brackets and remove extension
+                $file = str_replace(['%20', '%28', '%29', '.png'], [' ', '(', ')', ''], $file);
+
                 $info = parent::getTempEntityFile($file);
 
                 if(!$info){
