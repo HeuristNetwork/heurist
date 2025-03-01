@@ -184,7 +184,7 @@ class DbSysBugreport extends DbEntityBase
 
         $new_record['details']['958'] = array_key_exists('bug_Location', $record) ? $record['bug_Location'] : [7105];
 
-        $url = @$record['bug_Image'];
+        $url = @$record['bug_URL'];
         $cur_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
         if(!empty($url)){
             array_push($ext_info, "   Provided url: $url   Base url: $cur_url");
