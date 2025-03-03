@@ -648,7 +648,9 @@ class CmsManager {
                         res['rec_ID'] = record['rec_ID'];
                         //res[DT_NAME] = res[DT_NAME]
                         //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-                        window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options )
+                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options )
+                        
+                        res['pageTreeData'] = pageTreeData;
                         
                         if (window.hWin.HEURIST4.util.isFunction(options.callback)) options.callback.call(this, res);
                          

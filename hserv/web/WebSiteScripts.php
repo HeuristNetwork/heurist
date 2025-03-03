@@ -77,7 +77,39 @@ if($useOldCode){
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-<?php    
+<?php
+}
+
+if(@$_REQUEST['edit']){
+?>
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>hclient/assets/css/marching_ants.css" />
+
+    <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    
+<style>
+.cms-element-active{
+    -webkit-box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
+    box-shadow: inset 10px 10px 124px 14px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);
+}
+.cms-element-editing{
+    /* frame around editing element */
+    -webkit-box-shadow: 0px 0px 0px 5px rgb(201, 194, 249);
+    box-shadow: 0px 0px 0px 5px rgb(201, 194, 249);
+}
+.cms-element-overlay{
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(201, 194, 249, 0.5);
+}
+.tox-toolbar{
+    background-color: #b4eeff !important;
+}
+</style>
+
+    
+<?php
 }
 ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -119,26 +151,26 @@ if($useOldCode){
                 //webSite = new WebSite();
 
                 //init layout - init Heurist widgets on this page
-
                 //init layout
-                window.hWin.HAPI4.layoutMgr.layoutInit(pageContentJSON, 'main', {});
+                const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit(pageContentJSON, 'main', {});
 
                 //init header
                 window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', {HMenu:{onActionComplete:onPageLoad}});
                 
-                onPageLoad(<?php echo $this->getPageRecord()?>);
+                onPageLoad(<?php echo $this->getPageRecord()?>, pageTreeData);
             }
         }
         
         //
         // for edit
         //        
-        function onPageLoad(record){
-            if(window.parent && window.parent.editCMS_instance3){
-                window.parent.editCMS_instance3.onLoadPageContent(record);
+        function onPageLoad(record, pageTreeData){
+            if(window.parent && window.parent.cmsEditor){
+                if(pageTreeData){
+                    record['pageTreeData'] = pageTreeData;
+                }
+                window.parent.cmsEditor.onLoadPageContent(record);
             }
-
-
         }
         
     </script>

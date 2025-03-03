@@ -41,8 +41,6 @@ if(!defined('PDIR')) {
 
 require_once dirname(__FILE__).'/../../framecontent/initPage.php';
 
-includeJQuery();
-
 //parse_str($_SERVER['QUERY_STRING'], $vars);
 //$query_string = http_build_query($vars);
 
@@ -65,6 +63,10 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
+<link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
+
 <!--
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>
 -->
@@ -83,10 +85,25 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/javascript/javascript.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/css/css.js"></script>
     <script src="<?php echo PDIR;?>external/codemirror-5.61.0/mode/htmlmixed/htmlmixed.js"></script>
-
+    
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchInput.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectMultiValues.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
+    
 <style>
-.tox-toolbar{
-    background-color: #b4eeff !important;
+.ui-heurist-publish .fancytree-active, .ui-heurist-publish .fancytree-editing, .ui-heurist-publish .fancytree-hover{
+  background: rgba(201, 194, 249, 1) !important;
+}
+.ui-heurist-publish span.fancytree-node {
+    padding: 3px 0px !important;
 }
 .ui-cms-mainmenu{
     background: rgb(135, 205, 118) !important;
@@ -95,7 +112,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
 <script type="text/javascript">
 
-    window.editCMS_instance3 = null; 
+    window.cmsEditor = null; 
     let tinymce;
     
     let isWebPage = false;
@@ -104,12 +121,13 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
         if(!success) {return;}
         
-        //editCMS_instance3 = editCMS3();//editCMS_Init
-        //editCMS_instance3.startCMS({});
-        
         let options = <?php echo $editor_options;?>;
         
-        window.editCMS_instance3 = new HCmsEditor(options);
+        window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+        window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        
+        window.cmsEditor = new HCmsEditor(options);
         
     }
 </script>

@@ -339,7 +339,7 @@ class WebSite
         
         $rec = $this->pageRecord??$this->siteRecord;
         $res = array('rec_ID'=>$rec['rec_ID'], 
-                    DT_NAME=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION, false, $this->currentLang),
+                    DT_NAME=>$this->getValue($rec, DT_NAME, false, $this->currentLang),
                     DT_EXTENDED_DESCRIPTION=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION));
         return json_encode($res);
     }

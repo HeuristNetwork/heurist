@@ -2611,6 +2611,8 @@ window.hWin.HEURIST4.ui = {
         const pageid = (websiteid==options.pageid)?0:options.pageid;
         
         const mode = options.mode??'production';
+
+        const isEdit = options.edit??0;
         
         const version = options.version??'';
         
@@ -2633,7 +2635,7 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     surl += '/'+pageid;
                 }
-                if(mode=='edit'){
+                if(isEdit){
                     params.push('edit=2');
                 }            
             }
@@ -2647,7 +2649,7 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     params.push(`pageid=${pageid}`);
                 }
-                if(mode=='edit'){
+                if(isEdit){
                     params.push('edit=2');
                 }            
             }

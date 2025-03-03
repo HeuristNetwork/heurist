@@ -261,7 +261,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         _is_callserver_in_progress = true;
         
-        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
+        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info' && !request.remote
             && (new Date().getTime())-_last_check_dbcache_relevance> 7000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             

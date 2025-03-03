@@ -19,14 +19,13 @@ class HCmsEditor {
     editor_pos = 'west';
     isWebPage = false;
     current_edit_mode = 'page'; //or website
-    page_was_modified = false;
 
     //refs to helper classes
     _editCMS_SiteMenu = null;
-    _editCMS_Page = null;
+    _cmsEditorPage = null;
     
     //interface elements
-    _editor_panel = null; // tab controle with to trees - website menu and page structure
+    _editor_panel = null; // tab control with two trees - website menu and page structure
     
     _toolbar_WebSite; //move to editCMS_SiteMenu
     _tabControl;
@@ -34,19 +33,20 @@ class HCmsEditor {
     _webPageFrame;
     
     //website specific values
-    menuContentJSON;    // menu content as JSON
+    menuContentJSON; // menu content as JSON
     pageContentJSON; //_layout_content; - JSON config 
                 
     //
     website_id; // current website
     page_id;    // current page
+    current_language = 'def';
+    default_language = 'def';
     
     layout_container; // main-content with CMS content
     _ws_body;
     
-    _keep_EditPanelWidth;
+    _keep_EditPanelWidth = 0;
 
-    
   constructor(_options, _container) {
     
     this.website_id = _options.website_id;
@@ -61,7 +61,7 @@ class HCmsEditor {
   * Inits my editor layout - editor on the left and website in iframe in the center
   */
   #initInterface(){
-  
+      
         let that = this;
       
         if(!this._editor_panel){ //$(this.document).find('.editStructure').length==0
@@ -154,7 +154,8 @@ class HCmsEditor {
       
         //load content of page
         this._webPageFrame = $('#webPageFrame');
-        this._webPageFrame.attr('src', window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,edit:2}));
+        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,edit:2});
+        this._webPageFrame.attr('src', pageURL);
         this._webPageFrame.on('load', function(){
             that.onWebPageLoadComplete();
         });
@@ -210,7 +211,7 @@ class HCmsEditor {
             },
             beforeActivate: function( event, ui ){
 
-                if(that.current_edit_mode=='page' && that.warningOnExit(function(){ that.switchMode( 'website' ) })) {
+                if(that.current_edit_mode=='page' && that._cmsEditorPage.warningOnExit(function(){ that.switchMode( 'website' ) })) {
                     return false;  
                 }else{
                     return true;
@@ -231,13 +232,16 @@ class HCmsEditor {
   // called from editCMS_SiteMenu - load different page
   //
   loadPageContent(page_id){
-      this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', {page_id:page_id});;
+      this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', 
+            {page_id:page_id, callback:(rec)=>this.onLoadPageContent(rec)});;
   }
 
   //
   //
   //
   onLoadPageContent(record){
+      
+console.log('onLoadPageContent');      
     
       this.layout_container = this._webPageFrame[0].contentDocument.getElementsByTagName('main');
       if(!this.layout_container){
@@ -246,27 +250,50 @@ class HCmsEditor {
 
       this.layout_container = $(this.layout_container);
       
-      if(!this._editCMS_Page){
-        this._editCMS_Page = new HCmsEditorPage(this._editor_panel, this);    
+      if(!this._cmsEditorPage){
+        this._cmsEditorPage = new HCmsEditorPage(this._editor_panel, this);    
       }
     
       //console.log('>>>', record);
       
       this.page_id = record['rec_ID'];
+      this.pageContentJSON = record[window.hWin.DT_EXTENDED_DESCRIPTION];
       
-      //this._editCMS_Page.initPage(record);
+      if(this._editCMS_SiteMenu) this._editCMS_SiteMenu.highlightCurrentPage();
+      
+      let that = this;
+      
+      //swtich to page tab automatically
+      this.layout_container.on('click',function(event){
+            if(that.current_edit_mode!='page'){
+                //switch to page mode                
+                that.switchMode('page');
+            }
+      });
+      
+      this.switchMode('page');
+      this._cmsEditorPage.initPage(this.layout_container, record);
   }
   
   //
   // This is event for initial loading in iframe
   //
   onWebPageLoadComplete(){
+
+console.log('onWebPageLoadComplete');
       
       //menu as json tree
       this.menuContentJSON = this._webPageFrame[0].contentWindow.menuContentJSON;
-      
   }
   
+  getTinymce(){
+      return this._webPageFrame[0].contentWindow.tinymce;
+  }
+  
+  findInWebSite(selector){
+      return this._webPageFrame[0].contentDocument.querySelector(selector);
+  }
+
  
   #editHomePage(){
       
@@ -287,6 +314,25 @@ class HCmsEditor {
   #updateActionIcons(){
       
   }
+  
+  openEditorPanel(){
+        this._ws_body.layout().open(this.editor_pos);
+  }
+  
+  expandEditorPanel(){
+      if(this._ws_body.layout().state['west']['outerWidth']<450){
+          this._keep_EditPanelWidth = this._ws_body.layout().state['west']['outerWidth'];
+          this._ws_body.layout().sizePane('west', 450);    
+      }
+  }
+
+  shrinkEditorPanel(){
+      if(this._keep_EditPanelWidth>0){
+          this._ws_body.layout().sizePane('west', this._keep_EditPanelWidth);    
+      }
+      this._keep_EditPanelWidth = 0;
+  }
+
 
   /**
   *  
@@ -317,16 +363,6 @@ class HCmsEditor {
             //TBD this.#hidePropertyView();
             
             this._toolbar_WebSite.hide();
-           
-/* TBD           
-            if(init_tinymce!==false){
-                $.ui.fancytree.getTree( this._panel_treePage ).visit(function(node){
-                    node.setSelected(false); //reset
-                    node.setExpanded(true);
-                });            
-                this.#updateActionIcons(500);//it inits tinyMCE also
-            } //_initTinyMCE
-*/            
             
         }else{
 
@@ -360,14 +396,5 @@ class HCmsEditor {
   onBeforeUnload(){
       
   }    
- 
-  warningOnExit(){
-      
-  }
-  
-  resetModified(){
-    this.page_was_modified = false;    
-  }
-  
-    
+
 }

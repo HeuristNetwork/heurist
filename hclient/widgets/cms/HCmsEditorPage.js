@@ -14,60 +14,1193 @@
 */
 class HCmsEditorPage {
 
-    //state values    
-    page_was_modified = false;
+    _layout_content;   //JSON layout configuration for current page   
+    _layout_container; // main-content with CMS content
+
 
     //refs to parent classes
     _container = null; //general container
-    _editor = null;  //HCmsEditor
-    _edit_Element = null;  //instance of edit element class editCMS_ElementCfg
+    _cmsEditor = null;  //HCmsEditor
+    _cmsEditorElement = null;  //instance of edit element class editCMS_ElementCfg
     
     //interface elements
     _panel_treePage;     // panel with treeview for current page 
     _panel_propertyView; // panel with selected element properties
     _toolbar_Page;       // buttons to apply/cancel changes
     
-    _webPageFrame;       //reference to iframe with website 
-    
-    _layout_container; // main-content with CMS content
+    tinymce;
+
+    //interface flags and states
+    page_was_modified = false;
+    delay_onmove = 0;
+    __timeout = 0;
+    lockDefaultEdit = false;
 
     
   constructor(_container, _editor) {
     
     this._container = _container;
-    this._editor = _editor;
+    this._cmsEditor = _editor;
       
-    //this.website_id = _options.website_id;
-    //this._ws_body = _container?$(_container):$('body');  
-    this.#initInterface();
   }
+  
   
   /**
-  * Inits my editor layout - editor on the left and website in iframe in the center
+  * Exapnds structure tree, updates menu in tree, init tinymce
   */
-  #initInterface(){
-        this._panel_propertyView = this._container.find('.propertyView');
-        this._panel_treePage = this._container.find('.treePage').addClass('tree-rts');
-        this._toolbar_Page = this._container.find('.toolbarPage');
+  refreshInterface(){
+      this._panel_propertyView = this._container.find('.propertyView');
+
+      //reset selection and expand all   
+      $.ui.fancytree.getTree( this._panel_treePage ).visit(function(node){
+          node.setSelected(false); //reset
+          node.setExpanded(true);
+      });            
+      this.#updateActionIcons(500);//it inits tinyMCE also
+  }
+
+  //
+  //
+  //
+  #hideMenuInTree(){
+      let ele = this._panel_treePage.find('.lid-actionmenu');
+      ele.hide(); //menu icon
+      ele.find('span[data-action]').hide(); //popup menu
+  }        
+
+  
+  //
+  //
+  //
+  #initTinyMCE( key ){
+
+        this.tinymce = this._cmsEditor.getTinymce();
+      
+        let that = this;
+        if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
+
+            window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else if(!window.hWin.HEURIST4.util.isObject(response.data)){
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else{
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = response.data;
+                }
+
+                that.#initTinyMCE(key);
+            });
+
+            return;
+        }
+      
+        if(this.tinymce) this.tinymce.remove('.tinymce-body'); //detach
+        this._layout_container.find('.lid-actionmenu').remove();
+        
+        let selector = '.tinymce-body';
+        if(key>0){
+            selector = selector + '[data-hid='+key+']';
+        }
+
+        let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
+
+        let style_formats = Object.hasOwn(custom_formatting, 'style_formats') && custom_formatting.style_formats.length > 0 
+                                ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : [];
+
+        if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
+            style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
+        }
+        let inlineConfig = {
+            selector: selector,
+            menubar: false,
+            inline: true,
+            
+            branding: false,
+            elementpath: false,
+            
+            relative_urls : true,
+            remove_script_host: false,
+            //document_base_url : window.hWin.HAPI4.baseURL,
+            urlconverter_callback : 'tinymceURLConverter',
+
+            entity_encoding:'raw',
+            inline_styles: true,
+            content_style: "body {font-family: Helvetica,Arial,sans-serif;} " + custom_formatting.content_style,
+
+            plugins: [
+                'advlist autolink lists link image media preview', //anchor charmap print 
+                'searchreplace visualblocks code fullscreen',
+                'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
+            ],      
+
+            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristRecordAddLink customHeuristMedia link | align | bullist numlist outdent indent | table | help' ],  
+
+            content_css: [
+                '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+            ],
+            
+            //valid_elements: 'p[style],strong,em,span[style],a[href],ul,ol,li',
+            //valid_styles: {'*': 'font-size,font-family,color,text-decoration,text-align'},
+            powerpaste_word_import: 'clean',
+            powerpaste_html_import: 'clean',
+
+            default_link_target: "_blank", // default to new tab
+
+            formats: custom_formatting.formats,
+            style_formats_merge: true,
+            style_formats: style_formats,
+
+            image_caption: true,
+            
+            setup:function(editor) {
+
+                // ----- Event handles -----
+                editor.on('change', function(e) {
+                    if(that.tinymce.activeEditor && that.tinymce.activeEditor.targetElm){
+                        let key = $(that.tinymce.activeEditor.targetElm).attr('data-hid');
+                        //update in _layout_content
+                        let l_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(that._layout_content, key);
+                        if(l_cfg){
+                            let new_content = that.tinymce.activeEditor.getContent();
+                            that.page_was_modified = (that.page_was_modified || l_cfg.content!=new_content);
+
+                            that.#onPageChange();
+                            
+                            let lang = $(that.tinymce.activeEditor.targetElm).attr('data-lang');
+                            if(lang==that._cmsEditor.default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
+                                lang = '';
+                            }
+                            l_cfg['content'+lang] = new_content;    
+                            
+                            //update in editCMS_ElementCfg                            
+                            if(that._cmsEditorElement){
+                                that._cmsEditorElement.updateContent(new_content, lang);
+                            }
+                            
+                            
+                        }else{
+                            that.page_was_modified = false;
+                        }
+                       
+                    }
+                });
+
+                editor.on('click', function (e) {
+                    //adjust tinymce toolbar
+                    let $toolbar = $(that._cmsEditor.findInWebSite('.tox-toolbar-dock-transition'));
+                    if($toolbar.length > 0 && $toolbar.width() < 400){
+                        $toolbar.css('width', '400px');
+                    }
+
+                    let $link_btn = $toolbar.find('.tox-tbtn[title="Insert/edit link"]');
+                    if($link_btn.length > 0 && $link_btn.find('.tox-tbtn__select-label').length == 0){
+                        let html = '<span class="tox-tbtn__select-label">URL</span>';
+                        $link_btn.append(html);
+                    }
+
+                    $toolbar.find('.tox-split-button[title="Background color"]').attr('title', 'Highlight text');
+                });
+                    
+                editor.on('focus', function (e) {
+                    if(that.current_edit_mode=='page'){
+
+                        that._layout_container.find('.lid-actionmenu').hide();
+                        that._layout_container.find('div[data-hid]').removeClass('cms-element-active');  
+
+                        that._layout_container.find('.cms-element-overlay').css('visibility','hidden');
+
+                        //highlight editing element in tree
+                        let key = $(that.tinymce.activeEditor.targetElm).attr('data-hid');
+                        let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(key);
+                        that._panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                    
+                    }
+
+                    $(editor.bodyElement).css('padding-left', '5px'); // add space between content and body outline
+                });
+                editor.on('blur', function (e) { 
+                    $(editor.bodyElement).css('padding-left', ''); // remove space
+                });
+
+                // ----- Custom buttons -----
+                // Insert Heurist media
+                editor.ui.registry.addButton('customHeuristMedia', {
+                    icon: 'image',
+                    text: 'Add Media',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        that.#addHeuristMedia();
+                    }
+                });
+                
+                // Insert Add Heurist record link
+                editor.ui.registry.addButton('customHeuristRecordAddLink', {
+                    icon: 'comment-add',
+                    text: 'Add Rec',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        that.#addHeuristRecordAddLink();
+                    }
+                });
+                
+                // Insert horizontal rule
+                editor.ui.registry.addButton('customHRtag', {
+                    text: '&lt;hr&gt;',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        that.tinymce.activeEditor.insertContent( '<hr>' );
+                    }
+                });
+                // Clear text formatting - to replace the original icon
+                editor.ui.registry.addIcon('clear-formatting', `<img style="padding-left: 5px;" src="${window.hWin.HAPI4.baseURL}hclient/assets/clear_formatting.svg" />`)
+                editor.ui.registry.addButton('customClear', {
+                    text: '',
+                    icon: 'clear-formatting',
+                    tooltip: 'Clear formatting',
+                    onAction: function (_) {
+                        that.tinymce.activeEditor.execCommand('RemoveFormat');
+                    }
+                });
+                
+            },
+            
+            paste_preprocess: function(plugin, args){
+
+                let content = args.content;
+
+                if(content.indexOf('<img') === 0){
+                    // Tell user to use the 'Insert media' tool instead
+                    args.content = '';
+
+                    let msg = 'Please use the "Add media" tool located within the toolbar to added images';
+                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                }else if(content.search(/https?|ftps?|mailto/) == 0){
+                    // Trigger 'Insert link' dialog
+                    
+                    let href = args.content;
+                    href = href.replaceAll(/&amp;/g, '&');
+
+                    const org_href = href;
+                    args.content = '';
+
+                    href += `_${window.hWin.HEURIST4.util.random()}`;
+
+                    that.tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+
+                    let $link = $(that.tinymce.activeEditor.selection.getNode());
+                    if(!$link.is('a')){
+                        $link = $link.find(`a[href="${href}"]`);
+                    }
+                    if($link.length == 0){
+                        $link = $(that.tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
+                    }
+
+                    $link.attr({
+                        'href': org_href,
+                        'data-mce-href': org_href,
+                        'target': '_blank'
+                    }).text(org_href);
+                }
+            }
+
+        };
+      
+        this.tinymce.init(inlineConfig);
+
+        // Correct image and embedded urls
+        this._layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
+      
   }
   
+  //
+  //
+  //
+  #addHeuristRecordAddLink(){
+      
+      let that = this;
+
+      window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+          title: 'Select type and other parameters for new record',
+          height: 520, width: 540,
+          get_params_only: true,
+          onClose: function(context){
+              if(context && !window.hWin.HEURIST4.util.isempty(context.RecAddLink)){
+
+                  that.tinymce.activeEditor.execCommand('mceLink');
+
+                  setTimeout(()=>{
+                          const dlg = $('.tox-dialog__body-content');
+                          //dig down to the first input text field (being the URL)
+                          const urlTextField = dlg.find('.tox-control-wrap .tox-textfield');                    
+
+                          urlTextField.val(context.RecAddLink+'&guest_data=1');
+
+                      },500);    
+              }
+          },
+          default_palette_class: this._cmsEditor.default_palette_class
+          }
+      );    
+
+
+  }
+
+  //
+  // browse for heurist uploaded/registered files/resources and add player link
+  //         
+  #addHeuristMedia(){
+
+      let that = this;
+      
+      let popup_options = {
+          isdialog: true,
+          select_mode: 'select_single',
+          edit_addrecordfirst: false, //show editor atonce
+          selectOnSave: true,
+          select_return_mode:'recordset', //ids or recordset(for files)
+          filter_group_selected:null,
+          //filter_groups: this.configMode.filter_group,
+          onselect:function(event, data){
+
+              if(data){
+
+                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                      let recordset = data.selection;
+                      let record = recordset.getFirstRecord();
+
+                      //always add media as reference to production version of heurist code (not dev version)
+                      let thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                      +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                      let playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                      let $dlg;
+                      let msg = 'Enter a caption below (optional):<br><br>'
+                      + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+
+                      let btns = {};
+                      btns['Add caption'] = () => {
+                          let caption = $dlg.find('#figcap').val();
+
+                          if(!window.hWin.HEURIST4.util.isempty(caption)){
+                              playerTag = '<figure>'+ playerTag +'<figcaption>'+ caption +'</figcaption></figure>';   
+                          }
+
+                          that.tinymce.activeEditor.insertContent( playerTag );
+                          $dlg.dialog('close');
+                      };
+                      btns['No caption'] = () => {
+                          that.tinymce.activeEditor.insertContent( playerTag );
+                          $dlg.dialog('close');
+                      };
+
+                      $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                          {title: 'Adding caption to media', yes: 'Add caption', no: 'No caption'}, 
+                          { default_palette_class: 'ui-heurist-populate', appendTo: 'body' }
+                      );
+                  }
+
+              }//data
+
+          }
+      };//popup_options        
+
+      window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+  }
+
+       
+  //
+  //
+  //
+  #hidePropertyView(){
+
+      this._cmsEditorElement = null;
+      this.#initTinyMCE();
+
+      this._layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
+
+      this._panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
+      this._panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
+
+      this.#hideMenuInTree();
+      this._panel_propertyView.hide();
+
+      this._cmsEditor.shrinkEditorPanel(); 
+
+      this.#onPageChange();
+      this._panel_treePage[0].style.removeProperty('height');
+  }
+    
+  //
+  //
+  //
+  #onPageChange(){
+
+      if(this.page_was_modified){
+
+          if(this._cmsEditorElement==null){
+              //show toolbar with Save/Discard
+              this._toolbar_Page.show();
+          }else{
+              //activate save buttons
+              this._cmsEditorElement.onContentChange();
+          }
+
+      }else{
+          this._toolbar_Page.hide();
+      }
+  }     
   
+ //
+ // loads converts page as treeview data
+ //
+ #initTreePage( treeData ){
+      
+        let that = this;
+        
+        if(this._panel_treePage){
+            
+            $.ui.fancytree.getTree( this._panel_treePage ).reload(treeData);
+            
+        }else{
+        
+        //init treeview
+        let fancytree_options =
+        {
+            checkbox: false,
+            //titlesTabbable: false,     // Add all node titles to TAB chain
+            focusOnSelect:true,
+            source: treeData,
+            quicksearch: true,
+            
+            click: function(event, data){
+
+                if(data.targetType=='title'){
+                    if(data.node.isActive()){
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                    }
+                    if(data.node.key>0){
+                        that.#layoutEditElement(data.node.key);
+                    }
+                
+                }
+                
+            }
+            //,activate: function(event, data) { }
+        };
+
+        
+        fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
+        fancytree_options['dnd'] = {
+                autoExpandMS: 400,
+                preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+                preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
+                dragStart: function(node, data) {
+
+                    let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
+                    let is_cardinal = (node.type=='north' || node.type=='south' || 
+                               node.type=='east' || node.type=='west' || node.type=='center');
+                    
+                    return !(is_last_root || is_cardinal);
+                },
+                dragEnter: function(node, data) {
+                    if(node.type=='cardinal'){
+                        return false;
+                    }else{
+                        return (node.folder) ?true :["before", "after"];
+                    }
+                },
+                dragDrop: function(node, data) {
+                    // data.otherNode - dragging node
+                    // node - target
+                   
+                    let is_cardinal = (node.type=='north' || node.type=='south' || 
+                               node.type=='east' || node.type=='west' || node.type=='center');
+                    let hitMode = (is_cardinal)?'child' :data.hitMode;                    
+                    
+                    data.otherNode.moveTo(node, hitMode);    
+                    //change layout content and redraw page
+                    that.#layoutChangeParent(data.otherNode.key);
+                }
+            };
+
+            //create tree
+            this._panel_treePage = this._container.find('.treePage').addClass('tree-rts');
+            this._panel_treePage.fancytree(fancytree_options);
+                                
+            //add 3 buttons save,save+close,cancel                                
+            $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
+                                    +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
+                                    + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
+                                    + '<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                                +'</div>').appendTo(this._panel_treePage);
+            
+            this._toolbar_Page = this._panel_treePage.find('.toolbarPage').hide();
+                                
+            this._toolbar_Page.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',this.#saveLayoutCfg)
+            this._toolbar_Page.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
+                        function(){
+                            //_startCMS({record_id:options.record_id, container:'#main-content', content:null});
+                        }
+                    );
+            this._toolbar_Page.find('.bnt-cms-exit').button().css({'border-radius':'4px'}); //TBD.on('click',_closeCMS);
+            
+/*TBD                            
+                    this._panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
+                        function(){
+                            that.#startCMS({record_id:options.record_id, container:'#main-content', content:null});
+                        }
+                    );
+                    this._panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click', this.#closeCMS); //{icon:'ui-icon-close'}
+*/                    
+
+        }
+        
+    }
+    
+    //
+    // load page structure into tree and init layout
+    //
+    initPage(pageContainer, pageRecord){
+        
+        if(this.tinymce) this.tinymce.remove('.tinymce-body'); //detach
+        
+        if(window.hWin.HAPI4.layoutMgr){
+            window.hWin.HAPI4.layoutMgr.setEditMode(true);
+        }else {
+            return;
+        }
+        
+        let opts = {};
+        opts.page_id = this._cmsEditor.page_id;
+        
+        opts.page_name = pageRecord[window.hWin.DT_NAME];
+
+        //window.hWin.HAPI4.getTranslation(window.hWin.page_cache[options.record_id][window.hWin.DT_NAME], this._cmsEditor.current_language);
+        //TBD window.hWin.assignPageTitle(options.record_id)
+        
+        opts.rec_ID = this._cmsEditor.website_id;
+        opts.keep_top_config = true;
+        opts.lang = this._cmsEditor.current_language;
+        
+        //this._layout_content = pageRecord[window.hWin.DT_EXTENDED_DESCRIPTION];
+        
+        //const res = window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, $('<div>'), opts); //FromJSON
+//console.log(res);      
+        //const res = window.hWin.HEURIST4.util.isJSON(this._layout_content);
+        //const res = window.hWin.HAPI4.layoutMgr.convertOldCmsFormat(this._layout_content, $('<div>'));
+        
+        this._layout_container = pageContainer;
+        
+        if(!pageRecord['pageTreeData']){
+            window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
+            //clear treeview
+            this.#initTreePage([]);
+        }else{
+            this._layout_content = pageRecord['pageTreeData'];
+            this.#initTreePage(this._layout_content);
+        }
+        
+        this._container.find('.treePageHeader > h3')
+                .text( opts.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :opts.page_name );
+        
+        this.page_was_modified = false;
+        
+        
+        //expands structure tree, updates menu in tree, init tinymce
+        this.refreshInterface();
+    }
+ 
+//--------------------------------------
+  
+    //
+    // add and init action icons for page structure treeview
+    //
+    #updateActionIcons(delay){ 
+
+        let that = this;
+
+        if(delay>0){
+            setTimeout( ()=>that.#updateActionIcons(), delay );    
+            return;
+        }
+        
+console.log('updateActionIcons')        
+        
+        $.each( this._panel_treePage.find('.fancytree-node'), function( idx, item ){
+            
+            let ele_ID = $(item).find('span[data-lid]').attr('data-lid');
+
+            that.#defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
+        });
+
+        this.#initTinyMCE();
+        
+        // find all dragable elements - text and widgets
+        this._layout_container.find('div.brick').each(function(i, item){   //
+            let ele_ID = $(item).attr('data-hid');
+            
+            that.#defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+        });
+    }
+
+    //
+    // for treeview on mouse over toolbar
+    // item - either fancytree node or div.editable in container
+    // ele_ID - element key 
+    //
+    #defineActionIcons (item, ele_ID, style_pos){ 
+        
+        let that = this;
+        
+        if($(item).find('.lid-actionmenu').length==0){ //no one defined
+
+            ele_ID = ''+ele_ID;
+            let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_ID);
+
+            if(node==null){
+                return;
+            }
+            let is_intreeview = $(item).hasClass('fancytree-node');
+            if(is_intreeview && !$(item).hasClass('fancytree-hide')){       
+                $(item).css('display','block');   
+            }
+
+            let is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
+            let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
+            let is_cardinal = (node.type=='north' || node.type=='south' || 
+                node.type=='east' || node.type=='west' || node.type=='center');
+                
+            let actionspan = '<div class="lid-actionmenu mceNonEditable" '
+            +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
+            +'font-size:'+(is_intreeview?'12px;right:13px':'16px')
+            +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
+            //+ ele_ID
+            + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
+                            :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
+            //+ (true || is_root || is_cardinal?'':
+            + ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>')
+                                   
+            + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
+            +'<span class="ui-icon ui-icon-pencil"></span>Style</span>';               
+            
+            //hide element for cardinal and delete for its panes                     
+            if(node.type!='cardinal'){
+                actionspan += '<span data-action="element" style="display:block;padding:4px" title="Add a new element/widget"><span class="ui-icon ui-icon-plus"></span>Insert</span>';
+            }
+            if(!is_cardinal){
+                actionspan += ('<span data-action="delete" style="display:block;padding:4px" title="Remove element from layout"><span class="ui-icon ui-icon-close" title="'
+                    +'Remove element from layout"></span>Delete</span>');
+            }else if(is_last_root){ // display delete, but block action
+                actionspan += ('<span data-action="none" style="display:block;padding:4px" title="Cannot have an empty tree">'
+                    +'<span class="ui-icon ui-icon-delete"></span>Delete</span>');
+            }
+
+/* TBD  translation for text element
+            if(node.type=='text'){
+                let stitle = 'To enable multilanguage support define more than one language for web home parameter "Languages"';
+                let codes = '';
+                if(website_languages!=''){
+                    let langs = website_languages.split(',');
+                    if(langs.length>0){
+                        stitle = 'Define translation for this text element';
+                        for(let i=0;i<langs.length;i++){
+                            codes = codes
+                            +'<span data-action="translate" data-lang="'+langs[i]
+                                    +'" style="display:block;padding:4px;text-align:right">'
+                            +langs[i]+'</span>';
+                        }
+                    }
+                }
+                actionspan = actionspan + '<span data-action="translate_header" style="display:block;padding:4px" title="'
+                        +stitle+'"><span class="ui-icon ui-icon-translate"></span>Translate</span>'
+                        +codes;
+                        
+            }
+*/            
+
+            actionspan += '</div>';
+            actionspan = $( actionspan );
+
+            if(is_intreeview){   //in treeview
+                actionspan.appendTo(item);
+                
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-menu').on('click', function(event){
+                    let ele = $(event.target);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    ele.hide();
+                    ele.parent().find('span[data-action]').show();
+                });
+                
+            }else{ 
+
+                actionspan.insertAfter(item); //in main-content
+
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-gear').on('click', function(event){ // edit widget
+
+                    let ele = $(event.target);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    ele.hide();
+                    
+                    let is_widget = ele.parent().prev().hasClass('heurist-widget');
+                    
+                    if(is_widget){
+                        ele.parent().find('span[data-action="edit"]').trigger('click');
+                    }else{
+                        if(ele.parent().hasClass('lid-actionmenu')){
+                            ele.parent().show();    
+                        }
+                        ele.parent().find('span[data-action]').show();                        
+                    }
+                });
+
+                //actionspan.appendTo(body);    
+                //actionspan.position({ my: "left top", at: "left top", of: $(item) })
+            }
+
+            //
+            // menu for action span
+            //
+            actionspan.find('span[data-action]').on('click', function(event){
+                let ele = $(event.target);
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                that.lockDefaultEdit = true;
+                //timeout need to activate current node    
+                setTimeout(function(){
+                    that.lockDefaultEdit = false;
+
+                    let ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
+                    that._layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
+
+                    let action = ele.attr('data-action');
+                    if(!action) action = ele.parent().attr('data-action');
+                    if(action=='element'){
+
+                        //add new element or widget
+                        editCMS_SelectElement(function(selected_element, selected_name){
+                            that.#layoutInsertElement(ele_ID, selected_element, selected_name);    
+                        })
+
+                    }else if(action=='translate'){
+                       
+                       //reload the only text element in different language
+                       let lang = ele.attr('data-lang');
+                        
+                       //change or add content of specified language
+                       that.#layoutTranslateElement(ele_ID, lang)
+                       
+/*                        
+                        //define new translation - show popup to select language
+                        window.hWin.HEURIST4.msg.showPrompt('<p>Select language to translate content: '
++"<select id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
++" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'>"
++ window.hWin.HEURIST4.ui.createLanguageSelect() //returns content for language selector
++"</select></p>",
+function(value){
+    if(value){
+        //change or add content of specified language
+        _ws_body.layout().open(options.editor_pos);    
+    }            
+},
+'Select language for content',{default_palette_class: this._cmsEditor.default_palette_class});
+*/                        
+                        
+                    }else if(action=='edit'){
+
+                        //add editor panel 
+                        that._cmsEditor.openEditorPanel();
+                        //add element
+                        that.#layoutEditElement(ele_ID);
+
+                    }else if(action=='delete'){
+                        //different actions for separator and field
+                        let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(''+ele_ID);
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'Are you sure you wish to delete element "'+node.title+'"?', 
+                        function(){ that.#layoutRemoveElement(ele_ID); }, 
+                            {title:'Warning',yes:'Proceed',no:'Cancel'},
+                            {default_palette_class: this._cmsEditor.default_palette_class});        
+
+                    }
+                    },100); 
+
+                return false;
+            });
+
+            /*
+            $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
+            .on('click', function(event){ 
+            //tree.contextmenu("open", $(event.target) ); 
+
+            ).appendTo(actionspan);
+            */
+
+            //hide gear icon and overlay on mouse exit
+            function __onmouseexit(event){
+                
+                if(that._panel_propertyView.is(':visible')) return;
+
+                let el = document.elementFromPoint(event.pageX, event.pageY);
+                if($(el).hasClass('ui-icon-gear')) return;
+
+                let node;
+                if($(event.target).hasClass('brick')){ 
+                    //cms element
+                    
+                    node =  $(event.target);
+
+                    that._layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-hid')+']').hide();
+                    that._layout_container.find('div[data-lid]').removeClass('cms-element-active');
+                    
+                    if(!that._panel_propertyView.is(':visible'))
+                        that._layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    /*
+                    if(that.__timeout==0){
+                    __timeout = setTimeout(function(){$('.cms-element-overlay').css('visibility','hidden');},500);  
+                    }
+                    */ 
+                }else{
+                    //in tree
+                    if($(event.target).is('li')){
+                        node = $(event.target).find('.fancytree-node');
+                    }else if($(event.target).hasClass('fancytree-node')){
+                        node =  $(event.target);
+                    }else{
+                        //hide icon for parent 
+                        node = $(event.target).parents('.fancytree-node:first');
+                        if(node) node = $(node[0]);
+                    }
+                    if(node){
+                       
+                        
+                        let ele = node.find('.lid-actionmenu');
+                        ele.find('span[data-action]').hide();
+                        ele.find('span.ui-icon-menu').show();
+                        ele.hide();
+                        
+                       
+                       $(node).removeClass('fancytree-hover');
+                        
+                        //remove heighlight
+                        that._layout_container.find('div[data-hid]').removeClass('cms-element-active');
+                        that._layout_container.find('.lid-actionmenu').hide();
+                        
+                        if(!that._panel_propertyView.is(':visible'))
+                            that._layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    }
+                    
+                }
+            };             
+
+            function __onmouseenter(event){
+
+                    //TBD TEST if (current_edit_mode != 'page') return;
+                    if(that._panel_propertyView.is(':visible')) return;
+
+                    
+                    let node, ele_ID;
+
+                    if(that.__timeout>0) clearTimeout(that.__timeout);
+                    that.__timeout = 0;
+
+                    if($(event.target).hasClass('.lid-actionmenu') || $(event.target).parents('div.lid-actionmenu').length>0){
+                        if(that.delay_onmove>0) clearTimeout(that.delay_onmove);
+                        that.delay_onmove = 0;
+                        return;
+                    }
+
+                    let is_in_page = ($(event.target).hasClass('brick') || $(event.target).parents('div.brick:first').length>0);
+
+                    if( is_in_page ){
+                        //div.editable in container 
+                        if($(event.target).hasClass('brick')){
+                            node = $(event.target);
+                        }else{
+                            node = $(event.target).parents('div.brick:first');
+                        } 
+
+                        //tinymce is active - do not show toolbar
+                        if(that._layout_container.find('div.mce-edit-focus').length>0){  //node.hasClass('mce-edit-focus')){
+                            return;   
+                        }
+
+                       
+                        let ele_id = node.attr('data-hid');
+                        that._layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
+                        let ele = that._layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
+
+                        let parent = node.parents('div.ui-layout-pane:first');
+                        if(parent.length==0 || parent.parents('div[data-hid]').length==0){
+                            parent = that._layout_container;  
+                        }
+                        let pos = node.position();
+                        let margin_top = parseInt(node.css('margin-top'));
+                        if(!(margin_top>0)) margin_top = 2;
+                        let margin_left = parseInt(node.css('margin-left'));
+                        if(!(margin_left>0)) margin_left = 2;
+                        
+                        ele.find('span[data-action]').hide();  
+                        ele.find('span.ui-icon-gear').show();  
+                        ele.css({
+                            top:(pos.top<0?0:pos.top)+ margin_top +'px',
+                            left:(pos.left<0?0:pos.left)+margin_left+'px'});
+                        ele.show();
+                        
+                        ele_ID = $(node).attr('data-hid');
+
+                    }else {
+                        //node in treeview
+
+
+                        if($(event.target).hasClass('fancytree-node')){
+                            node =  $(event.target);
+                        }else{
+                            node = $(event.target).parents('.fancytree-node:first');
+                        }
+                        if(node){
+                            $(node).addClass('fancytree-hover');
+                            
+                            node = $(node).find('.lid-actionmenu');
+                            node.css('display','inline-block');
+                        }
+                        ele_ID = $(node).attr('data-lid');
+                    }
+
+                    if(ele_ID>0){
+                        
+                        if(is_in_page){
+                            //highlight in preview/page
+                            node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_ID);
+                            if(node) node.setActive(true);
+
+                            that._layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
+                            that._layout_container.find('div[data-hid='+ele_ID+']').addClass('cms-element-active');
+
+                        }else                            
+                        {   
+                            //highlight in treeview
+                            //separate overlay div - visible when mouse over tree
+                            if(!that._panel_propertyView.is(':visible')){
+                                that._panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                                that.#showOverlayForElement(ele_ID);
+                            }
+                                    
+                        }
+
+                    }
+
+            };
+                
+            $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
+
+            /*                            
+            $(item).on('mouseleave',
+
+            );
+            */
+        }
+    }
+
+    //
+    //
+    //
+    #showOverlayForElement( ele_ID ){
+        if(ele_ID>0){
+            let cms_ele = this._layout_container.find('div[data-hid='+ele_ID+']');
+            
+            if(cms_ele.hasClass('cms-element-editing')) return;
+            
+            let pos = cms_ele.offset(); //realtive to document
+            let pos2 = this._layout_container.offset();
+            let overlay_ele = this._layout_container.find('.cms-element-overlay');
+            if(overlay_ele.length==0){
+                overlay_ele = $('<div>').addClass('cms-element-overlay').appendTo(this._layout_container); //attr('data-lid',ele_ID).insertAfter
+            }
+            if(pos && pos2){
+                overlay_ele.attr('data-lid',ele_ID)
+                .css({top:((pos.top)+'px'), //pos.left-pos2.left
+                    left:((pos.left)+'px'),width:cms_ele.width(),height:cms_ele.height()});
+                overlay_ele.css('visibility','visible');
+            }
+        }
+    }
+
+    //
+    // remove element
+    // it prevents deletion of non-empty group
+    //
+    #layoutRemoveElement(ele_id){
+
+        let tree = $.ui.fancytree.getTree( this._panel_treePage );
+        let node = tree.getNodeByKey(''+ele_id);
+        let parentnode = node.getParent();
+        let parent_container, parent_children, parent_element;
+        
+        if(parentnode.isRootNode() && parentnode.countChildren(false) == 1){
+            //cannot remove root element
+            window.hWin.HEURIST4.msg.showMsgFlash('It is not possible to remove the last root element');
+            return;    
+            
+        }else if(parentnode.isRootNode()){
+            parent_children = this._layout_content;
+            parent_container = this._layout_container;
+        }else{
+
+            //remove child
+            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
+            parent_children = parent_element.children;
+            parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
+            
+        }
+
+        this.tinymce.remove('.tinymce-body'); //detach
+        this._layout_container.find('.lid-actionmenu').remove();
+        //find index in _layout_content
+        let idx = -1;
+        for(let i=0; i<parent_children.length; i++){
+          if(parent_children[i].key==ele_id){
+              idx = i;
+              break;
+          }   
+        }        
+        //from json
+        parent_children.splice(idx, 1); //remove from children
+
+        //from tree
+        node.remove();
+        
+        //recreate parent element
+        if(parent_element && parent_element.type=='accordion'){
+            window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
+        }else if(parent_element && parent_element.type=='tabs'){
+            window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
+        }else{
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+                        {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}); 
+        }
+        
+        this.page_was_modified = true;
+        this.#onPageChange();
+        
+        this.#updateActionIcons(200); //it inits tinyMCE also
+        
+    }
+    
+    //
+    // Reflects changes in tree
+    //
+    #layoutChangeParent(ele_id){
+
+        this.tinymce.remove('.tinymce-body'); //detach
+        this._layout_container.find('.lid-actionmenu').remove();
+        
+        let affected_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
+        
+
+        let oldparent = window.hWin.HAPI4.layoutMgr.layoutContentFindParent(this._layout_content, ele_id);
+        let parent_children;
+        
+        //remove from old parent -----------
+        if(oldparent=='root'){
+            parent_children = this._layout_content;
+        }else{
+            parent_children = oldparent.children;
+        }
+        let idx = -1;
+        for(let i=0; i<parent_children.length; i++){
+          if(parent_children[i].key==ele_id){
+              idx = i;
+              break;
+          }   
+        }        
+        parent_children.splice(idx, 1); //remove from children
+        
+        //add to new parent  ---------------
+        let tree = $.ui.fancytree.getTree( this._panel_treePage );
+        let node = tree.getNodeByKey(''+ele_id);
+        let prevnode = node.getPrevSibling();
+        let parentnode = node.getParent();
+        let parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
+        parent_children = parent_element ? parent_element.children : this._layout_content;
+        
+        if(prevnode==null){
+            idx = 0;
+        }else{
+            for(let i=0; i<parent_children.length; i++){
+              if(parent_children[i].key==prevnode.key){
+                  idx = i+1;
+                  break;
+              }   
+            }        
+        }
+        if(idx==parent_children.length){
+            parent_children.push(affected_element);
+        }else{
+            parent_children.splice(idx, 0, affected_element);    
+        }
+        
+        //redraw page
+        window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, this._layout_container, 
+                {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
+        this.#updateActionIcons(200); //it inits tinyMCE also
+        
+        this.page_was_modified = true;
+        this.#onPageChange();
+    }
+
+    //
+    // switch to different language version or create new one
+    //
+    #layoutTranslateElement(ele_id, lang_id){
+        
+        let affected_ele = this._layout_container.find('div[data-hid="'+ele_id+'"]');
+        let lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
+        
+        //need switch
+        if(affected_ele.attr('data-lang')==lang || (this._cmsEditor.current_language==lang && !affected_ele.attr('data-lang'))){
+            return;
+        }
+
+        let affected_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
+
+        let content = 'content';
+        if(this._cmsEditor.default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
+            content = content + lang;
+            if(!affected_cfg[content]){ //if not found -  add new content
+                affected_cfg[content] = 'Translate content to '+lang+'!' + affected_cfg['content'];
+            }
+        }
+                       
+        affected_ele.html(affected_cfg[content]);
+        affected_ele.attr('data-lang', lang);
+                       
+        //_ws_body.layout().open(options.editor_pos);    
+    }
+
+    
     //
     // Opens element/widget property editor  (editCMS_ElementCfg/WidgetCfg)
     // 1. css properties
     // 2  flexbox properties
     // 3. widget properties
     //
-  #layoutEditElement(ele_id){
-      
-        return;
+    #layoutEditElement(ele_id){
+        
+        let that = this;
 
-        if(this._edit_Element){ //already opened - save previous
+        if(this._cmsEditorElement){ //already opened - save previous
             
             if(this._layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
             
             //save previous element
-            if(this._edit_Element.warningOnExit(function(){that.#layoutEditElement(ele_id);})) return;
+            if(this.warningOnExit(function(){that.#layoutEditElement(ele_id);})) return;
             
             this._layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         }
@@ -79,18 +1212,12 @@ class HCmsEditorPage {
         h = (h<175)?h:175; 
         this._panel_treePage.css('height',h+'px');
         this._panel_propertyView.css('top',(h+20)+'px');
-        this._container.find('.page_tree').hide();
         this._toolbar_Page.hide();
         
         this._panel_propertyView.fadeIn(500);
         
-/* TBD expand width         
-        _editor.expandEditorWidth();
-        if(_ws_body.layout().state['west']['outerWidth']<450){
-            this._keep_EditPanelWidth = _ws_body.layout().state['west']['outerWidth'];
-            _ws_body.layout().sizePane('west', 450);    
-        }
-*/
+        this._cmsEditor.expandEditorPanel(); //expand width of editor panel at least 450px
+        
         //scroll tree that selected element will be visible
         let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_id);
         let top1 = $(node.li).position().top;
@@ -100,7 +1227,7 @@ class HCmsEditorPage {
         $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
         
-        _hideMenuInTree();
+        this.#hideMenuInTree();
         
         this._layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         this._layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
@@ -111,7 +1238,7 @@ class HCmsEditorPage {
             ele.addClass('headline marching-ants marching');
         }
         
-        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);  //json
         
         let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
                 element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
@@ -121,53 +1248,54 @@ class HCmsEditorPage {
              const node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(''+ele_id);
              const parentnode = node.getParent();
              ele_id = parentnode.key;
-             element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+             element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
         }
         
         //show overlay for editing element
-        _showOverlayForElement( ele_id );
+        this.#showOverlayForElement( ele_id );
         
-        _initTinyMCE( ele_id );
+        this.#initTinyMCE( ele_id );
 
         //
-        // mode - 0       take values from this._edit_Element without saving in db
+        // mode - 0       take values from this._cmsEditorElement without saving in db
         //        'save'  save entire page in db
         //
-        this._edit_Element = editCMS_ElementCfg(element_cfg, _layout_content, this._layout_container, this._panel_propertyView, function(new_cfg, mode){
+        this._cmsEditorElement = editCMS_ElementCfg(element_cfg, this._layout_content, this._layout_container, this._panel_propertyView, 
+        function(new_cfg, mode){
 
                     //save
                     if(new_cfg){
                         
-                        window.hWin.HAPI4.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
+                        window.hWin.HAPI4.layoutMgr.layoutContentSaveElement(that._layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
-                        let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(''+new_cfg.key);
+                        let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(''+new_cfg.key);
                         node.setTitle(new_cfg.title);
-                        _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
+                        that.#defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
                                
                         if(new_cfg.type=='cardinal'){
                             //recreate cardinal layout
-                            window.hWin.HAPI4.layoutMgr.layoutInitCardinal(new_cfg, this._layout_container);
+                            window.hWin.HAPI4.layoutMgr.layoutInitCardinal(new_cfg, that._layout_container);
                         }
                         
                         //save page
                         that.#saveLayoutCfg(); 
                         that.page_was_modified = false;
                         
-                        _onPageChange();
+                        that.#onPageChange();
                     }
                     
                     if(mode!='save'){
                         //close element config
-                        _hidePropertyView();
+                        that.#hidePropertyView();
                     }
 
                     // find all dragable elements - text and widgets
-                    this._layout_container.find('div.brick').each(function(i, item){   //
+                    that._layout_container.find('div.brick').each(function(i, item){   //
                         let ele_ID = $(item).attr('data-hid');
                         
-                        _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+                        that.#defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
                     });
 
                     
@@ -183,9 +1311,7 @@ class HCmsEditorPage {
     // 4. Update treeview
     //
     // @todo - store templates as json text 
-  #layoutInsertElement(ele_id, widget_type, widget_name){
-        
-        return;
+    #layoutInsertElement(ele_id, widget_type, widget_name){
         
        
         
@@ -299,25 +1425,27 @@ class HCmsEditorPage {
         }
         else if(widget_type.indexOf('new_tpl_')==0){
 
-            if(!this._editCMS_SiteMenu)
-            this._editCMS_SiteMenu = editCMS_SiteMenu( this._panel_treeWebSite, this );
+/* TBD            
+            if(!_editCMS_SiteMenu)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
 
             widget_type = widget_type.substring(8); // remove 'new_tpl_'
 
             // Get parent page id
-            let parent_page_id = this._editCMS_SiteMenu.getParentPage(window.hWin.current_page_id);
+            let parent_page_id = _editCMS_SiteMenu.getParentPage(window.hWin.current_page_id);
             parent_page_id = (parent_page_id == null || parent_page_id <= 0) ? window.hWin.current_page_id : parent_page_id;
 
-            this._editCMS_SiteMenu.createMenuRecord(parent_page_id, widget_name, widget_type);
+            _editCMS_SiteMenu.createMenuRecord(parent_page_id, widget_name, widget_type);
+*/            
             return;
         }
         else if(widget_type.indexOf('tpl_')==0){
             
-            _prepareTemplate(ele_id, widget_type);
+            this.#prepareTemplate(ele_id, widget_type);
             return;
         }
         
-        _layoutInsertElement_continue(ele_id, new_ele);
+        this.#layoutInsertElement_continue(ele_id, new_ele);
     }       
     
     //
@@ -329,13 +1457,13 @@ class HCmsEditorPage {
         let parentnode = tree.getNodeByKey(ele_id);
         let parent_container, parent_children, parent_element;
 
-        tinymce.remove('.tinymce-body'); //detach
+        this.tinymce.remove('.tinymce-body'); //detach
         this._layout_container.find('.lid-actionmenu').remove();
 
         if(parentnode.folder){
             //add child
 
-            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
             parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
             parent_children = parent_element.children;
 
@@ -344,9 +1472,9 @@ class HCmsEditorPage {
             if(parentnode.parent.isRootNode()){
                 parent_element = null;
                 parent_container = this._layout_container;
-                parent_children = _layout_content;
+                parent_children = this._layout_content;
             }else{
-                parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
+                parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.parent.key);
                 parent_container = this._layout_container.find('div[data-hid='+parentnode.parent.key+']');
                 parent_children = parent_element.children;
             }
@@ -364,9 +1492,10 @@ class HCmsEditorPage {
             window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
             window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
-            //window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, this._layout_container);    
+            //window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, this._layout_container);    
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language});
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+                    {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
         }   
 
 
@@ -385,116 +1514,56 @@ class HCmsEditorPage {
             parentnode.visit(function(node){
                 node.setExpanded(true);
             });
-            _updateActionIcons(200);
+            this.#updateActionIcons(200);
             },300);
 
         this.page_was_modified = true;
-        if(this._edit_Element==null) this._toolbar_Page.show();
-        /*        
-        [{name:'Layout', type:'group', //or cardinal
-        children:[
-        {name:'Text', type:'text', css:{}, content:'<p>Text element</p>'}
-        ] 
-        }];        
-        */        
+        if(this._cmsEditorElement==null) this._toolbar_Page.show();
     }
-    
-    //
-    // Reflects changes in tree
-    //
-    #layoutChangeParent(ele_id){
-        
-        return;
 
-        tinymce.remove('.tinymce-body'); //detach
-        this._layout_container.find('.lid-actionmenu').remove();
+    //
+    //
+    //
+    #prepareTemplate(ele_id, template_name){
         
-        let affected_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        if(template_name.indexOf('tpl_')==0){
+            template_name = template_name.substring(4);
+        }
         
+        // 1. load template files
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+        
+        let that = this;
 
-        let oldparent = window.hWin.HAPI4.layoutMgr.layoutContentFindParent(_layout_content, ele_id);
-        let parent_children;
-        
-        //remove from old parent -----------
-        if(oldparent=='root'){
-            parent_children = _layout_content;
-        }else{
-            parent_children = oldparent.children;
-        }
-        let idx = -1;
-        for(let i=0; i<parent_children.length; i++){
-          if(parent_children[i].key==ele_id){
-              idx = i;
-              break;
-          }   
-        }        
-        parent_children.splice(idx, 1); //remove from children
-        
-        //add to new parent  ---------------
-        let tree = $.ui.fancytree.getTree( this._panel_treePage );
-        let node = tree.getNodeByKey(''+ele_id);
-        let prevnode = node.getPrevSibling();
-        let parentnode = node.getParent();
-        let parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
-        parent_children = parent_element ? parent_element.children : _layout_content;
-        
-        if(prevnode==null){
-            idx = 0;
-        }else{
-            for(let i=0; i<parent_children.length; i++){
-              if(parent_children[i].key==prevnode.key){
-                  idx = i+1;
-                  break;
-              }   
-            }        
-        }
-        if(idx==parent_children.length){
-            parent_children.push(affected_element);
-        }else{
-            parent_children.splice(idx, 0, affected_element);    
-        }
-        
-        //redraw page
-        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, this._layout_container, {rec_ID:home_page_record_id, lang:current_language});
-        _updateActionIcons(200); //it inits tinyMCE also
-        
-        this.page_was_modified = true;
-        _onPageChange();
-    }
-    
-  
-  //
-  //
-  //
-  #onPageChange(){
+        // 2. Loads template json
+        $.getJSON(sURL, 
+        function( new_element_json ){
             
-        if(this.page_was_modified){
-
-            if(this._edit_Element==null){
-                //show toolbar with Save/Discard
-                this._toolbar_Page.show();
-            }else{
-                //activate save buttons
-                this._edit_Element.onContentChange();
+            if(template_name=='default'){
+                new_element_json = new_element_json.children[0];
+            }else if(template_name=='blog'){
+                window.hWin.HAPI4.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+                    that.#layoutInsertElement_continue( ele_id, updated_json );
+                });
+                return;
             }
             
-        }else{
-             this._toolbar_Page.hide();
-        }
-  }     
-
+            that.#layoutInsertElement_continue( ele_id, new_element_json );
+        }); //on template json load
+        
+    }
+    
+    
     //
-    //  Save page configuration (_layout_content) into RT_CMS_MENU record 
+    //  Save page configuration (this._layout_content) into RT_CMS_MENU record 
     //
     #saveLayoutCfg( callback ){
-        
-        return;
         
         if(!(options.record_id>0)) return;
         
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         
-        let newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
+        let newval = window.hWin.HEURIST4.util.cloneJSON(this._layout_content);
         let contents = [];
         
         //@todo remove keys and titles,  extract "content" into separate set of values
@@ -527,11 +1596,12 @@ class HCmsEditorPage {
         newval = JSON.stringify(newval);
         
         let request = {a: 'addreplace',
-                        recIDs: options.record_id,
-                        dtyID: DT_EXTENDED_DESCRIPTION,
+                        recIDs: this._cmsEditor.page_id,
+                        dtyID: window.hWin.DT_EXTENDED_DESCRIPTION,
                         rVal: newval,
                         needSplit: true};
         
+        let that = this;
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -551,18 +1621,9 @@ class HCmsEditorPage {
                             status: window.hWin.ResponseStatus.REQUEST_DENIED
                         });
                     }else{
-                        this._toolbar_Page.hide();
-                        this.page_was_modified = false;
-                        page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
-                        
-                        
-
-                        /* 2022-01-04 IJ does not want direct name of web page title
-                        if(_editCMS_SiteMenu && newname!=page_cache[options.record_id][DT_NAME]) {
-                            body.find('.treePageHeader > h2').text( newname ); 
-                            _editCMS_SiteMenu.renameMenuEntry(options.record_id, newname);
-                        }
-                        */
+                        that._toolbar_Page.hide();
+                        that.page_was_modified = false;
+                        //not used page_cache[that._cmsEditor.page_id][window.hWin.DT_EXTENDED_DESCRIPTION] = newval; //update in cache
                         
                         if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
@@ -572,194 +1633,50 @@ class HCmsEditorPage {
                 }
         });         
     }
-
-  //
-  //
-  //
-  #hideMenuInTree(){
-        let ele = this._panel_treePage.find('.lid-actionmenu');
-        ele.hide(); //menu icon
-        ele.find('span[data-action]').hide(); //popup menu
-  }        
-    
-  //
-  //
-  //
-  #hidePropertyView (){
-        
-        this._edit_Element = null;
-        //TBD this.#initTinyMCE();
-    
-        this._layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
-        
-        this._panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
-        this._panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
-        
-        this.#hideMenuInTree();
-
-        this._panel_propertyView.hide();
-
-        //restore tree
-/* TBD restore width         
-        _editor.restoreEditorWidth();
-        if(this._keep_EditPanelWidth>0){
-            this._ws_body.layout().sizePane('west', this._keep_EditPanelWidth);    
-        }
-        this._keep_EditPanelWidth = 0;
-*/
-        this._container.find('.page_tree').show();
-        
-        this.#onPageChange();
-        
-        this._panel_treePage[0].style.removeProperty('height');
-  }
   
- //
- // loads converts page as treeview data
- //
- #initTreePage( treeData ){
+   //
+  //
+  //  
+  warningOnExit( callback ){
       
-        var that = this;
-        
-        if(this._panel_treePage){
-            
-            $.ui.fancytree.getTree( this._panel_treePage ).reload(treeData);
-            
-        }else{
-        
-        //init treeview
-        let fancytree_options =
-        {
-            checkbox: false,
-            //titlesTabbable: false,     // Add all node titles to TAB chain
-            focusOnSelect:true,
-            source: treeData,
-            quicksearch: true,
-            
-            click: function(event, data){
+      let that = this;
 
-                if(data.targetType=='title'){
-                    if(data.node.isActive()){
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        ///  that._saveEditAndClose(null, 'close'); //close editor on second click
-                    }
-                    if(data.node.key>0){
-                        that._ws_body.layout().open(options.editor_pos);
-                        that.#layoutEditElement(data.node.key);
-                    }
-                
-                }
-                
+        //at first check if element editor is active
+        if(this._cmsEditorElement && this._cmsEditorElement.warningOnExit(function(){
+            if(that.page_was_modified){
+                that.#saveLayoutCfg(callback);
             }
-            //,activate: function(event, data) { }
-        };
-
+        })) return true;
         
-        fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
-        fancytree_options['dnd'] = {
-                autoExpandMS: 400,
-                preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
-                preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
-                dragStart: function(node, data) {
-
-                    let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
-                    let is_cardinal = (node.type=='north' || node.type=='south' || 
-                               node.type=='east' || node.type=='west' || node.type=='center');
-                    
-                    return !(is_last_root || is_cardinal);
+        if(that.page_was_modified){
+            
+            let $dlg;
+            let _buttons = [
+                {text:window.hWin.HR('Save'), 
+                    click: function(){that.#saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
-                dragEnter: function(node, data) {
-                    if(node.type=='cardinal'){
-                        return false;
-                    }else{
-                        return (node.folder) ?true :["before", "after"];
+                {text:window.hWin.HR('Leave unchanged'), 
+                    click: function(){
+                        that.toolbar_Page.hide();
+                        that.page_was_modified = false; 
+                        $dlg.dialog('close'); 
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
-                dragDrop: function(node, data) {
-                    // data.otherNode - dragging node
-                    // node - target
-                   
-                    let is_cardinal = (node.type=='north' || node.type=='south' || 
-                               node.type=='east' || node.type=='west' || node.type=='center');
-                    let hitMode = (is_cardinal)?'child' :data.hitMode;                    
-                    
-                    data.otherNode.moveTo(node, hitMode);    
-                    //change layout content and redraw page
-                    that.#layoutChangeParent(data.otherNode.key);
+                {text:window.hWin.HR('Cancel'), 
+                    click: function(){$dlg.dialog('close');}
                 }
-            };
-
-            //create tree
-            this._panel_treePage.fancytree(fancytree_options);
-                                
-            $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
-                                    +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
-                                    + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
-                                    + '<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
-                                +'</div>').appendTo(this._panel_treePage);
+            ];            
             
-            this._toolbar_Page.hide();
-                                
-                    this._panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'})
-                            .on('click', this.#saveLayoutCfg);
-            
-/*TBD                            
-                    this._panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
-                        function(){
-                            that.#startCMS({record_id:options.record_id, container:'#main-content', content:null});
-                        }
-                    );
-                    this._panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click', this.#closeCMS); //{icon:'ui-icon-close'}
-*/                    
+            let sMsg = '"'+ this._cmsEditor._editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
+                            {appendTo: 'body', default_palette_class:this._cmsEditor.default_palette_class});
 
-        }
-        
-    }
-    
-    //
-    // load page structure into tree and init layout
-    //
-    initPage(){
-        
-        //TBD if(tinymce) tinymce.remove('.tinymce-body'); //detach
-        
-        if(window.hWin.HAPI4.layoutMgr){
-            window.hWin.HAPI4.layoutMgr.setEditMode(true);
-        }else {
-            return;
-        }
-        
-        let opts = {};
-        opts.page_id = this._editor.page_id;
-        
-        if(window.hWin.page_cache && window.hWin.page_cache[opts.page_id]){
-            opts = {page_name:window.hWin.HAPI4.getTranslation(window.hWin.page_cache[options.record_id][DT_NAME], current_language)};  
-            //call global function from websiteScriptAndStyles
-            //TBD window.hWin.assignPageTitle(options.record_id)
-        } 
-        opts.rec_ID = this._editor.website_id;
-        opts.keep_top_config = true;
-        opts.lang = current_language;
-        
-        const res = window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, this._editor.layout_container, opts); //FromJSON
-      
-//console.log(res);      
-        
-        if(res===false){
-            window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
-            //clear treeview
-            this.#initTreePage([]);
+            return true;     
         }else{
-            _layout_content = res;
-            this.#initTreePage(_layout_content);
+            return false;     
         }
-        
-        this._container.find('.treePageHeader > h3')
-                .text( opts.page_id==this._editor.website_id ? window.hWin.HR('Home Page') :opts.page_name );
-        
-        if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
-        
-        page_was_modified = false;
-    }
-    
+      
+  }
+
 }
