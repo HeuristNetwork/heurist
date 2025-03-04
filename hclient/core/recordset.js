@@ -1427,10 +1427,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                         val1 = dres[0];
                                         val2 = dres[1];
                                     }
-                                    if(val1) val1 = val1.toLowerCase();
-                                    if(val2) val2 = val2.toLowerCase();
-                                    if(val1!=val2){
-                                        res = sortFields[fieldName]*(val1<val2?-1:1);
+                                    if(val1) val1 = val1.toLocaleLowerCase();
+                                    if(val2) val2 = val2.toLocaleLowerCase();
+                                    let compare = val1.localeCompare(val2);
+                                    if(compare !== 0){
+                                        res = sortFields[fieldName] * compare;
                                     }
                                 }
                                 if(res!=0){
@@ -1604,12 +1605,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     });
                     
                 }else{
-                    _order.sort(function(a,b){  
+                    _order.sort(function(a,b){
                         let val1 = that.fld(records[a], sortFields[0]);
                         let val2 = that.fld(records[b], sortFields[0]);
-                        if(val1) val1 = val1.toLowerCase();
-                        if(val2) val2 = val2.toLowerCase();
-                        return sortFieldsOrder[0]*(val1<val2?-1:1);
+                        if(val1) val1 = val1.toLocaleLowerCase();
+                        if(val2) val2 = val2.toLocaleLowerCase();
+                        return sortFieldsOrder[0] * val1.localeCompare(val2);
                     });
                 }
             }

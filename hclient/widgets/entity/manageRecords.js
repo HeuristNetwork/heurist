@@ -884,6 +884,30 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                           click: function() { 
                             let recset = $Db.rst(that._currentEditRecTypeID);
                             let hasField = false;
+                            let btns = {};
+                            let $dlg;
+
+                            if(that.options.rts_editor && that.options.rts_editor.manageDefRecStructure('checkIfEditing')){
+
+                                btns[window.hWin.HR('Save changes')] = () => {
+                                    that.element.find('.btnRecSaveAndClose_rts').trigger('click');
+                                    $dlg.dialog('close');
+                                    setTimeout(() => { that.closeEditDialog() }, 2000);
+                                };
+                                btns[window.hWin.HR('Close without saving')] = () => {
+                                    $dlg.dialog('close');
+                                    that.closeEditDialog();
+                                };
+
+                                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'You have un-saved structure changes which will be lost if not saved<br>Would you like to save your changes before closing?',
+                                    btns,
+                                    {title: 'Un-saved structure changes', no: window.hWin.HR('Close without saving'), yes: window.hWin.HR('Save changes')},
+                                    {default_palette_class: 'ui-heurist-design'}
+                                );
+
+                                return;
+                            }
 
                             if(!window.hWin.HEURIST4.util.isempty(recset)){
 
@@ -895,17 +919,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                             if(!hasField){ // check if any fields have been added to rectype
 
-                                let btns = {};
                                 btns[window.hWin.HR('Continue editing')] = function(){
-                                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                     $dlg.dialog('close');
                                 };
                                 btns[window.hWin.HR('Exit with no fields')] = function(){
-                                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                     $dlg.dialog('close');
                                     that.closeEditDialog();
                                 };
-                                window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
+
+                                $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You need to define fields to make this record type usable.', 
                                     btns, 
                                     {title:'No fields defined', no:window.hWin.HR('Continue editing'), yes:window.hWin.HR('Exit with no fields')},
                                     {default_palette_class: 'ui-heurist-design'}); 
