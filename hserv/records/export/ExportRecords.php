@@ -470,6 +470,8 @@ abstract class ExportRecords {
                 header('Access-Control-Max-Age: 5');// default value 5 sec
             }
             //2024-02-23 else header(HEADER_CORS_POLICY);
+        }elseif($format=='iiif'){
+            header(HEADER_CORS_POLICY);            
         }
 
         header($mimeType);
