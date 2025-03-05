@@ -3245,8 +3245,10 @@ window.hWin.HEURIST4.ui = {
                 if(!a_dtls || !b_dtls){
                     return 0;
                 }
+                let a_displayname = a_dtls['rst_DisplayName'].toLocaleLowerCase();
+                let b_displayname = b_dtls['rst_DisplayName'].toLocaleLowerCase();
                 if(order == 1){
-                    return (a_dtls['rst_DisplayName'].toLowerCase()<b_dtls['rst_DisplayName'].toLowerCase())?-1:1;
+                    return a_displayname.localeCompare(b_displayname);
                 }else{
                     return (a_dtls['rst_DisplayOrder']<b_dtls['rst_DisplayOrder'])?-1:1;
                 }
