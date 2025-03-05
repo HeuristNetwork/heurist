@@ -403,7 +403,9 @@ title: "Overview"
                                     to_del = null;
                                 }
                                 
-                                editCMS2.resetModified();
+                                if(!isVersion3){
+                                    editCMS2.resetModified();
+                                }
                                 
                                 _removeMenuEntry(parent_id, menuid, to_del, function(){
                                     item.remove();    
@@ -634,7 +636,7 @@ title: "Overview"
                 }
                 , open: function(){
                     $dlg.find('#pageName').on('keyup', function(e){
-                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.btnDoAction'), $(e.taget).val()=='');
+                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('#btnDoAction'), $(e.taget).val()=='');
                     } );
                 }
         });
@@ -762,13 +764,23 @@ title: "Overview"
     //
     function _refreshMainMenu( need_refresh_tree, new_page_id ){
         
-        //call global function from websiteScriptAndStyles
-        window.hWin.initMainMenu( function(){
-            if(need_refresh_tree!==false){
-                _initControls();
+        if(isVersion3){
+            editCMS2.loadWebSite(new_page_id); //reload entire website
+            /*
+            if(new_page_id>0){
+            }else{
+                //reload header only
             }
-            _refreshCurrentPage(new_page_id);
-        });  
+            */
+        }else{
+            //call global function from websiteScriptAndStyles
+            window.hWin.initMainMenu( function(){
+                if(need_refresh_tree!==false){
+                    _initControls();
+                }
+                _refreshCurrentPage(new_page_id);
+            });  
+        }
     }
 
     
@@ -793,7 +805,11 @@ title: "Overview"
     // reload entire website 
     //
     function _refreshWebsite(){
-        window.hWin.location.reload();
+        if(isVersion3){
+            editCMS2.loadWebSite();
+        }else{
+            window.hWin.location.reload();
+        }
     }
 
     //
@@ -850,6 +866,10 @@ title: "Overview"
         
         refreshWebsite: function(){
             _refreshWebsite();
+        },
+
+        initControls: function(){
+            _initControls();
         },
 
         // create new menu

@@ -1,5 +1,5 @@
 /*
-* HLayoutMgr.js - web page generator based on json configuration
+* HCmsEditorPage.js - web page structure editor
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -10,7 +10,7 @@
 */
 
 /*
-* HCmsEditorPage.js - particualr page editor - page treeview+element property editor
+* HCmsEditorPage.js - web page editor - page treeview+element property editor
 */
 class HCmsEditorPage {
 
@@ -27,8 +27,9 @@ class HCmsEditorPage {
     _panel_treePage;     // panel with treeview for current page 
     _panel_propertyView; // panel with selected element properties
     _toolbar_Page;       // buttons to apply/cancel changes
-    
+
     tinymce;
+    layoutMgr;
 
     //interface flags and states
     page_was_modified = false;
@@ -41,26 +42,11 @@ class HCmsEditorPage {
     
     this._container = _container;
     this._cmsEditor = _editor;
-      
+
   }
   
-  
-  /**
-  * Exapnds structure tree, updates menu in tree, init tinymce
-  */
-  refreshInterface(){
-      this._panel_propertyView = this._container.find('.propertyView');
-
-      //reset selection and expand all   
-      $.ui.fancytree.getTree( this._panel_treePage ).visit(function(node){
-          node.setSelected(false); //reset
-          node.setExpanded(true);
-      });            
-      this.#updateActionIcons(500);//it inits tinyMCE also
-  }
-
   //
-  //
+  // Hides popup menu in tree
   //
   #hideMenuInTree(){
       let ele = this._panel_treePage.find('.lid-actionmenu');
@@ -70,7 +56,7 @@ class HCmsEditorPage {
 
   
   //
-  //
+  // Inits inline rich text editor
   //
   #initTinyMCE( key ){
 
@@ -96,9 +82,8 @@ class HCmsEditorPage {
 
             return;
         }
-      
-        if(this.tinymce) this.tinymce.remove('.tinymce-body'); //detach
-        this._layout_container.find('.lid-actionmenu').remove();
+        
+        this.detachTinyMCE(false);
         
         let selector = '.tinymce-body';
         if(key>0){
@@ -157,18 +142,16 @@ class HCmsEditorPage {
             
             setup:function(editor) {
 
-                // ----- Event handles -----
+                // ----- Event handlers -----
                 editor.on('change', function(e) {
                     if(that.tinymce.activeEditor && that.tinymce.activeEditor.targetElm){
                         let key = $(that.tinymce.activeEditor.targetElm).attr('data-hid');
                         //update in _layout_content
-                        let l_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(that._layout_content, key);
+                        let l_cfg = that.layoutMgr.layoutContentFindElement(that._layout_content, key);
                         if(l_cfg){
                             let new_content = that.tinymce.activeEditor.getContent();
                             that.page_was_modified = (that.page_was_modified || l_cfg.content!=new_content);
 
-                            that.#onPageChange();
-                            
                             let lang = $(that.tinymce.activeEditor.targetElm).attr('data-lang');
                             if(lang==that._cmsEditor.default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 lang = '';
@@ -184,6 +167,7 @@ class HCmsEditorPage {
                         }else{
                             that.page_was_modified = false;
                         }
+                        that.#onPageChange();
                        
                     }
                 });
@@ -205,20 +189,18 @@ class HCmsEditorPage {
                 });
                     
                 editor.on('focus', function (e) {
-                    if(that.current_edit_mode=='page'){
+                    
+                    if(!that._panel_treePage.is(':visible')) return;
 
-                        that._layout_container.find('.lid-actionmenu').hide();
-                        that._layout_container.find('div[data-hid]').removeClass('cms-element-active');  
+                        //on editor activation - hides popup menu, overlay and remove "active" class
+                        that.hideOverlayAll();
 
-                        that._layout_container.find('.cms-element-overlay').css('visibility','hidden');
-
-                        //highlight editing element in tree
+                        //highlights editing element in tree
                         let key = $(that.tinymce.activeEditor.targetElm).attr('data-hid');
                         let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(key);
                         that._panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                     
-                    }
 
                     $(editor.bodyElement).css('padding-left', '5px'); // add space between content and body outline
                 });
@@ -314,7 +296,7 @@ class HCmsEditorPage {
   }
   
   //
-  //
+  // Add Heurist Record link
   //
   #addHeuristRecordAddLink(){
       
@@ -347,7 +329,7 @@ class HCmsEditorPage {
   }
 
   //
-  // browse for heurist uploaded/registered files/resources and add player link
+  // Browses for heurist uploaded/registered files/resources and add player link
   //         
   #addHeuristMedia(){
 
@@ -411,9 +393,9 @@ class HCmsEditorPage {
 
        
   //
+  // Closes _cmsEditorElement
   //
-  //
-  #hidePropertyView(){
+  hidePropertyView(){
 
       this._cmsEditorElement = null;
       this.#initTinyMCE();
@@ -433,7 +415,7 @@ class HCmsEditorPage {
   }
     
   //
-  //
+  // If page has been modified shows save/cancel buttons for tree or _cmsEditorElement
   //
   #onPageChange(){
 
@@ -453,7 +435,7 @@ class HCmsEditorPage {
   }     
   
  //
- // loads converts page as treeview data
+ // loads page structure into a treeview
  //
  #initTreePage( treeData ){
       
@@ -480,7 +462,7 @@ class HCmsEditorPage {
                     if(data.node.isActive()){
                         window.hWin.HEURIST4.util.stopEvent(event);
                     }
-                    if(data.node.key>0){
+                    if(data.node.key>0){  //opens property editor
                         that.#layoutEditElement(data.node.key);
                     }
                 
@@ -490,7 +472,7 @@ class HCmsEditorPage {
             //,activate: function(event, data) { }
         };
 
-        
+        //TO CHECK - it is possible to drop to group/container elements only
         fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
         fancytree_options['dnd'] = {
                 autoExpandMS: 400,
@@ -533,45 +515,44 @@ class HCmsEditorPage {
             $('<div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
                                     +'<button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard</button>'
                                     + '<button title="Save changes for current page" class="btn-page-save ui-button-action">Save</button>'
-                                    + '<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
+                                    //+ '<button title="Exit/Close content editor" class="bnt-cms-exit">Close</button>'
                                 +'</div>').appendTo(this._panel_treePage);
             
-            this._toolbar_Page = this._panel_treePage.find('.toolbarPage').hide();
+
+            //button panel below treeview - discard and save
+            //if property editor is visible this panel is hidden                                 
+            this._toolbar_Page = this._panel_treePage.find('.toolbarPage');
                                 
-            this._toolbar_Page.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',this.#saveLayoutCfg)
-            this._toolbar_Page.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
-                        function(){
-                            //_startCMS({record_id:options.record_id, container:'#main-content', content:null});
-                        }
-                    );
-            this._toolbar_Page.find('.bnt-cms-exit').button().css({'border-radius':'4px'}); //TBD.on('click',_closeCMS);
-            
-/*TBD                            
-                    this._panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
-                        function(){
-                            that.#startCMS({record_id:options.record_id, container:'#main-content', content:null});
-                        }
-                    );
-                    this._panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click', this.#closeCMS); //{icon:'ui-icon-close'}
-*/                    
+            this._toolbar_Page.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'})
+                        .on('click',()=>that.#saveLayoutCfg())
+            this._toolbar_Page.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'})
+                        .on('click',()=>that._cmsEditor.loadPageContent());  //reload this page
+                        
+            //this._panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click', this.#closeCMS);
+
 
         }
-        
+        this._toolbar_Page.hide();
     }
     
-    //
-    // load page structure into tree and init layout
-    //
-    initPage(pageContainer, pageRecord){
+//
+// Loads page structure into tree and init layout
+//
+initPage(pageContainer, pageRecord){
         
-        if(this.tinymce) this.tinymce.remove('.tinymce-body'); //detach
-        
-        if(window.hWin.HAPI4.layoutMgr){
-            window.hWin.HAPI4.layoutMgr.setEditMode(true);
+        this.detachTinyMCE(false);
+
+        this._layout_container = pageContainer;
+        this.layoutMgr = this._cmsEditor.getHapi().layoutMgr;
+
+
+        if(this.layoutMgr){
+            this.layoutMgr.setEditMode(true);
         }else {
             return;
         }
         
+        /*
         let opts = {};
         opts.page_id = this._cmsEditor.page_id;
         
@@ -590,8 +571,7 @@ class HCmsEditorPage {
 //console.log(res);      
         //const res = window.hWin.HEURIST4.util.isJSON(this._layout_content);
         //const res = window.hWin.HAPI4.layoutMgr.convertOldCmsFormat(this._layout_content, $('<div>'));
-        
-        this._layout_container = pageContainer;
+        */
         
         if(!pageRecord['pageTreeData']){
             window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
@@ -603,21 +583,34 @@ class HCmsEditorPage {
         }
         
         this._container.find('.treePageHeader > h3')
-                .text( opts.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :opts.page_name );
+                .text( this._cmsEditor.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :pageRecord[window.hWin.DT_NAME] );
         
         this.page_was_modified = false;
         
         
-        //expands structure tree, updates menu in tree, init tinymce
-        this.refreshInterface();
-    }
+        //expands structure tree, updates menu in tree
+        this._panel_propertyView = this._container.find('.propertyView');
+
+}
+
+//
+//
+//
+initActionIcons(){
+    //reset selection and expand all   
+    $.ui.fancytree.getTree( this._panel_treePage ).visit(function(node){
+        node.setSelected(false); //reset
+        node.setExpanded(true);
+    });            
+    this.#updateActionIcons(300);//it inits tinyMCE also
+}
  
 //--------------------------------------
   
-    //
-    // add and init action icons for page structure treeview
-    //
-    #updateActionIcons(delay){ 
+//
+// add and init action icons for page structure treeview
+//
+#updateActionIcons(delay){ 
 
         let that = this;
 
@@ -626,7 +619,7 @@ class HCmsEditorPage {
             return;
         }
         
-console.log('updateActionIcons')        
+        this.#initTinyMCE();
         
         $.each( this._panel_treePage.find('.fancytree-node'), function( idx, item ){
             
@@ -635,15 +628,13 @@ console.log('updateActionIcons')
             that.#defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
         });
 
-        this.#initTinyMCE();
-        
         // find all dragable elements - text and widgets
         this._layout_container.find('div.brick').each(function(i, item){   //
             let ele_ID = $(item).attr('data-hid');
             
             that.#defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
         });
-    }
+}
 
     //
     // for treeview on mouse over toolbar
@@ -679,9 +670,10 @@ console.log('updateActionIcons')
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
-            //+ (true || is_root || is_cardinal?'':
-            + ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>')
+            
+            // hide drag in menu
+            //+ ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
+            //        + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>')
                                    
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
             +'<span class="ui-icon ui-icon-pencil"></span>Style</span>';               
@@ -826,21 +818,13 @@ function(value){
                             'Are you sure you wish to delete element "'+node.title+'"?', 
                         function(){ that.#layoutRemoveElement(ele_ID); }, 
                             {title:'Warning',yes:'Proceed',no:'Cancel'},
-                            {default_palette_class: this._cmsEditor.default_palette_class});        
+                            {default_palette_class: that._cmsEditor.default_palette_class});        
 
                     }
                     },100); 
 
                 return false;
             });
-
-            /*
-            $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
-            .on('click', function(event){ 
-            //tree.contextmenu("open", $(event.target) ); 
-
-            ).appendTo(actionspan);
-            */
 
             //hide gear icon and overlay on mouse exit
             function __onmouseexit(event){
@@ -901,9 +885,8 @@ function(value){
 
             function __onmouseenter(event){
 
-                    //TBD TEST if (current_edit_mode != 'page') return;
-                    if(that._panel_propertyView.is(':visible')) return;
-
+                    if(!that._panel_treePage.is(':visible') 
+                    || that._panel_propertyView.is(':visible')) return;
                     
                     let node, ele_ID;
 
@@ -931,7 +914,7 @@ function(value){
                             return;   
                         }
 
-                       
+                        //show action menu button
                         let ele_id = node.attr('data-hid');
                         that._layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
                         let ele = that._layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
@@ -976,8 +959,8 @@ function(value){
                     if(ele_ID>0){
                         
                         if(is_in_page){
-                            //highlight in preview/page
-                            node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_ID);
+                            //highlight in treeview                                        
+                            node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(ele_ID);
                             if(node) node.setActive(true);
 
                             that._layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
@@ -985,13 +968,12 @@ function(value){
 
                         }else                            
                         {   
-                            //highlight in treeview
+                            //highlight in preview/page
                             //separate overlay div - visible when mouse over tree
                             if(!that._panel_propertyView.is(':visible')){
                                 that._panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                                 that.#showOverlayForElement(ele_ID);
                             }
-                                    
                         }
 
                     }
@@ -1000,11 +982,6 @@ function(value){
                 
             $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
 
-            /*                            
-            $(item).on('mouseleave',
-
-            );
-            */
         }
     }
 
@@ -1032,6 +1009,23 @@ function(value){
         }
     }
 
+    hideOverlayAll(){
+        if(this._layout_container){
+            this._layout_container.find('.lid-actionmenu').hide();
+            //this._layout_container.find('div[data-hid]').removeClass('cms-element-active');  
+            this._layout_container.find('.cms-element-overlay').css('visibility','hidden');
+            this._layout_container.find('div[data-hid]').removeClass('cms-element-active cms-element-editing headline marching-ants marching');                
+        }
+    }
+
+    //
+    // detach tinymce editor
+    //        
+    detachTinyMCE(removeActionMenu){
+        if(this.tinymce) this.tinymce.remove('.tinymce-body'); //detach
+        if(removeActionMenu!=false && this._layout_container) this._layout_container.find('.lid-actionmenu').remove();
+    }
+
     //
     // remove element
     // it prevents deletion of non-empty group
@@ -1054,14 +1048,13 @@ function(value){
         }else{
 
             //remove child
-            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
+            parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
             parent_children = parent_element.children;
             parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
             
         }
 
-        this.tinymce.remove('.tinymce-body'); //detach
-        this._layout_container.find('.lid-actionmenu').remove();
+        this.detachTinyMCE();
         //find index in _layout_content
         let idx = -1;
         for(let i=0; i<parent_children.length; i++){
@@ -1078,11 +1071,11 @@ function(value){
         
         //recreate parent element
         if(parent_element && parent_element.type=='accordion'){
-            window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
+            this.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
-            window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
+            this.layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+            this.layoutMgr.layoutInit(parent_children, parent_container, 
                         {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}); 
         }
         
@@ -1098,13 +1091,11 @@ function(value){
     //
     #layoutChangeParent(ele_id){
 
-        this.tinymce.remove('.tinymce-body'); //detach
-        this._layout_container.find('.lid-actionmenu').remove();
+        this.detachTinyMCE();
         
-        let affected_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
-        
+        let affected_element = this.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
 
-        let oldparent = window.hWin.HAPI4.layoutMgr.layoutContentFindParent(this._layout_content, ele_id);
+        let oldparent = this.layoutMgr.layoutContentFindParent(this._layout_content, ele_id);
         let parent_children;
         
         //remove from old parent -----------
@@ -1127,7 +1118,7 @@ function(value){
         let node = tree.getNodeByKey(''+ele_id);
         let prevnode = node.getPrevSibling();
         let parentnode = node.getParent();
-        let parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
+        let parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
         parent_children = parent_element ? parent_element.children : this._layout_content;
         
         if(prevnode==null){
@@ -1147,7 +1138,7 @@ function(value){
         }
         
         //redraw page
-        window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, this._layout_container, 
+        this.layoutMgr.layoutInit(this._layout_content, this._layout_container, 
                 {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
         this.#updateActionIcons(200); //it inits tinyMCE also
         
@@ -1168,7 +1159,7 @@ function(value){
             return;
         }
 
-        let affected_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
+        let affected_cfg = this.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
 
         let content = 'content';
         if(this._cmsEditor.default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
@@ -1238,7 +1229,7 @@ function(value){
             ele.addClass('headline marching-ants marching');
         }
         
-        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);  //json
+        let element_cfg = this.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);  //json
         
         let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
                 element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
@@ -1248,7 +1239,7 @@ function(value){
              const node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(''+ele_id);
              const parentnode = node.getParent();
              ele_id = parentnode.key;
-             element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
+             element_cfg = this.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);
         }
         
         //show overlay for editing element
@@ -1266,7 +1257,7 @@ function(value){
                     //save
                     if(new_cfg){
                         
-                        window.hWin.HAPI4.layoutMgr.layoutContentSaveElement(that._layout_content, new_cfg); //replace element to new one
+                        that.layoutMgr.layoutContentSaveElement(that._layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
                         let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(''+new_cfg.key);
@@ -1276,19 +1267,16 @@ function(value){
                                
                         if(new_cfg.type=='cardinal'){
                             //recreate cardinal layout
-                            window.hWin.HAPI4.layoutMgr.layoutInitCardinal(new_cfg, that._layout_container);
+                            that.layoutMgr.layoutInitCardinal(new_cfg, that._layout_container);
                         }
                         
                         //save page
                         that.#saveLayoutCfg(); 
-                        that.page_was_modified = false;
-                        
-                        that.#onPageChange();
                     }
                     
                     if(mode!='save'){
                         //close element config
-                        that.#hidePropertyView();
+                        that.hidePropertyView();
                     }
 
                     // find all dragable elements - text and widgets
@@ -1393,7 +1381,7 @@ function(value){
             
             
         }
-        else if(widget_type=='text_2'){
+        else if(widget_type=='text_2'){  //text 2 columns
             
             new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[]
@@ -1407,7 +1395,7 @@ function(value){
             new_ele.children.push(child);
             
         }
-        else if(widget_type=='text_3'){
+        else if(widget_type=='text_3'){ //text 3 columns
             
             new_ele = {name:'3 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
                 children:[]
@@ -1457,13 +1445,11 @@ function(value){
         let parentnode = tree.getNodeByKey(ele_id);
         let parent_container, parent_children, parent_element;
 
-        this.tinymce.remove('.tinymce-body'); //detach
-        this._layout_container.find('.lid-actionmenu').remove();
+        this.detachTinyMCE();
 
         if(parentnode.folder){
             //add child
-
-            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
+            parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
             parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
             parent_children = parent_element.children;
 
@@ -1474,7 +1460,7 @@ function(value){
                 parent_container = this._layout_container;
                 parent_children = this._layout_content;
             }else{
-                parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.parent.key);
+                parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.parent.key);
                 parent_container = this._layout_container.find('div[data-hid='+parentnode.parent.key+']');
                 parent_children = parent_element.children;
             }
@@ -1485,16 +1471,16 @@ function(value){
         }
 
         parent_children.push(new_element_json);
-        window.hWin.HAPI4.layoutMgr.layoutInitKey(parent_children, parent_children.length-1);
+        this.layoutMgr.layoutInitKey(parent_children, parent_children.length-1);
 
         //recreate
         if(parent_element && parent_element.type=='accordion'){
-            window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
+            this.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
-            window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
-            //window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, this._layout_container);    
+            this.layoutMgr.layoutInitTabs(parent_element, parent_container)
+            //this.layoutMgr.layoutInit(this._layout_content, this._layout_container);    
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+            this.layoutMgr.layoutInit(parent_children, parent_container, 
                     {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
         }   
 
@@ -1510,11 +1496,12 @@ function(value){
            
         }
 
+        let that = this;
         setTimeout(function(){
             parentnode.visit(function(node){
                 node.setExpanded(true);
             });
-            this.#updateActionIcons(200);
+            that.#updateActionIcons(200);
             },300);
 
         this.page_was_modified = true;
@@ -1542,7 +1529,7 @@ function(value){
             if(template_name=='default'){
                 new_element_json = new_element_json.children[0];
             }else if(template_name=='blog'){
-                window.hWin.HAPI4.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+                this.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
                     that.#layoutInsertElement_continue( ele_id, updated_json );
                 });
                 return;
@@ -1559,14 +1546,16 @@ function(value){
     //
     #saveLayoutCfg( callback ){
         
-        if(!(options.record_id>0)) return;
+        if(!window.hWin.HEURIST4.util.isPositiveInt(this._cmsEditor.page_id)){
+            return;
+        }
         
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         
         let newval = window.hWin.HEURIST4.util.cloneJSON(this._layout_content);
         let contents = [];
         
-        //@todo remove keys and titles,  extract "content" into separate set of values
+        // it removes keys and titles,  extracts "content" into separates set of values
         // each content:lang value will be saved in separate detail
         function __cleanLayout(items){
             
@@ -1585,7 +1574,7 @@ function(value){
 
         let newname = newval[0].name;
         
-        // if page consist one group and one text without css - save only content of this text
+        // if page consists one group and one text without css - save only content of this text
         // it allows edit content in standard record edit
         /*if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
             newval = newval[0].children[0].content;
@@ -1621,8 +1610,8 @@ function(value){
                             status: window.hWin.ResponseStatus.REQUEST_DENIED
                         });
                     }else{
-                        that._toolbar_Page.hide();
                         that.page_was_modified = false;
+                        that.#onPageChange();
                         //not used page_cache[that._cmsEditor.page_id][window.hWin.DT_EXTENDED_DESCRIPTION] = newval; //update in cache
                         
                         if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
@@ -1642,9 +1631,14 @@ function(value){
       let that = this;
 
         //at first check if element editor is active
-        if(this._cmsEditorElement && this._cmsEditorElement.warningOnExit(function(){
-            if(that.page_was_modified){
+        if(this._cmsEditorElement && this._cmsEditorElement.warningOnExit(function(needSave){
+            if(needSave){
+                that.page_was_modified = true;
                 that.#saveLayoutCfg(callback);
+            }else{
+                //discard changes
+                that.page_was_modified = false;
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
             }
         })) return true;
         
@@ -1657,10 +1651,10 @@ function(value){
                 },
                 {text:window.hWin.HR('Leave unchanged'), 
                     click: function(){
-                        that.toolbar_Page.hide();
+                        that._toolbar_Page.hide();
                         that.page_was_modified = false; 
                         $dlg.dialog('close'); 
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
@@ -1668,7 +1662,7 @@ function(value){
                 }
             ];            
             
-            let sMsg = '"'+ this._cmsEditor._editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
+            let sMsg = '"'+ this._container.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
                             {appendTo: 'body', default_palette_class:this._cmsEditor.default_palette_class});
 

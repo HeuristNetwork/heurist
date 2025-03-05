@@ -112,19 +112,21 @@ if (isLocalHost() && !@$_REQUEST['embed'])  {
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/ActionHandler.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
 

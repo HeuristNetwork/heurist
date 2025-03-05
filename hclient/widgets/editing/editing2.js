@@ -44,7 +44,7 @@ function HEditing(_options) {
     */
     function _init(_options) {
         
-        if(typeof tinymce === 'undefined'){
+        if(typeof tinyMCE === 'undefined'){
             _loadTinyMCE(function(){
                 _init(_options);    
             });

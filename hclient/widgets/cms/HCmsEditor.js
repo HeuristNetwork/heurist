@@ -34,7 +34,6 @@ class HCmsEditor {
     
     //website specific values
     menuContentJSON; // menu content as JSON
-    pageContentJSON; //_layout_content; - JSON config 
                 
     //
     website_id; // current website
@@ -68,13 +67,6 @@ class HCmsEditor {
         
             this._editor_panel = this._ws_body.find('#tabsEditCMS'); 
             
-            /* TBD add tinymce and codemirror
-            if(typeof tinymce === 'undefined'){
-                _loadTinyMCE(function(){_startCMS(_options)});
-                return;
-            }
-            */
-
             window.onbeforeunload = this.onBeforeUnload;
             
                 this._editor_panel = $('div.ui-layout-west');
@@ -152,16 +144,11 @@ class HCmsEditor {
         
         this._ws_body.layout().show(this.editor_pos, true );
       
-        //load content of page
-        this._webPageFrame = $('#webPageFrame');
-        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,edit:2});
-        this._webPageFrame.attr('src', pageURL);
-        this._webPageFrame.on('load', function(){
-            that.onWebPageLoadComplete();
-        });
+        //load the entire website
+        this.loadWebSite();
       
   }
-  
+
   //
   // Init interface controls
   //  
@@ -169,9 +156,9 @@ class HCmsEditor {
       
         let that = this;
 
-        this._editor_panel.find('.btn-website-homepage').on('click', this.#editHomePage);
-
-        this._editor_panel.find('.btn-website-edit').on('click', this.#editHomePageRecord);
+        this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
+        this._editor_panel.find('.btn-website-edit').on('click', ()=>that.#editHomePageRecord()); //open record edit
+        
         if(!this.isWebPage){
             this._editor_panel.find('.btn-website-edit')
                          .button({classes:{'ui-button': 'ui-button-action'}})
@@ -228,21 +215,59 @@ class HCmsEditor {
         }
   }
   
+  
   //
-  // called from editCMS_SiteMenu - load different page
+  // Reload the entire website
+  //  
+  loadWebSite(new_page_id){
+      
+        if(new_page_id>0 && new_page_id!=this.page_id){
+            this.page_id = new_page_id;
+        }
+      
+        this._webPageFrame = $('#webPageFrame');
+        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,edit:2});
+        this._webPageFrame.attr('src', pageURL);
+        
+        let that = this;
+        this._webPageFrame.on('load', function(){
+            that.#onWebPageLoadComplete();
+        });
+  }
+  
+  //
+  // This is event for initial loading in iframe
+  //
+  #onWebPageLoadComplete(){
+      //menu as json tree
+      this.menuContentJSON = this._webPageFrame[0].contentWindow.menuContentJSON;
+      
+      if(this._editCMS_SiteMenu){
+          //refresh website structure tree
+          this._editCMS_SiteMenu.initControls();
+      }
+      
+  }  
+  
+  
+  //
+  // called from editCMS_SiteMenu - load different page into target element
   //
   loadPageContent(page_id){
-      this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', 
+        
+    if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)){
+        page_id = this.page_id;
+    }
+
+    this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', 
             {page_id:page_id, callback:(rec)=>this.onLoadPageContent(rec)});;
   }
 
   //
-  //
+  //  Event handler on page load completed
   //
   onLoadPageContent(record){
       
-console.log('onLoadPageContent');      
-    
       this.layout_container = this._webPageFrame[0].contentDocument.getElementsByTagName('main');
       if(!this.layout_container){
           this.layout_container = this._webPageFrame[0].contentDocument.getElementsById('main-content');
@@ -251,13 +276,10 @@ console.log('onLoadPageContent');
       this.layout_container = $(this.layout_container);
       
       if(!this._cmsEditorPage){
-        this._cmsEditorPage = new HCmsEditorPage(this._editor_panel, this);    
+            this._cmsEditorPage = new HCmsEditorPage(this._editor_panel, this);    
       }
-    
-      //console.log('>>>', record);
-      
+
       this.page_id = record['rec_ID'];
-      this.pageContentJSON = record[window.hWin.DT_EXTENDED_DESCRIPTION];
       
       if(this._editCMS_SiteMenu) this._editCMS_SiteMenu.highlightCurrentPage();
       
@@ -271,36 +293,70 @@ console.log('onLoadPageContent');
             }
       });
       
-      this.switchMode('page');
       this._cmsEditorPage.initPage(this.layout_container, record);
+      this.switchMode('page');
   }
-  
-  //
-  // This is event for initial loading in iframe
-  //
-  onWebPageLoadComplete(){
 
-console.log('onWebPageLoadComplete');
-      
-      //menu as json tree
-      this.menuContentJSON = this._webPageFrame[0].contentWindow.menuContentJSON;
-  }
   
+  //
+  // Returns tinymce object from webpage iframe
+  //  
   getTinymce(){
       return this._webPageFrame[0].contentWindow.tinymce;
   }
   
+  //
+  // Returns html element from webpage iframe
+  //  
   findInWebSite(selector){
       return this._webPageFrame[0].contentDocument.querySelector(selector);
   }
 
- 
+  //
+  // Returns HAPI object from webpage iframe
+  //  
+  getHapi(){
+      return this._webPageFrame[0].contentWindow.HAPI4;
+  }
+
+  //
+  // loads home page content
+  //  
   #editHomePage(){
+      if(this.warningOnExit( ()=>that.#editHomePage() )) return;                           
+      //reload content of page
+      this.loadPageContent( this.website_id );
       
   }
   
+  warningOnExit(callback){
+      return (this._cmsEditorPage && this._cmsEditorPage.warningOnExit( callback ));                           
+  }
+  
+  //
+  // edit home page record (record editor)
+  //
   #editHomePageRecord(){
+
+      let that = this;
+      if(this.warningOnExit( ()=>that.#editHomePageRecord() )) return;                           
       
+      //if(!_editCMS_SiteMenu && !isWebPage)
+      //    _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
+
+      //edit menu item
+      window.hWin.HEURIST4.ui.openRecordEdit(this.website_id, null,
+          {selectOnSave:true, 
+              edit_obstacle: false, 
+              onClose: function(){ 
+
+              },
+              onselect:function(event, data){
+                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                      //reload entire site
+                      that.loadWebSite(that.website_id);
+                  }
+      }});
   }
   
   #addNewRootMenu(){
@@ -310,15 +366,17 @@ console.log('onWebPageLoadComplete');
   #showWebSiteMenu(){
       
   }
-  
-  #updateActionIcons(){
-      
-  }
-  
+
+  //
+  // Open editor panel
+  //
   openEditorPanel(){
         this._ws_body.layout().open(this.editor_pos);
   }
   
+  //
+  // Set width of editor panel min 450px
+  //
   expandEditorPanel(){
       if(this._ws_body.layout().state['west']['outerWidth']<450){
           this._keep_EditPanelWidth = this._ws_body.layout().state['west']['outerWidth'];
@@ -337,7 +395,7 @@ console.log('onWebPageLoadComplete');
   /**
   *  
   */
-  switchMode(mode, init_tinymce){
+  switchMode(mode){
 
         if(!mode){
             if(this._tabControl.tabs('option','active')==0){
@@ -360,9 +418,11 @@ console.log('onWebPageLoadComplete');
             this._tabControl.find('li[aria-controls="treeWebSite"]')
                 .removeClass('ui-cms-mainmenu');
                                 
-            //TBD this.#hidePropertyView();
+            //this.#hidePropertyView();
             
             this._toolbar_WebSite.hide();
+            
+            this._cmsEditorPage.initActionIcons();
             
         }else{
 
@@ -370,19 +430,17 @@ console.log('onWebPageLoadComplete');
                 .removeClass('ui-state-active') //ui-tabs-active 
                 .addClass('ui-cms-mainmenu');
                                 
-            //TBD this.#hidePropertyView();
-            //TBD this._toolbar_Page.hide();
             
+            //remove highlights
+            if(this._cmsEditorPage){
+                this._cmsEditorPage.hidePropertyView();
+                //TBD this._toolbar_Page.hide();
+                this._cmsEditorPage.hideOverlayAll();
+                this._cmsEditorPage.detachTinyMCE(false);
+            }
             this._toolbar_WebSite.show();
 
-            //remove highlights
-            this.layout_container.find('.lid-actionmenu').hide();
-            this.layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
-            this.layout_container.find('.cms-element-overlay').css('visibility','hidden');            
-/*TBD            
-            
-            if(tinymce) tinymce.remove('.tinymce-body');
-*/            
+
             //load website menu treeview
             if(!this._editCMS_SiteMenu)
             this._editCMS_SiteMenu = editCMS_SiteMenu( this._editor_panel.find('.treeWebSite'), this );

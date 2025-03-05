@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinymce, EditorCodeMirror, 
+/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror, 
 translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
 
 $.widget( "heurist.editing_input", {
@@ -702,8 +702,8 @@ $.widget( "heurist.editing_input", {
 
                     if(that.detailType=='blocktext'){
                         let eid = '#'+input.attr('id')+'_editor';
-                        //tinymce.remove('#'+input.attr('id')); 
-                        if(typeof tinymce !== 'undefined') { tinymce.remove(eid); }
+                        //tinyMCE.remove('#'+input.attr('id')); 
+                        if(typeof tinyMCE !== 'undefined') { tinyMCE.remove(eid); }
                         $(eid).parent().remove(); //remove editor element
                         //$(eid).remove(); 
 
@@ -1045,7 +1045,7 @@ $.widget( "heurist.editing_input", {
                 
                 let eid = $input.attr('id')+'_editor';
                 
-                //hidden textarea for tinymce editor
+                //hidden textarea for tinyMCE editor
                 let $editor = $( "<textarea>")
                 .attr("id", eid)
                 //.addClass('text ui-widget-content ui-corner-all')
@@ -1127,7 +1127,7 @@ $.widget( "heurist.editing_input", {
 
                 function __showEditor(is_manual){
                     
-                    if(typeof tinymce === 'undefined') return false; //not loaded yet
+                    if(typeof tinyMCE === 'undefined') return false; //not loaded yet
 
                     if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
 
@@ -1186,7 +1186,7 @@ $.widget( "heurist.editing_input", {
                     
                     let custom_webfonts = `${webfonts} body { font-size: 8pt; font-family: ${font_family}; ${is_grayed} }`;
 
-                    tinymce.init({
+                    tinyMCE.init({
                         //target: $editor, 
                         //selector: '#'+$input.attr('id'),
                         selector: eid,
@@ -1261,14 +1261,14 @@ $.widget( "heurist.editing_input", {
                                             let record = recordset.getFirstRecord();
                                             const record_id = recordset.fld(record,'rec_ID');
                                             let href = `${record_id}_${window.hWin.HEURIST4.util.random()}`;
-                                            tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+                                            tinyMCE.activeEditor.execCommand('mceInsertLink', false, href);
                                             
-                                            let $link = $(tinymce.activeEditor.selection.getNode());
+                                            let $link = $(tinyMCE.activeEditor.selection.getNode());
                                             if(!$link.is('a')){
                                                 $link = $link.find(`a[href="${href}"]`);
                                             }
                                             if($link.length == 0){
-                                                $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
+                                                $link = $(tinyMCE.activeEditor.contentDocument).find(`a[href="${href}"]`);
                                             }
 
                                             $link.attr('href', record_id).attr('data-mce-href', record_id);
@@ -1314,7 +1314,7 @@ $.widget( "heurist.editing_input", {
                                 editor.ui.registry.addButton('customHRtag', {
                                     text: '&lt;hr&gt;',
                                     onAction: function (_) {
-                                        tinymce.activeEditor.insertContent( '<hr>' );
+                                        tinyMCE.activeEditor.insertContent( '<hr>' );
                                     }
                                 });
                                 // Clear text formatting - to replace the original icon
@@ -1324,7 +1324,7 @@ $.widget( "heurist.editing_input", {
                                     icon: 'clear-formatting',
                                     tooltip: 'Clear formatting',
                                     onAction: function (_) {
-                                        tinymce.activeEditor.execCommand('RemoveFormat');
+                                        tinyMCE.activeEditor.execCommand('RemoveFormat');
                                     }
                                 });
                             }else{
@@ -1368,7 +1368,7 @@ $.widget( "heurist.editing_input", {
                                 // check if editor is 'expanded'
                                 if(editor.settings.max_height != null){
                                     editor.settings.max_height = null;
-                                    tinymce.activeEditor.execCommand('mceAutoResize');
+                                    tinyMCE.activeEditor.execCommand('mceAutoResize');
                                 }
 
                                
@@ -1377,14 +1377,14 @@ $.widget( "heurist.editing_input", {
 
                             editor.on('focus', (e) => { // expand text area
                                 editor.settings.max_height = null;
-                                tinymce.activeEditor.execCommand('mceAutoResize');
+                                tinyMCE.activeEditor.execCommand('mceAutoResize');
                             });
 
                             editor.on('blur', (e) => { // collapse text area
                                 is_blur = true;
                                 editor.settings.max_height = editor.settings.min_height;
                                 editor.settings.autoresize_min_height = null;
-                                tinymce.activeEditor.execCommand('mceAutoResize');
+                                tinyMCE.activeEditor.execCommand('mceAutoResize');
                             });
 
                             editor.on('ResizeContent', (e) => {
@@ -1402,7 +1402,7 @@ $.widget( "heurist.editing_input", {
 
                                     $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
 
-                                        let node = tinymce.activeEditor.selection.getNode();
+                                        let node = tinyMCE.activeEditor.selection.getNode();
 
                                         __openRecordLink(node);
                                     });
@@ -1412,7 +1412,7 @@ $.widget( "heurist.editing_input", {
 
                             editor.on('click', (e) => {
 
-                                let node = tinymce.activeEditor.selection.getNode();
+                                let node = tinyMCE.activeEditor.selection.getNode();
 
                                 if((e.ctrlKey || e.metaKey) && node.tagName == 'A'){
                                     __openRecordLink(node);
@@ -1545,7 +1545,7 @@ $.widget( "heurist.editing_input", {
 
                             //hide previous
                             if(cur_action=='wysiwyg'){
-                                tinymce.remove(eid);
+                                tinyMCE.remove(eid);
                                 $(eid).parent().hide();
                             }else if(cur_action=='codeeditor'){
                                 codeEditor.hideEditor();
@@ -1575,7 +1575,7 @@ $.widget( "heurist.editing_input", {
                             }else{
                                 $btn_edit_switcher.text('wysiwyg');
                                 $input.show();
-                                tinymce.remove(eid);
+                                tinyMCE.remove(eid);
                                 $(eid).parent().hide();
                                 __adjustTextareaHeight();
                             }
@@ -5952,15 +5952,15 @@ $.widget( "heurist.editing_input", {
             is_insert = true;
         }else{
 
-            node = tinymce.activeEditor.selection.getNode();
+            node = tinyMCE.activeEditor.selection.getNode();
             if(node.parentNode.nodeName.toLowerCase() == 'figure'){ // insert new figcaption
                 node = document.createElement('figcaption');
-                tinymce.activeEditor.selection.getNode().parentNode.appendChild(node);
+                tinyMCE.activeEditor.selection.getNode().parentNode.appendChild(node);
             }else{ // replace selected content with new wrapper
                 node = null;
             }
 
-            content = tinymce.activeEditor.selection.getContent();
+            content = tinyMCE.activeEditor.selection.getContent();
         }
 
         let $dlg;
@@ -5980,9 +5980,9 @@ $.widget( "heurist.editing_input", {
                 content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
 
                 if(is_insert){
-                    tinymce.activeEditor.insertContent( content );
+                    tinyMCE.activeEditor.insertContent( content );
                 }else{
-                    tinymce.activeEditor.selection.setContent( content );
+                    tinyMCE.activeEditor.selection.setContent( content );
                 }
             }
 
@@ -5990,7 +5990,7 @@ $.widget( "heurist.editing_input", {
         };
         btns[window.HR('No caption')] = () => {
             if(is_insert){
-                tinymce.activeEditor.insertContent( content );
+                tinyMCE.activeEditor.insertContent( content );
             }
             $dlg.dialog('close');
         };

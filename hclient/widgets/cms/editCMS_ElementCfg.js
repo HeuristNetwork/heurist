@@ -1006,20 +1006,22 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         if($container.find('.btn-save-element').attr('disabled')!='disabled'){
             
+            let that = this;
+            
             let $dlg;
             let _buttons = [
                 {text:window.hWin.HR('Save'), 
                     click: function(){
                         $container.find('.btn-save-element').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, true);
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
                         $container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close'); 
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 

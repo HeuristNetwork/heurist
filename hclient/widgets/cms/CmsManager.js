@@ -648,7 +648,9 @@ class CmsManager {
                         res['rec_ID'] = record['rec_ID'];
                         //res[DT_NAME] = res[DT_NAME]
                         //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options )
+                        
+                        //reload content of page_target
+                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options );
                         
                         res['pageTreeData'] = pageTreeData;
                         
