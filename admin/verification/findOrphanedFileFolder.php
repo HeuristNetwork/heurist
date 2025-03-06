@@ -60,7 +60,7 @@ if(!@$_REQUEST['mail']){
     $root = $system->getFileStoreRootFolder();
 
     //get all subfolder in HEURIST_FILESTORE
-    $folders = folderSubs($root, array('AAA_LOGS','_PURGES_IMPORTS', '_PURGES_SYSARCHIVE', 'DELETED_DATABASES', '_BATCH_PROCESS_ARCHIVE_PACKAGE'), false);
+    $folders = folderSubs($root, ['AAA_LOGS','_PURGES_IMPORTS', '_PURGES_SYSARCHIVE', 'DELETED_DATABASES', '_BATCH_PROCESS_ARCHIVE_PACKAGE', '_DB_STATS', '_ALL_SERVER_STATS'], false);
 
     $rep = '';
     $orphaned = array();

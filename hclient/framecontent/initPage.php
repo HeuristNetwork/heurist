@@ -322,6 +322,10 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
                     window.onAboutInit();//init about dialog
             }
 
+            if(window.hWin.HAPI4.sysinfo.refreshStatistics == 1){
+                updateDatabaseStatistics();
+            }
+
             if(initialLoadDatabaseDefintions(null, window.onPageInit)){
                 return;
             }
@@ -337,6 +341,32 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         if(window.hWin.HEURIST4.util.isFunction(window.onPageInit)){
             window.onPageInit(success);
         }
+    }
+
+    function updateDatabaseStatistics(){
+
+        let ajax_opts = {
+            "url": `${window.hWin.HAPI4.baseURL}/admin/describe/dbStatsBackground.php`,
+            "type": "POST",
+            "data": {
+                "refresh": 1
+            },
+            "dataType": "json",
+            "cache": false,
+            "xhrFields": {
+                "withCredentials": true
+            }
+            /* Don't bother the user
+            ,success: (response, status, jqXHR) => {
+                console.log('success', response);
+            },
+            error: (jqXHR, status, errorThrown) => {
+                console.log('error', jqXHR?.responseJSON?.status);
+            }*/
+        };
+
+        $.ajax(ajax_opts);
+        delete window.hWin.HAPI4.sysinfo.refreshStatistics;
     }
 
     //

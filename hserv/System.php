@@ -1118,6 +1118,15 @@ class System {
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
 
+            $filestoreRoot = $this->getFileStoreRootFolder();
+            if(!empty($filestoreRoot)){
+
+                $statsFile = "{$filestoreRoot}_DB_STATS/db_stats.txt";
+                $lastUpdate = file_exists($statsFile) ? filemtime($statsFile) : false;
+
+                $res['sysinfo']['refreshStatistics'] = !$lastUpdate || $lastUpdate < strtotime('-1 month') ? 1 : 0;
+            }
+
             recreateRecLinks( $this, false );//see utils_db
 
         }catch( \Exception $e ){
