@@ -8,7 +8,7 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-
+/* global editCMS_SelectElement, editCMS_ElementCfg */
 /*
 * HCmsEditorPage.js - web page editor - page treeview+element property editor
 */
@@ -352,8 +352,8 @@ class HCmsEditorPage {
                       let record = recordset.getFirstRecord();
 
                       //always add media as reference to production version of heurist code (not dev version)
-                      let thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
-                      +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+                      //let thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                      //+"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
 
                       let playerTag = recordset.fld(record,'ulf_PlayerTag');
 
@@ -406,8 +406,8 @@ class HCmsEditorPage {
       this._panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
 
       this.#hideMenuInTree();
-      this._panel_propertyView.hide();
 
+      this._panel_propertyView.hide();
       this._cmsEditor.shrinkEditorPanel(); 
 
       this.#onPageChange();
@@ -533,6 +533,8 @@ class HCmsEditorPage {
 
         }
         this._toolbar_Page.hide();
+        if(this._panel_propertyView) this._panel_propertyView.hide();
+        this._cmsEditor.shrinkEditorPanel(); 
     }
     
 //
@@ -658,7 +660,6 @@ initActionIcons(){
                 $(item).css('display','block');   
             }
 
-            let is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
             let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
             let is_cardinal = (node.type=='north' || node.type=='south' || 
                 node.type=='east' || node.type=='west' || node.type=='center');
@@ -1211,7 +1212,6 @@ function(value){
         
         //scroll tree that selected element will be visible
         let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_id);
-        let top1 = $(node.li).position().top;
         this._panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         this._panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
         $(node.li).find('.fancytree-node').removeClass('fancytree-active');
@@ -1553,7 +1553,6 @@ function(value){
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         
         let newval = window.hWin.HEURIST4.util.cloneJSON(this._layout_content);
-        let contents = [];
         
         // it removes keys and titles,  extracts "content" into separates set of values
         // each content:lang value will be saved in separate detail
@@ -1572,11 +1571,11 @@ function(value){
         }
         __cleanLayout(newval);
 
-        let newname = newval[0].name;
-        
         // if page consists one group and one text without css - save only content of this text
         // it allows edit content in standard record edit
-        /*if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
+        /*
+        let newname = newval[0].name;
+        if(newval[0].children && newval[0].children.length==1 && newval[0].children[0].type=='text'){
             newval = newval[0].children[0].content;
         }else{
             newval = JSON.stringify(newval);    

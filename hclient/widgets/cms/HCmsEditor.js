@@ -9,6 +9,8 @@
 * @version     4.0
 */
 
+/* global editCMS_SiteMenu */
+
 /*
 * HCmsEditor.js - web page editor
 */
@@ -40,7 +42,8 @@ class HCmsEditor {
     page_id;    // current page
     current_language = 'def';
     default_language = 'def';
-    
+
+    mainMenu; //main menu widget    
     layout_container; // main-content with CMS content
     _ws_body;
     
@@ -247,6 +250,7 @@ class HCmsEditor {
           this._editCMS_SiteMenu.initControls();
       }
       
+      this.mainMenu = null;
   }  
   
   
@@ -254,7 +258,7 @@ class HCmsEditor {
   // called from editCMS_SiteMenu - load different page into target element
   //
   loadPageContent(page_id){
-        
+      
     if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)){
         page_id = this.page_id;
     }
@@ -267,32 +271,43 @@ class HCmsEditor {
   //  Event handler on page load completed
   //
   onLoadPageContent(record){
-      
+
+      let that = this;
+
+      /*
+      if(!this.mainMenu){
+          this.mainMenu = this._webPageFrame[0].contentDocument.getElementById('main-menu');
+          if(this.mainMenu && $(this.mainMenu).HMenu('instance')){
+              $(this.mainMenu).HMenu('option','onBeforeAction', ()=>{
+                  return that.warningOnExit();
+              });
+          }
+      }
+      */
+
       this.layout_container = this._webPageFrame[0].contentDocument.getElementsByTagName('main');
       if(!this.layout_container){
-          this.layout_container = this._webPageFrame[0].contentDocument.getElementsById('main-content');
+          this.layout_container = this._webPageFrame[0].contentDocument.getElementById('main-content');
       }
 
       this.layout_container = $(this.layout_container);
-      
+
       if(!this._cmsEditorPage){
-            this._cmsEditorPage = new HCmsEditorPage(this._editor_panel, this);    
+          this._cmsEditorPage = new HCmsEditorPage(this._editor_panel, this);    
       }
 
       this.page_id = record['rec_ID'];
-      
+
       if(this._editCMS_SiteMenu) this._editCMS_SiteMenu.highlightCurrentPage();
-      
-      let that = this;
-      
+
       //swtich to page tab automatically
       this.layout_container.on('click',function(event){
-            if(that.current_edit_mode!='page'){
-                //switch to page mode                
-                that.switchMode('page');
-            }
+          if(that.current_edit_mode!='page'){
+              //switch to page mode                
+              that.switchMode('page');
+          }
       });
-      
+
       this._cmsEditorPage.initPage(this.layout_container, record);
       this.switchMode('page');
   }
@@ -323,6 +338,7 @@ class HCmsEditor {
   // loads home page content
   //  
   #editHomePage(){
+      let that = this;  
       if(this.warningOnExit( ()=>that.#editHomePage() )) return;                           
       //reload content of page
       this.loadPageContent( this.website_id );

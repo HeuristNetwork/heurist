@@ -36,6 +36,7 @@ $.widget( 'heurist.HMenu', {
         //menuTreeJSON: null,
         viewMode: 'bootstrap', // none, horizontal or vertical buttonsMenu, tree    
         menuActionHandler: null,  // replacment of default event handler via ActionHandler
+        onBeforeAction: null,
         onActionComplete: null    // invoked in ActionHandler after action execution
     },
     
@@ -154,6 +155,7 @@ $.widget( 'heurist.HMenu', {
         
         */    
         
+        this._init_completed = true;
         
     },
     
@@ -181,6 +183,13 @@ $.widget( 'heurist.HMenu', {
         }
         if(this.options.onActionComplete){
             opts.callback = this.options.onActionComplete;
+        }
+        
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onBeforeAction)){
+            const is_locked = this.options.onBeforeAction.call(this, action_id, opts);
+            if(is_locked){
+                return false;
+            }
         }
         
         // Call user-defined action handler

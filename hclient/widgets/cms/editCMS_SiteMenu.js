@@ -18,7 +18,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global page_cache, current_page_id, home_page_record_id */
 //
 //
 //

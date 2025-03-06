@@ -155,10 +155,18 @@ if(@$_REQUEST['edit']){
                 const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit(pageContentJSON, 'main', {});
 
                 //init header
-                window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', {HMenu:{onActionComplete:onPageLoad}});
+                window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', 
+                        {HMenu:{onActionComplete:onPageLoad, onBeforeAction:onPageBeforeLoad}});
                 
                 onPageLoad(<?php echo $this->getPageRecord()?>, pageTreeData);
             }
+        }
+        
+        function onPageBeforeLoad(){
+            if(window.parent && window.parent.cmsEditor){
+                return window.parent.cmsEditor.warningOnExit();    
+            }
+            return true;
         }
         
         //
@@ -169,7 +177,9 @@ if(@$_REQUEST['edit']){
                 if(pageTreeData){
                     record['pageTreeData'] = pageTreeData;
                 }
-                window.parent.cmsEditor.onLoadPageContent(record);
+                if(window.parent && window.parent.cmsEditor){
+                    window.parent.cmsEditor.onLoadPageContent(record);    
+                }
             }
         }
         

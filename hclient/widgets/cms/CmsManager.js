@@ -200,7 +200,7 @@ class CmsManager {
      */
     #createPage() {
         let that = this;
-        let $dlg = window.hWin.HEURIST4.msg.showPrompt(
+        window.hWin.HEURIST4.msg.showPrompt(
             window.hWin.HR('Name for new page') + ':',
             function(value) {
                 if (window.hWin.HEURIST4.util.isempty(value)) {
