@@ -57,7 +57,6 @@ define('FILESTORE_ROOT', $system->getFileStoreRootFolder());
 define('DB_STATS', FILESTORE_ROOT . '_DB_STATS'); // FILESTORE/_DB_STATS
 define('DB_STATS_FILE', DB_STATS . '/db_stats.txt'); // FILESTORE/_DB_STATS/db_stats.txt
 define('ALL_STATS', FILESTORE_ROOT . '_ALL_SERVER_STATS'); // FILESTORE/_ALL_SERVER_STATS
-define('TESTING_FILE', 'testing_stats.txt'); // for testing output ONLY
 define('LOCKING_FILE', DB_STATS . '/db_stats_lock.txt'); // prevent the function from running multiple times at once
 
 // Check for file lock
@@ -134,7 +133,7 @@ function sendStatsToMain(){
 
     global $system, $is_main_server;
 
-    $script = HEURIST_MAIN_SERVER . '/h6-bm/admin/describe/dbStatsBackground.php';
+    $script = HEURIST_MAIN_SERVER . '/h6-alpha/admin/describe/dbStatsBackground.php';
 
     if(!file_exists(DB_STATS_FILE) && !createStats()){
         exitScript(null, null, true);
