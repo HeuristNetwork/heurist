@@ -2198,6 +2198,8 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         $mask = $rectype_or_mask;
     }
 
+    $recID = intval($recID);
+
     if($mask == null)
     {
         if(!isPositiveInt($rectype)){
@@ -2233,12 +2235,12 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
         $new_title = mb_substr($new_title,0,1023);
     }
 
-    $res = mysql__exec_param_query($mysqli, 'UPDATE Records set rec_Title=? where rec_ID='.intval($recID), array('s',$new_title) );
+    $params = ['ss', $new_title, date(DATE_8601)];
+    $res = mysql__exec_param_query($mysqli, "UPDATE Records set rec_Title=?, rec_Modified=? where rec_ID={$recID}", $params );
     if($res!==true){
         $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $res);
         return false;
     }
-
 
     return $new_title;
 }
