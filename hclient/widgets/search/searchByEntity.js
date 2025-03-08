@@ -199,209 +199,220 @@ $.widget( "heurist.searchByEntity", {
         this._refresh();
 
     }, //end _create
-    
+
     //
     //
-    //    
+    //
     refreshOnShow: function(){
-            if( $Db.needUpdateRtyCount==0 ){
-                $Db.needUpdateRtyCount = -1;    
-                this.recreateRectypeSelectors();
-            }else if( $Db.needUpdateRtyCount>0 && !this._waiting_server_response){
-                let that = this;
-                
-                $Db.needUpdateRtyCount = -1;    
-                this._waiting_server_response = true;
-                
-                $Db.get_record_counts(function(){
-                    that._waiting_server_response = false;
-                    that.recreateRectypeSelectors();
-                });
-            }
+        if( $Db.needUpdateRtyCount==0 ){
+            $Db.needUpdateRtyCount = -1;
+            this.recreateRectypeSelectors();
+        }else if( $Db.needUpdateRtyCount>0 && !this._waiting_server_response){
+            let that = this;
+
+            $Db.needUpdateRtyCount = -1;
+            this._waiting_server_response = true;
+
+            $Db.get_record_counts(function(){
+                that._waiting_server_response = false;
+                that.recreateRectypeSelectors();
+            });
+        }
     },
-             
+
     //
     // recreate list of buttons or recreate combined_select
     //
     _redraw_buttons_by_entity: function(is_init){
-        
+
         let needs_saving = false;
         let that = this;
 
         if(is_init===true){
             //get selected from preferences
-            this.selected_rty_ids = window.hWin.HAPI4.get_prefs_def('entity_filter_btns','');
-            
+            this.selected_rty_ids = window.hWin.HAPI4.get_prefs_def('entity_filter_btns', '');
+
             if(window.hWin.HEURIST4.util.isempty(this.selected_rty_ids)){
                 this.selected_rty_ids = [];
-                
-                    //get 5 from first group
-                    let rtgID = $Db.rtg().getOrder()[0];
-                    $Db.rty().each2(function(rtyID,rectype){
-                        if(rectype['rty_RecTypeGroupID']==rtgID){
-                            that.selected_rty_ids.push(rtyID);
-                            if(that.selected_rty_ids.length>4) return false;
-                        }
-                    });
-                   /*
-                    //get 5 top most used rectypes
-                    let sorted = [];
-                    $Db.rty().each2(function(rtyID,rectype){
-                        sorted.push({ 'id':rty_ID, 'cnt':rectype['rty_RecCount']});
-                    });
-                    sorted.sort(function(a,b){
-                         return Number(a['cnt'])<Number(b['cnt'])?1:-1;
-                    });
-                    for(let idx=0; idx<sorted.length && idx<5; idx++){
-                        this.selected_rty_ids.push(sorted[idx]['id']);    
-                    }
-                    */
-            }else{
-                this.selected_rty_ids = this.selected_rty_ids.split(',');    
 
-                for (let i = 0; i < this.selected_rty_ids.length; i++) {
-                    const rty_ID = this.selected_rty_ids[i];
-                    if(rty_ID <= 0 || $Db.rty(rty_ID) == null){ // invalid rectype, or has been deleted
-                        this.selected_rty_ids.splice(i, 1);
-                        needs_saving = true;
+                //get 5 from first group
+                let rtgID = $Db.rtg().getOrder()[0];
+                $Db.rty().each2(function(rtyID,rectype){
+                    if(rectype['rty_RecTypeGroupID'] == rtgID){
+                        that.selected_rty_ids.push(rtyID);
+                        if(that.selected_rty_ids.length > 4) return false;
                     }
-                }
+                });
+
+            }else{
+
+                this.selected_rty_ids = this.selected_rty_ids.split(',');
+
+                let org_count = this.selected_rty_ids.length;
+                this.selected_rty_ids = this.selected_rty_ids.filter(
+                    (rty_ID) => window.hWin.HEURIST4.util.isPositiveInt(rty_ID) && $Db.rty(rty_ID) !== null
+                );
+
+                needs_saving = org_count !== this.selected_rty_ids.length;
             }
-            
         }
-        
 
         let container;
         if(this.options.use_combined_select){
 
+            this._off(this.combined_select.find('li[data-id]'), 'click');
+            container = this.combined_select.find('.by-usage');
+            container.empty();
 
-                this._off(this.combined_select.find('li[data-id]'), 'click');
-                container = this.combined_select.find('.by-usage');
-                container.empty();
-                
-                $.each(this.usage_select.find('option'),function(i, item){
-                    item = $(item);
-                    $('<li data-id="'+item.attr('entity-id')+'" style="font-size:smaller;padding:4px 0px 2px 0px">'
-                        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                            + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+item.attr('icon-url')+ '&quot;);"/>'
-                        //+'<img src="'+item.attr('icon-url')+'"/>'
-                        +'<div class="menu-text truncate" style="max-width:80%;display:inline-block;">'
-                        +item.text()+'</div>'
-                        +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
-                       +'</li>').appendTo(container);    
-                });
-            
-                container = this.combined_select.find('.by-selected');
-                container.empty();
-        }else{ 
+            $.each(this.usage_select.find('option'),function(i, item){
+                item = $(item);
+                $('<li data-id="'+item.attr('entity-id')+'" style="font-size:smaller;padding:4px 0px 2px 0px">'
+                    +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                        + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+item.attr('icon-url')+ '&quot;);"/>'
+                    //+'<img src="'+item.attr('icon-url')+'"/>'
+                    +'<div class="menu-text truncate" style="max-width:80%;display:inline-block;">'
+                    +item.text()+'</div>'
+                    +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
+                +'</li>').appendTo(container);
+            });
+
+            container = this.combined_select.find('.by-selected');
+            container.empty();
+        }else{
             this._off( this.div_entity_btns.find('.entity-filter-button'), 'click');
             this.div_entity_btns.find('.entity-filter-button').remove();
         }
-        
-        
-        
-        let idx=this.selected_rty_ids.length-1;
-        while(idx>=0){
-            
-            const rty_ID = this.selected_rty_ids[idx];
-            
-            if(rty_ID>0) {           
 
-                let cnt = $Db.rty(rty_ID,'rty_RecCount');
-                if(!(cnt>0)) cnt = 0;    
-                
-                if(this.options.use_combined_select){
-                    
-                    $('<li data-id="'+rty_ID+'" style="font-size:smaller;padding:4px 6px 2px 4px">'
-                        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-                            + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'
-                            + window.hWin.HAPI4.iconBaseURL + rty_ID+ '&quot;);"/>'
-                        +'<div class="menu-text truncate" style="max-width:80%;display:inline-block;">'
-                        + $Db.rty(rty_ID,'rty_Name')+'</div>'
-                        +'<span style="float:right;">'
-                        +(cnt>=0?cnt:'')+'</span>'
-                       +'</li>').appendTo(container);
-                    
-                }else{
-            
-                    $('<div>').button({label:
-                    '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '" height="12">'
-                    +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:8px">'
-                            + $Db.rty(rty_ID,'rty_Name') + '</span>'
-                            + '<span style="float:right;padding:2px;font-size:0.8em;">['   
-                            +  cnt
-                            +']</span>'}) 
-                        .attr('data-id', rty_ID)
-                        .css({'margin-left':'6px','font-size':'0.9em'})        
-                        .addClass('entity-filter-button')  // ui-state-active
-                        .insertAfter(this.config_btn.parent());
-                    
-                }
-            
-            }else{
-                //remove wrong(removed) rectypes
-                is_init = false;
-                this.selected_rty_ids.splice(idx,1);
+        let rectype_grouping = this._createRectypeList();
+        for(const rectypes of rectype_grouping){
+
+            const rtg_ID = rectypes[0];
+
+            if(this.options.use_combined_select){
+                $(`<li style="font-size:smaller;padding:4px 6px 2px 4px;font-weight: bold;">
+                    <img src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif" class="rt-icon" />
+                    <div class="menu-text truncate" style="max-width:80%;display:inline-block;cursor: default;">${$Db.rtg(rtg_ID, 'rtg_Name')}</div>
+                </li>`).appendTo(container);
             }
-            idx--;
-            
-        }//for
-        
-                
+
+            for(const rty_ID of rectypes[1]){
+
+                let cnt = $Db.rty(rty_ID, 'rty_RecCount');
+                cnt = !window.hWin.HEURIST4.util.isPositiveInt(cnt) ? 0 : cnt;
+
+                if(this.options.use_combined_select){
+
+                    $(`<li data-id="${rty_ID}" style="font-size:smaller;padding:4px 6px 2px 4px">
+                        <img src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif" class="rt-icon"
+                            style="vertical-align:bottom;background-image:url(&quot;${window.hWin.HAPI4.iconBaseURL}${rty_ID}&quot;);" />
+                        <div class="menu-text truncate" style="max-width:80%;display:inline-block;">${$Db.rty(rty_ID, 'rty_Name')}</div>
+                        <span style="float:right;">${cnt}</span>
+                    </li>`).appendTo(container);
+
+                }else{
+
+                    $('<div>', {'data-id': rty_ID, style: 'margin-left: 6px; font-size: 0.9em;', class: 'entity-filter-button'}).button({
+                        label:
+                            `<img src="${window.hWin.HAPI4.iconBaseURL}${rty_ID}" height="12">
+                            <span class="truncate" style="max-width:100px;display:inline-block;margin-left:8px">${$Db.rty(rty_ID,'rty_Name')}</span>'
+                            <span style="float:right;padding:2px;font-size:0.8em;">[${cnt}]</span>`
+                        }
+                    ).insertAfter(this.config_btn.parent());
+
+                }
+            }
+        }
+
         if(this.options.use_combined_select){
-            
-            this._on( this.combined_select.find('li[data-id]'), {click: function(e){
-                   let selval = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
-                   selval = selval.attr('data-id');
-                   if(selval>0){
+
+            this._on( this.combined_select.find('li[data-id]'), {
+                click: function(e){
+                    let selval = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
+                    selval = selval.attr('data-id');
+                    if(selval > 0){
                        this._doSearch(selval);
-                   }
-            },
-            mouseover: function(e){ 
-                let li = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
-                li.addClass('ui-state-active'); },
-            mouseout: function(e){ 
-                let li = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
-                li.removeClass('ui-state-active'); }
+                    }
+                },
+                mouseover: function(e){
+                    let li = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
+                    li.addClass('ui-state-active');
+                },
+                mouseout: function(e){
+                    let li = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
+                    li.removeClass('ui-state-active');
+                }
             });
-            
+
         }else{
-         
-            this._on( this.div_entity_btns.find('div.entity-filter-button'), {  click: function(e){
-                   let selval = $(e.target).hasClass('entity-filter-button')
-                            ?$(e.target):$(e.target).parent('.entity-filter-button');
-                   selval = selval.attr('data-id');
-                   if(selval>0){
+
+            this._on( this.div_entity_btns.find('div.entity-filter-button'), {
+                click: function(e){
+                    let selval = $(e.target).hasClass('entity-filter-button')
+                            ? $(e.target) : $(e.target).parent('.entity-filter-button');
+                    selval = selval.attr('data-id');
+                    if(selval>0){
                        this._doSearch(selval);
-                   }
-            } });
-            
+                    }
+                }
+            });
+
             this.div_entity_btns.sortable({
                 //containment: 'parent',
                 items: '.entity-filter-button',
                 cursor: 'move',
-                handle:'img',
+                handle: 'img',
                 delay: 250,
                 axis: 'x',
-                stop:function(){
+                stop: function(){
                     that.selected_rty_ids = [];
-                    $.each(that.div_entity_btns.find('.entity-filter-button'),function(idx, item){
-                      that.selected_rty_ids.push( $(item).attr('data-id') );
-                    })
+                    $.each(that.div_entity_btns.find('.entity-filter-button'), function(idx, item){
+                        that.selected_rty_ids.push( $(item).attr('data-id') );
+                    });
                     window.hWin.HAPI4.save_pref('entity_filter_btns', that.selected_rty_ids.join(','));
-                }}
-            );
+                }
+            });
         }
-        
-        
+
         if(is_init!==true || needs_saving){
             //save in user preferences
             window.hWin.HAPI4.save_pref('entity_filter_btns', this.selected_rty_ids.join(','));
         }
-            
+
     },
 
-    
+    _createRectypeList: function(){
+
+        if(window.hWin.HEURIST4.util.isempty(this.selected_rty_ids)){
+            return [];
+        }
+
+        let rtn = [];
+        let rectype_IDs = Array.isArray(this.selected_rty_ids)
+            ? window.hWin.HEURIST4.util.cloneJSON(this.selected_rty_ids)
+            : this.selected_rty_ids.split(',');
+
+        let count = rectype_IDs.length;
+        let handled = 0;
+
+        $Db.rtg().each2((rtg_ID, record) => {
+
+            let rec_IDs = $Db.rty().getSubSetByRequest({'rty_RecTypeGroupID': rtg_ID}).getOrder();
+
+            let common_rty = rec_IDs.filter((rty_ID) => rectype_IDs.includes(rty_ID));
+
+            if(common_rty.length > 0){
+                rtn.push([rtg_ID, common_rty]);
+                handled += common_rty.length;
+            }
+
+            if(handled === count){
+                return false;
+            }
+        });
+
+        return rtn;
+    },
+
     /* private function */
     _refresh: function(){
     },
@@ -410,34 +421,33 @@ $.widget( "heurist.searchByEntity", {
     // creates selectors usage_select or config_select
     //
     _recreateSelectRectypeFilter: function(opts){
-        
-            let that = this;
 
-            let select_rectype = opts['select_name'];
-            
-            opts.useIds = true;
-            
-            opts.useHtmlSelect = (select_rectype=='usage_select' && that.options.use_combined_select);
-            
-            this[select_rectype] = window.hWin.HEURIST4.ui.createRectypeSelectNew(
-                    (select_rectype=='config_select')?this.config_select_orig:null, opts);
-            
-            if(this[select_rectype].hSelect("instance")!=undefined){
-                let menu = this[select_rectype].hSelect( "menuWidget" );
-                menu.css({'max-height':'450px'});                        
-                this[select_rectype].hSelect({
-                        change: opts.onselect,
-                        close: function(){
-                                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
-                                    that.options.menu_locked.call( that, false ); //unlock
-                                }
-                        }
-                });
-                this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
-            }
-            
+        let that = this;
+
+        let select_rectype = opts['select_name'];
+
+        opts.useIds = true;
+
+        opts.useHtmlSelect = (select_rectype=='usage_select' && that.options.use_combined_select);
+
+        this[select_rectype] = window.hWin.HEURIST4.ui.createRectypeSelectNew(
+                (select_rectype=='config_select')?this.config_select_orig:null, opts);
+
+        if(this[select_rectype].hSelect("instance")!=undefined){
+            let menu = this[select_rectype].hSelect( "menuWidget" );
+            menu.css({'max-height':'450px'});
+            this[select_rectype].hSelect({
+                    change: opts.onselect,
+                    close: function(){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
+                                that.options.menu_locked.call( that, false ); //unlock
+                            }
+                    }
+            });
+            this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
+        }
+
     },
-    
 
     //
     // recreate rectype selectors and filter button set
@@ -461,104 +471,103 @@ $.widget( "heurist.searchByEntity", {
 
             this._recreateSelectRectypeFilter(this.config_select_options);
         }
-        
-    },      
-        
+
+    },
+
     //
     // opens selector on correct position
     //
     _openSelectRectypeFilter: function( opts ){
-        
-                let select_rectype = opts['select_name'];
-       
-                let that = this;
-                function __openSelect(){
-                    
-                    that[select_rectype].hSelect('open');
-                    that[select_rectype].val(-1);
-                    that[select_rectype].hSelect('menuWidget')
-                        .position({my: "left top", at: "left top", of: opts['ancor']}); //left+10 bottom-4
-            
-                    let menu = $(that[select_rectype].hSelect('menuWidget'));
-                    let ele = $(menu[0]);
-                    ele.scrollTop(0);        
-                   
-                    if(opts.useCheckboxes && window.hWin.HEURIST4.util.isFunction(opts.onmarker)){
-                        let spans = menu.find('span.rt-checkbox');
-                        that._off(spans,'click');
-                        that._on(spans,{'click':function(e){
-                            if($(event.target).is('span')){
-                                opts.onmarker.call(that, $(event.target) );
-                                window.hWin.HEURIST4.util.stopEvent(e);
-                            }}});
-                        /*
-                        menu.find('span.rt-checkbox').on('click', function(e){
-                            if($(event.target).is('span')){
-                                opts.onmarker.call(that, $(event.target) );
-                                window.hWin.HEURIST4.util.stopEvent(e);
-                            }
-                        });
-                        */
+
+        let select_rectype = opts['select_name'];
+
+        let that = this;
+        function __openSelect(){
+
+            that[select_rectype].hSelect('open');
+            that[select_rectype].val(-1);
+            that[select_rectype].hSelect('menuWidget')
+                .position({my: "left top", at: "left top", of: opts['ancor']}); //left+10 bottom-4
+
+            let menu = $(that[select_rectype].hSelect('menuWidget'));
+            let ele = $(menu[0]);
+            ele.scrollTop(0);
+
+            if(opts.useCheckboxes && window.hWin.HEURIST4.util.isFunction(opts.onmarker)){
+                let spans = menu.find('span.rt-checkbox');
+                that._off(spans,'click');
+                that._on(spans,{'click':function(e){
+                    if($(e.target).is('span')){
+                        opts.onmarker.call(that, $(e.target) );
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                    }}});
+                /*
+                menu.find('span.rt-checkbox').on('click', function(e){
+                    if($(event.target).is('span')){
+                        opts.onmarker.call(that, $(event.target) );
+                        window.hWin.HEURIST4.util.stopEvent(e);
                     }
-                    
-                }
-                
-                if(this[select_rectype]){
-                    
-                    if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
-                        this.options.menu_locked.call( this, true); //lock
-                    }
-                    __openSelect();
-                }
+                });
+                */
+            }
+        }
+
+        if(this[select_rectype]){
+
+            if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
+                this.options.menu_locked.call( this, true); //lock
+            }
+            __openSelect();
+        }
 
     },
-        
+
     //
     // search from input - query is defined manually
     //
     _doSearch: function(rty_ID){
 
-            let request = {};
-            request.q = 't:'+rty_ID;
-            request.w  = 'a';
-            request.qname = $Db.rty(rty_ID, 'rty_Plural');
-            request.detail = 'ids';
-            request.source = this.element.attr('id');
-            request.search_realm = this.options.search_realm;
-            
-            window.hWin.HAPI4.RecordSearch.doSearch( this, request );
-            
-            if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
-                this.options.onClose();
-            }
+        let request = {};
+        request.q = 't:'+rty_ID;
+        request.w  = 'a';
+        request.qname = $Db.rty(rty_ID, 'rty_Plural');
+        request.detail = 'ids';
+        request.source = this.element.attr('id');
+        request.search_realm = this.options.search_realm;
+
+        window.hWin.HAPI4.RecordSearch.doSearch( this, request );
+
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
+            this.options.onClose();
+        }
     }
 
     // events bound via _on are removed automatically
     // revert other modifications here
     ,_destroy: function() {
 
-        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
-        //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE);        
-        
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE);
+
         this.div_entity_btns.find('.entity-filter-button').remove();
 
         if(this.usage_btn) this.usage_btn.remove();
-        
+
         if(this.config_select) {
             if(this.config_select.hSelect("instance")!=undefined){
-               this.config_select.hSelect("destroy"); 
+               this.config_select.hSelect("destroy");
             }
-            this.config_select.remove();   
+            this.config_select.remove();
         }
         if(this.usage_select) {
             if(this.usage_select.hSelect("instance")!=undefined){
-               this.usage_select.hSelect("destroy"); 
+               this.usage_select.hSelect("destroy");
             }
-            this.usage_select.remove();   
-        }        
-        
+            this.usage_select.remove();
+        }
+
         this.div_entity_btns.remove();
-        
+
         if(this.combined_select) this.combined_select.remove();
     }
 
