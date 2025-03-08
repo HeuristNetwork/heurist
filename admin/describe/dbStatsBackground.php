@@ -42,12 +42,11 @@ if(empty($databases)){
 
 $req_params = USanitize::sanitizeInputArray();
 
-//const SERVER_NAME = !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME;
 define('SERVER_NAME', !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME);
 
 if(SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SERVER_NAME == '::1' || isLocalHost()){
-    dataOutput(['status' => HEURIST_ACTION_BLOCKED, 'message' => '']);
-    exit;    
+    $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED);
+    exit;
 }
 
 $is_main_server = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
@@ -55,9 +54,13 @@ $is_main_server = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_S
 // Define various constants for file & file paths
 define('FILESTORE_ROOT', $system->getFileStoreRootFolder());
 define('DB_STATS', FILESTORE_ROOT . '_DB_STATS'); // FILESTORE/_DB_STATS
-define('DB_STATS_FILE', DB_STATS . '/db_stats.txt'); // FILESTORE/_DB_STATS/db_stats.txt
 define('ALL_STATS', FILESTORE_ROOT . '_ALL_SERVER_STATS'); // FILESTORE/_ALL_SERVER_STATS
-define('LOCKING_FILE', DB_STATS . '/db_stats_lock.txt'); // prevent the function from running multiple times at once
+define('DB_STATS_FILE', ALL_STATS . '/db_stats.txt'); // FILESTORE/_ALL_SERVER_STATS/db_stats.txt
+define('LOCKING_FILE', ALL_STATS . '/db_stats_lock.txt'); // prevent the function from running multiple times at once
+
+if(file_exists(DB_STATS)){
+    folderDelete2(DB_STATS, true);
+}
 
 // Check for file lock
 if(file_exists(LOCKING_FILE)){
@@ -107,7 +110,8 @@ if(count($_FILES) == 1 && array_key_exists('stats_file', $_FILES)){
     checkDirectory(ALL_STATS);
 
     if(!array_key_exists('server', $req_params) || empty($req_params['server'])){
-        exitScript(HEURIST_REQUEST_DENIED, 'Missing server name', true);
+        $system->addError(HEURIST_REQUEST_DENIED, 'Missing server name');
+        exitScript(null, null, true);
     }
 
     $server_name = $req_params['server'];
@@ -180,7 +184,7 @@ function sendStatsToMain(){
 }
 
 /**
- * Create db_stats.txt file within local _DB_STATS
+ * Create db_stats.txt file within local _ALL_SERVER_STATS
  *  Per database, includes: record count, last newest record, last record modification, new records per month
  *
  * @return bool success or failure
@@ -189,7 +193,7 @@ function createStats(){
 
     global $system;
 
-    checkDirectory(DB_STATS);
+    checkDirectory(ALL_STATS);
 
     $mysqli = $system->getMysqli();
 
@@ -287,7 +291,7 @@ function checkDirectory($dir){
 /**
  * Remove file lock and exit on error if necessary
  *
- * @param integer|null $status HTTP status code
+ * @param string|null $status HTTP status code
  * @param string|null $msg error message
  * @param bool $is_error whether this is for an error
  */
