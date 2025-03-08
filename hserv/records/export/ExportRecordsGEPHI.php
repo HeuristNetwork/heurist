@@ -39,6 +39,8 @@ class ExportRecordsGEPHI extends ExportRecords {
 
     private $relmarker_fields = [];
 
+    private $edges_printed = [];
+
 //
 //
 //
@@ -75,7 +77,7 @@ protected function _outputHeader(){
         foreach ($this->retrieve_detail_fields as $dty_ID) {
 
             $dty_Name = mysql__select_value($this->mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
-            $rec_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$dty_Name}\" type=\"string\"/>";
+            $rec_fields .= "\n\t\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$dty_Name}\" type=\"string\"/>";
 
             $id_idx ++;
         }
@@ -102,7 +104,7 @@ protected function _outputHeader(){
 
             while($row = $res->fetch_row()){
 
-                $rel_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$row[0]}\" type=\"string\"/>";
+                $rel_fields .= "\n\t\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$row[0]}\" type=\"string\"/>";
                 $this->relmarker_fields[] = $row[1];
 
                 $id_idx ++;
@@ -155,8 +157,8 @@ protected function _outputRecord($record){
     $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.$this->system->dbname());
 
     $rec_values = '';
-    if(is_array($this->retrieve_detail_fields)){
-        $this->retrieve_detail_fields = array();
+    if(!is_array($this->retrieve_detail_fields)){
+        $this->retrieve_detail_fields = [];
     }
 
     $att_id = 4;
@@ -176,21 +178,20 @@ protected function _outputRecord($record){
             continue;
         }
 
-        $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+        $rec_values .= "\n\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
     }
 
             $gephi_node = <<<XML
-<node id="{$recID}" label="{$name}">
-    <attvalues>
-        <attvalue for="0" value="{$name}"/>
-        <attvalue for="1" value="{$image}"/>
-        <attvalue for="2" value="{$rty_ID}"/>
-        <attvalue for="3" value="0"/>
-        <attvalue for="4" value="{$recURL}"/>
-        {$rec_values}
-    </attvalues>
-</node>
-XML;
+                    <node id="{$recID}" label="{$name}">
+                        <attvalues>
+                            <attvalue for="0" value="{$name}"/>
+                            <attvalue for="1" value="{$image}"/>
+                            <attvalue for="2" value="{$rty_ID}"/>
+                            <attvalue for="3" value="0"/>
+                            <attvalue for="4" value="{$recURL}"/>{$rec_values}
+                        </attvalues>
+                    </node>
+                    XML;
 
     fwrite($this->fd, $gephi_node);
 
@@ -199,10 +200,10 @@ XML;
         return false;
     }
 
-    if(@$links['data']['direct']){
+    if(!empty(@$links['data']['direct'])){
         fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
     }
-    if(@$links['data']['reverse']){
+    if(!empty(@$links['data']['reverse'])){
         fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['reverse'], $this->links_cnt, 'reverse'));
     }
 
@@ -245,7 +246,6 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
 
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
 
-
     $edges = '';
 
     if($links){
@@ -259,6 +259,10 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                 $target = $link->recID;
             }
 
+            if(array_search([$source, $target], $this->edges_printed) !== false){
+                continue;
+            }
+
             $dtID = $link->dtID;
             $trmID = $link->trmID;
             $relationName = "Floating relationship";
@@ -267,58 +271,59 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
             $startDate = empty(@$link->dtl_StartDate) ? '' : $link->dtl_StartDate;
             $endDate = empty(@$link->dtl_EndDate) ? '' : $link->dtl_EndDate;
 
-            if(in_array($source, $records) && in_array($target, $records)){
-
-                if($dtID > 0) {
-                    $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
-                    $relationID = $dtID;
-                }elseif($trmID > 0) {
-                    $relationName = self::$defTerms->getTermLabel($trmID, true);
-                    $relationID = $trmID;
-                }
-
-                $relationName  = htmlspecialchars($relationName);
-                $links_cnt++;
-
-                $rel_values = '';
-                $att_id = 5;
-                if(!empty($this->relmarker_fields) && !empty($link->relationID) && intval($link->relationID) > 0){
-
-                    $record = recordSearchByID($this->system, intval($link->relationID), $this->relmarker_fields, 'rec_ID');
-
-                    foreach($this->relmarker_fields as $dty_ID){
-
-                        $att_id ++;
-
-                        if(!array_key_exists($dty_ID, $record['details']) || empty($record['details'][$dty_ID])){
-                            continue;
-                        }
-
-                        $values = $record['details'][$dty_ID];
-                        $this->_processFieldData($dty_ID, $values);
-
-                        if(empty($values)){
-                            continue;
-                        }
-
-                        $rel_values .= "\n\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
-                    }
-                }
-
-                $edges = $edges.<<<XML
-<edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">
-    <attvalues>
-        <attvalue for="0" value="{$relationID}"/>
-        <attvalue for="1" value="{$relationName}"/>
-        <attvalue for="3" value="1"/>
-        <attvalue for="4" value="{$startDate}"/>
-        <attvalue for="5" value="{$endDate}"/>{$rel_values}
-    </attvalues>
-</edge>
-XML;
-
-
+            if(!in_array($source, $records) || !in_array($target, $records)){
+                continue;
             }
+
+            if($dtID > 0) {
+                $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
+                $relationID = $dtID;
+            }elseif($trmID > 0) {
+                $relationName = self::$defTerms->getTermLabel($trmID, true);
+                $relationID = $trmID;
+            }
+
+            $relationName  = htmlspecialchars($relationName);
+            $links_cnt++;
+
+            $rel_values = '';
+            $att_id = 5;
+            if(!empty($this->relmarker_fields) && !empty($link->relationID) && intval($link->relationID) > 0){
+
+                $record = recordSearchByID($this->system, intval($link->relationID), $this->relmarker_fields, 'rec_ID');
+
+                foreach($this->relmarker_fields as $dty_ID){
+
+                    $att_id ++;
+
+                    if(!array_key_exists($dty_ID, $record['details']) || empty($record['details'][$dty_ID])){
+                        continue;
+                    }
+
+                    $values = $record['details'][$dty_ID];
+                    $this->_processFieldData($dty_ID, $values);
+
+                    if(empty($values)){
+                        continue;
+                    }
+
+                    $rel_values .= "\n\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+                }
+            }
+
+            $this->edges_printed[] = [$source, $target];
+
+            $edges .= <<<XML
+                    <edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1" name="{$relationName}">
+                        <attvalues>
+                            <attvalue for="0" value="{$relationID}"/>
+                            <attvalue for="1" value="{$relationName}"/>
+                            <attvalue for="3" value="1"/>
+                            <attvalue for="4" value="{$startDate}"/>
+                            <attvalue for="5" value="{$endDate}"/>{$rel_values}
+                        </attvalues>
+                    </edge>
+                    XML;
         }//for
     }
     return $edges;
