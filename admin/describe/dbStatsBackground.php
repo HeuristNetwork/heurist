@@ -55,12 +55,8 @@ $is_main_server = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_S
 define('FILESTORE_ROOT', $system->getFileStoreRootFolder());
 define('DB_STATS', FILESTORE_ROOT . '_DB_STATS'); // FILESTORE/_DB_STATS
 define('ALL_STATS', FILESTORE_ROOT . '_ALL_SERVER_STATS'); // FILESTORE/_ALL_SERVER_STATS
-define('DB_STATS_FILE', ALL_STATS . '/db_stats.txt'); // FILESTORE/_ALL_SERVER_STATS/db_stats.txt
-define('LOCKING_FILE', ALL_STATS . '/db_stats_lock.txt'); // prevent the function from running multiple times at once
-
-if(file_exists(DB_STATS)){
-    folderDelete2(DB_STATS, true);
-}
+define('DB_STATS_FILE', DB_STATS . '/db_stats.txt'); // FILESTORE/DB_STATS/db_stats.txt
+define('LOCKING_FILE', DB_STATS . '/db_stats_lock.txt'); // prevent the function from running multiple times at once
 
 // Check for file lock
 if(file_exists(LOCKING_FILE)){
@@ -184,7 +180,7 @@ function sendStatsToMain(){
 }
 
 /**
- * Create db_stats.txt file within local _ALL_SERVER_STATS
+ * Create db_stats.txt file within local _DB_STATS
  *  Per database, includes: record count, last newest record, last record modification, new records per month
  *
  * @return bool success or failure
@@ -193,7 +189,7 @@ function createStats(){
 
     global $system;
 
-    checkDirectory(ALL_STATS);
+    checkDirectory(DB_STATS);
 
     $mysqli = $system->getMysqli();
 
