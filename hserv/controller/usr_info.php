@@ -234,6 +234,8 @@
         }
     }elseif($action == 'get_user_notifications'){
         $res = user_getNotifications($system);
+    }elseif($action == 'set_user_notification_settings'){
+        $res = user_blockNotifications($system, $req_params['blocking']);
     }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->settings->getDatabaseSetting('TinyMCE formats');
