@@ -2313,11 +2313,12 @@ console.log('onEditFormChange @todo check buttons!!!');
         let that = this;
         let dtyIDs = [];
         let orders = [];
+
         this._tree.visit(function(node){
 
             let dty_ID = node.key;
             recset.setFldById(dty_ID, 'rst_DisplayOrder', order); // update local cache
-            $Db.rst(this.options.rty_ID, dty_ID, 'rst_DisplayOrder', order); // update global cache
+            $Db.rst(that.options.rty_ID, dty_ID, 'rst_DisplayOrder', order); // update global cache
 
             dtyIDs.push( dty_ID );
             orders.push( order );
