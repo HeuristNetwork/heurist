@@ -6076,11 +6076,12 @@ $.widget( "heurist.editing_input", {
             that.onChange();
         }
 
-        function translateDate(date, from_calendar, to_calendar){
+        function __translateDate(date, from_calendar, to_calendar){
 
             if(!window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){
                 return date;
             }
+            let date_keep = date;
 
             if(typeof date == 'string'){
                 let date_parts = date.split('-');
@@ -6093,15 +6094,20 @@ $.widget( "heurist.editing_input", {
                 if(date_parts.length == 3){
                     date['day'] = date_parts[2];
                 }
+            }else{
+                date_keep = date['year']+'-'+date['month']+'-'+date['day'];
             }
 
-            let new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
-            if(!new_cal){
-                return date;
+            try{    
+                let new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
+                if(!new_cal){
+                    return date_keep;
+                }
+                let julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
+                return to_calendar.fromJD(julian_date);
+            }catch(e){
+                return date_keep;
             }
-
-            let julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
-            return to_calendar.fromJD(julian_date);
         }
 
         let defDate = $input.val();
@@ -6164,7 +6170,7 @@ $.widget( "heurist.editing_input", {
                     let month = hasMonth ? tDate.getMonth() : 1;
                     let day = hasDay ? tDate.getDay() : 1;
 
-                    defDate = translateDate({'year': tDate.getYear(), 'month': month, 'day': day}, g_calendar, calendar);
+                    defDate = __translateDate({'year': tDate.getYear(), 'month': month, 'day': day}, g_calendar, calendar);
                 }
             }else if(tDate){
                 // remove padding zeroes from year
@@ -6268,7 +6274,7 @@ $.widget( "heurist.editing_input", {
 
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(val_parts) && val_parts.length == 3 && cur_cal.local.name.toLowerCase() != 'gregorian'){
 
-                        let g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
+                        let g_value = __translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
                         g_value = g_calendar.formatDate('yyyy-mm-dd', g_value);
 
                         if(g_value != ''){//translated value
@@ -6477,7 +6483,7 @@ $.widget( "heurist.editing_input", {
                                     let g_calendar = $.calendars.instance('gregorian');
 
                                     gregorian_date = `${new_date.getYear()}-${month}-${day}`;
-                                    new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
+                                    new_date = __translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
                                     new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
                                 }
 
