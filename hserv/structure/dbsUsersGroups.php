@@ -1124,79 +1124,191 @@
      *
      * Monthly bug / suggestion report is handled separatly
      *
-     * @param System - initialised system object
+     * @param \hserv\System - initialised system object
      *
      * @return array - messages to show
      */
     function user_getNotifications($system){
 
-        $user = $system->getCurrentUser();// ugr_ID
-
-        $notes_user_settings = HEURIST_FILESTORE_DIR . 'userNotifications.json';// individual user settings
-
+        $mysqli = $system->getMysqli();
         $today = strtotime('now');
-        $usr_id = $user['ugr_ID'];
-
-        // Handled system notifications
-        $notifications = array(
-            'bug_report' => array(
-                'message' => '',
-                'links' => array(
-                    'mainMenu' => 'menu-help-bugreport'
-                ),
-                'period' => '+1 month'
-            )
-        );
-        $conditions = array(
-            'bug_report' => array(
-                '*' => array()
-            )
-        );
+        $usr_id = intval($system->getUserId());
 
         // LOAD USER SETTINGS
-        $user_settings = array();
-        if(file_exists($notes_user_settings)){
+        $user_settings = $system->settings->getDatabaseSetting('Notifications');
+        $notes_user_settings = HEURIST_FILESTORE_DIR . 'userNotifications.json'; // original user settings file
+
+        if(empty($user_settings) && file_exists($notes_user_settings)){
 
             $user_settings = file_get_contents($notes_user_settings);
             $user_settings = json_decode($user_settings, true);
+
+            if(!empty($user_settings)){
+                $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
+            }
         }
+
+        fileDelete($notes_user_settings);
+
+        // Handled system notifications
+        $notifications = [
+            'bug_report' => [
+                'message' => '#bug-reporter',
+                'links' => [
+                    'span#open-bug-reporter' => [
+                        'widget' => 'actionHandler',
+                        'id' => 'menu-help-bugreport'
+                    ]
+                ]
+            ]
+        ];
+        $conditions = [
+            'bug_report' => [
+                'period' => '+1 month'
+            ],
+            'cms_websites' => [
+                'query' => [
+                    'query' => <<<QUERY
+                    SELECT IF(COUNT(rec_ID) = 0, true, false)
+                    FROM Records
+                    WHERE rec_RecTypeID IN (
+                        SELECT rty_ID
+                        FROM defRecTypes
+                        WHERE rty_OriginatingDBID = 99 AND rty_IDInOriginatingDB IN (51,52)
+                    )
+                    QUERY
+                ]
+            ],
+            'db_description' => [
+                'query' => [
+                    'query' => <<<QUERY
+                    SELECT IF(LENGTH(sys_dbDescription) = 0, true, false)
+                    FROM sysIdentification
+                    QUERY
+                ]
+            ]
+        ];
 
         if(empty($user_settings)){
-            $user_settings = array(
-                $usr_id => array()
-            );
+            $user_settings = [
+                $usr_id => []
+            ];
         }elseif(!array_key_exists($usr_id, $user_settings)){
-            $user_settings[$usr_id] = array();
+            $user_settings[$usr_id] = [];
         }
 
-        $messages = array();
+        $messages = [];
 
         if(empty($user_settings[$usr_id])){
 
             $user_settings[$usr_id] = array_fill_keys(array_keys($notifications), $today);
+            $user_settings[$usr_id]['last_login'] = $today;
 
-            fileSave(json_encode($user_settings), $notes_user_settings);
+            $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
             return $messages;
         }
 
-        // Check bug report independently
-        if(array_key_exists('bug_report', $user_settings[$usr_id]) &&
-           strtotime('+1 month', intval($user_settings[$usr_id]['bug_report'])) <= $today){
+        // check user has logged in within the last three days
+        if(!array_key_exists('last_login', $user_settings[$usr_id])
+        || strtotime('+3 days', $user_settings[$usr_id]['last_login']) <= $today){
 
-            $user_settings[$usr_id]['bug_report'] = $today;
+            $user_settings[$usr_id]['last_login'] = $today;
+            $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
-            $messages['bug_report'] = array(
-                'message' => @$notifications['bug_report']['message'],
-                'links' => @$notifications['bug_report']['links']
-            );
-        }elseif(!array_key_exists('bug_report', $user_settings[$usr_id])){
-            $user_settings[$usr_id]['bug_report'] = $today;
+            return $messages;
         }
 
-        fileSave(json_encode($user_settings), $notes_user_settings);
+        $blocked = array_key_exists('block', $user_settings[$usr_id]) ? $user_settings[$usr_id]['block'] : '';
+        $blocked = explode(',', $blocked);
+
+        foreach($notifications as $type => $details){
+
+            if(!array_key_exists($type, $user_settings[$usr_id])){
+                $user_settings[$usr_id][$type] = $today;
+                continue;
+            }elseif(in_array($type, $blocked)){
+                continue;
+            }
+
+            $notify_conds = $conditions[$type];
+            $notify = false;
+
+            foreach($notify_conds as $conditional_type => $condition){
+
+                switch($conditional_type){
+
+                    case 'period':
+
+                        $notify = strtotime($condition, intval($user_settings[$usr_id][$type])) <= $today;
+
+                        break;
+
+                    case 'query':
+
+                        $value = mysql__select_value($mysqli, $condition['query']);
+
+                        $notify = $value === 1;
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if($notify){
+
+                $user_settings[$usr_id][$type] = $today;
+
+                $messages[$type] = [
+                    'message' => $details['message'],
+                    'links' => $details['links']
+                ];
+            }
+        }
+
+        $user_settings[$usr_id]['last_login'] = $today;
+
+        $system->settings->setDatabaseSetting('Notifications', $user_settings, 0);
 
         return $messages;
+    }
+
+    /**
+     * Set blocked notifications to avoid displaying to the current user
+     *
+     * @param \hserv\System $system - initialised system object
+     * @param string|array $blocking - list of notification types to set
+     *
+     * @return boolean success or failure (error is set to System object)
+     */
+    function user_blockNotifications($system, $blocking){
+
+        $usr_id = intval($system->getUserId());
+
+        if(empty($blocking)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Missing required parameters');
+            return false;
+        }
+
+        $user_settings = $system->settings->getDatabaseSetting('Notifications');
+
+        if(empty($user_settings) || !array_key_exists($usr_id, $user_settings) || empty($user_settings[$usr_id])){
+            $system->addError(HEURIST_ACTION_BLOCKED, 'No notifications found for this user');
+            return false;
+        }
+
+        $notifications = ['bug_report'];
+
+        $blocking = !is_array($blocking) ? explode(',', $blocking) : $blocking;
+        $blocking = array_filter($blocking, function($type) use ($notifications){ return in_array($type, $notifications); });
+
+        $blocking = array_merge($blocking, $user_settings[$usr_id]['block']);
+
+        $user_settings[$usr_id]['block'] = implode(',', $blocking);
+
+        return $system->settings->setDatabaseSetting('Notifications', $user_settings);
     }
 
     function passwordGenerate ($length = 8) { //private

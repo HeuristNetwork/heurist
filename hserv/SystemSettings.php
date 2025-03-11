@@ -30,9 +30,10 @@ class SystemSettings {
     private $system;
 
     private $settingsInDb = null; //from sysIdentification
-    private $settingsInFiles = array('TinyMCE formats' => 'text_styles.json', 
-                                     'Webfonts' => 'webfonts.json',
-                                     'Invalid URLs' => 'invalid_urls.json'); //from /settings folder
+    private $settingsInFiles = ['TinyMCE formats' => 'text_styles.json', 
+                                'Webfonts' => 'webfonts.json',
+                                'Invalid URLs' => 'invalid_urls.json',
+                                'Notifications' => 'user_notifications.json']; //from /settings folder
 
     public function __construct( $system ) {
         $this->system = $system;
