@@ -596,6 +596,8 @@ $.widget( "heurist.editing_input", {
                     });
                 }
             });
+
+            this.element.find('.ui-selectmenu-button').addClass('ui-state-disabled');
         }else if(this.isReadonly()){
 
             this.input_cell.attr('title', 'This field has been marked as non-editable');
