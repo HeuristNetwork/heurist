@@ -133,7 +133,7 @@ function sendStatsToMain(){
 
     global $system, $is_main_server;
 
-    $script = HEURIST_MAIN_SERVER . '/h6-alpha/admin/describe/dbStatsBackground.php';
+    $script = HEURIST_MAIN_SERVER . '/h6-alpha/redirects/allServerStats.php';
 
     if(!file_exists(DB_STATS_FILE) && !createStats()){
         exitScript(null, null, true);
@@ -155,7 +155,7 @@ function sendStatsToMain(){
     $ch = curl_init($script);
 
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['stats_file' => $curl_file, 'server' => SERVER_NAME]));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['stats_file' => $curl_file, 'server' => SERVER_NAME, 'type' => 'db_stats']));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     curl_setopt($ch, CURLOPT_FAILONERROR, true);
