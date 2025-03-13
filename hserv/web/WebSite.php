@@ -193,7 +193,7 @@ class WebSite
 
             if(!$hasAccess)
             {
-                $try_login = $system->getCurrentUser() == null;
+                $try_login = $this->system->getCurrentUser() == null;
 
                 $err_message = 'The Heurist website at this address is not yet publicly accessible. '
                     . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
@@ -203,7 +203,7 @@ class WebSite
         if($err_message==null){
             return $rec;
         }else{
-            $this->outputError($res);
+            $this->outputError($err_message);
             return null;
         }
     }
@@ -293,8 +293,8 @@ class WebSite
 
         $val = @$record['details']?@$record['details'][$field_id]:@$record[$field_id];
 
-        if(is_array($file)){
-            $file = array_shift($file);
+        if(is_array($val)){
+            $file = array_shift($val);
             $file = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file['fileid'];
         }else{
             $file = $def;
@@ -434,7 +434,7 @@ class WebSite
     //
     private function getMainSubMenu($menu, $records){
         
-        $res .= '<ul class="dropdown-menu dropdown dropend">';
+        $res = '<ul class="dropdown-menu dropdown dropend">';
         
         foreach($menu as $id=>$subs){
             
@@ -455,7 +455,7 @@ class WebSite
             
         }
         
-        return $res.'</ul>';
+        return $res .= '</ul>';
                 
     }
     
