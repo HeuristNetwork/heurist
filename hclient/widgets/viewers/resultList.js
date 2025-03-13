@@ -3989,8 +3989,8 @@ $.widget( "heurist.resultList", {
                     +'</div>').appendTo(ele);
                     
                     ele.tabs('refresh');
-                    
-                    
+                    ele.tabs('option', 'active', -1);
+
                     $('<div class="ent_header">'
                         +'<span style="padding-top: 5px;display: inline-block;">'
                             +window.hWin.HR('Drag records to position in list, drag into list to add them')+'</span>'
