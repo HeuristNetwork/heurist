@@ -22,7 +22,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     options: {
 
         height: 540,
-        width: 820,
+        width: 880,
 
         title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
 
@@ -442,7 +442,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         let query = {};
         for(const field in this.search_mapping){
 
-            let value_field = this.search_mapping[field];
+            let value_field = window.hWin.HEURIST4.util.cloneJSON(this.search_mapping[field]);
             let actual_field = typeof value_field === 'string' ? value_field : Object.values(value_field)[1];
 
             let placeholder = actual_field.match(/__([a-zA-Z_]{7,14})__/);
