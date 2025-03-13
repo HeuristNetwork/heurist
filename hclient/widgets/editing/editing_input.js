@@ -588,6 +588,7 @@ $.widget( "heurist.editing_input", {
                         if(that.input_cell.sortable('instance') !== undefined){ // re-enable sorting inputs
                             that.input_cell.sortable('enable');
                         }
+                        that.element.find('.ui-selectmenu-button').removeClass('ui-state-disabled');
                     }, {title: 'Editing is discouraged', yes: 'Proceed', no: 'Cancel'}, {default_palette_class: 'ui-heurist-populate'});
 
                     window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('.ui-dialog-buttonpane button:first-child'), true);
