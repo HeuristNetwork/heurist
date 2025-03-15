@@ -26,6 +26,7 @@ onVisualizeResize */
 
 // Functions to handle the visualisation settings
 
+window.preference_settings = window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
 //localStorage.clear();
 /**
 * Returns the current displayed URL
@@ -40,8 +41,27 @@ function getURL() {
  * @param setting The setting to retrieve
  */
 function getSetting(key, defvalue) {
-    let value = localStorage.getItem(window.hWin.HAPI4.database+key);
-    
+
+    let value = '';
+
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key)){
+
+        let pref_key = key;
+        if(key.startsWith('setting_')){
+            pref_key = pref_key.split('_');
+            pref_key.shift();
+            pref_key = pref_key.join('_');
+        }
+
+        value = Object.hasOwn(window.preference_settings, pref_key) ? window.preference_settings[pref_key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
+
+        if(!Object.hasOwn(window.preference_settings, pref_key)){
+            putSetting(key, value);
+        }
+    }else{
+        value = localStorage.getItem(window.hWin.HAPI4.database+key);
+    }
+
     if (   //(isNaN(value) && window.hWin.HEURIST4.util.isNumber(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
         (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
         value = defvalue;
@@ -54,7 +74,28 @@ function getSetting(key, defvalue) {
 * Stores a value in the localStorage
 */
 function putSetting(key, value) {
-    localStorage.setItem(window.hWin.HAPI4.database+key, value);
+
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key)){
+
+        if(key.startsWith('setting_')){
+            key = key.split('_');
+            key.shift();
+            key = key.join('_');
+        }
+
+        window.preference_settings[key] = value;
+
+        window.hWin.HAPI4.save_pref('vis_struct', window.preference_settings);
+    }else{
+        localStorage.setItem(window.hWin.HAPI4.database+key, value);
+    }
+}
+
+/**
+* Remove setting from localStorage
+*/
+function removeSetting(key){
+    localStorage.removeItem(window.hWin.HAPI4.database+key);
 }
 
 /**

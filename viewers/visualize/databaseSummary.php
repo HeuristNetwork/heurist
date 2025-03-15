@@ -236,12 +236,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                 echo "<td align='center'>" .$row["count"]. "</td>";
 
                                 // Show
-                                if($row["count"] > 0 && $count < 10) {  //this record type has records
-                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record rectype_grp_". $row["grp_id"] ."' name='" .$title. "' checked='true'></td>";
-                                    $count++;
-                                }else{
-                                    echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp rectype_grp_". $row["grp_id"] ."' name='" .$title. "'></td>";
-                                }
+                                echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp rectype_grp_". $row["grp_id"] ."' name='" .$title. "'></td>";
                                 echo "</tr>";
                             }
                             ?>
@@ -267,8 +262,6 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             $("#expand").on('click', function(e) {
                 // Show visualisation elements
                 $(this).remove();
-                //$(".show").slideToggle(500);
-                //$("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
                 var url = window.hWin.HAPI4.baseURL+"hserv/controller/rectype_relations.php" + window.location.search;
@@ -285,50 +278,34 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     // Data loaded successfully!
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
-                    let isfirst_time = false;
                     let at_least_one_marked = false;
 
-                    <?php
-                        if($count==0){ //reset setting for empty db (only once)
-                            print 'isfirst_time = !(getSetting("'.HEURIST_DB_PREFIX.'"+window.hWin.HAPI4.database)>0); ';
-                            print 'putSetting("'.HEURIST_DB_PREFIX.'"+window.hWin.HAPI4.database, 1); ';
+                    let displayed_rectypes = getSetting('rectypes', []);
+                    if(displayed_rectypes.length > 0){
+                        //restore setting from previous session
+                        for(const rtyID of displayed_rectypes){
+                            $(`.show-record[id="${rtyID}"]`).prop('checked', true);
                         }
-                    ?>
-
-                    if(!isfirst_time){
-                        //restore setting for non empty db
-                        $(".show-record").each(function() {
-                            const name = $(this).attr("name");
-                            const record = getSetting(name);//@todo - change to recordtype ID
-                            if(record>0) {
-                                at_least_one_marked = true;
-                                $(this).prop("checked", true);
-                            }else{
-                                $(this).prop("checked", false);
-                            }
-                        }
-                        );
-                    }
-
-                    if(isfirst_time || !at_least_one_marked){
-                        $(".first_grp").each(function() {
-                            $(this).prop("checked", true);
-                            putSetting($(this).attr("name"), 1);
-                        });
-
-                        putSetting('startup_rectype_'+window.hWin.HAPI4.database, 1);
-                    }else{
-                        putSetting('startup_rectype_'+window.hWin.HAPI4.database, 0);
+                        at_least_one_marked = true;
                     }
 
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").on('change', function(e) {
-                        // Update record field 'checked' value in localstorage
-                        const name = $(e.target).attr("name");
 
-                        const value = $(e.target).is(':checked') ? 1 : 0;
-                        // Set 'checked' attribute and store it
-                        putSetting(name, value);
+                        // Update record field 'checked' value in localstorage
+                        const rtyID = $(e.target).attr("id");
+                        const checked = $(e.target).is(':checked') ? 1 : 0;
+
+                        let displayed_rectypes = getSetting('rectypes', []);
+                        const idx = displayed_rectypes.indexOf(rtyID);
+
+                        if(checked && idx === -1){
+                            displayed_rectypes.push(rtyID);
+                        }else if(!checked && idx !== -1){
+                            displayed_rectypes.splice(idx, 1);
+                        }
+
+                        putSetting('rectypes', displayed_rectypes);
 
                         // Update visualisation
                         filterData();
@@ -336,16 +313,28 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                     // Listen to the 'show-all' checkbox
                     $("#show-all").on('change', function() {
+
                         // Change all check boxes
                         const checked = $(this).prop('checked');
                         $(".show-record").prop("checked", checked);
 
-                        // Update localstorage
-                        $(".show-record").each(function(e) {
-                            const name = $(this).attr("name");
-                            // Set 'checked' attribute and store it
-                            putSetting(name, checked?1:0);
-                        });
+                        let displayed_rectypes = getSetting('rectypes', []);
+
+                        if(checked){
+
+                            // Update localstorage
+                            $(".show-record").each(function(e) {
+                                const rtyID = $(this).attr("id");
+                                const idx = displayed_rectypes.indexOf(rtyID);
+                                if(idx === -1){
+                                    displayed_rectypes.push(rtyID);
+                                }
+                            });
+                        }else{
+                            displayed_rectypes = [];
+                        }
+
+                        putSetting('rectypes', displayed_rectypes);
 
                         filterData();
                     });
@@ -356,19 +345,38 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         const group_id = $(this).attr('data-id');
                         const checked = $(this).prop('checked');
 
+                        let displayed_rectypes = getSetting('rectypes', []);
+
                         if(group_id){
-                            $('input.rectype_grp_'+group_id).prop('checked', checked);
+
+                            $(`input.rectype_grp_${group_id}`).prop('checked', checked);
 
                             // Update localstorage
-                            $(".show-record").each(function(e) {
-                                const name = $(this).attr("name");
-                                // Set 'checked' attribute and store it
-                                putSetting(name, checked?1:0);
+                            $(`input.rectype_grp_${group_id}`).each(function(e) {
+                                const rtyID = $(this).attr('id');
+                                const idx = displayed_rectypes.indexOf(rtyID);
+                                if(checked && idx === -1){
+                                    displayed_rectypes.push(rtyID);
+                                }else if(!checked && idx !== -1){
+                                    displayed_rectypes.splice(idx, 1);
+                                }
                             });
+
+                            putSetting('rectypes', displayed_rectypes);
 
                             filterData();
                         }
                     });
+
+                    if(!at_least_one_marked){
+
+                        $('.group_chkbox').first().prop('checked', true);
+
+                        window.trigger_checkbox_refresh = '.group_chkbox';
+                        window.startup_rectype = 1;
+                    }else{
+                        window.startup_rectype = 0;
+                    }
 
                     /** VISUALIZING */
                     // Parses the data
@@ -421,37 +429,14 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         });
                     }
 
-                    //reset settings for empty database
-                    if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-                        //localStorage.clear();
-                    }
+                    //$(window).on('onresize',onVisualizeResize);
 
-                    $(window).on('onresize',onVisualizeResize);
-
-                    onVisualizeResize();
                     initVisualizeData();
 
                 });
             });
 
-            function onVisualizeResize(){
-
-                /*
-                var width = $(window).width();
-
-                var is_advanced = getSetting('setting_advanced');
-
-                var supw = 0;
-                if(width<645 || (is_advanced && width <= 1440)){
-                     supw = 2;
-                }
-                */
-
-                const dbkey = 'db'+window.hWin.HAPI4.database;
-                putSetting(dbkey, '1');
-
-                //$('#divSvg').css('top', 8+supw+'em');
-            }
+            function onVisualizeResize(){} // noop function called in settings.js
 
         </script>
     </body>
