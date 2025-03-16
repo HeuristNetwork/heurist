@@ -5,7 +5,7 @@
         <div data-heurist-role="recordList-selection" aria-label="Selected items"> 
         
             <div class="dropdown">
-              <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-sm btn-light dropdown-toggle" type="button" idX="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 selected = 0
               </button>
                 <ul class="dropdown-menu">
@@ -60,7 +60,7 @@
     </div>
 </div>
 
-<div class="offcanvas" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="recordList-offcanvas">
+<div class="offcanvas" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" data-heurist-role="recordList-offcanvas" id="recordList-offcanvas">
   <div class="offcanvas-header py-1 justify-content-end">
     <!-- <h6 class="offcanvas-title">Selected record</h6> -->
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -69,7 +69,7 @@
   </div>
 </div>
 
-<div class="modal" tabindex="-1" id="recordList-modal">
+<div class="modal" tabindex="-1" data-heurist-role="recordList-modal" idX="recordList-modal">
   <div class="modal-dialog modal-dialog-scrollable"> 
     <div class="modal-content">
       <div class="modal-header justify-content-end">

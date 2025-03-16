@@ -165,7 +165,7 @@ if( @$_REQUEST['isalive']==1){
         $name = $name . '.htm';
     }
 
-    $help_folder = 'context_help/';
+    $asset_folder = 'context_help/';
 
     $locale = $params['lang'];//locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
@@ -175,14 +175,14 @@ if( @$_REQUEST['isalive']==1){
         $locale = '';
     }
 
-    $asset = $help_folder.$locale.basename($name);
+    $asset = $asset_folder.$locale.basename($name);
     if(!file_exists($asset)){
         //without locale - default is English
         $locale = '';
-        $asset = $help_folder.basename($name);
+        $asset = $asset_folder.basename($name);
     }
 
-    if(file_exists($help_folder.$name)){
+    if(file_exists($asset_folder.$name)){
         //download
         header( 'Location: '.$asset.' '.$part );
         return;

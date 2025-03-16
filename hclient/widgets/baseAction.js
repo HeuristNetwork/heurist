@@ -196,7 +196,7 @@ $.widget( "heurist.baseAction", {
     //
     // array of button defintions
     //
-    // id is not applicable since buttons with the smae id can be in different popup dialogs
+    // id is not applicable since buttons with the same id can be in different popup dialogs
     // in this case jquery handles events wrong
     // we indetify buttons by class name: btnDoAction, btnCancel etc
     //

@@ -22,6 +22,7 @@
 /*
 * HLayoutMgr.js - web page generator based on JSON configuration
 */
+
 class HLayoutMgr {
     
     pnl_counter;
@@ -1080,7 +1081,7 @@ class HLayoutMgr {
 
   //============================================================================
 
-  // Public API
+  // Public methods
 
   /**
   * Edit web. Recreate tabs

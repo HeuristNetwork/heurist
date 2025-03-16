@@ -180,6 +180,10 @@ $.widget( "heurist.searchInput", {
             },1000);
         }
 
+        if(!this.element.attr('id')){
+            this.element.uniqueId();
+        }
+        
     }, //end _create
 
    /* private function */

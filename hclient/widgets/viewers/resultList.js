@@ -2598,7 +2598,7 @@ $.widget( "heurist.resultList", {
     },
 
     /**
-    * return HRecordSet of selected records
+    * return HRecordSet or array of ids of selected records
     */
     getSelected: function( idsonly ){
 

@@ -666,6 +666,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
 
             //
+            // standard search without event triggers
+            //
+            , search2: function (request, callback) {
+                window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
+                // start search
+                _callserver('record_search', request, callback);    //standard search
+            }
+            
+            //
             // prepare result in required format
             //
             , search_new: function (request, callback) {
@@ -1760,11 +1769,13 @@ Automatic translation
         *
         *   @param needIds if it is true  it returns array of record ids
         */
-        getSelection: function (selection, needIds) {
+        getSelection: function (selection, needIds, recordset) {
+            
+            recordset = recordset??this.currentRecordset;
 
             if (selection == "all") {
-                if (this.currentRecordset) {
-                    selection = needIds ? this.currentRecordset.getIds() : this.currentRecordset;
+                if (recordset) {
+                    selection = needIds ? recordset.getIds() : recordset;
                 } else {
                     return null;
                 }
@@ -1776,7 +1787,7 @@ Automatic translation
                     }
                 } else {  //selection is array of ids
                     return (needIds) ? selection
-                        : ((that.currentRecordset) ? that.currentRecordset.getSubSetByIds(selection) : null);
+                        : ((recordset) ? recordset.getSubSetByIds(selection) : null);
                 }
             }
             return null;

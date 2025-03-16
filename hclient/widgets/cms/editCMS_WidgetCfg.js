@@ -17,8 +17,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global layoutMgr */
-
 //
 // widget_cfg -json cfg for widget to be edited 
 // _layout_content- json cfg for website
@@ -186,7 +184,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find map widget on this page
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
-                    const ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    const ele =  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
@@ -197,8 +195,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
             if(!opts.search_realm){ //not defined yet
             
-                if(!(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
-                    let sg = layoutMgr.layoutContentFindMainRealm(_layout_content);    
+                if(!(widget_name=='heurist_Map' &&  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
+                    let sg =  window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(_layout_content);    
                     if(sg=='') sg = 'search_group_1';
                     opts.search_realm = sg;
                 }
