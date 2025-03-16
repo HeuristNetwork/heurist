@@ -44,6 +44,7 @@
 * 
 */
 import './HBaseList.js';
+import './HContainerPopup.js';
 
 $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
@@ -85,7 +86,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         selectMode: 'none',   //TBD none, single, multi
 
         //where to show view or edit 
-        viewRecordMode: 'none', // none, inline, offcanvas-*, modal-*, event
+        viewRecordMode: 'none', // none, inline, offcanvas-*, modal-*, popup (jquery dialog), target id, event
         editRecordMode: 'none',   //TBD none, inline, offset, full, main, page, popup, event
         
         rendererCard: null,     // custom record card renderer that overrides default renderer
@@ -112,6 +113,8 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     div_pagination: null,
     div_content: null,
     
+    popupViewer: null, //instance of HContainerPopup
+    
     _current_page: 0,
     _cashedItem:{},
     _lastSelectedIndex: null,
@@ -121,8 +124,11 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         //debug
         this.options.templateView = null; 
-        this.options.selectAction = 'none';
-        //this.options.viewRecordMode = 'inline';
+        this.options.selectAction = 'view';
+        this.options.viewRecordMode = 'inline';
+        //this.options.viewRecordMode = 'modal-xl';
+        //this.options.viewRecordMode = 'offcanvas-end';
+        //this.options.viewRecordMode = 'popup';
         //this.options.viewRecordMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
         
         this.record_id_attr = `data-heurist-${this.options.entityType}`;
@@ -230,7 +236,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     */
     setSelection: function(selection){
         
-        this._super();
+        this._super(selection);
         //clear selection
         this.div_content.find('.selected').removeClass('selected');
         this.div_content.find('.selected_last').removeClass('selected_last');
@@ -742,16 +748,36 @@ console.log(interpolate(template, { ...data
                 //load content
                 let view_div = recdiv_card.querySelector('.recordList-fullview');
                 if(!view_div){
+                    //create new container
                     view_div = document.createElement('div');
                     view_div.classList.add('recordList-fullview');
                     recdiv_card.append(view_div);
                     //load content
-                    this._showFullRecordInfo(view_div, selected_rec_ID);    
+                    this._showFullRecordInfo(selected_rec_ID, view_div);    
                 }
                 [...recdiv_card.children].forEach(function (sub) { sub.style.display = 'none'; });
                 view_div.style.display = 'block';
                 
             }
+            else if (this.options.viewRecordMode != 'none' ){
+                
+                //this.popupViewer = this._$('[data-heurist-role="recordList-popup"]');
+                if(this.popupViewer==null){
+                    this.popupViewer = $('<div>').appendTo(this.element);
+                }
+                
+                if(this.popupViewer.HContainerPopup('instance')){
+                    this._showFullRecordInfo(selected_rec_ID)
+                }else{
+                    let that = this;
+                    this.popupViewer.HContainerPopup({viewMode: this.options.viewRecordMode, 
+                                                        showMargin: !this.options.templateView,
+                                                        keepInstance: true,
+                                                        onInitFinished:()=>that._showFullRecordInfo(selected_rec_ID) });
+                }
+                
+            }
+/*            
             else if(this.options.viewRecordMode.indexOf('offcanvas')==0){
                 
                 let offcanvas = this._$('[data-heurist-role="recordList-offcanvas"]')[0]; // document.getElementById('recordList-offcanvas');
@@ -818,7 +844,7 @@ console.log(interpolate(template, { ...data
                     
                     bsModal.show();
                     
-                    /* makes popup resizable
+                    // makes popup resizable
                     $(modal).find('.modal-content')
                       .resizable({
                         minWidth: 625,
@@ -827,14 +853,15 @@ console.log(interpolate(template, { ...data
                       })
                       .draggable({
                         handle: '.modal-header'
-                      });                    
-                    */
+                        });                    
+                    
                 }else{
                     bsModal.toggle();    
                 }
 
                 
             }
+*/            
             
         }
         
@@ -853,7 +880,12 @@ console.log(interpolate(template, { ...data
         
     },
     
-    _showFullRecordInfo: function(view_div, selected_rec_ID){
+    _showFullRecordInfo: function(selected_rec_ID, view_div){
+        
+            if(!view_div){
+                view_div = this.popupViewer.HContainerPopup('getContainer');
+                this.popupViewer.HContainerPopup('show');
+            }
         
             let request;
             if(this.options.templateView){
@@ -874,6 +906,7 @@ console.log(interpolate(template, { ...data
 
                 let frame = view_div.querySelector('iframe');
                 if(!frame){
+                    //adds iFrame 
                     frame = document.createElement('iframe');
                     frame.style.width = '100%';
                     frame.style.height = '100%';

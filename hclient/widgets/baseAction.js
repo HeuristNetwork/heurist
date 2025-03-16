@@ -29,6 +29,7 @@ $.widget( "heurist.baseAction", {
                            // help file must be in context_help folder
     
         default_palette_class: 'ui-heurist-admin', 
+
         //DIALOG section       
         isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
         supress_dialog_title: false, //hide dialog title bar (applicable if isdialog=true

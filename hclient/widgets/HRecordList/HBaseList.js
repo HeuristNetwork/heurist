@@ -227,6 +227,9 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     setSelection: function(selection){
         //get ids that are in current recordset    
         this.recordSetSelected = window.hWin.HAPI4.getSelection(selection, true, this.recordSet);
+        if(this.recordSetSelected==null){
+            this.recordSetSelected = [];
+        }
     },
 
     /*
