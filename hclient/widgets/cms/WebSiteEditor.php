@@ -36,13 +36,7 @@ use hserv\utilities\USanitize;
 if(!defined('PDIR')) {
     define('PDIR','../../../');//need for proper path to js and css
 }
-
-//require_once dirname(__FILE__).'/autoload.php';
-
 require_once dirname(__FILE__).'/../../framecontent/initPage.php';
-
-//parse_str($_SERVER['QUERY_STRING'], $vars);
-//$query_string = http_build_query($vars);
 
 $req_params = USanitize::sanitizeInputArray();
 $website_id = @$req_params['website'];
@@ -78,9 +72,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
-<!-- 
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HBaseWidget.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script> -->
+
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
 
@@ -94,9 +86,9 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>    
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
 
-<!-- for record edit -->    
+<!-- for record edit -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
@@ -134,7 +126,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
 <script type="text/javascript">
 
-    window.cmsEditor = null; 
+    window.cmsEditor = null;
     let tinymce;
     
     let isWebPage = false;
@@ -159,7 +151,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
     <div class="ui-layout-west">
         <div class="ent_wrapper editStructure" id="tabsEditCMS">
-            <div class="ent_header" style="height:5.5em"> 
+            <div class="ent_header" style="height:5.5em">
 
                 <div class="btn-website-edit" style="font-weight:normal !important; width: fit-content;margin:0.7em 0px;">Website layout / properties</div>
 
@@ -167,7 +159,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                     <a href="#" class="website-url truncate" style="color: blue;display: inline-block;width:70%;vertical-align: -1px;"></a>
                 </div>
 
-                <span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;right:0.05em" 
+                <span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;right:0.05em"
                     class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-w"></span>
 
             </div>
@@ -175,7 +167,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
                 <ul style="margin-right:40px;font-size:9px;">
                     <li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>
-                </ul>      
+                </ul>
 
                 <div id="treeWebSite" style="display:none;top:2em" class="ent_wrapper ui-cms-mainmenu">
                     <div class="toolbarWebSite ent_header" style="height:85px;padding-top:2px;">
@@ -191,24 +183,26 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                         </span>
 
                         <div style="padding:10px 8px;">
-                            <a href="#" title="Edit website home page" 
+                            <a href="#" title="Edit website home page"
                                 class="btn-website-homepage" style="text-decoration:none;">
                                 <span class="ui-icon ui-icon-home"></span>&nbsp;Home page
                             </a>
                             <span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" 
                                 style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
-                        </div>     
+                        </div>
 
                     </div>
 
                     <div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"></div>
-                </div>                                   
+                </div>
 
                 <div id="treePage" style="font-size:0.9em;top:2em;" class="ent_wrapper ui-widget-content">
 
                     <div class="treePageHeader ent_header" style="height:85px;line-height:normal;">
 
-                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>
+                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block">
+                            Page title
+                        </h3>
 
                         <span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">
                             <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">TODO website help</a>
@@ -227,8 +221,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
     </div>
 
     <div class="ui-layout-center">
-<!--  src="<?php echo HEURIST_BASE_URL.'?ver=3&db='.$system->dbname().'&website='.$website_id.'&pageid='.$page_id; ?>" -->    
-        <iframe id="webPageFrame" width="100%" height="100%"></iframe>
+        <iframe id="webPageFrame" width="100%" height="100%" title="Web Page Preview"></iframe>
     </div>
     
 </body>

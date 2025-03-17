@@ -229,7 +229,7 @@ class WebSite
             $this->loadWebHomePage();
             
             ob_start();
-            include 'WebSiteTemplate.php';
+            include_once 'WebSiteTemplate.php';
             $output = ob_get_contents();
             ob_end_clean();            
             
@@ -489,7 +489,7 @@ class WebSite
                         .$id.'" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
             }
         }
-        $res.'</ul>';
+        $res .= '</ul>';
         return $res;
                 
     }
