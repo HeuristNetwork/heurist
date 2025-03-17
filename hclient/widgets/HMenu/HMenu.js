@@ -188,7 +188,7 @@ $.widget( 'heurist.HMenu', {
         if(window.hWin.HEURIST4.util.isFunction(this.options.onBeforeAction)){
             const is_locked = this.options.onBeforeAction.call(this, action_id, opts);
             if(is_locked){
-                return false;
+                return;
             }
         }
         
@@ -198,8 +198,6 @@ $.widget( 'heurist.HMenu', {
         }else{
             this.actionHandler.executeActionById(action_id, opts);
         }
-        
-        return false; 
     },
     
 
