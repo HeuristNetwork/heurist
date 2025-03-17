@@ -305,6 +305,11 @@ foreach ($databases as $idx=>$db_name){
     if($archive_db){ // check for structure updates
 
         $datetime3 = getDefinitionsModTime($mysqli);//see utils_db
+        
+        //check user modification time also        
+        $usr_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(ugr_Modified), @@session.time_zone, "+00:00") FROM sysUgrps');
+        $usr_mod = date_create($usr_mod);
+        $datetime3 = $datetime3 > $usr_mod ? $datetime3 : $usr_mod;
 
         if(!$datetime3){
             echo $tabs0.$db_name.' cannot detect last structure modification date'.$eol;
