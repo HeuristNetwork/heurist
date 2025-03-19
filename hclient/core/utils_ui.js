@@ -3458,8 +3458,6 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         groupings: false,
         groupingsType: '',
         onClickingExpand: null,
-        onExpandGroup: null,
-        onCollapseGroup: null,
         searchable: false
     },
     
@@ -3662,15 +3660,10 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             this._hasGroupings = this._hasGroupings || child_IDs.length > 0;
         };
 
-        switch(this._groupType){
-
-            case 'trm':
-                groupByTermID();
-                break;
-
-            default:
-                groupByDepth();
-                break;
+        if(this._groupType == 'trm'){
+            groupByTermID();
+        }else{
+            groupByDepth();
         }
 
         if(this._hasGroupings){
@@ -3764,28 +3757,19 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             }
         }
 
-        if(child_IDs.length > 0){
+        if(child_IDs.length == 0){
+            return;
+        }
 
-            if(expand){
-
-                this._groupExpanded.indexOf(parent_HID) !== -1 || this._groupExpanded.push(parent_HID);
-                $parent.find('.expander').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
-
-                if(typeof this.onExpandGroup === 'function'){
-                    this.onExpandGroup.call(this, parent_HID, $parent);
-                }
-            }else{
-
-                let idx = this._groupExpanded.indexOf(parent_HID);
-                if(idx !== -1){
-                    this._groupExpanded.splice(idx, 1);
-                }
-                $parent.find('.expander').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
-
-                if(typeof this.onCollapseGroup === 'function'){
-                    this.onCollapseGroup.call(this, parent_HID, $parent);
-                }
+        if(expand){
+            this._groupExpanded.indexOf(parent_HID) !== -1 || this._groupExpanded.push(parent_HID);
+            $parent.find('.expander').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+        }else{
+            let idx = this._groupExpanded.indexOf(parent_HID);
+            if(idx !== -1){
+                this._groupExpanded.splice(idx, 1);
             }
+            $parent.find('.expander').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
         }
     },
 

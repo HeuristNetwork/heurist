@@ -114,8 +114,7 @@ $.widget( "heurist.importStructure", {
 
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
-        +'<h4  style="margin:0;padding:4 0 0 4" id="h_source"></h4>'     
-        +'<div id="btn_back_to_databases" style="position:absolute;right:30px;top:0px;z-index:10"></div>'
+        +'<h4 style="margin:0;padding:4 0 0 4" id="h_source"></h4>'
         +'</div>'
 
         //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
@@ -127,8 +126,9 @@ $.widget( "heurist.importStructure", {
         +'</div>'
 
         +'<div class="ent_wrapper" id="search_elements" style="top:2.8em;right:225px;border-right:1px solid lightgray;">'
-            +'<label> All Find<input id="search_names" class="text ui-widget-content ui-corner-all" style="width: 250px; margin-right:15px;margin-left:10px;"></label>' // general search
-            +'<label> Show All<input id="show_all" class="text ui-widget-content ui-corner-all" style="margin-left:10px;vertical-align:-2px;" type="checkbox"></label>' // show all
+            +'<div id="btn_back_to_databases" style="margin-right: 15px"></div>'
+            +'<label>Filter<input id="search_names" class="text ui-widget-content ui-corner-all" style="width: 10em; margin-right:15px;margin-left:10px;"></label>' // general search
+            +'<label><input id="show_all" class="text ui-widget-content ui-corner-all" style="margin-left:10px;vertical-align:-2px;" type="checkbox"> Show All (include items already in database)</label>' // show all
         +'</div>'
 
         //left - source                                
@@ -187,7 +187,7 @@ $.widget( "heurist.importStructure", {
         this.select_rty_list_target = this.element.find('#select_rty_list_target');
         this.select_dty_list_target = this.element.find('#select_dty_list_target');
         this.select_trm_list_target = this.element.find('#select_trm_list_target');
-        
+
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
         //.css({'line-height': '0.9em'})
@@ -243,7 +243,7 @@ $.widget( "heurist.importStructure", {
         });
 
         let ele = this.element.find('#btn_back_to_databases')
-        .button({label:'Back to Databases'});
+        .button({label:'<< Back to Databases'});
         if(that.options.source_database_id>0){
             ele.hide();
         }else{
@@ -720,12 +720,11 @@ $.widget( "heurist.importStructure", {
         panel_dbs.hide();
         this.panel_defs.show();
 
+        if( this._init_local_defs_once ){
 
-        if( this._init_local_rty_once ){
+            this._init_local_defs_once = false;
 
-            this._init_local_rty_once = false;
-
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
         }
         
@@ -1433,18 +1432,23 @@ $.widget( "heurist.importStructure", {
                 + `${points}`
             + '</ol>'
             +'<p style="font-size:smaller">'
-                +'<label><input type="checkbox" id="rename_target_entities"/>&nbsp;Check this box</label> '
+                +'<input type="checkbox" id="rename_target_entities" style="vertical-align: top;" />'
+                +'<label for="rename_target_entities" style="display: inline-block;width: 62em;padding-left: 10px;">Check this box'
                 +' if you wish the record type names, field names and description, and term '
                 +' labels to be replaced by the names and labels being imported. Use with care as this can overwrite existing '
                 +'customisation with names which may be quite different and out-of-context with existing data. '
                 +'If this is not a new database, we suggest cancelling and making a clone first (please' 
-                +' delete the clone once you are happy with the result of the import).'
-            +'</p>'
-            +'<p style="font-size:smaller">'
-                +'<label><input type="checkbox" id="import_new_rectypes_only"/>&nbsp;Check this box</label> '
-                +'  if you wish to import record types not yet in this database which are connected to the '
-                +' imported record type through record pointer or relationship marker fields.'
+                +' delete the clone once you are happy with the result of the import).</label>'
             +'</p>';
+            
+            if(type == 'all'){
+                msg += '<p style="font-size:smaller">'
+                    +'<input type="checkbox" id="import_new_rectypes_only" style="vertical-align: top;" checked="checked" />'
+                    +'<label for="import_new_rectypes_only" style="display: inline-block;width: 62em;padding-left: 10px;">Check this box'
+                    +'  if you wish to import record types not yet in this database which are connected to the '
+                    +' imported record type through record pointer or relationship marker fields.</label>'
+                +'</p>';
+            }
         }else if(type == 'detailtype'){
 
             title = "Downloading base field";
@@ -1475,7 +1479,7 @@ $.widget( "heurist.importStructure", {
         btns['Proceed'] = () => {
 
             that._is_rename_target = $dlg.find('#rename_target_entities').is(':checked');
-            that._is_conservative = !$dlg.find('#import_new_rectypes_only').is(':checked');
+            that._is_conservative = type == 'all' || !$dlg.find('#import_new_rectypes_only').is(':checked');
             if(that._is_rename_target){
 
                 let $dlg2, btn2 = {};
@@ -1512,6 +1516,55 @@ $.widget( "heurist.importStructure", {
             {title: title, yes:'Proceed', no:'Cancel'}, 
             {default_palette_class: 'ui-heurist-design'}
         );
+
+        let show_warning = true;
+
+        this._on($dlg.find('#import_new_rectypes_only'), {
+            change: () => {
+
+                if(!show_warning){
+                    return;
+                }
+
+                let is_checked = $dlg.find('#import_new_rectypes_only').is(':checked');
+                if(!is_checked){
+
+                    $dlg.find('#import_new_rectypes_only').prop('checked', true).trigger('change');
+
+                    let $wdlg;
+                    let msg = 'We <strong>STRONGLY</strong> recommend downloading all connected record types<br>'
+                            + 'otherwise record pointer fields and relationship marker fields will lack the appropriate target types<br>'
+                            + 'and may allow connection to any record type, whether it makes sense or not.<br><br>'
+                            + '<label for="confirm_choice"><input id="confirm_choice" type="checkbox"> I understand and wish to proceed</label>';
+
+                    let btns = {};
+                    btns[window.hWin.HR('Continue')] = () => {
+                        show_warning = false;
+                        $dlg.find('#import_new_rectypes_only').prop('checked', false).trigger('change');
+                        $wdlg.dialog('close');
+                    };
+
+                    btns[window.hWin.HR('Cancel')] = () => {
+                        $wdlg.dialog('close');
+                    };
+
+                    $wdlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns,
+                        {yes: window.hWin.HR('Continue'), no: window.hWin.HR('Cancel'), title: 'Warning about record type targets'},
+                        { default_palette_class: 'ui-heurist-design', dialogId: 'rectype-import-warning' }
+                    );
+
+                    let $continue = $wdlg.parent().find('.ui-dialog-buttonset button').first();
+                    window.hWin.HEURIST4.util.setDisabled($continue, true);
+
+                    let $chkbox = $wdlg.find('input');
+                    that._on($chkbox, {
+                        change: () => {
+                            window.hWin.HEURIST4.util.setDisabled($continue, !$chkbox.is(':checked'));
+                        }
+                    });
+                }
+            }
+        });
     },
 
     _processCloneResponse: function(response){
