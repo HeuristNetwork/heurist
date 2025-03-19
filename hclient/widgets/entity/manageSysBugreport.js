@@ -230,6 +230,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
                 $input.val($select.val()).trigger('change');
             }
         });
+        $select.hSelect('option', { groupings: true, groupingsType: 'other' });
 
         $input.hide();
     },

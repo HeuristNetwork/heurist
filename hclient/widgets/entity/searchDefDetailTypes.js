@@ -172,81 +172,81 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            let request = {}
-        
-            if(this.input_search.val()!=''){
+        let request = {}
+    
+        if(this.input_search && this.input_search.val()!=''){
 
-                let s = this.input_search.val();
-                this.element.find('#chb_show_all_groups').prop('checked', true);
+            let s = this.input_search.val();
+            this.element.find('#chb_show_all_groups').prop('checked', true);
 
-                if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
-                     request['dty_ID'] = s;   
-                     s = '';
-                }else if (s.indexOf('-')>0){
-                    
-                    let codes = s.split('-');
-                    if(codes.length==2 
-                        && window.hWin.HEURIST4.util.isNumber(codes[0])
-                        && window.hWin.HEURIST4.util.isNumber(codes[1])
-                        && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
-                        request['dty_OriginatingDBID'] = codes[0];
-                        request['dty_IDInOriginatingDB'] = codes[1];
-                        s = '';
-                    }
-                }
+            if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
+                    request['dty_ID'] = s;   
+                    s = '';
+            }else if (s.indexOf('-')>0){
                 
-                if(s!='') request['dty_Name'] = s;
-            }
-        
-            if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
-                request['dty_Type'] = this.input_search_type.val();
-            }   
-            
-            
-            let sGroupTitle = '';
-            if(this.options.import_structure){
-                if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
-                    request['dty_ID_local'] = '=0';
-                }
-            }else if( this.options.dtg_ID<0 ){
-                //find not in given group
-                request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
-            }else{
-        
-                sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
-                if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
-                    let dtg_id = this.options.dtg_ID;
-                    request['dty_DetailTypeGroupID'] = dtg_id;
-                    sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
-                                        +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
-                                        +$Db.dtg(dtg_id,'dtg_Description')+'</div>');
-                }else{
-                    sGroupTitle += 'Base field types</h4><div class="heurist-helper3" style="font-size:0.7em">All base field type groups</div>';
+                let codes = s.split('-');
+                if(codes.length==2 
+                    && window.hWin.HEURIST4.util.isNumber(codes[0])
+                    && window.hWin.HEURIST4.util.isNumber(codes[1])
+                    && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
+                    request['dty_OriginatingDBID'] = codes[0];
+                    request['dty_IDInOriginatingDB'] = codes[1];
+                    s = '';
                 }
             }
-            this.element.find('#div_group_information').html(sGroupTitle);
             
-            this.input_sort_type = this.element.find('#input_sort_type');
-            if(this.input_sort_type.val()=='recent'){
-                request['sort:dty_Modified'] = '-1' 
-            }else if(this.input_sort_type.val()=='type'){
-                request['sort:dty_Type'] = '1' 
-            }else{
-                request['sort:dty_Name'] = '1';   
+            if(s!='') request['dty_Name'] = s;
+        }
+    
+        if(this.input_search_type && this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
+            request['dty_Type'] = this.input_search_type.val();
+        }   
+        
+        
+        let sGroupTitle = '';
+        if(this.options.import_structure){
+            if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
+                request['dty_ID_local'] = '=0';
             }
-  
-            if(this.options.use_cache){
+        }else if( this.options.dtg_ID<0 ){
+            //find not in given group
+            request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
+        }else{
+    
+            sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
+            if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
+                let dtg_id = this.options.dtg_ID;
+                request['dty_DetailTypeGroupID'] = dtg_id;
+                sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
+                                    +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                    +$Db.dtg(dtg_id,'dtg_Description')+'</div>');
+            }else{
+                sGroupTitle += 'Base field types</h4><div class="heurist-helper3" style="font-size:0.7em">All base field type groups</div>';
+            }
+        }
+        this.element.find('#div_group_information').html(sGroupTitle);
+        
+        this.input_sort_type = this.element.find('#input_sort_type');
+        if(this.input_sort_type.val()=='recent'){
+            request['sort:dty_Modified'] = '-1' 
+        }else if(this.input_sort_type.val()=='type'){
+            request['sort:dty_Type'] = '1' 
+        }else{
+            request['sort:dty_Name'] = '1';   
+        }
 
-                if(this.options.select_mode != 'manager'){
-                    request['rtyID'] = this.input_filter_rectype.val();
-                }
+        if(this.options.use_cache){
+
+            if(this.options.select_mode != 'manager' && this.input_filter_rectype){
+                request['rtyID'] = this.input_filter_rectype.val();
+            }
+        
+            this._trigger( "onfilter", null, request);            
             
-                this._trigger( "onfilter", null, request);            
-                
-            }else{
-                this._search_request = request;
-                this._super();                
-            }            
+        }else{
+            this._search_request = request;
+            this._super();                
+        }
             
     },
     

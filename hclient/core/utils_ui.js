@@ -3453,108 +3453,117 @@ window.hWin.HEURIST4.ui = {
 hSelect - decendant of jquery.selectmenu
 */
 $.widget( "heurist.hSelect", $.ui.selectmenu, {
-    
-   _renderButtonItem: function( item ) {
-      let buttonItem = $( "<span>", {
-        "class": "ui-selectmenu-text"
-      })
-     
-      buttonItem.html(item.label).css({'min-height': '17px'});
-     
-      if(window.hWin.HEURIST4.util.isColor(item.value)){
-            buttonItem.css( "background-color", item.value )
-      }else{
-            buttonItem.css( "background-color", 'none' )
-      }
-     
-      return buttonItem;
-   },   
-   /*
-   _renderMenu: function( ul, items ) {
-        this._super();
-   },
-   */
-  _renderItem: function( ul, item ) {
-    let li = $( "<li>" ),
-      wrapper = $( "<div>", { html: item.label } ); 
 
-    if ( item.disabled ) {
-        li.addClass( "ui-state-disabled" );
-    }      
-    if ( $(item.element).attr('group') == 1 ){
-        li.css({'opacity':1});  
-        wrapper.css({'font-weight':'bold'});
-    }
-    if( $(item.element).hasClass('required')) {
-        wrapper.addClass('required');  
-    }
-    if(item.element.attr( 'ui-state-error' )){
-        wrapper.addClass('ui-state-error');
-    }
-    if(item.element.attr( 'hidden' )){
-        li.hide();
-    }    
+    options:{
+        groupings: false,
+        groupingsType: '',
+        onClickingExpand: null,
+        searchable: false
+    },
     
-    let rt_checkbox = item.element.attr( "rt-checkbox" );
-    if(rt_checkbox>=0){
-        $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
+    _renderButtonItem: function( item ) {
+
+        let buttonItem = $( "<span>", {
+            "class": "ui-selectmenu-text"
+        })
+
+        buttonItem.html(item.label).css({'min-height': '17px'});
+
+        if(window.hWin.HEURIST4.util.isColor(item.value)){
+            buttonItem.css( "background-color", item.value )
+        }else{
+            buttonItem.css( "background-color", 'none' )
+        }
+
+        return buttonItem;
+    },
+
+    _renderMenu: function( ul, items ) {
+        this._super(ul, items);
+
+        if(this.options.groupings){
+            this._setupGrouping();
+        }
+    },
+
+    _renderItem: function( ul, item ) {
+        let li = $( "<li>" ),
+        wrapper = $( "<div>", { html: item.label } ); 
+
+        if ( item.disabled ) {
+            li.addClass( "ui-state-disabled" );
+        }      
+        if ( $(item.element).attr('group') == 1 ){
+            li.css({'opacity':1});  
+            wrapper.css({'font-weight':'bold'});
+        }
+        if( $(item.element).hasClass('required')) {
+            wrapper.addClass('required');  
+        }
+        if(item.element.attr( 'ui-state-error' )){
+            wrapper.addClass('ui-state-error');
+        }
+        if(item.element.attr( 'hidden' )){
+            li.hide();
+        }    
+
+        let rt_checkbox = item.element.attr( "rt-checkbox" );
+        if(rt_checkbox>=0){
+            $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
                 + ' data-id="'+item.element.attr( 'data-id' )
                 + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"></span>')
-          .appendTo( wrapper );    
-    }
-    
-    let icon_url = item.element.attr( "icon-url" );
-    if(icon_url){
-    
-        $('<span style="float:left;padding-right:2px"><img alt src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
-          .prependTo( wrapper );    
+            .appendTo( wrapper );
+        }
 
-    }
+        let icon_url = item.element.attr( "icon-url" );
+        if(icon_url){
+            $('<span style="float:left;padding-right:2px"><img alt src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
+            .prependTo( wrapper );
+        }
 
-    let rt_count = item.element.attr( "rt-count" );
-    if(rt_count>0){
-        $('<span style="float:right;padding-right:2px">'+rt_count+'</span>')
-          .appendTo( wrapper );    
-    }
+        let rt_count = item.element.attr( "rt-count" );
+        if(rt_count>0){
+            $('<span style="float:right;padding-right:2px">'+rt_count+'</span>')
+            .appendTo( wrapper );
+        }
 
-    let entity_id = item.element.attr( 'entity-id' );
-    if(entity_id>0){
-        $('<span style="font-size:0.7em;font-style:italic;padding-left:1em">id'+entity_id+'</span>')
-          .appendTo( wrapper );    
-    }
-    
-    let depth = parseInt($(item.element).attr('depth'));
-    if(!(depth>0)) depth = 0;
-    wrapper.attr('data-depth', depth);
-    if(rt_checkbox>=0) depth = depth + 1;
-    wrapper.css('padding-left',(depth+0.2)+'em');
-    
-    return li.append( wrapper ).appendTo( ul );
-  },
-  
-  
-  hideOnMouseLeave: function(parent){
-      
+        let entity_id = item.element.attr( 'entity-id' );
+        if(entity_id>0){
+            $('<span style="font-size:0.7em;font-style:italic;padding-left:1em">id'+entity_id+'</span>')
+            .appendTo( wrapper );
+        }
+
+        let depth = parseInt($(item.element).attr('depth'));
+        if(!(depth>0)) depth = 0;
+        wrapper.attr('data-depth', depth);
+        if(rt_checkbox>=0) depth = depth + 1;
+        wrapper.css('padding-left',(depth+0.2)+'em');
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(item.value)){
+            li.attr('data-hid', item.value);
+        }
+
+        return li.append( wrapper ).appendTo( ul );
+    },
+
+    hideOnMouseLeave: function(parent){
+
         let myTimeoutId = -1;
-        
+
         //show hide function
         let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 ele.hSelect('close');
-               
-                }, 800);
+            }, 800);
         },
         _show = function(ele, parent) {
             clearTimeout(myTimeoutId);
-            
+
             $('.menu-or-popup').hide(); //hide other
-            
-           
-            
+
             return false;
         };
-      
 
         this._on( parent, {
             mouseenter : function(){_show(this.element, parent)},
@@ -3564,10 +3573,272 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             mouseenter : function(){_show(this.element, parent)},
             mouseleave : function(){_hide(this.element)}
         });
-      
-  },
 
+    },
 
+    _hasGroupings: false,
+    _groupings: {},
+    _groupType: null,
+    _handledGrouping: ['trm', 'other'],
+    _groupExpanded: [],
+
+    _setupGrouping: function(){
+
+        if(this._handledGrouping.indexOf(this.options.groupingsType) === -1){
+            return;
+        }
+
+        this._groupType = this.options.groupingsType;
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        let allow_grouping = !this._groupings || (this._groupType == 'trm' && !$Db);
+        if($menuWidget.length == 0 || $menuWidget.find('li').length == 0 || allow_grouping){
+            this._groupings = false;
+            return;
+        }
+
+        if(this._hasGroupings){
+            this._createGroupings();
+            return;
+        }
+
+        let groupByTermID = () => {
+            
+            $.each($menuWidget.find('li'), (idx, li) => {
+
+                li = $(li);
+                let HID = li.attr('data-hid');
+                if(!window.hWin.HEURIST4.util.isPositiveInt(HID)){
+                    return window.hWin.HEURIST4.util.isempty(HID) || HID == 'select';
+                }
+    
+                if(li.find('div:not([data-depth="0"])').length > 0){ // remove when making multi-leveled grouping
+                    return;
+                }
+    
+                let child_terms = $Db.trm_TreeData(HID, 2) ?? []; // change 2 => 1, when making multi-leveled gouuping
+                let groupings = [];
+    
+                for(const child of child_terms){
+                    groupings.push(child.key);
+                    // add handling for child.children[] for multi-leveled grouping
+                }
+    
+                this._groupings[HID] = groupings;
+                this._hasGroupings = this._hasGroupings || groupings.length > 0;
+            });
+        };
+
+        let groupByDepth = () => {
+
+            let prevParentID = null;
+            let child_IDs = [];
+
+            $.each($menuWidget.find('li'), (idx, li) => {
+
+                li = $(li);
+                const HID = li.attr('data-hid');
+
+                if(!prevParentID){
+                    prevParentID = HID;
+                    return;
+                }else if(li.find('div[data-depth="0"]').length == 1){
+
+                    this._groupings[prevParentID] = window.hWin.HEURIST4.util.cloneJSON(child_IDs);
+                    this._hasGroupings = this._hasGroupings || child_IDs.length > 0;
+
+                    prevParentID = HID;
+                    child_IDs = [];
+
+                    return;
+                }
+
+                child_IDs.push(HID);
+            });
+            
+            this._groupings[prevParentID] = window.hWin.HEURIST4.util.cloneJSON(child_IDs);
+            this._hasGroupings = this._hasGroupings || child_IDs.length > 0;
+        };
+
+        if(this._groupType == 'trm'){
+            groupByTermID();
+        }else{
+            groupByDepth();
+        }
+
+        if(this._hasGroupings){
+            this._createGroupings();
+        }
+    },
+
+    _createGroupings: function(){
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        if($menuWidget.find('li').length == 0 || !this._hasGroupings){
+            return;
+        }
+
+        $.each($menuWidget.find('li'), (idx, li) => {
+
+            li = $(li);
+            let $div = li.find('div[data-depth]');
+            let HID = li.attr('data-hid');
+            let depth = $div.attr('data-depth');
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(HID)){
+                return window.hWin.HEURIST4.util.isempty(HID) || HID == 'select';
+            }
+
+            let style = $div.attr('style');
+            let lpadding = style.match(/padding-left:\s?(\d.\d)em/);
+            if(!lpadding){
+                return;
+            }
+            lpadding = Number.parseFloat(lpadding[1]) + 1.5;
+            $div.css('padding-left', `${lpadding}em`);
+
+            if(depth > 0){
+                li.hide();
+                return;
+            }
+
+            $div.css('font-weight', 'bold');
+
+            let disabled = !Object.hasOwn(this._groupings, HID) || Object.keys(this._groupings[HID]).length == 0;
+
+            let $arrow = $('<span>', {
+                class: `ui-icon ui-icon-triangle-1-e ${disabled ? '' : 'expander'}`,
+                style: `color: ${disabled ? 'lightgrey' : 'black'}; z-index: 1;`
+            });
+
+            $arrow.prependTo($div);
+        });
+
+        this._on($menuWidget.find('.expander'), {
+            click: (e) => {
+
+                if(typeof this.onClickingExpand === 'function'){
+                    this.onClickingExpand.call(this, e);
+                    if(e.defaultPrevented){
+                        return;
+                    }
+                }
+
+                window.hWin.HEURIST4.util.stopEvent(e);
+                e.preventDefault();
+
+                let is_expanding = $(e.target).hasClass('ui-icon-triangle-1-e');
+                let parent_HID = $(e.target).closest('li.ui-menu-item').attr('data-hid');
+
+                this._toggleGroupings(is_expanding, parent_HID, $menuWidget);
+            }
+        });
+    },
+
+    _toggleGroupings: function(expand, parent_HID, $menuWidget){
+
+        if(!$menuWidget || $menuWidget.find('li').length == 0 || !window.hWin.HEURIST4.util.isPositiveInt(parent_HID)){
+            return;
+        }
+
+        let $parent = $menuWidget.find(`li[data-hid="${parent_HID}"]`);
+        if($parent.length == 0){
+            return;
+        }
+
+        let child_IDs = this._groupings[parent_HID];
+
+        for(const child_HID of child_IDs){
+            let $option = $menuWidget.find(`li[data-hid="${child_HID}"]`);
+            if(expand){
+                $option.show();
+            }else{
+                $option.hide();
+            }
+        }
+
+        if(child_IDs.length == 0){
+            return;
+        }
+
+        if(expand){
+            this._groupExpanded.indexOf(parent_HID) !== -1 || this._groupExpanded.push(parent_HID);
+            $parent.find('.expander').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+        }else{
+            let idx = this._groupExpanded.indexOf(parent_HID);
+            if(idx !== -1){
+                this._groupExpanded.splice(idx, 1);
+            }
+            $parent.find('.expander').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+        }
+    },
+
+    openAllGroupings: function(){
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        if($menuWidget.find('li').length == 0 || !this._hasGroupings || $menuWidget.find('.expander').length == 0){
+            return;
+        }
+
+        for(const parent_HID in this._groupings){
+            this._toggleGroupings(true, parent_HID, $menuWidget);
+        }
+    },
+
+    closeAllGroupings: function(){
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        if($menuWidget.find('li').length == 0 || !this._hasGroupings || $menuWidget.find('.expander').length == 0){
+            return;
+        }
+
+        for(const parent_HID in this._groupings){
+            this._toggleGroupings(false, parent_HID, $menuWidget);
+        }
+    },
+
+    refreshGroupings: function(skipExpand = false){
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        if($menuWidget.find('li').length == 0 || !this._hasGroupings){
+            return;
+        }
+
+        if($menuWidget.find('.expander').length == 0){
+            this._createGroupings();
+        }
+
+        for(const parent_HID in this._groupings){
+            this._toggleGroupings(this._groupExpanded.indexOf(parent_HID) !== -1, parent_HID, $menuWidget);
+        }
+    },
+
+    removeGroupings: function(){
+
+        let $menuWidget = this.element.hSelect('menuWidget');
+        if($menuWidget.find('.expander').length == 0 || !this._hasGroupings){
+            return;
+        }
+
+        this._off($menuWidget.find('.expander'), 'click');
+        $menuWidget.find('.ui-icon-triangle-1-e, .ui-icon-triangle-1-s').remove();
+
+        $.each($menuWidget.find('li.ui-menu-item'), (idx, li) => {
+
+            li = $(li).show();
+            let $div = li.find('div[role="option"]');
+
+            let style = $div.attr('style');
+            let lpadding = style.match(/padding-left:\s?(\d.\d)em/);
+            if(!lpadding){
+                return;
+            }
+            lpadding = Number.parseFloat(lpadding[1]) - 1.5;
+            $div.css({'padding-left': `${lpadding}em`, 'font-weight': ''});
+        });
+    },
+
+    
 });
 
 $.fn.sideFollow = function(dtime) {

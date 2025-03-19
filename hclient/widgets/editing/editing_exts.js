@@ -939,6 +939,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                 if(val.length<2){
                     $mnu.find('li').css('display','list-item');
                     $mnu.find('div.not-found').hide();
+                    that.selObj.hSelect('openAllGroupings');
                 }else{ //start search from 3 characters
                     if(_timeout==0){
                         $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
@@ -1872,7 +1873,7 @@ function browseTerms(_editing_input, $input, value){
                             collision: "none"
                         },
                         show: { // Add slight delay to show
-                            delay: 2000,
+                            delay: 1500,
                             duration: 0
                         },
                         content: function(callback){ // Check for image, then provide text
@@ -1954,6 +1955,7 @@ function browseTerms(_editing_input, $input, value){
         events['onOpenMenu'] = function(){
             __createTermTooltips(that.selObj);
             openSearchMenu(that, that.selObj, true, true);
+            that.selObj.hSelect('refreshGroupings', true);
         };
 
         events['onSelectMenu'] = function ( event ){
@@ -2002,6 +2004,7 @@ function browseTerms(_editing_input, $input, value){
                 defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
                 useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
 
+        that.selObj.hSelect('option', { groupings: true, groupingsType: 'trm' });
         $(that.selObj).hide(); //button will be hidden        
     }
     

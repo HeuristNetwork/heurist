@@ -64,27 +64,27 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-            let request = {}
-        
-            request['trm_Domain'] = this.currentDomain();
+        let request = {}
+    
+        request['trm_Domain'] = this.currentDomain();
 
-            if(this.input_search_code.val()!=''){
-                request['trm_Code'] = this.input_search_code.val();
-            }   
-            if(this.input_search.val()!=''){
-                request['trm_Label'] = this.input_search.val();
-            }
+        if(this.input_search_code && this.input_search_code.val()!=''){
+            request['trm_Code'] = this.input_search_code.val();
+        }   
+        if(this.input_search && this.input_search.val()!=''){
+            request['trm_Label'] = this.input_search.val();
+        }
+        
+        if(this.options.use_cache){
+            this._trigger( "onfilter", null, request);
             
-            if(this.options.use_cache){
-                this._trigger( "onfilter", null, request);
-                
-                
-            //NOTE use_cache=false for terms has no practical sense                    
-            }else{
-                request['details']   = 'list';
-                this._search_request = request;
-                this._super();
-            }            
+            
+        //NOTE use_cache=false for terms has no practical sense                    
+        }else{
+            request['details']   = 'list';
+            this._search_request = request;
+            this._super();
+        }
     },
     
     currentDomain:function(){
