@@ -60,6 +60,8 @@ use PHPMailer\PHPMailer\Exception;
  */
 class BulkEmailSystem {
 
+    private $system; // Heurist System object
+
     private $cur_user; // logged in user's details
 
     public $databases; // list of selected DBs
@@ -85,7 +87,7 @@ class BulkEmailSystem {
     private $use_native_mail_function = false;
     private $debug_run = false;
 
-    private $log = '';// log of emails, to be placed within a note record within the databases, extended version of receipt
+    private $log = ''; // last email sent
     private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"
     private $emails_sent_count = 0;
     private $error_msg = '';// error message
@@ -95,6 +97,16 @@ class BulkEmailSystem {
 
     private $add_gdpr = true;// add GDPR statement to end
 
+    private $session_id = null; // session ID
+    private $progress = ''; // progress update
+
+    public function __construct($system){
+
+        $this->system = $system;
+
+        set_time_limit(900); // 15 minutes
+    }
+
     /**
      * Processes form data for bulk emailing databases owners.
      *
@@ -102,9 +114,11 @@ class BulkEmailSystem {
      * @return int Returns 0 on success, or an error code on failure.
      */
     public function processFormData($data) {
-        global $system;
 
+        $this->session_id = array_key_exists('session_id', $data) ? $data['session_id'] : null;
         $rtn = 0; // Default return value indicating success.
+
+        $this->printMessage('Processing form data ..... ');
 
         // Reset databases property to null for a fresh start.
         $this->databases = [];
@@ -113,11 +127,13 @@ class BulkEmailSystem {
 
         // Validate database input from form data; return error code -1 if invalid.
         if (!$this->validateDatabaseInput($data)) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Invalid database values</span><br>');
             return -1;
         }
 
         // Validate user-related input; return error code -1 if invalid.
         if (!$this->validateUserInput($data)) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Invalid user values</span><br>');
             return -1;
         }
 
@@ -150,11 +166,13 @@ class BulkEmailSystem {
         // Create a list of users; return error code if it fails.
         $rtn = $this->createUserList();
         if ($rtn != 0) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Failed to create user list</span><br>');
             return $rtn;
         }
 
         // Check if any users were retrieved; set an error and return -1 if none.
         if (isEmptyArray($this->user_details)) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Missing user details</span><br>');
             $this->setError('No users have been retrieved, no emails have been sent');
             return -1;
         }
@@ -162,12 +180,15 @@ class BulkEmailSystem {
         // Create a list of records for each database; return error code if it fails.
         $rtn = $this->createRecordsList();
         if ($rtn != 0) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Failed to create record list</span><br>');
             return $rtn;
         }
 
         // Retrieve the current user's details and email address.
-        $this->cur_user = $system->getCurrentUser();
+        $this->cur_user = $this->system->getCurrentUser();
         $this->getUserEmail();
+
+        $this->printMessage('Completed<br>');
 
         return 0; // Return success.
     }
@@ -312,10 +333,9 @@ class BulkEmailSystem {
      * @return void
      */
     private function getUserEmail() {
-        global $system;
 
         // Get the mysqli connection parameters.
-        $mysqli = $system->getMysqli();
+        $mysqli = $this->system->getMysqli();
 
         // Prepare the query to fetch the user's email by their ID.
         $query = "SELECT ugr.ugr_eMail
@@ -353,8 +373,7 @@ class BulkEmailSystem {
      */
     private function validateDatabases($db_list) {
 
-        global $system;
-        $mysqli = $system->getMysqli();
+        $mysqli = $this->system->getMysqli();
 
         $valid_dbs = [];
 
@@ -381,8 +400,7 @@ class BulkEmailSystem {
      */
     private function createUserList() {
 
-        global $system;
-        $mysqli = $system->getMysqli();
+        $mysqli = $this->system->getMysqli();
 
         $dbs = $this->databases;
 
@@ -480,8 +498,7 @@ class BulkEmailSystem {
      */
     private function createRecordsList() {
 
-        global $system;
-        $mysqli = $system->getMysqli();
+        $mysqli = $this->system->getMysqli();
 
         $dbs = $this->databases;
 
@@ -585,7 +602,7 @@ class BulkEmailSystem {
      */
     public function constructEmails() {
 
-        global $mailRelayPwd; //se in heuristConfigIni
+        global $mailRelayPwd; //see in heuristConfigIni
 
         $email_rtn = 0;
         $user_cnt = 0;
@@ -596,6 +613,9 @@ class BulkEmailSystem {
             $this->setError('The email body is missing, this needs to be provided at class initialisation.');
             return -1;
         }
+
+        $this->saveReceipt(null);
+        $this->exportReceipt(true);
 
         // Initialise PHPMailer
         $mailer = new PHPMailer(true);// send true to use exceptions
@@ -613,21 +633,36 @@ class BulkEmailSystem {
         $mailer->addReplyTo($this->cur_user['ugr_eMail'], $this->cur_user["ugr_FullName"]);
         $mailer->SetFrom($email_from, $email_from_name);
 
+        $this->printMessage("Sending ". count($this->user_details) ." emails:<div style='padding: 10px;'>");
+
         foreach ($this->user_details as $email => $details) {
+
+            $this->printMessage("$email ..... ");
 
             $email_rtn = $this->processEmailForUser($email, $details, $mailer, $mailRelayPwd);
 
             if ($email_rtn != 0) {
+
+                $this->emails_sent_count = $user_cnt;
+
                 //ERROR
-                $this->saveReceipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
+                $this->printMessage('<span style="color: red; font-weight: bold;">Failed</span></div>');
+                $this->printMessage('<strong>Last log</strong>: ' . $this->getLog() . '<br><br>');
+                $this->saveReceipt($email_rtn);
+
                 return $email_rtn;
             }
+
+            $this->printMessage('Sent<br>');
 
             $user_cnt++;
         } //for users
 
+        $this->emails_sent_count = $user_cnt;
+
         //SUCCESS
-        $this->saveReceipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
+        $this->printMessage('</div><strong>Emails sent</strong><br>');
+        $this->saveReceipt($email_rtn);
 
         return $email_rtn;
     }
@@ -792,10 +827,9 @@ class BulkEmailSystem {
      */
     private function logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body) {
         $status_msg = $email_rtn == 0 ? "Sent, Sent Message: {$body}" : "Failed, Error Message: " . $this->getError();
-        $this->log .= htmlspecialchars("Values: {databases: {{$db_listed}}, email: {$email}, name: {$details['first_name']} {$details['last_name']}"
+        $this->log = htmlspecialchars("Values: {databases: {{$db_listed}}, email: {$email}, name: {$details['first_name']} {$details['last_name']}"
             . ", record_count: {{$records_listed}}, last_modified: {{$lastmod_listed}} },"
-            . "Timestamp: " . date(DATE_8601) . ", Status: {$status_msg}")
-        . '<br><br>';
+            . "Timestamp: " . date(DATE_8601) . ", Status: {$status_msg}");
     }
 
     /**
@@ -908,15 +942,17 @@ class BulkEmailSystem {
     /**
      * Prepare receipt value
      *
-     * @param int $status 0 || < 0, whether the emails were all sent
-     * @param string $email_subject email subject used
-     * @param string $email_body email body used
+     * @param int|null $status 0 || < 0, whether the emails were all sent
      * @param int $user_count count of users who have been emailed
      * @return void
      */
-    private function saveReceipt($status, $email_subject, $email_body, $user_count = 0) {
+    private function saveReceipt($status) {
+
+        $filler = $status == null ? 'pre-process' : 'post-process';
+        $this->printMessage("Creating {$filler} Receipt ..... ");
 
         $max_size = 1024 * 64; // 64 KBytes
+        $date = date(DATE_8601);
 
         $db = implode(", ", $this->databases);
         $db_list = str_replace(HEURIST_DB_PREFIX, "", $db);
@@ -928,16 +964,20 @@ class BulkEmailSystem {
 
         $lm = "{$this->rec_lastmod_logic} {$this->rec_lastmod_period} {$this->rec_lastmod_unit}";
 
-        $status_msg = $status==0 ? "Success" : "Failed, Error Message: " . $this->getError();
+        $status_msg = $status == null ? "In progress" : "Success";
+        $status_msg = $status != 0 && $status != null ? "Failed, Error Message: " . $this->getError() : $status;
+
+        $email_subject = $this->email_subject;
+        $email_body = $this->email_body;
 
         $main = "Parameters: {<br>"
         . "&nbsp;&nbsp;Databases: $db_list <br>"
         . "&nbsp;&nbsp;User Type: $u <br>"
         . "&nbsp;&nbsp;Number of Users to Email: $u_cnt <br>"
-        . "&nbsp;&nbsp;Number of Users Emailed: $user_count <br>"
+        . ($this->emails_sent_count > 0 ? "&nbsp;&nbsp;Number of Users Emailed: {$this->emails_sent_count} <br>" : "")
         . "&nbsp;&nbsp;Record Limit:$r_cnt <br>"
         . "&nbsp;&nbsp;Last Modified Filter: $lm <br>"
-        . "}, <br> Timestamp: " . date(DATE_8601) . ", Status: {$status_msg}"
+        . "}, <br> Timestamp: {$date}, Status: {$status_msg}"
         . ", <br> Email Subject: {$email_subject}"
         . ", <br> Email Body: <br>{$email_body}";
         $main_size = strlen($main);// Main part in bytes
@@ -958,7 +998,7 @@ class BulkEmailSystem {
 
         $user_list_size = strlen($user_list);// User List part in bytes
 
-        $this->emails_sent_count = $user_count;
+        $this->printMessage('Created<br>');
 
         // Check if Main and User List parts can be placed together or in different blocktext fields
         if ($main_size+$user_list_size <= $max_size) { // Save the text in chucks
@@ -978,7 +1018,6 @@ class BulkEmailSystem {
         } else { // Save this part in chunks
             $this->composeList($user_list);
         }
-
     }
 
     /**
@@ -1016,9 +1055,10 @@ class BulkEmailSystem {
      *
      * @return array|int Returns the results from recordSave, or an error code
      */
-    public function exportReceipt() {
+    public function exportReceipt($pre_emails = false) {
 
-        global $system;
+        $filler = $pre_emails ? 'pre-process' : 'post-process';
+        $this->printMessage("Saving {$filler} Receipt ..... ");
 
         // Get IDs
         $note_rectype_id = ConceptCode::getRecTypeLocalID("2-3");
@@ -1029,23 +1069,31 @@ class BulkEmailSystem {
 
         if (empty($note_rectype_id) || empty($title_detailtype_id) || empty($summary_detailtype_id) || empty($date_detailtype_id)) { // ensure all are valid
 
+            $this->printMessage('<span style="color: red; font-weight: bold;">Missing fields</span><br>');
+
             $this->setError("Unable to retrieve the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.<br>The Heurist team has been notified.");
-            $system->addError(HEURIST_ERROR, "Bulk Email System Error: Unable to get the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.");
+            $this->system->addError(HEURIST_ERROR, "Bulk Email System Error: Unable to get the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.");
             return -1;
         }
 
         if (isEmptyStr($this->receipt)) {
+            $this->printMessage('Done<br>');
             return 0;
         }
 
         // Save receipt to note record
-        $data = recordAdd($system, ["RecTypeID"=>$note_rectype_id], true);
+        $data = recordAdd($this->system, ["RecTypeID"=>$note_rectype_id], true);
         if (!empty($data["data"]) && is_numeric($data["data"])) {
 
             $rec_id = $data["data"];
 
-            $title = $this->email_subject ?? 'Heurist System Email Receipt';
-            $title .= "  [{$this->emails_sent_count}]  ";
+            $title = $this->email_subject ?? 'Heurist System Email';
+            if($pre_emails){
+                $title .= "  Docket";
+            }else{
+                $title .= "  Receipt  [{$this->emails_sent_count}]";
+            }
+
             if(!isEmptyStr($this->error_msg)){
                 $title = "Error: {$title}";
             }
@@ -1062,23 +1110,38 @@ class BulkEmailSystem {
             }
 
             // Proceed with saving
-            $rtn = recordSave($system, ["ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details]);
+            $rtn = recordSave($this->system, ["ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details]);
 
             if ($rtn["status"] === HEURIST_OK && $rtn["data"] == $rec_id) {
+                $this->printMessage('Saved<br>');
                 return $rtn;
             }
 
-            $this->setError("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), true));
+            $this->printMessage('<span style="color: red; font-weight: bold;">Failed</span><br>');
+            $this->setError("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($this->system->getError(), true));
             return -1;
 
         } else {
 
+            $this->printMessage('<span style="color: red; font-weight: bold;">Failed</span><br>');
+
             $this->setError("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
-            $system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => {$data["message"]}");
+            $this->system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => {$data["message"]}");
             return -1;
         }
 
     }//exportReceipt
+
+    private function printMessage($msg){
+
+        if(!$this->session_id){
+            return;
+        }
+
+        $this->progress .= $msg;
+
+        mysql__update_progress($this->system->getMysqli(), $this->session_id, false, $this->progress);
+    }
 }
 
 /**
@@ -1089,26 +1152,26 @@ class BulkEmailSystem {
  */
 function sendSystemEmail($data) {
 
-    $email_obj = new BulkEmailSystem();
+    global $system;
+
+    $email_obj = new BulkEmailSystem($system);
+    $rtn = [];
 
     if ($email_obj->processFormData($data) == 0) {
 
         //prepare and send emails
         if ($email_obj->constructEmails() <= -1) {
-
-            echo errorDiv('An error occurred with preparing and sending the system emails.<br>'
-                .$email_obj->getLog()); //remarked  due securiry reasons $email_obj->getError().
-
+            $rtn = ['status' => HEURIST_ERROR, 'message' => 'An error occurred with preparing and sending the system emails.<br>' . $email_obj->getLog()];
         }else{
             // create note record with that will contain the contents of log
             return $email_obj->exportReceipt();
         }
 
     } else {
-        echo errorDiv('An error occurred with processing the form\'s data.'); //remarked due securiry reasons '<br>'.$email_obj->getError());
+        $rtn = ['status' => HEURIST_INVALID_REQUEST, 'message' => 'An error occurred with processing the form\'s data.'];
     }
 
-    return -1;
+    return $rtn;
 }
 
 /**
@@ -1119,7 +1182,9 @@ function sendSystemEmail($data) {
  */
 function getCSVDownload($data) {
 
-    $csv_obj = new BulkEmailSystem();
+    global $system;
+
+    $csv_obj = new BulkEmailSystem($system);
 
     if ($csv_obj->processFormData($data) == 0) {
 
