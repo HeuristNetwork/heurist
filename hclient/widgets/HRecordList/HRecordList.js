@@ -43,15 +43,16 @@
 * RecordReport 
 * 
 */
-import './HBaseList.js';
-import './HContainerPopup.js';
+import './HRecordView.js';
+import '../HBase/HBaseList.js';
 
 $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
-    //roles in content
-    // heurist-role-count
-    // heurist-role-pagination
-    // heurist-role-viewport
+    //roles in content heurist-role-*
+    // recordList-count
+    // recordList-pagination
+    // recordList-content
+    // recordList-selection
     
     // default options
     options: {
@@ -113,7 +114,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     div_pagination: null,
     div_content: null,
     
-    popupViewer: null, //instance of HContainerPopup
+    recordView: null, //instance of HRecordView
     
     _current_page: 0,
     _cashedItem:{},
@@ -125,10 +126,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         //debug
         this.options.templateView = null; 
         this.options.selectAction = 'view';
-        this.options.viewRecordMode = 'inline';
+        //this.options.viewRecordMode = 'inline';
         //this.options.viewRecordMode = 'modal-xl';
         //this.options.viewRecordMode = 'offcanvas-end';
-        //this.options.viewRecordMode = 'popup';
+        this.options.viewRecordMode = 'popup';
         //this.options.viewRecordMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
         
         this.record_id_attr = `data-heurist-${this.options.entityType}`;
@@ -523,13 +524,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
                         }
                     }
                 }   
-                //add event listeners
-                //that._on( that.div_content.find(`div[${that.record_id_attr}]`), {
-                //    click: that._recordDivOnClick
-                //});
-                      
-                    });  
-            
+            });
             this._renderPagination(true);
             
         }else{
@@ -537,26 +532,6 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             //request for records
             if(this.options.entityType=='rec'){
                 
-                /*
-                const request = {
-                    q: 'ids:'+rec_toload.join(','),
-                    restapi: 1,
-                    columns: ['rec_ID', 'rec_Title'],
-                    zip: 1,
-                    format:'json'};
-                
-                //perform search see record_output.php       
-                this.HAPI.RecordMgr.search_new(server_request,
-                    function(response){
-                        if(that.$H.isJSON(response)) {
-                            
-                            that._onGetRecordData(response, rec_toload);   
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });                
-                */    
                 const request = { q: `{"ids":"${ids}"}`,
                     w: 'a',
                     detail: 'header',
@@ -729,7 +704,8 @@ console.log(interpolate(template, { ...data
         let recdiv_card = recdiv.firstChild;        
         recdiv_card.classList.add('selected'); //highlight record card
         
-        if(this.options.selectAction=='view'){
+        if(this.options.selectAction=='view' && this.options.viewRecordMode!='none')
+        {
             if(this.options.viewRecordMode=='inline'){
                 
                 let expanded_col = this.div_content[0].querySelector('.selected_col');
@@ -742,7 +718,7 @@ console.log(interpolate(template, { ...data
                     });
                 }
                 
-                //expand col - parent of record card
+                //expand col - record card is a parent
                 recdiv.classList.add('selected_col');
                 
                 //load content
@@ -752,117 +728,25 @@ console.log(interpolate(template, { ...data
                     view_div = document.createElement('div');
                     view_div.classList.add('recordList-fullview');
                     recdiv_card.append(view_div);
-                    //load content
-                    this._showFullRecordInfo(selected_rec_ID, view_div);    
                 }
                 [...recdiv_card.children].forEach(function (sub) { sub.style.display = 'none'; });
                 view_div.style.display = 'block';
-                
-            }
-            else if (this.options.viewRecordMode != 'none' ){
-                
-                //this.popupViewer = this._$('[data-heurist-role="recordList-popup"]');
-                if(this.popupViewer==null){
-                    this.popupViewer = $('<div>').appendTo(this.element);
-                }
-                
-                if(this.popupViewer.HContainerPopup('instance')){
-                    this._showFullRecordInfo(selected_rec_ID)
-                }else{
-                    let that = this;
-                    this.popupViewer.HContainerPopup({viewMode: this.options.viewRecordMode, 
-                                                        showMargin: !this.options.templateView,
-                                                        keepInstance: true,
-                                                        onInitFinished:()=>that._showFullRecordInfo(selected_rec_ID) });
-                }
-                
-            }
-/*            
-            else if(this.options.viewRecordMode.indexOf('offcanvas')==0){
-                
-                let offcanvas = this._$('[data-heurist-role="recordList-offcanvas"]')[0]; // document.getElementById('recordList-offcanvas');
-                if(!offcanvas.classList.contains(this.options.viewRecordMode)){
-                    offcanvas.classList.add(this.options.viewRecordMode)
-                }
-                
-                let bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanavs); //'#recordList-offcanvas');
-                
-                if(this.recordSetSelected.indexOf(selected_rec_ID)<0){
-                    //let bsOffcanvas = new bootstrap.Offcanvas(offcanvas)                
-                    let view_div = offcanvas.querySelector('.offcanvas-body');
-                    
-                    if(!this.options.templateView && !view_div.classList.contains('p-1')){
-                        view_div.classList.add('p-1');
-                        view_div.style.overflowY = 'hidden';
-                    }
-                    
-                    let handles = 's';
-                    if(this.options.viewRecordMode.indexOf('-start')>0){
-                        handles = 'e';
-                    }else if(this.options.viewRecordMode.indexOf('-bottom')>0){
-                        handles = 'w';
-                    }else if(this.options.viewRecordMode.indexOf('-end')>0){
-                        handles = 'n';
-                    }
-                    
-                    $(offcanvas)
-                      .resizable({
-                        minWidth: 400,
-                        handles: handles,
-                      });
-                    
-                    this._showFullRecordInfo(view_div, selected_rec_ID);
-                    
-                    bsOffcanvas.show();
-                }else{
-                    bsOffcanvas.toggle();    
-                }
-                
-            }
-            else if(this.options.viewRecordMode!='none'){
-                //modal by default
 
-                let modal = this._$('[data-heurist-role="recordList-modal"]')[0]; //document.getElementById('recordList-modal');
-                if(!modal.classList.contains(this.options.viewRecordMode)){
-                    modal.classList.add(this.options.viewRecordMode);
-                }
-                
-                let bsModal = bootstrap.Modal.getOrCreateInstance(modal);
-
-                if(this.recordSetSelected.indexOf(selected_rec_ID)<0){
-                    let view_div = modal.querySelector('.modal-body');
-                    
-                    if(!this.options.templateView && !view_div.classList.contains('p-1')){
-                        view_div.classList.add('p-1');
-                        view_div.style.overflowY = 'hidden';
-                        
-                        let content_div = modal.querySelector('.modal-content');
-                        content_div.style.height = '100%';
-                    }
-                    
-                    this._showFullRecordInfo(view_div, selected_rec_ID);
-                    
-                    bsModal.show();
-                    
-                    // makes popup resizable
-                    $(modal).find('.modal-content')
-                      .resizable({
-                        minWidth: 625,
-                        minHeight: 175,
-                        handles: 'n, e, s, w, ne, sw, se, nw',
-                      })
-                      .draggable({
-                        handle: '.modal-header'
-                        });                    
-                    
-                }else{
-                    bsModal.toggle();    
-                }
-
-                
+                this.recordView = $(view_div);
             }
-*/            
-            
+            else if ( this.recordView==null ){
+                this.recordView = $('<div>').appendTo(this.element);
+            }
+
+            if(this.recordView.HRecordView('instance')){
+                this.recordView.HRecordView('show', selected_rec_ID);
+            }else{
+                let that = this;
+                this.recordView.HRecordView({recID: selected_rec_ID,
+                                            viewMode: this.options.viewRecordMode, 
+                                            recordTemplate: this.options.templateView,
+                                            keepInstance: true});
+            }
         }
         
         
@@ -877,57 +761,6 @@ console.log(interpolate(template, { ...data
                              source: this._widgetId}; //search_origin
             this.document.trigger(this.HAPI.Event.ON_REC_SELECT, request);
         }
-        
-    },
-    
-    _showFullRecordInfo: function(selected_rec_ID, view_div){
-        
-            if(!view_div){
-                view_div = this.popupViewer.HContainerPopup('getContainer');
-                this.popupViewer.HContainerPopup('show');
-            }
-        
-            let request;
-            if(this.options.templateView){
-            
-                request = {q:`ids:${selected_rec_ID}`, 
-                           db:this.HAPI.database, 
-                           //
-                           template:this.options.templateView,
-                           lang: this.HAPI.getLocale()
-                          };
-            
-                let that = this;
-                $(view_div).load(this.HAPI.baseURL, request, function(){ 
-                    //TBD correct urls and activate action links
-                    //console.log('>>',view_div.innerHTML);
-                });
-            }else{
-
-                let frame = view_div.querySelector('iframe');
-                if(!frame){
-                    //adds iFrame 
-                    frame = document.createElement('iframe');
-                    frame.style.width = '100%';
-                    frame.style.height = '100%';
-                    //view_div.style.height = '100%';
-                    view_div.append(frame);
-                    if(view_div.classList.contains('recordList-fullview')){ //for iframe
-                        frame.addEventListener('load',(event)=>{ 
-                             const h = frame.contentWindow.document.body.scrollHeight;
-                             view_div.style.height = h+'px';
-                        });
-                    }
-                }
-                frame.src = this.HAPI.baseURL+`?recID=${selected_rec_ID}&db=${this.HAPI.database}&format=html`;
-                /*
-                request = {recID:selected_rec_ID, 
-                           db:this.HAPI.database, 
-                           format: 'html',
-                           lang: this.HAPI.getLocale()
-                          };
-                */
-            }
         
     },
     

@@ -1,5 +1,5 @@
 /**
-* BaseList - template widget for listing of record
+* HBaseList - template widget for listing of record
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -30,6 +30,9 @@
 * getSelection
 * triggerLoadAnimation
 * eventHandler
+* onSearchStart
+* onSearchFinish
+* onSelect
 */
 import './HBaseWidget.js';
 
@@ -46,7 +49,7 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     },
     
     _needLoadContent: false,
-    _needLoadCss: true,
+    _needLoadCss: false,
     
     recordSet:null,   // HRecordSet
     recordSetSelected:[], // array of selected ids
@@ -162,8 +165,7 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
             window.hWin.HEURIST4.msg.showMsgErr(response);    
             return;
         }
-        //let resp = new HRecordSet( response );
-        //that.setRecordSet(resp);
+
         let recordset = new HRecordSet( response.data );
         this.setRecordSet(recordset);
         
@@ -257,10 +259,23 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
             return;
         }
         
-console.log(e.type);        
-        
         if(e.type == this.HAPI.Event.ON_REC_SEARCHSTART)
         {
+            this.onSearchStart(data);
+
+        }else if(e.type == this.HAPI.Event.ON_REC_SEARCH_FINISH){
+            
+            this.onSearchFinish(data);
+
+        }
+        else if(e.type == this.HAPI.Event.ON_REC_SELECT){
+            
+            this.onSelect(data);
+        } 
+    },
+    
+    onSearchStart(data){
+        
             this.clearContent();
 
             if(data.reset || this.$H.isempty(data.q)){
@@ -269,9 +284,10 @@ console.log(e.type);
             }else{
                 this.triggerLoadAnimation(true);
             }
+    },
 
-        }else if(e.type == this.HAPI.Event.ON_REC_SEARCH_FINISH){
-
+    onSearchFinish(data){
+        
             this.triggerLoadAnimation(false);
             
             this.setRecordSet(data.recordset);
@@ -280,15 +296,17 @@ console.log(e.type);
                 //custom message
                 this.renderMessage(data.empty_remark);
             }
-        }
-        else if(e.type == this.HAPI.Event.ON_REC_SELECT){
+    },
 
-                if(!data.selection || data.reset){ //clear selection
-                    this.setSelection(null);
-                }else{
-                    this.setSelection(data.selection);        
-                }
-        } 
-    }
+    onSelect(data){
+    
+
+            if(!data.selection || data.reset){ //clear selection
+                this.setSelection(null);
+            }else{
+                this.setSelection(data.selection);        
+            }
+    },
+
     
 });

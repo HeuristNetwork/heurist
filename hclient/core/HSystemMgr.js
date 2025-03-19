@@ -1160,6 +1160,25 @@ class HSystemMgr {
       }
       return false;
   }
+
+  /*
+  *
+  */  
+  async loadHtmlContent(target, url){
+
+        let that = this;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            target[0].innerHTML = await response.text();
+        } catch (error) {
+            window.hWin.HEURIST4.msg.showMsgErr(`Failed to load content from ${url}: {error.message}`);
+        }
+    }
+
   
   
 }

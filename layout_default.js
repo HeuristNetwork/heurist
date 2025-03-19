@@ -50,7 +50,7 @@ window.hWin.cfg_widgets = [
     {id:'heurist_slidersMenu', name:'Main Side Menu', widgetname:'slidersMenu', script:'hclient/widgets/cpanel/slidersMenu.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js', minh:150, minw:150},
     
-    {id:'HBaseWidget', name:'Base', widgetname:'HBaseWidget', script:'hclient/widgets/HRecordList/HBaseWidget.js'},
+    {id:'HRecordView', name:'RecordView', widgetname:'HRecordView', script:'hclient/widgets/HRecordList/HRecordView.js'},
     {id:'HRecordList', name:'Records', widgetname:'HRecordList', script:'hclient/widgets/HRecordList/HRecordList.js'},
     {id:'HMenu', name:'Menu', widgetname:'HMenu', script:'hclient/widgets/HMenu/HMenu.js'},
     

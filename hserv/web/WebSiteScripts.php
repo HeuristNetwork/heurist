@@ -51,10 +51,8 @@ if(!defined('PDIR')){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
-<!--
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HBaseWidget.js"></script>
--->
+
+    <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordView.js"></script>
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
 
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
