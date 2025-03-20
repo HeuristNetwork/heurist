@@ -31,13 +31,14 @@ header(CTYPE_JSON);
 
 $system = new hserv\System();
 
-$sysadmin_pwd = USanitize::getAdminPwd('sysadmin_pwd');
+$sysadmin_pwd = USanitize::getAdminPwd('pwd');
+$request = USanitize::sanitizeInputArray();
 
 $data = null;
-$response = array();
+$response = [];
 $rtn = false;
 
-$isSystemInited = $system->init(@$_REQUEST['db']);
+$isSystemInited = $system->init(@$request['db']);
 
 if(!$isSystemInited) {
 
@@ -48,19 +49,23 @@ if(!$isSystemInited) {
     exit;
 }
 
+if(isset($request['databases'], $request['users'], $request['emailBody'], $request['db'], $sysadmin_pwd)){
+    sendEmails($request);
+}
+
 $mysqli = $system->getMysqli();
 
-if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title and Short Summary field for the selected id, id is for Email record */
+if(isset($request['get_email']) && isset($request['recid'])) {/* Get the Title and Short Summary field for the selected id, id is for Email record */
 
     $email_title = "";
     $email_body = "";
-    $id = intval($_REQUEST['recid']);
+    $id = intval($request['recid']);
 
     // Validate ID
     if(!is_numeric($id) || intval($id) < 1){
 
-        $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"An invalid Email record id was provided.", "request"=>htmlspecialchars($id));
-        $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($_REQUEST['recid']));
+        $response = ["status"=>HEURIST_ACTION_BLOCKED, "message"=>"An invalid Email record id was provided.", "request"=>htmlspecialchars($id)];
+        $system->addError(HEURIST_ERROR, "Bulk Email Other: The record IDs used for the Email selector are invalid or have not been retrieved correctly. Invalid ID => " . htmlspecialchars($request['recid']));
         $rtn = json_encode($response);
 
         print $rtn;
@@ -79,7 +84,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
             $missing = empty($title_detailtype_id) ? "for the title detail type." : "for the short summary detail type.";
         }
 
-        $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team.");
+        $response = ["status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the local id $missing <br>If this problem persists, please notify the Heurist team."];
 
         $rtn = json_encode($response);
 
@@ -87,41 +92,41 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
         exit;
     }
 
-  $query = "SELECT dtl_Value, dtl_DetailTypeID
-            FROM recDetails
-            WHERE dtl_RecID = $id AND dtl_DetailTypeID IN (".$shortsum_detiltype_id.", ".$title_detailtype_id.")";
+    $query = "SELECT dtl_Value, dtl_DetailTypeID
+              FROM recDetails
+              WHERE dtl_RecID = $id AND dtl_DetailTypeID IN (".$shortsum_detiltype_id.", ".$title_detailtype_id.")";
 
-  $detail_rtn = $mysqli->query($query);
-  if(!$detail_rtn){
+    $detail_rtn = $mysqli->query($query);
+    if(!$detail_rtn){
 
-    $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the details of Email record ID => $id.<br>If this persists, please notify the Heurist team.<br>", "error_msg"=>$mysqli->error, "request"=>$id);
+        $response = ["status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve the details of Email record ID => $id.<br>If this persists, please notify the Heurist team.<br>", "error_msg"=>$mysqli->error, "request"=>$id];
+        $rtn = json_encode($response);
+
+        print $rtn;
+        exit;
+    }
+
+    while($email_dtl = $detail_rtn->fetch_row()){
+        if($email_dtl[1] == $shortsum_detiltype_id){
+            $email_body = $email_dtl[0];
+        }elseif($email_dtl[1] == $title_detailtype_id){
+            $email_title = $email_dtl[0];
+        }
+    }
+
+    $data = [$email_title, $email_body];
+
+    $response = ["status"=>HEURIST_OK, "data"=>$data, "request"=>$id];
     $rtn = json_encode($response);
 
     print $rtn;
-    exit;
-  }
 
-  while($email_dtl = $detail_rtn->fetch_row()){
-      if($email_dtl[1] == $shortsum_detiltype_id){
-          $email_body = $email_dtl[0];
-      }elseif($email_dtl[1] == $title_detailtype_id){
-          $email_title = $email_dtl[0];
-      }
-  }
+} elseif(isset($request['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
-  $data = array($email_title, $email_body);
-
-    $response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>$id);
-    $rtn = json_encode($response);
-
-    print $rtn;
-
-} elseif(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
-
-    $db_request = $_REQUEST['db_filtering'];
-    $dbs = array();// list of databases
-    $databases = array();// array of database details
-    $invalid_dbs = array();
+    $db_request = $request['db_filtering'];
+    $dbs = [];// list of databases
+    $databases = [];// array of database details
+    $invalid_dbs = [];
 
     // Get all dbs that start with the Heurist prefix
     $query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE `SCHEMATA`.`SCHEMA_NAME` LIKE '".HEURIST_DB_PREFIX."%' ORDER BY `SCHEMATA`.`SCHEMA_NAME` COLLATE utf8_general_ci";
@@ -129,7 +134,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
     $db_list = $mysqli->query($query);
     if (!$db_list) {
 
-        $response = array("status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
+        $response = ["status"=>HEURIST_ACTION_BLOCKED, "message"=>"Unable to retrieve a list of Heurist databases.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request];
         $rtn = json_encode($response);
 
         print $rtn;
@@ -172,7 +177,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
 
     if($db_request == "all"){ // No additional filtering needed
 
-        $data = array('list' => $dbs, 'details' => array());
+        $data = ['list' => $dbs, 'details' => []];
         $details = getDatabaseDetails($mysqli, $dbs);
         $data['details'] = $details;
 
@@ -218,56 +223,24 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
             if($isok){
                 $data[] = $db;
             }
-            
-/*
-            $query = "SELECT count(*)
-                                FROM (
-                                    SELECT *
-                                    FROM `$db`.Records AS rec
-                                    WHERE rec_Title IS NOT NULL
-                                    AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
-                                    AND rec_FlagTemporary != 1
-                                    AND rec_Title != '' " . $lastmod_where . "
-                                ) AS a";
-            $count_res = $mysqli->query($query);
-            if($count_res>0){
-
-                $row = $count_res->fetch_row();
-
-                if($row[0] > $count){
-                    $data[] = $db;
-                }
-
-            }else{
-                $response = array("status"=>HEURIST_ERROR, "message"=>"Unable to filter Heurist databases based on provided filter.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
-                $rtn = json_encode($response);
-
-                $count_res->close();
-
-                print $rtn;
-
-                exit;
-            }
-*/            
-            
         }
     }
 
-    $response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>$db_request);
+    $response = ["status"=>HEURIST_OK, "data"=>$data, "request"=>$db_request];
     $rtn = json_encode($response);
 
     print $rtn;
 
-} elseif(isset($_REQUEST['user_count']) && isset($_REQUEST['db_list'])) { // Get a count of distinct users
+} elseif(isset($request['user_count']) && isset($request['db_list'])) { // Get a count of distinct users
 
-    $user_request = $_REQUEST['user_count'];
-    $dbs = $_REQUEST['db_list'];
+    $user_request = $request['user_count'];
+    $dbs = $request['db_list'];
     if(!is_array($dbs)){
         $dbs = explode(',', $dbs);
     }
 
     $data = 0;
-    $email_list = array();
+    $email_list = [];
 
     foreach($dbs as $db){
 
@@ -297,27 +270,20 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
             $where_clause = "ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
         }else{
 
-            $response = array("status"=>HEURIST_INVALID_REQUEST, "message"=>"Invalid user choice", "request"=>$user_request);
+            $response = ["status"=>HEURIST_INVALID_REQUEST, "message"=>"Invalid user choice", "request"=>$user_request];
             $rtn = json_encode($response);
 
             print $rtn;
             exit;
         }
 
-/*        
-        $query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail
-                          FROM `" . $db . "`.sysUsrGrpLinks AS ugl
-                          INNER JOIN `" . $db . "`.sysUGrps AS ugr ON ugl.ugl_UserID = ugr.ugr_ID "
-                        . $where_clause;
-*/
         if($need_groups){
-            $query = $query.', `' . $db . '`.sysUsrGrpLinks AS ugl ';
-            $where_clause = 'ugl.ugl_UserID = ugr.ugr_ID AND '.$where_clause;
+            $query .= ", `{$db}`.sysUsrGrpLinks AS ugl ";
+            $where_clause = "ugl.ugl_UserID = ugr.ugr_ID AND {$where_clause}";
         }
 
-        $query = $query.' WHERE ' . $where_clause;
-//error_log($query);                        
-                        
+        $query .= " WHERE {$where_clause}";
+
         $res = $mysqli->query($query);
         if(!$res){
             //Unable to retrieve user count for databases
@@ -334,19 +300,19 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
 
     }
 
-    $response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>$user_request);
+    $response = ["status"=>HEURIST_OK, "data"=>$data, "request"=>$user_request];
     $rtn = json_encode($response);
 
     print $rtn;
 
-} elseif(isset($_REQUEST['rec_count']) && isset($_REQUEST['db_list'])){ // Get a count of records
+} elseif(isset($request['rec_count']) && isset($request['db_list'])){ // Get a count of records
 
-    $dbs = $_REQUEST['db_list'];
+    $dbs = $request['db_list'];
     if(!is_array($dbs)){
         $dbs = explode(',', $dbs);
     }
 
-    $data = array();
+    $data = [];
     foreach($dbs as $db){
         if(strpos($db, HEURIST_DB_PREFIX)===0){
             $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
@@ -363,26 +329,26 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
         }
     }
 
-    $response = array("status"=>HEURIST_OK, "data"=>$data, "request"=>implode(',', $dbs));
+    $response = ["status"=>HEURIST_OK, "data"=>$data, "request"=>implode(',', $dbs)];
     $rtn = json_encode($response);
 
     print $rtn;
 
-} elseif(isset($sysadmin_pwd)) { // Verify Admin Password
+} elseif(isset($request['session'])) {
 
-    if(!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
-        $data = true;
-    } else {
-        $data = false;
+    $progress = mysql__update_progress($mysqli, $request['session'], false, null);
+    $status = !$progress || $progress == 'terminate' ? HEURIST_INVALID_REQUEST : HEURIST_OK;
+    $progress = !$progress || $progress == 'terminate' ? '' : $progress;
+
+    if($status === HEURIST_OK){
+        mysql__update_progress($mysqli, $request['session'], false, 'REMOVE');
     }
 
-    $response = array("status"=>HEURIST_OK, "data"=>$data);
-    $rtn = json_encode($response);
+    print json_encode(['status' => $status, 'data' => $progress]);
 
-    print $rtn;
 } else { // Invalid Request
 
-    $response = array("status"=>HEURIST_INVALID_REQUEST, "message"=>"invalid request sent", "request"=>$_REQUEST);
+    $response = ["status"=>HEURIST_INVALID_REQUEST, "message"=>"invalid request sent", "request"=>$request];
     $rtn = json_encode($response);
 
     print $rtn;
@@ -395,14 +361,15 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {/* Get the Title
 function getDatabaseDetails($mysqli, $db_list){
 
 
-    $details = array();
+    $details = [];
 
     // Retrieve record count and last update (record or structure)
     foreach ($db_list as $database) {
 
         $database = preg_replace(REGEX_ALPHANUM, "", $database);
 
-        $db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
+        $db_data = ['name' => $database, 'rec_count' => 0, 'last_update' => null];
+
         // Get record count
         $db_data['rec_count'] = mysql__select_value($mysqli, "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1");
 
@@ -415,7 +382,7 @@ function getDatabaseDetails($mysqli, $db_list){
 
         $last_struct = getDefinitionsModTime($mysqli, true);
 
-        if(!$last_recent || $last_struct>$last_recent){
+        if(!$last_recent || $last_struct > $last_recent){
             $last_recent = $last_struct;
         }
 
@@ -425,4 +392,24 @@ function getDatabaseDetails($mysqli, $db_list){
     }
 
     return $details;
+}
+
+function sendEmails($params){
+
+    global $system, $sysadmin_pwd, $passwordForServerFunctions;
+
+    require_once __DIR__ . '/bulkEmailSystem.php';
+
+    if ($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)) {
+        print json_encode(['status' => HEURIST_ACTION_BLOCKED, 'message' => 'The System Administrator password is invalid, please re-try in the previous tab/window.']);
+        exit;
+    }
+
+    // Attempt to send the system email.
+    $rtn = sendSystemEmail($params);
+    
+    // Check the result of the email sending process.
+    print json_encode($rtn);
+    
+    exit;
 }

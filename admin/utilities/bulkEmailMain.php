@@ -21,50 +21,32 @@
 
 define('PDIR','../../');//need for proper path to js and css
 
+require_once __DIR__ . '/../../autoload.php';
+
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/bulkEmailSystem.php';
+require_once __DIR__ . '/../../hclient/framecontent/initPageMin.php';
+require_once __DIR__ . '/bulkEmailSystem.php';
 
 // Retrieve the System Administrator password securely.
 $sysadminPwd = USanitize::getAdminPwd();
+$req_params = USanitize::sanitizeInputArray();
 
 // Handle CSV export functionality.
-if (isset($_REQUEST["exportCSV"]) && $_REQUEST["exportCSV"] == 1) {
+if (isset($req_params["exportCSV"]) && $req_params["exportCSV"] == 1) {
     if ($system->verifyActionPassword($sysadminPwd, $passwordForServerFunctions)) {
         echo "The System Administrator password is invalid, please re-try in the previous tab/window.";
     } else {
-        getCSVDownload($_REQUEST); // Trigger CSV download if verification succeeds.
+        getCSVDownload($req_params); // Trigger CSV download if verification succeeds.
     }
     exit;
 }
 
 // Check for required parameters and verify the system password.
-if (!isset($_REQUEST['db']) || $system->verifyActionPassword($sysadminPwd, $passwordForServerFunctions)) {
+if (!isset($req_params['db']) || $system->verifyActionPassword($sysadminPwd, $passwordForServerFunctions)) {
     echo '<h3>A Heurist database and Server Manager password are required to enter this function.</h3>';
     exit;
-}
-
-// Validate all required inputs for the email functionality.
-if (
-    isset($_REQUEST['databases'], $_REQUEST['users'], $_REQUEST['emailBody'], $_REQUEST['db'], $sysadminPwd)
-) {
-    if ($system->verifyActionPassword($sysadminPwd, $passwordForServerFunctions)) {
-        echo "The System Administrator password is invalid, please re-try in the previous tab/window.";
-        exit;
-    } else {
-        // Attempt to send the system email.
-        $rtn = sendSystemEmail($_REQUEST);
-
-        // Check the result of the email sending process.
-        if ($rtn["status"] === "ok") {
-            echo "<br><br><div>A receipt of the process has been saved as a Notes Record<br><br>Record ID => "
-                . htmlspecialchars($rtn["data"]) . "<br>Record Title => " . htmlspecialchars($rtn["rec_Title"]) . "</div>";
-        }
-
-        exit;
-    }
 }
 
 // Retrieve the mysqli object for database operations.
@@ -346,7 +328,8 @@ $stmt->close();
 
             var all_emails = <?php echo json_encode($emails)?>;// Object of Email records id->title
 
-            var current_db = "<?php echo $currentDb ?>";
+            const BASE_URL = "<?php echo HEURIST_BASE_URL ?>";
+            const CURRENT_DB = "<?php echo $currentDb ?>";
             var getting_databases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
             var run_filter = false;
             var isFormSubmit = false;
@@ -401,18 +384,8 @@ $stmt->close();
                 }
                 isFormSubmit = true;
 
-                var action = $("#emailOptions").attr("onsubmit");
-
                 $("input[name='exportCSV']").val(1);
 
-                /*
-                var data = {};
-
-                $.map($("#emailOptions").serializeArray(), function(obj, idx) {
-                    data[obj['name']] = obj['value'];
-                });
-                $("#exportData").val(data);
-                */
                 getDbList();
                 $("#emailOptions").trigger('submit');
 
@@ -742,7 +715,7 @@ $stmt->close();
                         $("#filterMsg").show().text("Filtering Databases...");
 
                         var data = {
-                            db: current_db,
+                            db: CURRENT_DB,
                             db_filtering: {
                                 count: $("#recTotal").val(),
                                 lastmod_logic: $("#recModifiedLogic").val(),
@@ -815,7 +788,8 @@ $stmt->close();
                     if(validateForm(event)){
                         getDbList();
                         $("input[name='exportCSV']").val('');
-                        $("#emailOptions").trigger('submit');
+                        sendEmails();
+                        return false;
                     }
                 });
 
@@ -825,6 +799,70 @@ $stmt->close();
                 });
 
                 $('input[id="name"]').prop('checked', true);
+            }
+
+            function sendEmails(){
+
+                let params = {};
+                let $prog_dlg;
+                let interval;
+
+                $('#emailOptions').serializeArray().reduce((params, value) => {
+
+                    if(window.hWin.HEURIST4.util.isempty(value['value'])){
+                        value['value'] = 0;
+                    }
+
+                    params[value['name']] = value['value'];
+                    return params;
+                }, params);
+
+                const SESSION_ID = window.hWin.HEURIST4.util.random();
+                params['sessionID'] = SESSION_ID;
+
+                let mail_url = `${BASE_URL}admin/utilities/bulkEmailOther.php`;
+
+                window.hWin.HEURIST4.util.sendRequest(mail_url, params, null, (response) => {
+
+                    if(interval > 0) { clearInterval(interval); interval = null; }
+
+                    $prog_dlg.parent().find('.ui-dialog-titlebar button').show();
+                    $prog_dlg.parent().find('.ui-dialog-buttonpane').show();
+
+                    window.hWin.HEURIST4.util.sendRequest(mail_url, {session: SESSION_ID, db: CURRENT_DB}, null, (session_resp) => {
+
+                        if(session_resp.status == 'ok'){
+                            $prog_dlg.find('#progress-report').html(session_resp.data);
+                        }
+
+                        $prog_dlg.find('#email-results').html(`<strong>Saved final receipt as a Note record: ID #${response.data} ${response.rec_Title}</strong>`);
+                    });
+                });
+
+                $prog_dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    '<div id="progress-report" style="padding-bottom: 10px;"></div><div id="email-results" style="padding-top: 10px; border-top: 1px solid black;"></div>',
+                    null,
+                    {title: 'Email progress tracker'}
+                );
+                $prog_dlg.parent().find('.ui-dialog-titlebar button').hide();
+                $prog_dlg.parent().find('.ui-dialog-buttonpane').hide();
+
+                let progress_url = `${BASE_URL}hserv/controller/progress.php`;
+
+                interval = setInterval(() => {
+
+                    let request = { t: new Date().getMilliseconds(), session: SESSION_ID, db: CURRENT_DB };
+
+                    window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, (response) => {
+                        if(response.message != 'terminate'){
+                            $prog_dlg.find('#progress-report').html(response.message);
+                        }else{
+                            if(interval > 0) { clearInterval(interval); interval = null; }
+                            return;
+                        }
+                    });
+                }, 1000);
+
             }
 
             //
@@ -837,7 +875,7 @@ $stmt->close();
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
-                    data: {db: current_db, db_filtering: "all", req_id: window.hWin.HEURIST4.util.random()},
+                    data: {db: CURRENT_DB, db_filtering: "all", req_id: window.hWin.HEURIST4.util.random()},
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -895,7 +933,7 @@ $stmt->close();
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
-                    data: {db: current_db, get_email: true, recid: id, req_id: window.hWin.HEURIST4.util.random()},
+                    data: {db: CURRENT_DB, get_email: true, recid: id, req_id: window.hWin.HEURIST4.util.random()},
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -998,7 +1036,7 @@ $stmt->close();
                 }
 
                 var data = {
-                    db: current_db,
+                    db: CURRENT_DB,
                     db_list: dbs,
                     rec_count: 1,
                     req_id: window.hWin.HEURIST4.util.random()
@@ -1070,7 +1108,7 @@ $stmt->close();
                 }
 
                 var data = {
-                    db: current_db,
+                    db: CURRENT_DB,
                     user_count: $("#userSel").val(),
                     db_list: dbs.join(','),
                     req_id: window.hWin.HEURIST4.util.random()
@@ -1113,62 +1151,6 @@ $stmt->close();
                         }
                     }
                 });
-            }
-
-            //
-            // Verify sysadmin password
-            //
-            function verifySystemAdminPwd() {
-
-                var data = {
-                    db: current_db,
-                    sysadmin_pwd: $("#sm_pwd").val()
-                };
-
-                $.ajax({
-                    url: 'bulkEmailOther.php',
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    cache: false,
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    error: function(jqXHR, textStatus, errorThrown){
-
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: "An error has occurred with verifying the System Administrator password.<br>"
-                                    + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
-                                    + "Please contact the Heurist team if this problem persists",
-                            error_title: 'Failed to authenticate'
-                        });
-                    },
-                    success: function(response, textStatus, jqXHR){
-
-                        if(response.status == "ok"){
-                            if(response.data == true){
-
-                                getDbList();
-                                $("#emailOptions").trigger('submit');
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgFlash("The System Administrator password is incorrect.<br>Please re-enter it.", 5000);
-                            }
-                        } else {
-
-                            if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: "An unknown error has occurred while attempting to authenticate the system administrator password, please contact the Heurist team.",
-                                    error_title: 'Unable to authenticate',
-                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                                });
-                            } else { // There is no error_msg
-                                window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: "Fail to authenticate"});
-                            }
-                        }
-                    }
-                });
-
-                return false;
             }
 
             function set_element_position(){

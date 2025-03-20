@@ -10,6 +10,8 @@
         $error = mysql__check_dbname($dbname);
         if($error==null){
 
+            [,$dbname] = mysql__get_names($dbname);
+
             if(!defined('HEURIST_SCRATCH_DIR')){
                 $warn = '';
                 $dir = $system->getSysDir(DIR_SCRATCH, basename($dbname));

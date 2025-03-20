@@ -19,11 +19,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+require_once __DIR__ . '/../../autoload.php';
+
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
+require_once __DIR__ . '/../../hclient/framecontent/initPageMin.php';
+require_once __DIR__ . '/../../hserv/records/edit/recordModify.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -97,7 +99,7 @@ class BulkEmailSystem {
 
     private $add_gdpr = true;// add GDPR statement to end
 
-    private $session_id = null; // session ID
+    private $sessionID = null; // session ID
     private $progress = ''; // progress update
 
     public function __construct($system){
@@ -115,10 +117,10 @@ class BulkEmailSystem {
      */
     public function processFormData($data) {
 
-        $this->session_id = array_key_exists('session_id', $data) ? $data['session_id'] : null;
+        $this->sessionID = array_key_exists('sessionID', $data) ? $data['sessionID'] : null;
         $rtn = 0; // Default return value indicating success.
 
-        $this->printMessage('Processing form data ..... ');
+        $this->printMessage("Processing form data:<div style='padding: 10px;'>");
 
         // Reset databases property to null for a fresh start.
         $this->databases = [];
@@ -188,7 +190,7 @@ class BulkEmailSystem {
         $this->cur_user = $this->system->getCurrentUser();
         $this->getUserEmail();
 
-        $this->printMessage('Completed<br>');
+        $this->printMessage('</div><strong>Data processed</strong><br>');
 
         return 0; // Return success.
     }
@@ -200,8 +202,12 @@ class BulkEmailSystem {
      * @return bool Returns true if the database input is valid, false otherwise.
      */
     private function validateDatabaseInput($data) {
+
+        $this->printMessage("Validating Databases ..... ");
+
         // Ensure the current database is provided; set an error if missing.
         if (empty($data["db"])) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Missing current database</span></div>');
             $this->setError('No current database has been provided.<br>Please contact the Heurist team if this problem persists.');
             return false;
         }
@@ -221,10 +227,13 @@ class BulkEmailSystem {
 
         // Check if valid databases exist after validation; set an error if none.
         if (isEmptyArray($this->databases)) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">No valid databases listed</span></div>');
             $provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . htmlspecialchars($data["databases"]);
             $this->setError("No valid databases have been provided.<br>{$provided_dbs}");
             return false;
         }
+
+        $this->printMessage("Done<br>");
 
         // Return true if all validations pass.
         return true;
@@ -237,10 +246,15 @@ class BulkEmailSystem {
      * @return bool Returns true if user input is valid, false otherwise.
      */
     private function validateUserInput($data) {
+
+        $this->printMessage('Validating email details ..... ');
         // Validate the 'users' field and ensure it matches one of the allowed options.
         if (!empty($data["users"]) && in_array($data["users"], $this->user_options)) {
             $this->users = $data["users"]; // Assign valid users.
         } else {
+
+            $this->printMessage('<span style="color: red; font-weight: bold;">invalid users details</span></div>');
+
             // Generate an error message if 'users' is invalid or missing.
             $main_msg = 'No valid users have been provided.<br>users => '
                 . (!empty($data["users"])
@@ -257,6 +271,7 @@ class BulkEmailSystem {
 
         // Ensure the email body is provided and is a string.
         if (!isset($data["emailBody"]) || !is_string($data["emailBody"])) {
+            $this->printMessage('<span style="color: red; font-weight: bold;">Missing email body</span></div>');
             $this->setError('No email body has been provided');
             return false;
         }
@@ -265,6 +280,8 @@ class BulkEmailSystem {
 
         // Add a GDPR statement to the email body if required.
         $this->addGDPRStatement();
+
+        $this->printMessage('Done<br>');
 
         return true; // All validations passed.
     }
@@ -334,6 +351,8 @@ class BulkEmailSystem {
      */
     private function getUserEmail() {
 
+        $this->printMessage('Getting current user\'s email ..... ');
+
         // Get the mysqli connection parameters.
         $mysqli = $this->system->getMysqli();
 
@@ -362,6 +381,8 @@ class BulkEmailSystem {
 
         // Set the user's email to the default admin email if invalid or not found.
         $this->cur_user['ugr_eMail'] = $email ?: HEURIST_MAIL_TO_ADMIN;
+
+        $this->printMessage('Done<br>');
     }
 
     /**
@@ -400,6 +421,8 @@ class BulkEmailSystem {
      */
     private function createUserList() {
 
+        $this->printMessage('Creating user list ..... ');
+
         $mysqli = $this->system->getMysqli();
 
         $dbs = $this->databases;
@@ -409,6 +432,7 @@ class BulkEmailSystem {
             $where_clause = $this->generateWhereClause($this->users, $db);
 
             if (empty($where_clause)) {
+                $this->printMessage('<span style="color: red; font-weight: bold;">Cannot create users WHERE clause</span></div>');
                 $this->setError('Unable to construct WHERE clause for User List query due to an invalid users option<br>users => '
                     . htmlspecialchars($this->users));
                 return -1;
@@ -432,6 +456,8 @@ class BulkEmailSystem {
         }
 
         ksort($this->user_details, SORT_FLAG_CASE);
+
+        $this->printMessage('Done<br>');
 
         return 0;
     }
@@ -498,6 +524,8 @@ class BulkEmailSystem {
      */
     private function createRecordsList() {
 
+        $this->printMessage('Creating record list ..... ');
+
         $mysqli = $this->system->getMysqli();
 
         $dbs = $this->databases;
@@ -527,7 +555,7 @@ class BulkEmailSystem {
 
             $res = $mysqli->query($query);
             if (!$res) {
-
+                $this->printMessage('<span style="color: red; font-weight: bold;">Unable to get record count</span></div>');
                 $this->setError('Query Error: Unable to get record count for the '
                     .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
                 return -2;
@@ -579,6 +607,7 @@ class BulkEmailSystem {
             $res = $mysqli->query($query);
 
             if (!$res) {
+                $this->printMessage('<span style="color: red; font-weight: bold;">Unable to get last modification date</span></div>');
                 $this->setError('Query Error: Unable to retrieve a last modified record from '
                     .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
                 return -2;
@@ -591,6 +620,8 @@ class BulkEmailSystem {
 
             $this->records[$db] = [$count, $date];// save results
         }//foreach ($dbs as $db)
+
+        $this->printMessage('Done<br>');
 
         return 0;
     }
@@ -1134,13 +1165,13 @@ class BulkEmailSystem {
 
     private function printMessage($msg){
 
-        if(!$this->session_id){
+        if(!$this->sessionID){
             return;
         }
 
         $this->progress .= $msg;
 
-        mysql__update_progress($this->system->getMysqli(), $this->session_id, false, $this->progress);
+        mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, $this->progress);
     }
 }
 
