@@ -1,0 +1,18 @@
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+
+---------------------------------------------------------------------
+
+Directory:	admin/setup/rectype-icons
+
+Overview:
+
+Record type icons for core definitions which are copied to every new database
+
+Notes:
+
+Updated: 	Ian Johnson 11 March 2014

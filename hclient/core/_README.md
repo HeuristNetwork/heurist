@@ -1,0 +1,49 @@
+Directory:    /hclient/core
+
+Overview:  Core client-side functions, H4 onwards.
+
+Notes:
+
+Updated:     18 Oct 2015
+
+
+utilsCollection.js - manages user's collection of record ids stored in SESSION
+
+
+Heurist Records,recDetails
+
+    hRecordSearch.js - wrapper class for hRecordMgr.search - executes this method either callback or global events
+
+    
+    
+    
+
+Javascript classes
+
+hAPI - main class that stores current system values and allows to interact with server API
+hEditing - add/edit record
+hMapping - work with OS Timemap
+hRecordSet - record set container/manipulation
+
+editing_input.js - input control widget
+utils.js - set of utilty functions
+
+----------------------------------------------------------------------------------------------------------------
+
+/**
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/

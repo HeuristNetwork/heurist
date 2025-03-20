@@ -11,7 +11,7 @@
 * Shows an email form
 *
 * @author      Jan Jaap de Groot <jjedegroot@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @link        https://HeuristNetwork.org
 * @version     4.0.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

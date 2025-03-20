@@ -5,7 +5,7 @@
 # install.sh: installation script for RedHat
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2023 University of Sydney
+# @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 # @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 # @author      Artem Osmakov   <osmakov@gmail.com>
 # @author      Ian Johnson     <ian.johnson.heurist@gmail.com>

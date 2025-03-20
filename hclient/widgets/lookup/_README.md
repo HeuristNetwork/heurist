@@ -1,0 +1,71 @@
+Directory:  /hclient/widgets/lookup
+
+Overview:   Perform requests to external sources to populate records
+
+Service requests are handled within hserv/controller/record_lookup.php
+
+New and existing service mapping is found at hserv/controller/record_lookup_config.json
+
+All lookups are extensions of the lookupBase widget (hclient/widget/lookup/lookupBase.js), which itself extends the recordAction widget (hclient/widget/record/recordAction.js)
+
+Some similar lookups (e.g. Geonames and Geonames Postalcodes) have an additional parent widget to avoid code duplication between lookups.
+
+lookup_Template.js and lookup_Template.html can provide a simple template for creating new external lookups, 
+    this also includes how to prepare data for terms, record pointer, files and relationship marker fields.
+(This template is based off of the BnF_bib lookup with some specifics stripped out)
+
+Current Services:
+ - TLCMap: Query the Time Layered Cultural Mapping of Australian history and culture database (site: tlcmap.org)
+ - GeoNames: Query the Geonames databse for geographical locations covering all countries and many places (site: geonames.org)
+ - GeoNames Postalcodes: Query the Geonames' postalcode database (site: geonames.org/postal-codes/)
+ - MPCE: Assign keywords to a Work (Book) record from searches or by association
+ - LRC18: Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search
+ - BnF Bib: Query the BnF Library's bibliographic records (site: www.bnf.fr)
+ - BnF Aut: Query the BnF Library's authoritative records (site: www.bnf.fr)
+ - Nomisma: Query Nomisma's database records (site: nomisma.org)
+ - Nakala: Query Nakala's media records (site: nakala.fr)
+ - Nakala Authors: Query Nakala's author records (site: nakala.fr)
+ - Opentheso: Query various servers that have a Opentheso service (sites: pactols.frantiq.fr/opentheso, opentheso.huma-num.fr/opentheso)
+
+Notes:
+
+The services can be accessed via a call to window.hWin.HAPI4.RecordMgr.lookup_external_service(request, callback), where:
+ => request (JSON Object): requires at least two keys; 'service': the complete URL for the external API request, and 'service_type': the name of the current external lookup (e.g. tlcmap, geonames)
+    -> The request parameters will be validated server side, so add the necessary lookup details to service_types and service_parameters (hserv/controller/record_lookup.php)
+ => callback (Function): Function to receive the response from the server call
+    -> The response variable will be a JSON object with two keys of focus; status: response status, and data: containing the response from the external API request
+
+Alternatively, perform a simple record search by calling window.hWin.HAPI4.RecordMgr.search(request, callback), where:
+ => request (JSON Object): can contain; q = heurist query (required), w = a | b (all or bookmarks), f = details of output (can be labeled 'detail'), limit, o = offset, and db = which database to query
+ => callback (Function): Same as above callback
+Both the MPCE and LRC18C lookups contain examples of record searching.
+
+Result Lists (widget found at hclient/widget/viewers/resultList.js) can be used to display the retrieved data as records in a list format for the user to select from.
+Result Lists accepts the resulting records as a HRecordSet (hclient/core/recordset.js).
+
+For record pointer, term and relationship fields, an id is needed to assign the corresponding value (record id and term id, respectively), or an array of ids.
+If any other value is returned, as necessary, the user will be prompted to create new terms and select/create new records for record pointer fields.
+
+For file fields, either the ulf_ID or ulf_ObfuscatedFileID need to be passed back, or a URL pointing to the file that will be registered upon returning the value.
+
+Updated: 13 Mar 2022
+
+----------------------------------------------------------------------------------------------------------------
+
+/**
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/

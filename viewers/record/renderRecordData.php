@@ -15,7 +15,7 @@
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
