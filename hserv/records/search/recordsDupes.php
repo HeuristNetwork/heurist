@@ -153,7 +153,7 @@ public static function findDupes( $params ){
 
     self::$distance = @$params['distance'];
     if(!(self::$distance>0)) {self::$distance = 0;}
-    if(self::$distance>20) {self::$distance = 20;} //percentage
+    if(self::$distance>60) {self::$distance = 60;} //percentage
 
     $startgroup = @$params['startgroup'];
     if(!($startgroup>0)){ $startgroup = 0;}
