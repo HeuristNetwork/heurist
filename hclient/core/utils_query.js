@@ -815,6 +815,8 @@ window.hWin.HEURIST4.query = {
 
         plain_text += deconstructed.join(`, ${use_or ? 'OR' : 'AND'} <br>`);
 
+        plain_text += sortby.length == 0 ? '' : `<br>Sorted by:<br>${sortby.join('<br>')}`;
+
         return window.hWin.HEURIST4.util.stripTags(plain_text, 'br, em, b, strong, u, i, div');
     },
 
@@ -914,6 +916,10 @@ window.hWin.HEURIST4.query = {
             case 'popularity':
                 res = 'Your Bookmarks';
                 break;
+            case 'a':
+            case 'added':
+                res = 'Record Creation';
+                break;
             default:
                 if(value.startsWith('f:') || value.startsWith('field:')){
 
@@ -933,6 +939,8 @@ window.hWin.HEURIST4.query = {
                 }
                 break;
         }
+
+        res += ` ${is_negate ? 'descending' : 'ascending'} order`;
 
         return res;
     }

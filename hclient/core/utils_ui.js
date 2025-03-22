@@ -3458,7 +3458,14 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         groupings: false,
         groupingsType: '',
         onClickingExpand: null,
-        searchable: false
+        searchable: false // to implmenet, general search
+    },
+
+    _toggleAttr: function(){
+        // to avoid a warning, remove focus as aria-hidden is set
+        //this.button.trigger('focus');
+        document.activeElement.blur();
+        this._super();
     },
     
     _renderButtonItem: function( item ) {
@@ -3479,6 +3486,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     },
 
     _renderMenu: function( ul, items ) {
+
         this._super(ul, items);
 
         if(this.options.groupings){
@@ -3576,6 +3584,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     },
 
+    /* Headings/Groupings */
     _hasGroupings: false,
     _groupings: {},
     _groupType: null,
@@ -3590,9 +3599,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
         this._groupType = this.options.groupingsType;
 
-        let $menuWidget = this.element.hSelect('menuWidget');
         let allow_grouping = !this._groupings || (this._groupType == 'trm' && !$Db);
-        if($menuWidget.length == 0 || $menuWidget.find('li').length == 0 || allow_grouping){
+        if(this.menu.length == 0 || this.menu.find('li').length == 0 || allow_grouping){
             this._groupings = false;
             return;
         }
@@ -3604,7 +3612,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
         let groupByTermID = () => {
             
-            $.each($menuWidget.find('li'), (idx, li) => {
+            $.each(this.menu.find('li'), (idx, li) => {
 
                 li = $(li);
                 let HID = li.attr('data-hid');
@@ -3634,7 +3642,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             let prevParentID = null;
             let child_IDs = [];
 
-            $.each($menuWidget.find('li'), (idx, li) => {
+            $.each(this.menu.find('li'), (idx, li) => {
 
                 li = $(li);
                 const HID = li.attr('data-hid');
@@ -3673,12 +3681,11 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     _createGroupings: function(){
 
-        let $menuWidget = this.element.hSelect('menuWidget');
-        if($menuWidget.find('li').length == 0 || !this._hasGroupings){
+        if(this.menu.find('li').length == 0 || !this._hasGroupings){
             return;
         }
 
-        $.each($menuWidget.find('li'), (idx, li) => {
+        $.each(this.menu.find('li'), (idx, li) => {
 
             li = $(li);
             let $div = li.find('div[data-depth]');
@@ -3714,7 +3721,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             $arrow.prependTo($div);
         });
 
-        this._on($menuWidget.find('.expander'), {
+        this._on(this.menu.find('.expander'), {
             click: (e) => {
 
                 if(typeof this.onClickingExpand === 'function'){
@@ -3730,18 +3737,18 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
                 let is_expanding = $(e.target).hasClass('ui-icon-triangle-1-e');
                 let parent_HID = $(e.target).closest('li.ui-menu-item').attr('data-hid');
 
-                this._toggleGroupings(is_expanding, parent_HID, $menuWidget);
+                this._toggleGroupings(is_expanding, parent_HID);
             }
         });
     },
 
-    _toggleGroupings: function(expand, parent_HID, $menuWidget){
+    _toggleGroupings: function(expand, parent_HID){
 
-        if(!$menuWidget || $menuWidget.find('li').length == 0 || !window.hWin.HEURIST4.util.isPositiveInt(parent_HID)){
+        if(this.menu.find('li').length == 0 || !window.hWin.HEURIST4.util.isPositiveInt(parent_HID)){
             return;
         }
 
-        let $parent = $menuWidget.find(`li[data-hid="${parent_HID}"]`);
+        let $parent = this.menu.find(`li[data-hid="${parent_HID}"]`);
         if($parent.length == 0){
             return;
         }
@@ -3749,7 +3756,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         let child_IDs = this._groupings[parent_HID];
 
         for(const child_HID of child_IDs){
-            let $option = $menuWidget.find(`li[data-hid="${child_HID}"]`);
+            let $option = this.menu.find(`li[data-hid="${child_HID}"]`);
             if(expand){
                 $option.show();
             }else{
@@ -3775,55 +3782,51 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     openAllGroupings: function(){
 
-        let $menuWidget = this.element.hSelect('menuWidget');
-        if($menuWidget.find('li').length == 0 || !this._hasGroupings || $menuWidget.find('.expander').length == 0){
+        if(this.menu.find('li').length == 0 || !this._hasGroupings || this.menu.find('.expander').length == 0){
             return;
         }
 
         for(const parent_HID in this._groupings){
-            this._toggleGroupings(true, parent_HID, $menuWidget);
+            this._toggleGroupings(true, parent_HID);
         }
     },
 
     closeAllGroupings: function(){
 
-        let $menuWidget = this.element.hSelect('menuWidget');
-        if($menuWidget.find('li').length == 0 || !this._hasGroupings || $menuWidget.find('.expander').length == 0){
+        if(this.menu.find('li').length == 0 || !this._hasGroupings || this.menu.find('.expander').length == 0){
             return;
         }
 
         for(const parent_HID in this._groupings){
-            this._toggleGroupings(false, parent_HID, $menuWidget);
+            this._toggleGroupings(false, parent_HID);
         }
     },
 
     refreshGroupings: function(skipExpand = false){
 
-        let $menuWidget = this.element.hSelect('menuWidget');
-        if($menuWidget.find('li').length == 0 || !this._hasGroupings){
+        if(this.menu.find('li').length == 0 || !this._hasGroupings){
             return;
         }
 
-        if($menuWidget.find('.expander').length == 0){
+        if(this.menu.find('.expander').length == 0){
             this._createGroupings();
         }
 
         for(const parent_HID in this._groupings){
-            this._toggleGroupings(this._groupExpanded.indexOf(parent_HID) !== -1, parent_HID, $menuWidget);
+            this._toggleGroupings(this._groupExpanded.indexOf(parent_HID) !== -1, parent_HID);
         }
     },
 
     removeGroupings: function(){
 
-        let $menuWidget = this.element.hSelect('menuWidget');
-        if($menuWidget.find('.expander').length == 0 || !this._hasGroupings){
+        if(this.menu.find('.expander').length == 0 || !this._hasGroupings){
             return;
         }
 
-        this._off($menuWidget.find('.expander'), 'click');
-        $menuWidget.find('.ui-icon-triangle-1-e, .ui-icon-triangle-1-s').remove();
+        this._off(this.menu.find('.expander'), 'click');
+        this.menu.find('.ui-icon-triangle-1-e, .ui-icon-triangle-1-s').remove();
 
-        $.each($menuWidget.find('li.ui-menu-item'), (idx, li) => {
+        $.each(this.menu.find('li.ui-menu-item'), (idx, li) => {
 
             li = $(li).show();
             let $div = li.find('div[role="option"]');
@@ -3836,9 +3839,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             lpadding = Number.parseFloat(lpadding[1]) - 1.5;
             $div.css({'padding-left': `${lpadding}em`, 'font-weight': ''});
         });
-    },
-
-    
+    }
 });
 
 $.fn.sideFollow = function(dtime) {
