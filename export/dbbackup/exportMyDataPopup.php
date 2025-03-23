@@ -508,7 +508,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             $folders_to_copy = [];
 
             $copy_uploaded_files = (@$_REQUEST['includeresources']=='1');
-
+            
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR,
@@ -519,26 +519,32 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 //limited set
                 echo_flush2("<br><br>Exporting system folders<br>");
             }
-
+            
             //custom user upload folders
             $user_media_folders = $system->settings->get('sys_MediaFolders');
             $user_media_folders = explode(';', $user_media_folders);
+
             foreach($user_media_folders as $dir){
 
+                $dir = basename($dir);
                 $path = HEURIST_FILESTORE_DIR . $dir;
-                if(file_exists($path)){
+                
+                if(trim($dir)=='' || $dir=='backup' || !file_exists($path)){
+                    continue;
+                }
+                
                     if(substr($path, -1, 1) != '/'){
                         $path = $path. '/';
                     }
                     if($copy_uploaded_files){
-                        folderRecurseCopy( $path, FOLDER_BACKUP.'/'.$dir );
+                       folderRecurseCopy( $path, FOLDER_BACKUP.'/'.$dir );
                     }
                     //exclude from full list of folders
                     $key = array_search($path, $folders_to_copy);
                     if($key!==false){
                        unset($folders_to_copy[$key]);
                     }
-                }
+                
             }//for
 
             if($copy_uploaded_files){ //uploaded images in standard folder
@@ -556,14 +562,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
 
             if(@$_REQUEST['include_docs']=='1' || $copy_uploaded_files){
-               folderRecurseCopy( HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, $copy_files_in_root);
+                folderRecurseCopy( HEURIST_FILESTORE_DIR, FOLDER_BACKUP, $folders_to_copy, $copy_files_in_root);
             }
 
             if(@$_REQUEST['include_docs']=='1'){// 2016-10-25
                 echo_flush2('Copy context_help folder<br>');
                 folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/');
             }
-
 
            //remove dbdef_cache.json (database definitions cache) from entity folder
            fileDelete(FOLDER_BACKUP.'/entity/db.json');//old name
