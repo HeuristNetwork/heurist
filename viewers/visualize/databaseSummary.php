@@ -71,7 +71,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 border-top: 3px solid black;
             }
 
-            .row:hover {
+            .t-row:hover {
                 background-color: #CCCCCC;
             }
 
@@ -206,7 +206,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                     if($grp_name!=null) {$first_grp = '';}
                                     $grp_name = $row['grp'];
                                     ?>
-                            <tr class="row">
+                            <tr class="t-row">
                                 <td colspan="5" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
                                 <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"];?>"></td>
                             </tr>
@@ -214,7 +214,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                 }
 
                                 // ID
-                                echo "<tr class='row'>";
+                                echo "<tr class='t-row'>";
                                 echo "<td align='center'>$rt_ID</td>";
 
                                 //HAPI4.iconBaseURL
