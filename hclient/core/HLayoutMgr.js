@@ -81,6 +81,12 @@ class HLayoutMgr {
                this.#layoutInitWidget(widget_cfg, ele);
           }
       });
+      
+      //find all elements with data-heurist-app-id
+      if (container.find('[data-heurist-app-id]').length>0) {
+            //old format v1: html with some widgets
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
+      }
 
   }
   
