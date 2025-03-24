@@ -221,12 +221,12 @@ if($isWebPage){ //set in websiteRecord.php
                 </div>
                 <div class="footer-content">
                     <div class="container">
-                        <div class="row">
+                        <div class="t-row">
                             <div class="col-md-2"><img class="logo"
                                     src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=791d3bd1e6a1bce0dd6292610c1c1bde4882d637"
                                     alt="Manuscripta Bibliae Hebraicae"></div>
                             <div class="col-md-6">
-                                <div class="row">
+                                <div class="t-row">
                                     <div class="col-md-6 address">
                                         <address>Maison Méditerranéenne des Sciences de l'Homme<br>
                                             5 rue du château de l'horloge, BP 647<br>

@@ -83,7 +83,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
     <div style="padding: 0.5em; height: 100%;"> <!-- margin:0px auto; overflow: auto; -->
         <div class="container-fluid">
             <!-- Page container -->
-            <div class="row">
+            <div class="t-row">
                 <div class="col-12 col-mb-2 d-none output-content" id="errorContainerFilter"></div>
                 <div class="col-12 col-mb-2 d-none" id="errorContainerRecChange"></div>
                 <div class="col-12 col-mb-2 d-none" id="errorContainer"></div>

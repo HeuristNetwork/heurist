@@ -2701,7 +2701,7 @@ li.edit-form-tab > a{
     display: table;
     width: 100%;
 }
-.row {
+.t-row {
     display: table-row;
 }
 .cell {
