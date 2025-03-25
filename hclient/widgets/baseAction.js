@@ -21,13 +21,14 @@ $.widget( "heurist.baseAction", {
 
     // default options
     options: {
+
         actionName: '',
 
         path: '',  // non default path to html content 
         htmlContent: '', //general layout
         helpContent: null, //if false help button is hidden, if null it sets name of help file to widgetName,
                            // help file must be in context_help folder
-    
+
         default_palette_class: 'ui-heurist-admin', 
 
         //DIALOG section       
@@ -40,17 +41,22 @@ $.widget( "heurist.baseAction", {
         modal:  true,
         title:  '',
         innerTitle: false, //show title as top panel 
-        
-        
+
         //listeners
         onInitFinished:null,  // event listener when dialog is fully inited
         beforeClose:null,     // to show warning before close
         onClose:null,
-        
-        keep_instance: false
+
+        keep_instance: false,
+
+        hapi: null
     },
 
-    _$: $, //shorthand for this.element.find
+    _$: $, // shorthand for this.element.find
+    $H: window.hWin.HEURIST4.util, // HUEIRST4.utils
+    $Hmsg: window.hWin.HEURIST4.msg, // HUEIRST4.msg
+    $Hui: window.hWin.HEURIST4.ui, // HUEIRST4.ui
+    HAPI: null,
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
@@ -64,8 +70,10 @@ $.widget( "heurist.baseAction", {
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
-       
+
         this._$ = selector => this.element.find(selector);
+
+        this.HAPI = this.options.hapi ?? window.hWin.HAPI4;
     }, //end _create
     
     //

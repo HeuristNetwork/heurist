@@ -686,6 +686,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }});                
 
                     let selval = imp_session['primary_rectype'];
+                    selval = !window.hWin.HEURIST4.util.isempty(selval) && $("select[id^='id_rectype']").length > 0
+                                ? $("select[id^='id_rectype']").first().val()
+                                : selval;
                     select_rectype.val( selval );
                     select_rectype.hSelect('refresh');
                     

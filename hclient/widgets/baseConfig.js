@@ -40,10 +40,18 @@ $.widget("heurist.baseConfig", {
         beforeClose:null, //to show warning before close
         onClose:null,
 
-        type: ''
+        type: '',
+
+        hapi: null
     },
 
-    _$: $, // alias for this.element.find
+    // Shorthand variables
+    _$: $, // this.element.find
+    $H: window.hWin.HEURIST4.util, // HUEIRST4.utils
+    $Hmsg: window.hWin.HEURIST4.msg, // HUEIRST4.msg
+    $Hui: window.hWin.HEURIST4.ui, // HUEIRST4.ui
+    HAPI: null,
+
     _as_dialog: null, //reference to itself as dialog (see options.isdialog)
 
     _need_load_content:true,
@@ -71,6 +79,7 @@ $.widget("heurist.baseConfig", {
 
         this._$ = selector => this.element.find(selector);
 
+        this.HAPI = this.options.hapi ?? window.hWin.HAPI4;
     }, //end _create
 
     _init: function(){

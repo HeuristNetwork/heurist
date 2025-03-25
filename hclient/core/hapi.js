@@ -951,7 +951,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 let s_time = new Date().getTime() / 1000;
                 if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
                 _msgOnRefreshEntityData = setTimeout(function(){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false, { position: {my: 'left+100 top+100', at: 'left top', of: $(document)} });
+                    window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false, null, { position: {my: 'left+100 top+100', at: 'left top', of: $(document)} });
                 }, 1000);
 
                  

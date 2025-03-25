@@ -160,7 +160,7 @@ $.widget( "heurist.search", {
         .css({
             'max-width':'99%',
             'resize':'none', 
-            'padding':'2px 50px 2px 17.5px',
+            'padding':'2px 50px 2px 1.5em',
             'line-height': '14px', 
             'min-width':'80px', 'width':'100%' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -168,8 +168,13 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_input );
 
         // Icon to bring up the query as plain text
-        let $query_icon = $('<span>', {class: 'icon_view_query ui-icon ui-icon-circle-b-help', style: 'font-size: 12px; position: absolute; cursor: pointer;'}).appendTo(this.div_search_input);
-        setTimeout(() => $query_icon.position({ my: 'left+2 top+2', at: 'left top', of: this.input_search }), 1000);
+        let $query_icon = $('<span>', {
+            class: 'icon_view_query ui-icon ui-icon-circle-b-info',
+            style: 'font-size: 1.2em; position: absolute; cursor: pointer; color: rgb(61, 153, 70);'
+        }).appendTo(this.div_search_input);
+
+        setTimeout(() => $query_icon.position({ my: 'left+2 top+5', at: 'left top', of: this.input_search }), 1000);
+
         this._on($query_icon, {
             click: () => {
                 if(!window.hWin.HEURIST4.util.isempty(this._query_as_plain)){

@@ -188,6 +188,10 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     _setupProgramArea: function(){
 
         let ele = this._editing.getFieldByName('bug_Location');
+        if(!ele || ele.length == 0){
+            return;
+        }
+
         let $input = ele.find('input');
 
         if(this._program_area === null){
