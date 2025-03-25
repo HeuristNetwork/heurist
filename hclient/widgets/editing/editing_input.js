@@ -992,18 +992,20 @@ $.widget( "heurist.editing_input", {
 
             //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
             function __adjustTextareaHeight(){
+
                 $input.attr('rows', 2);
-                let dheight = that.f('rst_DisplayHeight');  //max height 
-                let lht = parseInt($input.css('lineHeight'),10); 
-                if(!(lht>0)) lht = parseInt($input.css('font-size')); //*1.3
-                
+
+                let dheight = parseInt(that.f('rst_DisplayHeight'), 10); // max height
+
+                let lht = parseInt($input.css('lineHeight'), 10);
+                if(!Number.isInteger(lht) || lht <= 0) lht = parseInt($input.css('font-size')); //*1.3
+
                 let cnt = ($input.prop('scrollHeight') / lht).toFixed(); //visible number of lines
-                if(cnt>0){
-                    if(cnt>dheight && dheight>2){
-                        $input.attr('rows', dheight);    
-                    }else{
-                        $input.attr('rows', cnt);        
-                    }
+
+                cnt = parseInt(cnt);
+
+                if(Number.isInteger(cnt) && cnt > 0){
+                    $input.attr('rows', cnt > dheight && dheight > 2 ? dheight : cnt);
                 }
             }
             
@@ -1188,6 +1190,7 @@ $.widget( "heurist.editing_input", {
                     }
                     
                     let custom_webfonts = `${webfonts} body { font-size: 8pt; font-family: ${font_family}; ${is_grayed} }`;
+                    let editor_height = $input.height() + 125;
 
                     tinyMCE.init({
                         //target: $editor, 
@@ -1213,9 +1216,9 @@ $.widget( "heurist.editing_input", {
                         inline_styles: true,    
                         content_style: `${custom_webfonts} ${custom_formatting.content_style}`,
                         
-                        min_height: ($input.height()+110),
-                        max_height: ($input.height()+110),
-                        autoresize_bottom_margin: 10,
+                        min_height: editor_height,
+                        max_height: editor_height,
+                        autoresize_bottom_margin: 15,
                         autoresize_on_init: false,
                         image_caption: true,
 
@@ -1374,7 +1377,6 @@ $.widget( "heurist.editing_input", {
                                     tinyMCE.activeEditor.execCommand('mceAutoResize');
                                 }
 
-                               
                                 that.onChange();
                             });
 
@@ -1590,7 +1592,7 @@ $.widget( "heurist.editing_input", {
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     let nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html - show editor at once
-                        setTimeout(__showEditor, 1200); 
+                        setTimeout(__showEditor, 1200);
                     }
                 }
                 
