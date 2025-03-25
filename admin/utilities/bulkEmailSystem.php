@@ -105,8 +105,6 @@ class BulkEmailSystem {
     public function __construct($system){
 
         $this->system = $system;
-
-        set_time_limit(900); // 15 minutes
     }
 
     /**
@@ -456,6 +454,8 @@ class BulkEmailSystem {
         }
 
         ksort($this->user_details, SORT_FLAG_CASE);
+
+        count($this->user_details) > 1000 ? set_time_limit(1800) : set_time_limit(900); // temporary, to implement staggering/staged system
 
         $this->printMessage('Done<br>');
 
@@ -1112,6 +1112,8 @@ class BulkEmailSystem {
             return 0;
         }
 
+        $this->checkMysqli();
+
         // Save receipt to note record
         $data = recordAdd($this->system, ["RecTypeID"=>$note_rectype_id], true);
         if (!empty($data["data"]) && is_numeric($data["data"])) {
@@ -1139,6 +1141,8 @@ class BulkEmailSystem {
             if(!empty($count_detailtype_id)){
                 $details[$count_detailtype_id] = $this->emails_sent_count;
             }
+
+            $this->checkMysqli();
 
             // Proceed with saving
             $rtn = recordSave($this->system, ["ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details]);
@@ -1172,6 +1176,27 @@ class BulkEmailSystem {
         $this->progress .= $msg;
 
         mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, $this->progress);
+    }
+
+    private function checkMysqli(){
+
+        $mysqli = $this->system->getMysqli();
+
+        if(!$mysqli){
+            $this->system->init(HEURIST_DBNAME, true, false);
+            return;
+        }
+        
+        $res = true;
+        try{
+            $res = $mysqli->query('SELECT NULL'); // ->ping
+        }catch(\Exception $exception){
+            $res = false;
+        }
+
+        if(!$res){
+            $this->system->init(HEURIST_DBNAME, true, false);
+        }
     }
 }
 
