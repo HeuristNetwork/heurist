@@ -1141,96 +1141,114 @@ class HPredicate {
             }
         }
 
-        if( in_array($this->pred_type, $this->allowed) ){
-            $this->value = $value;
-
-            if(!isEmptyArray($value) &&
-                !(is_numeric(@$value[0]) || is_string(@$value[0])) )
-            { //subqueries
-                //special behavior for relation - extract reltypes and record ids
-                $p_type = strtolower($this->pred_type);
-                if($p_type=='related' ||
-                   $p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
-                   $p_type=='related_from' || $p_type=='relatedfrom' || $p_type=='rf')
-                {
-
-                    $this->relation_fields = array();
-                    $this->value = array();
-
-                    $REL_FLD = 'relf:'; //old predicate for relationship record field
-
-                    // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
-                    // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
-
-                    $value = $this->handleRelExistsPred($value);
-
-                    foreach($value as $idx=>$val){
-
-                        $rel_type = $idx==='r' || (is_array($val) && array_key_exists('r',$val));
-                        $rec_type = $idx==='t' || (is_array($val) && array_key_exists('t',$val));
-                        $exists = $idx==='exists' || (is_array($val) && array_key_exists('exists',$val));
-                        if($rel_type || $rec_type || $exists){ // relation type and record type already handled
-                            continue;
-                        }elseif(strpos($idx,'r:')===0 || strpos($idx,$REL_FLD)===0){  //that's for {"r:10":10,,}
-                               //fields in relationship record
-                               //{"r:10":">2010"}
-                               $rel_field = $idx;
-                               $rel_field = strpos($rel_field,'r:')===0
-                                                    ?str_replace('r:','f:',$rel_field)
-                                                    :str_replace($REL_FLD,'f:',$rel_field);
-                               $this->relation_fields[$rel_field] = $val;
-
-                        }elseif(is_array($val) &&
-                                    (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],$REL_FLD)===0)){  //that's for [{"r:10":10},{}]
-                            //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
-                            $rel_field = array_keys($val)[0];
-                            if($rel_field == "r:{$dty_id_relation_type}"){ // rel type already handled
-                                continue;
-                            }else{
-                                $rel_field2 = strpos($rel_field,'r:')===0
-                                                    ?str_replace('r:','f:',$rel_field)
-                                                    :str_replace($REL_FLD,'f:',$rel_field);
-
-                                $this->relation_fields[$rel_field2] = $val[$rel_field];
-                            }
-                        }
-
-                        $this->value[$idx] = $val;
-                    }
-                    $value = $this->value;
-
-                    if(!isEmptyArray($this->relation_fields)){
-                        $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);
-                    }else{
-                        $this->relation_fields = null;
-                    }
-
-                    // related to particular records
-                    foreach($value as $idx=>$val){
-                        if($idx==='ids' || (is_array($val) && @$val['ids']) ){
-                            if(is_array($val) && @$val['ids']) {$val = $val['ids'];}
-                            $this->value = $val;
-                            $value = array();//reset
-                            break;
-                        }
-                    }
-                }elseif($p_type == 'lt' || $p_type == 'linked_to' || $p_type == 'linkedto'
-                     || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom'
-                     || $p_type == 'links'){
-
-                    $this->handleResourceExistsPred($value);
-                }
-                if(!isEmptyArray($value)){
-
-                    $level = $this->parent->level."_".$this->parent->cnt_child_query;
-                    $this->parent->cnt_child_query++;
-
-                    $this->query = new HQuery( $level, $value );
-                }
-            }
-            $this->valid = true; //@todo
+        if( !in_array($this->pred_type, $this->allowed) ){
+            return;
         }
 
+        $this->value = $value;
+        $p_type = strtolower($this->pred_type);
+
+        if(!isEmptyArray($value) &&
+            !(is_numeric(@$value[0]) || is_string(@$value[0])) )
+        { //subqueries
+            //special behavior for relation - extract reltypes and record ids
+
+            if($p_type=='related' ||
+               $p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
+               $p_type=='related_from' || $p_type=='relatedfrom' || $p_type=='rf')
+            {
+
+                $this->relation_fields = array();
+                $this->value = array();
+
+                $REL_FLD = 'relf:'; //old predicate for relationship record field
+
+                // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
+                // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
+
+                $value = $this->handleRelExistsPred($value);
+
+                foreach($value as $idx=>$val){
+
+                    $rel_type = $idx==='r' || (is_array($val) && array_key_exists('r',$val));
+                    $rec_type = $idx==='t' || (is_array($val) && array_key_exists('t',$val));
+                    $exists = $idx==='exists' || (is_array($val) && array_key_exists('exists',$val));
+                    if($rel_type || $rec_type || $exists){ // relation type and record type already handled
+                        continue;
+                    }elseif(strpos($idx,'r:')===0 || strpos($idx,$REL_FLD)===0){  //that's for {"r:10":10,,}
+                           //fields in relationship record
+                           //{"r:10":">2010"}
+                           $rel_field = $idx;
+                           $rel_field = strpos($rel_field,'r:')===0
+                                                ?str_replace('r:','f:',$rel_field)
+                                                :str_replace($REL_FLD,'f:',$rel_field);
+                           $this->relation_fields[$rel_field] = $val;
+
+                    }elseif(is_array($val) &&
+                                (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],$REL_FLD)===0)){  //that's for [{"r:10":10},{}]
+                        //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
+                        $rel_field = array_keys($val)[0];
+                        if($rel_field == "r:{$dty_id_relation_type}"){ // rel type already handled
+                            continue;
+                        }else{
+                            $rel_field2 = strpos($rel_field,'r:')===0
+                                                ?str_replace('r:','f:',$rel_field)
+                                                :str_replace($REL_FLD,'f:',$rel_field);
+
+                            $this->relation_fields[$rel_field2] = $val[$rel_field];
+                        }
+                    }
+
+                    $this->value[$idx] = $val;
+                }
+                $value = $this->value;
+
+                if(!isEmptyArray($this->relation_fields)){
+                    $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);
+                }else{
+                    $this->relation_fields = null;
+                }
+
+                // related to particular records
+                foreach($value as $idx=>$val){
+                    if($idx==='ids' || (is_array($val) && @$val['ids']) ){
+                        if(is_array($val) && @$val['ids']) {$val = $val['ids'];}
+                        $this->value = $val;
+                        $value = array();//reset
+                        break;
+                    }
+                }
+            }elseif($p_type == 'lt' || $p_type == 'linked_to' || $p_type == 'linkedto'
+                 || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom'
+                 || $p_type == 'links'){
+
+                $this->handleResourceExistsPred($value);
+            }
+            if(!isEmptyArray($value)){
+
+                $level = $this->parent->level."_".$this->parent->cnt_child_query;
+                $this->parent->cnt_child_query++;
+
+                $this->query = new HQuery( $level, $value );
+            }
+        }elseif($p_type == 'id' || $p_type == 'ids'){
+
+            global $mysqli;
+
+            $final_ids = [];
+            $negate = strpos($value, '-') === 0;
+            $value = $negate ? ltrim($value, '-') : $value;
+            $ids = prepareIds($value);
+
+            foreach ($ids as $rec_ID) {
+                $final_ids[] = $rec_ID;
+                $final_ids[] = recordSearchReplacement($mysqli, $rec_ID);
+            }
+
+            $this->value = ($negate ? '-' : '') . implode(',', array_unique($final_ids));
+        }
+
+        $this->valid = true; //@todo
     }
 
     //
