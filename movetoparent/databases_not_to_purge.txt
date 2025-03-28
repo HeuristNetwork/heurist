@@ -4,4 +4,9 @@
 # regarded as abandoned even though they receive no updates
 # Add comments after name preceded by #
 
+# Any database restored from backups is automatically added to this file,
+# to avoid it being purged again (if it was restored because it was purged)
+# You may wish to delete databases which have over 200 records and will not
+# therefore be purged and/or are temporary eg. backups to recover some data.
+
 # List one database name to a line, excluding the hdb_ prefix

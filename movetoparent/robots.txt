@@ -1,6 +1,9 @@
 User-agent: *
 Disallow: /HEURIST_FILESTORE/
 Disallow: /h6-alpha/
+Disallow: /h6-beta/
+Disallow: /h7-alpha/
+Disallow: /h7-beta/
 Disallow: /heurist/admin/
 Disallow: /heurist/export/
 Disallow: /heurist/hclient/
@@ -10,4 +13,4 @@ Disallow: /heurist/movetoparent/
 Disallow: /heurist/redirects/
 Disallow: /heurist/server_scripts/
 Disallow: /heurist/viewers/
-Sitemap: [your domain]/sitemap.xml
+Sitemap: [enter your domain here]/sitemap.xml
