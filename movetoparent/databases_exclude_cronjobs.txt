@@ -1,0 +1,11 @@
+# Heurist (HeuristNetwork.org)
+
+# Databases to be excluded from the action of the dailyCronJobs.php script
+# The script is triggered by a Unix cron job
+
+# The script carried out the following actions (March 2023)
+#     1. reminder   Send record remainders sepcified in usrReminders
+#     2 report      Updates reports by schedule specified in usrReportSchedule
+#     3. url        Checks that rec_URL and URL like values are valid, database is skipped if sys_URLCheckFlag is set to false 
+
+# List one database name to a line, excluding the hdb_ prefix

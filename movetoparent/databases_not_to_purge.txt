@@ -1,0 +1,7 @@
+# Heurist (HeuristNetwork.org)
+
+# These databases are finished or reference databases which should not be
+# regarded as abandoned even though they receive no updates
+# Add comments after name preceded by #
+
+# List one database name to a line, excluding the hdb_ prefix

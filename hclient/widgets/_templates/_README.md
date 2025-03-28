@@ -1,5 +1,5 @@
 
-Directory:    /hclient/widgets/cms
+Directory:    /hclient/widgets/_templates
 
 Overview:   Example templates for the creation of new widgets
 
