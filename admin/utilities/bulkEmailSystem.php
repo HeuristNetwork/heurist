@@ -296,16 +296,7 @@ class BulkEmailSystem {
             return;
         }
 
-        // Define the primary and fallback file paths for the GDPR disclaimer.
-        $primaryGDPRFile = __DIR__ . '/../../../GDPR.html';
-        $fallbackGDPRFile = __DIR__ . '/../../movetoparent/GDPR.html';
-
-        // Determine the appropriate GDPR file to use.
-        $GDPRFile = file_exists($primaryGDPRFile) && is_readable($primaryGDPRFile) && filesize($primaryGDPRFile) > 0
-            ? $primaryGDPRFile
-            : (file_exists($fallbackGDPRFile) && is_readable($fallbackGDPRFile) && filesize($fallbackGDPRFile) > 0
-                ? $fallbackGDPRFile
-                : null);
+        $GDPRFile = $this->getGDPRFile();
 
         // Exit if no valid GDPR file is found.
         if (!$GDPRFile) {
@@ -338,6 +329,29 @@ class BulkEmailSystem {
         if (!empty($GDPRContent)) {
             $this->email_body .= "<br><br>{$GDPRContent}";
         }
+    }
+
+    /**
+     * Retrieve the file location for the server's GDPR statement
+     *
+     * @return string|null Returns the file path on success, otherwise null
+     */
+    private function getGDPRFile(){
+
+        // Define the primary and fallback file paths for the GDPR disclaimer.
+        $primaryGDPRFile = __DIR__ . '/../../../GDPR.html';
+        $fallbackGDPRFile = __DIR__ . '/../../movetoparent/GDPR.html';
+
+        // Determine the appropriate GDPR file to use.
+        $GDPRFile = file_exists($primaryGDPRFile) && is_readable($primaryGDPRFile) && filesize($primaryGDPRFile) > 0
+            ? $primaryGDPRFile
+            : null;
+
+        $GDPRFile = !$GDPRFile && file_exists($fallbackGDPRFile) && is_readable($fallbackGDPRFile) && filesize($fallbackGDPRFile) > 0
+            ? $fallbackGDPRFile
+            : $GDPRFile;
+
+        return $GDPRFile;
     }
 
     /**
@@ -1084,6 +1098,7 @@ class BulkEmailSystem {
     /**
      * Finish up receipt and save to database as a note record
      *
+     * @param bool $pre_emails whether this is before or after the emails have been sent
      * @return array|int Returns the results from recordSave, or an error code
      */
     public function exportReceipt($pre_emails = false) {
@@ -1096,7 +1111,6 @@ class BulkEmailSystem {
         $title_detailtype_id = ConceptCode::getDetailTypeLocalID("2-1");
         $summary_detailtype_id = ConceptCode::getDetailTypeLocalID("2-3");
         $date_detailtype_id = ConceptCode::getDetailTypeLocalID("2-9");
-        $count_detailtype_id = ConceptCode::getDetailTypeLocalID("1609-3322");
 
         if (empty($note_rectype_id) || empty($title_detailtype_id) || empty($summary_detailtype_id) || empty($date_detailtype_id)) { // ensure all are valid
 
@@ -1120,27 +1134,7 @@ class BulkEmailSystem {
 
             $rec_id = $data["data"];
 
-            $title = $this->email_subject ?? 'Heurist System Email';
-            if($pre_emails){
-                $title .= "  Docket";
-            }else{
-                $title .= "  Receipt  [{$this->emails_sent_count}]";
-            }
-
-            if(!isEmptyStr($this->error_msg)){
-                $title = "Error: {$title}";
-            }
-
-            $details = [
-                $title_detailtype_id=>$title,
-                $date_detailtype_id=>"now",
-                $summary_detailtype_id=>$this->getReceipt(), //content
-                "rec_ID"=>$rec_id
-            ];
-
-            if(!empty($count_detailtype_id)){
-                $details[$count_detailtype_id] = $this->emails_sent_count;
-            }
+            $details = $this->prepareReceiptDetails($rec_id, $pre_emails);
 
             $this->checkMysqli();
 
@@ -1156,17 +1150,63 @@ class BulkEmailSystem {
             $this->setError("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($this->system->getError(), true));
             return -1;
 
-        } else {
-
-            $this->printMessage('<span style="color: red; font-weight: bold;">Failed</span><br>');
-
-            $this->setError("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
-            $this->system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => {$data["message"]}");
-            return -1;
         }
+
+        $this->printMessage('<span style="color: red; font-weight: bold;">Failed</span><br>');
+
+        $this->setError("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
+        $this->system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => {$data["message"]}");
+        return -1;
 
     }//exportReceipt
 
+    /**
+     * Prepare records details for saving the receipt
+     *
+     * @param int $recID receipt's record ID
+     * @param mixed $preEmails whether this is before or after the emails have been sent
+     * @return array record details
+     */
+    private function prepareReceiptDetails($recID, $preEmails){
+
+        $details = [];
+
+        $title_detailtype_id = ConceptCode::getDetailTypeLocalID("2-1");
+        $summary_detailtype_id = ConceptCode::getDetailTypeLocalID("2-3");
+        $date_detailtype_id = ConceptCode::getDetailTypeLocalID("2-9");
+        $count_detailtype_id = ConceptCode::getDetailTypeLocalID("1609-3322");
+
+        $title = $this->email_subject ?? 'Heurist System Email';
+        if($preEmails){
+            $title .= "  Docket";
+        }else{
+            $title .= "  Receipt  [{$this->emails_sent_count}]";
+        }
+
+        if(!isEmptyStr($this->error_msg)){
+            $title = "Error: {$title}";
+        }
+
+        $details = [
+            $title_detailtype_id=> $title,
+            $date_detailtype_id=> "now",
+            $summary_detailtype_id=> $this->getReceipt(), //content
+            "rec_ID"=> $recID
+        ];
+
+        if(!empty($count_detailtype_id)){
+            $details[$count_detailtype_id] = $this->emails_sent_count;
+        }
+
+        return $details;
+    }
+
+    /**
+     * Update the progress report
+     *
+     * @param string $msg new progress line
+     * @return void
+     */
     private function printMessage($msg){
 
         if(!$this->sessionID){
@@ -1178,6 +1218,11 @@ class BulkEmailSystem {
         mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, $this->progress);
     }
 
+    /**
+     * Determine whether the MySQL connection is still active, mainly an issue on Huma-num's server where MySQL is restarted at midnight
+     *
+     * @return void
+     */
     private function checkMysqli(){
 
         $mysqli = $this->system->getMysqli();
