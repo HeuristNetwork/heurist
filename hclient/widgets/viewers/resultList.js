@@ -4528,11 +4528,13 @@ $.widget( "heurist.resultList", {
 
             this._isCollectionUsed = true;
 
-            this._fullRecordset = this._currentRecordset;
+            this._fullRecordset = this._fullRecordset ?? this._currentRecordset;
 
             let cnt = this._collection.length;
             let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
             this._currentRecordset = new HRecordSet(rs);
+
+            this._currentSubset = null; // remove subset
 
         }else{
             this._isCollectionUsed = false;
@@ -4540,7 +4542,7 @@ $.widget( "heurist.resultList", {
         }
 
         const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';
-        
+
         window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {
