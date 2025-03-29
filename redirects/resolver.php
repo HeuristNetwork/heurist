@@ -76,7 +76,7 @@ if($is_own_domain){
 }
 
 // --------------- INDEX or STARTUP
-if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
+if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha' || $requestUri[0]=='h7-alpha')){
 
     //redirectURL2('/'.rawurlencode($requestUri[0]).'/index.php');
     include_once '../index.php';  //root index that goes to startup
@@ -219,7 +219,7 @@ $requestUri:
 
         if($database=='MBH'){ //special case
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
-        }elseif($database=='heurist' || $database=='h6-alpha'){
+        }elseif($database=='heurist' || $database=='h6-alpha' || $database=='h7-alpha'){
             redirectURL2('/'.rawurlencode($database).'/index.php');
             exit;
         }
@@ -389,7 +389,9 @@ $requestUri:
     exit;
 
 }
-elseif(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha') && $requestUri[1]=='viewers'){
+elseif(count($requestUri)>2
+      && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha' || $requestUri[0]=='h7-alpha') 
+      && $requestUri[1]=='viewers'){
     //Redirects to index page for viewers plugins
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);

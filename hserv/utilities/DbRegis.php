@@ -94,7 +94,7 @@ class DbRegis {
 
         $reg_record = null;
 
-        $remote_url = HEURIST_MAIN_SERVER.'/h6-alpha/'  //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+        $remote_url = HEURIST_MAIN_SERVER.'/heurist/'  //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
                 .'hserv/controller/indexController.php?'
                 .http_build_query($params);
 

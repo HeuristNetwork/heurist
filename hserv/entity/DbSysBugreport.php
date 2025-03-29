@@ -245,7 +245,7 @@ class DbSysBugreport extends DbEntityBase
                 'new_record' => $new_record,
                 'fields' => ['is_bug_report' => 1]
             ];
-            $url = HEURIST_MAIN_SERVER . '/h6-alpha/hserv/controller/entityScrud.php?' . http_build_query($params);
+            $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
 
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
 

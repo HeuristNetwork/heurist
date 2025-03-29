@@ -390,7 +390,7 @@ class DbAnnotations extends DbEntityBase
             Sample:
 
             sourceRecordId:15
-            manifestUrl: http://127.0.0.1//h6-alpha/?db=iiif_import&file=3c6a9074ce8037cb5ec4da4cc1a2d0a63deacb65
+            manifestUrl: http://127.0.0.1//heurist/?db=iiif_import&file=3c6a9074ce8037cb5ec4da4cc1a2d0a63deacb65
             canvas: http://8f74dd58-ab81-4d0c-8003-28d1d008f3db
             data:{
                 body:{type:"TextualBody",

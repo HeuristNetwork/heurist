@@ -49,7 +49,7 @@ if (@$argv) {
 
 // example:
 //  sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- reminder report
-// sudo php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php -- url
+// sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- url
 
     $ARGV = array();
     $i=0;
@@ -65,7 +65,7 @@ if (@$argv) {
         ++$i;
     }
 
-//sudo php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php -- -database camil_inthemarginofstone
+//sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- -database camil_inthemarginofstone
 //camillaC_Pakistan_Villages
     $arg_database = null;
     if(@$ARGV['database']){ //limit scrit to the only database

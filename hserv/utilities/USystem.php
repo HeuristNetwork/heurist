@@ -39,7 +39,7 @@ class USystem {
     *   server_url  - full server url                                     (https://heuristref.net:80)
     *   heurist_dir - code folder, for cli from getcwd or $_SERVER["DOCUMENT_ROOT"]    (/var/www/html/HEURIST)
     *
-    *   baseURL     - base url ( ie server url+optional folder (https://heuristref.net/h6-alpha/)
+    *   baseURL     - base url ( ie server url+optional folder (https://heuristref.net/h7-alpha/)
     *   baseURL_pro - url for production version  ( https://heuristref.net/heurist/ )
     */
     public static function getHostParams( $argv=null )
@@ -52,7 +52,7 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h6-ao','h6-ij');//need to cli and short url
+        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h6-ij');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -222,7 +222,7 @@ class USystem {
 
         //validate
         if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h6-ao');//need to cli and short url
+            $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao');//need to cli and short url
 
             $i = 0;
             while ($i<=count($codeFolders)) {

@@ -143,7 +143,7 @@ function replaceAbsPathinCMS($recID, $val){
 
 
     $paths0 = array('\/HEURIST', '\/html', '');
-    $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
+    $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta', 'h7-alpha');
 
     $cnt = 0;
 

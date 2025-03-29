@@ -66,7 +66,7 @@ define('HEURIST_SERVER_NAME', @$host_params['server_name']);// server host name 
 
 if(!defined('HEURIST_DIR'))  { define('HEURIST_DIR', $host_params['heurist_dir']); }
 
-define('HEURIST_BASE_URL', $host_params['baseURL'] );// eg. https://myheurist.net/h6-alpha/
+define('HEURIST_BASE_URL', $host_params['baseURL'] );// eg. https://myheurist.net/h7-alpha/
 define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );// production url eg. https://myheurist.net/heurist/
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
@@ -554,15 +554,15 @@ function dataOutput($data, $filename=null, $mimeType=null)
     echo $data;
 }
 
-function includeJQuery($useVersion3=false){
-
-   //$useVersion3 =  false;
+function includeJQuery($useVersion3=true){
 
    if ($useVersion3) {
            // integrity has been got with https://www.srihash.org/
 ?>
         <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
+<!--        
         <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha384-v0gmY8lRWAAaI20hT2ehyGAhsZiQpB+ZMpRHg/ipfVinhY4zxJXPjV8zaVW3kq4W" crossorigin="anonymous"></script>
+-->        
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
 
@@ -590,17 +590,20 @@ function includeJQuery($useVersion3=false){
 <?php
         if(isLocalHost()){
 ?>            
+<!--
     <script src="<?php echo PDIR;?>external/bootstrap/bootstrap.bundle.min.js"></script>
     <link href="<?php echo PDIR;?>external/bootstrap/bootstrap.min.css" rel="stylesheet">
-        
+        -->
 <?php
         }else{
 ?>            
+<!--
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+-->
 <?php
         }
    }else{

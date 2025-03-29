@@ -109,6 +109,7 @@ $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
 cd "${base_dir}/HEURIST/$1"
+#ln -s ../HEURIST_SUPPORT/external external
 $2 ln -s ../HEURIST_SUPPORT/external_h5 external
 $2 ln -s ../HEURIST_SUPPORT/help help
 $2 ln -s ../HEURIST_SUPPORT/vendor vendor
