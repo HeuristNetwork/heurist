@@ -822,7 +822,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                          'Cancel':function(){ 
                                 $__dlg.dialog( "close" );
                             }},  
-                            {title:'Confirm'});
+                            {title:'Confirm'}, {dialogId: 'warn-navigate', height: 154});
                            
                          let dlged = that._as_dialog.parent('.ui-dialog');   
                          $__dlg.parent('.ui-dialog').css({
