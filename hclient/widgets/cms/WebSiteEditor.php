@@ -2,36 +2,28 @@
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 
-    /**
-    *  Website generator based on CMS records 99-51,52,53
-    *
-    *  It is either generate home page from cmsTemplate file (inits main menu, header, footer)
-    *  or returns content for particular page
-    *
-    *  Parameters
-    *  recID - home page record (99-51) or web page (99-53)
-    *          if is is not defined it takes first record of type 'Home page'
-    *
-    * if home page has defined as template file it is loaded as body, otherwise default template
-    * that includes header with main-logo, main-title, main-menu and
-    * main-content where content of particular page will be loaded
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/**
+*  Website generator based on CMS records 99-51,52,53
+*
+*  It is either generate home page from cmsTemplate file (inits main menu, header, footer)
+*  or returns content for particular page
+*
+*  Parameters
+*  recID - home page record (99-51) or web page (99-53)
+*          if is is not defined it takes first record of type 'Home page'
+*
+* if home page has defined as template file it is loaded as body, otherwise default template
+* that includes header with main-logo, main-title, main-menu and
+* main-content where content of particular page will be loaded
+*
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2025 Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @version     7.0
+*/
 
 if(!defined('PDIR')) {
     define('PDIR','../../../');//need for proper path to js and css
@@ -70,7 +62,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorPage.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_ElementCfg.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>

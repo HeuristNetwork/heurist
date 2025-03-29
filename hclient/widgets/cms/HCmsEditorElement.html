@@ -1,0 +1,483 @@
+<!--
+/**
+* Define flexbox layout within group
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+        <div class="ent_header" style="text-align:right; padding: 5px 2px; font-size:0.9em">
+            <div class="btn-save-element ui-button-action" style="margin-right:10px">Save</div>
+            <div class="btn-save-page ui-button-action" style="margin-right:10px">Save and Close</div>
+            <div class="btn-cancel" style="margin-right:20px">Cancel</div>
+        </div>
+        
+        <div class="ent_content_full" style="top:30px; font-size: 11px;">
+
+            <fieldset style="font-size:1em;padding:0px 5px;"><legend style="display:none"></legend>
+                <div style="display:inline-block;" class="header_narrow">Widget label:</div>
+                <div style="display:inline-block;width:80%;max-width:200px"><input data-type="element-name" style="width:100%"/></div>
+                <div class="heurist-helper3">Please edit to clarify the tree</div>
+            </fieldset>
+            <br>
+            <div id="properties_form" style="font-size:1em;">
+                <h3 class="group-layout" style="padding: 0.1em 0.1em 0.1em 1.2em;">Layout</h3>
+                <div class="group-layout" style="background:none">
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+
+                            <div>
+                                <div class="header_narrow" style="font-weight:bold">Type:</div>
+                                <select name="groupType" id="groupType">
+                                    <option value="group" selected>simple</option>
+                                    <option value="tabs">page control</option>
+                                    <option value="accordion">accordion</option>
+                                    <option value="grid">grid</option>
+                                    <option value="flex">flex</option>
+                                    <!--
+                                    <option value="flexbox" disabled>flex (bootstrap)</option>
+                                    <option value="fixed" disabled>fixed</option>
+                                    -->
+                                </select>
+                            </div>
+
+                            <!-- PAGECONTROL/TABS -->
+                            <div class="props tabs">
+                                <div class="header_narrow">Appearance:</div>
+                                <select name="nav_type" class="tabs-select" id="nav_type">
+                                    <option value="nav-jquery">jQuery</option>
+                                    <option value="nav-tabs">tabs</option>
+                                    <option value="nav-pills">pills</option>
+                                    <option value="nav-links">links</option>
+                                </select>
+                            </div>
+                            <div class="props tabs">
+                                <div class="header_narrow">Direction:</div>
+                                <select name="nav_dir" class="tabs-select" id="nav_dir">
+                                    <option value="nav-row">horizontal</option>
+                                    <option value="nav-col">vertical</option>
+                                </select>
+                            </div>
+                            
+                            <!-- ACCORDION -->
+                            <div class="props accordion">
+                                <div class="header_narrow">Appearance:</div>
+                                <select name="acc_type" class="accordion-select" id="acc_type">
+                                    <option value="acc-jquery">jQuery</option>
+                                    <option value="acc-bs">Bootstrap</option>
+                                </select>
+                            </div>
+                            <div class="props accordion">
+                                <div class="header_narrow">Collapsible:</div>
+                                <input name="acc_collapse" type="checkbox" id="acc_collapse"/>
+                            </div>
+
+                            <!-- GRID -->
+                            <div class="props grid">
+                                <div class="header_narrow">Horizontal alignment:</div>
+                                <select name="justify-content" class="grid-select" id="grid-justify-content">
+                                    <option value="start">start</option> <!-- default -->
+                                    <option value="end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="between">between</option>
+                                    <option value="around">around</option>
+                                    <option value="evenly">evenly</option>
+                                </select>
+                            </div>
+                            <div class="props grid">
+                                <div class="header_narrow">Vertical alignment:</div>
+                                <select name="align-items" class="grid-select" id="grid-align-items">
+                                    <option value="start">start</option> <!-- default -->
+                                    <option value="end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="stretch">stretch</option>
+                                </select>
+                            </div>
+                            <div class="props grid">
+                                <div class="header_narrow">Gap:</div>
+                                <input name="g" class="grid-select" type="number" min="0" max="5" value="0" placeholder="0" style="width:30px" id="grid-gap"/>
+                            </div>
+                            <div class="props grid">
+                                <div class="header_narrow">Equal columns:</div>
+                                <input name="grid-equal" class="Xgrid-select" type="checkbox" id="grid-equal"/>
+                            </div>
+                            
+                            
+                            <!-- FLEX CSS -->
+                            <div class="props flex">
+                                <div class="header_narrow">Direction:</div>
+                                <select name="direction" class="flex-select" id="flex-direction">
+                                    <option value="">row</option> <!-- default -->
+                                    <option value="column">column</option>
+                                    <!-- <option value="row-reverse">row-reverse</option>-->
+                                    <!-- <option value="column-reverse">column-reverse</option>-->
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Wrap:</div>
+                                <select name="wrap" class="flex-select" id="flex-wrap">
+                                    <option value="">nowrap</option> <!-- default -->
+                                    <option value="wrap">wrap</option>
+                                    <!-- <option value="wrap-reverse">wrap-reverse</option> -->
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Main axis alignment:</div>
+                                <select name="justify-content" class="flex-select" id="justify-content">
+                                    <option value="">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="space-between">space-between</option>
+                                    <option value="space-around">space-around</option>
+                                    <option value="stretch">stretch</option>
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Cross axis alignment:</div>
+                                <select name="align-items" class="flex-select" id="align-items">
+                                    <option value="">stretch</option>
+                                    <option value="flex-start">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="baseline">baseline</option>
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow" title="Align lines within when there is extra space in the cross-axis">Align content:</div>
+                                <select name="align-content" class="flex-select" id="align-content">
+                                    <option value="">stretch</option>
+                                    <option value="flex-start">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="space-between">space-between</option>
+                                    <option value="space-around">space-around</option>
+                                </select>
+                            </div>
+                            
+                            <hr>
+                            <div data-flexitem="stub" style="display: none;">
+                                <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
+                                <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:40px"/>
+                                <label for="">&nbsp;Size:</label>
+                            </div>                    
+                            
+                            <div data-gridcol="stub" style="display: none;">
+                                <div class="header_narrow" title="Grid column proportion">Column width:</div>
+                                <select name="grid-col-width">
+                                    <option value="">expand</option>
+                                    <option value="auto">auto</option>
+                                    <option value="proportion">proportional (1 of 12)</option>
+                                </select>
+                                <input name="grid-col" type="number" min="1" max="12" value="3" placeholder="3" style="width:30px"/>
+                            </div>                    
+                            
+                    </fieldset>
+                </div>
+
+                <!-- Wdith / Height -->
+                <div>
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                        <div>
+                            <div class="header_narrow"><b>Dimensions</b></div>
+                            <label for="">&nbsp;Width:</label>
+                            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
+                            <label for="">&nbsp;Height:</label>
+                            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
+                        </div>
+                    </fieldset>
+                </div>
+                
+                <!-- Widget config -->
+                <div style="border: 1px solid lightgray;border-radius:4px;margin: 2px 0px;overflow-x: auto;">
+
+                    <div id="widget-config">
+                        <!-- Widget Config Content -->
+                    </div>
+
+                </div>
+
+                <!-- General stuff -->
+                <div style="background:none;margin:2px 15px;">
+                    <div style="margin:10px 0px;">
+                        <div style="display:inline-block"><b>HTML (DOM) ID</b></div>
+                        <input data-type="element-id" value=""/>
+                        <div class="heurist-helper3">For example to define target element for menu ("page-content")</div>
+                    </div>
+                    <div style="margin:10px 0px;">
+                        <div style="display:inline-block;vertical-align:top;"><b>CSS:</b></div>
+                        <textarea name="elementCss" rows="10" cols="40">
+                        </textarea>
+                    </div>
+                    <div style="text-align:center;display: block;">
+                        <div class="btn-html-edit">Edit HTML source</div>
+                    </div>
+                </div>
+                
+                <!-- Cardinal -->
+                <h3 class="props cardinal" style="padding: 0.1em 0.1em 0.1em 1.2em;">Cardinal properties</h3>
+                <div class="props cardinal" style="background:none">
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow"><b>North:</b></div>
+                                <select data-type="cardinal" data-pane="north" name="init">
+                                    <option value="">initally open</option>
+                                    <option value="closed">initally closed</option>
+                                    <option value="hidden">hidden</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size</div>
+                                <input data-type="cardinal" data-pane="north" name="size" type="number" min="10" value="" style="width:40px"/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="north" name="resizable" type="checkbox" checked="checked"/></label>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Min size:</div>
+                                <input data-type="cardinal" data-pane="north" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>                       
+                            </div>
+                    </fieldset>
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow"><b>South:</b></div>
+                                <select data-type="cardinal" data-pane="south" name="init">
+                                    <option value="">initally open</option>
+                                    <option value="closed">initally closed</option>
+                                    <option value="hidden">hidden</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size:</div>
+                                <input data-type="cardinal" data-pane="south" name="size" type="number" min="10" value="" style="width:40px"/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="south" name="resizable" type="checkbox" checked/></label>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Min size:</div>
+                                <input data-type="cardinal" data-pane="south" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                            </div>
+                    </fieldset>
+                    
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow"><b>West:</b></div>
+                                <select data-type="cardinal" data-pane="west" name="init">
+                                    <option vaue="">initally open</option>
+                                    <option value="closed">initally closed</option>
+                                    <option value="hidden">hidden</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size</div>
+                                <input data-type="cardinal" data-pane="west" name="size" type="number" min="10" value="" style="width:40px"/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="west" name="resizable" type="checkbox" checked/></label>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Min size:</div>
+                                <input data-type="cardinal" data-pane="west" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                            </div>
+                    </fieldset>
+
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow"><b>East:</b></div>
+                                <select data-type="cardinal" data-pane="east" name="init">
+                                    <option vaue="">initally open</option>
+                                    <option value="closed">initally closed</option>
+                                    <option value="hidden">hidden</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size</div>
+                                <input data-type="cardinal" data-pane="east" name="size" type="number" min="10" value="" style="width:40px"/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="east" name="resizable" type="checkbox" checked/></label>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Min size:</div>
+                                <input data-type="cardinal" data-pane="east" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                            </div>
+                    </fieldset>
+
+                </div>
+
+                <!-- Cosmetic CSS helpers -->
+                <div>
+                    <!-- Border -->
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="border">
+                        <legend style="display:none"></legend>
+                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                            Border:
+                            <select data-type="css" id="border-style" name="border-style">
+                                <option>none</option>
+                                <option>solid</option>
+                                <option>double</option>
+                                <option>dotted</option>
+                                <option>dashed</option>
+                                <option>inset</option>
+                                <option>outset</option>
+                                <option>groove</option>
+                                <option>ridge</option>
+                            </select>
+                        </h3>
+
+                        <div style="background:none">
+                            <div>
+                                <div class="header_narrow">Color:</div>
+                                <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size:</div>
+                                <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
+                                <label>&nbsp;Corner:
+                                <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/></label>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <!-- Background -->
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="background">
+                        <legend style="display:none"></legend>
+                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                            <label><b>Background:</b>
+                            <input data-type="css" name="background" type="checkbox" checked/></label>
+                        </h3>
+
+                        <div style="background:none">
+                            <div>
+                                <div class="header_narrow">Color:</div>
+                                <input data-type="css" name="background-color" type="text" value="" style="width:50px"/>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Image:</div>
+                                <div style="display: inline-block;">
+                                    <input data-type="css" name="background-image" type="hidden" value=""/>
+                                    <input data-type="css" name="bg-image" type="text" value="" style="width:190px" readonly="readonly"/>
+                                    <button id="btn-background-image" title="select image">select</button>
+                                    <button id="btn-background-image-clear" title="clear image">x</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Position:</div>
+                                <select data-type="css" name="background-position">
+                                    <option>center</option>
+                                    <option>left</option>
+                                    <option>top</option>
+                                    <option>right</option>
+                                    <option>bottom</option>
+                                    <option>top right</option>
+                                    <option>top left</option>
+                                    <option>bottom left</option>
+                                    <option>bottom right</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Repeat:</div>
+                                <select data-type="css" name="background-repeat">
+                                    <option value="no-repeat">no repeat</option>
+                                    <option value="repeat-y">verically</option>
+                                    <option value="repeat-x">horizontally</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <!-- Margins and Padding -->
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                        <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>
+
+                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                            Margins
+                            <div style="display:none;" class="margin-short">
+                                <label>&nbsp;Inner:
+                                <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
+                                <label>&nbsp;Outer:
+                                <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
+                            </div> 
+                        </h3>
+
+                        <div style="background:none">
+                            <div style="display:inline-block" class="margin-full">
+                                <div class="header_narrow" style="vertical-align:middle">Inner</div>
+                                <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                    <label><input class="cb_sync" data-type="padding" type="checkbox" checked/>sync&nbsp;</label>
+                                    <input data-type="css" name="padding-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                                <div style="vertical-align:middle;display:inline-block;">
+                                    <input data-type="css" name="padding-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                    <br>
+                                    <input data-type="css" name="padding-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                                <div style="vertical-align:middle;display:inline-block;">
+                                    <input data-type="css" name="padding-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                            </div>
+                            <div style="display:inline-block" class="margin-full">
+                                <div class="header_narrow" style="vertical-align:middle">Outer</div>
+                                <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                    <label><input class="cb_sync" data-type="margin" type="checkbox" checked/>sync&nbsp;</label>
+                                    <input data-type="css" name="margin-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                                <div style="vertical-align:middle;display:inline-block;">
+                                    <input data-type="css" name="margin-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                    <br>
+                                    <input data-type="css" name="margin-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                                <div style="vertical-align:middle;display:inline-block;">
+                                    <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                </div>    
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+
+                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">Classes</h3>
+
+                        <div style="background:none">
+                            <div>
+                                <div class="header_narrow" style="vertical-align:top;"><b>Custom CSS classes:</b></div>
+                                <textarea name="elementClasses" rows="4" cols="30">
+                                </textarea>
+                                <div class="heurist-helper3">Space separated list of classes defined in custom css field in page record</div>
+                            </div>
+                            <!--
+                            <div style="text-align:center;display: block;">
+                                <div class="header_narrow" style="vertical-align:top;"><b>Bootstrap classes:</b></div>
+                                <textarea name="elementBootstrap" rows="10" cols="30">
+                                </textarea>
+                                <div class="heurist-helper3">Use Grid, Typography and BG classes. Activate Bootstrap in home page record</div>
+                            </div>
+                            -->
+                        </div>
+
+                    </fieldset>
+                </div>
+
+            </div>
+
+        </div>
+        
+        <div id="codemirror-container" style="display:none;">
+            <div id="codemirror-body" style="position:absolute;left:0px;right:2px;top:0px;bottom:0px;border:lightblue 1px dotted;"></div>
+        </div>

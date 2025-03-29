@@ -168,7 +168,8 @@ class HCmsEditor {
                          .css({'padding':'5px','font-size':'smaller'});
         }
 
-        this._editor_panel.find('.btn-website-addpage').on('click', this.#addNewRootMenu); // button({icon:'ui-icon-plus'}).
+
+        this._editor_panel.find('.btn-website-addpage').on('click', ()=>that.#addNewRootMenu());
 
         let url = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,version:3});
         
@@ -185,8 +186,6 @@ class HCmsEditor {
         .on( 'mouseleave', function(event){
             that._editor_panel.find('.btn-website-addpage').hide();
         } );
-        
-        this._editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click', this.#showWebSiteMenu);
         
         this._editor_panel.find('.bnt-cms-hidepanel').on('click', function(){ that._ws_body.layout().close(that.editor_pos); } );
      
@@ -375,13 +374,18 @@ class HCmsEditor {
       }});
   }
   
+  /**
+  * Add new root menu/page
+  */
   #addNewRootMenu(){
-      
+
+        if(this._editCMS_SiteMenu){
+          //refresh website structure tree
+          this._editCMS_SiteMenu.selectMenuRecord(this.website_id);
+        }
   }
   
-  #showWebSiteMenu(){
-      
-  }
+  //#showWebSiteMenu(){}
 
   //
   // Open editor panel

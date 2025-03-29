@@ -59,6 +59,6 @@ Updated:     07 March 2025
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @version     6.0
+* @version     7.0
 */
 

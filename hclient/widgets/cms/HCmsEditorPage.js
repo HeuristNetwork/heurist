@@ -3,12 +3,14 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2025 Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @version     7.0
 */
-/* global editCMS_SelectElement, editCMS_ElementCfg */
+
+/* global editCMS_SelectElement, HCmsEditorElement */
+
 /*
 * HCmsEditorPage.js - web page editor - page treeview+element property editor
 */
@@ -21,7 +23,7 @@ class HCmsEditorPage {
     //refs to parent classes
     _container = null; //general container
     _cmsEditor = null;  //HCmsEditor
-    _cmsEditorElement = null;  //instance of edit element class editCMS_ElementCfg
+    _cmsEditorElement = null;  //instance of edit element class HCmsEditorElement
     
     //interface elements
     _panel_treePage;     // panel with treeview for current page 
@@ -158,7 +160,7 @@ class HCmsEditorPage {
                             }
                             l_cfg['content'+lang] = new_content;    
                             
-                            //update in editCMS_ElementCfg                            
+                            //update in HCmsEditorElement                            
                             if(that._cmsEditorElement){
                                 that._cmsEditorElement.updateContent(new_content, lang);
                             }
@@ -646,16 +648,20 @@ initActionIcons(){
     #defineActionIcons (item, ele_ID, style_pos){ 
         
         let that = this;
+        ele_ID = ''+ele_ID;
         
-        if($(item).find('.lid-actionmenu').length==0){ //no one defined
-
-            ele_ID = ''+ele_ID;
+        let is_intreeview = $(item).hasClass('fancytree-node');
+        if(is_intreeview){
+            $(item).find('.lid-actionmenu').remove();
+        }else{
+            $(item).parent().find(`.lid-actionmenu[data-lid=${ele_ID}]`).remove();
+        }
+        
             let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(ele_ID);
 
             if(node==null){
                 return;
             }
-            let is_intreeview = $(item).hasClass('fancytree-node');
             if(is_intreeview && !$(item).hasClass('fancytree-hide')){       
                 $(item).css('display','block');   
             }
@@ -813,7 +819,7 @@ function(value){
 
                     }else if(action=='delete'){
                         //different actions for separator and field
-                        let node = $.ui.fancytree.getTree( this._panel_treePage ).getNodeByKey(''+ele_ID);
+                        let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(''+ele_ID);
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Are you sure you wish to delete element "'+node.title+'"?', 
@@ -982,8 +988,6 @@ function(value){
             };
                 
             $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
-
-        }
     }
 
     //
@@ -1178,7 +1182,7 @@ function(value){
 
     
     //
-    // Opens element/widget property editor  (editCMS_ElementCfg/WidgetCfg)
+    // Opens element/widget property editor  (HCmsEditorElement/WidgetCfg)
     // 1. css properties
     // 2  flexbox properties
     // 3. widget properties
@@ -1251,7 +1255,7 @@ function(value){
         // mode - 0       take values from this._cmsEditorElement without saving in db
         //        'save'  save entire page in db
         //
-        this._cmsEditorElement = editCMS_ElementCfg(element_cfg, this._layout_content, this._layout_container, this._panel_propertyView, 
+        this._cmsEditorElement = HCmsEditorElement(element_cfg, this._layout_content, this._layout_container, this._panel_propertyView, this,
         function(new_cfg, mode){
 
                     //save

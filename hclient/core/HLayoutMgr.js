@@ -94,6 +94,7 @@ class HLayoutMgr {
   //
   //
   #layoutInitFromJSON(layout, container, forStorage, isFirstLevel) {
+    
     if (container == null) {
       container = document.createElement("div");
     }
@@ -151,14 +152,14 @@ class HLayoutMgr {
           this.#layoutInitCardinal(ele, container, forStorage);
           break;
         case "tabs":
-          this.#layoutInitTabs(ele, container, forStorage);
+          this.layoutInitTabs(ele, container, forStorage);
           break;
         case "accordion":
-          this.#layoutInitAccordion(ele, container, forStorage);
+          this.layoutInitAccordion(ele, container, forStorage);
           break;
         default:
           if (ele.children && ele.children.length > 0) {
-            this.#layoutInitGroup(ele, container, forStorage);
+            this.layoutInitGroup(ele, container, forStorage);
           } else if ((ele.type && ele.type.indexOf("text") === 0) || ele.content) {
             this.#layoutInitText(ele, container, forStorage);
           } else if (ele.type === "widget" || ele.appid) {
@@ -192,65 +193,94 @@ class HLayoutMgr {
     }
   }
 
+  //  cms-widget - for widgets
+  //  cms-group  - for containers: group,flex,cardinal,tabs,accordion
+  //  cms-content - for content/text
+  //
   #layoutCreateDiv(layout, classes, forStorage) {
-    if (layout.dom_id && layout.dom_id.indexOf("cms-tabs-") === 0) {
-//id is reassigned on every page reload
-      layout.dom_id = `cms-tabs-${layout.key}`;
-    }
-
-    let $d;
-
-    if (forStorage) {
-            //attributes
-            // key - unique id withing edit session - it is assigned every time layout recreated in edit mode   
-            // dom_id - unique html id                                                                          
-            // name - dats-cms-name
-            // type - data-cms-type
-            // css - css  
-            // classes - classes
-
-      $d = $(
-        `<div id="${layout.dom_id}" data-cms-name="${layout.name}" data-cms-type="${layout.type}"></div>`
-      );
-    } else {
-      $d = $(document.createElement("div"));
-
-      if (!layout.dom_id) {
-        let uid = "" + window.hWin.HEURIST4.util.random();
-
-        do {
-          layout.dom_id = layout.appid
-            ? `cms-widget-${uid}`
-            : `cms-content-${uid}`;
-        } while (this.body.find(`#${layout.dom_id}`).length > 0);
+      
+      if (layout.dom_id && layout.dom_id.indexOf('cms-group-') === 0) {
+          //id is reassigned on every page reload
+          layout.dom_id = `cms-group-${layout.key}`;
       }
 
-      $d.attr("id", layout.dom_id).attr("data-hid", layout.key);
+      let $d;
 
-      if (classes) {
-        $d.addClass(classes);
+      if (forStorage) {
+          //attributes
+          // key - unique id withing edit session - it is assigned every time layout recreated in edit mode   
+          // dom_id - unique html id                                                                          
+          // name - data-cms-name  (encoded)
+          // type - data-cms-type
+          // css - css  
+          // classes - classes
+
+          $d = $(
+              `<div id="${layout.dom_id}" data-cms-name="${layout.name}" data-cms-type="${layout.type}"></div>`
+          );
+      } else {
+          $d = $(document.createElement("div"));
+
+          if (!layout.dom_id) {
+              
+              do {
+                  let uid = "" + window.hWin.HEURIST4.util.random();
+                  
+                  layout.dom_id = layout.appid
+                  ? `cms-widget-${uid}`
+                  : `cms-content-${uid}`;
+              } while (this.body.find(`#${layout.dom_id}`).length > 0);
+          }
+
+          $d.attr("id", layout.dom_id).attr("data-hid", layout.key);
+
+          if (classes) {
+              $d.addClass(classes);
+          }
       }
-    }
 
-    if (layout.classes) {
-      $d.addClass(layout.classes);
-    }
+      if (layout.classes) {
+              $d.addClass(layout.classes);
+      }
 
-    return $d;
+      return $d;
   }
-
-  #layoutInitGroup(layout, container, forStorage) {
-    const $d = this.#layoutCreateDiv(layout, "cms-element brick", forStorage);
-    $d.appendTo(container);
-
+  
+  /*
+  
+  */
+  #layoutSetCssAndClasses(layout, element){
     if (!layout.css) layout.css = {};
     if (layout.css && !$.isEmptyObject(layout.css)) {
-      $d.css(layout.css);
+      element.css(layout.css);
     }
+    if (layout.bsClasses){
+        element.addClass(layout.bsClasses);
+    }
+  }
+  
+  /*
+  
+  */
+  layoutInitGroup(layout, container, forStorage) {
+      
+        layout.dom_id = 'temo1';//'cms-group-'+layout.key;
+        layout.dom_id = 'cms-group-'+layout.key;
+        
+        let $d = this.#layoutCreateDiv(layout, 'cms-element brick', forStorage);
+        
+        this.#layoutReplaceGroupDiv(container, $d)
+        
+        this.#layoutSetCssAndClasses(layout, $d);
 
-    this.#layoutInitFromJSON(layout.children, $d, forStorage);
+        this.#layoutInitFromJSON(layout.children, $d, forStorage);
+        
+        return $d;
   }
 
+  /*
+  
+  */
   #layoutInitText(layout, container, forStorage) {
     const $d = this.#layoutCreateDiv(
       layout,
@@ -259,10 +289,7 @@ class HLayoutMgr {
     );
     $d.appendTo(container);
 
-    if (!layout.css) layout.css = {};
-    if (layout.css && !$.isEmptyObject(layout.css)) {
-      $d.css(layout.css);
-    }
+    this.#layoutSetCssAndClasses(layout, $d);
 
     let content = "content";
     if (forStorage) {
@@ -433,33 +460,45 @@ class HLayoutMgr {
 
     }
   
+    /*
+    *
+    */
+    #layoutReplaceGroupDiv(container, new_element){
+
+        const dom_id = new_element.attr('id');
+        
+        //find old one
+        let old_element;
+        if(container.attr('id')==dom_id){
+            old_element = container;    
+        }else{
+            old_element = container.find('#'+dom_id);
+        }
+        
+        //replace old one
+        if(old_element.length>0){
+            new_element.insertBefore(old_element);
+            old_element.remove();
+        }else{
+            new_element.appendTo(container);
+        }
+        
+        //remove old header (for tabs)
+        $('#'+dom_id+'-header').remove();
+    }    
+    
   
   #layoutInitCardinal(layout, container, forStorage){
-      
-        let $d, $parent;
+
+        layout.dom_id = 'cms-group-'+layout.key;
         
-        layout.dom_id = 'cms-tabs-'+layout.key;
+        let $parent = this.#layoutCreateDiv(layout, '', forStorage);
         
-        if(container.attr('id')==layout.dom_id){
-            $d = container;    
-        }else{
-            $d = container.find('#'+layout.dom_id);
-        }
-        
-        if($d.length>0){
-            container = $d.parent();            
-            $d.remove(); //remove itself
-        }
-        
-        //create parent div
-        $parent = this.#layoutCreateDiv(layout, '', forStorage);
+        this.#layoutReplaceGroupDiv(container, $parent)
         
         if( layout.css && !$.isEmptyObject(layout.css) ){
             $parent.css( layout.css );
         }
-        
-        $parent.appendTo(container);
-        
         
         let layout_opts = {applyDefaultStyles: true, maskContents: true};
     
@@ -518,7 +557,7 @@ class HLayoutMgr {
 
                 if(layout.children[i].children.length>1){
                   
-                    lpane.dom_id = 'cms-tabs-'+lpane.key;
+                    lpane.dom_id = 'cms-group-'+lpane.key;
                     //@todo additional container for children>1        
                     layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
                     
@@ -529,7 +568,7 @@ class HLayoutMgr {
                     
                     let dom_id = layout.children[i].children[0].dom_id;
                     if(!dom_id){
-                        dom_id = 'cms-tabs-'+lpane.key;
+                        dom_id = 'cms-group-'+lpane.key;
                         layout.children[i].children[0].dom_id = dom_id;
                     }
                     if(!layout.children[i].children[0].classes){
@@ -555,109 +594,140 @@ class HLayoutMgr {
       
   }
   
-   //
-    //
-    //
-  #layoutInitTabs(layout, container, forStorage){
+  /*
+  * Recreates tabs Inserts UL as navbar
+  */ 
+  layoutInitTabs(layout, container, forStorage){
+
+        layout.dom_id = 'cms-group-'+layout.key;
         
+        let $d = this.#layoutCreateDiv(layout, '', forStorage);
         
-        let $d;
+        this.#layoutReplaceGroupDiv(container, $d)
+        this.#layoutSetCssAndClasses(layout, $d);     
         
-        layout.dom_id = 'cms-tabs-'+layout.key;
-        
-        if(container.attr('id')==layout.dom_id){
-            $d = container;    
-        }else{
-            $d = container.find('#'+layout.dom_id);
-        }
-        
-        if($d.length>0){
-            container = $d.parent();            
-            $d.remove();
-        }
-        
-        //create parent div
-        $d = this.#layoutCreateDiv(layout, '', forStorage);
-        
-        if (!layout.css) layout.css = {};
-        if (layout.css && !$.isEmptyObject(layout.css)) {
-            $d.css(layout.css);
-        }        
-        
-        $d.appendTo(container);
-          
-        if($d.parent().hasClass('layout-content')){
+        if($d.parent().hasClass('layout-content')){ //to be removed - not used
             $d.addClass('ent_wrapper');    
         }
-
-        //tab panels    
-        this.#layoutInitFromJSON(layout.children, $d, forStorage);
-               
+        
         if(!forStorage) {
-            //tab header
-            $d = this.body.find('#'+layout.dom_id);
-            let groupTabHeader = $('<ul>').prependTo($d);
+        }
+        
+        //adds tab panels    
+        this.#layoutInitFromJSON(layout.children, $d, forStorage);
+        
+        
+        if(!forStorage) {
+            //adds tab header
+            //$d = this.body.find('#'+layout.dom_id);
             
+            let groupTabHeader = $('<ul>').attr('id',layout.dom_id+'-header');
+
             for(let i=0; i<layout.children.length; i++){
-          
-                //.addClass('edit-form-tab')
                 $('<li>').html('<a href="#'+layout.children[i].dom_id
                                     +'"><span style="font-weight:bold">'
                                     +layout.children[i].name+'</span></a>')
                             .appendTo(groupTabHeader);
             }
             
-            $d.tabs();
+            if(!layout.options?.nav_type){
+                if(!layout.options) layout.options = {};
+                layout.options.nav_type='nav-jquery';
+            }
+            
+            if(layout.options?.nav_type!='nav-jquery'){
+                $d.addClass('tab-content');
+                // adds bootstrap classes
+                groupTabHeader.addClass('nav');
+                groupTabHeader.addClass(layout.options.nav_type);
+                if(layout.options?.nav_dir=='nav-col'){
+                    groupTabHeader.addClass('flex-column');
+                    $d.parent().addClass('d-flex align-items-start');
+                }
+                groupTabHeader.find('li').addClass('nav-item');
+                groupTabHeader.find('li>a').addClass('nav-link')
+                    .attr('data-bs-toggle','tab');
+
+                $(groupTabHeader.find('li>a')[0]).addClass('active');
+                    
+                $d.children().addClass('tab-pane fade');
+                $($d.children()[0]).addClass('show active');
+                groupTabHeader.insertBefore($d);
+            }else{
+                groupTabHeader.prependTo($d);
+                $d.tabs();        
+            }
         }
+        
+        return $d;
+        
     }
     
-    //
-    //
-    //
-    #layoutInitAccordion(layout, container, forStorage){
+    /**
+    * Recreate accordion
+    */
+    layoutInitAccordion(layout, container, forStorage){
        
-        let $d;
+        layout.dom_id = 'cms-group-'+layout.key;
         
-        layout.dom_id = 'cms-tabs-'+layout.key;
+        let $d = this.#layoutCreateDiv(layout, '', forStorage);
         
-        if(container.attr('id')==layout.dom_id){
-            $d = container;    
-        }else{
-            $d = container.find('#'+layout.dom_id);
-        }
-        
-        if($d.length>0){
-            container = $d.parent();            
-            $d.remove();
-        }
-            
-        //create parent div
-        $d = this.#layoutCreateDiv(layout, '', forStorage);
-        
-        $d.appendTo(container);
+        this.#layoutReplaceGroupDiv(container, $d)
+        this.#layoutSetCssAndClasses(layout, $d);    
        
         //accordion panels    
         this.#layoutInitFromJSON(layout.children, $d, forStorage);
-        
-        if(!forStorage){
-       
-        //accordion headers
-        for(let i=0; i<layout.children.length; i++){
+
+
+        if(!forStorage) {
+            
+            if(layout.options?.acc_type=='acc-bs'){
+                // adds bootstrap classes
+                $d.addClass('accordion');
+
+                for(let i=0; i<layout.children.length; i++){
+              
+                    let $child = $d.find('#'+layout.children[i].dom_id);
+                    
+    //  aria-expanded="true" aria-controls="collapseOne"   collapsed                          
+                    
+      let $item = $(`<div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${layout.children[i].dom_id}">
+            ${layout.children[i].name}
+          </button>
+        </h2>
+      </div>`);
+      $d.append($item);
+      $child.addClass('accordion-collapse collapse show accordion-body').attr('data-bs-parent',`#${layout.dom_id}`);
+      $item.append($child);
       
-            $d = this.body.find('#'+layout.children[i].dom_id);
-            
-            $('<h3>').html( layout.children[i].name )
-                     .insertBefore($d);
-            
+    /*
+        <div id="${layout.children[i].dom_id}" class="accordion-collapse collapse show" data-bs-parent="#${layout.dom_id}">
+          <div class="accordion-body">
+
+          </div>
+        </div>
+    */                            
+                }//for children
+                
+            }else{
+                
+                //accordion headers
+                for(let i=0; i<layout.children.length; i++){
+                    const child_dom_id = '#'+layout.children[i].dom_id;
+                    $('<h2>').html( layout.children[i].name )
+                             .insertBefore(child_dom_id);
+                }
+                
+                $d.accordion({heightStyle: "content", 
+                      active: false,
+                      //active:(currGroupType == 'expanded')?0:false,
+                      collapsible: layout.options?.acc_collapse });        
+            }
         }
         
-        $d = this.body.find('#'+layout.dom_id);
-        $d.accordion({heightStyle: "content", 
-                      active:false,
-                //active:(currGroupType == 'expanded')?0:false,
-                      collapsible: true });
-                      
-        }
+        return $d;
     }
     
     //
@@ -1088,20 +1158,6 @@ class HLayoutMgr {
   //============================================================================
 
   // Public methods
-
-  /**
-  * Edit web. Recreate tabs
-  */
-  layoutInitTabs(layout, container) {
-    this.#layoutInitTabs(layout, container);
-  }
-
-  /**
-  * Edit web. Recreate accordion
-  */
-  layoutInitAccordion(layout, container) {
-    this.#layoutInitAccordion(layout, container);
-  }
 
   /**
   * Edit web. Recreate cardinal layout
