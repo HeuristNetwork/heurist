@@ -117,10 +117,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         //debug
         this.options.templateView = null; 
         this.options.selectAction = 'view';
-        //this.options.viewRecordMode = 'inline';
+        this.options.viewRecordMode = 'inline';
         //this.options.viewRecordMode = 'modal-xl';
         //this.options.viewRecordMode = 'offcanvas-end';
-        this.options.viewRecordMode = 'popup';
+        //this.options.viewRecordMode = 'popup';
         //this.options.viewRecordMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
         
         this.record_id_attr = `data-heurist-${this.options.entityType}`;

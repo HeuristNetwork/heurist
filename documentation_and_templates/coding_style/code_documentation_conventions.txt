@@ -1,9 +1,9 @@
 Heurist Code Documentation Conventions
-Updated: 29 March 2010
+Updated: 29 March 2025
 
 OVERVIEW
 
-Heurist code is hierarchichally structured. RTF documentation files are placed in every main directory to explain the functions of the files in that directory.
+Heurist code is hierarchichally structured. _README.md documentation files are placed in every main directory to explain the functions of the files in that directory.
 
 
 DIRECTORY NAMING CONVENTIONS
@@ -16,23 +16,25 @@ No directory should contain more than a dozen files unless there is a repetitive
 
 Directory names will be short (since they contribute to the length of URLs) but informative.
 
-As far as possible directory names should be a single lowercase word or concatenated word, but where required for clarity an underscore may be used as a word separator. We will not use CamelCase or lowerCamelCase for directory names.
+As far as possible directory names should be a single lowercase word or concatenated word, but where required for clarity an underscore may be used as a word separator.
 
 Core functions shared by many different branches, including php, javascript, media items and templates are located in /core
 
 
 FILE NAMING CONVENTIONS
 
-Similar to directory names. Directory locations should provide context for file names, so we might have /admin/rectypes/add.php rather than needing to call the file something like add_rectype_definitions.php.
+For all new code we will use CamelCase for file names. Name of file must be the same as Class or Widget defined in this file.
 
 
 VARIABLE NAMING CONVENTIONS
 
-
+Names given to variables should make sense and relate to what it really stores. 
+It is recommended to avoid one-letter names. Use camel case for names with more than one word.
+Give classes names that start with an uppercase letter.
 
 CODE COMMENTING
 
-Since ACL projects are a combination of PHP, HTML, XSLT, JS and CSS file types, we have selected a JavaDoc/PHPDoc commenting style using a common tag subset and tag format that will be accepted from both tools.
+Since Heurist project is a combination of PHP, HTML, XSLT, JS and CSS file types, we have selected a JavaDoc/PHPDoc commenting style using a common tag subset and tag format that will be accepted from both tools.
 
 /**
 *  getimage

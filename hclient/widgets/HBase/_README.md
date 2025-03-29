@@ -44,7 +44,6 @@ HBaseList.js – Base widget for handling a set of records (HResultSet)
 
 This widget serves as the parent for HRecordList, HRecordNetwork, HRecordMap, and others.
 
-    
     Widgets acting on a single record (e.g. record edit, record view); 
     Widgets acting on the current Resultset or a selection (filter selector, results view, tabular view, map view, custom report, network diagram, storymap, various export functions, merge records, recode functions);
     Functions acting independently (pe. Filter and facet builders, Preferences, CSV import, structure export, new database)
