@@ -845,7 +845,7 @@ window.hWin.HEURIST4.query = {
     
             if(multi_rectype){
                 plain_text += `<br><hr><br><strong>Warning</strong>:<br>
-                    You appear to be attempting to filter by multiple individual record types; as it\'s impossible for a record to be multiple types at the same time, this will always provide an empty result.<br>
+                    You appear to be attempting to filter by multiple individual record types; as it's impossible for a record to be multiple types at the same time, this will always provide an empty result.<br>
                     Please remove the un-necessary record type filterings or combine them into one as a comma separated list (e.g. {"t":"10,11,12"}).`;
             }
         }
@@ -866,7 +866,10 @@ window.hWin.HEURIST4.query = {
             value = value.split(',');
             value = value.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
 
-            value = value.map((id) => `${$Db.trm(id, 'trm_Label')}${$Db.trm(id, 'trm_Code') !== '' ? ` [code ${$Db.trm(id, 'trm_Code')}]` : ''}`);
+            value = value.map((id) => {
+                let trm_Code = $Db.trm(id, 'trm_Code') !== '' ? ` [code ${$Db.trm(id, 'trm_Code')}]` : '';
+                return `${$Db.trm(id, 'trm_Label')}${trm_Code}`;
+            });
 
             value = value.filter((trm) => !window.hWin.HEURIST4.util.isempty(trm)).join(' | ');
         }
@@ -950,10 +953,6 @@ window.hWin.HEURIST4.query = {
             case 'p':
             case 'popularity':
                 res = 'Your Bookmarks';
-                break;
-            case 'a':
-            case 'added':
-                res = 'Record Creation';
                 break;
             default:
                 if(value.startsWith('f:') || value.startsWith('field:')){
