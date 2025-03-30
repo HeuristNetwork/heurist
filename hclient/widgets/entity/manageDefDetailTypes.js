@@ -2284,8 +2284,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         // Main message
         $('<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
-        + '<div style="color: red;display: block;margin-left: auto;margin-right: auto;width: 90%;font-size: 1.2em;"><strong>You are creating a new sub-record child pointer field</strong><br>'
-        + 'In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
+        + '<div style="color: red;display: block;margin-left: auto;margin-right: auto;width: 90%;font-size: 1.2em;">'
+        + '<strong>You are creating a new sub-record child pointer field</strong>'
+        + '<br>When you select the target record type(s), Create or select only ONE target record type.'
+        + '<br>You will probably want to create a new target record type, but you need not create any fields.'
+        + '<br>In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
     },
 
     importDetailTypes: function(){
