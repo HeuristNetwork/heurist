@@ -164,8 +164,6 @@ class HCmsEditorPage {
                             if(that._cmsEditorElement){
                                 that._cmsEditorElement.updateContent(new_content, lang);
                             }
-                            
-                            
                         }else{
                             that.page_was_modified = false;
                         }
@@ -594,6 +592,17 @@ initPage(pageContainer, pageRecord){
         
         //expands structure tree, updates menu in tree
         this._panel_propertyView = this._container.find('.propertyView');
+        
+console.log('initPage', pageRecord[window.hWin.DT_NAME] );        
+        
+        this._container.find('#responsiveScreen').on({change:function(event){
+            
+            let screenWidth = $(event.target).val();
+            if(screenWidth==100){
+                screenWidth = '100%';
+            }
+            $('#webPageFrame').width(screenWidth);
+        }})
 
 }
 
@@ -1222,6 +1231,8 @@ function(value){
         $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
         
+        const isRoot = node.getParent().isRootNode();
+        
         this.#hideMenuInTree();
         
         this._layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
@@ -1255,7 +1266,9 @@ function(value){
         // mode - 0       take values from this._cmsEditorElement without saving in db
         //        'save'  save entire page in db
         //
-        this._cmsEditorElement = HCmsEditorElement(element_cfg, this._layout_content, this._layout_container, this._panel_propertyView, this,
+        if(isRoot){ element_cfg.isPage = true; }
+        this._cmsEditorElement = HCmsEditorElement(element_cfg, 
+                    this._layout_content, this._layout_container, this._panel_propertyView, this,
         function(new_cfg, mode){
 
                     //save

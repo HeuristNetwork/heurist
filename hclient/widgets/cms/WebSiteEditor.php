@@ -196,10 +196,21 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             Page title
                         </h3>
 
-                        <span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">
-                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">TODO website help</a>
+                        <span style="float: right; padding-top: 2px;" class="heurist-helper1 element_edit">
+                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">
+                                <span class="ui-icon ui-icon-circle-help" style="font-size:12px;"></span>
+                            </a>
                         </span>
-
+                        
+                        <select name="responsiveScreen" id="responsiveScreen" title="Responsive screen width" style="float: right; font-size: 10px;max-width:60px;">
+                            <option value="100" selected>100%</option>
+                            <option value="540">Small (540px)</option>
+                            <option value="720">Medium (720px)</option>
+                            <option value="960">Large (960px)</option>
+                            <option value="1200">XLarge (1200px)</option>
+                            <option value="1400">XXLarge (1400px)</option>
+                        </select>
+                        
                     </div>
 
                     <div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"></div>
@@ -212,7 +223,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
         </div>
     </div>
 
-    <div class="ui-layout-center">
+    <div class="ui-layout-center" style="text-align:center">
         <iframe id="webPageFrame" width="100%" height="100%" title="Web Page Preview"></iframe>
     </div>
     

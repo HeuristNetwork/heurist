@@ -91,7 +91,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         cont.find('textarea[name="elementClasses"]').val(l_cfg.classes);
         
         if(l_cfg.type=='group' && l_cfg.css?.display=='flex'){
-            l_cfg.type='flex'; //backward capability
+            l_cfg.type='flex'; //for backward capability
         }
 
         //type: group,cardinal,tabs,accordion,widget
@@ -100,17 +100,25 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         cont.find('h4').css({margin:0});
         cont.find('#widget-config').parent().hide();
         cont.find('input[data-type="element-id"]').parent().show();
+        cont.find('.page-layout').hide();
+        cont.find('.group-layout').hide();
         
-        if(etype=='widget' || etype=='text' || etype=='cardinal'){
-            cont.find('.group-layout').hide();    
+        if(l_cfg.isPage || etype=='widget' || etype=='text' || etype=='cardinal'){
+            
             cont.find('#groupType').val('');
+            
+            if(l_cfg.isPage){
+                cont.find('.page-layout').show();    
+                let containerClass = _getBsClasses(l_cfg.bsClasses, 'container');
+                cont.find('#containerType').val(containerClass);
+                cont.find('#groupType').val('group');  
+            }
+            
         }else{
             cont.find('.group-layout').show();
             //initially hide-show      
             cont.find('#groupType').val(l_cfg.type);  
         }
-        _initControlsForLayoutType();
-
         let activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
 
         cont.find('fieldset:first .heurist-helper3').position({
@@ -120,11 +128,12 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
         cont.find('h3').css({'font-size': '1.1em', 'font-weight': 'bold'});
 
+        _initControlsForLayoutType();
+        
         if(!l_cfg.css) l_cfg.css = {}; //{display:'block'}; default
 
         _assignCssToUI(); //from css to ui
 
-console.log(etype);        
         //load and init widget properties
         if(etype=='widget'){
 
@@ -239,7 +248,6 @@ console.log(etype);
             __saveWidgetConfig();
             //5. save in layout cfg
             _getCfgFromUI();
-//console.log(l_cfg);            
             main_callback.call(this, l_cfg, 'save'); //save only
             window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         });
@@ -319,9 +327,9 @@ console.log(etype);
         let cont = $container;
 
         let etype = cont.find('#groupType').val();
-        
+console.log('>>>', etype);        
         cont.find('.props').hide();
-        if(etype!=''){
+        if(!window.hWin.HEURIST4.util.isempty(etype)){
             cont.find('.props.'+etype).show();
         }
         
@@ -343,14 +351,17 @@ console.log(etype);
                     item.attr('data-gridcol',i).show();
                     let lbl = item.find('.header_narrow');
 
-                    lbl.text(i+' '+child.name);
+                    lbl.text(child.name);
 
                     let inputColWidth = item.find('select[name="grid-col-width"]');
                     let inputCol = item.find('input[name="grid-col"]');
                     
-                    if(!child.bsClasses){
-                        child.bsClasses = 'col';
-                    }
+                    let colClass = _getBsClasses(child.bsClasses, 'col');
+                    if(colClass==''){
+                        colClass = 'col';    
+                        child.bsClasses = (child.bsClasses+' col').trim();
+                    } 
+
                     //remove possible flex settings
                     if(child.css?.flex){
                         delete child.css.flex;
@@ -359,7 +370,7 @@ console.log(etype);
                         delete child.css.display;
                     }
                     
-                    let val = child.bsClasses; //TBD use regex to extract col
+                    let val = colClass;
                     val = val.split('-');
                     // col,col-auto or col-{1~12}
                     if(val.length==2 && parseInt(val[1])>0 && parseInt(val[1])<13){
@@ -384,8 +395,8 @@ console.log(etype);
                         }
 
                         let k = item.attr('data-gridcol');
-                        if(!l_cfg.children[k].bsClasses) l_cfg.children[k].bsClasses = '';
-                        l_cfg.children[k].bsClasses = val;
+
+                        l_cfg.children[k].bsClasses = (_removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
                         
                         let child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
                         
@@ -458,7 +469,7 @@ console.log(etype);
     }
 
     //
-    //
+    // obtains name, id, user classes
     //
     function _getCfgFromUI(){            
         
@@ -519,10 +530,14 @@ console.log(etype);
 
         const isGroup = !(etype=='widget' || etype=='text');
         
-        let bsClasses = [];
+        let bsClasses = _getBsClasses(l_cfg.bsClasses, 'col');
+        bsClasses = bsClasses.split(' ');
         let groupType = cont.find('#groupType').val();
         let recreateGroup = false;
         
+        if(l_cfg.isPage){
+            bsClasses.push(cont.find('#containerType').val());
+        }else
         if(isGroup){
         
             if(groupType=='grid'){
@@ -532,7 +547,6 @@ console.log(etype);
                         bsClasses.push($(item).attr('name')+'-'+$(item).val());
                     }
                 });
-                l_cfg.bsClasses = bsClasses.join(' ');
             }else if(groupType=='tabs'){
 
                 const ntype = cont.find('#nav_type').val();
@@ -568,9 +582,37 @@ console.log(etype);
         }else{
             css['display'] = 'block';
         }
-
+        
+        // BORDER
+        
+        let val = cont.find('#bsBorder-style').val();
+        if(val!='none'){
+            css['--bs-border-style'] = val;
+            
+            bsClasses.push('border');
+            val = cont.find('#bsBorder-size').val();
+            if(val>1){
+                bsClasses.push('border-'+val);
+            }
+            val = cont.find('#bsBorder-color').val();
+            if(val!='default'){
+                bsClasses.push('border-'+val);
+            }
+            val = cont.find('#bsBorder-radius').val();
+            if(val!=0){
+                bsClasses.push('rounded-'+val);
+            }
+            
+            val = cont.find('#bsBorder-shadow').val();
+            if(val!='none'){
+                bsClasses.push(val);    
+            }
+        }
+        
+        
+        
         //style - border
-        let val = cont.find('#border-style').val();
+        val = cont.find('#border-style').val();
 
         let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
         if(val=='none'){
@@ -665,20 +707,28 @@ console.log(etype);
         l_cfg.css = css;
         _assignCssTextArea();
         
-        if(groupType!='grid' && l_cfg.type=='grid'){
-            if(l_cfg.bsClasses){
-                l_cfg.bsClasses = '';    
-            }
-            for(let i=0; i<l_cfg.children.length; i++){
-                l_cfg.children[i].bsClasses = '';
-            }
-        }else if(groupType!='flex'){
-            for(let i=0; i<l_cfg.children.length; i++){
-                if(l_cfg.children[i].css?.flex){
-                    l_cfg.children[i].css.flex = null;
-                    delete l_cfg.children[i].css['flex'];
+        if(isGroup){
+            if(groupType!='grid' && l_cfg.type=='grid'){
+                //remove grid classes for container and children
+                if(l_cfg.bsClasses){
+                    bsClasses = _removeBsClasses(bsClasses, 'row');
+                }
+                for(let i=0; i<l_cfg.children.length; i++){
+                    l_cfg.children[i].bsClasses = _removeBsClasses(l_cfg.children[i].bsClasses, 'col');
+                }
+            }else if(groupType!='flex'){
+                //remove flex css for children if container is not flex
+                for(let i=0; i<l_cfg.children.length; i++){
+                    if(l_cfg.children[i].css?.flex){
+                        l_cfg.children[i].css.flex = null;
+                        delete l_cfg.children[i].css['flex'];
+                    }
                 }
             }
+        }
+
+        if(bsClasses.length>0){
+            l_cfg.bsClasses = bsClasses.join(' '); //keep
         }
         
         if((isGroup && groupType!=l_cfg.type) || recreateGroup){
@@ -696,8 +746,9 @@ console.log(etype);
             element.addClass('cms-element-editing headline marching-ants marching');
             
         }else{
-            if(groupType=='grid'){
-                _replaceBsClasses(element[0], ['row','justify-content','align-items','g-'], bsClasses);
+            //if(groupType=='grid'){
+            if(bsClasses.length>0){
+                _replaceBsClasses(element[0], ['container','border','rounded','shadow','row',' col','justify-content','align-items','g-'], bsClasses);
             }
             
             element.removeAttr('style');
@@ -712,13 +763,16 @@ console.log(etype);
     //
     function _replaceBsClasses(element, removeWithPrefix, newClasses){
         
-        const bsClasses = Array.isArray(removeWithPrefix)?removeWithPrefix:[removeWithPrefix];
-        
         let classes = Array.from(element.classList);
+        
+        classes = _removeBsClasses(classes, removeWithPrefix); //returns array
+        /*        
+        const bsClasses = Array.isArray(removeWithPrefix)?removeWithPrefix:[removeWithPrefix];
         classes = classes.filter(function(value) {
             const res = bsClasses.some(substr => value.startsWith(substr));
             return !res;
         });        
+        */
 
         if(Array.isArray(newClasses)){
             classes = classes.concat(newClasses);    
@@ -726,23 +780,49 @@ console.log(etype);
             classes.push(newClasses);
         }
         element.classList = classes.join(' ');
-        
-        
     }    
+
+    //
+    // returns only classes started with the given prefix
+    //
+    function _getBsClasses(classes, withPrefix){
+        return _getOrRemoveClasses(classes, withPrefix, false);
+    }
+
+    //
+    // Remove classes with given previx
+    //
+    function _removeBsClasses(classes, withPrefix){
+        return _getOrRemoveClasses(classes, withPrefix, true);
+    }
+
+    //
+    //
+    //
+    function _getOrRemoveClasses(classes, withPrefix, isRemove){
+
+        const isArray = Array.isArray(classes);
+                
+        if(window.hWin.HEURIST4.util.isempty(classes)){
+            return isArray?[]:'';   
+        }
+
+        if(!isArray){
+            classes = classes.split(' ');    
+        }
         
-    //
-    // remove all bootstrap classes
-    //
-    function _removeBsClasses(element){
-        const bsClasses = ['col','row','justify-content','align-items','g-'];
-        let classes = Array.from(element.classList); //[].slice.call(classes)
+        const bsClasses = Array.isArray(withPrefix)?withPrefix:[withPrefix];
+        
+        //return all with prefixes
         classes = classes.filter(function(value) {
-            const res = bsClasses.some(substr => value.startsWith(substr));
-            return !res;
+            let res = bsClasses.some(substr => value.startsWith(substr));
+            if(isRemove){
+                res = !res;
+            }
+            return res;
         });        
-            
-        element.classList = classes.join(' ');
-console.log(element.classList);        
+        
+        return isArray?classes:classes.join(' ');
     }
 
     //
@@ -908,21 +988,52 @@ console.log(element.classList);
     }
     
     //
-    //
-    //
-    function _assignClassesToUI(){
-      
-        let cont = $container;
-        //assign grid classes
-        
-    }
-    
-    //
-    //
+    // From Css and Classes to UI
     //
     function _assignCssToUI(){        
             
             let cont = $container;
+            
+            //
+            if(!l_cfg.bsClasses){
+                //get from element  TBD
+                //l_cfg.bsClasses 
+                
+            }
+            if(l_cfg.bsClasses){
+                if(css['--bs-border-style'] && css['--bs-border-style']!='none'){
+                    cont.find('#bsBorder-style').val(css['--bs-border-style']);
+
+                    let borderClass = _getBsClasses(l_cfg.bsClasses, 'border');
+                    
+                    //TBD
+                    //cont.find('#bsBorder-size').val(borderClass)
+                    
+                    //cont.find('#bsBorder-color').val(borderClass)
+
+                
+                }
+                
+                const roundedClass = _getBsClasses(l_cfg.bsClasses, 'rounded')??'0';
+                cont.find('#bsBorder-radius').val(roundedClass);
+                    
+                const shadowClass = _getBsClasses(l_cfg.bsClasses, 'shadow')??'none';
+                cont.find('#bsBorder-shadow').val(shadowClass);
+            }
+                
+            
+            
+            bsClasses.push('border');
+            val = cont.find('#bsBorder-size').val();
+            if(val>1){
+                bsClasses.push('border-'+val);
+            }
+            val = cont.find('#bsBorder-color').val();
+            if(val!='default'){
+                bsClasses.push('border-'+val);
+            }
+            
+            
             
             //assign flex css parameters
             let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];

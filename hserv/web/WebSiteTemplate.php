@@ -62,7 +62,7 @@
 <!-- header -->
 <?php $this->getPageHeader();?>
 
-<main class="container mt-3 pt-5">
+<main> <!--  class="container mt-3 pt-5" -->
 <?php echo $page_content;?>
 </main>
 <footer class="">

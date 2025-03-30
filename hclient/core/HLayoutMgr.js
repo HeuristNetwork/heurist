@@ -484,7 +484,7 @@ class HLayoutMgr {
         }
         
         //remove old header (for tabs)
-        $('#'+dom_id+'-header').remove();
+        //$('#'+dom_id+'-header').remove();
     }    
     
   
@@ -606,12 +606,8 @@ class HLayoutMgr {
         this.#layoutReplaceGroupDiv(container, $d)
         this.#layoutSetCssAndClasses(layout, $d);     
         
-        if($d.parent().hasClass('layout-content')){ //to be removed - not used
-            $d.addClass('ent_wrapper');    
-        }
+        //
         
-        if(!forStorage) {
-        }
         
         //adds tab panels    
         this.#layoutInitFromJSON(layout.children, $d, forStorage);
@@ -619,8 +615,6 @@ class HLayoutMgr {
         
         if(!forStorage) {
             //adds tab header
-            //$d = this.body.find('#'+layout.dom_id);
-            
             let groupTabHeader = $('<ul>').attr('id',layout.dom_id+'-header');
 
             for(let i=0; i<layout.children.length; i++){
@@ -636,13 +630,22 @@ class HLayoutMgr {
             }
             
             if(layout.options?.nav_type!='nav-jquery'){
-                $d.addClass('tab-content');
+                //d-flex align-items-start
+                
+                //move all children to tabContent
+                let tabContent = $('<div>').addClass('tab-content');
+                $d.children().appendTo(tabContent);
+                
+                tabContent.prependTo($d);
+                groupTabHeader.prependTo($d);
+                
                 // adds bootstrap classes
                 groupTabHeader.addClass('nav');
                 groupTabHeader.addClass(layout.options.nav_type);
+                
                 if(layout.options?.nav_dir=='nav-col'){
                     groupTabHeader.addClass('flex-column');
-                    $d.parent().addClass('d-flex align-items-start');
+                    $d.addClass('d-flex align-items-start');
                 }
                 groupTabHeader.find('li').addClass('nav-item');
                 groupTabHeader.find('li>a').addClass('nav-link')
@@ -650,11 +653,11 @@ class HLayoutMgr {
 
                 $(groupTabHeader.find('li>a')[0]).addClass('active');
                     
-                $d.children().addClass('tab-pane fade');
-                $($d.children()[0]).addClass('show active');
-                groupTabHeader.insertBefore($d);
+                tabContent.children().addClass('tab-pane fade');
+                $(tabContent.children()[0]).addClass('show active');
+                
             }else{
-                groupTabHeader.prependTo($d);
+                groupTabHeader.prependTo($d); //adds as a first child
                 $d.tabs();        
             }
         }
@@ -684,22 +687,23 @@ class HLayoutMgr {
             if(layout.options?.acc_type=='acc-bs'){
                 // adds bootstrap classes
                 $d.addClass('accordion');
+                
+                const isBtnCollapsed = layout.options?.acc_collapse?'collapsed':'';
+                const isItemShow = layout.options?.acc_collapse?'':'show';
 
                 for(let i=0; i<layout.children.length; i++){
               
                     let $child = $d.find('#'+layout.children[i].dom_id);
                     
-    //  aria-expanded="true" aria-controls="collapseOne"   collapsed                          
-                    
       let $item = $(`<div class="accordion-item">
         <h2 class="accordion-header">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${layout.children[i].dom_id}">
+          <button class="accordion-button ${isBtnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#${layout.children[i].dom_id}">
             ${layout.children[i].name}
           </button>
         </h2>
       </div>`);
       $d.append($item);
-      $child.addClass('accordion-collapse collapse show accordion-body').attr('data-bs-parent',`#${layout.dom_id}`);
+      $child.addClass(`accordion-collapse collapse accordion-body ${isItemShow}`).attr('data-bs-parent',`#${layout.dom_id}`);
       $item.append($child);
       
     /*

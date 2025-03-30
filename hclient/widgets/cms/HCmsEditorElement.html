@@ -33,6 +33,26 @@
             </fieldset>
             <br>
             <div id="properties_form" style="font-size:1em;">
+            
+                <h3 class="page-layout" style="padding: 0.1em 0.1em 0.1em 1.2em;">Container</h3>
+                <div class="page-layout" style="background:none">
+                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow" style="font-weight:bold">Type:</div>
+                                <select name="containerType" id="containerType" style="min-width:200px">
+                                    <option value="container-fluid" selected>100% width</option>
+                                    <!-- <option value="container">Max width at each breakpoint</option> -->
+                                    <option value="container-sm">Small (540px)</option>
+                                    <option value="container-md">Medium (720px)</option>
+                                    <option value="container-lg">Large (960px)</option>
+                                    <option value="container-xl">XLarge (1200px)</option>
+                                    <option value="container-xxl">XXLarge (1400px)</option>
+                                </select>
+                                <div class="heurist-helper3">Sets a max-width at each responsive breakpoint</div>
+                            </div>
+                    </fieldset>
+                </div>
+            
                 <h3 class="group-layout" style="padding: 0.1em 0.1em 0.1em 1.2em;">Layout</h3>
                 <div class="group-layout" style="background:none">
                     <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
@@ -108,10 +128,12 @@
                                 <div class="header_narrow">Gap:</div>
                                 <input name="g" class="grid-select" type="number" min="0" max="5" value="0" placeholder="0" style="width:30px" id="grid-gap"/>
                             </div>
+                            <!--
                             <div class="props grid">
                                 <div class="header_narrow">Equal columns:</div>
                                 <input name="grid-equal" class="Xgrid-select" type="checkbox" id="grid-equal"/>
                             </div>
+                            -->
                             
                             
                             <!-- FLEX CSS -->
@@ -181,6 +203,13 @@
                                 </select>
                                 <input name="grid-col" type="number" min="1" max="12" value="3" placeholder="3" style="width:30px"/>
                             </div>                    
+                            <div class="props grid heurist-helper3" style="display: block;">
+                                Define columns width: 
+                                1) <i>Expand</i> for all available width (equal width)
+                                2) <i>Auto</i> based on internal column width
+                                3) <i>Proportional</i> - 12 columns max
+                            </div>
+                            <div class="props flex heurist-helper3"></div>
                             
                     </fieldset>
                 </div>
@@ -320,6 +349,78 @@
 
                 </div>
 
+                <!-- Cosmetic Bootstrap classes -->
+                <div>
+                    <!-- Border -->
+                    <fieldset class="border border-1 rounded-4 m-2 border-dark" data-section="bsBorder">
+                        <legend style="display:none"></legend>
+                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
+                            Border, Corners, Shadow:
+                        </h3>
+
+                        <div style="background:none">
+                        
+                            <div>
+                                <div class="header_narrow">Style</div>
+                                <select data-type="bs" id="bsBorder-style">
+                                    <option>none</option>
+                                    <option>solid</option>
+                                    <option>double</option>
+                                    <option>dotted</option>
+                                    <option>dashed</option>
+                                    <option>inset</option>
+                                    <option>outset</option>
+                                    <option>groove</option>
+                                    <option>ridge</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size:</div>
+                                <input data-type="bs" name="bsBorder-size"  type="number" min="1" max="5" value="" placeholder="1" style="width:50px"/></label>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Color:</div>
+                                <select data-type="bs" id="bsBorder-color">
+                                    <option>default</option>
+                                    <option>primary</option>
+                                    <option>primary-subtle</option>
+                                    <option>secondary</option>
+                                    <option>success</option>
+                                    <option>danger</option>
+                                    <option>warning</option>
+                                    <option>info</option>
+                                    <option>light</option>
+                                    <option>dark</option>
+                                    <option>black</option>
+                                    <option>white</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Radius:</div>
+                                <select data-type="bs" id="bsBorder-radius">
+                                    <option value="0">none</option>
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>pill</option>
+                                    <option>circle</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Shadow:</div>
+                                <select data-type="bs" id="bsBorder-shadow">
+                                    <option value="none">none</option>
+                                    <option value="shadow-sm">small</option>
+                                    <option value="shadow">standard</option>
+                                    <option value="shadow-lg">large</option>
+                                </select>
+                            </div>
+                        </div>                        
+                    </fieldset>
+                
+                
                 <!-- Cosmetic CSS helpers -->
                 <div>
                     <!-- Border -->
