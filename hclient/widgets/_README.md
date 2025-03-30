@@ -1,22 +1,20 @@
 
 Directory:    /hclient/widgets
 
-Overview:    Heurist vsn 4 widgets
+Overview:    Heurist widgets - these are used to build the standard interface of Heurist (allowing for the addition of new functions)
+             as well as in websites built with the Heurist CMS 
 
-Notes:
 
-digital_harlem is a public interface for the Digital Harlem project, developed as a reskinning of the standard search.
-It may provide a good model for public websites running directly off a Heurist database.
-
-Updated:     16 december 2015
+             Templates and instructions for creating new widgets (from v 7.0 onwards) 
+             can be found in HBase, HMenu and HRecordList
 
 ---------------------------------------------------------------------
 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @copyright   (C) 2025 Heurist Network
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.1
+* @version     7.0
 
 
