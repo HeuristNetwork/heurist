@@ -3377,7 +3377,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 
             window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-            request['session'] = window.hWin.HEURIST4.msg.showProgress({interval: 500, content: progress_msg});
+            request['session'] = window.hWin.HEURIST4.msg.showProgress({interval: 500});
 
             window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
 
