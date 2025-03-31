@@ -68,6 +68,7 @@ $.widget( "heurist.editing_input", {
     entity_image_already_uploaded: false,
 
     enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
+    isWorkflowStage: false,
 
     is_disabled: false,
     new_value: '', // value for new input
@@ -127,9 +128,15 @@ $.widget( "heurist.editing_input", {
             this.options['dtFields']['rst_FieldConfig']= {entity:'DefDetailTypes',csv:true};
         }
 
-        
         if(this.options.dtFields==null){ //field description is not defined
             return;
+        }
+
+        this.isWorkflowStage = window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE'] 
+                            && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']
+                            && $Db.getSwfByRectype(this.f('rst_RecTypeID')).length > 0;
+        if(this.isWorkflowStage){
+            this.options['dtFields']['rst_MaxValues'] = 1;
         }
         
         if(this.options.suppress_repeat=='force_repeat'){
@@ -4227,7 +4234,7 @@ $.widget( "heurist.editing_input", {
                 });
             }
         }
-        
+
         // add visible icon for dragging/sorting field values
         if(this.is_sortable && !that.isReadonly() && !this.is_disabled 
             && (this.detailType!="relmarker")
@@ -4257,7 +4264,7 @@ $.widget( "heurist.editing_input", {
                 }
             });
         }
-        
+
         //adds individual field visibility button
         let btn_field_visibility = $( '<span>', {title: 'Show/hide value from public'})
                     .addClass('field-visibility smallicon ui-icon ui-icon-eye-open')
@@ -4268,15 +4275,13 @@ $.widget( "heurist.editing_input", {
                         'vertical-align': 'top'
                     });
 
-
         if($inputdiv.find('.btn_input_clear').length > 0){
            btn_field_visibility.insertBefore($inputdiv.find('.btn_input_clear'));
         }else{
-           btn_field_visibility.insertAfter( $input );
+           btn_field_visibility.insertAfter($input);
         }
         btn_field_visibility.hide();
-                    
-                    
+
         let chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
                     +'Hide this value from public<div>', 
                     {title: 'Per record visibility'})
@@ -4303,8 +4308,7 @@ $.widget( "heurist.editing_input", {
                 
                 btn.trigger('click');
             }});
-                    
-                    
+
         this._on(btn_field_visibility, {
             'click': function(e){
 
@@ -4327,6 +4331,41 @@ $.widget( "heurist.editing_input", {
             }
         });
 
+        // Add Advance button for workflow field
+        if(this.isWorkflowStage){
+
+            let $after_ele = $inputdiv.find('.ui-selectmenu-button').length > 0 ? $inputdiv.find('.ui-selectmenu-button') : $input.find('.enum_input').last();
+
+            let $btn_advance = $('<button>', {
+                style: 'font-size: 0.9em; margin: 0px 10px;',
+                html: 'Advance <span class="ui-button-icon ui-icon ui-icon-caret-1-e"></span>'
+            }).insertAfter($after_ele);
+
+            this._on($btn_advance.button(), {
+                click: () => {
+
+                    let swf_terms = $Db.getSwfByRectype(this.f('rst_RecTypeID'));
+                    let cur_swf = this.getValues()[0];
+                    let new_swf;
+
+                    for(const swf of swf_terms){
+
+                        if(swf.swf_Stage == cur_swf){
+                            new_swf = true;
+                        }else if(new_swf === true){
+                            new_swf = swf.swf_Stage;
+                            break;
+                        }
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(new_swf)){
+                        return;
+                    }
+
+                    this.setValue(new_swf);
+                }
+            });
+        }
 
         //move term error message to last 
         let trm_err = $inputdiv.find('.term-error-message');
