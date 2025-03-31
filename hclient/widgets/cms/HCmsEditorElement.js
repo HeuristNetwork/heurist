@@ -121,18 +121,15 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         }
         let activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
 
-        cont.find('fieldset:first .heurist-helper3').position({
-            my: 'left top', at: 'left bottom', of: cont.find('fieldset:first div:nth(1)')
-        });
-
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
-        cont.find('h3').css({'font-size': '1.1em', 'font-weight': 'bold'});
+        cont.find('h3').css({padding:'1em', 'font-size': '1.1em', 'font-weight': 'bold'});
+        cont.find('fieldset').css({background: 'transparent', padding: '1em'});
 
         _initControlsForLayoutType();
         
         if(!l_cfg.css) l_cfg.css = {}; //{display:'block'}; default
 
-        _assignCssToUI(); //from css to ui
+        //it will be called from _assignCssToUI(); //from css to ui
 
         //load and init widget properties
         if(etype=='widget'){
@@ -288,7 +285,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
             element.css(new_css);
             l_cfg.css = new_css;
 
-            _assignCssToUI();
+           _assignCssToUI();
            
         }).trigger('change');
         
@@ -338,6 +335,19 @@ console.log('>>>', etype);
         if(!(l_cfg.children && l_cfg.children.length>0)) return;
         
         if(etype=='grid'){
+            
+                let val = [...l_cfg.bsClasses.matchAll(/(justify-content-)([a-z]+)/g)];
+                if(val.length==1 && val[0].length==3){
+                    cont.find('#grid-justify-content').val(val[0][2]);
+                }
+                val = [...l_cfg.bsClasses.matchAll(/(align-items-)([a-z]+)/g)];
+                if(val.length==1 && val[0].length==3){
+                    cont.find('#grid-align-items').val(val[0][2]);
+                }
+                val = [...l_cfg.bsClasses.matchAll(/(g-)(\d)/g)];
+                if(val.length==1 && val[0].length==3 && val[0][2]>0){
+                    cont.find('#grid-gap').val(val[0][2]);
+                }
 
                 let item_ele = cont.find('div[data-gridcol]');
                 item_ele.splice(1);
@@ -583,10 +593,10 @@ console.log('>>>', etype);
             css['display'] = 'block';
         }
         
-        // BORDER
+        // BORDER  get values from UI 
         
         let val = cont.find('#bsBorder-style').val();
-        if(val!='none'){
+        if(val!='none' || cont.find('#bsBorder-size').val()>0){
             css['--bs-border-style'] = val;
             
             bsClasses.push('border');
@@ -1001,40 +1011,37 @@ console.log('>>>', etype);
                 
             }
             if(l_cfg.bsClasses){
-                if(css['--bs-border-style'] && css['--bs-border-style']!='none'){
-                    cont.find('#bsBorder-style').val(css['--bs-border-style']);
-
-                    let borderClass = _getBsClasses(l_cfg.bsClasses, 'border');
-                    
-                    //TBD
-                    //cont.find('#bsBorder-size').val(borderClass)
-                    
-                    //cont.find('#bsBorder-color').val(borderClass)
-
                 
+                let borderClasses = _getBsClasses(l_cfg.bsClasses, 'border');
+                
+                if(borderClasses){
+                    
+                    const size = [...borderClasses.matchAll(/(border-)(\d)/g)];
+                    cont.find('#bsBorder-size').val(size.length==1 && size[0].length==3 && size[0][2]>0?size[0][2]:1);
+                
+                    if(l_cfg.css['--bs-border-style'] && l_cfg.css['--bs-border-style']!='none'){
+                        cont.find('#bsBorder-style').val(l_cfg.css['--bs-border-style']);
+                    }else{
+                        cont.find('#bsBorder-style').val('solid');
+                    }
+
+                    const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
+                    if(clr.length==1 && clr[0].length==3){
+                         cont.find('#bsBorder-color').val(clr[0][2]);
+                    }
+                    
+                    //cont.find('#bsBorder-color').hSelect('refresh')
+                    
                 }
                 
-                const roundedClass = _getBsClasses(l_cfg.bsClasses, 'rounded')??'0';
-                cont.find('#bsBorder-radius').val(roundedClass);
+                const roundedClass = _getBsClasses(l_cfg.bsClasses, 'rounded')??'rounded-0';
+                cont.find('#bsBorder-radius').val(roundedClass.substring(8));
                     
                 const shadowClass = _getBsClasses(l_cfg.bsClasses, 'shadow')??'none';
                 cont.find('#bsBorder-shadow').val(shadowClass);
+                cont.find('select[data-type="bs"]').hSelect('refresh');
             }
-                
-            
-            
-            bsClasses.push('border');
-            val = cont.find('#bsBorder-size').val();
-            if(val>1){
-                bsClasses.push('border-'+val);
-            }
-            val = cont.find('#bsBorder-color').val();
-            if(val!='default'){
-                bsClasses.push('border-'+val);
-            }
-            
-            
-            
+
             //assign flex css parameters
             let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(let i=0; i<params.length; i++){
