@@ -556,10 +556,14 @@ function dataOutput($data, $filename=null, $mimeType=null)
 
 function includeJQuery($useBootstrap=false){
 
-   $useVersion3 = true; 
-    
-   if ($useVersion3) {
-           // integrity has been got with https://www.srihash.org/
+   // integrity has been got with https://www.srihash.org/
+   if(isLocalHost()){
+?>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery/jquery-3.7.1.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery/jquery-ui.css"/>
+<?php
+   }else{
 ?>
         <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
 <!--        
@@ -567,7 +571,10 @@ function includeJQuery($useBootstrap=false){
 -->        
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
-
+<?php
+   }
+?>
+        
         <!-- Calendar picker -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
@@ -591,12 +598,12 @@ function includeJQuery($useBootstrap=false){
         
 <?php
         if($useBootstrap){
-        if(isLocalHost()){
+            if(isLocalHost()){
 ?>            
     <script src="<?php echo PDIR;?>external/bootstrap/bootstrap.bundle.min.js"></script>
     <link href="<?php echo PDIR;?>external/bootstrap/bootstrap.min.css" rel="stylesheet">
 <?php
-        }else{
+            }else{
 ?>            
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
@@ -604,50 +611,18 @@ function includeJQuery($useBootstrap=false){
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <?php
+            }
         }
-        }
-   }else{
-
-
-   if(isLocalHost()){
-?>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
+        if(isLocalHost()){
+?>        
+   <script src="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/jquery.fancytree-all.js"></script>
+   <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
-   }else{
-?>
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
-<?php
-   }
-?>
-        <!-- Calendar picker -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
-<?php
-   }
-?>
+        }else{
+?>        
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js" integrity="sha384-BSBg3ImWc3aK3fo7lX3qP5Ben/mH1jIVv4MJPkG7txP2Qg+kmn7l5u6XWDCxrrYK" crossorigin="anonymous"></script>
    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
+        }
 }
 ?>
