@@ -33,7 +33,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
     UTMzone = 0,
 
-    uniq_fieldnames = [],
+    uniq_fieldnames = {},
     
     currentStep, 
     currentId,  //currect record id in import tabel to PREVIEW data
@@ -679,10 +679,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     //reload dependency tree on select change
                     select_rectype.hSelect({change: 
-                    function(event, data){ 
-                            let treeElement = $dlg.find('#dependencies_preview');
-                            let selval = data.item.value;
-                            _loadRectypeDependencies( $dlg, treeElement, selval ); 
+                    function(event, data){
+                        let treeElement = $dlg.find('#dependencies_preview');
+                        let selval = data.item.value;
+                        uniq_fieldnames = {};
+                        _loadRectypeDependencies( $dlg, treeElement, selval ); 
                     }});                
 
                     let selval = imp_session['primary_rectype'];
@@ -693,6 +694,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     select_rectype.hSelect('refresh');
                     
                     let treeElement = $(this).find('#dependencies_preview');
+                    uniq_fieldnames = {};
                     _loadRectypeDependencies( $(this), treeElement, selval ); 
                     
                 },
@@ -782,8 +784,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 for(let j=fields.length-1;j>=0;j--){
                     let field = fields[j], k = field.indexOf('.');
                     if(k>0){
-                        let field_id = field.substr(0,k);
-                        let rt_id = field.substr(k+1);
+                        let field_id = field.substring(0,k);
+                        let rt_id = field.substring(k+1);
 
                         let field_title = $Db.rst(prev_rt, field_id, 'rst_DisplayName');
                         let rt_title = $Db.rty(rt_id,'rty_Name');
@@ -939,7 +941,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 let rectypes = response.data;
-                uniq_fieldnames = [];
+
                 let rtOrder = _fillDependencyList(rectypes, {levels:{}, fields:{} }, 0);    
                 //rt_fields - resource (record pointer) fields
                 //depend - only required dependencies 
@@ -1326,7 +1328,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     function _getFt_ID(field_key){
-        return field_key.substr(0, field_key.indexOf('.'));
+        return field_key.substring(0, field_key.indexOf('.'));
     }
     //
     //
@@ -1336,7 +1338,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(k<0){
             return field_key;
         }else{
-            return field_key.substr(k+1);
+            return field_key.substring(k+1);
         }
         
     }
@@ -1492,9 +1494,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                        let ids = (field.rt_ids)?field.rt_ids.split(','):[];
                        let field_id = field['key'];
                        field_id = field_id.substr(2);//remove prefix "f:"
-                      
-                       let rectypeNames = [], idfields={};
-             
+
                        for (i=0;i<ids.length;i++){
                                                       
                             recTypeID = ids[i];
@@ -1511,21 +1511,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             //get unique id field name for import table
                             let id_fieldname = _getColumnNameForPresetIndex(recTypeID, field_title);
-                            if(imp_session['primary_rectype']!=recTypeID){
-                                //add count to be unique
-                                let pos = id_fieldname.indexOf('H-ID');
-                                if(id_fieldname.indexOf('H-ID')== id_fieldname.length-4){
-                                    if(uniq_fieldnames[id_fieldname]>0){
-                                        uniq_fieldnames[id_fieldname] = uniq_fieldnames[id_fieldname] + 1;
-                                        id_fieldname = id_fieldname + ' ' + uniq_fieldnames[id_fieldname];
-                                    }else{
-                                        uniq_fieldnames[id_fieldname] = 1;
-                                    }
-                                }
+                            if(Object.hasOwn(uniq_fieldnames, id_fieldname)){
+                                uniq_fieldnames[id_fieldname] = uniq_fieldnames[id_fieldname] + 1;
+                                id_fieldname += ` ${uniq_fieldnames[id_fieldname]}`;
+                            }else{
+                                uniq_fieldnames[id_fieldname] = 1;
                             }
-                            
+
                             if(window.hWin.HEURIST4.util.isnull(rtOrder['fields'][key_ft_rt])){
-                                
+
                                 rtOrder['fields'][key_ft_rt] = {
                                     title:  field_title,
                                     parent_rt_id: parent_rectype_id,
@@ -1545,12 +1539,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 
                             }
 
-
                             if(rtOrder['fields'][parent_field_key]['depend'].indexOf(key_ft_rt)<0){
                                 rtOrder['fields'][parent_field_key]['depend'].push(key_ft_rt);
                             }
-                             
-                            
+
                             if( field.children.length>0){
                                 for(k=0; k<field.children.length; k++){
                                     if(field.children[k].type=='rectype' && field.children[k].key==recTypeID){
@@ -1571,30 +1563,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         rtOrder = _fillDependencyList(field, rtOrder, depth, parent_field_key);
                    }
              }//for children
-             
-             /*
-             for (j=0;j<rectypeTree.children.length;j++){
-                 
-                   let field = window.hWin.HEURIST4.util.cloneJSON(rectypeTree.children[j]);
-                   if(field.type!='rectype'){
-                            if( field.children.length>0){
-                                for(k=0; k<field.children.length; k++){
-                                    if(field.children[k].type=='rectype' && field.children[k].key==recTypeID){
-                                        rtOrder = _fillDependencyList(field.children[k], rtOrder, depth+1, key_ft_rt);
-                                        break;
-                                    }else if(field.children[k].type!='rectype') {
-                                        rtOrder = _fillDependencyList(field, rtOrder, depth+1, key_ft_rt);
-                                    }
-                                }
-                            }
-                   }else{
-                        rtOrder = _fillDependencyList(field, rtOrder, depth, parent_field_key);
-                   }
-             }*/
- 
-             
+
          }//has children
-         
 
          return rtOrder;
     }
@@ -1610,7 +1580,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         let rts = Object.keys(imp_session['indexes']);
         for(let k=0; k<rts.length; k++){
             if(imp_session['indexes'][rts[k]]==recTypeID){
-                let idx_id_fieldname = rts[k].substr(6); //'field_'
+                let idx_id_fieldname = rts[k].substring(6); //'field_'
                 sname = imp_session['columns'][idx_id_fieldname];
                 break;
             }
@@ -2658,7 +2628,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
                             
-                            sval = response[i].substr(0,100);
+                            sval = response[i].substring(0,100);
 
                             if(isIndex && response[i]<0){
                                 sval = "&lt;New Record&gt;";
@@ -4004,7 +3974,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let rts = Object.keys(imp_session['indexes']);
             for(k=0; k<rts.length; k++){
                 
-                let idx_id_fieldname = rts[k].substr(6); //'field_'
+                let idx_id_fieldname = rts[k].substring(6); //'field_'
                 if(idx_id_fieldname>imp_session['columns'].length){
                     let rtyID = imp_session['indexes'][rts[k]];
                     let sname = $Db.rty(rtyID,'rty_Name') +' H-ID';
@@ -4321,7 +4291,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         checked_field = checked_field[0];
                     }
                 
-                    let colname = imp_session['columns'][checked_field.substr(6)]; //field_
+                    let colname = imp_session['columns'][checked_field.substring(6)]; //field_
                         s = s + '<li><a href="#rec__'+k+'" style="color:red">'
                                     +colname+'<br><span style="font-size:0.7em">'
                                     +cnt+tabs[k]['short_message']+'</span></a></li>';
@@ -4347,7 +4317,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     checked_field = checked_field[0];
                 }
                 if(checked_field){
-                    ismultivalue = imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
+                    ismultivalue = imp_session['multivals'][checked_field.substring(6)];//highlight errors individually
                 }
                 /*
                 if(checked_field && checked_field.length>0){
@@ -4364,7 +4334,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //all this code only for small asterics
                 let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
 
-                let colname = imp_session['columns'][checked_field.substr(6)];
+                let colname = imp_session['columns'][checked_field.substring(6)];
                 let dt_id = res['mapped_fields'][checked_field]; //from validation
             
                     
@@ -4409,7 +4379,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                     if(fieldnames[i] == checked_field){
                         
-                        let dt_id2 = (dt_id>0) ?dt_id :dt_id.substr(0,dt_id.indexOf('_'));
+                        let dt_id2 = (dt_id>0) ?dt_id :dt_id.substring(0,dt_id.indexOf('_'));
                         
                         if($Db.rst(rtyID, dt_id2)==null){
                             console.error('ERROR: field '+dt_id2+' not found for '+rtyID);
@@ -4495,7 +4465,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             let i=0, fieldnames = Object.keys(res['mapped_fields']);
             for(;i<fieldnames.length;i++){
                 
-                let colname = imp_session['columns'][fieldnames[i].substr(6)];
+                let colname = imp_session['columns'][fieldnames[i].substring(6)];
                 s = s + '<th>'+colname+'</th>';
             }
 
@@ -4834,7 +4804,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 
                                 let isIndex =  (idx_id_fieldname==(i-1)) || !window.hWin.HEURIST4.util.isnull(imp_session['indexes']['field_'+(i-1)]);
                                 
-                                sval = response[i].substr(0,100);
+                                sval = response[i].substring(0,100);
 
                                 if(isIndex && response[i]<0){
                                     sval = "&lt;New Record&gt;";
