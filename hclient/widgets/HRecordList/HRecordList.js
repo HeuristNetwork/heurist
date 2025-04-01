@@ -36,6 +36,8 @@
 */
 import './HRecordView.js';
 import '../HBase/HBaseList.js';
+import '../HRecordList/HRecordListOpts.js';
+
 
 $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
@@ -47,8 +49,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     
     // default options
     options: {
+
+        resourcePath: 'hclient/widgets/HRecordList/HRecordList', //relative path+filename to resources: html, css and localization
         
-/* inherited from HBaseWidget, HBaseList
+        /* inherited from HBaseWidget, HBaseList
         hapi: null,
         
         htmlContent: null, // custom content
@@ -59,26 +63,27 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         entityType: 'rec', //'rec' by default
 
-        searchDomain: null,     // reference to entity HSearchDomains
-        searchInitial: null,    // initial search query
         
         recordSet:null,         // initial recordset
 */                
-        resourcePath: 'hclient/widgets/HRecordList/HRecordList', //relative path+filename to resources: html, css and localization
-
+        searchDomain: null,     // reference to entity HSearchDomains
+        searchInitial: null,    // initial search query
+        
         showCounter: true,
+        selectFirstRecord:false,
+        
         pageSize: 0, //   if zero it shows all records, and no pagination, maxvalue is 1000
 
         supportCollection: false, // TBD
         showMediaViewer: false,   // TBD show gallery on thumbnail click - data-heurist-media
         
         //default action of record item click  ????
-        selectAction: 'view', // none, select, view
+        selectAction: 'select', // none, select, view
         
-        selectMode: 'none',   //TBD none, single, multi
+        selectMode: 'single',   //TBD none, single, multi
 
         //where to show view or edit 
-        viewRecordMode: 'none', // none, inline, offcanvas-*, modal-*, popup (jquery dialog), target id, event
+        viewRecordMode: 'popup', // none, inline, offcanvas-*, modal-*, popup (jquery dialog), target id, event
         editRecordMode: 'none',   //TBD none, inline, offset, full, main, page, popup, event
         
         rendererCard: null,     // custom record card renderer that overrides default renderer
@@ -87,7 +92,6 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         templateCard: null,     // template for card renderer 
         templateTable: null,
         templateView: null,     //(if not defined it uses entity default smarty report)
-
     },
     
     _needLoadContent: true, //flag to avoid repeatable load of html content
@@ -115,15 +119,26 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     _init: function() {
         
         //debug
-        this.options.templateView = null; 
-        this.options.selectAction = 'view';
-        this.options.viewRecordMode = 'inline';
+        //this.options.templateView = null; 
+        //this.options.selectAction = 'view';
+        //this.options.viewRecordMode = 'inline';
         //this.options.viewRecordMode = 'modal-xl';
         //this.options.viewRecordMode = 'offcanvas-end';
         //this.options.viewRecordMode = 'popup';
         //this.options.viewRecordMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
         
+        if(this.recordView){
+            this.recordView.remove();   
+            this.recordView = null;
+        }
+        this._cashedItem = {};
+        this._current_page = 0;
+        
         this.record_id_attr = `data-heurist-${this.options.entityType}`;
+        
+        //this.options = $.extend(this.optionsDef, this.options);
+        
+console.log('INIT', this.options);      
         
         if(this.options.pageSize>1000){
             this.options.pageSize = 1000;
@@ -137,7 +152,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     *        b) perform some default actions (intial search for example) 
     */
     _initControls:function(){
-        
+
         //TBD
         // init multi-selection elements
         //init showMediaViewer
@@ -158,6 +173,20 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         }
         
         this.div_content = this._$('[data-heurist-role="recordList-content"]');
+        
+        if(this.options.selectMode!='multi'){
+            this._$('[data-heurist-role="recordList-selection"]').hide();
+        }
+        
+        this._on(this._$('[data-heurist-role="recordList-options"]'),
+            {click: ()=>this._openOptionsEditor((newOptions)=>{
+                if(newOptions){
+console.log('NEW', newOptions);      
+                    this.element.HRecordList(newOptions);
+                    //this.options = $.extend(this.optionsDefault, newOptions); 
+                    //this._initControls();
+                }
+            })});
 
         //triggers onInitFinished and performs initial search
         this._super();
@@ -496,6 +525,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             
             let request = {q:`ids:${ids}`, 
                            db:this.HAPI.database, 
+                           snippet: 1, //without header
                            template:this.options.templateCard,
                            lang: this.HAPI.getLocale()
                           };

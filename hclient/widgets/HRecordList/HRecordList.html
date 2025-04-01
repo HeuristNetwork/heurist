@@ -2,28 +2,33 @@
 
     <!-- record navigation -->
     <nav class="navbar navbar-light bg-light sticky-top container-fluid mb-2 py-1 px-2">
-        <div data-heurist-role="recordList-selection" aria-label="Selected items"> 
-        
-            <div class="dropdown">
-              <button class="btn btn-sm btn-light dropdown-toggle" type="button" idX="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                selected = 0
-              </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Select All</a></li>
-                  <li><a class="dropdown-item" href="#">Select None</a></li>
-                  <li><a class="dropdown-item" href="#">Show selected</a></li>
-                </ul>
-            </div>        
-<!--
-            <span data-heurist-role="recordList-selection-count">selected = 0</span>
+
+        <div class="d-flex">
+            <button data-heurist-role="recordList-options" type="button" class="btn btn-sm btn-outline-secondary"><span class="ui-icon ui-icon-gear"></span></button>
             
-            <input type="checkbox" class="btn-check" autocomplete="off" id="recordList-selection-show" data-heurist-role="recordList-selection-show">
-            <label class="btn btn-sm btn-outline-secondary" for="recordList-selection-show">
-                <i class="fas fa-filter"></i>
-            </label>            
+            <div data-heurist-role="recordList-selection" aria-label="Selected items"> 
             
-            <button class="btn btn-sm btn-light" data-heurist-role="recordList-selection-clear"><i class="far fa-times-circle"></i></button>
--->            
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-light dropdown-toggle" type="button" idX="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    selected = 0
+                  </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Select All</a></li>
+                      <li><a class="dropdown-item" href="#">Select None</a></li>
+                      <li><a class="dropdown-item" href="#">Show selected</a></li>
+                    </ul>
+                </div>        
+    <!--
+                <span data-heurist-role="recordList-selection-count">selected = 0</span>
+                
+                <input type="checkbox" class="btn-check" autocomplete="off" id="recordList-selection-show" data-heurist-role="recordList-selection-show">
+                <label class="btn btn-sm btn-outline-secondary" for="recordList-selection-show">
+                    <i class="fas fa-filter"></i>
+                </label>            
+                
+                <button class="btn btn-sm btn-light" data-heurist-role="recordList-selection-clear"><i class="far fa-times-circle"></i></button>
+    -->            
+            </div>
         </div>
 
         <div style="height:2rem">

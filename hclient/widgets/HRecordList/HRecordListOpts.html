@@ -1,0 +1,118 @@
+<fieldset><legend style="display:none"></legend>
+
+        <div>
+            <div class="header header_wide">
+                Filter to be applied at start
+            </div>
+            <input name="searchInitial" size="40" class="text ui-widget-content"/>
+        </div>
+        <!-- appearance -->
+        <div>
+            <div class="header header_wide">
+                Page size:
+            </div>
+            <select name="pageSize" class="text ui-widget-content" style="min-width:50px">
+                <option value="0">no pagination (limit 1,000)</option>
+                <option value="50">50 (optimum)</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="5000">5,000 (slow)</option>
+            </select>
+        </div>
+
+        <!-- selection -->        
+        <div>
+            <div class="header header_wide">
+                Default action on item click:
+            </div>
+            <select name="selectAction" style="min-width:50px">
+                <option value="select">select</option>
+                <option value="view">view details</option>
+                <option value="edit" disabled>edit details</option>
+                <option value="none">none</option>
+            </select>
+        </div>
+
+        <div>
+            <div class="header header_wide">
+                Selection mode:
+            </div>
+            <select name="selectMode" style="min-width:50px" disabled="disabled">
+                <option value="single">single</option>
+                <option value="multi">multi</option>
+            </select>
+        </div>
+        
+        <div>
+            <div class="header header_wide">
+                Auto trigger click on first record:
+            </div>
+            <input type="checkbox" name="selectFirstRecord" disabled="disabled"/>
+        </div>
+        
+        <div>
+            <div class="header header_wide">
+                View details as:
+            </div>
+            <select name="viewRecordMode" style="min-width:50px">
+                <option value="popup">popup</option>
+                <option value="inline">inline</option>
+                <option value="target" disabled="disabled">target element</option>
+                <option value="modal-sm">modal small</option>
+                <option value="modal-md">modal medium</option>
+                <option value="modal-lg">modal large</option>
+                <option value="modal-xl">modal xl</option>
+                <option value="modal-fullscreen">modal fullscreen</option>
+                <option value="modal-xl">modal xl</option>
+                <option value="offcanvas-start">offcanvas start</option>
+                <option value="offcanvas-end">offcanvas end</option>
+                <option value="offcanvas-top">offcanvas top</option>
+                <option value="offcanvas-bottom">offcanvas bottom</option>
+            </select>
+        </div>
+        
+        <div>
+            <div class="header header_wide">
+                Record card custom template
+            </div>
+            <select name="templateCard" class="text ui-widget-content ui-corner-all" title="">
+            </select>
+            <div class="heurist-helper3">Define custom report that generates invidual record cards. Record card div must have 
+                attribute 'data-heurist-rec' with record ID value and  class 'recordList-item'</div>
+        </div>
+        <div>
+            <div class="header header_wide">
+                Row custom template
+            </div>
+            <select name="templateTable" class="text ui-widget-content ui-corner-all" title="">
+            </select>
+            <div class="heurist-helper3">Define custom report that generates table ROW</div>
+        </div>
+        <div>
+            <div class="header header_wide">
+                View custom template
+            </div>
+            <select name="templateView" class="text ui-widget-content ui-corner-all" title="">
+            </select>
+            <div class="heurist-helper3">Define custom report for detail view</i>
+        </div>
+        
+        <div>
+            <div class="header header_narrow">
+                Unique widget id
+            </div>
+
+            <input name="widget_id" class="text ui-widget-content"/>
+            <div class="heurist-helper3">Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</div>
+        </div>
+        <div>
+            <div class="header header_narrow">
+                Search group
+            </div>
+            <input name="searchDomain" class="text ui-widget-content" value="search_group_1"/>
+            <div class="heurist-helper3">Arbitrary identifier for a group of widgets which share search and select events</div>
+
+        </div>
+        
+</fieldset>

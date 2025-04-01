@@ -54,7 +54,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
 
     // Flag to track close event context
     // Variable to be passed to options.onClose
-    _context_on_close:false, 
+    _contextOnClose:false, 
     
     /**
      * Initialize the widget.
@@ -147,7 +147,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
             }
             if(canClose){
                 if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
-                    this.options.onClose( this._context_on_close );
+                    this.options.onClose( this._contextOnClose );
                 }
             }
             this.element.hide();
@@ -251,7 +251,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
             beforeClose: options.beforeClose,
             close: () => {
                 if(this.$H.isFunction(this.options.onClose)){
-                    this.options.onClose(this._context_on_close);
+                    this.options.onClose(this._contextOnClose);
                 }
                 if (!this.options.keepInstance) {
                     this.jqDialog.remove();
@@ -333,7 +333,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
             text: window.hWin.HR('Close'),
             class: 'btnCancel',
             css: { 'float': 'right', 'margin-left': '30px', 'margin-right': '20px' },
-            click: () => this._closeDialog()
+            click: () => this.close()
         }];
 /*        return [
                  {text:window.hWin.HR('Cancel'), 

@@ -39,6 +39,7 @@ $.widget( 'heurist.HBaseWidget', {
     
     // Container for widget content (by default, `this.element`)
     _container: null, 
+    _optionsEditor: null, //container for options editor
     
     /**
      * Widget constructor: Initializes the component.
@@ -160,5 +161,30 @@ $.widget( 'heurist.HBaseWidget', {
      */
     _destroy: function() {
         // Implement cleanup logic here if necessary
-    }    
+        if(this._optionsEditor!=null){
+            this._optionsEditor.remove();    
+        }
+    },
+    
+    /*
+    * Opens options editor popup
+    */
+    _openOptionsEditor: function(onClose){
+        
+        const optEditor = this.widgetName+'Opts';
+        
+        if(this._optionsEditor==null){
+            this._optionsEditor = $('<div>').appendTo(this.element);    
+        }
+
+        if(this._optionsEditor[optEditor]('instance')){
+            this._optionsEditor[optEditor]('show', this.options);
+        }else{
+            let that = this;
+            this._optionsEditor[optEditor]({editOptions: this.options, onClose:onClose});
+                                        //viewMode: this.options.viewRecordMode, 
+                                        //recordTemplate: this.options.templateView,
+                                        //keepInstance: true});
+        }
+    }
 });
