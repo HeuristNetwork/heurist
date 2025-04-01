@@ -3401,7 +3401,9 @@ console.log('onEditFormChange @todo check buttons!!!');
 
                             $dlg.dialog('close');
                             $res_dlg.dialog('close');
-                            that.previewEditor.manageRecords('reloadEditForm', true); 
+                            that.previewEditor.manageRecords('reloadEditForm', true);
+
+                            window.hWin.HAPI4.EntityMgr.refreshEntityData('rst');
                         }
                     });
                 }

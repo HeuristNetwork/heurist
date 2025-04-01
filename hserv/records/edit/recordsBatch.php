@@ -2083,6 +2083,12 @@ public methods
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
+        if(!$this->checkRecordStructure($target_rty, $source_ids, $source_rty)){
+            $mysqli->rollback();
+            if($keep_autocommit===true) {$mysqli->autocommit(true);}
+            return false;
+        }
+
         foreach($record_ids as $rec_id){
 
             $cur_count ++;
@@ -2241,6 +2247,59 @@ public methods
         return ['count' => $final_count, 'record_ids' => implode(',', $new_records)];
     }
 
+    private function checkRecordStructure($rtyID, $dtyIDs, $importFromRty = 0){
+
+        $dtyIDs = prepareIds($dtyIDs);
+        $rtyID = intval($rtyID);
+        $importFromRty = intval($importFromRty);
+
+        if($rtyID <= 0 || empty($dtyIDs)){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $rtyID <= 0 ? 'Invalid record type to check has been provided' : 'No fields have been provided to check for');
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $hasAllFields = true;
+
+        foreach($dtyIDs as $dtyID){
+
+            $hasFld = mysql__select_value($mysqli, "SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID = ? AND rst_RecTypeID = ?", ['ii', $dtyID, $rtyID]);
+
+            if($hasFld > 0){
+                continue;
+            }
+
+            if($importFromRty <= 0){
+                $hasAllFields = $dtyID;
+                break;
+            }
+
+            $fieldDetails = mysql__select_row_assoc($mysqli, "SELECT * FROM defRecStructure WHERE rst_DetailTypeID = {$dtyID} AND rst_RecTypeID = {$importFromRty}");
+            if(empty($fieldDetails)){
+                $hasAllFields = $dtyID;
+                break;
+            }
+
+            unset($fieldDetails['rst_ID']);
+
+            $fieldDetails['rst_RecTypeID'] = $rtyID;
+
+            $rstID = mysql__insertupdate($mysqli, 'defRecStructure', 'rst', $fieldDetails, true);
+
+            if(!$rstID){
+                $hasAllFields = $dtyID;
+                break;
+            }
+        }
+
+        if(is_int($hasAllFields)){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, "Record structure is missing field type {$hasAllFields}");
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Change letter cases fo values found in freetext and blocktext (memo) fields based on selection:
      *  1 - Lowercase, uppercase first letter + first letter following fullstops
@@ -2380,10 +2439,10 @@ public methods
 
                     foreach($text_nodes as $node){
 
-                        $text = $operation == 1 || $operation == 3 ? mb_strtolower($node->data) : $node->data;
+                        $text = $operation == 1 || $operation == 3 ? mb_strtolower($node->textContent) : $node->textContent;
                         $text = $operation == 4 ? mb_strtoupper($text) : $text;
 
-                        $node->data = $use_reg ? mb_ereg_replace_callback($regex, $callback, $text) : $text;
+                        $node->textContent = $use_reg ? mb_ereg_replace_callback($regex, $callback, $text) : $text;
                     }
 
                     $value = $doc->saveHTML();// save new value
