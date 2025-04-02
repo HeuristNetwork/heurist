@@ -1236,8 +1236,10 @@ class HPredicate {
             global $mysqli;
 
             $final_ids = [];
-            $negate = strpos($value, '-') === 0;
-            $value = $negate ? ltrim($value, '-') : $value;
+            if(is_string($value)){
+                $negate = strpos($value, '-') === 0;
+                $value = $negate ? ltrim($value, '-') : $value;
+            }
             $ids = prepareIds($value);
 
             foreach ($ids as $rec_ID) {
