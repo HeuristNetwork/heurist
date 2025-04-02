@@ -5096,7 +5096,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 let $group = $(group);
                 let $tabs = $group.find('ul[role="tablist"]');
-                let last_dtid = $group.find('fieldset:last-child div[data-dtid]:last-child').attr('data-dtid');
+                let last_dtid = $group.find('fieldset.ui-tabs-panel:last-child div[data-dtid]').last().attr('data-dtid');
 
                 let $empty_cont = $('<div>').uniqueId();
                 let $new_tab = $('<li>').addClass('add_new_tab').append('<a href="#'+ $empty_cont.attr('id') +'"></a>').appendTo($tabs);

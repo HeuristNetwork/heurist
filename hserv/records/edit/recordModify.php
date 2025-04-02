@@ -3259,6 +3259,8 @@ function _getRtConstraintNames($system, $dtyID, $rectype)
         $allowed_names = array();
 
         foreach($allowed_rectypes as $rty_ID){
+            $rty_ID = intval($rty_ID);
+            if(!isPositiveInt($rty_ID)) continue;
             $recstr = dbs_GetRectypeStructure($system, $recstructures, $rty_ID);
             array_push( $allowed_names, $recstructures[$rty_ID]['commonFields'][$idx_name] );
         }

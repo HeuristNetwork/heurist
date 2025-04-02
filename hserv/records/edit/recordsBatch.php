@@ -921,7 +921,7 @@ class RecordsBatch
                     foreach($splitValues as $val){
                         $dtl['dtl_ID'] = -1;
                         $dtl['dtl_RecID'] = $recID;
-                        $dtl['dtl_DetailTypeID'] = $dtyID;
+                        $dtl['dtl_DetailTypeID'] = intval($dtyID);
                         $dtl['dtl_Value'] = $val;
                         $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                     }

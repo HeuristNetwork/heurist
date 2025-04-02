@@ -605,8 +605,8 @@ $.widget( "heurist.controlPanel", {
                 if(window.hWin.HEURIST4.util.isempty(response.data)){
                     return;
                 }
-
-                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data + location.search}" id="lnk_change" title="Move to alpha version">`
+                
+                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_change" title="Move to alpha version">`
                                + `Use the latest (alpha) version</a> (recommended)`;
 
                 that.version_message = $("<div>")
@@ -646,7 +646,7 @@ $.widget( "heurist.controlPanel", {
                             $dlg.dialog('close');
                             window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
                                 onClose: () => {
-                                    location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                                    location.href = window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database;
                                 }
                             });
                         };
@@ -657,7 +657,7 @@ $.widget( "heurist.controlPanel", {
                         $dlg.dialog('close');
                         window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
                             onClose: () => {
-                                location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                                location.href = window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database;
                             }
                         });
                     });
