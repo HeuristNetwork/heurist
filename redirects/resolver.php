@@ -64,7 +64,9 @@ $requestContent = array('xml'=>'text/xml',
 $format = null;
 $redirection_path = '../';
 
-$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
+$is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && 
+                    !($_SERVER["SERVER_NAME"]=='heurist.huma-num.fr' ||
+                      $_SERVER["SERVER_NAME"]=='heurist2025.huma-num.fr'));
 
 if($is_own_domain){
     //'dicobiosport' and 'privileges'
@@ -74,7 +76,6 @@ if($is_own_domain){
         array_unshift($requestUri, $database_name_from_domain); //add to beginning of array
     }
 }
-
 // --------------- INDEX or STARTUP
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha' || $requestUri[0]=='h7-alpha')){
 
@@ -88,7 +89,7 @@ if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-al
     )
 { //&& (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
     $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]);//to avoid "Open redirect" security report
-    
+
     if($dbname=='startup'){
         //redirectURL2('/'.rawurlencode($requestUri[0]).'/startup/index.php');
         include_once '../startup/index.php';
