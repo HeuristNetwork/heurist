@@ -2064,7 +2064,7 @@ $.widget( "heurist.resultList", {
             $rdiv = $target;
         }
 
-        let selected_rec_ID = $rdiv.attr('recid');
+        let selected_rec_ID = parseInt($rdiv.attr('recid'));
 
         let action =  $target.attr('data-key') || $target.parents().attr('data-key');
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
@@ -2474,6 +2474,7 @@ $.widget( "heurist.resultList", {
                         isSmarty = true;
                     }else{
                         //content is record view 
+                        recID = parseInt(recID);
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
