@@ -243,7 +243,7 @@ $.widget( "heurist.resultList", {
 
         if(!window.hWin.HEURIST4.util.isempty(rec_ids)){
             this._auto_select_record = Array.isArray(rec_ids) ? rec_ids : rec_ids.split(',');
-            this._auto_select_record = this._auto_select_record.filter((rec_ID) => !window.hWin.HEURIST4.util.isempty(rec_ID) && rec_ID > 0);
+            this._auto_select_record = this._auto_select_record.map(v =>parseInt(v, 10)).filter((v) => v > 0);
         }
 
         this._initControls();
