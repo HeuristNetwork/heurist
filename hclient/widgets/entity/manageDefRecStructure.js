@@ -2453,10 +2453,12 @@ console.log('onEditFormChange @todo check buttons!!!');
         if(afterAction=='close'){
             //after save on server - close edit form and refresh preview
             afterAction = function( recID ){
-                that._stillNeedUpdateForRecID = 0;
-                that._afterSaveEventHandler( recID ); //to update definitions and tree
-                if(refresh_tree) { that._initTreeView(); } // refresh tree if separator type has been changed
-                that._showRecordEditorPreview();  //refresh 
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', () => {
+                    that._stillNeedUpdateForRecID = 0;
+                    that._afterSaveEventHandler( recID ); //to update definitions and tree
+                    if(refresh_tree) { that._initTreeView(); } // refresh tree if separator type has been changed
+                    that._showRecordEditorPreview();  //refresh 
+                });
             };
         }
 
