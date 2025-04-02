@@ -1378,7 +1378,7 @@ class DbUtils {
                         echo "<b>Adding records to tables: </b>";
                     }
                     while ($table = $tables->fetch_row()) { //loop for all tables
-                        $table = $table[0];
+                        $table = $mysqli->real_escape_string($table[0]);
 
                         if($nodata && in_array(strtolower($table), $data_tables)){
                             continue;

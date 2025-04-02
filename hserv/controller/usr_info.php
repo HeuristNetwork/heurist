@@ -171,7 +171,6 @@
                 }
             }
         }
-
     }elseif($action == 'get_time_diffs'){
 
         $data = $req_params['data'];

@@ -1222,25 +1222,29 @@
         $blocked = array_key_exists('block', $user_settings[$usr_id]) ? $user_settings[$usr_id]['block'] : '';
         $blocked = explode(',', $blocked);
 
-        foreach($notifications as $type => $details){
+        $checkLastNotify = function(&$usrSettings, $type) use ($today, $usr_id, $blocked){
 
-            if(!array_key_exists($type, $user_settings[$usr_id])){
-                $user_settings[$usr_id][$type] = $today;
-                continue;
+            if(!array_key_exists($type, $usrSettings[$usr_id])){
+                $usrSettings[$usr_id][$type] = $today;
+                return true;
             }elseif(in_array($type, $blocked)){
-                continue;
+                return true;
             }
 
-            $notify_conds = $conditions[$type];
+            return false;
+        };
+
+        $checkConditions = function($conditions, $usrLastCheck) use ($mysqli, $today){
+
             $notify = false;
 
-            foreach($notify_conds as $conditional_type => $condition){
+            foreach($conditions as $conditional_type => $condition){
 
                 switch($conditional_type){
 
                     case 'period':
 
-                        $notify = strtotime($condition, intval($user_settings[$usr_id][$type])) <= $today;
+                        $notify = strtotime($condition, intval($usrLastCheck)) <= $today;
 
                         break;
 
@@ -1257,7 +1261,18 @@
                 }
             }
 
-            if($notify){
+            return $notify;
+        };
+
+        foreach($notifications as $type => $details){
+
+            if($checkLastNotify($user_settings, $type)){
+                continue;
+            }
+
+            $notify_conds = $conditions[$type];
+
+            if($checkConditions($notify_conds, $user_settings[$usr_id][$type])){
 
                 $user_settings[$usr_id][$type] = $today;
 

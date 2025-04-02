@@ -1,5 +1,7 @@
 /**
-* Template to define new widget
+* Template to define new widget 
+* 
+* PLEASE SEE _README.md for widget templates for version 7 and above
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

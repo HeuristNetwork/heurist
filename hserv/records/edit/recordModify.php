@@ -3259,6 +3259,8 @@ function _getRtConstraintNames($system, $dtyID, $rectype)
         $allowed_names = array();
 
         foreach($allowed_rectypes as $rty_ID){
+            $rty_ID = intval($rty_ID);
+            if(!isPositiveInt($rty_ID)) continue;
             $recstr = dbs_GetRectypeStructure($system, $recstructures, $rty_ID);
             array_push( $allowed_names, $recstructures[$rty_ID]['commonFields'][$idx_name] );
         }
@@ -3413,7 +3415,8 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
         $recordField = intval($rule['swf_RecEmailField']);
         if($recordField > 0 && array_key_exists($recordField, $record['details'])){
-            foreach($record['details'][$recordField] as $email){
+            $emails = is_array($record['details'][$recordField]) ? $record['details'][$recordField] : [$record['details'][$recordField]];
+            foreach($emails as $email){
                 if(!filter_var($email, FILTER_VALIDATE_EMAIL) || array_search($email, $res['emails']) !== false){
                     continue;
                 }

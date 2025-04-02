@@ -243,7 +243,7 @@ $.widget( "heurist.resultList", {
 
         if(!window.hWin.HEURIST4.util.isempty(rec_ids)){
             this._auto_select_record = Array.isArray(rec_ids) ? rec_ids : rec_ids.split(',');
-            this._auto_select_record = this._auto_select_record.filter((rec_ID) => !window.hWin.HEURIST4.util.isempty(rec_ID) && rec_ID > 0);
+            this._auto_select_record = this._auto_select_record.map(v =>parseInt(v, 10)).filter((v) => v > 0);
         }
 
         this._initControls();
@@ -2064,7 +2064,7 @@ $.widget( "heurist.resultList", {
             $rdiv = $target;
         }
 
-        let selected_rec_ID = $rdiv.attr('recid');
+        let selected_rec_ID = parseInt($rdiv.attr('recid'));
 
         let action =  $target.attr('data-key') || $target.parents().attr('data-key');
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
@@ -2474,6 +2474,7 @@ $.widget( "heurist.resultList", {
                         isSmarty = true;
                     }else{
                         //content is record view 
+                        recID = parseInt(recID);
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
@@ -4528,11 +4529,13 @@ $.widget( "heurist.resultList", {
 
             this._isCollectionUsed = true;
 
-            this._fullRecordset = this._currentRecordset;
+            this._fullRecordset = this._fullRecordset ?? this._currentRecordset;
 
             let cnt = this._collection.length;
             let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
             this._currentRecordset = new HRecordSet(rs);
+
+            this._currentSubset = null; // remove subset
 
         }else{
             this._isCollectionUsed = false;
@@ -4540,7 +4543,7 @@ $.widget( "heurist.resultList", {
         }
 
         const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';
-        
+
         window.hWin.HAPI4.currentRecordset = this._currentRecordset;
 
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {
