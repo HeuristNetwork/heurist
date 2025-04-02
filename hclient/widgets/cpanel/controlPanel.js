@@ -646,7 +646,7 @@ $.widget( "heurist.controlPanel", {
                             $dlg.dialog('close');
                             window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
                                 onClose: () => {
-                                    location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                                    location.href = window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database;
                                 }
                             });
                         };
@@ -657,7 +657,7 @@ $.widget( "heurist.controlPanel", {
                         $dlg.dialog('close');
                         window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport', {
                             onClose: () => {
-                                location.href = window.hWin.HAPI4.baseURL_pro + location.search;
+                                location.href = window.hWin.HAPI4.baseURL_pro + '?db=' + window.hWin.HAPI4.database;
                             }
                         });
                     });
