@@ -8,11 +8,3 @@ Note:       Although these functions are mostly Version 3 code, they have been m
 Updated:    17 december 2015
 
 ---------------------------------------------------------------------
-
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-

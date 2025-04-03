@@ -49,12 +49,3 @@ Updated:     07 March 2025
 
 ----------------------------------------------------------------------------------------------------------------
 
-/**
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2025 Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @version     7.0
-*/
-

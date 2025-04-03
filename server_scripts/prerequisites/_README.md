@@ -8,9 +8,3 @@ Created: 	24th Feb 2016, Mostly work in progress @ oct 2022
 
 ---------------------------------------------------------------------
 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2022 University of Sydney
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
