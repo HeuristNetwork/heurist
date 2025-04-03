@@ -1,4 +1,4 @@
-Directory:    /context_help
+Directory:    /documentation/context_help
 
 Overview:      Specific context help pages, mostly updated to Vsn 6.
 

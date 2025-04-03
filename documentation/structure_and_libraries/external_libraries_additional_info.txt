@@ -25,7 +25,7 @@ External libraries managed by composer (see composer.json) are in:
 
     .../HEURIST_SUPPORT/vendors
 
-See also /documentation_and_templates/modifications_to_external_functions.txt 
+See also /documentation/modifications_to_external_functions.txt 
 for specific changes that have been made to the source code of these functions 
 (where unavoidable), and the reasons for modification.
 

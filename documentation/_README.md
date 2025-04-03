@@ -1,4 +1,4 @@
-Directory:	/documentation_and_templates
+Directory:	/documentation
 
 Overview:	All general technical documentation should be placed here
 
