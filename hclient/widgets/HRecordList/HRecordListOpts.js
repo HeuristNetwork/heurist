@@ -58,15 +58,8 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
         
         //Init some controls
         this._$('select').hSelect();
+        this._$('#tabs').tabs();
 
-        let that = this;
-        this._$('select[name^="template"]').each((i,sel)=>{
-        window.hWin.HEURIST4.ui.createTemplateSelector(  
-                        $(sel), [{key:'',title:'standard template'}], 
-                           '',  //$select3.attr('data-template')
-                           {extraOptions: {menu_parent: that.jqDialog}}); 
-                        }); // or bsModal bsOffcanvas
-        
     },
 
     /* 
@@ -126,7 +119,7 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
     _fillControls: function(){
 
         let that = this;
-        let allFields = this._$('input,select');
+        let allFields = this._$('input,select,textarea');
         if(!that.options.editOptions) that.options.editOptions = {};
         //from prefs to ui
         allFields.each(function(){
@@ -139,6 +132,13 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
                 }
             };
         });
+        
+        this._$('select[name^="template"]').each((i,sel)=>{
+        window.hWin.HEURIST4.ui.createTemplateSelector(  
+                        $(sel), [{key:'',title:'standard template'}], 
+                           that.options.editOptions[sel.name],  //$select3.attr('data-template')
+                           {extraOptions: {menu_parent: that.jqDialog}});  // or bsModal bsOffcanvas
+                        }); 
     },
 
     /*
@@ -147,15 +147,13 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
     _applyChanges: function(){
 
         let that = this;
-        let allFields = this._$('input,select');
+        let allFields = this._$('input,select,textarea');
         
         that.options.editOptions = {};
 
         allFields.each(function(){
             if(this.type=="checkbox"){
-                if(!this.checked){
-                    that.options.editOptions[this.name] = false; //this.checked?1:0;
-                }
+                that.options.editOptions[this.name] = this.checked;
             }else if(!($(this).val()=='' || ($(this).is('select') && $(this)[0].selectedIndex==0))) {
                 that.options.editOptions[this.name] = $(this).val();
             }

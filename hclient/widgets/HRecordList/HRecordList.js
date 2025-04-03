@@ -92,6 +92,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         templateCard: null,     // template for card renderer 
         templateTable: null,
         templateView: null,     //(if not defined it uses entity default smarty report)
+        
+        placeholderInitBlank: false,
+        placeholderEmptyBlank: false,
+        placeholderInit: null,
+        placeholderEmpty: null,
+        placeholderInitDef: '',
+        placeholderEmptyDef: 'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)',
     },
     
     _needLoadContent: true, //flag to avoid repeatable load of html content
@@ -115,30 +122,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     _cashedItem:{},
     _lastSelectedIndex: null,
 
-
     _init: function() {
-        
-        //debug
-        //this.options.templateView = null; 
-        //this.options.selectAction = 'view';
-        //this.options.viewRecordMode = 'inline';
-        //this.options.viewRecordMode = 'modal-xl';
-        //this.options.viewRecordMode = 'offcanvas-end';
-        //this.options.viewRecordMode = 'popup';
-        //this.options.viewRecordMode = 'modal-xl'; //modal-sm modal-lg modal-xl  modal-fullscreen-md-down  modal-fullscreen
-        
-        if(this.recordView){
-            this.recordView.remove();   
-            this.recordView = null;
-        }
-        this._cashedItem = {};
-        this._current_page = 0;
-        
+
         this.record_id_attr = `data-heurist-${this.options.entityType}`;
         
-        //this.options = $.extend(this.optionsDef, this.options);
-        
-console.log('INIT', this.options);      
+//console.log('DEF', $.heurist.HRecordList.prototype.options)        
+//console.log('INIT', this.options);      
         
         if(this.options.pageSize>1000){
             this.options.pageSize = 1000;
@@ -181,10 +170,17 @@ console.log('INIT', this.options);
         this._on(this._$('[data-heurist-role="recordList-options"]'),
             {click: ()=>this._openOptionsEditor((newOptions)=>{
                 if(newOptions){
+                    newOptions = $.extend($.heurist.HRecordList.prototype.options, newOptions);
 console.log('NEW', newOptions);      
+                    
+                    if(this.recordView){
+                        this.recordView.remove();   
+                        this.recordView = null;
+                    }
+                    this._cashedItem = {};
+                    this._current_page = 0;
+
                     this.element.HRecordList(newOptions);
-                    //this.options = $.extend(this.optionsDefault, newOptions); 
-                    //this._initControls();
                 }
             })});
 
@@ -765,7 +761,7 @@ console.log(interpolate(template, { ...data
                 let that = this;
                 this.recordView.HRecordView({recID: selected_rec_ID,
                                             viewMode: this.options.viewRecordMode, 
-                                            recordTemplate: this.options.templateView,
+                                            templateView: this.options.templateView,
                                             keepInstance: true});
             }
         }

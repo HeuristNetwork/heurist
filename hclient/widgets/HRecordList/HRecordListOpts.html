@@ -1,5 +1,28 @@
-<fieldset><legend style="display:none"></legend>
+<div id="tabs">
+<ul>
+    <li><a href="#tab-setup">Setup</a></li>
+    <li><a href="#tab-templates">Custom templates</a></li>
+    <li><a href="#tab-messages">Messages</a></li> <!-- Various custom messages, e.g. placeholder and no data -->
+</ul>
 
+<fieldset id="tab-setup"><legend style="display:none"></legend>
+
+        <div>
+            <div class="header header_narrow">
+                Unique widget id
+            </div>
+
+            <input name="widget_id" class="text ui-widget-content"/>
+            <div class="heurist-helper3">Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</div>
+        </div>
+        <div>
+            <div class="header header_narrow">
+                Search group
+            </div>
+            <input name="searchDomain" class="text ui-widget-content" value="search_group_1"/>
+            <div class="heurist-helper3">Arbitrary identifier for a group of widgets which share search and select events</div>
+        </div>
+        
         <div>
             <div class="header header_wide">
                 Filter to be applied at start
@@ -16,15 +39,21 @@
                 <option value="50">50 (optimum)</option>
                 <option value="100">100</option>
                 <option value="500">500</option>
-                <option value="1000">1,000</option>
-                <option value="5000">5,000 (slow)</option>
+                <option value="1000">1,000 (slow)</option>
             </select>
         </div>
 
+        <div>
+            <div class="header header_wide">
+                Show counter:
+            </div>
+            <input type="checkbox" name="showCounter"/>
+        </div>
+        
         <!-- selection -->        
         <div>
             <div class="header header_wide">
-                Default action on item click:
+                Action on select:
             </div>
             <select name="selectAction" style="min-width:50px">
                 <option value="select">select</option>
@@ -46,7 +75,7 @@
         
         <div>
             <div class="header header_wide">
-                Auto trigger click on first record:
+                Auto select first record:
             </div>
             <input type="checkbox" name="selectFirstRecord" disabled="disabled"/>
         </div>
@@ -71,6 +100,8 @@
                 <option value="offcanvas-bottom">offcanvas bottom</option>
             </select>
         </div>
+</fieldset>
+<fieldset id="tab-templates"><legend style="display:none"></legend>
         
         <div>
             <div class="header header_wide">
@@ -98,21 +129,48 @@
             <div class="heurist-helper3">Define custom report for detail view</i>
         </div>
         
+</fieldset>
+<fieldset id="tab-messages"><legend style="display:none"></legend>
+        
         <div>
-            <div class="header header_narrow">
-                Unique widget id
+
+            <div class="header header_wide">
+                Message prior to selection
             </div>
 
-            <input name="widget_id" class="text ui-widget-content"/>
-            <div class="heurist-helper3">Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</div>
-        </div>
-        <div>
-            <div class="header header_narrow">
-                Search group
+            <label><input type="checkbox" name="placeholderInitBlank"> check to leave blank</label>,
+            otherwise defaults to <br>
+            "<span id="placeholderInitBlankDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
+
+            <br>
+            <textarea name="placeholderInit" rows="10" cols="45"></textarea>
+            <br>
+
+            <div class="heurist-helper3">
+                Message to display while search is not performed or no record or search has been selected
             </div>
-            <input name="searchDomain" class="text ui-widget-content" value="search_group_1"/>
-            <div class="heurist-helper3">Arbitrary identifier for a group of widgets which share search and select events</div>
+
+        </div>
+
+        <div>
+
+            <div class="header header_wide">
+                No data message
+            </div>
+
+            <label><input type="checkbox" name="placeholderEmptyBlank"> check to leave blank</label>,
+            otherwise defaults to <br>
+            "<span id="placeholderEmptyDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
+
+            <br>
+            <textarea name="placeholderEmpty" rows="10" cols="45"></textarea>
+            <br>
+
+            <div class="heurist-helper3">
+                Message to be shown if query returns no records
+            </div>
 
         </div>
         
 </fieldset>
+</div>

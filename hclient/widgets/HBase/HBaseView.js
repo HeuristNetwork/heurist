@@ -202,10 +202,12 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
         else if (this.options.viewMode.includes('-bottom')) handles = 'n';
         else if (this.options.viewMode.includes('-end')) handles = 's';
 
+        /*temp disable   jquery ui-resizable sets position:relative
         $(offcanvas).resizable({
             minWidth: 400,
             handles: handles,
         });
+        */
 
         this.bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvas);
 
