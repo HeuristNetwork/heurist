@@ -133,7 +133,7 @@ function sendStatsToMain(){
 
     global $system, $is_main_server;
 
-    $script = HEURIST_MAIN_SERVER . '/h6-alpha/redirects/allServerStats.php';
+    $script = HEURIST_MAIN_SERVER . '/heurist/admin/describe/allServerStats.php';
 
     if(!file_exists(DB_STATS_FILE) && !createStats()){
         exitScript(null, null, true);
