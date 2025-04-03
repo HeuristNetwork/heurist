@@ -33,7 +33,7 @@ Summary of current status with UI translations:
 
 - Widgets text content - htm snippets (only text and tags) - stored along widget js files
 
-- Context help - content for popups. htm snippets (only text and tags) - stored in context_help
+- Context help - content for popups. htm snippets (only text and tags) - stored in documentation/context_help
 
 - Entities edit forms - localised version of entity configuration json. It does not duplicate the entire json -  only translated label values like rst_DisplayName or rst_DisplayHelpText
 

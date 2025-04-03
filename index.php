@@ -149,7 +149,7 @@ if( @$_REQUEST['isalive']==1){
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
 
-}elseif (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
+}elseif (@$_REQUEST['asset']){ //only from documentation/context_help - download localized help or documentation
 
     $params = USanitize::sanitizeInputArray();
 
@@ -165,7 +165,7 @@ if( @$_REQUEST['isalive']==1){
         $name = $name . '.htm';
     }
 
-    $asset_folder = 'context_help/';
+    $asset_folder = 'documentation/context_help/';
 
     $locale = $params['lang'];//locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){

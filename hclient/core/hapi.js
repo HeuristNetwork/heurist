@@ -195,7 +195,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(installDir=='/') installDir = '/heurist/';/* to change back to '/heurist/'; */
             }else{
                 //removed top folders: applications|common|search|records|
-                installDir = script_name.replace(/(((\?|admin|context_help|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+                installDir = script_name.replace(/(((\?|admin|documentation/context_help|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
             }
         }
 
@@ -1657,7 +1657,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 *
 *For widgets we use json from /hlcient/assets/localization/localization[_lang3].js  (function window.hWin.HR)
 *To localize entity edit forms (record types, fields, terms etc) we use localized json from /hserv/entity/defRecTypes[_lang3].json
-*For static context help or html snippets  we take html snippets from /context_help/resultListEmptyMsg_fre.htm  (function window.hWin.HRes )
+*For static context help or html snippets  we take html snippets from /documentation/context_help/resultListEmptyMsg_fre.htm  (function window.hWin.HRes )
 * 
 *In other words, where content is created dynamically (widgets, edit forms) we take localized strings (mostly for labels and hints) from json arrays 
 *For large static content with a lot of text we load the entire translated html snippet. 

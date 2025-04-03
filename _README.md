@@ -24,7 +24,7 @@ as a blogging, bibliography and student project tool, as well as for administrat
 
 For full information please visit https://HeuristNetwork.org
 
-Documentation standards and overall structure are described in files in the /documentation_and_templates
+Documentation standards and overall structure are described in files in the /documentation
 directory. This includes a detaiiled description of the layout of the Heurist directories and steps for 
 installation.
 
@@ -50,7 +50,7 @@ linked to result lists, maps etc. A central index allows Heurist databases to im
 registered database to promote sharing of data models. Right-to-left scripts and Asian characters are fully supported. 
 There is provision to translate the interface and for cross-database searching although we have not had the resources to do this.
 
-![Main Interface Vsn 6](/documentation_and_templates/assets/main%20interface%20v6.jpg "Main Interface Vsn 6")
+![Main Interface Vsn 6](/documentation/assets/main%20interface%20v6.jpg "Main Interface Vsn 6")
 
 ## Research database workflow
 
@@ -58,20 +58,20 @@ Heurist has been developed at the University of Sydney since 2005, based on year
 Heurist is in active development with more than 1000 commits/year since moving to gitHub in 2014. Version 6 was released in February 2021 and represents a complete redesign of the menu system and overall appearance in collaboration with a professional UX designer (Brant Trim, Serata Digital, Canberra) but is fully backward compatible with databases developed in version 5.
 We transferred the help system from help builder software to a Heurist database in Nov 2020, which now generates the Heurist Help System (also accessible within Heurist). This is now being updated to reflect version 6 (work-in-progress 2021). Issue tracking is also handled by a Heurist database. 
 
-![Model and Build](/documentation_and_templates/assets/model%20and%20build.jpg "Model and Build")
+![Model and Build](/documentation/assets/model%20and%20build.jpg "Model and Build")
 
 ## Heurist Projects
 
 Heurist has a built-in capability to generate data-driven interactive websites. The CMS website pages are stored and edited directly in the database and can render media, searches, maps, blog pages etc. using the data. Heurist hosts dozens of research websites around the world, several of which are displayed below. You can see [featured projects](https://heuristnetwork.org/featured-projects) and [search our projects database](https://heuristnetwork.org/projects-search) at our website.
 
-![Projects Collage](/documentation_and_templates/assets/project_thumbnail_collage.png "Projects Collage")
+![Projects Collage](/documentation/assets/project_thumbnail_collage.png "Projects Collage")
 
 
 ## Contributing
 
 We very much welcome collaboration and invite contributions to the development of Heurist. We will be delighted to exchange design ideas and our development roadmap with developers, researchers, documenters and trainers who would be interested in contributing to the system or developing specific extensions or training programs for their own use. Please feel free to add suggestions to our job tracking system (see below) or email support@heuristnetwork.org.
 
-In 2022, we are undergoing significant refactoring and code documentation, and have formed a documentation group of power users and developers. To get started with the source code, you can view some of the items in the [documentation and templates](/documentation_and_templates/) directory. Most of the server-side code is in the `hsapi` directory. Most of the client code is in the `hclient` directory.
+In 2022, we are undergoing significant refactoring and code documentation, and have formed a documentation group of power users and developers. To get started with the source code, you can view some of the items in the [documentation and templates](/documentation/) directory. Most of the server-side code is in the `hsapi` directory. Most of the client code is in the `hclient` directory.
 
 ## Source code & licensing
 
