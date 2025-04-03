@@ -716,6 +716,8 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 window.hWin.HEURIST4.util.setDisabled($sel_Field, !$chk_Enabled.is(':checked'));
                 if(!$chk_Enabled.is(':checked')){
                     $input.val('').trigger('change');
+                }else if(!window.hWin.HEURIST4.util.isempty($sel_Field.val())){
+                    $input.val($sel_Field.val()).trigger('change');
                 }
             }
         });
