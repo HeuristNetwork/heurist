@@ -971,7 +971,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                      }});
                      
             //init help button     
-            if( options["documentation/context_help"] && window.hWin.HEURIST4.ui ){
+            if( options['context_help'] && window.hWin.HEURIST4.ui ){
                     
                     $info_button = $('<button>')
                             .button({icon:'ui-icon-circle-help', showLabel:false, label:'Help'})
@@ -981,7 +981,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     
                     window.hWin.HEURIST4.ui.initHelper({
                             button:$info_button, 
-                            url: window.hWin.HRes(options['documentation/context_help']),
+                            url: window.hWin.HRes(options['context_help']),
                             position:{my:'right top', at:'right top', of:$container},
                             container: $container,
                             is_open_at_once: options['show_help_on_init']===false ? false : true

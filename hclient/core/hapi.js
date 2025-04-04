@@ -195,7 +195,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(installDir=='/') installDir = '/heurist/';/* to change back to '/heurist/'; */
             }else{
                 //removed top folders: applications|common|search|records|
-                installDir = script_name.replace(/(((\?|admin|documentation/context_help|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
             }
         }
 
