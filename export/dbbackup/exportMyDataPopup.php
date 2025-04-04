@@ -566,8 +566,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
 
             if(@$_REQUEST['include_docs']=='1'){// 2016-10-25
-                echo_flush2('Copy context_help folder<br>');
-                folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/');
+                echo_flush2('Copy documentation/context_help folder<br>');
+                folderRecurseCopy( HEURIST_DIR.'documentation/context_help/', FOLDER_BACKUP.'/documentation/context_help/');
             }
 
            //remove dbdef_cache.json (database definitions cache) from entity folder

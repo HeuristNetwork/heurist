@@ -219,7 +219,7 @@ ext/
 vendor/
 help/
 external/
-documentation_and_templates/api/
+documentation/api/
 node_modules/
 
 *.mjs

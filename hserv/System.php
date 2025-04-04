@@ -511,7 +511,7 @@ class System {
             $folders['entity']        = array(null,'used to store icons and images for record types users,groups,terms', $allowWebAccessEntityFiles);
             $folders['backup']        = array(null,'used to write files for user data dump');
             $folders['uploaded_tilestacks'] = array('TILESTACKS','used to store uploaded map tiles', true, false);
-            //since 2023-06-02 $folders['documentation_and_templates'] = array('','', false, false);
+            //since 2023-06-02 $folders['documentation'] = array('','', false, false);
             $folders['faims']    = array('','');
             $folders['blurredimagescache'] = array(null,'(for blurred due to visibility settings)', true, false);
             $folders['webimagecache'] = array(null,'(for cached web images)', true, false);

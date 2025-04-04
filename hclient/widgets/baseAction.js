@@ -27,7 +27,7 @@ $.widget( "heurist.baseAction", {
         path: '',  // non default path to html content 
         htmlContent: '', //general layout
         helpContent: null, //if false help button is hidden, if null it sets name of help file to widgetName,
-                           // help file must be in context_help folder
+                           // help file must be in documentation/context_help folder
 
         default_palette_class: 'ui-heurist-admin', 
 

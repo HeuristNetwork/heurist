@@ -25,8 +25,8 @@
                 "rst_TermsAsButtons": 1,
                 "rst_RequirementType":"required",
                 "rst_FieldConfig": [
-                    {"key": "6983", "title": "Suggestion or feature request"},
-                    {"key": "6981", "title": "Minor annoyance, workflow or cosmetic issue"},
+                    {"key": "7615", "title": "Suggestion or feature request"},
+                    {"key": "7608", "title": "Minor annoyance, workflow or cosmetic issue"},
                     {"key": "6980", "title": "Major annoyance or unexpected behaviour"},
                     {"key": "6982", "title": "Minor bug or small glitch"},
                     {"key": "6977", "title": "Significant bug or problematic behaviour"},

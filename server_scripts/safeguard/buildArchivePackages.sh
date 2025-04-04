@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# THIS SEEMS LIKE AN OUTDATED VERSION, LAST MODIFIED BY ARTEM OSMAKOV APPROX. OCT 2024
+# MOVED HERE FROM ROOT 3/4/2025
+# NOT CALLED WITHIN THE SOURCE CODE OF HEURIST
+# cron job calls /srv/scripts/archive_bzip_dbs.sh
+
 # Default prefix for databases
 DB_PREFIX="hdb_"
 
