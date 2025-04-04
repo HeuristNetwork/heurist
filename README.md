@@ -153,6 +153,66 @@ Comprehensive help is available in a dedicated Heurist database,
 
 The distribution version at HeuristNetwork.org in the installation page is updated approximately once a month more frequently in case of urgent bug fixes. Monthly updates generally contain numerous tweaks and bug fixes, while significant new features are added every two to three months. The installation and update scripts (see installation page) are very simple and have been proven over a decade \- they should run on most Unix servers and have been designed specifically to restrict their activity to a single directory (/var/www/html/HEURIST) so that they do not mess with anything else installed on the server.
 
+The scripts below or in ```server_scripts/utiliy``` can be downloaded, edited (if required) and run locally where the server does not have access to the Internet or for greater control on file locations etc. (on the whole we do not recommend this as our installation is non-invasive – it installs everything in ```/var/www/html/HEURIST``` (the directory can be moved or renamed after installation) and intentionally avoids changing any server settings (some manual tweaking could be required, but that remains under your control).
+
+#### Test Prerequisites
+Heurist assumes that Linux, Apache, MySQL and PHP (LAMP stack) are installed and running, and requires some specific PHP modules (which may already exist on your server). Heurist installs in an independent directory and makes no changes to the server to avoid conflicts with existing installed software. Please see the Prerequisites section below for changes which might be required to Apache, MySQL and PHP INI files for optimal management, and for the PHP modules to be installed. Once Heurist has been installed, run ```https://<your server>/heurist/admin/verification/verifyInstallation.php``` to list any missing required modules.
+
+#### Install
+```curl -l https://HeuristRef.net/HEURIST/DISTRIBUTION/install_heurist.sh | bash -s h6-alpha sudo```
+**h6-alpha** is the name of the version to be installed, and can be replaced with **heurist** or **h6-beta**. This script sets up and copies all necessary files to the HEURIST directory. After installation, you will need to add MySQL login information and contact email addresses etc. to the Heurist initialisation file (```…/HEURIST/heuristConfigIni.php```) before running Heurist. The installation script will give you instructions at the end. The script ONLY creates directories, sets permissions and copies files, it does not make other changes to the server, so it should not interfere with any other software.
+
+#### Update
+```curl -l https://HeuristRef.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha sudo```
+This creates a separate instance of Heurist in the HEURIST directory with the name of the update version (if this is different from an existing version on the server, allowing it to be used in parallel with the existing version in this case). This can be replaced once the new version has been checked over. The distribution file can be found at:
+
+> version.tar.bz2
+
+where version is the version. All current versions operate on a compatible database structure, so one can switch to and fro between versions freely without problems, accessing the same database in each case. Thus it is OK to operate on an alpha version and switch back to a beta or production version if a problem is encountered. Heurist version 6.x.x is backwards compatible with any version since version 3.0 (dating to 2010), although there may be some minor glitches with saved searches and custom formats.
+
+#### Support files
+Heurist requires **external**, **external_h4**, **vendor**, and **help** directories, normally installed in ```/var/www/html/HEURIST/HEURIST_SUPPORT``` and simlinked from the root folder of each Heurist codebase. They are located at: **external.tar.bz2**, **external_h4.tar.bz2**, **vendor.tar.bz2**, and **help.tar.bz2**. They are not included in the program’s tar.bz2 files (above), but are downloaded and installed automatically by the installation and update scripts. Note: vendor is new in version 5.1.x (Feb 2019) and will gradually replace the other external library folders.
+
+#### Prerequisites
+Heurist runs under a standard Unix LAMP stack configuration (Apache, PHP, MySQL/MariaDB) on Debian, Ubuntu, RHEL and other Unix variants (it can also be run on Windows or Mac). We currently support PHP 5.6 – 7.3 and MySQL 5.7 – 8.0, although it should run on older versions from MySQL 5.1. You may be able to install all three at once with lamp-stack, or else install the three components separately with ```sudo yum install``` … or ```sudo apt-get install```…
+
+Please search the web for instructions for your particular operating system. Be sure to run /usr/bin/mysql_secure_installation to set the root password and remove default user and database.
+
+Run ```https://[yourhost]/heurist/admin/verification/verifyInstallation.php``` to verify that all required extensions are installed. Most of them should be enabled by default. Some extensions such as pdo, pdo_sqlite, exif, xsl are required only for specific tasks (for in situ file import or faims import). Some, such as mbstring, may already be installed by default. Make sure the following PHP extensions are installed:
+
+> **gd**, **pdo**, **mbstring**, **mysqli**, **json**, **session**, **dom**, **curl**, **xsl**, **SimpleXML**, **xml**, **apache2handler**, **pcre**, **filter**, **SPL**, **zip**, **pdo_sqlite** (for faims import), **exif** (for in situ file import)
+
+In **/etc/my.cnf** or **/etc/mysql/my.cnf** add:
+
+```
+[mysqld]
+
+local-infile = 1
+```
+```
+[mysql]
+
+local-infile = 1
+```` 
+
+To increase max allowed size for media files or import data to be uploaded from the PHP default of 2 MBytes, make the following changes in php.ini file  (to locate your **php.ini** type in command line use either ```php -r “phpinfo();” | grep php.ini``` or  php –ini ).
+```
+upload_max_filesize=30M 
+
+post_max_size=30M
+```
+The max size can be increased further, but it is better to use the multi-file uploader for very large files as it uploads in chunks and handles errors in transmission. 
+
+Finally, you should edit ```/etc/httpd/conf/httpd.conf``` and replace ```AllowOverride None```  with ```AllowOverride Limit Options=Indexes``` inside the ```<Directory “/var/www/html”>``` section. This enables ```.htaccess``` files which are used to restrict access to uploaded files and other user data, but permit web access to record type icons, image thumbnails and html output.
+
+Once the pre-requisites are loaded, simply run the Heurist install script and you’re ready to roll.
+
+Mail (optional but strongly recommended): Certain functions (new user registration, notifications and sharing) require Heurist to send email. You can install a local email server with: ```apt-get install postfix``` (Debian) or ```yum install postfix``` (Redhat).
+
+Cron (optional but strongly recommended): You should also set up cron jobs to carry out notifications and regeneration of fixed html files from custom reports. If you require this functionality, please send us an email and we will supply instructions.
+
+In case of problems, please feel free to contact us.
+
 Heurist can also be installed on a Windows server \- Systemik Solutions are working on documentation, please contact us for information.
 
 ### **Feedback / questions**
