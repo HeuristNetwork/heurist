@@ -2845,7 +2845,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             title: sTitle,
             height: 600,
             width: 900,
-            'documentation/context_help': 'defTerms #import',
+            context_help: 'defTerms #import',
             callback: function(context){ 
 
                 if(context && context.result)
@@ -2892,7 +2892,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             title: sTitle,
             height: 600,
             width: 900,
-            'documentation/context_help': 'defTerms #import',
+            context_help: 'defTerms #import',
             callback: function(context){ 
 
                 if(context && context.result)
