@@ -1672,7 +1672,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '<td style="width:300px;">'
                 + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Heurist IDs for records being added/updated &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
-                + '<select id="sa_dt_'+i+'" style="width:230px;max-width:230px;font-size:1em;" data-field="'+i+'" '
+                + '<select id="sa_dt_'+i+'" style="width:17.5em;max-width:17.5em;font-size:1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select>';
             
@@ -3715,7 +3715,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#prepareErrors').show();//.css('display','inline-block');
                             
                             window.hWin.HEURIST4.msg.showMsgErr({
-                                message: (res['count_error']==1?'There is one row':('There are '+res['count_error']+' ROWS '))
+                                message: (res['count_error']==1?'There is one row ':('There are '+res['count_error']+' ROWS '))
                                         +'with warnings in your input (the same error may occur in many rows).'
                                         +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
                                         +'(no record with given ID), missing required values and so forth.'
@@ -4353,7 +4353,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         s += '<br><br>';     
                     }
 
-                    if(cnt >= 1000 || cnt == imp_session['reccount']){
+                    if(cnt >= 500 || (cnt == imp_session['reccount'] && cnt >= 100)){
 
                         s += '<span style="color:red;">'
                             + 'Heurist has determined that there is a very large amount of terms to be imported that do not exist.<br>'
@@ -4630,26 +4630,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         let btns = {};
         btns['Periods as separators'] = function(){
 
+            let keep_parent_label = $dlg_term_warning.find('[name="chk_retain_parent"]').is(':checked') ? 1 : 0;
             $dlg_term_warning.dialog('close');
 
-            _importTerms_Import(fields, '.', $dlg, is_all);
+            _importTerms_Import(fields, '.', $dlg, is_all, keep_parent_label);
         };
 
         btns['Periods as part of terms'] = function(){
 
             $dlg_term_warning.dialog('close');
 
-            _importTerms_Import(fields, '', $dlg, is_all);
+            _importTerms_Import(fields, '', $dlg, is_all, 0);
         };
 
         $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
             'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
-            + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
+            + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)<br><br>'
+            + '<label><input type="checkbox" name="chk_retain_parent" checked="checked"> Retain parent terms in the term label at lower levels</label>',
             btns, 
             {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
         );
     }
-    function _importTerms_Import(fields, separator, $dlg, is_all){
+    function _importTerms_Import(fields, separator, $dlg, is_all, retain_parent_label = 0){
 
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(fields) || fields[0].length != 3){
             window.hWin.HEURIST4.msg.showMsgErr({
@@ -4669,6 +4671,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             action: 'import_terms',
             fields: fields,
             trm_Separator: separator,
+            trm_RetainParentLabel: retain_parent_label,
             request_id: window.hWin.HEURIST4.util.random()
         };
 
@@ -4687,7 +4690,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
 
             let cnt = $dlg.find('.add_terms').length;
-            let added_count = response.data.success.length;
+            let added_count = response.data.added;
 
             let s = `${added_count} new term${(added_count==1)?' was':'s were'} imported. `;
 
