@@ -3360,6 +3360,7 @@ $.widget( "heurist.editing_input", {
         let max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
         let upload_count = 0; // for paste/drop of multiple files
         let uploaded_urls = []; // uploaded files, for multiple files at once
+        let keep_existing = false; // whether the upload is from a paste or drop event
 
         let fileupload_opts = {
     url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
@@ -3380,16 +3381,22 @@ $.widget( "heurist.editing_input", {
     pasteZone: $input_img,
     dropZone: $input_img,
     paste: function(e, data){
-        upload_count = that.f('rst_DefaultValue') != 1 ? data.files.length : 1;
+        upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     drop: function(e, data){
-        upload_count = that.f('rst_DefaultValue') != 1 ? data.files.length : 1;
+        upload_count = that.f('rst_MaxValues') != 1 ? data.files.length : 1;
+        keep_existing = that.f('rst_MaxValues') != 1 && Object.keys(that.newvalues).length > 0;
     },
     always: function(){
         if(upload_count > 0 && uploaded_urls.length === upload_count){
+
             let values = Object.values(that.newvalues).concat(...uploaded_urls);
             that.setValue(values);
+
+            upload_count = 0;
         }
+        keep_existing = false;
     },
     add: function (e, data) {
         if (e.isDefaultPrevented()) {
@@ -3463,7 +3470,7 @@ $.widget( "heurist.editing_input", {
                         :file[(that.configMode.version=='icon')?'iconUrl':'thumbnailUrl'])
                         +'?'+(new Date()).getTime();
 
-                    if(upload_count > 1){
+                    if(upload_count > 1 || keep_existing){
                         uploaded_urls.push(urlThumb);
                         return;
                     }
