@@ -24,15 +24,9 @@ if(!defined('PDIR')){
     includeJQuery(true);
     
     $useOldCode = true;
-    
-/*
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
-*/ 
 ?>
     <script>
-        window.hWin = window; //isolated
+        window.hWin = window; //isolated instances (to avoid mix with cmsEditor in parent)
     </script>
 
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -52,6 +46,8 @@ if(!defined('PDIR')){
 
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordView.js"></script>
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
+    <script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
+    <script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenuPersonal.js"></script>
 
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>
@@ -62,6 +58,8 @@ if(!defined('PDIR')){
     -->
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/ActionHandler.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/CmsManager.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/WebSite.js"></script>
+
     
 <?php    
 if($useOldCode){
@@ -109,7 +107,7 @@ if(@$_REQUEST['edit']){
 
     
 <?php
-}
+}//edit
 ?>
     
     <!-- move to WebSite.js -->
@@ -137,48 +135,39 @@ if(@$_REQUEST['edit']){
         
         function onHapiInit(success)
         {
+            if(!success){
+                return;
+            }
+            
+            // Successfully initialized system
+            
+            window.hWin.HAPI4.is_publish_mode = true; //to avoid mandatory login and other checks for admin part
 
             window.isHapiInited = true;
 
-            window.Hul = window.hWin.HEURIST4.util;
+            window.Hul = window.hWin.HEURIST4.util; //TBR: need only for consts in svs_list 
 
-            if(success) // Successfully initialized system
-            {
-
-                //webSite = new WebSite();
-
-                //init layout - init Heurist widgets on this page
-                //init layout
-                const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit(pageContentJSON, 'main', {});
-
-                //init header
-                window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', 
-                        {HMenu:{onActionComplete:onPageLoad, onBeforeAction:onPageBeforeLoad}});
+            <?php
+                //main menu - json array 
+                $menu_content = $this->getMenuTree();
+                print 'let menuContentJSON = '.json_encode($menu_content).';'; //used in _editCMS_SiteMenu
                 
-                onPageLoad(<?php echo $this->getPageRecord()?>, pageTreeData);
-            }
-        }
-        
-        function onPageBeforeLoad(){
-            if(window.parent && window.parent.cmsEditor){
-                return window.parent.cmsEditor.warningOnExit();    
-            }
-            return true;
-        }
-        
-        //
-        // for edit
-        //        
-        function onPageLoad(record, pageTreeData){
-            if(window.parent && window.parent.cmsEditor){
-                if(pageTreeData){
-                    record['pageTreeData'] = pageTreeData;
+                $page_content = $this->getPageContent(false);
+                $page_content_json = json_decode($page_content, true);
+                if($page_content_json){
+                    //cms version 2 - json array
+                    print 'let pageContentJSON = '.$page_content.';';
+                    $page_content = '';
+                }else{
+                    print 'let pageContentJSON = null;';
                 }
-                if(window.parent && window.parent.cmsEditor){
-                    window.parent.cmsEditor.onLoadPageContent(record);    
-                }
-            }
+                
+                print 'let siteId = '.$this->getSiteId().';';
+                print 'let pageId = '.$this->getPageId().';';
+            ?>
+            
+            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON});  
+
         }
-        
     </script>
     

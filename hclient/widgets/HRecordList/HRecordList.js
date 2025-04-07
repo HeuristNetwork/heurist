@@ -101,7 +101,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         placeholderEmptyDef: 'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)',
     },
     
-    _needLoadContent: true, //flag to avoid repeatable load of html content
+    _needLoadContent: true,
     _needLoadCss: true,
     /* inherited
     recordSet:null,   // HRecordSet

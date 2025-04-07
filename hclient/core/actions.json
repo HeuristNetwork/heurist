@@ -364,6 +364,12 @@
         "title": "Log out Heurist",
         "text": "Log out"
     },
+    {
+        "id": "menu-profile-login",
+        
+        "title": "Login",
+        "text": "Log in"
+    },
 
     {
         "text": "---------------------------------------------------- STRUCTURE"

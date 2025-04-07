@@ -47,7 +47,7 @@ $.widget( 'heurist.HBaseWidget', {
     _create: function() {
         
         // Define a shorthand function for querying elements inside `this.element`
-        this._$ = selector => this.element.find(selector);
+        this._$ = selector => this.element.find(selector);  //querySelector(selector);
         
         // Assign HAPI instance (fallback to global HAPI4 if not provided)
         this.HAPI = this.options.hapi ?? window.hWin.HAPI4;

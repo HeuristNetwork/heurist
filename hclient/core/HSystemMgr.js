@@ -86,7 +86,10 @@ class HSystemMgr {
    * @param {callserverCallback} callback - callback function with response parameter HUser object
    */
   login(request, callback) {
-    if (request) request.a = 'login';
+
+    if (!request) request = {};  
+    request.a = 'login';  
+    
     window.hWin.HAPI4.callserver('usr_info', request, response => {
            if (response.status == window.hWin.ResponseStatus.OK) {
                this.matomoTrackLogin();
@@ -95,6 +98,8 @@ class HSystemMgr {
            if (window.hWin.HEURIST4.util.isFunction(callback)) {
                callback(response);
            }
+console.log('ON CREDNE');           
+           $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
        });
   }  
  

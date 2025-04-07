@@ -53,6 +53,7 @@ window.hWin.cfg_widgets = [
     {id:'HRecordView', name:'RecordView', widgetname:'HRecordView', script:'hclient/widgets/HRecordList/HRecordView.js'},
     {id:'HRecordList', name:'Records', widgetname:'HRecordList', script:'hclient/widgets/HRecordList/HRecordList.js'},
     {id:'HMenu', name:'Menu', widgetname:'HMenu', script:'hclient/widgets/HMenu/HMenu.js'},
+    {id:'HMenuPersonal', name:'Menu Personal', widgetname:'HMenuPersonal', script:'hclient/widgets/HMenu/HMenuPersonal.js'},
     
     {id:'heurist_resultListDataTable', name:'List View', widgetname:'resultListDataTable', script:'hclient/widgets/viewers/resultListDataTable.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},

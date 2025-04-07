@@ -343,6 +343,15 @@ class WebSite
                     DT_EXTENDED_DESCRIPTION=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION));
         return json_encode($res);
     }
+
+    public function getSiteId(){
+        return $this->siteRecord['rec_ID'];
+    }
+
+    public function getPageId(){
+        $rec = $this->pageRecord??$this->siteRecord;
+        return $rec['rec_ID'];
+    }
     
     //
     // Returns page main content (stored in DT_EXTENDED_DESCRIPTION)
@@ -412,7 +421,7 @@ class WebSite
     //
     private function getLanguageSelector(){
         
-        return '<select class="form-select me-2 w-auto">'
+        return '<select class="form-select-sm me-2 w-auto">'
                             .'<option value="en">English</option>'
                             .'<option value="fr">Français</option>'
                .'</select>';
@@ -469,7 +478,7 @@ class WebSite
         $siteID = $this->siteRecord['rec_ID'];
         $menu_tree = $this->menuTree[$siteID];
         
-        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all" data-heurist-role="Menu">';
+        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all">';
         
         foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
         

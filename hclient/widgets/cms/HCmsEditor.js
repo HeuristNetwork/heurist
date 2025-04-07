@@ -240,9 +240,14 @@ class HCmsEditor {
   //
   // This is event for initial loading in iframe
   //
-  #onWebPageLoadComplete(){
-      //menu as json tree
-      this.menuContentJSON = this._webPageFrame[0].contentWindow.menuContentJSON;
+  #onWebPageLoadComplete()
+  {
+      //website menu as json tree
+      if(this._webPageFrame[0].contentWindow){
+        this.menuContentJSON = this._webPageFrame[0].contentWindow.webSite.siteMenu;
+      }else{
+          this.menuContentJSON = [];
+      }
       
       if(this._editCMS_SiteMenu){
           //refresh website structure tree
@@ -256,14 +261,21 @@ class HCmsEditor {
   //
   // called from editCMS_SiteMenu - load different page into target element
   //
-  loadPageContent(page_id){
+  loadPageContent(pageId){
       
-    if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)){
-        page_id = this.page_id;
+    if(this.warningOnExit()){
+        return;
+    }
+      
+    if(!window.hWin.HEURIST4.util.isPositiveInt(pageId)){
+        pageId = this.pageId;
     }
 
-    this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', 
-            {page_id:page_id, callback:(rec)=>this.onLoadPageContent(rec)});;
+    if(this._webPageFrame[0].contentWindow.webSite){
+        this._webPageFrame[0].contentWindow.webSite.loadPage( {pageId:pageId} );
+    }
+    //this._webPageFrame[0].contentWindow.HAPI4.actionHandler.executeActionById('data-heurist-pageid', {pageId:pageId}); 
+    //, callback:(rec)=>this.onLoadPageContent(rec)}
   }
 
   //
@@ -284,6 +296,7 @@ class HCmsEditor {
       }
       */
 
+      //TBD change to webSite.getContainer
       this.layout_container = this._webPageFrame[0].contentDocument.getElementsByTagName('main');
       if(!this.layout_container){
           this.layout_container = this._webPageFrame[0].contentDocument.getElementById('main-content');
@@ -344,6 +357,9 @@ class HCmsEditor {
       
   }
   
+  /*
+  * Returns true if action is blocked
+  */
   warningOnExit(callback){
       return (this._cmsEditorPage && this._cmsEditorPage.warningOnExit( callback ));                           
   }

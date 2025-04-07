@@ -1,6 +1,7 @@
 <?php
 /**
 *  WebSiteTemplate.php - basic Heurist CMS website template
+*   It is included into WebSite.php. $this - instances of WebSite
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -39,21 +40,7 @@
     <link rel="icon" href="<?php $this->meta('favicon');?>"> <!--  type="image/x-icon" -->
     <link rel="shortcut icon" href="<?php $this->meta('favicon');?>">
 
-    <?php
-        //main menu - json array 
-        $menu_content = $this->getMenuTree();
-        print '<script>window.menuContentJSON = '.json_encode($menu_content).'</script>';
-        
-        $page_content = $this->getPageContent(false);
-        $page_content_json = json_decode($page_content, true);
-        if($page_content_json){
-            //cms version 2 - json array
-            print '<script>let pageContentJSON = '.$page_content.'</script>';
-            $page_content = '';
-        }else{
-            print '<script>let pageContentJSON = null;</script>';
-        }
-
+    <?php    
         //includes minimal required set of heurist scripts and styles
         include_once 'WebSiteScripts.php';
     ?>
@@ -63,7 +50,7 @@
 <?php $this->getPageHeader();?>
 
 <main> <!--  class="container mt-3 pt-5" -->
-<?php echo $page_content;?>
+<?php $this->getPageContent();?>
 </main>
 <footer class="">
 <?php $this->getPageFooter();?>

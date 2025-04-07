@@ -3,7 +3,7 @@
         <nav class="navbar navbar-expand-md navbar-dark">
             <div class="container-fluid">
             
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" Xdata-heurist-widget="HBrand">
                 <img src="{$header.logo_small}" alt="Logo" height="40" class="me-2 d-block d-md-none">
                 <img src="{$header.logo}" alt="Logo" height="40" class="me-2 d-none d-md-block">
                 <div class="h6 mb-0">{$header.title}</div>
@@ -18,8 +18,9 @@
                 <div class="d-flex ms-lg-3">
                     <!-- language selector -->
                     {$header.languages} 
+                    <!-- <div data-heurist-widget="HMenuLanguages"></div> -->
                     <!-- login/signup and personal menu -->
-                    <div data-heurist-role="userPersonal"></div>
+                    <div data-heurist-widget="HMenuPersonal"></div>
                 </div>
             </div>
             </div>   

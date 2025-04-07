@@ -2346,13 +2346,14 @@ option {padding-left:15px;}
     max-width:120px;
     font-size:10px;
 }
-
+/* 2025-04-04
 A:link {
     text-decoration: underline;
 }
 A:hover {
     text-decoration: underline;
 }
+*/
 a.bare {
     color: black;
     text-decoration: none;

@@ -2306,7 +2306,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             title: 'Import Base fields by CSV',
             height: 800,
             width: 1000,
-            documentation/context_help: 'defDetailTypes #import',
+            context_help: 'defDetailTypes #import',
             callback: function(context){ 
 
                 if(context && context.result){

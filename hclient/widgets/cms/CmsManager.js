@@ -78,13 +78,6 @@ class CmsManager {
             return;
         }
         
-        if(actionid=='data-heurist-pageid'){ //load webpage
-            this.#initDefCodes();
-            this.#loadWebPage(options);
-            return;
-        }
-        
-
         if (!this.checkRequiredRecordTypes(() => {
             this.executeAction(actionid);
         })) {
@@ -102,6 +95,7 @@ class CmsManager {
                 break;
             case 'menu-cms-edit-page':
             case 'menu-cms-view-page':
+                //standalone page
                 this.#selectPage(actionid, -1);
                 break;
             case 'menu-cms-edit':
@@ -606,68 +600,4 @@ class CmsManager {
         });
     }
     
-    /**
-    * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
-    */
-    #loadWebPage(options){
-        
-        let page_target = $(options.container??'main');
-        if(page_target.length==0){
-            page_target = $('#main-content');
-        }
-        if(page_target.length==0){
-            window.hWin.HEURIST4.msg.showMsgErr('Web Page can not be loaded. Targer element not found');
-            return;
-        }
-        
-        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-        const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-        const supp_options = options.supp_options;
-        
-        const server_request = {
-                        q: 'ids:'+options.page_id,
-                        restapi: 1,
-                        columns: ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
-                        zip: 1,
-                        format:'json'};
-                        
-        //perform search see record_output.php       
-        window.hWin.HAPI4.RecordMgr.search_new(server_request,
-            function(response){
-              
-                if(window.hWin.HEURIST4.util.isJSON(response)) {
-                    let record = response['records'];
-                    if(record && record.length>0){
-                        record = record[0];
-                        let res = record['details'];
-                        let keys = Object.keys(res);
-                        for(let idx in keys){
-                            let key = keys[idx];
-                            res[key] = res[key][ Object.keys(res[key])[0] ];
-                        }
-                        res['rec_ID'] = record['rec_ID'];
-                        //res[DT_NAME] = res[DT_NAME]
-                        //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-                        
-                        //reload content of page_target
-                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options );
-                        
-                        res['pageTreeData'] = pageTreeData;
-                        
-                        if (window.hWin.HEURIST4.util.isFunction(options.callback)) options.callback.call(this, res);
-                         
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: `Web Page not found (record #${options.page_id})`,
-                            error_title: 'Failed to load page'
-                        });
-                    }
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
-        
-
-    }
 }

@@ -1,5 +1,5 @@
 /**
-* Menu - menu handler
+* HMenu - menu handler
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -7,87 +7,46 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @version     7.0
 */
+import '../HBase/HBaseWidget.js';
 
+$.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
-
-$.widget( 'heurist.HMenu', {
-
-    //roles in content
-    // heurist-role-count
-    // heurist-role-pagination
-    // heurist-role-viewport
-    
     // default options
     options: {
-        hapi: null,
+        resourcePath: 'hclient/widgets/HMenu/HMenu',
         
-        path: 'hclient/widgets/HMenu/',
-        htmlContent: null, // custom content
-        uiLibrary: null,   // 'bootstrap','jqueryui'
-    
-        //menuTreeJSON: null,
-        viewMode: 'bootstrap', // none, horizontal or vertical buttonsMenu, tree    
-        menuActionHandler: null,  // replacment of default event handler via ActionHandler
+        viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, tree    
+        //styleMode: 'links',     // pills, jquery
+        
+        customActionHandler: null,  // replacement of default event handler via ActionHandler
         onBeforeAction: null,
         onActionComplete: null    // invoked in ActionHandler after action execution
     },
     
-    $H: window.hWin.HEURIST4.util,
-    _$: $, //shorthand for this.element.find
-
-    _init_completed: false,
+    _needLoadContent: false,
+    _needLoadCss: true,
     
-    actionHandler: null,
-    
+    _actionHandler: null,
 
-    // the widget's constructor
-    _create: function() {
+    _init: function(){
         
-        this._$ = selector => this.element.find(selector); //querySelector(selector); 
-
-        // prevent double click to select text
-        this.element.disableSelection();
-    }, //end _create
-
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
-    _init: function() {
+        this._super();
         
-        this.options.templateView = null; 
-    
-        let that = this;    
-        
-        if(!this.options.hapi){
-            this.options.hapi = window.hWin.HAPI4;    
-        }
-        
-        this.actionHandler = this.options.hapi.actionHandler;
-
-        const isCssLoaded = selectorExists('.dropdown-hover-all');
-
-        if(!isCssLoaded){
-            //add widget classes
-            let css_url = this.options.hapi.baseURL + this.options.path + 'HMenu.css';
-            $.getStyles(css_url);
-        }
-        
-            
-        if(!this.$H.isempty(this.options.htmlContent)){ 
-            //custom content
-            this.element.html(this.options.htmlContent);
-        }
-        
-        this._initControls();
+        this._events = this.HAPI.Event.ON_CREDENTIALS;
+        let that = this;
+        $(window.hWin.document).on(this._events, (event, data)=>that.eventHandler(event, data) );
     },
+
     
-    //  
-    // invoked from _init after loading of html content
-    // adds event listeners 
-    //
+    /**
+     * Initializes UI controls and event listeners after content is loaded.
+     */
     _initControls:function(){
         let that = this;
+
+        this._actionHandler = this.HAPI.actionHandler;
        
-        if(this.options.viewMode=='bootstrap'){
+        if(this.options.viewMode=='horizontal'){
                 // move it to HMenu
                 let $bs = bootstrap;
   
@@ -140,18 +99,20 @@ $.widget( 'heurist.HMenu', {
 
         this._on( this._$('a[data-heurist-pageid]'), {click : this.menuActionHandler }); //load cms record (web page)
         
-        /*
+        /*  Action attributes for link elements
             data-heurist-recid  - view record
             data-heurist-svs  - start saved filter
             data-heurist-svs-list|add|delete  
+            data-heurist-pageid = edit
         
         */    
         
-        this._init_completed = true;
-        
+        this._super();
     },
     
-    
+    /**
+     * Initializes UI controls and event listeners after content is loaded.
+     */
     menuActionHandler: function(event, ui) {
 
         event.preventDefault(); 
@@ -170,7 +131,7 @@ $.widget( 'heurist.HMenu', {
         let action_id = ele.attr('data-heurist-action');
         if(!action_id){
             action_id = ele.attr('data-heurist-pageid');
-            opts.page_id = action_id;
+            opts.pageId = action_id;
             action_id = 'data-heurist-pageid';
         }
         if(this.options.onActionComplete){
@@ -185,40 +146,51 @@ $.widget( 'heurist.HMenu', {
         }
         
         // Call user-defined action handler
-        if(this.options.menuActionHandler){
-            this.options.menuActionHandler.call(this, action_id, opts);
+        if(this.options.customActionHandler){
+            //custom handler
+            this.options.customActionHandler.call(this, action_id, opts);
         }else{
-            this.actionHandler.executeActionById(action_id, opts);
+            //defeault action handler
+            this._actionHandler.executeActionById(action_id, opts);
         }
     },
-    
 
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-        if(!this._init_completed) return;
-    },
-    // 
-    // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        this.clearContent();       
-        this._clearPagination();       
+        if(this._events){
+            $(this.document).off(this._events);
+        }
+        
+        this.clearContent();    
+        this._super();   
     },
 
-    //
-    // Removes content
-    //
+    /*
+    * Removes content
+    */
     clearContent: function(){
         
-        if(!this._init_completed) return;
-        
-        //_off all clicks for actions per record cards
-        this._off( this.div_content.find(`div[${this.record_id_attr}]`), 'click');
+        if(!this._initCompleted) return;   
+
+        this._off( this._$('a[data-heurist-action]') );
+        this._off( this._$('a[data-heurist-pageid]') );
     },
     
-
+    /*
+    *
+    */
+    eventHandler: function(e, data){
+        if(e.type == this.HAPI.Event.ON_CREDENTIALS)
+        {
+            this.onChangeCredentials(data);
+        } 
+    },
+    
+    /*
+    * Show/hide elements on menu depends on current credentials
+    */    
+    onChangeCredentials: function(data){
+        
+    }
     
 });

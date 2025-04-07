@@ -411,10 +411,12 @@ class ActionHandler {
         }
         
         if (actionid == 'data-heurist-pageid') {
-            if (!this.cmsManager) {
-                this.cmsManager = new CmsManager();
+            
+            if(window.hWin.webSite){
+                window.hWin.webSite.loadPage( dialog_options );
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr('Web Page can not be loaded. CMS is not inited for this instance of Heurist');
             }
-            this.cmsManager.executeAction(actionid, dialog_options);
             return true;
         }
         
@@ -561,6 +563,9 @@ class ActionHandler {
                 break;
             case "menu-profile-import":
                 this.importUsers( popup_dialog_options ); //for admin only
+                break;
+            case "menu-profile-login":
+                window.hWin.HEURIST4.ui.checkAndLogin( false ); 
                 break;
             case "menu-profile-logout":
                 window.hWin.HAPI4.SystemMgr.logout();
