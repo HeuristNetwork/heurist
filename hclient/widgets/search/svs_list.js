@@ -2051,11 +2051,7 @@ $.widget( "heurist.svs_list", {
                     if(that.options.is_h6style){
                         context_on_exit = noptions;
                     }else {
-                        
-                        if(this.isPublished){
-                            this.element.css('overflow-y','hidden');
-                        }
-                        
+
                         this.search_faceted.show();
                         if(this.search_faceted.height() == 0 && this.search_tree.height() != 0){ // set facet container height to avoid invisible search
                             let min_height = this.search_tree.height();
