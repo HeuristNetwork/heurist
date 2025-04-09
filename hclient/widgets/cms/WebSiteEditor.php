@@ -30,9 +30,14 @@ if(!defined('PDIR')) {
 }
 require_once dirname(__FILE__).'/../../framecontent/initPage.php';
 
-$req_params = USanitize::sanitizeInputArray();
-$website_id = @$req_params['website'];
-$page_id = @$req_params['pageid'];
+if(!isset($params)){
+    $params = USanitize::sanitizeInputArray();
+}
+$website_id = @$params['website'];
+if(!isPositiveInt($website_id)){
+    $website_id = 0; //default website
+}
+$page_id = @$params['pageid'];
 if(!isPositiveInt($page_id)){
     $page_id = $website_id;
 }
@@ -64,9 +69,10 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
-
+<!--
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
+<script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
+-->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>

@@ -47,6 +47,7 @@ class WebSite {
         //onPageLoad(<?php echo $this->getPageRecord()?>, pageTreeData);
         
         this.loadPage({pageId:this.pageId});
+        
     }
 
 
@@ -150,5 +151,26 @@ class WebSite {
         
 
     }
+ 
+    /**
+    * Reload page to open CMS editor
+    */
+    editPage(options){
+        
+        if(!options){
+            //edit=3 loads WebSiteEditor and then website in iframe 
+            //edit=2 loads website in edit mode
+            options = {mode:'edit', websiteid:this.siteId, pageid:this.pageId};
+        }
+    
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink(options);
+
+        if (options.newlycreated) {
+            sURL = sURL + '&newlycreated';
+        }
+        window.open(sURL);
+        
+    }
+    
 
 }

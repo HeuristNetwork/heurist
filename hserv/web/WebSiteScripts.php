@@ -167,7 +167,10 @@ if(@$_REQUEST['edit']){
             ?>
             
             window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON});  
-
+            
+            if(window.parent?.cmsEditor){
+                window.parent.cmsEditor.onWebSiteInitComplete();
+            }
         }
     </script>
     

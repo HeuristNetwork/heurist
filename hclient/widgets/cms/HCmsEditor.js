@@ -171,7 +171,7 @@ class HCmsEditor {
 
         this._editor_panel.find('.btn-website-addpage').on('click', ()=>that.#addNewRootMenu());
 
-        let url = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,version:3});
+        let url = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id});
         
         this._editor_panel.find('.website-url').text(url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
             window.hWin.HEURIST4.util.copyStringToClipboard(`${url}`);
@@ -228,19 +228,19 @@ class HCmsEditor {
         }
       
         this._webPageFrame = $('#webPageFrame');
-        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,edit:2});
+        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,mode:'edit',edit:2});
         this._webPageFrame.attr('src', pageURL);
         
         let that = this;
         this._webPageFrame.on('load', function(){
-            that.#onWebPageLoadComplete();
+            //that.onWebSiteInitComplete();
         });
   }
   
   //
   // This is event for initial loading in iframe
   //
-  #onWebPageLoadComplete()
+  onWebSiteInitComplete()
   {
       //website menu as json tree
       if(this._webPageFrame[0].contentWindow){

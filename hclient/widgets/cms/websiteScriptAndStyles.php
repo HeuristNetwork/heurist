@@ -1104,7 +1104,7 @@ function initLinksAndImages($container, search_data){
         if(href=='#' && window.hWin.HEURIST4.util.isPositiveInt($(link).attr('data-pageid'))){
             //main menu link - create standard url for crawler and right-click
             let rec_id = $(link).attr('data-pageid');
-            href = window.hWin.HEURIST4.ui.getCmsLink({websiteid:home_page_record_id, pageid:rec_id});
+            href = window.hWin.HEURIST4.ui.getCmsLink({version:2,websiteid:home_page_record_id, pageid:rec_id});
             $(link).attr('href',href);
         }else
         //1. special case for search links in smarty reports
@@ -1133,7 +1133,7 @@ function initLinksAndImages($container, search_data){
                     href = href.join('/');
                     */
                     
-                    href = window.hWin.HEURIST4.ui.getCmsLink({websiteid:home_page_record_id, pageid:current_page_id});
+                    href = window.hWin.HEURIST4.ui.getCmsLink({version:2,websiteid:home_page_record_id, pageid:current_page_id});
                     href = href+'?q='+encodeURIComponent(query);
                     
                     $(link).attr('href', href);
@@ -1207,7 +1207,7 @@ function initLinksAndImages($container, search_data){
 
             if(window.hWin.HEURIST4.util.isPositiveInt(rec_id)){
                 
-                href = window.hWin.HEURIST4.ui.getCmsLink({websiteid:home_page_record_id, pageid:rec_id});
+                href = window.hWin.HEURIST4.ui.getCmsLink({version:2,websiteid:home_page_record_id, pageid:rec_id});
                 $(link).attr('href',href);
                 $(link).attr('data-pageid', rec_id);
 

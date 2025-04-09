@@ -53,7 +53,9 @@
 // special case for dicobiosport.huma-num.fr and privileges.huma-num.fr
 //
 
-$requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
+$requestUri = $_SERVER['SCRIPT_URL']; // str_replace( $_SERVER['REQUEST_QUERY'], '', $_SERVER['REQUEST_URI'] );
+
+$requestUri = explode('/', trim($requestUri,'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
 $requestContent = array('xml'=>'text/xml',
                         'hml'=>'application/hml+xml',

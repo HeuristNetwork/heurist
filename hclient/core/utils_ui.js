@@ -2612,9 +2612,12 @@ window.hWin.HEURIST4.ui = {
         
         const mode = options.mode??'production';
 
-        const isEdit = options.edit??0;
+        const version = options.version??'3'; //by default version 3
         
-        const version = options.version??'';
+        if(mode=='edit' && !options.edit){
+            options.edit = version==3?'start':'2';
+        }
+        const isEdit = !window.hWin.HEURIST4.util.isempty(options.edit);
         
         const use_redirect = options.use_redirect??window.hWin.HAPI4.sysinfo.use_redirect;
         
@@ -2635,9 +2638,6 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     surl += '/'+pageid;
                 }
-                if(isEdit){
-                    params.push('edit=2');
-                }            
             }
             
         }else{
@@ -2649,19 +2649,20 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     params.push(`pageid=${pageid}`);
                 }
-                if(isEdit){
-                    params.push('edit=2');
-                }            
             }
         }
-        if(version>0){
+        
+        if(isEdit){
+            params.push('edit='+options.edit);
+        }            
+        if(version!=''){
             params.push('ver='+version);
         }
         
         if(params.length>0){
             surl += '?'+params.join('&');    
         }
-        
+console.log(surl);        
         return surl;
     },
 

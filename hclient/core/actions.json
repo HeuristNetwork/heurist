@@ -321,6 +321,11 @@
         }
     },
     {
+        "id": "menu-profile-admin",
+        "text": "Database Admin",
+        "title": "Database Admin dashboard"
+    },
+    {
       "id": "menu-profile-groups",
       "text": "Workgroups",
       "title": "List of groups you are member of",

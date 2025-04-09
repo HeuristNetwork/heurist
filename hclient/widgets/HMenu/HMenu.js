@@ -110,12 +110,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this._super();
     },
     
-    /**
-     * Initializes UI controls and event listeners after content is loaded.
-     */
-    menuActionHandler: function(event, ui) {
-
-        event.preventDefault(); 
+    /*
+    *
+    */
+    getUiEle: function(event, ui){
+        
         let ele;
         
         if(ui?.item){
@@ -127,9 +126,21 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             }
         }
         
+        return ele;
+    },
+    
+    /**
+     * Initializes UI controls and event listeners after content is loaded.
+     */
+    menuActionHandler: function(event, ui) {
+
+        event.preventDefault(); 
+        let ele = this.getUiEle(event, ui);
+        
         let opts = {};
         let action_id = ele.attr('data-heurist-action');
         if(!action_id){
+            //open webpage with give id
             action_id = ele.attr('data-heurist-pageid');
             opts.pageId = action_id;
             action_id = 'data-heurist-pageid';
@@ -151,7 +162,8 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             this.options.customActionHandler.call(this, action_id, opts);
         }else{
             //defeault action handler
-            this._actionHandler.executeActionById(action_id, opts);
+            //this._actionHandler
+            this.HAPI.actionHandler.executeActionById(action_id, opts);
         }
     },
 

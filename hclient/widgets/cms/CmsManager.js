@@ -482,9 +482,9 @@ class CmsManager {
             this.#createNewWebContent(options);
             return;
         }
-
+                                                    
         let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id})
-
+console.log(sURL);
         if (options.newlycreated) {
             sURL = sURL + '&newlycreated';
         }

@@ -680,7 +680,7 @@ initActionIcons(){
                 node.type=='east' || node.type=='west' || node.type=='center');
                 
             let actionspan = '<div class="lid-actionmenu mceNonEditable" '
-            +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
+            +' style="'+style_pos+';width:auto;display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
             +'font-size:'+(is_intreeview?'12px;right:13px':'16px')
             +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
             //+ ele_ID

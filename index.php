@@ -72,8 +72,15 @@ if( @$_REQUEST['isalive']==1){
         $format = 'website';
 
         if(@$_REQUEST['ver']==3){
-            $controller = new FrontController(isset($params)?$params:null);
-            $controller->run();
+            
+            if(@$_REQUEST['edit']=='start'){
+                unset($_REQUEST['edit']);
+                if(!defined('PDIR')) {define('PDIR','');}
+                include_once dirname(__FILE__).'/hclient/widgets/cms/WebSiteEditor.php';
+            }else{
+                $controller = new FrontController(isset($params)?$params:null);
+                $controller->run();
+            }
         }else{
             //embed - when heurist is run on page on non-heurist server
             if(array_key_exists('embed', $_REQUEST)){

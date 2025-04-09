@@ -434,7 +434,7 @@ class ActionHandler {
         
         let is_supported = true;
         let contentURL;
-
+        let url;
         
         switch (actionid) {
             case "menu-database-create":
@@ -475,7 +475,7 @@ class ActionHandler {
                 d.setDate(d.getDate() - 1);
                 let yesterday = d.toISOString().split('T')[0];
                 
-                let url = `https://${window.hWin.HAPI4.sysinfo.matomo_url}/index.php?module=CoreHome&action=index&idSite=${window.hWin.HAPI4.sysinfo.matomo_siteid}&period=day&date=yesterday&updated=1#?period=week&date=${yesterday}&segment=pageUrl%3D%40%2F${window.hWin.HAPI4.database}&idSite=1&category=Dashboard_Dashboard&subcategory=1`;
+                url = `https://${window.hWin.HAPI4.sysinfo.matomo_url}/index.php?module=CoreHome&action=index&idSite=${window.hWin.HAPI4.sysinfo.matomo_siteid}&period=day&date=yesterday&updated=1#?period=week&date=${yesterday}&segment=pageUrl%3D%40%2F${window.hWin.HAPI4.database}&idSite=1&category=Dashboard_Dashboard&subcategory=1`;
                 
                 window.open(url, "_blank");
                 
@@ -505,6 +505,12 @@ class ActionHandler {
             
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
+                break;
+                
+            case "menu-profile-admin":
+            
+                url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database;
+                window.open(url)
                 break;
 
             case "menu-profile-info":

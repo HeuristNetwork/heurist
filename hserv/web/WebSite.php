@@ -116,7 +116,7 @@ class WebSite
 
         
         if(!isPositiveInt($siteId)){
-            // if $this->siteID is not defined - use fist available "CMS home" record
+            // if $siteId is not defined - use fist available "CMS home" record
             
             //find default website
             $res = recordSearch($this->system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));

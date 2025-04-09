@@ -334,7 +334,7 @@ function editCMS2(website_document){
 
         _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
 
-        let url = window.hWin.HEURIST4.ui.getCmsLink({websiteid:home_page_record_id});
+        let url = window.hWin.HEURIST4.ui.getCmsLink({version:2, websiteid:home_page_record_id});
         
         _editor_panel.find('.website-url').text(url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
             window.hWin.HEURIST4.util.copyStringToClipboard(`${url}`);

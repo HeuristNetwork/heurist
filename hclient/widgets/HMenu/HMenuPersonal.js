@@ -27,11 +27,9 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
         this._super();
         
         this._on( this._$('button[data-heurist-action]'), {click : this.menuActionHandler }); //system actions
-        
-        // http://127.0.0.1/heurist/hclient/widgets/cms/WebSiteEditor.php?db=osmak_11&ver=3&website=12&pageid=27"
-        //url = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', version:3, websiteid:rec_ID});
-        //window.open(url); //reload page
-        
+      
+        this._$('button[data-heurist-action="menu-profile-admin"]').attr('href',
+                      window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database);
         
         this.onChangeCredentials();
     },
@@ -42,7 +40,7 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
     onChangeCredentials: function(data){
 
         if (this.HAPI.has_access()) {
-                //
+             //
              this._$('.usrFullName').text(this.HAPI.currentUser?.ugr_FullName);
             
              this._$('div[data-heurist-role="menuPersonal-login"]').hide();
@@ -51,6 +49,22 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
              this._$('div[data-heurist-role="menuPersonal-login"]').show();
              this._$('div[data-heurist-role="menuPersonal-dropdown"]').hide();
         }
+    },
+    
+    /*
+    *
+    */    
+    menuActionHandler:function(event, ui){
+        
+        event.preventDefault(); 
+        let ele = this.getUiEle(event, ui);
+        let action_id = ele.attr('data-heurist-action');
+        if(action_id=='menu-cms-edit'){
+            window.hWin.webSite.editPage();
+            return;
+        }
+        
+        this._super(event, ui);
     }
 
     
