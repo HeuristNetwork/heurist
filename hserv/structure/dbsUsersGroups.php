@@ -1150,6 +1150,28 @@
 
         fileDelete($notes_user_settings);
 
+        // Skip notifications if the user is now getting the 'new version' popup
+        $userPreferences = user_getPreferences($system);
+        if($userPreferences && array_key_exists('version_in_cache', $userPreferences)){
+
+            $curVersion = explode('.', HEURIST_VERSION);
+            $lastVersion = explode('.', $userPreferences['version_in_cache']);
+
+            $mismatch = false;
+
+            foreach($curVersion as $idx => $curNum){
+
+                if(count($lastVersion) < $idx + 1 || $curNum != $lastVersion[$idx]){
+                    $mismatch = true;
+                    break;
+                }
+            }
+
+            if($mismatch){
+                return [];
+            }
+        }
+
         // Handled system notifications
         $notifications = [
             'bug_report' => [
