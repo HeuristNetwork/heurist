@@ -880,14 +880,14 @@ class System {
         $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
         if($mysql_gone_away_error){
             $message =  $message
-            .' There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+            .' There is database server interruption. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
         }else{
-            $message = 'Heurist was unable to process this request. ' . $message;
-            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
-        }
-
-        if(!$mysql_gone_away_error){
-            $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
+            $message = "Heurist was unable to process this request. <br><strong>$message</strong><br>";
+            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project),'
+            .' there are several thousand Heurist databases, so we are unable to review all automated reports.'
+            .'If this is the first time you have seen this error, please try again in a few minutes in case it is '
+            .'a temporary network outage. Please contact us if this error persists and is causing you a problem,' 
+            .'as this will help us identify important issues. We apologise for any inconvenience';
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
