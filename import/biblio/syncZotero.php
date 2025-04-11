@@ -321,8 +321,7 @@ if($step=="1"){  // info about current status
             print "<strong>Data not transfered</strong><br>";
             print "<em>The following fields in Zotero have been mapped into the Heurist database but will<br>"
             . "not be saved as the record type does not contain a field to hold them. If you feel that<br>"
-            . "any of these fields are needed, you may add the indicated base field to the record<br>"
-            . "type. Contact the Heurist team (support at HeuristNetwork.org) if you require help<br>with this.</em><br><br>";
+            . "any of these fields are needed, you may add the indicated base field to the record type.</em><br><br>";
             print TABLE_S.implode("", $transfer_errors).TABLE_E."<br>";
         }
         if(!empty($mapping_rt_errors2)){
@@ -523,16 +522,13 @@ if($step=="1"){  //first step - info about current status
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
                 $itemtitle = strval(findXMLelement($entry, null, "title"));
 
-                #print " <br>".$itemtype."  ".strval(findXMLelement($entry, null, "title"))."<br>";
-
                 //@ob_flush();
                 //@flush();
 
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
 
-                    print "<br>Undefined Record type ".htmlspecialchars($itemtype.' '.$itemtitle)."<br>";
+                    print "<br>Undefined record type : <b>".htmlspecialchars($itemtype.'</b> <i>'.$itemtitle.'</i>')."<br>";
 
-                    #print " <br> Undefined Record type".$itemtype."  ".$itemtitle."<br>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
                     if(!@$arr_ignored_by_type[$itemtype]) {$arr_ignored_by_type[$itemtype] = 0;}
                     $arr_ignored_by_type[$itemtype]++;
@@ -775,7 +771,7 @@ if($step=="1"){  //first step - info about current status
         $start = $start + $fetch;
 
     }// end of while loop
-    print 'Synching Completed, Printing Report<br>';
+    print '<p></p><hr><p><b>Synching Completed, Printing Report</b></p>';
 
     //fclose($fd);
     print TABLE_S.'<tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
@@ -800,6 +796,8 @@ if($step=="1"){  //first step - info about current status
         print '<div style="color:red">';
         if($cnt_ignored>0){
             print '<br>Zotero entries that are not mapped to Heurist record types: '.intval($cnt_ignored).TABLE_S;
+            print '<br>You should obtain the record types from one of the curated templates using Design > Browse templates or ask the' 
+                 .'<br>Heurist team to define and map them if they are not available, by submitting a bug/improvement ticket (top of page).';
             foreach ($arr_ignored_by_type as $itemtype => $cnt){
                 print TR_S.htmlspecialchars($itemtype).TD.intval($cnt).TR_E;
             }
@@ -824,6 +822,7 @@ if($step=="1"){  //first step - info about current status
         print '<div style="color:black">';
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
+            print '<br>In general these will be insignificant, please submit bug/improvement request if necessary';
             print "<div style ='padding-left:20px'>- ".implode($line_sep,$arr_notmapped).DIV_E;
 
             $err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
@@ -834,12 +833,13 @@ if($step=="1"){  //first step - info about current status
             'Zotero Synchronisation has reported ' . $tot_erros . ' warnings',
             $err_msg);
 
-        print '<span><br>If you think the Zotero import needs updating or wish to provide additional information you can contact the '.CONTACT_HEURIST_TEAM.' here.</span>';
+        print '<span><br>If you think the Zotero import needs updating or wish to provide additional information'
+              .'please submit a bug report/improvement request - link at top of page.</span>';
 
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
         .' warnings reported: Please check the warnings listed. '
         .' We do not map all fields from Zotero as for most purposes these are fields of little use in your database.'
-        .' Please submit a bug report (Help > Bug report) if you think the Zotero import needs updating."'
+        .' Please submit a bug report/improvement request at top of page if you think the Zotero import needs updating."'
         .',null,"Zotero synchronisation warnings");</script>';
     }
 
