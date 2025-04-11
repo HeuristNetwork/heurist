@@ -1,12 +1,11 @@
-<header class="bg-dark text-white py-1" style="background-image: url(&quot;{$header.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;"> <!-- {$header.classes} -->
+<header class="" style="background-image: url(&quot;{$header.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;"> 
     <div class="container">
-        <nav class="navbar navbar-expand-md navbar-dark">
+        <nav>
             <div class="container-fluid">
             
             <div class="d-flex align-items-center">
-                <img src="{$header.logo_small}" alt="Logo" height="20" class="me-2 d-block d-md-none">
-                <img src="{$header.logo}" alt="Logo" height="40" class="me-2 d-none d-md-block">
-                <div class="h5 mb-0">{$header.title}</div>
+                <img src="{$header.logo}" alt="Logo" height="40">
+                <h5>{$header.title}</h5>
             </div>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar" focusable="false">

@@ -24,6 +24,7 @@ class HCmsEditorPage {
     _container = null; //general container
     _cmsEditor = null;  //HCmsEditor
     _cmsEditorElement = null;  //instance of edit element class HCmsEditorElement
+    _cmsEditorMargin = null; //instance of HCmsEditorMargin
     
     //interface elements
     _panel_treePage;     // panel with treeview for current page 
@@ -584,16 +585,14 @@ initPage(pageContainer, pageRecord){
             this.#initTreePage(this._layout_content);
         }
         
-        this._container.find('.treePageHeader > h3')
-                .text( this._cmsEditor.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :pageRecord[window.hWin.DT_NAME] );
+        const sTitle =  this._cmsEditor.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :window.hWin.HEURIST4.util.stripTags(pageRecord[window.hWin.DT_NAME]) ;
+        let ele_title = this._container.find('.treePageHeader > h3')
+        ele_title.attr('title',sTitle).text(sTitle);
         
         this.page_was_modified = false;
         
-        
         //expands structure tree, updates menu in tree
         this._panel_propertyView = this._container.find('.propertyView');
-        
-console.log('initPage', pageRecord[window.hWin.DT_NAME] );        
         
         this._container.find('#responsiveScreen').on({change:function(event){
             
@@ -604,6 +603,41 @@ console.log('initPage', pageRecord[window.hWin.DT_NAME] );
             $('#webPageFrame').width(screenWidth);
         }})
 
+}
+
+//
+//
+//
+showMarginProperties(marginContainer){
+
+    this.detachTinyMCE(false);
+    this._container.find('.treePageHeader > h3').text(window.hWin.HR('Header'));
+    this._panel_propertyView.text('data-top', this._panel_propertyView.css('top'));
+    
+    this._panel_propertyView.css('top',21);
+    this._panel_propertyView.fadeIn(500);
+    
+    let that = this;
+    this._cmsEditorMargin = new HCmsEditorMargin(
+    {
+        container: this._panel_propertyView, 
+        callback: function(new_cfg, mode){
+            that.hideMarginProperties();            
+        }
+    });
+}
+
+//
+//
+//
+hideMarginProperties(){
+    if(this._panel_propertyView.is(':visible')){
+        this._panel_propertyView.css('top', this._panel_propertyView.attr('data-top'));
+        this.hidePropertyView();
+        //restore title
+        let ele_title = this._container.find('.treePageHeader > h3');
+        ele_title.text(ele_title.attr('title'));
+    }
 }
 
 //

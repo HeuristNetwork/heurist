@@ -1,12 +1,11 @@
 /*
-* HLayoutMgr.js - web page generator based on json configuration
+* HCmsEditor.js - web page editor
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     7.0
 */
 
 /* global editCMS_SiteMenu */
@@ -160,6 +159,12 @@ class HCmsEditor {
         let that = this;
 
         this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
+        
+        this._editor_panel.find('.btn-website-header').on('click', ()=>that.#editHeader());
+
+        this._editor_panel.find('.btn-website-footer').on('click', ()=>that.#editFooter());
+
+        
         this._editor_panel.find('.btn-website-edit').on('click', ()=>that.#editHomePageRecord()); //open record edit
         
         if(!this.isWebPage){
@@ -179,7 +184,7 @@ class HCmsEditor {
         });
 
         this._editor_panel.find('.btn-website-homepage').parent()
-        .addClass('fancytree-node')
+        //.addClass('fancytree-node')
         .on( 'mouseenter', function(event){ 
             that._editor_panel.find('.btn-website-addpage').show();
         } )
@@ -319,11 +324,38 @@ class HCmsEditor {
               that.switchMode('page');
           }
       });
+      
+      //swtich to page tab automatically
+      let header = this._webPageFrame[0].contentDocument.getElementsByTagName('header'); //TBD or main-header
+      let footer = this._webPageFrame[0].contentDocument.getElementsByTagName('footer'); 
+      
+      $(header).on('click',()=>that.onMarginEdit(true));
+      $(footer).on('click',()=>that.onMarginEdit(false));
+      
+      this.layout_container.on('click',function(event){
+          if(that.current_edit_mode!='page'){
+              //switch to page mode                
+              that.switchMode('page');
+          }else{
+              that._cmsEditorPage.hideMarginProperties();
+          }
+      });
 
       this._cmsEditorPage.initPage(this.layout_container, record);
       this.switchMode('page');
   }
-
+  
+  /*
+  * Start edit header or footer by click in SiteMenu
+  */
+  onMarginEdit(isHeader){
+      
+console.log('initMargin');      
+      let margin = this._webPageFrame[0].contentDocument.getElementsByTagName(isHeader?'header':'footer'); 
+      
+      this._cmsEditorPage.showMarginProperties(margin);
+      this.switchMode('page');
+  }
   
   //
   // Returns tinymce object from webpage iframe
@@ -490,5 +522,16 @@ class HCmsEditor {
   onBeforeUnload(){
       
   }    
+
+  /*
+  *
+  */
+  #editHeader(){
+      
+      
+  }
+  #editFooter(){
+      
+  }
 
 }

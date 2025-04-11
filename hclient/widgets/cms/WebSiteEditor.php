@@ -68,6 +68,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SelectElement.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_WidgetCfg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorElement.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsEditorMargin.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 <!--
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
@@ -180,7 +181,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             Click to edit the page
                         </span>
 
-                        <div style="padding:10px 8px;">
+                        <div style="padding:10px 0px 5px 8px;" class="fancytree-node">
                             <a href="#" title="Edit website home page"
                                 class="btn-website-homepage" style="text-decoration:none;">
                                 <span class="ui-icon ui-icon-home"></span>&nbsp;Home page
@@ -188,17 +189,33 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             <span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" 
                                 style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
                         </div>
+                        <div style="padding:5px 32px;" class="fancytree-node">
+                            <a href="#" title="Edit website header"
+                                class="btn-website-header" style="text-decoration:none;">
+                                Header
+                            </a>
+                            <span  class="btn-website-header ui-icon ui-icon-pencil" 
+                                style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
+                        </div>
+                        <div style="padding:5px 32px;" class="fancytree-node">
+                            <a href="#" title="Edit website footer"
+                                class="btn-website-footer" style="text-decoration:none;">
+                                Footer
+                            </a>
+                            <span  class="btn-website-footer ui-icon ui-icon-pencil" 
+                                style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
+                        </div>
 
                     </div>
 
-                    <div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;"></div>
+                    <div class="treeWebSite ent_content_full" style="top:120px;padding:3px 10px;"></div>
                 </div>
 
                 <div id="treePage" style="font-size:0.9em;top:2em;" class="ent_wrapper ui-widget-content">
 
                     <div class="treePageHeader ent_header" style="height:85px;line-height:normal;">
 
-                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block">
+                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 65%; display: inline-block">
                             Page title
                         </h3>
 

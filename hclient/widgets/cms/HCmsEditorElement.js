@@ -6,8 +6,7 @@
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     7.0
 */
 
 /*
@@ -30,9 +29,12 @@ element editor
 
 */
 
-//
-//
-//
+/*
+  _layout_content;    JSON layout configuration for current page (pageRecord[window.hWin.DT_EXTENDED_DESCRIPTION])
+  _layout_container;  HTML element "#main-content" with CMS content
+  $container - element this 
+  _pageEditor - reference to HCmsEditorPage
+*/
 function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $container, _pageEditor, main_callback, already_changed ){
 
     const _className = 'HCmsEditorElement';

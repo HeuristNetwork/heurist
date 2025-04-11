@@ -1,0 +1,64 @@
+<!--
+/**
+* Content for HCmsEditorMargins.js - to define properties for header or footer elements in CMS
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @version     7.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<div class="ent_header" style="text-align:right; padding: 5px 2px; font-size:0.9em">
+    <div class="btn-save-element ui-button-action" style="margin-right:4px">Save</div>
+    <div class="btn-save-page ui-button-action" style="margin-right:4px">Save and Close</div>
+    <div class="btn-cancel" style="margin-right:10px">Cancel</div>
+</div>
+
+<div class="ent_content_full" style="top:30px; font-size: 11px;">
+
+    <!-- General stuff -->
+    <fieldset style="border: 1px solid lightgray;border-radius:4px;margin: 2px 4px;">
+        <legend style="display:none"></legend>
+        <div>
+            <div class="header_narrow">Position:</div>        
+            <select name="position">
+                <option value="">default</option>
+                <option value="fixed">fixed</option>
+                <option value="sticky">sticky</option>
+                <option value="slide">slide</option>
+                <option value="left">slide-left</option>
+                <option value="right">slide-right</option>
+                <option value="hidden">hidden</option>
+            </select>
+        </div>
+        <div>
+            <div class="header_narrow">Width:</div>        
+            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/>
+            <label for="">&nbsp;Height:
+            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/></label>
+        </div>
+        
+        <div>
+            <div class="header_narrow">
+                Template
+            </div>
+            <select name="template" class="text ui-widget-content ui-corner-all" title="">
+            </select>
+        </div>
+        
+                        
+        <div style="text-align:center;display: block;">
+            <hr>
+            <div class="btn-html-edit">Edit HTML source</div>
+        </div>
+    </fieldset>
+</div>

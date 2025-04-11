@@ -393,22 +393,44 @@ class WebSite
             //header template not defined - take the default one
             $header = file_get_contents(dirname(__FILE__).'/templates/header01.html');
         }
+
+        //    
+        $bgImage = $this->getFile($this->siteRecord, '99-951', 'none');
+        if($bgImage!=null){
+            //$bgImage = 'background-image: url(&quot;'.$bgImage
+            //    .'&quot;) !important; background-repeat: repeat-x !important; background-size: auto;';
+        }else{
+            $bgImage = '';
+        }
+        
         //replace template values {} with settings from siteRecord (CMS_HOME)
         $header_tpl = array(
-            'logo_small'=>$this->getFile($this->siteRecord, '2-926', (HEURIST_BASE_URL.'hclient/assets/v6/logo.png')),
-            'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE, (HEURIST_BASE_URL.'hclient/assets/v6/h6logo_inv.png')), 
+            'logo_small'=>$this->getFile($this->siteRecord, '2-926'), //, (HEURIST_BASE_URL.'hclient/assets/v6/logo.png')),
+            'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE), //, (HEURIST_BASE_URL.'hclient/assets/v6/h6logo_inv.png')), 
             'title'=>$this->getVal(DT_NAME),
             'title_alt'=>$this->getVal('3-1009'),
+            'bgImage'=>$bgImage,
             'languages'=>$this->getLanguageSelector(),
             'navbar'=>$this->getMainMenu()
             );
-        
+            
+        if(!$header_tpl['logo_small'] && $header_tpl['logo']){
+            $header_tpl['logo_small'] = $header_tpl['logo'];
+        }
+            
+
         $values_to_replace = array_map(function ($v) {
                     return "{\$header.$v}";
              }, array_keys($header_tpl));
-        
+             
         //$header.classes DT_CMS_BANNER
         $header = str_replace($values_to_replace, array_values($header_tpl), $header);
+
+
+        
+        
+
+
                 
         if($is_out){
             echo $header;
@@ -478,7 +500,7 @@ class WebSite
         $siteID = $this->siteRecord['rec_ID'];
         $menu_tree = $this->menuTree[$siteID];
         
-        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all">';
+        $res = '<ul class="navbar-nav ms-auto dropdown-hover-all">'; //nav nav-pills  navbar-nav
         
         foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
         
