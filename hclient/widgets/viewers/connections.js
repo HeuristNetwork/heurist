@@ -85,7 +85,7 @@ $.widget( "heurist.connections", {
 
                 //accept events from the same realm only
                 if(!that._isSameRealm(data)) return;
-                
+
                 that.options.relations = null;
                 that.options.recordset = null;
                 that.options.selection = null;
@@ -179,7 +179,7 @@ $.widget( "heurist.connections", {
                         // Parse response to spring diagram format
                         let data = this._parseData(records_ids, relations);
                         this._doVisualize(data);
-                    
+
                     }
                 }else if(this._isVisualizeInited()){
                     //clear
@@ -219,9 +219,9 @@ $.widget( "heurist.connections", {
     //
     //
     _isSameRealm: function(data){
+
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
-        ||
-        (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
+        || (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
     
     /**
@@ -373,6 +373,9 @@ $.widget( "heurist.connections", {
                     },
                     function(selected){
                         that._getRelations(that.options.recordset);
+                    },
+                    function(type, rec_ID){
+                        that._expandSearch(type, rec_ID);
                     }
             );
             this.recordset_changed = false;
@@ -393,6 +396,173 @@ $.widget( "heurist.connections", {
             if(this.element.is(':visible') && this._isVisualizeInited()){
                 this.graphframe[0].contentWindow.showSelection(this.options.selection);
             }
-    }    
+    },
+
+    /**
+     * Expand the visualiser's graph with connected records, not in the current recordset
+     *  THIS SHOULD ONLY AFFECT THE VISUALISER
+     *
+     * @param {string} type predicate being added to the search {related, related_to, related_from, linked, linked_to, linked_from}
+     * @param {integer} rec_ID record of focus, the point of origin
+     */
+    _expandSearch: function(type, rec_ID){
+
+        let that = this;
+        let new_query = [];
+        let existing_query = window.hWin.HEURIST4.util.isJSON(this._lastRequest.q);
+
+        if(existing_query){ // JSON query
+
+            let has_any = false;
+
+            for(const key in existing_query){
+
+                if(key == 'any' || (window.hWin.HEURIST4.util.isObject(existing_query) && Object.hasOwn(existing_query[key], 'any'))){
+                    has_any = key;
+                }
+            }
+
+            if(!has_any){
+                // Add new top-level 'any' predicate
+
+                new_query = [{[type]: rec_ID}];
+                new_query = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query, new_query);
+                new_query = [{any: new_query}];
+
+            }else if(window.hWin.HEURIST4.util.isPositiveInt(has_any) || Number.parseInt(has_any) === 0){
+                // Merge first existing top-level 'any' predicate
+
+                if(!this._mergeRecordIDs(existing_query[has_any]['any'], type, rec_ID)){
+
+                    new_query = {[type]: rec_ID};
+                    let new_any = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query[has_any]['any'], new_query);
+    
+                    new_query = existing_query;
+                    new_query[has_any]['any'] = new_any;
+                }else{
+                    new_query = existing_query;
+                }
+
+            }else{
+                // Merge 'any' predicates
+
+                if(!this._mergeRecordIDs(existing_query, type, rec_ID)){
+                    new_query = {any: [{[type]: rec_ID}]};
+                    new_query = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query, new_query);
+                }
+            }
+
+        }else if(typeof this._lastRequest.q === 'string' && !window.hWin.HEURIST4.util.isempty(this._lastRequest.q)){ // Old format
+            new_query = window.hWin.HEURIST4.query.mergeHeuristQuery(this._lastRequest.q, [{[type]: rec_ID}]);
+            new_query = [{any: new_query}];
+        }
+
+        if(window.hWin.HEURIST4.util.isempty(new_query)){
+            return;
+        }
+
+        let request = window.hWin.HEURIST4.util.cloneJSON(this._lastRequest);
+        request['q'] = new_query;
+
+        window.hWin.HAPI4.RecordSearch.doSearchWithCallback(request, (response) => {
+
+            if(!response){
+                return;
+            }
+
+            that.recordset_changed = true;
+            that.options.relations = null;
+            that.options.recordset = response;
+            that._lastRequest = request;
+
+            that._refresh();
+        });
+    },
+
+    /**
+     * Merge the new record ID into the provided query part, to avoid adding more predicates
+     *
+     * @param {object|array} query current query used for the visualiser, to be updated
+     * @param {string} type predicate type to be added/updated
+     * @param {string|integer} rec_ID new record ID to add
+     *
+     * @returns {boolean} whether the query part has been updated
+     */
+    _mergeRecordIDs: function(query, type, rec_ID){
+
+        if(!window.hWin.HEURIST4.util.isObject(query) && !Array.isArray(query)){
+            return false;
+        }
+
+        rec_ID = typeof rec_ID === 'string' ? rec_ID : rec_ID.toString();
+
+        /**
+         * Updates the existing list of values
+         *
+         * @param {string|integer} curValue current record ID(s) being used for the predicate type
+         *
+         * @returns {string} updated list of values
+         */
+        function updateValue(curValue){
+
+            if(typeof curValue === 'number'){
+                curValue = curValue.toString();
+            }else if(typeof curValue !== 'string'){
+                curValue = '';
+            }
+
+            curValue = curValue.split(',');
+            curValue.indexOf(rec_ID) >= 0 || curValue.push(rec_ID);
+
+            return curValue.join(',');
+        }
+
+        // Convert query to an array, if not already one
+        if(!Array.isArray(query)){
+
+            if(Object.hasOwn(query, type)){
+                query[type] = updateValue(query[type]);
+                query = [query];
+            }else{                
+                query = [query];
+                query.push({[type]: rec_ID});
+            }
+
+            return true;
+        }
+
+        let found = false;
+        for(let idx in query){
+
+            let param = query[idx];
+            if(!window.hWin.HEURIST4.util.isObject(param)){
+                continue;
+            }
+
+            let key = Object.keys(param)[0];
+            if(key !== type){
+                continue;
+            }
+
+            // Ensure value is either an integer, string integer, or comma separated list
+            let value = param[key];
+            if(typeof value === 'number' && Number.isInteger(value)){
+                value = value.toString();
+            }else if(typeof value !== 'string' || !value.match(/^\d+(,\d+)*$/)){
+                continue;
+            }
+
+            query[idx][key] = updateValue(value);
+
+            found = true;
+            break;
+        }
+
+        if(!found){
+            query.push({[type]: rec_ID});
+        }
+        
+        return true;
+    }
 
 });
