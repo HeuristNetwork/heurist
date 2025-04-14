@@ -2181,7 +2181,7 @@ window.hWin.HEURIST4.dbs = {
                         trn_Source: 'trm_Label', 
                         trn_Code: term_id}).getFirstRecord();
                     if(rec && Object.keys(rec).length > 0){
-                        return  translations.fld(rec, 'trn_Translation');
+                        return translations.fld(rec, 'trn_Translation');
                     }
                 }
             }
@@ -3245,6 +3245,34 @@ window.hWin.HEURIST4.dbs = {
             && (mask_parts.length == 1 || window.hWin.HEURIST4.util.isempty(mask_parts[1]) || output.endsWith(mask_parts[1]));
 
         return true_on_success && bool_output === true ? true : output;
+    },
+
+    trm_RemoveDupHierarchy: function(label, trm_separator = '.'){
+
+        if(window.hWin.HEURIST4.util.isempty(label) || label.indexOf(trm_separator) === -1){
+            return label;
+        }
+
+        trm_separator = window.hWin.HEURIST4.util.isempty(trm_separator) ? '.' : trm_separator;
+
+        let parts = label.split(trm_separator);
+        let i = 1;
+
+        while(i < parts.length){
+
+            let prefix = parts.slice(0, i).join(trm_separator);
+            let remainder = parts.slice(i).join(trm_separator);
+
+            // check if prefix appears at start
+            if(remainder.startsWith(prefix)){ // remove repeated prefix and restart
+                parts = parts.slice(i);
+                i = 1;
+            }else{ // no repeat, continue searching
+                i++;
+            }
+        }
+
+        return parts.join(trm_separator);
     }
 
 }//end dbs

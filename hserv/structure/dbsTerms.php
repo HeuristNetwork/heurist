@@ -137,30 +137,46 @@ class DbsTerms
             return '';
         }
 
-            $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
+        $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
 
-            if(!$with_hierarchy){
-                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
+        if(!$with_hierarchy){
+            return @$term[$idx_term_label]?$term[$idx_term_label]:'';
+        }
+
+        $labels = '';
+        $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
+        $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
+
+
+        $labels = explode('.', $term[$idx_term_label]);
+
+        while($term[$idx_term_parent] > 0){
+            $term = $this->getTerm($term[$idx_term_parent]);
+
+            if($term[$idx_term_parent] > 0){
+                $trmLabels = explode('.', $term[$idx_term_label]);
+                $labels = array_merge($trmLabels, $labels);
+            }else{
+                break; //ignore vocabulary
             }
+        }
 
-                $labels = '';
-                $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
-                $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
+        // Remove duplicated hierarchy labels
+        $i = 1;
+        while($i < count($labels)){
 
+            $prefix = implode('.', array_slice($labels, 0, $i)) . '.';
+            $test = implode('.', array_slice($labels, $i));
 
-                $labels = array();
-                array_push($labels, $term[$idx_term_label]);
+            if(strpos($test, $prefix) === 0){
+                $labels = array_slice($labels, $i);
+                $i = 1;
+            }else{
+                $i ++;
+            }
+        }
 
-                while ( $term[$idx_term_parent]>0 ) {
-                    $term = $this->getTerm($term[$idx_term_parent]);
-
-                    if($term[$idx_term_parent]>0){
-                        array_unshift($labels, $term[$idx_term_label]);
-                    }else{
-                        break; //ignore vocabulary
-                    }
-                }
-                return implode('.',$labels);
+        return implode('.',$labels);
     }
 
     //

@@ -134,7 +134,9 @@ function editCMS_SelectElement( callback ){
             },
             open: function(){
                 $dlg.find('.heurist-online-help').attr('href',
-                window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website&id=39&pageid=708');
+                window.hWin.HAPI4.sysinfo.referenceServerURL
+                +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                +'&website=39&pageid=708');
 
                 //load list of groups and elements and init selector
                 let sel = $dlg.find('#components');

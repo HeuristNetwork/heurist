@@ -3411,7 +3411,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                             +'We strongly recommend putting a little thought into this, as well-designed constructed titles can<br>'
                             +'greatly improve the clarity and ease of use of the database.<br>'
-                            +'We recommend you read the <a href="https://heuristref.net/heurist/?db=Heurist_Help_System&website&id=39&pageid=773" target="_blank">help for Constructed titles</a>', 
+                            +'We recommend you read the <a href="'
+                                +window.hWin.HAPI4.sysinfo.referenceServerURL
+                                +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                                +'&website=39&pageid=773" target="_blank">help for Constructed titles</a>', 
                             { 'Proceed': function(){ that.editRecordTypeTitle(); $dlg.dialog('close'); } },
                             {title:'Constructed title not yet configured', yes:'Proceed'},
                             {default_palette_class: 'ui-heurist-design'});

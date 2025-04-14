@@ -1297,21 +1297,20 @@ $.widget( "heurist.svs_list", {
                             }
                             s_hint = this._HINT_FACETED;
                         }else if(prms.type==1){ //withrules
-                                s = //'<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
-                                '<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
-                                s_hint = this._HINT_WITHRULES;
+                            s = '<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
+                            s_hint = this._HINT_WITHRULES;
                         }else if(prms.type==2){ //rules only
-                                s = '<span/>';
-                                s_hint = this._HINT_RULESET;
+                            s = '<span/>';
+                            s_hint = this._HINT_RULESET;
                         }else if(prms.type<0){ //broken
-                                s = '<span class="ui-icon ui-icon-alert svs-type-icon" title="broken"></span>';
-                                s_hint = 'Broken filter. Remove and re-create it';
+                            s = '<span class="ui-icon ui-icon-alert svs-type-icon" title="broken"></span>';
+                            s_hint2 = 'Broken filter. Remove and re-create it';
                         }
 
                         $span.find("> span.fancytree-title").html(node.title+' '+s);
                         $span.attr('title', s_hint2)
                         $span.attr('filter_type', prms.type);
-                        
+
                     }
 
             },
@@ -1415,7 +1414,7 @@ $.widget( "heurist.svs_list", {
                 hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
                 //highlight: true,   // Highlight matches by wrapping inside <mark> tags
                 leavesOnly: true, // Match end nodes only
-                nodata: true,      // Display a 'no data' status node if result is empty
+                nodata: false,      // Display a 'no data' status node if result is empty
                 mode: 'hide'       // dimm Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
             };
 
@@ -1743,9 +1742,9 @@ $.widget( "heurist.svs_list", {
                     +' style="display:inline-block; vertical-align: bottom"></span>'
                     +'<span class="hasmenu2 droppable">add</span>')
                 .on('click', function(event){
-                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
-                   
-             });
+                    append_link.contextmenu('open', append_link.find('span.ui-icon') );   
+                });
+
              append_link.contextmenu(context_opts);
 
 
@@ -1917,7 +1916,7 @@ $.widget( "heurist.svs_list", {
             let hasVisibleNode = false;
             this.treeviews[groupID].$container.find("li").each(function(idx, li_ele){
                 
-                if($(li_ele).css("display") != "none"){
+                if($(li_ele).css("display") != "none" && $(li_ele).find('.ui-icon-alert').length == 0){
 
                     hasVisibleNode = true;
                     return false;
@@ -2052,11 +2051,7 @@ $.widget( "heurist.svs_list", {
                     if(that.options.is_h6style){
                         context_on_exit = noptions;
                     }else {
-                        
-                        if(this.isPublished){
-                            this.element.css('overflow-y','hidden');
-                        }
-                        
+
                         this.search_faceted.show();
                         if(this.search_faceted.height() == 0 && this.search_tree.height() != 0){ // set facet container height to avoid invisible search
                             let min_height = this.search_tree.height();

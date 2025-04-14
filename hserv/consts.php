@@ -35,13 +35,21 @@ if(!@$heuristReferenceServer){
 }
 
 define('HEURIST_DEF_DIR', '/heurist/'); //default Heurist folder
-define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
-define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.HEURIST_DEF_DIR);//central index and template databases url
+if(isset($heuristReferenceServerMirror) && $heuristReferenceServerMirror!=''){
+    define('HEURIST_MAIN_SERVER', $heuristReferenceServerMirror);
+    define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index_MIRROR');
+    define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker_MIRROR');
+    define('HEURIST_HELP_DATABASE', 'Heurist_Help_System_MIRROR');
+}else{
+    define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
+    define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
+    define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
+    define('HEURIST_HELP_DATABASE', 'Heurist_Help_System');
+}
+define('HEURIST_INDEX_BASE_URL', HEURIST_MAIN_SERVER.HEURIST_DEF_DIR);//central index and template databases url
 define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
-define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
-define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
-define('HEURIST_HELP', $heuristReferenceServer.HEURIST_DEF_DIR.'help');
+define('HEURIST_HELP', HEURIST_MAIN_SERVER.HEURIST_DEF_DIR.'help');
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));//always use proxy for CURL

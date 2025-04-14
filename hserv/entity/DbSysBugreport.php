@@ -38,13 +38,13 @@ class DbSysBugreport extends DbEntityBase
     
     You can view your report at: <a href="__LINK__">__LINK__</a><br><br>
     
-    For current and resolved issues list see: <a href="https://heuristref.net/Heurist_Job_Tracker/web/64/1526">https://heuristref.net/Heurist_Job_Tracker</a><br><br>
+    For current and resolved issues list see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
     Database: __DBLINK__<br><br>
     Bug description:__DESC__
     EMAIL;
-
+    
     private $bugReportType = 56;
 
     public function __construct( $system, $data=null ) {
@@ -275,7 +275,9 @@ class DbSysBugreport extends DbEntityBase
                 $user_name = is_array($user_info) ? $user_info['ugr_FullName'] : 'None found';
                 $user_email = is_array($user_info) ? $user_info['ugr_eMail'] : 'None found';
 
-                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__'], [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url], $this->reportEmail);
+                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__'], 
+                    [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE],
+                    $this->reportEmail);
 
             }elseif(is_array($res)){
                 $this->system->addErrorArr($res);
@@ -383,7 +385,9 @@ class DbSysBugreport extends DbEntityBase
 
             $db_link = is_array($record['details']['993']) ? $record['details']['993'][1] : $record['details']['993'];
 
-            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__'], [$report_link, $record['details']['3'], $user_name, $user_email, $db_link], $this->reportEmail);
+            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__','__DB_JOBTRAK__'],
+             [$report_link, $record['details']['3'], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE],
+              $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
             $admin_emails = mysql__select_list2($mysqli, $user_query);

@@ -377,13 +377,19 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
             
         }else if(action_type=='delete_detail'){
+            
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'
+                +'<label for="cb_delete_all">Remove all values</label></div>'
+                +'<input id="cb_delete_all" name="delete_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header">'
                 +'<label for="cb_sub_string">Remove search string only</label></div>'
                 +'<input id="cb_sub_string" name="delete_type" type="radio" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px" checked="checked">'
                 +'</div>').appendTo($fieldset);
-                
+
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header">'
                 +'<label for="cb_whole_value">Remove complete value</label></div>'
@@ -614,13 +620,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         let field_type = $Db.dty(dtID, 'dty_Type');
         if(field_type=='geo'){
             
-            $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
+            $('#cb_delete_all').prop('checked',true).addClass('ui-state-disabled');;
             $('#cb_replace_all').prop('checked',true).addClass('ui-state-disabled');;
             $('#fld-1').hide();
            
            if(action_type=='delete_detail') return;
         }else{
-            $('#cb_remove_all').removeClass('ui-state-disabled');;
+            $('#cb_delete_all').removeClass('ui-state-disabled');;
             $('#cb_replace_all').removeClass('ui-state-disabled');;
             
         }
@@ -837,7 +843,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }else if(action_type=='delete_detail'){
 
                 request['a'] = 'delete';
-                if(!$('#cb_remove_all').is(':checked')){
+                if(!$('#cb_delete_all').is(':checked')){
                     request['sVal'] = getFieldValue('fld-1');
                     if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
                         alert('Define value to delete');

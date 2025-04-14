@@ -44,7 +44,8 @@ $req_params = USanitize::sanitizeInputArray();
 
 define('SERVER_NAME', !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME);
 
-if(SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SERVER_NAME == '::1' || isLocalHost()){
+$isPublic = filter_var($_SERVER['SERVER_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+if(!$isPublic || SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SERVER_NAME == '::1' || isLocalHost()){
     $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED);
     exit;
 }

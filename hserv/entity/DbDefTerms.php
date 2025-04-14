@@ -311,8 +311,13 @@ class DbDefTerms extends DbEntityBase
 
         $trm_sep = @$this->data['term_separator'];
 
-        if($trm_sep==null){
+        if($trm_sep === null){
             $trm_sep = '.';
+        }
+
+        $trm_extendLabel = @$this->data['term_RetainParentLabel'];
+        if($trm_extendLabel != 1){
+            $trm_extendLabel = false;
         }
 
         foreach ($input as $path) {
@@ -323,6 +328,8 @@ class DbDefTerms extends DbEntityBase
             if($trm_sep!=''){
                 $s = strtok($path, $trm_sep);
 
+                $hierarchy = "{$s}{$trm_sep}";
+
                 //iterate path
                 while (($next = strtok($trm_sep)) !== false) {
                     if (!isset($prev[$s])) {
@@ -330,8 +337,10 @@ class DbDefTerms extends DbEntityBase
                     }
 
                     $prev = &$prev[$s];
-                    $s = $next;
+                    $s = !$trm_extendLabel ? $next : "{$hierarchy}{$next}";
+                    $hierarchy .= "{$next}{$trm_sep}";
                 }
+
             }else{
                 $s = $path;
             }
