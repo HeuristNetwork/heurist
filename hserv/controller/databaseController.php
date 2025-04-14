@@ -381,7 +381,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');
             }else{
                 
-                $isHeuristReferenceIndex = (strcasecmp(HEURIST_DBNAME,'Heurist_Reference_Index')==0);
+                $isHeuristReferenceIndex = (strcasecmp(HEURIST_DBNAME, HEURIST_INDEX_DATABASE)==0);
                 $checker = new DbVerifyURLs($system, HEURIST_SERVER_URL, $isHeuristReferenceIndex);
                 
                 if(@$req_params['checksession']==1){

@@ -205,7 +205,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                         </h3>
 
                         <span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">
-                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">TODO website help</a>
+                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">TODO Website help</a>
                         </span>
 
                     </div>

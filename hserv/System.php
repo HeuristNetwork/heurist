@@ -1020,6 +1020,9 @@ class System {
                         "baseURL"=>HEURIST_BASE_URL,
                         'baseURL_pro'=>HEURIST_BASE_URL_PRO,
                         "referenceServerURL"=>HEURIST_INDEX_BASE_URL,
+                        "referenceServerIndexDatabase"=>HEURIST_INDEX_DATABASE,
+                        "referenceServerBugreportDatabase"=>HEURIST_BUGREPORT_DATABASE,
+                        "referenceServerHelpDatabase"=>HEURIST_HELP_DATABASE,
                         'database_prefix'=>HEURIST_DB_PREFIX),
                     'host_logo'=>$host_logo,
                     'host_url'=>$host_url,
@@ -1067,6 +1070,9 @@ class System {
                     'database_prefix'=>HEURIST_DB_PREFIX,
                     //"serverURL"=>HEURIST_SERVER_URL,
                     "referenceServerURL"=>HEURIST_INDEX_BASE_URL,
+                    "referenceServerIndexDatabase"=>HEURIST_INDEX_DATABASE,
+                    "referenceServerBugreportDatabase"=>HEURIST_BUGREPORT_DATABASE,
+                    "referenceServerHelpDatabase"=>HEURIST_HELP_DATABASE,
                     "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
                     "service_config"=>$this->settings->get('sys_ExternalReferenceLookups'), //get 3d part web service mappings
                     "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services

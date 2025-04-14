@@ -198,7 +198,8 @@ function editCMS2(website_document){
                                     :'<h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block"></h3>')
                                     +'<span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
                                         +'<a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
-                                        +'?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>'
+                                        +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                                        +'&website=39&pageid=708" target="_blank">website help</a>'
                                     +'</span>'
                                         
                                 +'</div>'

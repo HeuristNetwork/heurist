@@ -199,9 +199,11 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
             let request = {
                 terms: '6988',
                 mode: 2,
-                remote: `${window.hWin.HAPI4.sysinfo.referenceServerURL}?db=Heurist_Job_Tracker`
+                remote: `${window.hWin.HAPI4.sysinfo.referenceServerURL}?db=${window.hWin.HAPI4.sysinfo.referenceServerBugreportDatabase}`
             };
 
+console.log('AAA',request.remote)            
+            
             window.hWin.HAPI4.SystemMgr.get_defs(request, (response) => {
 
                 if(response.status != window.hWin.ResponseStatus.OK){

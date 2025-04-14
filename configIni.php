@@ -99,6 +99,8 @@ $version = "6.7.0";// sets current program version number, determined by Heurist
 
 $heuristReferenceServer = "https://heuristref.net";// DO NOT CHANGE THIS as it is critical for a number of functions
 
+$heuristReferenceServerMirror = ''; //reserve mirror server, if it is set, it owerwrites mian reference server settings
+
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
 $dbHost = '';

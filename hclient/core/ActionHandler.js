@@ -617,7 +617,7 @@ class ActionHandler {
 
             case "menu-help-online":
             
-                action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website';
+                action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?website&db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase;
                  // fall through
             default:
                 is_supported = this.#handleHrefAction(action, popup_dialog_options);
