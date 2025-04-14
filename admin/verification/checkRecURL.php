@@ -64,9 +64,8 @@ $isHeuristReferenceIndex = (strcasecmp(HEURIST_DBNAME, HEURIST_INDEX_DATABASE)==
 $checker = new DbVerifyURLs($system, HEURIST_SERVER_URL, $isHeuristReferenceIndex);
 $results = $checker->checkURLs(true, $list_only);
 
-/* heurist instances
+/* heurist instances   THIS IS NOT A COMPREHENSIVE LSIT NOR MAINTAINED
 $heurist_instances = array(
- 'https://int-heuristweb-prod.intersect.org.au',
  'https://heuristref.net',
  'https://heurist.huma-num.fr',
  'https://heurist.sfb1288.uni-bielefeld.de',
