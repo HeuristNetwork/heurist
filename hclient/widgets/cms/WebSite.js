@@ -68,6 +68,13 @@ class WebSite {
     onPageLoad(record, pageTreeData){
 
         this.pageId = record['rec_ID'];
+        
+        //close main-menu if it is offcanvas
+        let ele_menu = $('#main-header');
+        if(ele_menu.length>0 && ele_menu.hasClass('offcanvas')){
+            let bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(ele_menu);
+            bsOffcanvas.hide();
+        }
 
         if(window.parent?.cmsEditor){ //edit mode
             if(pageTreeData){
@@ -169,6 +176,27 @@ class WebSite {
             sURL = sURL + '&newlycreated';
         }
         window.open(sURL);
+        
+    }
+    
+    /*
+    * Reloads header or footer separately
+    */ 
+    loadMargin(template){
+        
+        if(!template){
+            template = 1; //default template
+        }
+
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, header:template});
+        
+        let new_header = $('<div>')
+        new_header.load(sURL, ()=>{
+            new_header = new_header.children(0);
+            $('header').replaceWith( new_header );    
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, new_header); 
+        });
+    
         
     }
     

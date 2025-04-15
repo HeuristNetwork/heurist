@@ -28,24 +28,6 @@
     <!-- General stuff -->
     <fieldset style="border: 1px solid lightgray;border-radius:4px;margin: 2px 4px;">
         <legend style="display:none"></legend>
-        <div>
-            <div class="header_narrow">Position:</div>        
-            <select name="position">
-                <option value="">default</option>
-                <option value="fixed">fixed</option>
-                <option value="sticky">sticky</option>
-                <option value="slide">slide</option>
-                <option value="left">slide-left</option>
-                <option value="right">slide-right</option>
-                <option value="hidden">hidden</option>
-            </select>
-        </div>
-        <div>
-            <div class="header_narrow">Width:</div>        
-            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/>
-            <label for="">&nbsp;Height:
-            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/></label>
-        </div>
         
         <div>
             <div class="header_narrow">
@@ -55,7 +37,22 @@
             </select>
         </div>
         
-                        
+        <div>
+            <div class="header_narrow">Position:</div>        
+            <select name="position">
+                <option value="">default</option>
+                <option value="fixed">fixed</option>
+                <option value="hidden">hidden</option>
+            </select>
+        </div>
+<!--        
+        <div>
+            <div class="header_narrow">Width:</div>        
+            <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/>
+            <label for="">&nbsp;Height:
+            <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/></label>
+        </div>
+-->        
         <div style="text-align:center;display: block;">
             <hr>
             <div class="btn-html-edit">Edit HTML source</div>

@@ -15,11 +15,13 @@
 */
 class HCmsEditorMargin {
 
-  container;
+  cmsEditor;
   main_callback;
+  siteId;
 
   constructor(options) {
 
+      this.cmsEditor = options.cmsEditor;
       this.container = options.container;
       this.main_callback = options.callback;
       
@@ -40,15 +42,25 @@ class HCmsEditorMargin {
       //        this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
 
       cont.find('select[name="position"]').hSelect({change:function(event){
+console.log( $(event.target).val() );
+            
 
       }});
       
       cont.find('select[name="template"]').each((i,sel)=>{
         window.hWin.HEURIST4.ui.createTemplateSelector(  
-                        $(sel), [{key:'',title:'default'}], 
+                        $(sel), [],  //[{key:'',title:'default'}], 
                            '',   //that.options.editOptions[sel.name], 
-                           {extraOptions: {menu_parent: cont}});
+                           {cms:'header', extraOptions: {menu_parent: cont}, 
+                            eventHandlers:{onSelectMenu:function(event){
+                                //replace header element
+                                that.cmsEditor.webSite.loadMargin( $(event.target).val() );
+                            } }  });
                         }); 
+                        
+      cont.find('div.btn-html-edit').button().on('click', function(){
+
+      });
 
       //save entire page (in background)
       cont.find('.btn-save-page').button().css('border-radius','4px').on('click', function(){

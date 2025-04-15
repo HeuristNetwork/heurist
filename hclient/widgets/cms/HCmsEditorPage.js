@@ -620,6 +620,7 @@ showMarginProperties(marginContainer){
     let that = this;
     this._cmsEditorMargin = new HCmsEditorMargin(
     {
+        cmsEditor: this._cmsEditor,
         container: this._panel_propertyView, 
         callback: function(new_cfg, mode){
             that.hideMarginProperties();            

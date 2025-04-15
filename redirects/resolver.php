@@ -257,6 +257,9 @@ $requestUri:
             if(@$_REQUEST['ver']){
                 $params['ver'] = $_REQUEST['ver'];    
             }
+            if(@$_REQUEST['header']){
+                $params['header'] = $_REQUEST['header'];    
+            }
             if(@$_REQUEST['newlycreated']){
                 $params['newlycreated'] = $_REQUEST['newlycreated'];    
             }

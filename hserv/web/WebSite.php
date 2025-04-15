@@ -31,6 +31,8 @@ define('HEAD_E','</head>');
 
 /**
  * Class WebSite
+ * 
+ * It is initialized in FrontController
  *
  * This class generates web page content as browser output, file, or returns as string 
  */
@@ -228,12 +230,21 @@ class WebSite
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
             
-            ob_start();
-            include_once 'WebSiteTemplate.php';
-            $output = ob_get_contents();
-            ob_end_clean();            
+            if(@$this->params['header']){
+                
+                $this->getPageHeader(true); //direct output
+                
+            }elseif(@$this->params['footer']){
+
+                $this->getPageFooter(true);
             
-            $result = $this->handleOutput($output);
+            }else{
+                ob_start();
+                include_once 'WebSiteTemplate.php';
+                $output = ob_get_contents();
+                ob_end_clean();            
+                $result = $this->handleOutput($output);
+            }
         }
 
         return $result;
@@ -378,24 +389,35 @@ class WebSite
         return $val;
     }
     
+    private function getHeaderTemplateContent($filename){
+        
+        $header = null;
+        $header_template = HEURIST_DIR.'hserv/web/templates/headers/'.basename($filename);
+        if(file_exists($header_template)){
+            $header = file_get_contents($header_template);
+        }
+        if($header==null || $header==''){
+            //header template not defined - take the default one
+            $header = file_get_contents(HEURIST_DIR.'hserv/web/templates/headers/default.html');
+        }
+        return $header;
+    }
+    
     //
     // Loads header template and replace values from siteRecord
     //
     public function getPageHeader($is_out=true){
         
-        //get header settings
-        
-        //$image_banner = $this->getFile($this->siteRecord, '99-951', null); //DT_CMS_BANNER
-        
+        //by default it is taken from field value
         $header = $this->getVal(DT_CMS_HEADER, false);
         
-        if($header==''){
-            //header template not defined - take the default one
-            $header = file_get_contents(dirname(__FILE__).'/templates/header01.html');
+        if(!$header || @$this->params['header']){
+            //custom header is not defined or need to load template
+            $header = $this->getHeaderTemplateContent($this->params['header']);
         }
 
         //    
-        $bgImage = $this->getFile($this->siteRecord, '99-951', 'none');
+        $bgImage = $this->getFile($this->siteRecord, '99-951', 'none'); //DT_CMS_BANNER
         if($bgImage!=null){
             //$bgImage = 'background-image: url(&quot;'.$bgImage
             //    .'&quot;) !important; background-repeat: repeat-x !important; background-size: auto;';
@@ -403,6 +425,7 @@ class WebSite
             $bgImage = '';
         }
         
+        //get header settings
         //replace template values {} with settings from siteRecord (CMS_HOME)
         $header_tpl = array(
             'logo_small'=>$this->getFile($this->siteRecord, '2-926'), //, (HEURIST_BASE_URL.'hclient/assets/v6/logo.png')),
@@ -426,16 +449,24 @@ class WebSite
         //$header.classes DT_CMS_BANNER
         $header = str_replace($values_to_replace, array_values($header_tpl), $header);
 
-
-        
-        
-
-
                 
         if($is_out){
             echo $header;
         }
         return $header;
+    }
+    
+    //
+    //
+    //
+    public function getPageFooter($is_out=true){
+        
+        $val = $this->getVal(DT_CMS_FOOTER, false);
+        
+        if($is_out){
+            echo $val;
+        }
+        return $val;
     }
     
     //
@@ -585,19 +616,6 @@ class WebSite
         }
         
         return $res;
-    }
-    
-    //
-    //
-    //
-    public function getPageFooter($is_out=true){
-        
-        $val = $this->getVal(DT_CMS_FOOTER, false);
-        
-        if($is_out){
-            echo $val;
-        }
-        return $val;
     }
     
     // TBD

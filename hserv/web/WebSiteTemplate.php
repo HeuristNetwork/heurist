@@ -46,14 +46,13 @@
     ?>
 </head>
 <body>
-<!-- header -->
+
 <?php $this->getPageHeader();?>
 
 <main> <!--  class="container mt-3 pt-5" -->
 <?php $this->getPageContent();?>
 </main>
-<footer class="">
+
 <?php $this->getPageFooter();?>
-</footer>
 </body>
 </html>

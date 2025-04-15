@@ -37,6 +37,7 @@ class HCmsEditor {
     menuContentJSON; // menu content as JSON
                 
     //
+    webSite;
     website_id; // current website
     page_id;    // current page
     current_language = 'def';
@@ -160,9 +161,9 @@ class HCmsEditor {
 
         this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
         
-        this._editor_panel.find('.btn-website-header').on('click', ()=>that.#editHeader());
+        this._editor_panel.find('.btn-website-header').on('click', ()=>that.onMarginEdit(true));
 
-        this._editor_panel.find('.btn-website-footer').on('click', ()=>that.#editFooter());
+        this._editor_panel.find('.btn-website-footer').on('click', ()=>that.onMarginEdit(false));
 
         
         this._editor_panel.find('.btn-website-edit').on('click', ()=>that.#editHomePageRecord()); //open record edit
@@ -249,9 +250,14 @@ class HCmsEditor {
   {
       //website menu as json tree
       if(this._webPageFrame[0].contentWindow){
-        this.menuContentJSON = this._webPageFrame[0].contentWindow.webSite.siteMenu;
+        this.webSite = this._webPageFrame[0].contentWindow.webSite;
+        this.menuContentJSON = this.webSite.siteMenu;
+        this.website_id = this.webSite.siteId;
+        this.page_id = this.webSite.pageId;
       }else{
-          this.menuContentJSON = [];
+        this.menuContentJSON = [];
+        this.website_id = 0;
+        this.page_id = 0;
       }
       
       if(this._editCMS_SiteMenu){
@@ -350,9 +356,7 @@ class HCmsEditor {
   */
   onMarginEdit(isHeader){
       
-console.log('initMargin');      
       let margin = this._webPageFrame[0].contentDocument.getElementsByTagName(isHeader?'header':'footer'); 
-      
       this._cmsEditorPage.showMarginProperties(margin);
       this.switchMode('page');
   }
@@ -377,7 +381,7 @@ console.log('initMargin');
   getHapi(){
       return this._webPageFrame[0].contentWindow.HAPI4;
   }
-
+  
   //
   // loads home page content
   //  
@@ -385,6 +389,7 @@ console.log('initMargin');
       let that = this;  
       if(this.warningOnExit( ()=>that.#editHomePage() )) return;                           
       //reload content of page
+console.log( 'load home',this.website_id );      
       this.loadPageContent( this.website_id );
       
   }
@@ -522,16 +527,4 @@ console.log('initMargin');
   onBeforeUnload(){
       
   }    
-
-  /*
-  *
-  */
-  #editHeader(){
-      
-      
-  }
-  #editFooter(){
-      
-  }
-
 }

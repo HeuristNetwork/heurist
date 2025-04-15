@@ -126,7 +126,11 @@ class ReportController
                     break;
 
                 case 'list':
-                    $result = $this->repAction->getList();
+                    if(@$this->req_params['cms']){
+                        $result = $this->repAction->getListForCms($this->req_params['cms']);
+                    }else{
+                        $result = $this->repAction->getList();    
+                    }
                     break;
 
                 case 'get':

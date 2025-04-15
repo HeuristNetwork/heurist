@@ -46,7 +46,7 @@ setValueAndWidth assign value to input and adjust its width
 initHSelect - converts HTML select to jquery selectmenu
 
 getRecordTitle - retuns of title for given record id
-createTemplateSelector - fills with names of smarty templates
+createTemplateSelector - fills with names of smarty or html templates
 
 createLanguageSelect - fill html select with list of languages for translation 
 
@@ -2272,7 +2272,13 @@ window.hWin.HEURIST4.ui = {
     //
     createTemplateSelector: function($select, topOptions, defValue, options){
         
-        window.hWin.HAPI4.SystemMgr.reportAction({action:'list'}, 
+        let params = {action:'list'};
+        
+        if(options?.cms){ //header, footer
+            params['cms'] = options.cms;
+        }
+        
+        window.hWin.HAPI4.SystemMgr.reportAction(params, 
             function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
 
@@ -2657,6 +2663,9 @@ window.hWin.HEURIST4.ui = {
         }            
         if(version!=''){
             params.push('ver='+version);
+        }
+        if(options.header){
+            params.push('header='+options.header);
         }
         
         if(params.length>0){

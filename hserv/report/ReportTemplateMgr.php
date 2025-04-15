@@ -98,6 +98,27 @@ class ReportTemplateMgr
 
         return $results;
     }
+    
+    /*
+    * Returns templates for cms headers or footers
+    */
+    public function getListForCms($template_type=null){
+    
+        $dir = HEURIST_DIR.'hserv/web/templates/'.($template_type=='header'?'headers':'footers');
+        
+        $files = scandir($dir);
+        $results = [];
+
+        foreach ($files as $filename) {
+            $path_parts = pathinfo($filename);
+            if ($path_parts['extension']=='html') {
+                $name = substr($filename, 0, -5);
+                $results[] = ['filename' => $filename, 'name' => $name];
+            }
+        }
+        
+        return $results;
+    }
 
     /**
     * Converts gpl file to tpl
