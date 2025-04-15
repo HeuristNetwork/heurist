@@ -444,8 +444,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         function __setDim(name){
             let ele = cont.find('input[name="'+name+'"]');
             let val = ele.val();
-            if( (val!='' || val!='auto') && parseInt(val)>0){
-                if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
+            if( (val != '' || val != 'auto') && parseInt(val)>0){
+                if(!val.endsWith('%') && !val.endsWith('px') && !val.endsWith('em')){
                     val = val + 'px';
                 }
                 css[name] = val;
@@ -597,12 +597,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     // Width
                     if(parts.length == 3 || part_one_style){
 
-                        if(parts[0].indexOf('px') === -1 && isNaN(parts[0])){ // something else
+                        if(parts[0].indexOf('px') === -1 && !window.hWin.HEURIST4.util.isNumber(parts[0])){ // something else
                             s.push(`${style}: ${value}`);
                             continue;
                         }
 
-                        let px = parts[0].indexOf('px') === -1 ? `${parts[0]}px` : parts[0];
+                        let px = window.hWin.HEURIST4.util.isNumber(parts[0]) ? `${parts[0]}px` : parts[0];
                         s.push(`border-width: ${px}`);
 
                         l_cfg.css['border-width'] = px;
