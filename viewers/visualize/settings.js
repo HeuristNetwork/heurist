@@ -44,7 +44,7 @@ function getSetting(key, defvalue) {
 
     let value = '';
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && !key.startsWith('translate')){
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
 
         let pref_key = key;
         if(key.startsWith('setting_')){
@@ -75,7 +75,7 @@ function getSetting(key, defvalue) {
 */
 function putSetting(key, value) {
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && !key.startsWith('translate')){
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
 
         if(key.startsWith('setting_')){
             key = key.split('_');

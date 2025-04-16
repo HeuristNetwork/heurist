@@ -407,9 +407,22 @@ $.widget( "heurist.connections", {
      */
     _expandSearch: function(type, rec_ID){
 
-        let that = this;
         let new_query = [];
         let existing_query = window.hWin.HEURIST4.util.isJSON(this._lastRequest.q);
+
+        function mergeAnyPred(any_index){
+
+            if(!this._mergeRecordIDs(existing_query[any_index]['any'], type, rec_ID)){
+
+                new_query = {[type]: rec_ID};
+                let new_any = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query[any_index]['any'], new_query);
+
+                new_query = existing_query;
+                new_query[any_index]['any'] = new_any;
+            }else{
+                new_query = existing_query;
+            }
+        }
 
         if(existing_query){ // JSON query
 
@@ -432,24 +445,13 @@ $.widget( "heurist.connections", {
             }else if(window.hWin.HEURIST4.util.isPositiveInt(has_any) || Number.parseInt(has_any) === 0){
                 // Merge first existing top-level 'any' predicate
 
-                if(!this._mergeRecordIDs(existing_query[has_any]['any'], type, rec_ID)){
+                mergeAnyPred(has_any); // new_query is updated within
 
-                    new_query = {[type]: rec_ID};
-                    let new_any = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query[has_any]['any'], new_query);
-    
-                    new_query = existing_query;
-                    new_query[has_any]['any'] = new_any;
-                }else{
-                    new_query = existing_query;
-                }
-
-            }else{
+            }else if(!this._mergeRecordIDs(existing_query, type, rec_ID)){
                 // Merge 'any' predicates
 
-                if(!this._mergeRecordIDs(existing_query, type, rec_ID)){
-                    new_query = {any: [{[type]: rec_ID}]};
-                    new_query = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query, new_query);
-                }
+                new_query = {any: [{[type]: rec_ID}]};
+                new_query = window.hWin.HEURIST4.query.mergeHeuristQuery(existing_query, new_query);
             }
 
         }else if(typeof this._lastRequest.q === 'string' && !window.hWin.HEURIST4.util.isempty(this._lastRequest.q)){ // Old format
@@ -461,22 +463,7 @@ $.widget( "heurist.connections", {
             return;
         }
 
-        let request = window.hWin.HEURIST4.util.cloneJSON(this._lastRequest);
-        request['q'] = new_query;
-
-        window.hWin.HAPI4.RecordSearch.doSearchWithCallback(request, (response) => {
-
-            if(!response){
-                return;
-            }
-
-            that.recordset_changed = true;
-            that.options.relations = null;
-            that.options.recordset = response;
-            that._lastRequest = request;
-
-            that._refresh();
-        });
+        this._performSearch(new_query);
     },
 
     /**
@@ -517,16 +504,22 @@ $.widget( "heurist.connections", {
             return curValue.join(',');
         }
 
-        // Convert query to an array, if not already one
-        if(!Array.isArray(query)){
-
+        /**
+         * Micro function to appease Sonarcloud
+         */
+        function updateArrayPred(){
             if(Object.hasOwn(query, type)){
                 query[type] = updateValue(query[type]);
-                query = [query];
             }else{                
                 query = [query];
                 query.push({[type]: rec_ID});
             }
+        }
+
+        // Convert query to an array, if not already one
+        if(!Array.isArray(query)){
+
+            updateArrayPred();
 
             return true;
         }
@@ -548,7 +541,7 @@ $.widget( "heurist.connections", {
             let value = param[key];
             if(typeof value === 'number' && Number.isInteger(value)){
                 value = value.toString();
-            }else if(typeof value !== 'string' || !value.match(/^\d+(,\d+)*$/)){
+            }else if(typeof value !== 'string' || /^\d+(,\d+)*$/.exec(value) === null){
                 continue;
             }
 
@@ -563,6 +556,32 @@ $.widget( "heurist.connections", {
         }
         
         return true;
+    },
+
+    /**
+     * Perform localised search to update the visualiser
+     *
+     * @param {json} new_query 
+     */
+    _performSearch: function(new_query){
+
+        let that = this;
+        let request = window.hWin.HEURIST4.util.cloneJSON(this._lastRequest);
+        request['q'] = new_query;
+
+        window.hWin.HAPI4.RecordSearch.doSearchWithCallback(request, (response) => {
+
+            if(!response){
+                return;
+            }
+
+            that.recordset_changed = true;
+            that.options.relations = null;
+            that.options.recordset = response;
+            that._lastRequest = request;
+
+            that._refresh();
+        });
     }
 
 });

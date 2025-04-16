@@ -275,7 +275,7 @@ class DbSysBugreport extends DbEntityBase
                 $user_name = is_array($user_info) ? $user_info['ugr_FullName'] : 'None found';
                 $user_email = is_array($user_info) ? $user_info['ugr_eMail'] : 'None found';
 
-                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__'], 
+                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__'],
                     [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE],
                     $this->reportEmail);
 
