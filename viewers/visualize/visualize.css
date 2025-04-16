@@ -132,23 +132,11 @@
 
 
 /** SVG */
-#d3svg {
-    /* border: 1px dashed #423896; */
-}
-
-/** Record hover */
-g:hover {
-    /*cursor: pointer;*/
-}
 
 /** Lines between records */
 .link {
     fill: none;    
     stroke-opacity: 0.7;  
-}
-
-.link:hover {
-    /*cursor: pointer;*/
 }
 
 /** Circle around icon */
@@ -168,6 +156,10 @@ circle.selected {
 }
 
 /** Text above circle */
+text {
+    cursor: default !important;
+}
+
 text.center {
     font-weight: bold;
     text-anchor: middle;   

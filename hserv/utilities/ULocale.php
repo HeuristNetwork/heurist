@@ -451,7 +451,7 @@
                     $error = '';
                     break;
 
-                case 459:
+                case 456:
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Heurist has exceeded it\'s quota with Deepl and will be unable to attempt automatic translations of your texts.<br>'
                            .'We apologise for the inconvenience.';

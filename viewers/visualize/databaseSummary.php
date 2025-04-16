@@ -126,7 +126,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <!-- On Row Click -->
         <script>
             function onrowclick(rt_ID, innewtab){
-                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID+'&nometadatadisplay=true';
+                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;

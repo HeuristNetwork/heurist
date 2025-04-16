@@ -106,6 +106,7 @@ let maxCountForNodes, maxCountForLinks;
             
             selectedNodeIds: [],
             onRefreshData: function(){},
+            onExpandNode: null,
             triggerSelection: function(selection){}, 
             
             isDatabaseStructure: false,

@@ -295,8 +295,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['popup_width']){
 
                         let value = opts.layout_params['popup_width'];
-                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
-                        value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
+                        const unit = value.endsWith('%') ? value.slice(-1) : value.slice(-2);
+                        value = value.endsWith('%') ? value.slice(0, -1) : value.slice(0, -2);
 
                         $dlg.find('input[name="popup_width"]').val(value); // first index
                         $dlg.find('select[name="popup_wunit"]').val(unit); // second index
@@ -304,8 +304,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['popup_height']){
 
                         let value = opts.layout_params['popup_height'];
-                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
-                        value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
+                        const unit = value.endsWith('%') ? value.slice(-1) : value.slice(-2);
+                        value = value.endsWith('%') ? value.slice(0, -1) : value.slice(0, -2);
 
                         $dlg.find('input[name="popup_height"]').val(value); // first index
                         $dlg.find('select[name="popup_hunit"]').val(unit); // second index
@@ -415,10 +415,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                         let popup_dims = opts['recview_dimensions'];
 
-                        let h_unit = popup_dims.height.indexOf('px') !== -1 ? 'px' : '%';
-                        let w_unit = popup_dims.width.indexOf('px') !== -1 ? 'px' : '%';
-                        let l_unit = popup_dims.left.indexOf('px') !== -1 ? 'px' : '%';
-                        let t_unit = popup_dims.top.indexOf('px') !== -1 ? 'px' : '%';
+                        let h_unit = popup_dims.height.endsWith('%') ? '%' : popup_dims.height.slice(-2);
+                        let w_unit = popup_dims.width.endsWith('%') ? '%' : popup_dims.width.slice(-2);
+                        let l_unit = popup_dims.left.endsWith('%') ? '%' : popup_dims.left.slice(-2);
+                        let t_unit = popup_dims.top.endsWith('%') ? '%' : popup_dims.top.slice(-2);
 
                         $dlg.find('[name="dialog_hunit"]').val(h_unit);
                         $dlg.find('[name="dialog_wunit"]').val(w_unit);

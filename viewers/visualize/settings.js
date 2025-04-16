@@ -44,7 +44,7 @@ function getSetting(key, defvalue) {
 
     let value = '';
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key)){
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
 
         let pref_key = key;
         if(key.startsWith('setting_')){
@@ -75,7 +75,7 @@ function getSetting(key, defvalue) {
 */
 function putSetting(key, value) {
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key)){
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
 
         if(key.startsWith('setting_')){
             key = key.split('_');
@@ -388,7 +388,8 @@ function handleSettingsInUI() {
 
 function initRecTypeSelector(){
 
-    let hidePane = getSetting('startup_rectype_'+window.hWin.HAPI4.database) != 1;
+    let hidePane = window.startup_rectype != 1;
+    delete window.startup_rectype;
 
     let layout_options = { 
         applyDefaultStyles: true,
@@ -427,6 +428,12 @@ function initRecTypeSelector(){
             layout.open('west');
             $('#list_rectypes').show();
             $('#lblShowRectypeSelector').show();
+
+            let refresh_chkbx = window.trigger_checkbox_refresh;
+            if(!window.hWin.HEURIST4.util.isempty(refresh_chkbx)){
+                $(`#list_rectypes ${refresh_chkbx}`).trigger('change');
+                delete window.trigger_checkbox_refresh;
+            }
         }, 1000);
     }
 }

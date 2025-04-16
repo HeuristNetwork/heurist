@@ -28,8 +28,8 @@ Widget hierarchy:<br>
 | TLCMap | Query the Time Layered Cultural Mapping of Australian history and culture database | site: [tlcmap.org](https://tlcmap.org) | Disabled, issues with API response |
 | GeoNames | Query the Geonames database for geographical locations covering all countries and many additional places | site: [geonames.org](https://geonames.org) | Done |
 | GeoNames Postalcodes | Query the Geonames' postalcode database for more precise locale information | site: [geonames.org/postal-codes/](https://geonames.org/postal-codes/) | Done |
-| MPCE | Assign keywords to a Work (Book) record from searches or by association | database: [Mapping Print Charting Enlightenment](https://int-heuristweb-prod.intersect.org.au/heurist/?db=MPCE_Mapping_Print_Charting_Enlightenment&website) | Done |
-| LRC18 | Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search | database: [ESTC Helsinki Bibliographic Metadata](https://int-heuristweb-prod.intersect.org.au/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata) | Done |
+| MPCE | Assign keywords to a Work (Book) record from searches or by association | database: [Mapping Print Charting Enlightenment](https://HeuristRef.net/heurist/?db=MPCE_Mapping_Print_Charting_Enlightenment&website) | Done |
+| LRC18 | Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search | database: [ESTC Helsinki Bibliographic Metadata](https://HeuristRef.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata) | Done |
 | BnF Bib | Query the Bibliothèque nationale de France's bibliographic records | site: [BnF.fr](https://www.bnf.fr) | Done |
 | BnF Aut | Query the Bibliothèque nationale de France's authoritative records | site: [BnF.fr](https://www.bnf.fr) | Done |
 | Nomisma | Retrieve the Nomisma records for Mints, Hoards and Findspots | site: [nomisma.org](https://nomisma.org/) | Done |

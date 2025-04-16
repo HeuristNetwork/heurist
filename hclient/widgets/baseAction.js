@@ -53,9 +53,9 @@ $.widget( "heurist.baseAction", {
     },
 
     _$: $, // shorthand for this.element.find
-    $H: window.hWin.HEURIST4.util, // HUEIRST4.utils
-    $Hmsg: window.hWin.HEURIST4.msg, // HUEIRST4.msg
-    $Hui: window.hWin.HEURIST4.ui, // HUEIRST4.ui
+    $H: window.hWin.HEURIST4?.util, // HEURIST4.utils
+    $Hmsg: window.hWin.HEURIST4?.msg, // HEURIST4.msg
+    $Hui: window.hWin.HEURIST4?.ui, // HEURIST4.ui
     HAPI: null,
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)

@@ -434,10 +434,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           return d.text;
                       })
                       .attr("class", function(d, i) {
-                        if(i>0 && d.subheader==1){ // d.style=='italic'
+                        if(i > 0 && d.subheader==1){ // d.style=='italic'
                             return 'info-mode-full namelabel';
                         }else{
-                            return (i>0?'info-mode ':'nodelabel ')+'namelabel';     
+                            return (i > 0 ? 'info-mode ':'nodelabel ')+'namelabel';     
                         }
                       })
                       .attr("x", function(d, i) {
@@ -514,6 +514,53 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 }
 
             }).style('cursor', 'pointer');
+        }else if(typeof settings.onExpandNode === 'function'){
+            // Add context menu for nodes, allowing users to expand node connections
+            // @todo: allow for both vis, disabled and hide based on: settings.isDatabaseStructure and typeof settings.onExpandNode === 'function'
+
+            let data = overlay.data();
+
+            $(overlay[0][0]).contextmenu({
+                delegate: 'text.nodelabel',
+                position: (event, ui) => {
+                    return {my: "left top", at: "right+5 top", of: ui.target};
+                },
+                menu: [
+                    {title: 'Show record viewer', cmd: 'viewer', data: {id: data[0].id, name: data[0].name}},
+                    {title: 'Get all linked and related records', cmd: 'links', data: {id: data[0].id}},
+                    {title: 'Get Relationship markers:', isHeader: true},
+                    {title: 'Related To', cmd: 'related_to', data: {id: data[0].id}},
+                    {title: 'Related From', cmd: 'related_from', data: {id: data[0].id}},
+                    {title: 'Related Both ways', cmd: 'related', data: {id: data[0].id}},
+                    {title: 'Get Record pointers:', isHeader: true},
+                    {title: 'Linked To', cmd: 'linked_to', data: {id: data[0].id}},
+                    {title: 'Linked From', cmd: 'linked_from', data: {id: data[0].id}},
+                    //{title: 'Linked Both ways', cmd: 'linked', data: {id: data[0].id}} @todo - need to add handling for linked, performs both to and from like related
+                    //{title: 'Remove', isHeader: true},
+                    //{title: 'Node', cmd: 'remove_node', data: {id: data[0].id}},
+                    //{title: 'Connected Nodes', cmd: 'remove_connections', data: {id: data[0].id}}
+                ],
+                select: (event, ui) => {
+
+                    let cmd = ui.cmd;
+                    let rec_ID = ui.item.data().id;
+
+                    if(cmd !== 'viewer'){
+                        settings.onExpandNode.call(this, cmd, rec_ID);
+                        return;
+                    }
+
+                    showNodeInformation(ui.item.data());
+                },
+                beforeOpen: (event, ui) => {
+                    let style = $(ui.menu).attr('style');
+
+                    if(style.indexOf('100000') == -1){
+                        style += 'z-index: 100000 !important;';
+                        $(ui.menu).attr('style', style);
+                    }
+                }
+            });
         }
     }else{ // link information, onhover
 
