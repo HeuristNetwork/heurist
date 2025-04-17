@@ -15,7 +15,7 @@
 
 
 /*
-* HBasePopup
+* HBaseView
 *
 */
 import './HBaseWidget.js';

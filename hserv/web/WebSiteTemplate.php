@@ -47,12 +47,12 @@
 </head>
 <body>
 
-<?php $this->getPageHeader();?>
+<?php echo $this->getPageMargin('header');?>
 
 <main> <!--  class="container mt-3 pt-5" -->
 <?php $this->getPageContent();?>
 </main>
 
-<?php $this->getPageFooter();?>
+<?php echo $this->getPageMargin('footer');?>
 </body>
 </html>

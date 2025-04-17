@@ -1412,14 +1412,14 @@ function initHeaderTitle(){
 
     if(website_title){
 
-        var headertitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
+        let headertitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
 
         document.title = window.hWin.HEURIST4.util.stripTags(headertitle);
         headertitle = window.hWin.HEURIST4.util.stripTags(headertitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');
 
 
-        var ele = $('#main-title');
-        var isFirstInit = (ele.length>0 && ele.children().length==0);
+        let ele = $('#main-title');
+        let isFirstInit = (ele.length>0 && ele.children().length==0);
 
         // show shadow for title if there is header background image (banner)
         let bg_img = $('#main-header').css('background-image');

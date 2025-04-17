@@ -1,19 +1,19 @@
-<header class="mb-4 border-bottom bg-body-tertiary" style="background-image: url(&quot;{$header.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">
+<header class="mb-4 border-bottom bg-body-tertiary" style="background-image: url(&quot;{$website.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">
 
     <div class="container-fluid d-flex flex-wrap justify-content-center align-items-center border-bottom py-md-3 py-sm-1">
-        <img src="{$header.logo_small}" alt="Logo" height="40" class="me-2 d-block d-md-none">
-        <img src="{$header.logo}" alt="Logo" height="80" class="me-2 d-none d-md-block">
-        <div class="h3 mb-0">{$header.title}</div>
+        <img src="{$website.logo_small}" alt="Logo" height="40" class="me-2 d-block d-md-none">
+        <img src="{$website.logo}" alt="Logo" height="80" class="me-2 d-none d-md-block">
+        <div class="h3 mb-0">{$website.title}</div>
     </div>
     
     <!-- main menu -->
     <div class="container justify-content-center ps-sm-2 py-md-2 navbar navbar-expand-sm">
 
-        <div id="main-menu" data-heurist-widget="HMenu">{$header.navbar}</div>
+        <div id="main-menu" data-heurist-widget="HMenu">{$website.navbar}</div>
 
         <div class="ms-3">
             <!-- language selector -->
-            {$header.languages} 
+            {$website.languages} 
         </div>
 
         <!-- login/signup and personal menu -->

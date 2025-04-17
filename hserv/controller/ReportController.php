@@ -134,7 +134,7 @@ class ReportController
                     break;
 
                 case 'get':
-                    $this->repAction->downloadTemplate($template_file);
+                    $this->repAction->downloadTemplate($template_file, @$this->req_params['cms']);
                     break;
 
                 case 'save':

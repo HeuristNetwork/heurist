@@ -126,17 +126,18 @@ class WebSite {
                     if(record && record.length>0){
                         record = record[0];
                         let res = record['details'];
+                        /*
                         let keys = Object.keys(res);
                         for(let idx in keys){
                             let key = keys[idx];
                             res[key] = res[key][ Object.keys(res[key])[0] ];
                         }
+                        */
                         res['rec_ID'] = record['rec_ID'];
-                        //res[DT_NAME] = res[DT_NAME]
-                        //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
                         
                         //reload content of page_target
-                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], page_target, supp_options );
+                        let content = window.hWin.HAPI4.getTranslation(res[DT_EXTENDED_DESCRIPTION], null);
+                        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, page_target, supp_options );
                         
                         res['pageTreeData'] = pageTreeData;
                         
@@ -180,23 +181,38 @@ class WebSite {
     }
     
     /*
-    * Reloads header or footer separately
+    * Reloads header or footer separately with default or given template
     */ 
-    loadMargin(template){
+    reloadMargin(isHeader, template){
         
-        if(!template){
-            template = 1; //default template
-        }
-
+        const mtype = isHeader?'header':'footer';
+        
+        let request = {website:this.siteId, ver:3};
+        request[mtype] = template;
+      
+        window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL,
+                    request, null, function(response){
+                        if(response?.message){
+                            //TBD - always wrap content into header or footer
+                            let new_content = $(response.message);
+                            if(!new_content.is(mtype)){
+                                new_content = $(`<${mtype}>`).append(new_content);
+                            }
+                            
+                            $(type).replaceWith( new_content );    
+                            window.hWin.HAPI4.layoutMgr.layoutInit(null, new_content); 
+                        }
+                    });
+        
+/*        
         let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, header:template});
-        
         let new_header = $('<div>')
         new_header.load(sURL, ()=>{
             new_header = new_header.children(0);
             $('header').replaceWith( new_header );    
             window.hWin.HAPI4.layoutMgr.layoutInit(null, new_header); 
         });
-    
+*/    
         
     }
     

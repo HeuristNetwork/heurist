@@ -403,7 +403,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     indentUnit     : 2,
                     indentWithTabs : false,
                     lineNumbers    : true,
-                    smartyVersion  : 3,
+                    smartyVersion  : 5,
                     matchBrackets  : true,
                     smartIndent    : true,
                     extraKeys: {

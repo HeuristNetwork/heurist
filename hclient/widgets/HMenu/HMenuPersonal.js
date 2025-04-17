@@ -39,6 +39,7 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
     */    
     onChangeCredentials: function(data){
 
+        console.log('!!!!');
         if (this.HAPI.has_access()) {
              //
              this._$('.usrFullName').text(this.HAPI.currentUser?.ugr_FullName);

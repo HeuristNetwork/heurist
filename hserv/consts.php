@@ -243,6 +243,7 @@ define('DIR_SMARTY_TEMPLATES', 'smarty-templates/');
 
 define('ICON_PLACEHOLDER', HEURIST_BASE_URL.'hclient/assets/16x16.gif');
 define('ICON_EXTLINK', HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif');
+define('ASSETS_URL', HEURIST_BASE_URL.'hclient/assets/');
 
 /** RECORD TYPE DEFINITIONS */
 $rtDefines = array(

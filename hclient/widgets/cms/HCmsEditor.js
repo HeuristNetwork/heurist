@@ -355,9 +355,7 @@ class HCmsEditor {
   * Start edit header or footer by click in SiteMenu
   */
   onMarginEdit(isHeader){
-      
-      let margin = this._webPageFrame[0].contentDocument.getElementsByTagName(isHeader?'header':'footer'); 
-      this._cmsEditorPage.showMarginProperties(margin);
+      this._cmsEditorPage.showMarginProperties(isHeader);
       this.switchMode('page');
   }
   
@@ -391,7 +389,6 @@ class HCmsEditor {
       //reload content of page
 console.log( 'load home',this.website_id );      
       this.loadPageContent( this.website_id );
-      
   }
   
   /*

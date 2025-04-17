@@ -18,8 +18,8 @@
 */
 -->
 <div class="ent_header" style="text-align:right; padding: 5px 2px; font-size:0.9em">
-    <div class="btn-save-element ui-button-action" style="margin-right:4px">Save</div>
-    <div class="btn-save-page ui-button-action" style="margin-right:4px">Save and Close</div>
+    <div class="btn-save-only ui-button-action" style="margin-right:4px">Save</div>
+    <div class="btn-save-and-close ui-button-action" style="margin-right:4px">Save and Close</div>
     <div class="btn-cancel" style="margin-right:10px">Cancel</div>
 </div>
 
@@ -28,14 +28,6 @@
     <!-- General stuff -->
     <fieldset style="border: 1px solid lightgray;border-radius:4px;margin: 2px 4px;">
         <legend style="display:none"></legend>
-        
-        <div>
-            <div class="header_narrow">
-                Template
-            </div>
-            <select name="template" class="text ui-widget-content ui-corner-all" title="">
-            </select>
-        </div>
         
         <div>
             <div class="header_narrow">Position:</div>        
@@ -53,9 +45,21 @@
             <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/></label>
         </div>
 -->        
+
+        <div>
+            <div class="header_narrow">
+                Template
+            </div>
+            <select name="template" class="text ui-widget-content ui-corner-all" title="">
+            </select>
+        </div>
+        
+
         <div style="text-align:center;display: block;">
             <hr>
             <div class="btn-html-edit">Edit HTML source</div>
         </div>
     </fieldset>
+    <div id="codemirror-container" style="display:none;">
+    </div>
 </div>

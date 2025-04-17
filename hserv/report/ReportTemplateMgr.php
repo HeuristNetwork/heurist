@@ -151,8 +151,9 @@ class ReportTemplateMgr
      * @param string $template_file The name of the template file to retrieve.
      * @return void Outputs the content of the template file or throws error message if not found.
      */
-    public function downloadTemplate($template_file)
+    public function downloadTemplate($template_file, $cms_type=null)
     {
+        
         try {
             if ($template_file == null || $template_file == '') {
                 $template_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'template.tpl';

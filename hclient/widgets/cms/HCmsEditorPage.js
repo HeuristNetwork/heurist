@@ -608,7 +608,7 @@ initPage(pageContainer, pageRecord){
 //
 //
 //
-showMarginProperties(marginContainer){
+showMarginProperties(isHeader){
 
     this.detachTinyMCE(false);
     this._container.find('.treePageHeader > h3').text(window.hWin.HR('Header'));
@@ -622,10 +622,12 @@ showMarginProperties(marginContainer){
     {
         cmsEditor: this._cmsEditor,
         container: this._panel_propertyView, 
-        callback: function(new_cfg, mode){
+        isHeader: isHeader,
+        onClose: function(){
             that.hideMarginProperties();            
         }
     });
+    
 }
 
 //
