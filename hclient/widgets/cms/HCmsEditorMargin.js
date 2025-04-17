@@ -130,7 +130,7 @@ console.log( $(event.target).val() );
         window.hWin.HEURIST4.ui.createTemplateSelector(  
                         $(sel), [{key:'',title:'select...'}], 
                            '',   //that.options.editOptions[sel.name], 
-                           {cms:'header', extraOptions: {menu_parent: cont}, 
+                           {cms:that.isHeader?'header':'footer', extraOptions: {menu_parent: cont}, 
                             eventHandlers:{onSelectMenu:function(event){
                                 //get new content and then reload header/footer
                                 that.#getTemplateContent($(event.target).val(), function(response){

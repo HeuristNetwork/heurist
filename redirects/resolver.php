@@ -53,7 +53,7 @@
 // special case for dicobiosport.huma-num.fr and privileges.huma-num.fr
 //
 
-$requestUri = $_SERVER['SCRIPT_URL']; // str_replace( $_SERVER['REQUEST_QUERY'], '', $_SERVER['REQUEST_URI'] );
+$requestUri = str_replace( '?'.$_SERVER['QUERY_STRING'], '', $_SERVER['REQUEST_URI'] );
 
 $requestUri = explode('/', trim($requestUri,'/'));
 $allowedActions = array('website','web','hml','tpl','view','edit','adm');
@@ -70,6 +70,10 @@ $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 &&
                     !($_SERVER["SERVER_NAME"]=='heurist.huma-num.fr' ||
                       $_SERVER["SERVER_NAME"]=='heurist2025.huma-num.fr'));
 
+                      
+//echo  $_SERVER["SERVER_NAME"].'  '.$is_own_domain.'  '.$requestUri;
+//exit;
+                      
 if($is_own_domain){
     //'dicobiosport' and 'privileges'
     //detect databasename

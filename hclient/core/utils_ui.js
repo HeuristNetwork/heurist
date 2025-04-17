@@ -2655,6 +2655,8 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     params.push(`pageid=${pageid}`);
                 }
+            }else{
+                params.push('website');
             }
         }
         

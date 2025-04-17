@@ -199,7 +199,7 @@ class WebSite {
                                 new_content = $(`<${mtype}>`).append(new_content);
                             }
                             
-                            $(type).replaceWith( new_content );    
+                            $(mtype).replaceWith( new_content );    
                             window.hWin.HAPI4.layoutMgr.layoutInit(null, new_content); 
                         }
                     });

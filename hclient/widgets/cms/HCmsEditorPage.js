@@ -611,7 +611,7 @@ initPage(pageContainer, pageRecord){
 showMarginProperties(isHeader){
 
     this.detachTinyMCE(false);
-    this._container.find('.treePageHeader > h3').text(window.hWin.HR('Header'));
+    this._container.find('.treePageHeader > h3').text(window.hWin.HR(isHeader?'Header':'Footer'));
     this._panel_propertyView.text('data-top', this._panel_propertyView.css('top'));
     
     this._panel_propertyView.css('top',21);

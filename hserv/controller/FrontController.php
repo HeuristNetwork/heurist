@@ -96,7 +96,7 @@ class FrontController
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
 
-        }elseif(@$this->req_params['website']!=null){
+        }elseif(array_key_exists('website', $this->req_params)){
 
             $controller = new WebSite($this->system, $this->req_params);
             
