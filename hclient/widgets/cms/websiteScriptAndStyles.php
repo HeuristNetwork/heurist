@@ -1180,9 +1180,9 @@ function initLinksAndImages($container, search_data){
             var rec_id = 0;
 
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(parts)
-                && parts.length>2 && parts[parts.length-2]=='view'){
-
-                rec_id = parts[parts.length-1];
+                && parts.length>2 && !parts[parts.length-2].startsWith('web')){
+                // Record link to non cms webpage, e.g. record viewer/editor, output, or backend
+                return;
             }else if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?'
                 || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database )
@@ -1194,6 +1194,9 @@ function initLinksAndImages($container, search_data){
                         if($(link).attr('target')!='_blank'){
                             return;
                         }
+                    }else if(!window.hWin.HEURIST4.util.getUrlParameter('fmt',href).startsWith('web')){
+                        // Record link to non cms webpage, e.g. record viewer/editor, output, or backend
+                        return;
                     }else{
                         rec_id  = window.hWin.HEURIST4.util.getUrlParameter('recID',href);
                     }

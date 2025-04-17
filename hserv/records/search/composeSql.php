@@ -209,6 +209,7 @@ $wg_ids = null; //groups current user is member
 $publicOnly = false;
 $currUserID = 0;
 $is_admin = false;
+$isFacetCount = false;
 
 //keep params for debug only!
 $params_global;
@@ -425,7 +426,7 @@ function parse_query_to_json($query){
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query
-        , $rty_id_relation, $dty_id_relation_type, $is_admin;
+        , $rty_id_relation, $dty_id_relation_type, $is_admin, $isFacetCount;
 
 
     if(defined('RT_RELATION')){
@@ -436,6 +437,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     }
 
     $params_global = $params;
+    $isFacetCount = @$params['a'] === 'getfacets';
 
     $mysqli = $db;
 
@@ -1105,7 +1107,7 @@ class HPredicate {
 
     public function __construct(&$parent, $key, $value, $index_of_predicate)
     {
-        global $dty_id_relation_type;
+        global $dty_id_relation_type, $isFacetCount;
 
         $this->parent = &$parent;
         $this->qlevel = $this->parent->level; //
@@ -1166,14 +1168,16 @@ class HPredicate {
                 // extract all with predicate type "r" - this is either relation type or other fields from relatinship record
                 // "rf:245":[{"t":4},{"r":6421}] - related from organization (4) with relation type 6421
 
-                $value = $this->handleRelExistsPred($value);
+                if(!$isFacetCount){
+                    $value = $this->handleRelExistsPred($value);
+                }
 
                 foreach($value as $idx=>$val){
 
                     $rel_type = $idx==='r' || (is_array($val) && array_key_exists('r',$val));
                     $rec_type = $idx==='t' || (is_array($val) && array_key_exists('t',$val));
                     $exists = $idx==='exists' || (is_array($val) && array_key_exists('exists',$val));
-                    if($rel_type || $rec_type || $exists){ // relation type and record type already handled
+                    if(!$isFacetCount && ($rel_type || $rec_type || $exists)){ // relation type and record type already handled
                         continue;
                     }elseif(strpos($idx,'r:')===0 || strpos($idx,$REL_FLD)===0){  //that's for {"r:10":10,,}
                            //fields in relationship record

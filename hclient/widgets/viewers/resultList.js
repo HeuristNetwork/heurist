@@ -4443,7 +4443,7 @@ $.widget( "heurist.resultList", {
 
             opts.position = pos;
         }else if(dlg.dialog('instance') !== undefined){
-            dlg.dialog('option', 'title', popup_title);
+            dlg.parent().find('.ui-dialog-titlebar .ui-dialog-title').html(popup_title);
         }
 
         window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
@@ -4456,6 +4456,7 @@ $.widget( "heurist.resultList", {
                         that._closeRecordViewPopup();
                     }
                 });
+
                 let dlg_header = dlg.parent().find('.ui-dialog-titlebar');
                 dlg_header.find('.ui-dialog-title').css({width: '80%', 'font-size': '1em'});
                 this._on(dlg_header,{mouseout:function(){

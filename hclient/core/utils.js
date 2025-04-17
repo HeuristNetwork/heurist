@@ -348,6 +348,10 @@ window.hWin.HEURIST4.util = {
 
         if(!query){
             query = window.location.search;
+        }else if(query.startsWith('http')){
+            let parts = query.split('?');
+            parts.shift();
+            query = parts.join('?');
         }
 
         const urlParams = new URLSearchParams(query);
