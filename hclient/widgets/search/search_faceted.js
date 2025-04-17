@@ -2094,7 +2094,8 @@ let s_time = new Date().getTime() / 1000;
                             width: '100%',
                             padding: '10px 5px 5px',
                             'border-top': '1px black solid', // or <hr>
-                            'font-size': 'smaller'
+                            'font-size': 'smaller',
+                            cursor: 'default'
                           })
                           .appendTo(this.facets_list);
 
@@ -2105,7 +2106,7 @@ let s_time = new Date().getTime() / 1000;
                     'vertical-align': 'top',
                     'margin-left': '5px',
                     'max-width': max_w + 'px'
-                }).text(empty_facets).appendTo($ele);
+                }).html(empty_facets).appendTo($ele);
 
             }
 
