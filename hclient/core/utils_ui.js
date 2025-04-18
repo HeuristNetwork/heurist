@@ -1854,7 +1854,7 @@ window.hWin.HEURIST4.ui = {
                     width:dwidth,
                     padding:0,
                     title: window.hWin.HR(dtitle),
-                    class:'ui-heurist-bg-light',
+                    class:'ui-heurist-text-light',
                     callback: popup_options.callback,
                     beforeClose: function(){
                         //access manageRecord within frame within this popup and call close prefs
@@ -3552,6 +3552,16 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         if(entity_id>0){
             $('<span style="font-size:0.7em;font-style:italic;padding-left:1em">id'+entity_id+'</span>')
             .appendTo( wrapper );
+        }
+        
+        let bg_color = item.element.attr( "bg-color" );
+        if(bg_color){
+            $('<span style="float:left;padding-right:2px;width:16px;height:16px" class="'+bg_color+'"></span>')
+            .prependTo( wrapper );
+        }
+        let text_color = item.element.attr( "text-color" );
+        if(text_color){
+            wrapper.addClass(text_color);
         }
 
         let depth = parseInt($(item.element).attr('depth'));

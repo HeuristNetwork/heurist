@@ -111,7 +111,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
             
             if(l_cfg.isPage){
                 cont.find('.page-layout').show();    
-                let containerClass = _getBsClasses(l_cfg.bsClasses, 'container');
+                let containerClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'container');
                 cont.find('#containerType').val(containerClass);
                 cont.find('#groupType').val('group');  
             }
@@ -368,7 +368,7 @@ console.log('>>>', etype);
                     let inputColWidth = item.find('select[name="grid-col-width"]');
                     let inputCol = item.find('input[name="grid-col"]');
                     
-                    let colClass = _getBsClasses(child.bsClasses, 'col');
+                    let colClass = HCmsEditor.getBsClasses(child.bsClasses, 'col');
                     if(colClass==''){
                         colClass = 'col';    
                         child.bsClasses = (child.bsClasses+' col').trim();
@@ -408,11 +408,11 @@ console.log('>>>', etype);
 
                         let k = item.attr('data-gridcol');
 
-                        l_cfg.children[k].bsClasses = (_removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
+                        l_cfg.children[k].bsClasses = (HCmsEditor.removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
                         
                         let child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
                         
-                        _replaceBsClasses(child_ele[0], 'col', val);
+                        HCmsEditor.replaceBsClasses(child_ele[0], 'col', val);
                     }
                     
                     inputColWidth.hSelect({change: __onColWidthChange});
@@ -542,7 +542,7 @@ console.log('>>>', etype);
 
         const isGroup = !(etype=='widget' || etype=='text');
         
-        let bsClasses = _getBsClasses(l_cfg.bsClasses, 'col');
+        let bsClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'col');
         bsClasses = bsClasses.split(' ');
         let groupType = cont.find('#groupType').val();
         let recreateGroup = false;
@@ -723,10 +723,10 @@ console.log('>>>', etype);
             if(groupType!='grid' && l_cfg.type=='grid'){
                 //remove grid classes for container and children
                 if(l_cfg.bsClasses){
-                    bsClasses = _removeBsClasses(bsClasses, 'row');
+                    bsClasses = HCmsEditor.removeBsClasses(bsClasses, 'row');
                 }
                 for(let i=0; i<l_cfg.children.length; i++){
-                    l_cfg.children[i].bsClasses = _removeBsClasses(l_cfg.children[i].bsClasses, 'col');
+                    l_cfg.children[i].bsClasses = HCmsEditor.removeBsClasses(l_cfg.children[i].bsClasses, 'col');
                 }
             }else if(groupType!='flex'){
                 //remove flex css for children if container is not flex
@@ -760,7 +760,7 @@ console.log('>>>', etype);
         }else{
             //if(groupType=='grid'){
             if(bsClasses.length>0){
-                _replaceBsClasses(element[0], ['container','border','rounded','shadow','row',' col','justify-content','align-items','g-'], bsClasses);
+                HCmsEditor.replaceBsClasses(element[0], ['container','border','rounded','shadow','row',' col','justify-content','align-items','g-'], bsClasses);
             }
             
             element.removeAttr('style');
@@ -768,73 +768,6 @@ console.log('>>>', etype);
         }
         
         return css;
-    }
-
-    //
-    // replace classes with given prefix with new classes
-    //
-    function _replaceBsClasses(element, removeWithPrefix, newClasses){
-        
-        let classes = Array.from(element.classList);
-        
-        classes = _removeBsClasses(classes, removeWithPrefix); //returns array
-        /*        
-        const bsClasses = Array.isArray(removeWithPrefix)?removeWithPrefix:[removeWithPrefix];
-        classes = classes.filter(function(value) {
-            const res = bsClasses.some(substr => value.startsWith(substr));
-            return !res;
-        });        
-        */
-
-        if(Array.isArray(newClasses)){
-            classes = classes.concat(newClasses);    
-        }else if(newClasses!=''){
-            classes.push(newClasses);
-        }
-        element.classList = classes.join(' ');
-    }    
-
-    //
-    // returns only classes started with the given prefix
-    //
-    function _getBsClasses(classes, withPrefix){
-        return _getOrRemoveClasses(classes, withPrefix, false);
-    }
-
-    //
-    // Remove classes with given previx
-    //
-    function _removeBsClasses(classes, withPrefix){
-        return _getOrRemoveClasses(classes, withPrefix, true);
-    }
-
-    //
-    //
-    //
-    function _getOrRemoveClasses(classes, withPrefix, isRemove){
-
-        const isArray = Array.isArray(classes);
-                
-        if(window.hWin.HEURIST4.util.isempty(classes)){
-            return isArray?[]:'';   
-        }
-
-        if(!isArray){
-            classes = classes.split(' ');    
-        }
-        
-        const bsClasses = Array.isArray(withPrefix)?withPrefix:[withPrefix];
-        
-        //return all with prefixes
-        classes = classes.filter(function(value) {
-            let res = bsClasses.some(substr => value.startsWith(substr));
-            if(isRemove){
-                res = !res;
-            }
-            return res;
-        });        
-        
-        return isArray?classes:classes.join(' ');
     }
 
     //
@@ -1014,7 +947,7 @@ console.log('>>>', etype);
             }
             if(l_cfg.bsClasses){
                 
-                let borderClasses = _getBsClasses(l_cfg.bsClasses, 'border');
+                let borderClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'border');
                 
                 if(borderClasses){
                     
@@ -1036,10 +969,10 @@ console.log('>>>', etype);
                     
                 }
                 
-                const roundedClass = _getBsClasses(l_cfg.bsClasses, 'rounded')??'rounded-0';
+                const roundedClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'rounded')??'rounded-0';
                 cont.find('#bsBorder-radius').val(roundedClass.substring(8));
                     
-                const shadowClass = _getBsClasses(l_cfg.bsClasses, 'shadow')??'none';
+                const shadowClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'shadow')??'none';
                 cont.find('#bsBorder-shadow').val(shadowClass);
                 cont.find('select[data-type="bs"]').hSelect('refresh');
             }

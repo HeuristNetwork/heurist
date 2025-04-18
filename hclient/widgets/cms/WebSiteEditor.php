@@ -183,7 +183,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             Click to edit the page
                         </span>
 
-                        <div style="padding:10px 0px 5px 8px;" class="fancytree-node">
+                        <div style="padding:5px 0px 5px 8px;" class="fancytree-node">
                             <a href="#" title="Edit website home page"
                                 class="btn-website-homepage" style="text-decoration:none;">
                                 <span class="ui-icon ui-icon-home"></span>&nbsp;Home page
@@ -191,7 +191,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             <span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" 
                                 style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
                         </div>
-                        <div style="padding:5px 32px;" class="fancytree-node">
+                        <div style="padding:3px 32px;" class="fancytree-node">
                             <a href="#" title="Edit website header"
                                 class="btn-website-header" style="text-decoration:none;">
                                 Header
@@ -199,7 +199,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
                             <span  class="btn-website-header ui-icon ui-icon-pencil" 
                                 style="display:none;float:right;cursor:pointer;color:black;margin-top:0px"></span>
                         </div>
-                        <div style="padding:5px 32px;" class="fancytree-node">
+                        <div style="padding:3px 32px;" class="fancytree-node">
                             <a href="#" title="Edit website footer"
                                 class="btn-website-footer" style="text-decoration:none;">
                                 Footer
@@ -210,7 +210,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 
                     </div>
 
-                    <div class="treeWebSite ent_content_full" style="top:120px;padding:3px 10px;"></div>
+                    <div class="treeWebSite ent_content_full" style="top:125px;padding:3px 10px;"></div>
                 </div>
 
                 <div id="treePage" style="font-size:0.9em;top:2em;" class="ent_wrapper ui-widget-content">

@@ -46,6 +46,23 @@ class HCmsEditorMargin {
   */
   #loadHomeRecord(){
       
+        let that = this;
+        this.#getTemplateContent('', (response)=>{
+            
+            if(response?.message){
+                that.oldContent = response?.message;
+                that.newContent = that.oldContent;
+                that.#initControls();
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `Web Home Page not found (record #${that.siteId})`,
+                    error_title: 'Failed to load home page'
+                });
+            }
+            
+        });     
+      
+/*      
         const server_request = {
                         q: 'ids:'+this.siteId,
                         restapi: 1,
@@ -81,7 +98,7 @@ class HCmsEditorMargin {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             });
-      
+*/      
   }
   
   /*
@@ -114,23 +131,45 @@ class HCmsEditorMargin {
   * Inits inteface controls
   */
   #initControls(){
+      
+      this.#onContentChanged();
 
       let that = this;
       let cont = this.container;
+      
+      const mtype = that.isHeader?'header':'footer';
 
       //        this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
 
       cont.find('select[name="position"]').hSelect({change:function(event){
-console.log( $(event.target).val() );
-            
-
+          
+          let val = $(event.target).val();
+          
+          if(val=='default'){
+              val = '';
+          }else if(val=='fixed'){
+              val = that.isHeader?'sticky-top':'fixed-bottom';
+          }else if(val=='hidden'){
+              val = 'visually-hidden';
+          }
+          
+          that.#replaceClasses(mtype, ['sticky-','fixed-','visually-hidden'], val);
+          
       }});
+      
+      cont.find('select[name="bgColor"]').hSelect({change:function(event){
+          that.#replaceClasses(mtype, 'bg-', $(event.target).val());
+      }}).css('width','5rem');
+      
+      cont.find('select[name="textColor"]').hSelect({change:function(event){
+          that.#replaceClasses(mtype, 'text-', $(event.target).val());
+      }}).css('width','5rem');
       
       cont.find('select[name="template"]').each((i,sel)=>{
         window.hWin.HEURIST4.ui.createTemplateSelector(  
                         $(sel), [{key:'',title:'select...'}], 
                            '',   //that.options.editOptions[sel.name], 
-                           {cms:that.isHeader?'header':'footer', extraOptions: {menu_parent: cont}, 
+                           {cms:mtype, extraOptions: {menu_parent: cont}, 
                             eventHandlers:{onSelectMenu:function(event){
                                 //get new content and then reload header/footer
                                 that.#getTemplateContent($(event.target).val(), function(response){
@@ -147,7 +186,7 @@ console.log( $(event.target).val() );
                                                                           onClose:(context)=>that.onCodeEditorApply(context)});
       
       cont.find('div.btn-html-edit').button().on('click', function(){
-                if(!that.newContent){
+                if(!that.newContent){ //not defined
                     that.#getTemplateContent('', (response)=>codeEditor.HCmsCodeEditor('show', response?.message));
                 }else{
                     codeEditor.HCmsCodeEditor('show', that.newContent);
@@ -171,9 +210,29 @@ console.log( $(event.target).val() );
           this.cmsEditor.webSite.reloadMargin( this.isHeader );
           that.onClose.call();
       });
-
-
   }
+   
+  /*
+  *
+  */
+  #replaceClasses(mtype, classesToReplace, newClasses){          
+
+      //repalce in interface      
+      let ele = this.cmsEditor.findInWebSite(mtype);
+      newClasses = HCmsEditor.replaceBsClasses(ele, classesToReplace, newClasses);
+
+      //replace in value
+      let regex;
+      if(mtype=='header'){
+          regex = /(<header\s+.*?class=").*?(".*)/gi
+      }else{
+          regex = /(<footer\s+.*?class=").*?(".*)/gi
+      }
+
+      this.newContent = this.newContent.replace(regex, `$1${newClasses}$2`);
+      this.#onContentChanged();
+  }
+  
  
   /*
   *

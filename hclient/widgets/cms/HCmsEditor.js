@@ -524,4 +524,77 @@ console.log( 'load home',this.website_id );
   onBeforeUnload(){
       
   }    
+  
+  /*
+  * Utility for working with classes
+  */
+  //
+  // replace classes with given prefix with new classes
+  //
+  static replaceBsClasses(element, removeWithPrefix, newClasses){
+
+      let classes = Array.from(element.classList);
+
+      classes = HCmsEditor.removeBsClasses(classes, removeWithPrefix); //returns array
+      /*        
+      const bsClasses = Array.isArray(removeWithPrefix)?removeWithPrefix:[removeWithPrefix];
+      classes = classes.filter(function(value) {
+      const res = bsClasses.some(substr => value.startsWith(substr));
+      return !res;
+      });        
+      */
+
+      if(Array.isArray(newClasses)){
+          classes = classes.concat(newClasses);    
+      }else if(newClasses!='' && newClasses!=null){
+          classes.push(newClasses);
+      }
+      element.classList = classes.join(' ');
+      
+      return element.classList;
+  }    
+
+  //
+  // returns only classes started with the given prefix
+  //
+  static getBsClasses(classes, withPrefix){
+      return HCmsEditor.getOrRemoveClasses(classes, withPrefix, false);
+  }
+
+  //
+  // Remove classes with given previx
+  //
+  static removeBsClasses(classes, withPrefix){
+      return HCmsEditor.getOrRemoveClasses(classes, withPrefix, true);
+  }
+
+  //
+  //
+  //
+  static getOrRemoveClasses(classes, withPrefix, isRemove){
+
+      const isArray = Array.isArray(classes);
+
+      if(window.hWin.HEURIST4.util.isempty(classes)){
+          return isArray?[]:'';   
+      }
+
+      if(!isArray){
+          classes = classes.split(' ');    
+      }
+
+      const bsClasses = Array.isArray(withPrefix)?withPrefix:[withPrefix];
+
+      //return all with prefixes
+      classes = classes.filter(function(value) {
+          let res = bsClasses.some(substr => value.startsWith(substr));
+          if(isRemove){
+              res = !res;
+          }
+          return res;
+      });        
+
+      return isArray?classes:classes.join(' ');
+  }
+  
 }
