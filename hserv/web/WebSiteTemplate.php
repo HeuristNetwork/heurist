@@ -49,7 +49,7 @@
 
 <?php echo $this->getPageMargin('header');?>
 
-<main> <!--  class="container mt-3 pt-5" -->
+<main id="main-content"> <!--  class="container mt-3 pt-5" -->
 <?php $this->getPageContent();?>
 </main>
 

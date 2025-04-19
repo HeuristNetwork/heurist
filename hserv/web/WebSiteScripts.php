@@ -108,6 +108,9 @@ if(@$_REQUEST['edit']){
     
 <?php
 }//edit
+
+//include custom script and styles defined in CMS_HOME
+echo $this->getCustomScriptsAndStyles();
 ?>
     
     <!-- move to WebSite.js -->
@@ -166,11 +169,19 @@ if(@$_REQUEST['edit']){
                 print 'let pageId = '.$this->getPageId().';';
             ?>
             
-            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON});  
+            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON});
             
             if(window.parent?.cmsEditor){
-                window.parent.cmsEditor.onWebSiteInitComplete();
+                //called once - on website init
+                window.parent.cmsEditor.onWebSiteLoad();
             }
+        }
+        
+        /*
+        * global function to init proper image and links path 
+        */ 
+        function initLinksAndImages($container, search_data){
+            
         }
     </script>
     

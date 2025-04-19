@@ -297,8 +297,10 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 
         try{
             //bootstrap workaround
-            $.fn.button.noConflict();
-            $.fn.tooltip.noConflict();
+            if($.fn){
+                $.fn.button.noConflict();
+                $.fn.tooltip.noConflict();
+            }
         }catch(e){
             console.error(e);
         }

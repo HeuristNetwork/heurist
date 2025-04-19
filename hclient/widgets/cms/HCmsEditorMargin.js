@@ -207,7 +207,7 @@ class HCmsEditorMargin {
       cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
           //restore old settings 
           that.newContent = that.oldContent;
-          this.cmsEditor.webSite.reloadMargin( this.isHeader );
+          that.cmsEditor.webSite.reloadMargin( that.isHeader );
           that.onClose.call();
       });
   }

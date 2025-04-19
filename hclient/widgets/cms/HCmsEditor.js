@@ -236,17 +236,13 @@ class HCmsEditor {
         this._webPageFrame = $('#webPageFrame');
         const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,mode:'edit',edit:2});
         this._webPageFrame.attr('src', pageURL);
-        
-        let that = this;
-        this._webPageFrame.on('load', function(){
-            //that.onWebSiteInitComplete();
-        });
   }
   
   //
-  // This is event for initial loading in iframe
+  // This is event for (first)initial loading in iframe
+  // For particular page - onLoadPageContent
   //
-  onWebSiteInitComplete()
+  onWebSiteLoad()
   {
       //website menu as json tree
       if(this._webPageFrame[0].contentWindow){
@@ -387,7 +383,6 @@ class HCmsEditor {
       let that = this;  
       if(this.warningOnExit( ()=>that.#editHomePage() )) return;                           
       //reload content of page
-console.log( 'load home',this.website_id );      
       this.loadPageContent( this.website_id );
   }
   

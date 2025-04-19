@@ -226,6 +226,7 @@ class WebSite
         } elseif (!isset($this->params)) {
             // Check if parameters are defined
             $this->outputError('Parameters for website are not defined');
+            
         } elseif ($this->verifyWebsiteIds()) {
 
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
@@ -275,7 +276,7 @@ class WebSite
     }
         
     //
-    // Move to new class HRecord
+    // TBD Move to new class HRecord
     //
     private function getValue($record, $field_id, $is_safe=false, $lang=null){
         
@@ -435,6 +436,14 @@ class WebSite
                 $template = $this->getTemplateContent($type);
             }
         }
+        
+        if(strpos($template,'<'.$type.' ')!==0){
+            if($type=='header'){
+                $template = '<header id="main-header" style="background-image: url(&quot;{$website.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">'.$template.'</header>';
+            }else{
+                $template = '<footer id="page-footer">'.$template.'</footer>';
+            }
+        }
 
         //return raw template
         if(@$this->params['raw']){
@@ -449,6 +458,40 @@ class WebSite
         }else{
             $bgImage = '';
         }
+
+        //backward capability with v2
+        if(strpos($template,'id="main-logo"')>0){
+            $doc = new \DOMDocument();
+            //$doc->preserveWhiteSpace = false;
+            $doc->loadHTML($template);
+            $ele = $doc->getElementById('main-logo');
+            if($ele) {
+                //$divInner = $doc->createDocumentFragment();
+                //$divInner->appendXML('<img src="{$website.logo}" alt="Logo"/>');
+                //$ele->appendChild($divInner);
+                
+                $img = $doc->createElement("img");
+                $img = $ele->appendChild($img);
+                $img->setAttribute('src', '{$website.logo}');                
+                
+                //$ele->nodeValue = '<img src="{$website.logo}" alt="Logo"/>';
+            }
+            
+            
+            $ele = $doc->getElementById('main-title');
+            if($ele) $ele->nodeValue = '{$website.title}';
+            $template = $doc->saveHTML();            
+            
+            $template = str_replace('%7B%24','{$',$template);
+            $template = str_replace('%7D','}',$template);
+        }
+/*        
+            #main-logo
+            main-title
+            main-logo-alt
+            main-title-alt
+            main-title-alt2
+*/        
         
         
         //get header settings
@@ -495,7 +538,7 @@ class WebSite
     }
 
     //
-    // For header - language selector
+    // TBD For header - language selector
     //
     private function getLanguageSelector(){
         
@@ -641,13 +684,6 @@ class WebSite
         }
         
         return $res;
-    }
-    
-    // TBD
-    // includes publisher's custom scripts and styles AND links to external resources
-    //
-    public function getPublisherScriptsAndStyles(){
-        
     }
     
     //
@@ -797,8 +833,12 @@ class WebSite
      *
      * @return string The HTML content containing custom styles and scripts.
      */
-    private function addCustomStylesAndScripts()
+    // 
+    // includes publisher's custom scripts and styles AND links to external resources
+    //
+    public function getCustomScriptsAndStyles()
     {
+        
          $head = '';
          $css_fields = array();
          if($this->system->defineConstant('DT_CMS_CSS')){
@@ -807,29 +847,42 @@ class WebSite
          if($this->system->defineConstant('DT_CMS_EXTFILES')){
              array_push($css_fields, DT_CMS_EXTFILES);
          }
+         if($this->system->defineConstant('DT_CMS_SCRIPT')){
+             array_push($css_fields, DT_CMS_SCRIPT);
+         }
          if(empty($css_fields)){
              return '';
          }
 
-         $record = recordSearchByID($this->system, $this->recordWithCustomCSS, $css_fields, 'rec_ID');
+         $record = recordSearchByID($this->system, $this->getSiteId(), $css_fields, 'rec_ID');
          if(!@$record['details']){
             return '';
          }
 
          if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
              //add to begining
-             $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
+             $val = $this->getValue($record, DT_CMS_CSS);
+             $head .= '<style>'.$val.'</style>';
          }
+         
+         if($this->system->settings->isJavaScriptAllowed()){
 
-         if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
-             //add to header
-             $external_files = $record['details'][DT_CMS_EXTFILES] ?? [];
-             if(!is_array($external_files)){
-                     $external_files = array($external_files);
+             if(defined('DT_CMS_SCRIPT') && @$record['details'][DT_CMS_SCRIPT]){
+                 //add to begining
+                 $val = $this->getValue($record, DT_CMS_SCRIPT);
+                 $head .= '<script>function afterPageLoad'.$this->getSiteId().'(){'.$val.'}</script>';
              }
+             
+             if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
+                 //add to header
+                 $external_files = $record['details'][DT_CMS_EXTFILES] ?? [];
+                 if(!is_array($external_files)){
+                         $external_files = array($external_files);
+                 }
 
-             foreach ($external_files as $ext_file){
-                $head .= $ext_file;
+                 foreach ($external_files as $ext_file){
+                    $head .= $ext_file;
+                 }
              }
          }
 
