@@ -421,54 +421,72 @@
                     </div>
                 </div>                        
                 
-                
-                <!-- Cosmetic CSS helpers -->
+                <!-- Background -->
                 <div>
-                    <!-- Border HIDDEN/disabled -->
-                    <fieldset style="display:none;border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="border">
-                        <legend style="display:none"></legend>
-                        <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
-                            Border:
-                            <select data-type="css" id="border-style" name="border-style">
-                                <option>none</option>
-                                <option>solid</option>
-                                <option>double</option>
-                                <option>dotted</option>
-                                <option>dashed</option>
-                                <option>inset</option>
-                                <option>outset</option>
-                                <option>groove</option>
-                                <option>ridge</option>
-                            </select>
+                    <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <input data-type="cssX" name="background" type="checkbox" style="float:right;margin-top:1.2em"/></label>
+                        <h3 style="display:inline-block">
+                            Background
                         </h3>
+                        <fieldset data-section="bsBg">
 
-                        <div style="background:none">
                             <div>
-                                <div class="header_narrow">Color:</div>
-                                <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
+                                <div class="header_narrow">Background:</div>
+                                <select data-type="bs" name="bgColor" style="max-width:7rem">
+                                    <option value="">select...</option>
+                                    <option bg-color="bg-primary">bg-primary</option>
+                                    <option bg-color="bg-primary-subtle">bg-primary-subtle</option>
+                                    <option bg-color="bg-secondary">bg-secondary</option>
+                                    <option bg-color="bg-secondary-subtle">bg-secondary-subtle</option>
+                                    <option bg-color="bg-success">bg-success</option>
+                                    <option bg-color="bg-success-subtle">bg-success-subtle</option>
+                                    <option bg-color="bg-danger">bg-danger</option>
+                                    <option bg-color="bg-danger-subtle">bg-danger-subtle</option>
+                                    <option bg-color="bg-warning">bg-warning</option>
+                                    <option bg-color="bg-warning-subtle">bg-warning-subtle</option>
+                                    <option bg-color="bg-info">bg-info</option>
+                                    <option bg-color="bg-info-subtle">bg-info-subtle</option>
+                                    <option bg-color="bg-light">bg-light</option>
+                                    <option bg-color="bg-light-subtle">bg-light-subtle</option>
+                                    <option bg-color="bg-dark">bg-dark</option>
+                                    <option bg-color="bg-dark-subtle">bg-dark-subtle</option>
+                                    <option bg-color="bg-body-secondary">bg-body-secondary</option>
+                                    <option bg-color="bg-body-tertiary">bg-body-tertiary</option>
+                                    <option bg-color="bg-body">bg-body</option>
+                                    <option bg-color="bg-black">bg-black</option>
+                                    <option bg-color="bg-white">bg-white</option>
+                                    <option bg-color="bg-transparent">bg-transparent</option>
+                                </select>
                             </div>
+                            
                             <div>
-                                <div class="header_narrow">Size:</div>
-                                <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
-                                <label>&nbsp;Corner:
-                                <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/></label>
+                                <div class="header_narrow">Text color:</div>
+                                <select data-type="bs" name="textColor" style="max-width:7rem">
+                                    <option value="">select...</option>
+                                    <option text-color="text-primary">text-primary</option>
+                                    <option text-color="text-primary-emphasis">text-primary-emphasis</option>
+                                    <option text-color="text-secondary">text-secondary</option>
+                                    <option text-color="text-secondary-emphasis">text-secondary-emphasis</option>
+                                    <option text-color="text-success">text-success</option>
+                                    <option text-color="text-success-emphasis">text-success-emphasis</option>
+                                    <option text-color="text-danger">text-danger</option>
+                                    <option text-color="text-danger-emphasis">text-danger-emphasis</option>
+                                    <option text-color="text-warning">text-warning</option>
+                                    <option text-color="text-warning-emphasis">text-warning-emphasis</option>
+                                    <option text-color="text-info">text-info</option>
+                                    <option text-color="text-info-emphasis">text-info-emphasis</option>
+                                    <option text-color="text-light">text-light</option>
+                                    <option text-color="text-light-emphasis">text-light-emphasis</option>
+                                    <option text-color="text-dark">text-dark</option>
+                                    <option text-color="text-dark-emphasis">text-dark-emphasis</option>
+                                    <option text-color="text-body-secondary">text-body-secondary</option>
+                                    <option text-color="text-body-tertiary">text-body-tertiary</option>
+                                    <option text-color="text-body">text-body</option>
+                                    <option text-color="text-black">text-black</option>
+                                    <option text-color="text-white">text-white</option>
+                                </select>
                             </div>
-                        </div>
-
-                    </fieldset>
-                    <!-- Background -->
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;" data-section="background">
-                        <legend style="display:none"></legend>
-                        <h3>
-                            <label><b>Background:</b>
-                            <input data-type="css" name="background" type="checkbox" checked/></label>
-                        </h3>
-
-                        <div style="background:none">
-                            <div>
-                                <div class="header_narrow">Color:</div>
-                                <input data-type="css" name="background-color" type="text" value="" style="width:50px"/>
-                            </div>
+                        
                             <div>
                                 <div class="header_narrow">Image:</div>
                                 <div style="display: inline-block;">
@@ -496,13 +514,29 @@
                                 <div class="header_narrow">Repeat:</div>
                                 <select data-type="css" name="background-repeat">
                                     <option value="no-repeat">no repeat</option>
+                                    <option value="repeat">repeat</option>
                                     <option value="repeat-y">verically</option>
                                     <option value="repeat-x">horizontally</option>
                                 </select>
                             </div>
-                        </div>
-
-                    </fieldset>
+                            <div>
+                                <div class="header_narrow">Size:</div>
+                                <select data-type="css" name="background-size">
+                                    <option value="auto">auto</option>
+                                    <option value="contain">contain</option>
+                                    <option value="cover">cover</option>
+                                    <option value="revert">revert</option>
+                                </select>
+                            </div>
+                        
+                        </fieldset>
+                    </div>
+                </div>                        
+                
+                
+                
+                <!-- Cosmetic CSS helpers -->
+                <div>
                     <!-- Margins and Padding -->
                     <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
                         <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>

@@ -131,7 +131,7 @@ class WebSite {
     #initPage( record ){
         
         //options.container
-        let pageElement = $(this.container??'main');
+        let pageElement = $(this.container||'main');
         if(pageElement.length==0){
             pageElement = $('#main-content');
         }
@@ -144,6 +144,10 @@ class WebSite {
         let content = window.hWin.HAPI4.getTranslation( record[DT_EXTENDED_DESCRIPTION], null );
         const supp_options = {};
         const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, pageElement, supp_options );
+
+
+        this.currentPageRec = record;
+        this.pageId = this.currentPageRec['rec_ID'];
         
         if(window.parent?.cmsEditor){ //keep json structure for edit mode
             record['pageTreeData'] = pageTreeData;
@@ -151,7 +155,6 @@ class WebSite {
             //keep cache for not edit mode
             this.pageCache[this.pageId] = record;
         }
-        this.currentPageRec = record;
         
         //not used
         //if (window.hWin.HEURIST4.util.isFunction(options.callback)) options.callback.call(this, res);
@@ -180,8 +183,6 @@ class WebSite {
 
             }
         }        
-        
-        this.pageId = this.currentPageRec['rec_ID'];
         
         //close main-menu if it is offcanvas
         let ele_menu = $('#main-header');

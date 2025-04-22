@@ -26,13 +26,20 @@ class HCmsEditorMargin {
 
   constructor(options) {
 
+console.log('create HCmsEditorMargin');
+      
       this.cmsEditor = options.cmsEditor;
       this.container = options.container;
       this.onClose = options.onClose;
-      this.isHeader = options.isHeader;
       
       this.siteId = this.cmsEditor.website_id;
-      
+
+      this.show( options );      
+  }
+  
+  show(options){
+      this.isHeader = options.isHeader;
+
       this.DT_CONTENT = window.hWin.HAPI4.sysinfo['dbconst'][this.isHeader?'DT_CMS_HEADER':'DT_CMS_FOOTER'];
       
       let that = this;
@@ -247,6 +254,8 @@ class HCmsEditorMargin {
   * Load raw template and update header/footer on template selection
   */  
   #getTemplateContent(templateName, callback){
+      
+console.log('#getTemplateContent');      
       
         let request = {website:this.siteId, raw:1, ver:3};
         request[this.isHeader?'header':'footer'] = templateName;

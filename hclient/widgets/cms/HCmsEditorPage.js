@@ -554,28 +554,7 @@ initPage(pageContainer, pageRecord){
         }else {
             return;
         }
-        
-        /*
-        let opts = {};
-        opts.page_id = this._cmsEditor.page_id;
-        
-        opts.page_name = pageRecord[window.hWin.DT_NAME];
 
-        //window.hWin.HAPI4.getTranslation(window.hWin.page_cache[options.record_id][window.hWin.DT_NAME], this._cmsEditor.current_language);
-        //TBD window.hWin.assignPageTitle(options.record_id)
-        
-        opts.rec_ID = this._cmsEditor.website_id;
-        opts.keep_top_config = true;
-        opts.lang = this._cmsEditor.current_language;
-        
-        //this._layout_content = pageRecord[window.hWin.DT_EXTENDED_DESCRIPTION];
-        
-        //const res = window.hWin.HAPI4.layoutMgr.layoutInit(this._layout_content, $('<div>'), opts); //FromJSON
-//console.log(res);      
-        //const res = window.hWin.HEURIST4.util.isJSON(this._layout_content);
-        //const res = window.hWin.HAPI4.layoutMgr.convertOldCmsFormat(this._layout_content, $('<div>'));
-        */
-        
         if(!pageRecord['pageTreeData']){
             window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
             //clear treeview
@@ -618,15 +597,20 @@ showMarginProperties(isHeader){
     this._panel_propertyView.fadeIn(500);
     
     let that = this;
-    this._cmsEditorMargin = new HCmsEditorMargin(
-    {
-        cmsEditor: this._cmsEditor,
-        container: this._panel_propertyView, 
-        isHeader: isHeader,
-        onClose: function(){
-            that.hideMarginProperties();            
-        }
-    });
+    
+    if(!this._cmsEditorMargin){
+        this._cmsEditorMargin = new HCmsEditorMargin(
+        {
+            cmsEditor: this._cmsEditor,
+            container: this._panel_propertyView, 
+            isHeader: isHeader,
+            onClose: function(){
+                that.hideMarginProperties();            
+            }
+        });
+    }else{
+        this._cmsEditorMargin.show({isHeader: isHeader});
+    }
     
 }
 

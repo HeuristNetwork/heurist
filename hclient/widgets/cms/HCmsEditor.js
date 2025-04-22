@@ -162,7 +162,6 @@ class HCmsEditor {
         this._editor_panel.find('.btn-website-homepage').on('click', ()=>that.#editHomePage()); //load home page content
         
         this._editor_panel.find('.btn-website-header').on('click', ()=>that.onMarginEdit(true));
-
         this._editor_panel.find('.btn-website-footer').on('click', ()=>that.onMarginEdit(false));
 
         
@@ -331,8 +330,8 @@ class HCmsEditor {
       let header = this._webPageFrame[0].contentDocument.getElementsByTagName('header'); //TBD or main-header
       let footer = this._webPageFrame[0].contentDocument.getElementsByTagName('footer'); 
       
-      $(header).on('click',()=>that.onMarginEdit(true));
-      $(footer).on('click',()=>that.onMarginEdit(false));
+      //$(header).on('click',()=>that.onMarginEdit(true));
+      //$(footer).on('click',()=>that.onMarginEdit(false));
       
       this.layout_container.on('click',function(event){
           if(that.current_edit_mode!='page'){

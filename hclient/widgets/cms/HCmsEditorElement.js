@@ -48,6 +48,10 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
     let textAreaCss;
     let margin_mode_full = true;
     
+    const allAffectedBsClasses = ['container','border','bg-','text-','rounded','shadow','row',' col','justify-content','align-items','g-'];
+            
+
+    
     function _init(){
 
         /* not used as dialog
@@ -79,6 +83,8 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
                 +'hclient/widgets/cms/HCmsEditorElement.html',
                 _initControls
             );
+            
+        element.removeClass('marching-ants marching');
     }
     
     //
@@ -206,8 +212,6 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         cont.find('input[name="background"]').on('change', _getCss);
         /*
             var css = _getCss();
-           
-           
         });*/
         
         //4c. button listeners
@@ -276,9 +280,9 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
             let new_css = {};
             for (let i=0; i<vals.length; i++){
                 let vs = vals[i].split(':');
-                if(vs && vs.length==2){
-                     let key = vs[0].trim();
-                     let val = vs[1].trim();
+                if(vs && vs.length>1){
+                     const key = String(vs.shift()).trim();
+                     const val = vs.join(':').trim();
                      new_css[key] = val;
                 }
             }
@@ -595,34 +599,33 @@ console.log('>>>', etype);
             css['display'] = 'block';
         }
         
-        // BORDER  get values from UI 
+// BORDER  get values from UI -----------------
         
         let val = cont.find('#bsBorder-style').val();
-        if(val!='none' || cont.find('#bsBorder-size').val()>0){
+        if(val!='none' && cont.find('#bsBorder-size').val()>0){
             css['--bs-border-style'] = val;
             
             bsClasses.push('border');
             val = cont.find('#bsBorder-size').val();
-            if(val>1){
+            if(val>0){
                 bsClasses.push('border-'+val);
             }
             val = cont.find('#bsBorder-color').val();
             if(val!='default'){
                 bsClasses.push('border-'+val);
             }
-            val = cont.find('#bsBorder-radius').val();
-            if(val!=0){
-                bsClasses.push('rounded-'+val);
-            }
-            
-            val = cont.find('#bsBorder-shadow').val();
-            if(val!='none'){
-                bsClasses.push(val);    
-            }
+        }
+        val = cont.find('#bsBorder-radius').val();
+        if(val!=0){
+            bsClasses.push('rounded-'+val);
         }
         
+        val = cont.find('#bsBorder-shadow').val();
+        if(val!='none'){
+            bsClasses.push(val);    
+        }
         
-        
+/* disabled        
         //style - border
         val = cont.find('#border-style').val();
 
@@ -644,10 +647,24 @@ console.log('>>>', etype);
             if(!css['border-width']) css['border-width'] = '1px';
             if(!css['border-color']) css['border-color'] = 'black';
         }
+*/        
+
+// BACKGROUND  get values from UI -----------------
+
+        //colors for text and bg
+        val = cont.find('select[name="bgColor"]').val();
+        if(val!=''){
+            bsClasses.push(val);
+        }
+        val = cont.find('select[name="textColor"]').val();
+        if(val!=''){
+            bsClasses.push(val);
+        }
 
         //style - background
         val = cont.find('input[name="background"]').is(':checked');
         fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
+        val = true;
         if(!val){
             fieldset.hide();
             css['background'] = 'none';
@@ -665,9 +682,12 @@ console.log('>>>', etype);
                 css['background-position'] = val;  
                 val = cont.find('select[name="background-repeat"]').val();
                 css['background-repeat'] = val;  
+                val = cont.find('select[name="background-size"]').val();
+                css['background-size'] = val;  
             } 
         }
 
+//------------------------------------------------        
 
         function __setDim(name){
             let ele = cont.find('input[name="'+name+'"]');
@@ -703,8 +723,8 @@ console.log('>>>', etype);
             let params = ['display','width','height',
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
-                'background','background-image','bg-image',
-                'border-width','border-color','border-style',
+                'background','background-image','bg-image','background-repeat','background-position','background-size',
+                //'border-width','border-color','border-style',
                 'flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(let i=0; i<params.length; i++){
                 let prm = params[i];
@@ -755,20 +775,25 @@ console.log('>>>', etype);
                 element = pageEditor.layoutMgr.layoutInitGroup(l_cfg, element);
             }
             
-            element.addClass('cms-element-editing headline marching-ants marching');
+            element.addClass('cms-element-editing headline');// marching-ants marching
             
         }else{
             //if(groupType=='grid'){
             if(bsClasses.length>0){
-                HCmsEditor.replaceBsClasses(element[0], ['container','border','rounded','shadow','row',' col','justify-content','align-items','g-'], bsClasses);
+                HCmsEditor.replaceBsClasses(element[0], allAffectedBsClasses, bsClasses);
             }
             
             element.removeAttr('style');
+            
             element.css(css); //assign changed css at once
+            
+console.log( l_cfg.bsClasses );            
+console.log( 'assign', css );            
+            
         }
         
         return css;
-    }
+    }//_getCss
 
     //
     //
@@ -853,6 +878,8 @@ console.log('>>>', etype);
             {
                 border_styles.push($(this).val());
             });
+            
+console.log('_assignCssTextArea');  
 
             s = [];
             for(const [style, value] of Object.entries(l_cfg.css)){
@@ -942,14 +969,15 @@ console.log('>>>', etype);
             //
             if(!l_cfg.bsClasses){
                 //get from element  TBD
-                //l_cfg.bsClasses 
-                
+                let classes = Array.from(element[0].classList);
+                l_cfg.bsClasses = HCmsEditor.getBsClasses(classes, allAffectedBsClasses);
+                l_cfg.bsClasses = l_cfg.bsClasses.join(' ').trim();
             }
+            
             if(l_cfg.bsClasses){
-                
                 let borderClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'border');
                 
-                if(borderClasses){
+                if(borderClasses && borderClasses.length>0){
                     
                     const size = [...borderClasses.matchAll(/(border-)(\d)/g)];
                     cont.find('#bsBorder-size').val(size.length==1 && size[0].length==3 && size[0][2]>0?size[0][2]:1);
@@ -969,13 +997,34 @@ console.log('>>>', etype);
                     
                 }
                 
-                const roundedClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'rounded')??'rounded-0';
+                const roundedClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'rounded') || 'rounded-0';
                 cont.find('#bsBorder-radius').val(roundedClass.substring(8));
                     
-                const shadowClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'shadow')??'none';
+                const shadowClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'shadow') || 'none';
                 cont.find('#bsBorder-shadow').val(shadowClass);
+
+                const bgColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'bg-');
+                cont.find('select[name="bgColor"]').val(bgColorClass);
+
+                const textColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'text-');
+                cont.find('select[name="textColor"]').val(textColorClass);
+                
                 cont.find('select[data-type="bs"]').hSelect('refresh');
             }
+            
+            
+            //init file picker
+            cont.find('input[name="bg-image"]')
+                    .on('click',_selecHeuristMedia);
+            cont.find('#btn-background-image').button()
+                    .css({'font-size':'0.7em'})
+                    .on('click',_selecHeuristMedia);
+
+            cont.find('#btn-background-image-clear')
+                    .button() //{icon:'ui-icon-close',showLabel:false})
+                    .css({'font-size':'0.7em'})
+                    .on('click',_clearBgImage);
+            
 
             //assign flex css parameters
             let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
@@ -985,7 +1034,8 @@ console.log('>>>', etype);
             }
 
             let no_margin_values = true, mode_full = false;    
-            //assign other css parameters
+
+            //assign other css parameters for all elements with data-type="css"
             cont.find('[data-type="css"]').each(function(i,item){
                 let key = $(item).attr('name');
                 let val = l_cfg.css[key];
@@ -1006,24 +1056,15 @@ console.log('>>>', etype);
                 }
             });
             margin_mode_full = true;
-            //init file picker
-            cont.find('input[name="bg-image"]')
-                    .on('click',_selecHeuristMedia);
-            cont.find('#btn-background-image').button()
-                    .css({'font-size':'0.7em'})
-                    .on('click',_selecHeuristMedia);
-
-            cont.find('#btn-background-image-clear')
-                    .button() //{icon:'ui-icon-close',showLabel:false})
-                    .css({'font-size':'0.7em'})
-                    .on('click',_clearBgImage);
             
             //init color pickers
             cont.find('input[name$="-color"]').colorpicker({
                 hideButton: false, //show button right to input
                 showOn: "both"});//,val:value
             cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
-            
+
+            //old border set            
+            /* disabled - old boder set
             let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
             if(cont.find('#border-style').val()=='none'){
                 fieldset.hide();
@@ -1040,6 +1081,7 @@ console.log('>>>', etype);
             }else{
                 fieldset.hide();
             }
+            */
             
             _onMarginMode();
     }

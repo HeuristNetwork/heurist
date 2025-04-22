@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global cfg_widgets, prepareTemplateBlog, layoutMgr */
+/* global prepareTemplateBlog */
 
 
 /*
@@ -52,29 +52,26 @@ class HLayoutMgr {
       this.pnl_counter++;
     }
   }
-  
-  #layoutInitFromHTML(container){
+
+  /*
+  *
+  */
+  layoutInitFromHTML(container, supp_options)
+  {
+      this._supp_options = supp_options || {};
 
       container = $(container);
+      
+      //const layout = this.#convertHTMLtoJSON(container, 0);
+      //return this.#layoutInitFromJSON(layout, container, false, true );
 
-      //find all elements with data-heurist-widget
-      $.each(container.find('[data-heurist-widget]'), (idx, ele) => {
+      
+      //find all elements with data-heurist-cms
+      $.each(container.find('[data-heurist-cms]'), (idx, ele) => {
           ele = $(ele);
           
-          let widget_cfg = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-widget'));
-          
-          if(!widget_cfg){
-              widget_cfg = window.hWin.HEURIST4.util.isJSON(ele.text());
-              if(!widget_cfg){
-                    widget_cfg = {};
-              }
-              widget_cfg.appid = ele.attr('data-heurist-widget');
-          }
-          
+          let widget_cfg = this.#convertWidgetHTMLtoJSON(ele);
           if(widget_cfg && widget_cfg.appid){
-               if(!widget_cfg.options){
-                   widget_cfg = {appid:widget_cfg.appid, options:widget_cfg};
-               }
                widget_cfg.key = this.pnl_counter;
                this.pnl_counter++;
                ele.attr('data-hid', widget_cfg.key);
@@ -87,7 +84,11 @@ class HLayoutMgr {
             //old format v1: html with some widgets
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
       }
-
+      
+      //let res = this.#convertHTMLtoJSON(container, 0);
+//console.log('>>>',res)
+      
+      return null;
   }
   
   //
@@ -550,7 +551,7 @@ class HLayoutMgr {
                 $d2.appendTo($parent);
             }else{
                 //create cardinal div
-                $d = $(document.createElement('div'));
+                let $d = $(document.createElement('div'));
             
                 $d.addClass('ui-layout-'+pos)
                   .appendTo($parent);
@@ -924,19 +925,24 @@ class HLayoutMgr {
         
     
     //
-    // rea
     //
-    #convertOldCmsFormat(container, lvl){
+    //
+    #convertHTMLtoJSON(container, lvl){
 
 
         let res = [];
+        let is_root_div = false;
+        let that = this;
+        let children = container.children();
 
-        $.each(container.children(), function(idx, ele){
+        $.each(children, function(idx, ele){
 
             ele = $(ele);
 
             let child;
-
+            
+            let widget_cfg = that.#convertWidgetHTMLtoJSON(ele);
+            /*
             if(ele.attr('data-heurist-app-id')){
                 //this is widget
                 let opts = window.hWin.HEURIST4.util.isJSON(ele.text());
@@ -948,60 +954,123 @@ class HLayoutMgr {
                     child.name = opts.__widget_name.replaceAll('=','').trim();
                 }
                 if(!child.name) child.name = "Widget "+lvl+'.'+idx;
-            }else 
-                if(ele.find('div[data-heurist-app-id]').length==0){ //no widgets
+            */
+            if(widget_cfg){
+                
+                child = widget_cfg;
+                if(!child.name) child.name = "Widget "+lvl+'.'+idx;
+                
+            }else if(ele.attr('data-heurist-cms')){ //group|accordion|tabs|cardianl|app
+/*
+                if(res.type=='north' || res.type=='south' || res.type=='west' || res.type=='east'){
+                    let cardinal_opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-cms-options'));
+                    if(cardinal_opts){
+                        res['options'] = cardinal_opts;        
+                    }
+                }
+*/            
+            
+            }else if(ele.find('div[data-heurist-app-id]').length==0 && ele.find('div[data-heurist-cms]').length==0){ 
+                    //no widgets among children
 
-                    let tag = ele[0].nodeName;
-                    let s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
-
+                    let tag = ele[0].nodeName.toLowerCase();
+                    let s = ele.html();
+                    if(lvl == 1  && children.length==1 && tag=='div'){
+                        is_root_div = true;
+                    }else{
+                        s = '<' + tag + '>'+s+'</' + tag + '>';
+                    }
                     child = {name:"Content "+lvl+'.'+idx, 
                         type:"text", 
                         content: s };
-                }else{
-
-                    //if(ele[0].nodeName=='TABLE'){}
-
+                        
+            }else{
                     //there are widgets among children
                     child = {name:"Group "+lvl+'.'+idx,
                         type:"group", 
                         folder:true, 
-                        children: this.#convertOldCmsFormat(ele, lvl+1) };
-                }
+                        children: that.#convertHTMLtoJSON(ele, lvl+1) };
+            }
+                
 
             if(child){
                 if(ele.attr('style')){
-
-
-                    let styles = ele.attr('style').split(';'),
-                    i= styles.length,
-                    css = {},
-                    style, k, v;
-
-
-                    while (i--)
-                    {
-                        style = styles[i].split(':');
-                        k = String(style[0]).trim();
-                        v = String(style[1]).trim();
-                        if (k.length > 0 && v.length > 0)
-                        {
-                            css[k] = v;
-                        }
-                    }                 
-
-                    if(!$.isEmptyObject(css)) child['css'] = css;
+                    res['css'] = that.#css2json(ele.attr('style'));    
                 }
+                if(ele.attr('class')){
+                    res['classes'] = ele.attr('class');
+                }
+
                 res.push(child);
             }
         });
 
         if(lvl == 0){
-            res = [{name:"Name of this page",type:"group",folder:true, children:res }];
+            if(res.length==1 && !res[0].folder){
+                //only content - adds top group
+                let root_css = {};
+                if(is_root_div){
+                    root_css = res[0].css;
+                    res[0].css = {};
+                }
+                res = {name:'Page', type:'group', folder:true, children:res, css:root_css};
+            }
         }
 
         return res;
-    }
+  }
 
+    
+  /*
+  * Converts element with widget config to JSON configuration
+  */ 
+  #convertWidgetHTMLtoJSON(element){
+
+      let widgetId = element.attr('data-heurist-cms');
+      
+      if(!widgetId){ //old version
+          widgetId = element.attr('data-heurist-app-id');
+      }
+
+      if(!widgetId || widgetId=='text'){
+          //widget is not define
+          return null;    
+      }
+
+      //widget configuration is value of attribute      
+      let widget_cfg = window.hWin.HEURIST4.util.isJSON(widgetId);
+
+      if(widget_cfg){ //attribute value is valid json
+         widgetId = widget_cfg.appid || widget_cfg.type;
+      }else{          
+         //take configuration from content of div
+         widget_cfg = window.hWin.HEURIST4.util.isJSON(element.text());
+         if(widgetId=='app' && widget_cfg){
+             widgetId = widget_cfg.appid;
+         }
+      }
+      
+      if(!widget_cfg) widget_cfg = {};
+      if(!widget_cfg.options){
+            widget_cfg.options = window.hWin.HEURIST4.util.cloneJSON(widget_cfg);
+      }
+      if(!widget_cfg.appid) widget_cfg.appid = widgetId;
+      
+      //if(widgetId=='group' || widgetId=='tabs' || widgetId=='accordion')
+      
+      let app = this.#getWidgetById(widget_cfg.appid);
+      
+      let defName = app?app.name:'Widget not defined';
+      if(!widget_cfg.name){
+        widget_cfg.name = defName;
+      }
+      
+      widget_cfg.dom_id = element.attr('id');
+
+      return widget_cfg;
+  }
+   
+    // data-heurist-cms="text|group|accordion|tabs|cardianl|app"
     
     // 1. Save result of CMS edit as human-readble html
     // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
@@ -1016,7 +1085,7 @@ class HLayoutMgr {
     //   a) create html content as Group+MainMenu   
     // 
     //
-    #convertHTMLtoJSON(ele, lvl){
+  #convertHTMLtoJSON_alt(ele, lvl){
         
         ele = $(ele);
 
@@ -1027,7 +1096,7 @@ class HLayoutMgr {
             if(ele.find('[data-cms-type]').length>0 || ele.attr('data-lang') || ele.find('div[data-lang]').length>0){
                 res = [];
                 ele.each((i, item)=>{
-                    res.push(this.#convertHTMLtoJSON(item, lvl));
+                    res.push(this.#convertHTMLtoJSON_alt(item, lvl));
                 });
                 return res;
             }else{
@@ -1036,7 +1105,7 @@ class HLayoutMgr {
         }
         
         
-        if(!ele.attr('data-cms-type')){
+        if(!ele.attr('data-cms-type')){ //group tabs grid accordion
             if(lvl==0){
                 res = [{name:'Page', type:'group',
                         children:[
@@ -1093,7 +1162,7 @@ class HLayoutMgr {
                     
                     res.children = [];
                     children.each((i,item)=>{
-                        res.children.push(this.#convertHTMLtoJSON(item, lvl+1));                    
+                        res.children.push(this.#convertHTMLtoJSON_alt(item, lvl+1));                    
                     });
                     res.folder = true;    
                     
@@ -1120,15 +1189,17 @@ class HLayoutMgr {
         if (!css) return s;
         if (css instanceof CSSStyleDeclaration) {
             for (let i in css) {
-                if ((css[i]).toLowerCase) {
+                if ((css[i]).toLowerCase()) {
                     s[(css[i]).toLowerCase()] = (css[css[i]]);
                 }        
             }
         } else if (typeof css == "string") {
-            css = css.split("; ");
+            css = css.split(';');
             for (let i in css) {
-                let l = css[i].split(": ");
-                s[l[0].toLowerCase()] = (l[1]);
+                let vs = css[i].split(':');
+                const key = String(vs.shift()).trim();
+                const val = vs.join(':').trim();
+                s[key.toLowerCase()] = val;
             }
         }
         return s;
@@ -1143,11 +1214,8 @@ class HLayoutMgr {
     #convertJSONtoHTML(content){
         
         //from json
-        console.log(content);
-        
-        //to html
+        //to html for storage 
         let res = this.#layoutInitFromJSON(content, null, true, true);
-        console.log(res);
         
         //and back to json
         res = this.#convertHTMLtoJSON(res, 0);
@@ -1180,7 +1248,7 @@ class HLayoutMgr {
     container = $(container);
     container.empty();
     container.html(layout);
-    return this.#convertOldCmsFormat(container, 0);
+    return this.#convertHTMLtoJSON(container, 0);
   }
   
   /**
@@ -1277,9 +1345,9 @@ class HLayoutMgr {
   layoutGetById(id){
         if(id){
             id = id.toLowerCase();
-            for(let i=0; i<cfg_layouts.length; i++){
-                if(cfg_layouts[i].id.toLowerCase()==id){
-                    return cfg_layouts[i];
+            for(let i=0; i<window.hWin.cfg_layouts.length; i++){
+                if(window.hWin.cfg_layouts[i].id.toLowerCase()==id){
+                    return window.hWin.cfg_layouts[i];
                 }
             }
         }
@@ -1302,12 +1370,13 @@ class HLayoutMgr {
   
     //main content
     if(layout && window.hWin.HEURIST4.util.isJSON(layout)){ //init from json
-        return this.#layoutInitFromJSON(layout, container, false, true);
+        let res = this.#layoutInitFromJSON(layout, container, false, true);
+        return res;
     }else{
         if(layout){
             $(container).html(layout);
         }
-        return this.#layoutInitFromHTML(container);
+        return this.layoutInitFromHTML(container);
     }
     
   }
@@ -1316,12 +1385,6 @@ class HLayoutMgr {
   {
     this._supp_options = supp_options || {};
     return this.#layoutInitFromJSON(layout, container, false, true);
-  }
-  
-  layoutInitFromHTML(container, supp_options)
-  {
-    this._supp_options = supp_options || {};
-    return this.#layoutInitFromHTML(container);
   }
   
 }
