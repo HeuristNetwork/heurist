@@ -280,7 +280,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     // Set filtering settings in UI
                     let at_least_one_marked = false;
 
-                    let displayed_rectypes = getSetting('rectypes', []);
+                    let displayed_rectypes = getSetting('rectypes', [], ',');
                     if(displayed_rectypes.length > 0){
                         //restore setting from previous session
                         for(const rtyID of displayed_rectypes){
@@ -296,7 +296,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         const rtyID = $(e.target).attr("id");
                         const checked = $(e.target).is(':checked') ? 1 : 0;
 
-                        let displayed_rectypes = getSetting('rectypes', []);
+                        let displayed_rectypes = getSetting('rectypes', [], ',');
                         const idx = displayed_rectypes.indexOf(rtyID);
 
                         if(checked && idx === -1){
@@ -318,7 +318,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         const checked = $(this).prop('checked');
                         $(".show-record").prop("checked", checked);
 
-                        let displayed_rectypes = getSetting('rectypes', []);
+                        let displayed_rectypes = getSetting('rectypes', [], ',');
 
                         if(checked){
 
@@ -345,7 +345,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         const group_id = $(this).attr('data-id');
                         const checked = $(this).prop('checked');
 
-                        let displayed_rectypes = getSetting('rectypes', []);
+                        let displayed_rectypes = getSetting('rectypes', [], ',');
 
                         if(group_id){
 

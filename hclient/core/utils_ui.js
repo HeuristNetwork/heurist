@@ -3173,8 +3173,10 @@ window.hWin.HEURIST4.ui = {
 
                     // Display the show thumbnail anchor
                     elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
-                    elem.style.display = 'inline-block';
-                    elem.onclick = __closePlayer;
+                    if(elem){
+                        elem.style.display = 'inline-block';
+                        elem.onclick = __closePlayer;
+                    }
                 }
             }
         });
@@ -3188,13 +3190,15 @@ window.hWin.HEURIST4.ui = {
 
   hidePlayer: function(id, container){
     //clear and hide player div
-    let  elem = container.querySelector('#player'+id);
+    let elem = container.querySelector('#player'+id);
     elem.innerHTML = '';
     elem.style.display = 'none';
 
     //hide show tumbnail link
     elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
-    elem.style.display = 'none';
+    if(elem){
+        elem.style.display = 'none';
+    }
 
     //show thumbnail
     elem = container.querySelector('#img'+id);
@@ -3822,7 +3826,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         }
     },
 
-    refreshGroupings: function(skipExpand = false){
+    refreshGroupings: function(){
 
         if(this.menu.find('li').length == 0 || !this._hasGroupings){
             return;

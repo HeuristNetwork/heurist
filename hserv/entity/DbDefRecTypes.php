@@ -300,65 +300,62 @@ class DbDefRecTypes extends DbEntityBase
 
         $ret = parent::prepareRecords();
 
-        $mysqli = $this->system->getMysqli();
-
         //add specific field values
         foreach($this->records as $idx=>$record){
-             if(!$this->prepareRecord($idx)){
-                 break;
-             }
+            if(!$this->prepareRecord($idx)){
+                return false;
+            }
         }//foreach
 
         return $ret;
-
     }
 
     private function prepareRecord($idx){
 
+        //validate duplication
+        if(@$this->records[$idx]['rty_Name']){
+
+            // Strip trailing + double spacing
+            $this->records[$idx]['rty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['rty_Name']);
+            $this->records[$idx]['rty_Name'] = super_trim($this->records[$idx]['rty_Name']);
+
             //validate duplication
-            if(@$this->records[$idx]['rty_Name']){
+            if(!$this->doDuplicationCheck($idx, 'rty_Name', 'Record type cannot be saved. The provided name already exists', 'Duplicate record type title')){
+                return false;
+            }
+        }
 
-                // Strip trailing + double spacing
-                $this->records[$idx]['rty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['rty_Name']);
-                $this->records[$idx]['rty_Name'] = super_trim($this->records[$idx]['rty_Name']);
+        $is_new = !(@$this->records[$idx]['rty_ID']>0);
 
-                //validate duplication
-                if(!$this->doDuplicationCheck($idx, 'rty_Name', 'Record type cannot be saved. The provided name already exists')){
-                        return false;
-                }
+        if($is_new){
+            $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
+
+            if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
+                $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
             }
 
-            $is_new = !(@$this->records[$idx]['rty_ID']>0);
-
-            if($is_new){
-                $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
-
-                if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
-                    $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
-                }
-
-                if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
-                    $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
-                }
-
-            }else{
-
-                if (@$this->records[$idx]['rty_IDInOriginatingDB']==''){
-                    $this->records[$idx]['rty_IDInOriginatingDB'] = null;
-                    unset($this->records[$idx]['rty_IDInOriginatingDB']);
-                }
-
-                if(array_key_exists('rty_LocallyModified',$this->records[$idx])){
-                    $this->records[$idx]['rty_LocallyModified'] = null;
-                    unset($this->records[$idx]['rty_LocallyModified']);
-                }
+            if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
+                $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
             }
 
-            $this->records[$idx]['rty_Modified'] = date(DATE_8601);//reset
+        }else{
 
-            $this->records[$idx]['is_new'] = $is_new;
+            if (@$this->records[$idx]['rty_IDInOriginatingDB']==''){
+                $this->records[$idx]['rty_IDInOriginatingDB'] = null;
+                unset($this->records[$idx]['rty_IDInOriginatingDB']);
+            }
 
-            return true;
+            if(array_key_exists('rty_LocallyModified',$this->records[$idx])){
+                $this->records[$idx]['rty_LocallyModified'] = null;
+                unset($this->records[$idx]['rty_LocallyModified']);
+            }
+        }
+
+        $this->records[$idx]['rty_Modified'] = date(DATE_8601);//reset
+
+        $this->records[$idx]['is_new'] = $is_new;
+
+        return true;
     }
 
     /**

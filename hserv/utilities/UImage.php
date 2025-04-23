@@ -740,9 +740,13 @@ class UImage {
         //verify that this is valid iiif manifest
         if($iiif_manifest!==false && is_array($iiif_manifest))
         {
-            if(@$iiif_manifest['@type']=='sc:Manifest' ||   //v2
-            @$iiif_manifest['type']=='Manifest')        //v3
-            {
+            $type = array_key_exists('@type', $iiif_manifest) ? $iiif_manifest['@type'] : '';
+            $type = array_key_exists('type', $iiif_manifest) ? $iiif_manifest['type'] : $type;
+            $type = strtolower($type);
+
+            if($type === 'sc:manifest' || //v2
+               $type === 'manifest'){ //v3
+
                 if(@$iiif_manifest['thumbnail']){
 
                     if(@$iiif_manifest['thumbnail']['@id']){  //v2
@@ -773,6 +777,16 @@ class UImage {
                                 );
                             }
                         }
+                    }else{
+                        // ver 3, use first available item as thumbnail
+
+                        $thumb_url = @$iiif_manifest['items'][0];
+                        if($thumb_url && @$thumb_url['id']){
+
+                            $image_url = $thumb_url['id'];
+
+                            $thumbUrl = UImage::composeThumbnailIIIF($image_url, @$thumb_url['width'], @$thumb_url['height']);
+                        }
                     }
                 }
 
@@ -792,7 +806,7 @@ class UImage {
         
         //download
         if($thumbUrl && $thumbnail_file){
-            $temp_path = tempnam($scratch_dir, "_temp_");
+            $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
             if(saveURLasFile($thumbUrl, $temp_path)){ //save to temp in scratch folder
                 UImage::createScaledImageFile($temp_path, $thumbnail_file);//create thumbnail for iiif image
                 unlink($temp_path);
