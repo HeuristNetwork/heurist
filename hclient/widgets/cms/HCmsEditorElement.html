@@ -66,9 +66,12 @@
                 </div>
 
                 <!-- Cardinal -->
-                <h3 class="props cardinal" style="padding: 0.1em 0.1em 0.1em 1.2em;">Cardinal properties</h3>
-                <div class="props cardinal" style="background:none">
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                <div class="cardinal-layout" style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                    <h3>
+                        Cardinal properties
+                    </h3>
+                    <fieldset>
+                            <legend style="display:none"></legend>
                             <div>
                                 <div class="header_narrow"><b>North:</b></div>
                                 <select data-type="cardinal" data-pane="north" name="init">
@@ -90,7 +93,8 @@
                                 <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>                       
                             </div>
                     </fieldset>
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                    <fieldset>
+                            <legend style="display:none"></legend>
                             <div>
                                 <div class="header_narrow"><b>South:</b></div>
                                 <select data-type="cardinal" data-pane="south" name="init">
@@ -112,8 +116,7 @@
                                 <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
-                    
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                    <fieldset><legend style="display:none"></legend>
                             <div>
                                 <div class="header_narrow"><b>West:</b></div>
                                 <select data-type="cardinal" data-pane="west" name="init">
@@ -135,8 +138,7 @@
                                 <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
-
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
+                    <fieldset><legend style="display:none"></legend>
                             <div>
                                 <div class="header_narrow"><b>East:</b></div>
                                 <select data-type="cardinal" data-pane="east" name="init">
@@ -158,7 +160,6 @@
                                 <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
-
                 </div>
 
 
@@ -352,10 +353,10 @@
                 
                 
                 <!-- Cosmetic Bootstrap classes -->
-                <div>
-                    <!-- Border -->
-                    <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <h3>
+                <!-- Border -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <input data-type="css" name="border" type="checkbox" checked style="float:right;margin-top:1.2em"/>
+                        <h3 style="display:inline-block">
                             Border, Corners, Shadow
                         </h3>
                         <fieldset data-section="bsBorder">
@@ -376,7 +377,7 @@
                                 </div>
                                 <div>
                                     <div class="header_narrow">Size:</div>
-                                    <input data-type="bs" id="bsBorder-size"  type="number" min="1" max="5" value="" placeholder="1" style="width:50px;line-height: 1.5em;" class="text ui-widget-content"/></label>
+                                    <input data-type="bs" id="bsBorder-size"  type="number" min="1" max="5" value="1" placeholder="1" style="width:50px;line-height: 1.5em;" class="text ui-widget-content"/></label>
                                 </div>
                                 <div>
                                     <div class="header_narrow">Color:</div>
@@ -418,13 +419,11 @@
                                     </select>
                                 </div>
                         </fieldset>
-                    </div>
                 </div>                        
                 
                 <!-- Background -->
-                <div>
-                    <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
-                        <input data-type="cssX" name="background" type="checkbox" style="float:right;margin-top:1.2em"/></label>
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <input data-type="css" name="background" type="checkbox" checked style="float:right;margin-top:1.2em"/>
                         <h3 style="display:inline-block">
                             Background
                         </h3>
@@ -530,67 +529,54 @@
                             </div>
                         
                         </fieldset>
-                    </div>
                 </div>                        
                 
-                
-                
-                <!-- Cosmetic CSS helpers -->
-                <div>
-                    <!-- Margins and Padding -->
-                    <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
-                        <button class="margin-mode" style="position:absolute;right: 10px;">compact</button>
-
-                        <h3>
+                <!-- Margins and Padding -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <!-- <input data-type="css" name="margin" type="checkbox" checked style="float:right;margin-top:1.2em"/> -->
+                        <h3 style="display:inline-block">
                             Margins
-                            <div style="display:none;" class="margin-short">
-                                <label>&nbsp;Inner:
-                                <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
-                                <label>&nbsp;Outer:
-                                <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
-                            </div> 
                         </h3>
+                        <fieldset data-section="bsMargin">
+                            <legend style="display:none"></legend>
 
-                        <div style="background:none">
-                            <div style="display:inline-block" class="margin-full">
-                                <div class="header_narrow" style="vertical-align:middle">Inner</div>
-                                <div style="vertical-align:middle;display:inline-block;padding-left:20px">
-                                    <label><input class="cb_sync" data-type="padding" type="checkbox" checked/>sync&nbsp;</label>
-                                    <input data-type="css" name="padding-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
-                                <div style="vertical-align:middle;display:inline-block;">
-                                    <input data-type="css" name="padding-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                    <br>
-                                    <input data-type="css" name="padding-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
-                                <div style="vertical-align:middle;display:inline-block;">
-                                    <input data-type="css" name="padding-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
+                            <div style="background:none">
+                                <div style="display:inline-block">
+                                    <div class="header_narrow" style="vertical-align:middle">Inner</div>
+                                    <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                        <label><input class="cb_sync" data-type="padding" type="checkbox" checked/>sync&nbsp;</label>
+                                        <input data-type="bs" name="bsMargin-ps" type="number" min="0" max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-pt" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                        <br>
+                                        <input data-type="bs" name="bsMargin-pb" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-pe" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                </div>
+                                <div style="display:inline-block">
+                                    <div class="header_narrow" style="vertical-align:middle">Outer</div>
+                                    <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                        <label><input class="cb_sync" data-type="margin" type="checkbox" checked/>sync&nbsp;</label>
+                                        <input data-type="bs" name="bsMargin-ms" type="number" min="0"  max="5" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-mt" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                        <br>
+                                        <input data-type="bs" name="bsMargin-mb" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-me" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                </div>
                             </div>
-                            <div style="display:inline-block" class="margin-full">
-                                <div class="header_narrow" style="vertical-align:middle">Outer</div>
-                                <div style="vertical-align:middle;display:inline-block;padding-left:20px">
-                                    <label><input class="cb_sync" data-type="margin" type="checkbox" checked/>sync&nbsp;</label>
-                                    <input data-type="css" name="margin-left" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
-                                <div style="vertical-align:middle;display:inline-block;">
-                                    <input data-type="css" name="margin-top" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                    <br>
-                                    <input data-type="css" name="margin-bottom" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
-                                <div style="vertical-align:middle;display:inline-block;">
-                                    <input data-type="css" name="margin-right" type="number" min="0" value="" placeholder="0" style="margin:2px;width:50px"/>
-                                </div>    
-                            </div>
-                        </div>
-
-                    </fieldset>
-                  
+                        </fieldset>
                 </div>
                 
-                <div>
-                    <!-- Direct edit CSS and User's classes -->
-                    <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                <!-- Direct edit CSS and User's classes -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
                         <h3>
                             Direct edit for CSS and Classes
                         </h3>
@@ -606,7 +592,6 @@
                                 <div class="heurist-helper3">Space separated list of classes defined in custom css field in page record</div>
                             </div>
                         </fieldset>
-                    </div>
                 </div>
                     
                 

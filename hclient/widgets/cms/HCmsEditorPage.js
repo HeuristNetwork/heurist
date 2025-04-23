@@ -564,7 +564,12 @@ initPage(pageContainer, pageRecord){
             this.#initTreePage(this._layout_content);
         }
         
-        const sTitle =  this._cmsEditor.page_id==this._cmsEditor.website_id ? window.hWin.HR('Home Page') :window.hWin.HEURIST4.util.stripTags(pageRecord[window.hWin.DT_NAME]) ;
+        let sTitle;
+        if(this._cmsEditor.page_id==this._cmsEditor.website_id){
+            sTitle = window.hWin.HR('Home Page')  
+        }else{ 
+            sTitle = window.hWin.HEURIST4.util.stripTags(window.hWin.HAPI4.getTranslation(pageRecord[window.hWin.DT_NAME], null));
+        }
         let ele_title = this._container.find('.treePageHeader > h3')
         ele_title.attr('title',sTitle).text(sTitle);
         

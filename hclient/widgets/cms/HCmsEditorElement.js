@@ -46,11 +46,8 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         codeEditorDlg = null,
         codeEditorBtns = null;
     let textAreaCss;
-    let margin_mode_full = true;
     
-    const allAffectedBsClasses = ['container','border','bg-','text-','rounded','shadow','row',' col','justify-content','align-items','g-'];
-            
-
+    const allAffectedBsClasses = ['container','border','bg-','text-','rounded','shadow','row',' col','justify-content','align-items','g-','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-'];
     
     function _init(){
 
@@ -96,7 +93,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
 
         cont.find('input[data-type="element-name"]').val(l_cfg.name);
         cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
-        cont.find('textarea[name="elementClasses"]').val(l_cfg.classes);
+        cont.find('textarea[name="elementClasses"]').val(l_cfg.classes); //publisher's classes
         
         if(l_cfg.type=='group' && l_cfg.css?.display=='flex'){
             l_cfg.type='flex'; //for backward capability
@@ -110,30 +107,32 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         cont.find('input[data-type="element-id"]').parent().show();
         cont.find('.page-layout').hide();
         cont.find('.group-layout').hide();
-        
-        if(l_cfg.isPage || etype=='widget' || etype=='text' || etype=='cardinal'){
-            
-            cont.find('#groupType').val('');
-            
-            if(l_cfg.isPage){
-                cont.find('.page-layout').show();    
-                let containerClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'container');
-                cont.find('#containerType').val(containerClass);
-                cont.find('#groupType').val('group');  
-            }
-            
-        }else{
-            cont.find('.group-layout').show();
-            //initially hide-show      
-            cont.find('#groupType').val(l_cfg.type);  
-        }
+        cont.find('.cardinal-layout').hide();
+        cont.find('.group-layout').hide();
+
         let activePage = (etype=='group'?0:(etype=='widget'?false:(etype=='cardinal'?1:2)));
 
         cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
         cont.find('h3').css({padding:'1em', 'font-size': '1.1em', 'font-weight': 'bold'});
         cont.find('fieldset').css({background: 'transparent', padding: '1em'});
 
-        _initControlsForLayoutType();
+        
+        if(etype=='widget' || etype=='text' || etype=='cardinal'){
+            cont.find('#groupType').val('');
+        }else{
+
+            if(l_cfg.isPage){
+                cont.find('.page-layout').show();    
+                let containerClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'container');
+                cont.find('#containerType').val(containerClass);
+                cont.find('#groupType').val('group');
+            }else{
+                cont.find('.group-layout').show();
+                cont.find('#groupType').val(l_cfg.type);
+            }
+                
+            _initControlsForLayoutType();
+        }
         
         if(!l_cfg.css) l_cfg.css = {}; //{display:'block'}; default
 
@@ -161,6 +160,8 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
 
         }else
         if(etype=='cardinal'){ //assign cardinal properties
+        
+            cont.find('.cardinal-layout').show();
             
             for(let i=0; i<l_cfg.children.length; i++){
                 let lpane = l_cfg.children[i];
@@ -190,43 +191,35 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         
         
         //4. listeners for selects    
-        cont.find('select[name!="grid-col-width"]').hSelect({change:function(event){
-            
+        cont.find('select[name!="grid-col-width"]').each((i,selObj)=>{
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
+            selObj.on({change:function(event){
+
             let ele = $(event.target);
+
+            if((ele).attr('data-type')=='cardinal') return;
 
             //change layout selectors
             if(ele.attr('id')=='groupType'){ 
                 _initControlsForLayoutType();
             }
             
-            if((ele).attr('data-type')=='cardinal') return;
-            
             _getCss();
             
             _enableSave();
-        }});
+            }});
+        });
 
         //4b. listeners for styles (border,bg,margin)
         cont.find('input[data-type="css"]').on('change', _getCss);
         cont.find('input[data-type="css"]').on('keyup', _getCss);
         cont.find('input[name="background"]').on('change', _getCss);
-        /*
-            var css = _getCss();
-        });*/
+        cont.find('input[name="border"]').on('change', _getCss);
         
         //4c. button listeners
-        cont.find('.margin-mode').button()
-            .css({'font-size':'0.7em'})
-            .on('click', function(e){
-            //show hide short and full margin/padding
-            margin_mode_full = !margin_mode_full;
-            _onMarginMode();
-        });
-        
         cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
         cont.find('.cb_sync').on('change',_onMarginSync);
-        cont.find('input[name="padding-left"]').on('change',_onMarginSyncVal);
-        cont.find('input[name="margin-left"]').on('change',_onMarginSyncVal);
+        cont.find('input[name^="bsMargin-"]').on('change', _onMarginSyncVal);
 
         function __saveWidgetConfig(){
             if(widget_cfg){
@@ -479,7 +472,7 @@ console.log('>>>', etype);
         }else
         if(etype=='accordion'){
                 cont.find('#acc_type').val(l_cfg.options?.acc_type);
-                cont.find('#acc_collapse').prop('checked',l_cfg.options?.acc_collapse);
+                cont.find('#acc_collapse').attr('checked',l_cfg.options?.acc_collapse);
         }
         
     }
@@ -600,32 +593,36 @@ console.log('>>>', etype);
         }
         
 // BORDER  get values from UI -----------------
-        
-        let val = cont.find('#bsBorder-style').val();
-        if(val!='none' && cont.find('#bsBorder-size').val()>0){
-            css['--bs-border-style'] = val;
+        let val = cont.find('input[name="border"]').is(':checked');
+        if(!val){
+            css['border'] = 'none';
+        }else{
+            val = cont.find('#bsBorder-style').val();
+            if(val!='none' && cont.find('#bsBorder-size').val()>0){
+                css['--bs-border-style'] = val;
+                
+                bsClasses.push('border');
+                val = cont.find('#bsBorder-size').val();
+                if(val>0){
+                    bsClasses.push('border-'+val);
+                }
+                val = cont.find('#bsBorder-color').val();
+                if(val!='default'){
+                    bsClasses.push('border-'+val);
+                }
+            }
+            val = cont.find('#bsBorder-radius').val();
+            if(val!=0){
+                bsClasses.push('rounded-'+val);
+            }
             
-            bsClasses.push('border');
-            val = cont.find('#bsBorder-size').val();
-            if(val>0){
-                bsClasses.push('border-'+val);
-            }
-            val = cont.find('#bsBorder-color').val();
-            if(val!='default'){
-                bsClasses.push('border-'+val);
+            val = cont.find('#bsBorder-shadow').val();
+            if(val!='none'){
+                bsClasses.push(val);    
             }
         }
-        val = cont.find('#bsBorder-radius').val();
-        if(val!=0){
-            bsClasses.push('rounded-'+val);
-        }
         
-        val = cont.find('#bsBorder-shadow').val();
-        if(val!='none'){
-            bsClasses.push(val);    
-        }
-        
-/* disabled        
+/* disabled OLD VERSION        
         //style - border
         val = cont.find('#border-style').val();
 
@@ -651,28 +648,24 @@ console.log('>>>', etype);
 
 // BACKGROUND  get values from UI -----------------
 
-        //colors for text and bg
-        val = cont.find('select[name="bgColor"]').val();
-        if(val!=''){
-            bsClasses.push(val);
-        }
-        val = cont.find('select[name="textColor"]').val();
-        if(val!=''){
-            bsClasses.push(val);
-        }
-
         //style - background
         val = cont.find('input[name="background"]').is(':checked');
-        fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
-        val = true;
         if(!val){
-            fieldset.hide();
             css['background'] = 'none';
         }else{
+            
+            //colors for text and bg
+            val = cont.find('select[name="bgColor"]').val();
+            if(val!=''){
+                bsClasses.push(val);
+            }
+            val = cont.find('select[name="textColor"]').val();
+            if(val!=''){
+                bsClasses.push(val);
+            }
 
-            fieldset.css('display','table-row');
-            val = cont.find('input[name="background-color"]').val();
-            if(val) css['background-color'] = val;
+            //val = cont.find('input[name="background-color"]').val();
+            //if(val) css['background-color'] = val;
 
             val = cont.find('input[name="background-image"]').val();
             if(val){
@@ -686,7 +679,38 @@ console.log('>>>', etype);
                 css['background-size'] = val;  
             } 
         }
-
+        
+// MARGINS  get values from UI -----------------
+        let isSync = cont.find('input.cb_sync[data-type="padding"]').is(':checked');
+        if(isSync){
+            const val = cont.find('input[name^="bsMargin-ps"]').val();    
+            if(val>0) bsClasses.push('p-'+val);
+        }else{
+            cont.find('input[name^="bsMargin-p"]').each((i,item)=>{
+                item = $(item);
+                if(item.val()>0){
+                    let cls = item.attr('name').split('-');
+                    cls = cls[1]+'-'+item.val();
+                    bsClasses.push(cls);
+                }
+            });
+        }
+        
+        isSync = cont.find('input.cb_sync[data-type="margin"]').is(':checked');
+        if(isSync){
+            const val = cont.find('input[name^="bsMargin-ms"]').val();    
+            if(val>0) bsClasses.push('m-'+val);
+        }else{
+            cont.find('input[name^="bsMargin-m"]').each((i,item)=>{
+                item = $(item);
+                if(item.val()>0){
+                    let cls = item.attr('name').split('-');
+                    cls = cls[1]+'-'+item.val();
+                    bsClasses.push(cls);
+                }
+            });
+        }
+                
 //------------------------------------------------        
 
         function __setDim(name){
@@ -703,20 +727,6 @@ console.log('>>>', etype);
         __setDim('width');
         __setDim('height');
 
-        if(margin_mode_full){
-            __setDim('margin-left');
-            __setDim('margin-top');
-            __setDim('margin-bottom');
-            __setDim('margin-right');
-            __setDim('padding-left');
-            __setDim('padding-top');
-            __setDim('padding-bottom');
-            __setDim('padding-right');
-        }else{
-            __setDim('margin');
-            __setDim('padding');
-        }
-
         if(l_cfg.css){
             let old_css = l_cfg.css;
             //remove these parameters from css and assign from form
@@ -724,7 +734,7 @@ console.log('>>>', etype);
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
                 'background','background-image','bg-image','background-repeat','background-position','background-size',
-                //'border-width','border-color','border-style',
+                'border','border-width','border-color','border-style','border-radius','--bs-border-style',
                 'flex-direction','flex-wrap','justify-content','align-items','align-content'];
             for(let i=0; i<params.length; i++){
                 let prm = params[i];
@@ -802,19 +812,17 @@ console.log( 'assign', css );
         
         let type = $(event.target).attr('data-type');
         
-        if($(event.target).is(':checked')){
-            
-            //disable
-            
-            
+        const namePrefix = 'bsMargin-'+(type=='margin'?'m':'p');
+        
+        if($(event.target).is(':checked')){ //synched
 
-            $container.find('input[name^="'+type+'-"]').prop('readonly',true);
-            $container.find('input[name^="'+type+'-left"]').removeProp('readonly');
+            $container.find('input[name^="'+namePrefix+'"]').attr('readonly',true);
+            $container.find('input[name="'+namePrefix+'s"]').removeAttr('readonly');
             
-            _onMarginSyncVal(null, type)
+            _onMarginSyncVal(null, type);
             
         }else{
-            $container.find('input[name^="'+type+'-"]').removeProp('readonly');
+            $container.find('input[name^="'+namePrefix+'"]').removeAttr('readonly');
             
         }       
     }
@@ -826,34 +834,18 @@ console.log( 'assign', css );
         
         if(!type){
             type = $(event.target).attr('name');
-            type = type.substr(0,type.indexOf('-'));
+            type = type.indexOf('bsMargin-m')?'margin':'padding';
         }
         
-        if($container.find('.cb_sync[data-type="'+type+'"]').is(':checked')){
+        if($container.find('input.cb_sync[data-type="'+type+'"]').is(':checked')){
+                type = 'bsMargin-'+(type=='margin'?'m':'p');
         
-                let val = $container.find('input[name="'+type+'-left"]').val();
-                $container.find('input[name="'+type+'-top"]').val(val);
-                $container.find('input[name="'+type+'-bottom"]').val(val);
-                $container.find('input[name="'+type+'-right"]').val(val);
-                _getCss();
+                let val = $container.find('input[name="'+type+'s"]').val();
+                $container.find('input[name="'+type+'-t"]').val(val);
+                $container.find('input[name="'+type+'-b"]').val(val);
+                $container.find('input[name="'+type+'-e"]').val(val);
         }
-    }
-
-    //
-    //
-    //
-    function _onMarginMode(){
-        let cont = $container;
-        let btn = cont.find('.margin-mode').hide();
-        if(margin_mode_full){
-            btn.text('short');
-            cont.find('.margin-short').hide();
-            cont.find('.margin-full').css({display: 'inline-block'});
-        }else{
-            btn.text('full');
-            cont.find('.margin-short').show();
-            cont.find('.margin-full').hide();
-        }
+        _getCss();
     }
 
     //
@@ -879,8 +871,6 @@ console.log( 'assign', css );
                 border_styles.push($(this).val());
             });
             
-console.log('_assignCssTextArea');  
-
             s = [];
             for(const [style, value] of Object.entries(l_cfg.css)){
 
@@ -974,6 +964,9 @@ console.log('_assignCssTextArea');
                 l_cfg.bsClasses = l_cfg.bsClasses.join(' ').trim();
             }
             
+            let hasBorder = false;
+            let hasBackground = false;
+            
             if(l_cfg.bsClasses){
                 let borderClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'border');
                 
@@ -994,20 +987,45 @@ console.log('_assignCssTextArea');
                     }
                     
                     //cont.find('#bsBorder-color').hSelect('refresh')
-                    
+                    hasBorder = cont.find('#bsBorder-style').val()!='none';
                 }
                 
                 const roundedClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'rounded') || 'rounded-0';
+                hasBorder = hasBorder || roundedClass!='rounded-0';
                 cont.find('#bsBorder-radius').val(roundedClass.substring(8));
                     
                 const shadowClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'shadow') || 'none';
+                hasBorder = hasBorder || shadowClass!='none';
                 cont.find('#bsBorder-shadow').val(shadowClass);
 
                 const bgColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'bg-');
+                hasBackground = (bgColorClass!='');
                 cont.find('select[name="bgColor"]').val(bgColorClass);
 
                 const textColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'text-');
+                hasBackground = hasBackground || (textColorClass!='');
                 cont.find('select[name="textColor"]').val(textColorClass);
+                
+                function __setMargins(type, classes){
+                    let marginClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, classes);
+                    if(marginClasses=='') return;
+                    
+                    let isSync = false;
+                    marginClasses = marginClasses.split(' ');
+                    for(const cls of marginClasses){
+                        let [key, val] = cls.split('-');
+                        if(key=='m' || key=='p'){
+                            key = key+'s';
+                            isSync = true;
+                        }
+                        cont.find('input[name="bsMargin-'+key+'"]').val(val);
+                    }
+                    cont.find('input.cb_sync[data-type="'+type+'"]').attr('checked', isSync);
+                }
+                
+                
+                __setMargins('margin', ['m-','ms-','me-','mt-','mb-']);
+                __setMargins('padding', ['p-','ps-','pe-','pt-','pb-']);
                 
                 cont.find('select[data-type="bs"]').hSelect('refresh');
             }
@@ -1025,6 +1043,8 @@ console.log('_assignCssTextArea');
                     .css({'font-size':'0.7em'})
                     .on('click',_clearBgImage);
             
+            
+            
 
             //assign flex css parameters
             let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
@@ -1034,28 +1054,36 @@ console.log('_assignCssTextArea');
             }
 
             let no_margin_values = true, mode_full = false;    
+            
+            cont.find('input[name="background"]').attr('checked', hasBackground );
+            cont.find('input[name="border"]').attr('checked', hasBorder );
 
             //assign other css parameters for all elements with data-type="css"
             cont.find('[data-type="css"]').each(function(i,item){
                 let key = $(item).attr('name');
                 let val = l_cfg.css[key];
-                if(key=='background'){
-                    $(item).prop('checked', val='none');
-                }else if(val){
-                    $(item).val($(item).attr('type')=='number'?parseInt(val):val);
-                }
-                
-                if(!mode_full && !window.hWin.HEURIST4.util.isempty(val)){
-                    if(key.indexOf('padding')===0 || 
-                       key.indexOf('margin')===0){
-                           
-                       no_margin_values = false;
-                           
-                       mode_full = (key.indexOf('-') > 0);    
+                if(!window.hWin.HEURIST4.util.isempty(val)){
+                    
+                    if(key=='background'){
+                        $(item).attr('checked', val!='none');
+                    }else if(key=='border'){
+                        $(item).attr('checked', val!='none');
+                    }else{
+                        $(item).val($(item).attr('type')=='number'?parseInt(val):val);
                     }
+                    /* old version
+                    if(!mode_full){
+                        if(key.indexOf('padding')===0 || 
+                           key.indexOf('margin')===0){
+                               
+                           no_margin_values = false;
+                               
+                           mode_full = (key.indexOf('-') > 0);    
+                        }
+                    }
+                    */
                 }
             });
-            margin_mode_full = true;
             
             //init color pickers
             cont.find('input[name$="-color"]').colorpicker({
@@ -1063,27 +1091,6 @@ console.log('_assignCssTextArea');
                 showOn: "both"});//,val:value
             cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
 
-            //old border set            
-            /* disabled - old boder set
-            let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
-            if(cont.find('#border-style').val()=='none'){
-                fieldset.hide();
-            }else{
-                fieldset.css('display','table-row');
-                fieldset.find('[name="border-color"]').trigger('keyup'); // trigger colour change
-            }
-            if(cont.find('#border-style').hSelect('instance') !== undefined){ // update border style dropdown
-                cont.find('#border-style').hSelect('refresh');
-            }
-            fieldset = cont.find('fieldset[data-section="background"] > div:not(:first)');
-            if(cont.find('input[name="background"]').is(':checked')){
-                fieldset.css('display','table-row');
-            }else{
-                fieldset.hide();
-            }
-            */
-            
-            _onMarginMode();
     }
 
     

@@ -2673,7 +2673,6 @@ window.hWin.HEURIST4.ui = {
         if(params.length>0){
             surl += '?'+params.join('&');    
         }
-console.log(surl);        
         return surl;
     },
 
@@ -3498,7 +3497,6 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     },
 
     _renderMenu: function( ul, items ) {
-
         this._super(ul, items);
 
         if(this.options.groupings){
