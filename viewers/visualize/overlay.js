@@ -526,7 +526,6 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     return {my: "left top", at: "right+5 top", of: ui.target};
                 },
                 menu: [
-                    {title: 'Show record viewer', cmd: 'viewer', data: {id: data[0].id, name: data[0].name}},
                     {title: 'Get all linked and related records', cmd: 'links', data: {id: data[0].id}},
                     {title: 'Get Relationship markers:', isHeader: true},
                     {title: 'Related To', cmd: 'related_to', data: {id: data[0].id}},

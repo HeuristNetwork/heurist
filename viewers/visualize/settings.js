@@ -40,7 +40,7 @@ function getURL() {
  * Returns a setting from the localStorage
  * @param setting The setting to retrieve
  */
-function getSetting(key, defvalue) {
+function getSetting(key, defvalue, split_string = '') {
 
     let value = '';
 
@@ -62,11 +62,15 @@ function getSetting(key, defvalue) {
         value = localStorage.getItem(window.hWin.HAPI4.database+key);
     }
 
-    if (   //(isNaN(value) && window.hWin.HEURIST4.util.isNumber(defvalue)) ||   //!isNaN(parseFloat(n)) && isFinite(n)
-        (window.hWin.HEURIST4.util.isnull(value) && !window.hWin.HEURIST4.util.isnull(defvalue))){
+    if(window.hWin.HEURIST4.util.isempty(value) && !window.hWin.HEURIST4.util.isnull(defvalue)){
         value = defvalue;
         putSetting(key, value);
     }
+
+    if(!window.hWin.HEURIST4.util.isempty(split_string) && typeof value === 'string'){
+        value = value.split(split_string);
+    }
+
     return value;
 }
 

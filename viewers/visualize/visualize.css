@@ -211,10 +211,9 @@ text.shadow {
   #iframeDiv {
     display: none;
     position: absolute;
-    right: 16px;
-    bottom: 0px;
+    right: 10px;
+    top: 3.5em;
     width: 30%;
-    height: 40%;
     min-width: 380px;
     min-height: 330px;
     max-width: 380px;
@@ -294,7 +293,7 @@ text.shadow {
 .dropdown-content2, 
 .dropdown-content3 {
     padding: 5px;
-    margin-top: 10px;
+    margin-top: 5px;
     display: none;
     position: relative;
     background-color: #f1f1f1;

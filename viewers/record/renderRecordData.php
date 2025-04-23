@@ -2178,7 +2178,7 @@ function print_public_details($bib) {
                 print "<h5 style='margin-block:0.5em;'>MEDIA $media_control_chkbx</h5>";
             }
 
-            if($thumb['player'] && !$is_map_popup){
+            if($thumb['player'] && ($noclutter || !$is_map_popup)){
 
                 if($isAudioVideo){
                     //audio or video is maximized at once
@@ -2198,13 +2198,13 @@ function print_public_details($bib) {
                 }
             }else{  //for usual image
                 print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .(($is_map_popup || $without_header)
+                    .($is_map_popup || $without_header
                         ?''
                         :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print DIV_E;
             print '</div><!--CLOSE THUMB SECTION-->';
-            if($is_map_popup){
+            if(!$noclutter && $is_map_popup){
                 print '<br>';
                 break; //in map popup show the only thumbnail
             }

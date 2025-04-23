@@ -174,11 +174,22 @@ function showNodeInformation(d){
         return;
     }
 
+    let $iframeDiv = $('#iframeDiv');
     let iframeDiv = window.d3.select("#iframeDiv");//select the parent div
     let infoBox = window.d3.select("#iframeInfo");//select the iframe
 
     if(iframeDiv.length == 0 || infoBox.length == 0){
         return;
+    }
+
+    if($iframeDiv.resizable('instance') === undefined){ // setup resizing
+        $iframeDiv.resizable({
+            maxHeight: 400,
+            minHeight: 250,
+            resize: (event, ui) => {
+                infoBox[0][0].style.height = `${$iframeDiv.height()}px`;
+            }
+        });
     }
 
     iframeDiv.style("display", "block");// make iframe visible
@@ -196,7 +207,24 @@ function showNodeInformation(d){
            .attr("recid", d.id)
            .attr("data-recid", d.id)
            .on('load', () => {
+
                 window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+
+                let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
+                viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
+                let height = infoBox[0][0].contentWindow.document.body.scrollHeight;
+
+                if(height <= 0 || height >= viewMaxHeight){
+                    height = viewMaxHeight
+                }else{
+                    height += 15;
+                }
+
+                infoBox[0][0].style.height = `${height}px`;
+
+                iframeDiv[0][0].style.maxHeight = `${height}px`;
+                iframeDiv[0][0].style.height = `${height}px`;
+                $iframeDiv.resizable('option', 'maxHeight', height);
            });//supply document to iframe
 
     // Remove block after 5 seconds
