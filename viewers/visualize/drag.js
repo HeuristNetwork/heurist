@@ -150,89 +150,147 @@ function addNodes() {
               }
               return false;
           })    
-         .on("click", function(d) {
-             
-            closeRectypeSelector();
-            // Check if it's not a click after dragging
-            if(!window.d3.event.defaultPrevented) {
-                // Load record details
-                showNodeInformation(d);//Added by ISH
-            }
-         })
+         .on("click", onNodeClick)
+         .on("contextmenu", onNodeClick)
          .call(drag);
 
      });            
      return nodes;
 }
 
-/*Shows the record details in an iframe when a node is clicked
-  Added by "ISH"
-*/
+function onNodeClick(d){
+
+    closeRectypeSelector();
+    // Check if it's not a click after dragging
+    if(!window.d3.event.defaultPrevented) {
+        // Load record details
+        showNodeInformation(d);//Added by ISH
+    }
+}
+
+/**
+ * Shows the record details in an iframe when a node is clicked
+ *
+ * @param {Object} d node data object from d3
+ */
 function showNodeInformation(d){
 
-    if(settings.isDatabaseStructure){
+    let $infoDiv = $('#infoDiv');
+    let infoDiv = window.d3.select("#infoDiv"); // select the parent div
+    let infoFrame = window.d3.select("#infoIframe"); // select the iframe
+    let infoBox = window.d3.select("#infoBox"); // select the info box
+
+    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0){
         return;
     }
 
-    let $iframeDiv = $('#iframeDiv');
-    let iframeDiv = window.d3.select("#iframeDiv");//select the parent div
-    let infoBox = window.d3.select("#iframeInfo");//select the iframe
-
-    if(iframeDiv.length == 0 || infoBox.length == 0){
-        return;
-    }
-
-    if($iframeDiv.resizable('instance') === undefined){ // setup resizing
-        $iframeDiv.resizable({
+    if($infoDiv.resizable('instance') === undefined){ // setup resizing
+        $infoDiv.resizable({
             maxHeight: 400,
-            minHeight: 250,
+            minHeight: settings.isDatabaseStructure ? 150 : 300,
             resize: (event, ui) => {
-                infoBox[0][0].style.height = `${$iframeDiv.height()}px`;
-            }
+                infoFrame.style('height', `${$infoDiv.height()}px`);
+                infoBox.style('height', `${$infoDiv.height()}px`);
+            },
+            handles: 's'
         });
     }
 
-    iframeDiv.style("display", "block");// make iframe visible
+    infoDiv.style("display", "block"); // make info div visible
 
-    if(infoBox.attr("recid") == d.id){ // block retrival of last record in quick succession
-        return;
+    function displayRecordViewer(){
+
+        $('.iframeControls').show();
+        infoFrame.style('display', 'inline');
+        infoBox.style('display', 'none');
+
+        if(infoFrame.attr("data-hid") == d.id){ // block retrival of last record in quick succession
+            return;
+        }
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
+            'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
+    
+        const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${d.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
+
+        infoFrame.attr("src", srcURL)
+                 .attr("data-hid", d.id)
+                 .on('load', () => {
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+
+                    let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
+                    viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
+
+                    let height = infoFrame.node().contentWindow.document.body.scrollHeight;
+                    height += 15;
+
+                    if(height <= 100 || height >= viewMaxHeight){
+                        height = viewMaxHeight
+                    }
+
+                    infoFrame.style('height', `${height}px`);
+
+                    infoDiv.style('max-height', `${height}px`);
+                    infoDiv.style('height', `${height}px`);
+                    $infoDiv.resizable('option', 'maxHeight', height);
+                 });//supply document to iframe
     }
 
-    window.hWin.HEURIST4.msg.bringCoverallToFront(iframeDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
-        'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
+    function displayRecTypeInfo(){
 
-    const srcURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?noclutter=1&recID=' 
-                + d.id + '&db=' + window.hWin.HAPI4.database;//URL for source of information iframe
-    infoBox.attr("src", srcURL)
-           .attr("recid", d.id)
-           .attr("data-recid", d.id)
-           .on('load', () => {
+        $('.iframeControls').hide();
+        $('#btnCtrlClose').show();
+        infoFrame.style('display', 'none');
+        infoBox.style('display', 'block');
 
-                window.hWin.HEURIST4.msg.sendCoverallToBack(true);
-
-                let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
-                viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
-                let height = infoBox[0][0].contentWindow.document.body.scrollHeight;
-
-                if(height <= 0 || height >= viewMaxHeight){
-                    height = viewMaxHeight
-                }else{
-                    height += 15;
-                }
-
-                infoBox[0][0].style.height = `${height}px`;
-
-                iframeDiv[0][0].style.maxHeight = `${height}px`;
-                iframeDiv[0][0].style.height = `${height}px`;
-                $iframeDiv.resizable('option', 'maxHeight', height);
-           });//supply document to iframe
-
-    // Remove block after 5 seconds
-    setTimeout((id) => {
-        if(infoBox.attr("recid") == id){
-            infoBox.attr("recid", "");
+        if(infoBox.attr("data-hid") == d.id){ // block retrival of last record in quick succession
+            return;
         }
-    }, 5000, d.id);
+
+        let recType = $Db.rty(d.id);
+
+        let icon_URL = window.hWin.HAPI4.getImageUrl('rty', recType.rty_ID, 'thumb', 2, window.hWin.HAPI4.database);
+        let rty_Icon = `<img
+        height="25" width="25"
+        src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif"
+        class="rt-icon"
+        style="background-image: url(&quot;${icon_URL}&quot;);" />`;
+
+        let rectypeDetails = `<br>
+        ${rty_Icon}<br><br>
+        <strong>ID</strong>: ${recType.rty_ID}<br>
+        <strong>Name</strong>: ${recType.rty_Name}<br>
+        <strong>Count</strong>: ${recType.rty_RecCount}<br>
+        <strong>Description</strong>:<br>${recType.rty_Description}<br>
+        `;
+
+        infoBox.attr('data-hid', d.id)
+               .html(rectypeDetails);
+
+        let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
+        viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
+
+        let height = infoBox.node().scrollHeight;
+        height += 15;
+
+        if(height <= 100 || height >= viewMaxHeight){
+            height = viewMaxHeight
+        }
+
+        infoBox.style('height', `${height}px`);
+
+        infoDiv.style('max-height', `${height}px`);
+        infoDiv.style('height', `${height}px`);
+        $infoDiv.resizable('option', 'maxHeight', height);
+    }
+
+    if(settings.isDatabaseStructure){
+        displayRecTypeInfo();
+    }else{
+        displayRecordViewer();
+    }
+
 }
 
 /*Hides record details shown by showNodeInformation
@@ -241,11 +299,11 @@ function showNodeInformation(d){
 function handleNodeAction(action = 'close'){
 
     if(action == 'close'){
-        window.d3.select('#iframeDiv').style('display', 'none');//close the box when clicked 
+        window.d3.select('#infoDiv').style('display', 'none');//close the box when clicked 
         return;
     }
 
-    let rec_ID = window.d3.select('#iframeInfo').attr('data-recid');
+    let rec_ID = window.d3.select('#infoIframe').attr('data-hid');
     let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
 
     action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');

@@ -208,16 +208,14 @@ text.shadow {
 
 /**Node information iframe
   *ADDED BY ISH */
-  #iframeDiv {
+  #infoDiv {
     display: none;
     position: absolute;
     right: 10px;
     top: 3.5em;
     width: 30%;
     min-width: 380px;
-    min-height: 330px;
     max-width: 380px;
-    max-height: 350px;
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 }
 
