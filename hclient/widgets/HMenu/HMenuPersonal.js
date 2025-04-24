@@ -13,11 +13,23 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
 
     // default options
     options: {
-        resourcePath: 'hclient/widgets/HMenu/HMenuPersonal',
+        isMenuMode: false, //if false - button mode
+        resourcePath: 'hclient/widgets/HMenu/HPersonalMenu',
     },
     
     _needLoadContent: true,
     _needLoadCss: false,
+    
+    _init: function() {
+        
+        if(this.options.isMenuMode){
+            this.options.resourcePath = 'hclient/widgets/HMenu/HPersonalMenu';
+        }else{
+            this.options.resourcePath = 'hclient/widgets/HMenu/HPersonalBtn';
+        }
+        
+        this._super();
+    },
     
     /**
      * Initializes UI controls and event listeners after content is loaded.

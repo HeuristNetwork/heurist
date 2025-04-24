@@ -263,7 +263,10 @@ class WebSite {
         if (options.newlycreated) {
             sURL = sURL + '&newlycreated';
         }
-        window.open(sURL);
+        
+        window.location.replace(sURL);
+        
+        //window.open(sURL);
         
     }
     
