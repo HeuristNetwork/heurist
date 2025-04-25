@@ -577,11 +577,22 @@ window.hWin.HEURIST4.query = {
 
     stringQueryToPlainText: function(query){
 
+        const getSubquery = /\(([^[\)])*\)/g;
+        const removeParenthesis = /(?:^[\s\(]+)|(?:[\s\)]+$)/g;
+
         query = typeof query === 'string' ? query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
-        let is_invalid = typeof query !== 'string' || /^[^\w\d]/.exec(query) !== null;
+        let is_invalid = typeof query !== 'string' || query === '' || /^[^\w\d]/.exec(query) !== null;
 
         if(window.hWin.HEURIST4.util.isJSON(query) || is_invalid){
             return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
+        }
+
+        let subqueries = [...query.matchAll(getSubquery)];
+        for(let subquery of subqueries){
+
+            subquery = subquery.replaceAll(removeParenthesis, '');
+
+            subquery = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
         }
 
         let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract via spaces, not within double quotes
@@ -597,8 +608,6 @@ window.hWin.HEURIST4.query = {
             let pieces = part[0].split(':');
             if(pieces.length == 2){
                 json_query.push({ [pieces[0]]: pieces[1] });
-                continue;
-            }else if(pieces.length == 1){
                 continue;
             }
 
@@ -617,6 +626,7 @@ window.hWin.HEURIST4.query = {
 
     jsonQueryToPlainText: function(query, is_sub_query = false, use_or = false){
 
+        const commaListRegex = /^\d+(?:,\d+)*$/;
         let plain_text = '';
         if(window.hWin.HEURIST4.util.isempty(query) || !window.hWin.HEURIST4.util.isJSON(query)){
             return window.hWin.HEURIST4.util.isempty(query) ? plain_text : window.hWin.HEURIST4.query.stringQueryToPlainText(query);
@@ -630,8 +640,8 @@ window.hWin.HEURIST4.query = {
 
         function handleRectype(rty_IDs){
 
-            if(rty_IDs.match(/\d, ?\d/)){
-                rty_IDs = window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) ? [rty_IDs] : rty_IDs.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id) && id > 0);
+            if(window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) || ( typeof rty_IDs === 'string' && commaListRegex.exec(rty_IDs) )){
+                rty_IDs = window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) ? [rty_IDs] : rty_IDs.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
             }else{
                 rty_IDs = [rty_IDs];
             }
@@ -669,7 +679,7 @@ window.hWin.HEURIST4.query = {
             if(key === 'r' && !field){ // Relation type field handling
 
                 let cond = value.startsWith('-') ? 'not' : '';
-                if(window.hWin.HEURIST4.util.isPositiveInt(value) || value.match(/\d, ?\d/)){
+                if(window.hWin.HEURIST4.util.isPositiveInt(value) || commaListRegex.exec(value)){
                     value = value.split(',');
                     value = value.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
                     value = value.map((id) => $Db.trm(id, 'trm_Label'));
@@ -683,10 +693,17 @@ window.hWin.HEURIST4.query = {
 
             if(key.startsWith('link') || key.startsWith('related')){ // linked_to,linkedfrom,related_to,relatedfrom,links
 
-                let sub_query = window.hWin.HEURIST4.query.jsonQueryToPlainText(value, true) ?? 'Missing sub query';
                 let linking = key.indexOf('link') >= 0 ? 'Linked' : 'Related';
                 let direction = key.indexOf('from') >= 0 ? 'from' : 'to';
-                conditional = `<br>Search ${linking} Records ${direction} ${field}:<br><div style="padding:5px;">${sub_query}</div>`;
+
+                if(window.hWin.HEURIST4.util.isPositiveInt(value) || ( typeof value === 'string' && commaListRegex.exec(value) )){
+                    let recIDs = window.hWin.HEURIST4.util.isPositiveInt(value) ? value : value.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id)).join(',');
+                    conditional = `<br>Search for ${linking} Records ${direction} record ID: ${recIDs}`;
+                }else{
+                    let sub_query = window.hWin.HEURIST4.query.jsonQueryToPlainText(value, true) ?? 'Missing sub query';
+                    conditional = `<br>Search ${linking} Records ${direction} ${field}:<br><div style="padding:5px;">${sub_query}</div>`;
+                }
+
                 field = '';
             }
 
@@ -768,7 +785,7 @@ window.hWin.HEURIST4.query = {
                     break;
                 case 'user':
                     value = value.split(',');
-                    value = value.length == 0 || value[0] == '' ? ' User' : `: "${value.filter((usr_ID) => window.hWin.HEURIST4.util.isPositiveInt(usr_ID)).join(' | ')}"`;
+                    value = value.length == 0 || value[0] == '' ? ' User' : `: "${value.filter((usr_ID) => window.hWin.HEURIST4.util.isPositiveInt(usr_ID)).join(',')}"`;
                     cond = `Records Bookmarked by${value}`;
                     break;
                 case 'before':
@@ -793,6 +810,9 @@ window.hWin.HEURIST4.query = {
                 case 'all':
                 case 'any':
                     handleAnyAll(field_key, value);
+                    break;
+                case 'plain':
+                    cond = window.hWin.HEURIST4.query.stringQueryToPlainText(value);
                     break;
 
                 default:
@@ -855,13 +875,14 @@ window.hWin.HEURIST4.query = {
 
     extractCondition: function(value, type){
 
+        const commaListRegex = /^\d+(?:,\d+)*$/;
         let res = '';
 
         if(typeof value !== 'string' && typeof value !== 'number'){
             return res;
         }
 
-        if(type === 'enum' && (window.hWin.HEURIST4.util.isPositiveInt(value) || value.match(/\d, ?\d/))){
+        if(type === 'enum' && (window.hWin.HEURIST4.util.isPositiveInt(value) || ( typeof value === 'string' && commaListRegex.exec(value) ))){
 
             value = value.split(',');
             value = value.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
