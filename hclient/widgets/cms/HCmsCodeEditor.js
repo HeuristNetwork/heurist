@@ -17,7 +17,7 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
             width: 800,
             height: 600,
             default_palette_class: 'ui-heurist-publish',
-            
+            helpContent: null,
             keepInstance:true
     },
     
@@ -147,6 +147,8 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
                     
                     that.codeEditor.focus()
                 },500);
+                
+        this.ce_container.find('.CodeMirror').css('height','100%');
     },
     
     

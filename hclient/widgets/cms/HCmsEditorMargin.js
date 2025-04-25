@@ -190,7 +190,8 @@ console.log('create HCmsEditorMargin');
                         }); 
                         
       let codeEditor = cont.find('#codemirror-container').HCmsCodeEditor({title:this.isHeader?'Page Header':'Page Footer',
-                                                                          onClose:(context)=>that.onCodeEditorApply(context)});
+                                                                          onClose:(context)=>that.onCodeEditorApply(context),
+                                                                          helpContent: 'website_header_footer.htm'});
       
       cont.find('div.btn-html-edit').button().on('click', function(){
                 if(!that.newContent){ //not defined
@@ -254,8 +255,6 @@ console.log('create HCmsEditorMargin');
   * Load raw template and update header/footer on template selection
   */  
   #getTemplateContent(templateName, callback){
-      
-console.log('#getTemplateContent');      
       
         let request = {website:this.siteId, raw:1, ver:3};
         request[this.isHeader?'header':'footer'] = templateName;

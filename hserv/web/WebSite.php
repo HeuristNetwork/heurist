@@ -537,11 +537,10 @@ class WebSite
                 .' at: &nbsp;<img src="'.$host_logo.'" height="32" align="center"></a>';
         }
             
-        /*
-        if(!$header_tpl['logo_alt'] && $header_tpl['logo']){
-            $header_tpl['logo_alt'] = $header_tpl['logo'];
+        
+        if(!$header_tpl['logoAlt']){
+            $header_tpl['logoAlt'] = ASSETS_URL.'16x16.gif';
         }
-        */
             
 
         $values_to_replace = array_map(function ($v) {

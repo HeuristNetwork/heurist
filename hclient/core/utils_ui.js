@@ -1578,7 +1578,7 @@ window.hWin.HEURIST4.ui = {
                                         }
                                     
                                         $helper_div.dialog('option','title', options.title);
-                                        $helper_div.dialog('option', {width:div_width, height: 'auto', position: divpos});
+                                        $helper_div.dialog('option', {width:div_width, height: 500, position: divpos});
                                         $helper_div.dialog( "open" );
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);

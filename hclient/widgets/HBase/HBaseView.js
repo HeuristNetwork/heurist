@@ -35,7 +35,8 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
         position: null,
         modal: true,
         title: '',
-
+        helpContent: null,
+        
         // Visibility toggles
         isTitleVisible: false, // Hide title
         isHeaderVisible: true,  // Show header as a top panel
@@ -287,6 +288,12 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
                 this.element.addClass('ui-heurist-bg-light');
             }
 
+            if(this.options.helpContent){
+                const helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this.jqDialog, null, helpURL, false);    
+            }
+            
+            
             /* TBD
             if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
 
