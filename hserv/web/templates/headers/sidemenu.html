@@ -4,7 +4,7 @@
     <div data-heurist-cms="HMenuPersonal" style="position:fixed;right:10px;z-index:9999"></div>                
 
     <nav class="navbar nabvar-light container-fluid justify-content-start" style="z-index:9999;background-image: url(&quot;{$website.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">
-            <button class="navbar navbar-toggler mx-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#main-header" focusable="false">
+            <button class="navbar navbar-toggler mx-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#main-sidemenu" focusable="false">
                 <span class="navbar-toggler-icon" style="font-size:0.8rem"></span>
             </button>
             <div class="d-flex align-items-center">
@@ -14,27 +14,9 @@
             </div>
     </nav>
 
-    <div class="bg-info-subtle offcanvas offcanvas-start" style="border:none;padding-top:3rem" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="main-header">
+    <div class="bg-info-subtle offcanvas offcanvas-start" style="border:none;padding-top:3rem" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="main-sidemenu">
     
         <navbar class="navbar nabvar-light p-3">
-<!--
-            <div class="container-fluid">
-            
-            <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas" aria-label="Close" focusable="false">
-                <span class="ui-icon ui-icon-carat-2-w"></span>
-            </button>
-            <div class="d-flex align-items-center">
-                <img src="{$website.logo_small}" alt="Logo" height="20" class="me-2 d-block d-md-none">
-                <img src="{$website.logo}" alt="Logo" height="40" class="me-2 d-none d-md-block">
-                <div class="h5 mb-0">{$website.title}</div>
-            </div>
-
-            <div id="main-navbar" class="justify-content-end">
-            </div>
-            
-            </div>
--->            
-             
 
                 <!-- main menu -->
                 <div id="main-menu" data-heurist-cms="HMenu">{$website.navbar}</div>

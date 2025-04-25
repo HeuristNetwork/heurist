@@ -28,6 +28,12 @@ class WebSite {
 
     // {siteId:siteId, pageId:pageId, siteMenu:menuContentJSON}
     constructor(_options) {
+        
+        //set global constants
+        window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+        window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        
 
         this.siteId = _options.siteId;
         this.pageId = _options.pageId;
@@ -68,13 +74,10 @@ class WebSite {
         
         const supp_options = options.supp_options; //additiona init options for widgets
         
-        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-        const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-        
         const server_request = {
                         q: 'ids:'+options.pageId,
                         restapi: 1,
-                        columns: ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
+                        columns: ['rec_ID', window.hWin.DT_NAME, window.hWin.DT_EXTENDED_DESCRIPTION],
                         zip: 1,
                         format:'json'};
                         
@@ -140,8 +143,7 @@ class WebSite {
             return;
         }
 
-        const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-        let content = window.hWin.HAPI4.getTranslation( record[DT_EXTENDED_DESCRIPTION], null );
+        let content = window.hWin.HAPI4.getTranslation( record[window.hWin.DT_EXTENDED_DESCRIPTION], null );
         const supp_options = {};
         const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, pageElement, supp_options );
 
@@ -205,9 +207,8 @@ class WebSite {
     */
     #assignPageTitle(){
         
-        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-        if(this.currentPageRec && !window.hWin.HEURIST4.util.isempty(this.currentPageRec[DT_NAME])){
-            let pagetitle = window.hWin.HAPI4.getTranslation(this.currentPageRec[DT_NAME], this.current_language);
+        if(this.currentPageRec && !window.hWin.HEURIST4.util.isempty(this.currentPageRec[window.hWin.DT_NAME])){
+            let pagetitle = window.hWin.HAPI4.getTranslation(this.currentPageRec[window.hWin.DT_NAME], this.current_language);
             pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         }
         //TBD
@@ -250,7 +251,7 @@ class WebSite {
     /**
     * Reload page to open CMS editor
     */
-    editPage(options){
+    openPageEditor(options){
         
         if(!options){
             //edit=3 loads WebSiteEditor and then website in iframe 
@@ -269,6 +270,14 @@ class WebSite {
         //window.open(sURL);
         
     }
+    
+    closePageEditor(options){
+        if(window.parent){
+            let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, pageid:this.pageId});
+            window.parent.location.replace(sURL);
+        }
+    }
+
     
     /*
     * Reloads header or footer separately with default or given template

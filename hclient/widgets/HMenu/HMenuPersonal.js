@@ -42,6 +42,17 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
       
         this._$('button[data-heurist-action="menu-profile-admin"]').attr('href',
                       window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database);
+                      
+        const isEdit = window.parent?.cmsEditor!=null;
+        const sLabel = window.HR(isEdit?'Close editor':'Website editor');
+            
+        let btn = this._$('button[data-heurist-action="menu-cms-edit"] > span');
+        if(btn.length>1){
+            $(btn[0]).addClass('ui-icon-'+isEdit?'close':'pencil').removeClass('ui-icon-'+isEdit?'pencil':'close');
+            btn[1].innerText = sLabel;
+        }else{
+            this._$('a[data-heurist-action="menu-cms-edit"]').text(sLabel);
+        }
         
         this.onChangeCredentials();
     },
@@ -73,7 +84,11 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
         let ele = this.getUiEle(event, ui);
         let action_id = ele.attr('data-heurist-action');
         if(action_id=='menu-cms-edit'){
-            window.hWin.webSite.editPage();
+            if(window.parent?.cmsEditor){
+                window.hWin.webSite.closePageEditor();
+            }else{
+                window.hWin.webSite.openPageEditor();
+            }
             return;
         }
         
