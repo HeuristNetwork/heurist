@@ -589,7 +589,7 @@ console.log('>>>', etype);
             }
             
         }else{
-            css['display'] = 'block';
+            //css['display'] = 'block';
         }
         
 // BORDER  get values from UI -----------------

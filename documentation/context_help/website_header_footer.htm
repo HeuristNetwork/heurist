@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+
+        <title>HEURIST Context Help - Create your website with Heurist</title>
+        <link rel=stylesheet href="../../h4styles.css">
+    </head>
+
+    <body width=600 height=500 class="popup">
+
+        <span style="font-size:1em;font-weight:bold">HEURIST Help</span>
+
+        <h2>Define website header and footer</h2>
+        <hr>
+
+        <h4>Where are configuration settings</h4>
+        
+        <p>In Site menu treeview select Header or Footer items. They are just below "Home page"</p>
+        
+        <h4>Select template</h4>
+
+        <p>First of all you may select the template. There are several ones to choose. Warning if you already modify the header or footer your changes will be lost</p>
+        
+        <h4>Define behaviour</h4>
+
+        <p>Define scroll and visibility behaviour. Your header or footer can be sticked (always visible), scrollable (default option), collapsable or hidden at all</p>
+        
+        <h4>Define styles</h4>
+        
+        <p>You can define the standard set of styles for background, border and margins</p>
+
+        <h4>Define widget options</h4>
+        
+        <p>Header and footer have the default set of widgets: Menu, Personal, Brands. Besides you can add any other widget from Heurist set. Such as Search or Contact Us forms. To change widget appearance and behaviour select it in Page treeview and set options in a form.</p>
+        
+        <h4>Direct edit of content</h4>
+
+        <p>The HTML content can be modified directly. You may define static values for elements (such as website title or background image url). Or these values can be obtained from Website Home record or generated from system settings. The latter approach gives you more flexibility for updating content and a single place to edit many values.</p>
+        <p>The dynamic values in content are defined in Smarty format: {$website.[name of variable]}. Here is the list of available variables:</p>
+        <ul>
+            <li>title - title of website (field# 2-1)</li>
+            <li>titleAlt1 - alternative title of website (3-1009)</li>
+            <li>titleAlt2 - alternative title of website (3-1052)</li>
+            
+            <li>logo - main logo image (2-38)</li>
+            <li>logoAlt - alternative logo (2-926)</li>
+            <li>url     - url of website (home page)</li>
+            <li>urlAlt  - additional url (2-943)</li>
+            
+            <li>bgImage - background (banner) image (99-951)</li>
+            <li>languages - selector with list of languages (2-967)</li>
+            
+            <li>showLogin - returns "block" or "none" to show or hide suppress personal menu widget (login and edit website) (2-1095)</li>
+            <!-- <li>pageTitle - current page title if flag is set (99-952)</li> -->
+            <li>navbar - generates site map - list of links. Use as a content for HMenu widget</li>
+            
+            <li>hostInfo - logo and information of Heurist hosting (defined in system settings)</li>
+            <li>heuristInfo - Heurist logo and info</li>
+        </ul>
+        
+    </body>
+</html>
