@@ -611,6 +611,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                                             $dlg.find('input[name="OwnerUGrpID"]').val(context.OwnerUGrpID);
                                             $dlg.find('input[name="NonOwnerVisibility"]').val(context.NonOwnerVisibility);
                                             __human_readble();
+
+                                            $dlg.find('input[name="RecTypeID"], input[name="OwnerUGrpID"], input[name="NonOwnerVisibility"]').trigger('input');
                                         }
 
                                     },
