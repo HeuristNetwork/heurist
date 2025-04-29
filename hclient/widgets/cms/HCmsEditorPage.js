@@ -152,19 +152,19 @@ class HCmsEditorPage {
                         //update in _layout_content
                         let l_cfg = that.layoutMgr.layoutContentFindElement(that._layout_content, key);
                         if(l_cfg){
-                            let new_content = that.tinymce.activeEditor.getContent();
-                            that.page_was_modified = (that.page_was_modified || l_cfg.content!=new_content);
+                            let newContent = that.tinymce.activeEditor.getContent();
+                            that.page_was_modified = (that.page_was_modified || l_cfg.content!=newContent);
 
                             let lang = $(that.tinymce.activeEditor.targetElm).attr('data-lang');
                             if(lang==that._cmsEditor.default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 lang = '';
                             }
-                            l_cfg['content'+lang] = new_content;    
+                            l_cfg['content'+lang] = newContent;    
                             
                             //update in HCmsEditorElement                            
-                            if(that._cmsEditorElement){
-                                that._cmsEditorElement.updateContent(new_content, lang);
-                            }
+                            that._cmsEditorElement.updateContent(newContent, lang);
+                            
+                            
                         }else{
                             that.page_was_modified = false;
                         }
@@ -397,8 +397,9 @@ class HCmsEditorPage {
   // Closes _cmsEditorElement
   //
   hidePropertyView(){
-
+      
       this._cmsEditorElement = null;
+      
       this.#initTinyMCE();
 
       this._layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
@@ -427,7 +428,7 @@ class HCmsEditorPage {
               this._toolbar_Page.show();
           }else{
               //activate save buttons
-              this._cmsEditorElement.onContentChange();
+              this._cmsEditorElement.onContentChange( true );
           }
 
       }else{
@@ -1293,9 +1294,8 @@ function(value){
         //        'save'  save entire page in db
         //
         if(isRoot){ element_cfg.isPage = true; }
-        this._cmsEditorElement = HCmsEditorElement(element_cfg, 
-                    this._layout_content, this._layout_container, this._panel_propertyView, this,
-        function(new_cfg, mode){
+        
+                function __onSaveElementConfig(new_cfg, mode){
 
                     //save
                     if(new_cfg){
@@ -1320,17 +1320,36 @@ function(value){
                     if(mode!='save'){
                         //close element config
                         that.hidePropertyView();
+
+                        // find all dragable elements - text and widgets
+                        that._layout_container.find('div.brick').each(function(i, item){   //
+                            let ele_ID = $(item).attr('data-hid');
+                            
+                            that.#defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+                        });
+                        
                     }
 
-                    // find all dragable elements - text and widgets
-                    that._layout_container.find('div.brick').each(function(i, item){   //
-                        let ele_ID = $(item).attr('data-hid');
-                        
-                        that.#defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
-                    });
-
                     
-                }, this.page_was_modified );
+                }
+                
+                if(element_cfg.type=='text'){ //new 
+                
+                    this._cmsEditorElement = new HCmsConfig({
+                            cmsEditor: this._cmsEditor,
+                            container: this._panel_propertyView,
+                            onClose: __onSaveElementConfig,
+                            element_cfg: element_cfg,
+                            isModified: this.page_was_modified
+                    });
+                
+                }else{ //old
+                 
+                    this._cmsEditorElement = HCmsEditorElement(element_cfg, 
+                        this._layout_content, this._layout_container, this._panel_propertyView, this, 
+                                __onSaveElementConfig, this.page_was_modified );
+                    
+                }
     }
     
     

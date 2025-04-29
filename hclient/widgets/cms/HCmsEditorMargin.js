@@ -25,8 +25,6 @@ class HCmsEditorMargin {
   DT_CONTENT;
 
   constructor(options) {
-
-console.log('create HCmsEditorMargin');
       
       this.cmsEditor = options.cmsEditor;
       this.container = options.container;
@@ -155,7 +153,7 @@ console.log('create HCmsEditorMargin');
           if(val=='default'){
               val = '';
           }else if(val=='fixed'){
-              val = that.isHeader?'sticky-top':'fixed-bottom';
+              val = that.isHeader?'sticky-top':'sticky-bottom';
           }else if(val=='hidden'){
               val = 'visually-hidden';
           }

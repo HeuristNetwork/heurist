@@ -1,0 +1,301 @@
+<!--
+/**
+* Content for HCmsConfig.js - base set of properties for CMS element
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @version     7.0
+*/
+-->
+    <div class="d-flex flex-column">
+        <div class="pb-1" style="text-align:right;font-size:0.9em">
+            <div class="btn-save-only ui-button-action" style="margin-right:10px">Save</div>
+            <div class="btn-save-and-close ui-button-action" style="margin-right:10px">Save and Close</div>
+            <div class="btn-cancel" style="margin-right:20px">Cancel</div>
+        </div>
+        
+        <div style="font-size: 11px;">
+
+            <!-- General stuff -->
+            <fieldset style="border: 1px solid lightgray;border-radius:4px;margin: 2px 4px;">
+                <legend style="display:none"></legend>
+                <div>
+                    <div class="header_narrow">Widget label:</div>        
+                    <input data-type="element-name" style="width:100%" class="text ui-widget-content"/>
+                    <div class="heurist-helper3">Please edit to clarify the tree</div>
+                </div>
+                
+                <div>
+                    <div class="header_narrow">HTML (DOM) ID:</div>        
+                    <input data-type="element-id" style="width:100%" class="text ui-widget-content"/>
+                    <div class="heurist-helper3">For example to define target element for menu ("page-content")</div>
+                </div>
+                
+                <div>
+                    <div class="header_narrow">Width:</div>        
+                    <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/>
+                    <label for="">&nbsp;Height:
+                    <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px" class="text ui-widget-content"/></label>
+                </div>
+                                
+                <div style="text-align:center;display: block;">
+                    <hr>
+                    <div class="btn-html-edit">Edit HTML source</div>
+                </div>
+                
+            </fieldset>
+            
+            
+            <div id="properties_form" style="font-size:1em;">
+                
+                <!-- Cosmetic Bootstrap classes -->
+                <!-- Border -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <input Xdata-type="css" name="border" type="checkbox" checked="checked" style="float:right;margin-top:1.2em"/>
+                        <h3 style="display:inline-block">
+                            Border, Corners, Shadow
+                        </h3>
+                        <fieldset data-section="bsBorder">
+                            <legend style="display:none"></legend>
+                                <div>
+                                    <div class="header_narrow">Style</div>
+                                    <select data-type="bs" id="bsBorder-style">
+                                        <option>none</option>
+                                        <option>solid</option>
+                                        <option>double</option>
+                                        <option>dotted</option>
+                                        <option>dashed</option>
+                                        <option>inset</option>
+                                        <option>outset</option>
+                                        <option>groove</option>
+                                        <option>ridge</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="header_narrow">Size:</div>
+                                    <input data-type="bs" id="bsBorder-size"  type="number" min="1" max="5" value="1" placeholder="1" style="width:50px;line-height: 1.5em;" class="text ui-widget-content"/></label>
+                                </div>
+                                <div>
+                                    <div class="header_narrow">Color:</div>
+                                    <select data-type="bs" id="bsBorder-color">
+                                        <option>default</option>
+                                        <option>primary</option>
+                                        <option>primary-subtle</option>
+                                        <option>secondary</option>
+                                        <option>success</option>
+                                        <option value="danger">danger</option>
+                                        <option>warning</option>
+                                        <option>info</option>
+                                        <option>light</option>
+                                        <option>dark</option>
+                                        <option>black</option>
+                                        <option>white</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="header_narrow">Radius:</div>
+                                    <select data-type="bs" id="bsBorder-radius">
+                                        <option value="0">none</option>
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                        <option>pill</option>
+                                        <option>circle</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="header_narrow">Shadow:</div>
+                                    <select data-type="bs" id="bsBorder-shadow">
+                                        <option value="none">none</option>
+                                        <option value="shadow-sm">small</option>
+                                        <option value="shadow">standard</option>
+                                        <option value="shadow-lg">large</option>
+                                    </select>
+                                </div>
+                        </fieldset>
+                </div>                        
+                
+                <!-- Background -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <input Xdata-type="css" name="background" type="checkbox" checked="checked" style="float:right;margin-top:1.2em"/>
+                        <h3 style="display:inline-block">
+                            Background
+                        </h3>
+                        <fieldset data-section="bsBg">
+
+                            <div>
+                                <div class="header_narrow">Background:</div>
+                                <select data-type="bs" name="bgColor" style="max-width:7rem">
+                                    <option value="">select...</option>
+                                    <option bg-color="bg-primary">bg-primary</option>
+                                    <option bg-color="bg-primary-subtle">bg-primary-subtle</option>
+                                    <option bg-color="bg-secondary">bg-secondary</option>
+                                    <option bg-color="bg-secondary-subtle">bg-secondary-subtle</option>
+                                    <option bg-color="bg-success">bg-success</option>
+                                    <option bg-color="bg-success-subtle">bg-success-subtle</option>
+                                    <option bg-color="bg-danger">bg-danger</option>
+                                    <option bg-color="bg-danger-subtle">bg-danger-subtle</option>
+                                    <option bg-color="bg-warning">bg-warning</option>
+                                    <option bg-color="bg-warning-subtle">bg-warning-subtle</option>
+                                    <option bg-color="bg-info">bg-info</option>
+                                    <option bg-color="bg-info-subtle">bg-info-subtle</option>
+                                    <option bg-color="bg-light">bg-light</option>
+                                    <option bg-color="bg-light-subtle">bg-light-subtle</option>
+                                    <option bg-color="bg-dark">bg-dark</option>
+                                    <option bg-color="bg-dark-subtle">bg-dark-subtle</option>
+                                    <option bg-color="bg-body-secondary">bg-body-secondary</option>
+                                    <option bg-color="bg-body-tertiary">bg-body-tertiary</option>
+                                    <option bg-color="bg-body">bg-body</option>
+                                    <option bg-color="bg-black">bg-black</option>
+                                    <option bg-color="bg-white">bg-white</option>
+                                    <option bg-color="bg-transparent">bg-transparent</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <div class="header_narrow">Text color:</div>
+                                <select data-type="bs" name="textColor" style="max-width:7rem">
+                                    <option value="">select...</option>
+                                    <option text-color="text-primary">text-primary</option>
+                                    <option text-color="text-primary-emphasis">text-primary-emphasis</option>
+                                    <option text-color="text-secondary">text-secondary</option>
+                                    <option text-color="text-secondary-emphasis">text-secondary-emphasis</option>
+                                    <option text-color="text-success">text-success</option>
+                                    <option text-color="text-success-emphasis">text-success-emphasis</option>
+                                    <option text-color="text-danger">text-danger</option>
+                                    <option text-color="text-danger-emphasis">text-danger-emphasis</option>
+                                    <option text-color="text-warning">text-warning</option>
+                                    <option text-color="text-warning-emphasis">text-warning-emphasis</option>
+                                    <option text-color="text-info">text-info</option>
+                                    <option text-color="text-info-emphasis">text-info-emphasis</option>
+                                    <option text-color="text-light">text-light</option>
+                                    <option text-color="text-light-emphasis">text-light-emphasis</option>
+                                    <option text-color="text-dark">text-dark</option>
+                                    <option text-color="text-dark-emphasis">text-dark-emphasis</option>
+                                    <option text-color="text-body-secondary">text-body-secondary</option>
+                                    <option text-color="text-body-tertiary">text-body-tertiary</option>
+                                    <option text-color="text-body">text-body</option>
+                                    <option text-color="text-black">text-black</option>
+                                    <option text-color="text-white">text-white</option>
+                                </select>
+                            </div>
+                        
+                            <div>
+                                <div class="header_narrow">Image:</div>
+                                <div style="display: inline-block;">
+                                    <input data-type="css" name="background-image" type="hidden" value=""/>
+                                    <input data-type="css" name="bg-image" type="text" value="" style="width:190px" readonly="readonly"/>
+                                    <button id="btn-background-image" title="select image">select</button>
+                                    <button id="btn-background-image-clear" title="clear image">x</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Position:</div>
+                                <select data-type="css" name="background-position">
+                                    <option>center</option>
+                                    <option>left</option>
+                                    <option>top</option>
+                                    <option>right</option>
+                                    <option>bottom</option>
+                                    <option>top right</option>
+                                    <option>top left</option>
+                                    <option>bottom left</option>
+                                    <option>bottom right</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Repeat:</div>
+                                <select data-type="css" name="background-repeat">
+                                    <option value="no-repeat">no repeat</option>
+                                    <option value="repeat">repeat</option>
+                                    <option value="repeat-y">verically</option>
+                                    <option value="repeat-x">horizontally</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="header_narrow">Size:</div>
+                                <select data-type="css" name="background-size">
+                                    <option value="auto">auto</option>
+                                    <option value="contain">contain</option>
+                                    <option value="cover">cover</option>
+                                    <option value="revert">revert</option>
+                                </select>
+                            </div>
+                        
+                        </fieldset>
+                </div>                        
+                
+                <!-- Margins and Padding -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <!-- <input data-type="css" name="margin" type="checkbox" checked style="float:right;margin-top:1.2em"/> -->
+                        <h3 style="display:inline-block">
+                            Margins
+                        </h3>
+                        <fieldset data-section="bsMargin">
+                            <legend style="display:none"></legend>
+
+                            <div style="background:none">
+                                <div style="display:inline-block">
+                                    <div class="header_narrow" style="vertical-align:middle">Inner</div>
+                                    <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                        <label><input class="cb_sync" data-type="padding" type="checkbox" checked/>sync&nbsp;</label>
+                                        <input data-type="bs" name="bsMargin-ps" type="number" min="0" max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-pt" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                        <br>
+                                        <input data-type="bs" name="bsMargin-pb" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-pe" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                </div>
+                                <div style="display:inline-block">
+                                    <div class="header_narrow" style="vertical-align:middle">Outer</div>
+                                    <div style="vertical-align:middle;display:inline-block;padding-left:20px">
+                                        <label><input class="cb_sync" data-type="margin" type="checkbox" checked/>sync&nbsp;</label>
+                                        <input data-type="bs" name="bsMargin-ms" type="number" min="0"  max="5" value="" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-mt" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                        <br>
+                                        <input data-type="bs" name="bsMargin-mb" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                    <div style="vertical-align:middle;display:inline-block;">
+                                        <input data-type="bs" name="bsMargin-me" type="number" min="0"  max="5" value="0" placeholder="0" style="margin:2px;width:50px"/>
+                                    </div>    
+                                </div>
+                            </div>
+                        </fieldset>
+                </div>
+                
+                <!-- Direct edit CSS and User's classes -->
+                <div style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                        <h3>
+                            Direct edit for CSS and Classes
+                        </h3>
+                        <fieldset>
+                            <legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow" style="vertical-align:top">CSS</div>
+                                <textarea name="elementCss" rows="10" cols="40"></textarea>
+                            </div>
+                            <div>
+                                <div class="header_narrow" style="vertical-align:top">Classes</div>
+                                <textarea name="elementClasses" rows="4" cols="40"></textarea>
+                                <div class="heurist-helper3">Space separated list of classes defined in custom css field in page record</div>
+                            </div>
+                        </fieldset>
+                </div>
+                    
+            </div>
+
+        </div>
+    </div>        
+    <div id="codemirror-container" style="display:none;">
+        <div id="codemirror-body" style="position:absolute;left:0px;right:2px;top:0px;bottom:0px;border:lightblue 1px dotted;"></div>
+    </div>

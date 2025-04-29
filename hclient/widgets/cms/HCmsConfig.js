@@ -1,0 +1,665 @@
+/*
+* HCmsConfig.js - base configuration for CSM element
+* It containes name, border/bg/margin and direct edit
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @version     7.0
+*/
+class HCmsConfig {
+
+  container; //element for form
+  cmsEditor; //reference to parent editor
+  onClose;
+  siteId;
+
+  element;
+  element_cfg; //current cfg
+  l_cfg; //copy of json config
+  
+  codeEditor; //HCmsCodeEditor
+  isChanged = false;
+
+  allAffectedBsClasses = ['container','border','bg-','text-','rounded','shadow','row',' col','justify-content','align-items','g-','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-'];
+  
+  constructor(options) {
+      
+      this.cmsEditor = options.cmsEditor;
+      this.container = options.container;
+      this.onClose = options.onClose;
+      this.siteId = this.cmsEditor.website_id;
+  
+      this.show( options );      
+  }
+  
+  show(options){
+      
+      this.isChanged = options.isModified;
+
+      this.element_cfg = options.element_cfg
+      this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(options.element_cfg);
+      this.element = this.cmsEditor.findInWebSite('div[data-hid="'+this.element_cfg.key+'"]'); //element in main-content    
+      $(this.element).removeClass('marching-ants marching');
+      
+      let that = this;
+      this.container.empty().load(window.hWin.HAPI4.baseURL
+          +'hclient/widgets/cms/HCmsConfig.html',
+          ()=>that.#initControls());
+  }
+  
+  /**
+  * Inits inteface controls
+  */
+  #initControls(){
+      
+      this.onContentChange( this.isChanged );
+
+      let that = this;
+      let cont = this.container;
+      let l_cfg = this.l_cfg;
+      
+      if(!l_cfg.css) l_cfg.css = {};
+
+      const activePage = 0;
+      cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
+      cont.find('h3').css({padding:'1em', 'font-size': '1.1em', 'font-weight': 'bold'});
+      cont.find('fieldset').css({background: 'transparent', padding: '1em'});
+      
+      cont.find('input[data-type="element-name"]').val(l_cfg.name);
+      cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
+      cont.find('textarea[name="elementClasses"]').val(l_cfg.classes); //publisher's classes
+
+      
+      //Listeners for inputs
+      cont.find('input[data-type="css"]').on('change', ()=>that.#getCss());
+      cont.find('input[data-type="css"]').on('keyup', ()=>that.#getCss());
+      
+      //Margin sync values
+      cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
+      cont.find('.cb_sync').on('change',(e)=>that.#onMarginSync(e));
+      cont.find('input[name^="bsMargin-"]').on('change',(e)=>that.#onMarginSyncVal(e));
+      
+      //Listeners for selects    
+      cont.find('select').each((i,selObj)=>{
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
+            selObj.on('change', ()=>that.#getCss());
+      });
+      
+      //Listeneres for global border and bg checkboxes
+      cont.find('input[name="background"]').on('change',()=>that.#getCss(true) );
+      cont.find('input[name="border"]').on('change',()=>that.#getCss(true) );
+      
+      this.#setCssToUI();
+      
+      //direct content editor
+      let btnDirectEdit = cont.find('div.btn-html-edit');
+      btnDirectEdit.button().on('click', ()=>that.#showCodeEditor());
+        
+      //SAVE AND CANCEL BUTTONS      
+      //save entire page (in background) 
+      cont.find('.btn-save-and-close').button().css('border-radius','4px').on('click', function(){
+          that.#getCfgFromUI();
+          that.#updateConfiguration();
+          that.onClose.call(this, that.l_cfg, 'close');
+      });
+
+      cont.find('.btn-save-only').button().css('border-radius','4px').on('click', function(){
+          that.#getCfgFromUI();
+          that.#updateConfiguration();
+          that.onClose.call(this, that.l_cfg);
+          that.onContentChange( false );
+      });
+      cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
+          //restore old settings for classes, style and content
+          if(that.isChanged){
+              that.#revertChanges();
+          }
+          that.onClose.call();      
+      });
+      
+  }
+  
+  #revertChanges(){
+      
+      this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(this.element_cfg);
+      this.#setCssToUI();
+      this.#getCss();
+      $(this.element).html(this.l_cfg.content);
+  }
+  
+  //
+  //
+  //
+  #onMarginSync(event, type){
+
+      let isChecked;
+      if(type){
+          isChecked = this.container.find('.cb_sync[data-type="'+type+'"]').is(':checked');
+      }else{
+          type = $(event.target).attr('data-type');
+          isChecked = $(event.target).is(':checked');
+      }
+
+      const namePrefix = 'bsMargin-'+(type=='margin'?'m':'p');
+
+      if(isChecked){ //synched
+
+          this.container.find('input[name^="'+namePrefix+'"]').attr('readonly',true);
+          this.container.find('input[name="'+namePrefix+'s"]').removeAttr('readonly');
+
+          this.#onMarginSyncVal(null, type);
+
+      }else{
+          this.container.find('input[name^="'+namePrefix+'"]').removeAttr('readonly');
+      }       
+  }
+
+  //
+  //
+  //
+  #onMarginSyncVal(event, type){
+      
+      let cont = this.container;
+
+      if(!type){
+          type = $(event.target).attr('name');
+          type = type.indexOf('bsMargin-m')?'margin':'padding';
+      }
+
+      if(this.container.find('input.cb_sync[data-type="'+type+'"]').is(':checked')){
+          type = 'bsMargin-'+(type=='margin'?'m':'p');
+
+          let val = cont.find('input[name="'+type+'s"]').val();
+          cont.find('input[name="'+type+'-t"]').val(val);
+          cont.find('input[name="'+type+'-b"]').val(val);
+          cont.find('input[name="'+type+'-e"]').val(val);
+      }
+      if(event){
+          this.#getCss();
+      }
+  }
+
+  /*
+  *
+  */
+  onContentChange( isChanged ){
+      this.isChanged = isChanged;
+      window.hWin.HEURIST4.util.setDisabled(this.container.find('.btn-save-only'), !this.isChanged);
+      window.hWin.HEURIST4.util.setDisabled(this.container.find('.btn-save-and-close'), !this.isChanged);
+  }  
+ 
+  /*
+  * Show HTML code editor
+  */
+  #showCodeEditor(){
+      let that = this;
+      if(!this.codeEditor){
+            this.codeEditor = this.container.find('#codemirror-container').HCmsCodeEditor({title: window.hWin.HR("Edit content of element"),
+                                                                          onClose:(context)=>that.onCodeEditorApply(context),
+                                                                          helpContent: 'website_header_footer.htm'});
+      }                                                                   
+      
+      //if(!that.newContent
+      //not defined
+            // TBD for MARGINS 
+            //that.#getTemplateContent('', (response)=>codeEditor.HCmsCodeEditor('show', response?.message));
+      //}
+            
+      this.codeEditor.HCmsCodeEditor('show', this.l_cfg.content);
+  }
+  
+  // 
+  //update from main editor
+  //
+  updateContent: function(newContent, lang){
+      this.l_cfg.content = newContent;
+      //this.l_cfg['content'+lang] = newContent;            
+  }
+   
+  /*
+  * On code editor exit
+  */  
+  onCodeEditorApply(newContent, lang){
+      if(!newContent){
+          return;
+      }
+      //replace content with new one
+      if(this.l_cfg.content != newContent){
+          this.onContentChange( true );                
+          this.l_cfg.content = newContent;
+          //this.element.innerHtml = this.l_cfg.content;
+          $(this.element).html(this.l_cfg.content);
+      }
+/* TBD      
+      if(contents==null){ //no languages defined
+      }else{ //multilang
+      
+          let cur_lang = ce_container.attr('data-lang');
+          contents[cur_lang] = newval;
+          let langs = Object.keys(contents);
+          for(let i=0; i<langs.length; i++){
+              let lang_key = 'content'+langs[i];
+              if(default_language.toUpperCase()==langs[i]){
+                  lang_key = 'content';
+              }
+              if(l_cfg[lang_key] != contents[langs[i]]){
+
+                  l_cfg[lang_key] = contents[langs[i]];
+                  _enableSave();
+                  if(current_language.toUpperCase()==langs[i]){
+                      element.html(l_cfg[lang_key]);    
+                  }
+              }
+          }
+      }
+*/          
+      
+      // TBD
+      //this.cmsEditor.webSite.reloadMargin( this.isHeader, newContent );
+  }
+
+  /*
+  * Prepare values for saving
+  */  
+  #getCfgFromUI(){
+
+      let cont = this.container;
+      let l_cfg = this.l_cfg;
+      this.#getCss(); //assigns l_cfg.css and l_cfg.bsClasses
+
+      l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
+      if(!l_cfg.name) l_cfg.name = 'Define name of element';
+      l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
+
+      l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+
+      const userClasses = cont.find('textarea[name="elementClasses"]').val();
+      if(window.hWin.HEURIST4.util.isempty(userClasses)){
+          if(l_cfg.classes) delete l_cfg['classes'];
+      }else{
+          l_cfg.classes = userClasses;    
+      }
+
+  }
+
+  /*
+  * Setter. Assigns values from l_cfg to UI
+  */ 
+  #setCssToUI(){
+
+      let cont = this.container;
+      let l_cfg = this.l_cfg;
+
+      //
+      if(!l_cfg.bsClasses){
+          //get from element  TBD
+          let classes = Array.from(this.element.classList);
+          l_cfg.bsClasses = HCmsEditor.getBsClasses(classes, this.allAffectedBsClasses);
+          l_cfg.bsClasses = l_cfg.bsClasses.join(' ').trim();
+      }
+
+      let hasBorder = false;
+      let hasBackground = false;
+
+      if(l_cfg.bsClasses){
+          let borderClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'border');
+
+          if(borderClasses && borderClasses.length>0){
+
+              const size = [...borderClasses.matchAll(/(border-)(\d)/g)];
+              cont.find('#bsBorder-size').val(size.length==1 && size[0].length==3 && size[0][2]>0?size[0][2]:1);
+
+              if(l_cfg.css['--bs-border-style'] && l_cfg.css['--bs-border-style']!='none'){
+                  cont.find('#bsBorder-style').val(l_cfg.css['--bs-border-style']);
+              }else{
+                  cont.find('#bsBorder-style').val('solid');
+              }
+
+              const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
+              if(clr.length==1 && clr[0].length==3){
+                  cont.find('#bsBorder-color').val(clr[0][2]);
+              }
+
+              //cont.find('#bsBorder-color').hSelect('refresh')
+              hasBorder = cont.find('#bsBorder-style').val()!='none';
+          }
+
+          const roundedClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'rounded') || 'rounded-0';
+          hasBorder = hasBorder || roundedClass!='rounded-0';
+          cont.find('#bsBorder-radius').val(roundedClass.substring(8));
+
+          const shadowClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'shadow') || 'none';
+          hasBorder = hasBorder || shadowClass!='none';
+          cont.find('#bsBorder-shadow').val(shadowClass);
+
+          const bgColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'bg-');
+          hasBackground = (bgColorClass!='');
+          cont.find('select[name="bgColor"]').val(bgColorClass);
+
+          const textColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'text-');
+          hasBackground = hasBackground || (textColorClass!='');
+          cont.find('select[name="textColor"]').val(textColorClass);
+
+          function __setMargins(type, classes){
+              let marginClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, classes);
+              if(marginClasses=='') return;
+
+              let isSync = false;
+              marginClasses = marginClasses.split(' ');
+              for(const cls of marginClasses){
+                  let [key, val] = cls.split('-');
+                  if(key=='m' || key=='p'){
+                      key = key+'s';
+                      isSync = true;
+                  }
+                  cont.find('input[name="bsMargin-'+key+'"]').val(val);
+              }
+              cont.find('input.cb_sync[data-type="'+type+'"]').prop('checked', isSync);
+          }
+
+
+          __setMargins('margin', ['m-','ms-','me-','mt-','mb-']);
+          __setMargins('padding', ['p-','ps-','pe-','pt-','pb-']);
+          this.#onMarginSync(null, 'margin');
+          this.#onMarginSync(null, 'padding');
+
+          cont.find('select[data-type="bs"]').hSelect('refresh');
+      }
+
+
+      //init file picker
+      cont.find('input[name="bg-image"]')
+      .on('click', this.#selecHeuristMedia);
+      cont.find('#btn-background-image').button()
+      .css({'font-size':'0.7em'})
+      .on('click', this.#selecHeuristMedia);
+
+      cont.find('#btn-background-image-clear')
+      .button() //{icon:'ui-icon-close',showLabel:false})
+      .css({'font-size':'0.7em'})
+      .on('click', this.#clearBgImage);      
+
+      cont.find('input[name="background"]').prop('checked', hasBackground);
+      cont.find('input[name="border"]').prop('checked', hasBorder);
+
+  }
+  
+  /*
+  * Select uloaded image for background
+  */
+  #selecHeuristMedia(){
+      
+      let that = this;
+      
+        let popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            filter_types: 'image',
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        let recordset = data.selection;
+                        let record = recordset.getFirstRecord();
+                        
+                        let sUrl = recordset.fld(record,'ulf_ExternalFileReference');
+                        if(!sUrl){
+                            //always add media as reference to production version of heurist code (not dev version)
+                            sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                            +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
+                            that.container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
+                        }else{
+                            that.container.find('input[name="bg-image"]').val(sUrl);
+                        }
+                        
+                        sUrl = 'url(\'' + sUrl + '\')';
+                        that.container.find('input[name="background-image"]').val(sUrl);
+                        
+                        that.#getCss();
+
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+      
+  }
+
+  /*
+  *
+  */  
+  #clearBgImage(){
+        this.container.find('input[name="background-image"]').val('');
+        this.container.find('input[name="bg-image"]').val('');
+        
+        this.#getCss();
+  }
+
+  /*
+  * Getter. Get css vaues from UI and apply to element
+  */
+  #getCss( isGlobalCheck ){
+      
+        let cont = this.container;
+        let css = {};
+        
+console.log('getcss', this.l_cfg);
+        
+        let bsClasses = [];
+        //HCmsEditor.getBsClasses(this.l_cfg.bsClasses, 'col');
+        //bsClasses = bsClasses.split(' ');
+// BORDER  get values from UI -----------------
+        let val = cont.find('input[name="border"]').is(':checked');
+        if(isGlobalCheck && !val){
+            css['border'] = 'none';
+        }else{
+            val = cont.find('#bsBorder-style').val();
+            if(val!='none' && cont.find('#bsBorder-size').val()>0){
+                css['--bs-border-style'] = val;
+                
+                bsClasses.push('border');
+                val = cont.find('#bsBorder-size').val();
+                if(val>0){
+                    bsClasses.push('border-'+val);
+                }
+                val = cont.find('#bsBorder-color').val();
+                if(val!='default'){
+                    bsClasses.push('border-'+val);
+                }
+            }
+            val = cont.find('#bsBorder-radius').val();
+            if(val!=0){
+                bsClasses.push('rounded-'+val);
+            }
+            
+            val = cont.find('#bsBorder-shadow').val();
+            if(val!='none'){
+                bsClasses.push(val);    
+            }
+            
+            const hasBorder = bsClasses.length>0;
+            cont.find('input[name="border"]').prop('checked', hasBorder);
+        }
+      
+
+// BACKGROUND  get values from UI -----------------
+
+        //style - background
+        val = cont.find('input[name="background"]').is(':checked');
+        if(isGlobalCheck && !val){
+            css['background'] = 'none';
+        }else{
+            
+            let hasBg = false;
+            //colors for text and bg
+            val = cont.find('select[name="bgColor"]').val();
+            if(val!=''){
+                bsClasses.push(val);
+                hasBg = true;
+            }
+            val = cont.find('select[name="textColor"]').val();
+            if(val!=''){
+                bsClasses.push(val);
+                hasBg = hasBg || true;
+            }
+
+            //val = cont.find('input[name="background-color"]').val();
+            //if(val) css['background-color'] = val;
+
+            val = cont.find('input[name="background-image"]').val();
+            if(val){
+                css['background-image'] = val;  
+                css['bg-image'] = cont.find('input[name="bg-image"]').val();
+                val = cont.find('select[name="background-position"]').val();
+                css['background-position'] = val;  
+                val = cont.find('select[name="background-repeat"]').val();
+                css['background-repeat'] = val;  
+                val = cont.find('select[name="background-size"]').val();
+                css['background-size'] = val;  
+                hasBg = hasBg || true;
+            } 
+            
+            cont.find('input[name="background"]').prop('checked', hasBg);
+        }
+        
+// MARGINS  get values from UI -----------------
+        let isSync = cont.find('input.cb_sync[data-type="padding"]').is(':checked');
+        if(isSync){
+            const val = cont.find('input[name^="bsMargin-ps"]').val();    
+            if(val>0) bsClasses.push('p-'+val);
+        }else{
+            cont.find('input[name^="bsMargin-p"]').each((i,item)=>{
+                item = $(item);
+                if(item.val()>0){
+                    let cls = item.attr('name').split('-');
+                    cls = cls[1]+'-'+item.val();
+                    bsClasses.push(cls);
+                }
+            });
+        }
+        
+        isSync = cont.find('input.cb_sync[data-type="margin"]').is(':checked');
+        if(isSync){
+            const val = cont.find('input[name^="bsMargin-ms"]').val();    
+            if(val>0) bsClasses.push('m-'+val);
+        }else{
+            cont.find('input[name^="bsMargin-m"]').each((i,item)=>{
+                item = $(item);
+                if(item.val()>0){
+                    let cls = item.attr('name').split('-');
+                    cls = cls[1]+'-'+item.val();
+                    bsClasses.push(cls);
+                }
+            });
+        }
+                
+//------------------------------------------------        
+
+        function __setDim(name){
+            let ele = cont.find('input[name="'+name+'"]');
+            let val = ele.val();
+            if( (val!='' || val!='auto') && parseInt(val)>0){
+                if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
+                    val = val + 'px';
+                }
+                css[name] = val;
+            }
+        }
+
+        __setDim('width');
+        __setDim('height');
+
+        if(this.l_cfg.css){
+            let old_css = this.l_cfg.css;
+            //remove these parameters from css and assign from form
+            let params = ['display','width','height',
+                'padding','padding-left','padding-top','padding-bottom','padding-right',
+                'margin','margin-left','margin-top','margin-bottom','margin-right',
+                'background','background-image','bg-image','background-repeat','background-position','background-size',
+                'border','border-width','border-color','border-style','border-radius','--bs-border-style',
+                'flex-direction','flex-wrap','justify-content','align-items','align-content'];
+            for(let i=0; i<params.length; i++){
+                let prm = params[i];
+                if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
+                    old_css[prm] = null;
+                    delete old_css[prm];
+                };
+            }
+            css = $.extend(old_css, css);
+        }
+
+        //update 
+        if(bsClasses.length>0){
+            this.l_cfg.bsClasses = bsClasses.join(' '); //keep
+            HCmsEditor.replaceBsClasses(this.element, this.allAffectedBsClasses, bsClasses);
+        }
+        
+        $(this.element).removeAttr('style');
+        $(this.element).css(css); //assign changed css at once
+        this.l_cfg.css = css;
+        //TBD _assignCssTextArea();
+            
+console.log( this.l_cfg.bsClasses );            
+console.log( 'assign', css );            
+
+        this.onContentChange( true );
+        return css;
+  }
+  
+  #updateConfiguration(){
+      
+  }
+
+  /*
+  *
+  */  
+  warningOnExit( callback ){
+      
+        if(this.container.find('.btn-save-only').attr('disabled')!='disabled'){
+            
+            let that = this;
+            
+            let $dlg;
+            let _buttons = [
+                {text:window.hWin.HR('Save'), 
+                    click: function(){
+                        that.container.find('.btn-save-only').trigger('click');
+                        $dlg.dialog('close');
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, true);
+                    }
+                },
+                {text:window.hWin.HR('Discard'), 
+                    click: function(){
+                        that.container.find('.btn-cancel').trigger('click');
+                        $dlg.dialog('close'); 
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
+                    }
+                },
+                {text:window.hWin.HR('Cancel'), 
+                    //TBD restore
+                    click: function(){$dlg.dialog('close');}
+                }
+            ];            
+            
+            let sMsg = '"'+ window.hWin.HEURIST4.util.stripTags(this.l_cfg.name) 
+                    +'" '+window.hWin.HR('element has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Element changed')});   
+
+            return true;     
+        }else{
+            return false;     
+        }
+  }
+  
+}

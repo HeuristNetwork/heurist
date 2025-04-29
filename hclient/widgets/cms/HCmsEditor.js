@@ -365,7 +365,8 @@ class HCmsEditor {
   // Returns html element from webpage iframe
   //  
   findInWebSite(selector){
-      return this._webPageFrame[0].contentDocument.querySelector(selector);
+      const matches = this._webPageFrame[0].contentDocument.querySelectorAll(selector);
+      return matches.length>0 ?matches[0] :null;
   }
 
   //

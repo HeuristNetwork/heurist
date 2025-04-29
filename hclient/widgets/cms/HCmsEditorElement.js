@@ -34,6 +34,18 @@ element editor
   _layout_container;  HTML element "#main-content" with CMS content
   $container - element this 
   _pageEditor - reference to HCmsEditorPage
+  
+  
+  
+  HCmsConfig - name + border + bg + margins + direct
+  HCmsConfigPage + container type (no width, height, id)  direct HTML edit if not structured
+  HCmsConfigMargin = for header and footer (no id)        direct HTML edit if not structured   
+  HCmsConfigContainer - (group, tab accordion, grid, flex) + layout type
+  HCmsConfigCardinal  only cardinal config
+  HCmsConfigWidget
+  
+  
+  
 */
 function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $container, _pageEditor, main_callback, already_changed ){
 
@@ -528,7 +540,7 @@ console.log('>>>', etype);
     }            
     
     //
-    // Get css vaues from UI and apply to $container
+    // Get css vaues from UI and apply to element
     //
     function _getCss()
     {
@@ -1043,21 +1055,11 @@ console.log( 'assign', css );
                     .css({'font-size':'0.7em'})
                     .on('click',_clearBgImage);
             
-            
-            
-
-            //assign flex css parameters
-            let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
-            for(let i=0; i<params.length; i++){
-                let prm = params[i];
-                if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
-            }
-
-            let no_margin_values = true, mode_full = false;    
-            
             cont.find('input[name="background"]').attr('checked', hasBackground );
             cont.find('input[name="border"]').attr('checked', hasBorder );
-
+            
+            let no_margin_values = true, mode_full = false;    
+            
             //assign other css parameters for all elements with data-type="css"
             cont.find('[data-type="css"]').each(function(i,item){
                 let key = $(item).attr('name');
@@ -1090,7 +1092,14 @@ console.log( 'assign', css );
                 hideButton: false, //show button right to input
                 showOn: "both"});//,val:value
             cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
+            
 
+            //assign flex css parameters
+            let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+            for(let i=0; i<params.length; i++){
+                let prm = params[i];
+                if (l_cfg.css[prm]) cont.find('#'+prm).val(l_cfg.css[prm]);
+            }
     }
 
     

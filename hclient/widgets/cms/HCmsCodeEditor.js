@@ -148,7 +148,7 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
                     that.codeEditor.focus()
                 },500);
                 
-        this.ce_container.find('.CodeMirror').css('height','100%');
+        this.ce_container.find('.CodeMirror ').css('height','100%');
     },
     
     
