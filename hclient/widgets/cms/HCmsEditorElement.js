@@ -153,14 +153,14 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         //load and init widget properties
         if(etype=='widget'){
 
-            let dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+            const dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
             if(dom_id!=l_cfg.options.widget_id){
                 l_cfg.options.widget_id = dom_id;
             }
 
             widget_cfg = editCMS_WidgetCfg(l_cfg, _layout_content, cont.find('#widget-config'), null, function(){
 
-                let new_cfg = widget_cfg.getValues();
+                const new_cfg = widget_cfg.getValues();
 
                 if(JSON.stringify(l_cfg.options) != JSON.stringify(new_cfg)){
                     _enableSave();    

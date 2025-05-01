@@ -32,7 +32,7 @@ class HCmsEditorPage {
     _toolbar_Page;       // buttons to apply/cancel changes
 
     tinymce;
-    layoutMgr;
+    layoutMgr; //instance form website frame
 
     //interface flags and states
     page_was_modified = false;
@@ -162,8 +162,9 @@ class HCmsEditorPage {
                             l_cfg['content'+lang] = newContent;    
                             
                             //update in HCmsEditorElement                            
-                            that._cmsEditorElement.updateContent(newContent, lang);
-                            
+                            if(that._cmsEditorElement){
+                                that._cmsEditorElement.updateContent(newContent, lang);
+                            }
                             
                         }else{
                             that.page_was_modified = false;
@@ -1340,7 +1341,17 @@ function(value){
                             container: this._panel_propertyView,
                             onClose: __onSaveElementConfig,
                             element_cfg: element_cfg,
-                            isModified: this.page_was_modified
+                            alreadyModified: this.page_was_modified
+                    });
+                    
+                }else if(element_cfg.appid?.indexOf('HRecord')===0){
+                    
+                    this._cmsEditorElement = new HCmsConfigWidget({
+                            cmsEditor: this._cmsEditor,
+                            container: this._panel_propertyView,
+                            onClose: __onSaveElementConfig,
+                            element_cfg: element_cfg,
+                            alreadyModified: this.page_was_modified
                     });
                 
                 }else{ //old
@@ -1392,7 +1403,7 @@ function(value){
             {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
           
-        }else if(widget_type.indexOf('heurist_')===0){
+        }else if(widget_type.indexOf('heurist_')===0 || widget_type.indexOf('HRecord')===0){
             
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
             new_ele = {appid:widget_type, name:widget_name, css:{}, options:{}};

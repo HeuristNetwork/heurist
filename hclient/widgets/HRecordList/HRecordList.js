@@ -168,27 +168,31 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         }
         
         this._on(this._$('[data-heurist-role="recordList-options"]'),
-            {click: ()=>this._openOptionsEditor((newOptions)=>{
-                if(newOptions){
-                    newOptions = $.extend($.heurist.HRecordList.prototype.options, newOptions);
-console.log('NEW', newOptions);      
-                    
-                    if(this.recordView){
-                        this.recordView.remove();   
-                        this.recordView = null;
-                    }
-                    this._cashedItem = {};
-                    this._current_page = 0;
-
-                    this.element.HRecordList(newOptions);
-                }
-            })});
+            {click: ()=>this.openOptionsEditor()});
 
         //triggers onInitFinished and performs initial search
         this._super();
-        
     },
+    
+    /*
+    *
+    */
+    onCloseOptionEditor: function(newOptions){
+        if(newOptions){
+            
+            newOptions = $.extend($.heurist.HRecordList.prototype.options, newOptions);
+            
+            if(this.recordView){
+                this.recordView.remove();   
+                this.recordView = null;
+            }
+            this._cashedItem = {};
+            this._current_page = 0;
 
+            this.element.HRecordList(newOptions);
+        }
+    },
+    
     /* 
     * Cleanup. Removes generated elements and off event listeners
     */

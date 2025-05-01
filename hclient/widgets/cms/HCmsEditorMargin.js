@@ -153,7 +153,7 @@ class HCmsEditorMargin {
           if(val=='default'){
               val = '';
           }else if(val=='fixed'){
-              val = that.isHeader?'sticky-top':'sticky-bottom';
+              val = that.isHeader?'sticky-top':'fixed-bottom';
           }else if(val=='hidden'){
               val = 'visually-hidden';
           }

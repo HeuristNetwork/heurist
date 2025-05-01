@@ -169,22 +169,35 @@ $.widget( 'heurist.HBaseWidget', {
     /*
     * Opens options editor popup
     */
-    _openOptionsEditor: function(onClose){
+    openOptionsEditor: function(container, onChange){
         
         const optEditor = this.widgetName+'Opts';
         
-        if(this._optionsEditor==null){
-            this._optionsEditor = $('<div>').appendTo(this.element);    
+        if(this._optionsEditor==null || container){ //update if container defined
+            this._optionsEditor = container?container:$('<div>').appendTo(this.element);    
         }
 
         if(this._optionsEditor[optEditor]('instance')){
+console.log('show');            
             this._optionsEditor[optEditor]('show', this.options);
         }else{
+console.log('create');            
             let that = this;
-            this._optionsEditor[optEditor]({editOptions: this.options, onClose:onClose});
-                                        //viewMode: this.options.viewRecordMode, 
+            this._optionsEditor[optEditor]({editOptions: this.options, 
+                        viewMode: container ?'inline':'popup', 
+                        isHeaderVisible: container ?false:true, 
+                        onChange: onChange,
+                        onClose:this.onCloseOptionEditor});
                                         //recordTemplate: this.options.templateView,
                                         //keepInstance: true});
         }
+    },
+    
+    /*
+    *
+    */
+    onCloseOptionEditor: function(newOptions){
+        
     }
+    
 });

@@ -1,19 +1,28 @@
 <div id="tabs">
-<ul>
+<ul style="font-size: 0.5rem;">
     <li><a href="#tab-setup">Setup</a></li>
     <li><a href="#tab-templates">Custom templates</a></li>
     <li><a href="#tab-messages">Messages</a></li> <!-- Various custom messages, e.g. placeholder and no data -->
+    <li><a href="#tab-connect">Connect</a></li>
 </ul>
 
-<fieldset id="tab-setup"><legend style="display:none"></legend>
+<fieldset id="tab-connect"><legend style="display:none"></legend>
 
         <div>
             <div class="header header_narrow">
-                Unique widget id
+                HTML (DOM) ID
             </div>
 
-            <input name="widget_id" class="text ui-widget-content"/>
+            <input name="dom_id" class="text ui-widget-content"/>
             <div class="heurist-helper3">Unique, arbitrary, HTML ID for widget, for reference in javascript and from other widgets</div>
+        </div>
+        <div>
+            <div class="header header_narrow">
+                Widget label
+            </div>
+
+            <input name="name" class="text ui-widget-content"/>
+            <div class="heurist-helper3">Please edit to clarify the tree</div>
         </div>
         <div>
             <div class="header header_narrow">
@@ -23,6 +32,10 @@
             <div class="heurist-helper3">Arbitrary identifier for a group of widgets which share search and select events</div>
         </div>
         
+
+</fieldset>
+<fieldset id="tab-setup"><legend style="display:none"></legend>
+
         <div>
             <div class="header header_wide">
                 Filter to be applied at start
@@ -53,7 +66,7 @@
         <!-- selection -->        
         <div>
             <div class="header header_wide">
-                Action on select:
+                Action on item click:
             </div>
             <select name="selectAction" style="min-width:50px">
                 <option value="select">select</option>
@@ -130,46 +143,44 @@
         </div>
         
 </fieldset>
-<fieldset id="tab-messages"><legend style="display:none"></legend>
+<fieldset id="tab-messages" style="margin:0.4rem"><legend style="display:none"></legend>
         
-        <div>
-
             <div class="header header_wide">
                 Message prior to selection
             </div>
 
+        <div>
+
             <label><input type="checkbox" name="placeholderInitBlank"> check to leave blank</label>,
             otherwise defaults to <br>
             "<span id="placeholderInitBlankDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
-
-            <br>
-            <textarea name="placeholderInit" rows="10" cols="45"></textarea>
-            <br>
-
-            <div class="heurist-helper3">
-                Message to display while search is not performed or no record or search has been selected
-            </div>
-
         </div>
 
-        <div>
+        <textarea name="placeholderInit" rows="10" cols="45"></textarea>
 
+        <div class="heurist-helper3">
+            Message to display while search is not performed or no record or search has been selected
+            <br>
+            <br>
+        </div>
+
+      
             <div class="header header_wide">
                 No data message
             </div>
 
+        <div>
             <label><input type="checkbox" name="placeholderEmptyBlank"> check to leave blank</label>,
             otherwise defaults to <br>
             "<span id="placeholderEmptyDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
+        </div>
 
-            <br>
+        <div>
             <textarea name="placeholderEmpty" rows="10" cols="45"></textarea>
-            <br>
+        </div>
 
-            <div class="heurist-helper3">
-                Message to be shown if query returns no records
-            </div>
-
+        <div class="heurist-helper3">
+            Message to be shown if query returns no records
         </div>
         
 </fieldset>

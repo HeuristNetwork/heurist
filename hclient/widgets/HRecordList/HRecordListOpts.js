@@ -1,5 +1,5 @@
 /**
-* RecordList - listing of record from given HRecordSet
+* HRecordListOpts - form to modify HRecordList options
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -8,32 +8,6 @@
 * @version     7.0
 */
 
-/*
-* HBaseWidget->HRecordList->HRecordTable, HRecordCards, HRecordMap, HRecordNetwork
-*
-* HBaseWidget - loads resources: html, css, localization
-* HRecordList - setDomain, setRecordSet, loadRecordDetails, doSearch(?)
-* 
-* BaseList:
-* setRecordSet
-* doSearch TBD for initial search or on search domain event
-* selectRecords TBD
-* clearContent 
-* loadRecordDetails - loads records details
-* renderPage - abstract
-* renderMessage - notification message (init or for empty result)
-* 
-* RecordList:
-* pagination  _renderPagination/_clearPagination
-* page renderer implementation 
-* selection
-* open view/edit record
-* 
-* Plan:
-* BaseList, RecordList->RecordTable, RecordCards, 
-* RecordReport 
-* 
-*/
 import '../HBase/HBaseView.js';
 
 $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
@@ -45,6 +19,7 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
         default_palette_class: 'ui-heurist-publish',
         resourcePath: 'hclient/widgets/HRecordList/HRecordListOpts', //relative path+filename to resources: html, css and localization
         editOptions: {},
+        onChange: null
     },
 
     /*
@@ -54,10 +29,15 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
     _initControls:function(){
         
         this._super();
+        
         this.show();  
         
         //Init some controls
-        this._$('select').hSelect();
+        this._$('select').each((i,selObj)=>{
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
+            //selObj.on('change', ()=>that._triggerOnChange());
+        });
+        
         this._$('#tabs').tabs();
 
     },
@@ -68,20 +48,7 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
     _destroy: function() {
         // remove generated elements
         this.clearContent();
-        
         this._super();
-    },
-    
-    /*
-    * Removes all record elements
-    *  overwrites parent's method
-    */
-    clearContent: function(){
-        
-        if(!this._initCompleted) return;
-        
-        //_off all clicks for actions per record cards
-        //this._off( this.div_content.find(`div[${this.record_id_attr}]`), 'click');
     },
     
     /**
@@ -132,6 +99,7 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
                 }
             };
         });
+
         
         this._$('select[name^="template"]').each((i,sel)=>{
         window.hWin.HEURIST4.ui.createTemplateSelector(  
@@ -139,13 +107,23 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
                            that.options.editOptions[sel.name],  //$select3.attr('data-template')
                            {extraOptions: {menu_parent: that.jqDialog}});  // or bsModal bsOffcanvas
                         }); 
+
+        if (this.$H.isFunction(this.options.onChange)) { 
+            //event listeners for all input,select and textarea
+            this._on(allFields, {change:this._triggerOnChange});
+        }
+    },
+    
+    _triggerOnChange(){
+        this._getEditOptions();
+        this.options.onChange.call(this, this.options.editOptions);   
     },
 
     /*
-    * from UI to editOptions
+    *
     */    
-    _applyChanges: function(){
-
+    _getEditOptions: function(){
+        
         let that = this;
         let allFields = this._$('input,select,textarea');
         
@@ -158,7 +136,14 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
                 that.options.editOptions[this.name] = $(this).val();
             }
         });
-        
+    },
+
+    /*
+    * from UI to editOptions
+    */    
+    _applyChanges: function(){
+
+        this._getEditOptions();    
         this._contextOnClose = this.options.editOptions;
         this.close(true);
     }

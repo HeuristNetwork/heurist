@@ -8,6 +8,9 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @version     7.0
 */
+
+/* global HCmsEditor */
+
 class HCmsConfig {
 
   container; //element for form
@@ -30,32 +33,33 @@ class HCmsConfig {
       this.container = options.container;
       this.onClose = options.onClose;
       this.siteId = this.cmsEditor.website_id;
+      this.isChanged = options.alreadyModified;
+
+      this.element_cfg = options.element_cfg
+      this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(options.element_cfg);
   
       this.show( options );      
   }
   
   show(options){
       
-      this.isChanged = options.isModified;
-
-      this.element_cfg = options.element_cfg
-      this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(options.element_cfg);
+      //element = this.layoutMgr.layoutContentFindElement(this._layout_content, this.element_cfg.key);
       this.element = this.cmsEditor.findInWebSite('div[data-hid="'+this.element_cfg.key+'"]'); //element in main-content    
       $(this.element).removeClass('marching-ants marching');
       
       let that = this;
       this.container.empty().load(window.hWin.HAPI4.baseURL
           +'hclient/widgets/cms/HCmsConfig.html',
-          ()=>that.#initControls());
+          ()=>that.initControls());
   }
   
   /**
   * Inits inteface controls
   */
-  #initControls(){
+  initControls(){
       
-      this.onContentChange( this.isChanged );
-
+      const alreadyModified = this.isChanged;
+      
       let that = this;
       let cont = this.container;
       let l_cfg = this.l_cfg;
@@ -70,7 +74,7 @@ class HCmsConfig {
       cont.find('input[data-type="element-name"]').val(l_cfg.name);
       cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
       cont.find('textarea[name="elementClasses"]').val(l_cfg.classes); //publisher's classes
-
+      cont.find('input[data-type^="element"]').on('change',()=>that.onContentChange(true));
       
       //Listeners for inputs
       cont.find('input[data-type="css"]').on('change', ()=>that.#getCss());
@@ -108,7 +112,7 @@ class HCmsConfig {
       cont.find('.btn-save-only').button().css('border-radius','4px').on('click', function(){
           that.#getCfgFromUI();
           that.#updateConfiguration();
-          that.onClose.call(this, that.l_cfg);
+          that.onClose.call(this, that.l_cfg, 'save');
           that.onContentChange( false );
       });
       cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
@@ -119,6 +123,7 @@ class HCmsConfig {
           that.onClose.call();      
       });
       
+      this.onContentChange( alreadyModified );
   }
   
   #revertChanges(){
@@ -186,6 +191,7 @@ class HCmsConfig {
   */
   onContentChange( isChanged ){
       this.isChanged = isChanged;
+      this.container.find('.btn-cancel').button({label: window.hWin.HR(this.isChanged?'Cancel':'Close')});
       window.hWin.HEURIST4.util.setDisabled(this.container.find('.btn-save-only'), !this.isChanged);
       window.hWin.HEURIST4.util.setDisabled(this.container.find('.btn-save-and-close'), !this.isChanged);
   }  
@@ -213,7 +219,7 @@ class HCmsConfig {
   // 
   //update from main editor
   //
-  updateContent: function(newContent, lang){
+  updateContent(newContent, lang){
       this.l_cfg.content = newContent;
       //this.l_cfg['content'+lang] = newContent;            
   }
@@ -259,6 +265,19 @@ class HCmsConfig {
       // TBD
       //this.cmsEditor.webSite.reloadMargin( this.isHeader, newContent );
   }
+  
+  /*
+  * Get name and id from UI
+  */  
+  #getIdAndName(){
+console.log('getIdAndName');
+      let l_cfg = this.l_cfg;
+      let cont = this.container;
+      l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
+      if(!l_cfg.name) l_cfg.name = 'Define name of element';
+      l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+      l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
+  }
 
   /*
   * Prepare values for saving
@@ -268,12 +287,8 @@ class HCmsConfig {
       let cont = this.container;
       let l_cfg = this.l_cfg;
       this.#getCss(); //assigns l_cfg.css and l_cfg.bsClasses
-
-      l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
-      if(!l_cfg.name) l_cfg.name = 'Define name of element';
-      l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
-
-      l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
+      
+      this.#getIdAndName();
 
       const userClasses = cont.find('textarea[name="elementClasses"]').val();
       if(window.hWin.HEURIST4.util.isempty(userClasses)){

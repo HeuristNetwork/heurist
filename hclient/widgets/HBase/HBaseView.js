@@ -66,19 +66,21 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
         }
 
         // Handle Bootstrap modals and offcanvas
-        if (this.options.viewMode !== 'popup') {
-            const mode = this.options.viewMode.split('-')[0];
-            this._container = this._$(`.${mode}-body`);
-
-            if (this._container.length === 0) {
-                // Load modal/offcanvas layout or header/footer for inline
-                let url = `${this.HAPI.baseURL}hclient/widgets/HBase/HBaseView.html div.${mode}`;
-                                    //+ '?t='+this.$H.random();
-                this.loadHtmlContent(this.element, url, this._init);
-                return;
-            }
+        if (this.options.viewMode === 'popup' || (this.options.viewMode === 'inline' && !this.options.isHeaderVisible)) {
+            this._super();
+            return;
         }
+        
+        const mode = this.options.viewMode.split('-')[0];
+        this._container = this._$(`.${mode}-body`); //inline-body
 
+        if (this._container.length === 0) {
+            // Load modal/offcanvas layout or header/footer for inline
+            let url = `${this.HAPI.baseURL}hclient/widgets/HBase/HBaseView.html div.${mode}`;
+                                //+ '?t='+this.$H.random();
+            this.loadHtmlContent(this.element, url, this._init);
+            return;
+        }
         // Call parent `_init`
         this._super();
     },

@@ -1387,4 +1387,26 @@ class HLayoutMgr {
     return this.#layoutInitFromJSON(layout, container, false, true);
   }
   
+  /*
+  *
+  */
+  executeWidgetMethod( element, widgetname, method, params ){
+      
+      let app = $(element);
+      if(app && window.hWin.HEURIST4.util.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
+          
+          if(!Array.isArray(params)){
+              params = [params];
+          }
+          
+          $(app)[widgetname](method, ...params);
+      
+      }else if(!app){
+            console.log('widget '+element_id+' not found');
+      }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
+            console.log('widget '+widgetname+' not loaded');
+      }
+  }
+  
+  
 }
