@@ -1,0 +1,100 @@
+<!--
+* lookupBnFLibrary_bib.html: used by lookupBnFLibrary_bib.js
+*
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @link        https://HeuristNetwork.org
+* @version     6
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<style>
+    #frm-query .CodeMirror-line{
+        padding-left: 3em !important;
+    }
+    #frm-query .CodeMirror-linenumber{
+        background-color: lightgray !important;
+        color: black !important;
+    }
+</style>
+
+<div id="tabs-cont">
+
+    <ul>
+        <li><a href="#frm-query">Query</a></li>
+        <li><a href="#frm-results">Results</a></li>
+        <li><a href="#frm-settings">Options</a></li>
+    </ul>
+
+    <!-- Query Container -->
+    <div id="frm-query">
+        <div style="padding: 1em 0.75em !important;">
+
+            <div style="padding-bottom: 10px;">
+                You can view the SPARQL editor and examples at WikiData <a href="https://query.wikidata.org/" target="https://query.wikidata.org/">here</a>.
+            </div>
+
+            <div class="input-div">
+                <textarea id="sparql-input" class="search-input" rows="30" cols="115"></textarea>
+            </div>
+
+            <div style="display: block; margin: 10px 0 0 10px;" id="btn_container">
+                <button id="btnStartSearch">Query</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Result List Container -->
+    <div id="frm-results" style="display: none;">
+        <div id="div_result" class="ent_content_full" style="height: 570px;"></div>
+    </div>
+
+    <!-- Additional settings for role code fields -->
+    <div id="frm-settings" style="display: none;">
+        <div style="padding: 10px 5px;">
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label for="dump_record">Save record: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <input type="checkbox" name="dump_record" style="margin-top: 0;">
+                    <span class="heurist-helper1" style="display: block;">Save the complete selected record as JSON</span>
+                </div>
+            </div>
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label for="rty_flds">Save selected record to: </label>
+                </div>
+
+                <div div class="input-cell" style="margin-left: 15px;">
+                    <label><input type="radio" name="dump_field" value="rec_ScratchPad" checked="checked"> Record scratch pad</label>
+                    <label><input type="radio" name="dump_field" value="dty_ID"> Record field (blocktext fields only)</label>
+                    <select id="rty_flds">
+                    </select>
+                    <span class="heurist-helper1" style="display: block;">Where will the JSON be placed</span>
+                </div>
+            </div>
+
+            <div style="display: table; margin: 10px 0px;">
+                <div class="header optional" style="width: 150px; display: table-cell; vertical-align: top; text-align: right;">
+                    <label for="author_codes">Label mapping: </label> 
+                </div>
+
+                <div class="input-cell" style="margin-left: 15px;">
+                    <textarea id="label_mapping" rows="5" cols="50" class="input-div" readonly="true"></textarea>
+                    <span class="heurist-helper1" style="display: block;">
+                        SPARQL field labels mapped to record fields
+                    </span>
+                </div>
+            </div>
+
+            <button id="save-settings" class="ui-button-action">Save options</button>
+        </div>
+    </div>
+
+</div>
