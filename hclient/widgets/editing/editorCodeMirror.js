@@ -21,33 +21,51 @@
       
 class EditorCodeMirror {
   
-  //html textarea that will be substituted with editor
-  input;  
+    //html textarea that will be substituted with editor
+    input;  
   
-  //parent div
-  inputdiv;
+    //parent div
+    inputdiv;
 
-  //element for codeEditor  
-  editorContainer = null;
+    //element for codeEditor  
+    editorContainer = null;
+
+    codeEditor = null;
+
+    #default_options = {
+        mode           : "htmlmixed", // list of modes: https://codemirror.net/5/mode/index.html
+        tabSize        : 2,
+        indentUnit     : 2,
+        indentWithTabs : false,
+        lineNumbers    : false,
+        matchBrackets  : true,
+        smartIndent    : true
+        /*extraKeys: {
+            "Enter": function(e){
+                insertAtCursor(null, "");
+            }
+        },*/
+    };
+    options = {};
+
+    //
+    //
+    //
+    constructor( _input_element, options = {} ) { 
+
+        this.input = _input_element;
+
+        //add hidden textarea element
+        this.inputdiv = this.input.parent('.input-div');
+
+        $.extend(this.options, this.#default_options, options);
+    }
   
-  codeEditor = null;
-  
-  //
-  //
-  //
-  constructor( _input_element ) { 
-      
-      this.input = _input_element;
-      
-      //add hidden textarea element
-      this.inputdiv = this.input.parent('.input-div');
-  }
-  
-  //
-  // private method to load codeMirror code 
-  //
-  #getCodeMirror()
-  {  
+    //
+    // private method to load codeMirror code 
+    //
+    #getCodeMirror(){
+
         let path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
         let scripts = [ //'lib/codemirror.css', included in index.php
                         'lib/codemirror.js',
@@ -55,109 +73,92 @@ class EditorCodeMirror {
                         'mode/xml/xml.js',
                         'mode/htmlmixed/htmlmixed.js'
                         ];
-        let  that = this;
+        let that = this;
         $.getMultiScripts2(scripts, path)
         .then(function() {  //OK! widget script js has been loaded
             that.showEditor();
         }).catch(function(error) {
             window.hWin.HEURIST4.msg.showMsg_ScriptFail();
         });
-                
-  }
 
-  //                                                                             
-  //
-  //
-  hideEditor(){
-     if(this.editorContainer) {
-        this.editorContainer.hide();
-     }
-  }
-  
-  //
-  //
-  //
-  showEditor(){
+    }
 
-      if(typeof CodeMirror !== 'function'){
+    //                                                                             
+    //
+    //
+    hideEditor(){
+        if(this.editorContainer) {
+            this.editorContainer.hide();
+        }
+    }
+
+    //
+    //
+    //
+    showEditor(){
+
+        if(typeof CodeMirror !== 'function'){
 
             this.#getCodeMirror();
             return;
-      }
+        }
 
-      let that = this;
-      
-      if(this.editorContainer==null){
-          let iwidth = $(this.input).width();
-          if(iwidth<300) iwidth = 300;
-          
-          let editor_id = $(this.input).attr('id')+'_codemirror';
-          this.editorContainer = $( "<div>")
-          .attr("id", editor_id)
-          .css({'overflow':'auto',resize:'both',width:iwidth})
-          .insertAfter(this.input) ;
-          this.editorContainer.hide();
-      }
+        let that = this;
 
+        if(this.editorContainer==null){
+            let iwidth = $(this.input).width();
+            if(iwidth<300) iwidth = 300;
 
-      if(this.codeEditor==null){
+            let editor_id = $(this.input).attr('id')+'_codemirror';
+            this.editorContainer = $( "<div>")
+            .attr("id", editor_id)
+            .css({'overflow':'auto',resize:'both',width:iwidth})
+            .insertAfter(this.input) ;
+            this.editorContainer.hide();
+        }
 
-          this.codeEditor = CodeMirror(this.editorContainer[0], {
-              mode           : "htmlmixed",
-              tabSize        : 2,
-              indentUnit     : 2,
-              indentWithTabs : false,
-              lineNumbers    : false,
-              matchBrackets  : true,
-              smartIndent    : true
-              /*extraKeys: {
-              "Enter": function(e){
-              insertAtCursor(null, "");
-              }
-              },*/
-          });
+        if(this.codeEditor==null){
 
-          this.codeEditor.on('change', function(instance){
+            this.codeEditor = CodeMirror(this.editorContainer[0], this.options);
+
+            this.codeEditor.on('change', function(instance){
                 that.input.val(instance.getValue());
                 that.input.trigger('change');
-              });
-              
-              
-          //$('.CodeMirror')
-          this.editorContainer.resizable({
-              resize: function() {
-                that.codeEditor.setSize($(this).width(), $(this).height());
-              }
-          });              
-              
-      }
+            });
 
-      //autoformat
-      setTimeout(function(){
-          if(typeof that.codeEditor.autoFormatRange === 'function'){
+            //$('.CodeMirror')
+            this.editorContainer.resizable({
+                resize: function() {
+                    that.codeEditor.setSize($(this).width(), $(this).height());
+                }
+            });              
+
+        }
+
+        //autoformat
+        setTimeout(function(){
+            if(typeof that.codeEditor.autoFormatRange === 'function'){
                 let totalLines = that.codeEditor.lineCount();  
                 that.codeEditor.autoFormatRange({line:0, ch:0}, {line:totalLines});                    
-          }
-          that.codeEditor.scrollTo(0,0);
-          that.codeEditor.setCursor(0,0); //clear selection
+            }
+            that.codeEditor.scrollTo(0,0);
+            that.codeEditor.setCursor(0,0); //clear selection
 
-          that.codeEditor.focus();
-          },500);
+            that.codeEditor.focus();
+        },500);
 
+        this.input.hide();
 
-      this.input.hide();
+        let btn_switcher = this.inputdiv?.find('.editor_switcher');
+        if(btn_switcher.length>0){
+            btn_switcher.find('span').css('text-decoration', '');
+            btn_switcher.find('span:contains("codeeditor")').css('text-decoration', 'underline');
+        }
 
-      let btn_switcher = this.inputdiv.find('.editor_switcher')
-      if(btn_switcher.length>0){
-          btn_switcher.find('span').css('text-decoration', '');
-          btn_switcher.find('span:contains("codeeditor")').css('text-decoration', 'underline');
-      }
+        this.editorContainer.css({display:'inline-block'});
+        if($(this.input).val()!=this.codeEditor.getValue()){
+            this.codeEditor.setValue($(this.input).val());    
+        }
+    }  
 
-      this.editorContainer.css({display:'inline-block'});
-      if($(this.input).val()!=this.codeEditor.getValue()){
-        this.codeEditor.setValue($(this.input).val());    
-      }
-  }  
-
-  
 }

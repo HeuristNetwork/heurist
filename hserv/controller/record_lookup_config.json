@@ -153,7 +153,7 @@
     },
     "options": {
         "author_codes": "",
-        "dump_receord": true,
+        "dump_record": true,
         "dump_field": "rec_ScratchPad"
     }
 },
@@ -172,7 +172,7 @@
         "auturl": ""
     },
     "options": {
-        "dump_receord": true,
+        "dump_record": true,
         "dump_field": "rec_ScratchPad"
     }
 },
@@ -246,6 +246,19 @@
         "term_translations": "",
         "geopoint": "",
         "editor_notes": ""
+    }
+},
+{
+    "service": "wikidata_SPARQL",
+    "rty_ID": "",
+    "label": "Wikidata - SPARQL query",
+    "dialog": "lookupWikidata_SPARQL",
+    "description": "Use SPARQL to query Wikidata",
+    "fields": {},
+    "options": {
+        "dump_record": false,
+        "dump_field": "rec_ScratchPad",
+        "SPARQL_field_map": {}
     }
 }
 ]

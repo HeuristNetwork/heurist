@@ -67,7 +67,10 @@ $service_types = array(
     'ESTC' => array(
         'db' => 'ESTC_Helsinki_Bibliographic_Metadata',
         'action' => 'import_records' // 'record_output'
-    )
+    ),
+
+    'wikidata_simple' => 'https://www.wikidata.org/w/api.php?',
+    'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?'
 );
 
 // Check if more servers have been defined within heuristConfigIni
@@ -113,7 +116,17 @@ $service_parameters = array(
         'q' => $MIXED,
         'lang' => $MIXED,
         'group' => $MIXED
-    )
+    ),
+
+    'wikidata_simple' => [
+        'type' => $MIXED,
+        'language' => $MIXED,
+        'search' => $MIXED,
+        'limit' => $NUMBERED
+    ],
+    'wikidata_SPARQL' => [
+        'query' => $MIXED
+    ]
 );
 
 // BnF xml namespace urls
@@ -347,6 +360,7 @@ if($is_extra_service){
 $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
 
 $clean_query = array();
+$headers = [];
 
 if($url !== false && !empty($url)){
 
@@ -380,6 +394,11 @@ if($url !== false && !empty($url)){
             $clean_query['version'] = '1.2';
             $clean_query['operation'] = 'searchRetrieve';
             $clean_query['recordSchema'] = 'unimarcxchange';
+        }elseif($cur_type == 'wikidata_simple'){
+            $clean_query['action'] = 'wbsearchentities';
+            $clean_query['format'] = 'json';
+        }elseif($cur_type == 'wikidata_SPARQL'){
+            $headers[] = 'Accept: application/sparql-results+json';
         }
 
         if(empty($clean_query)){
@@ -395,7 +414,7 @@ if($url === false || empty($url)){
 }
 
 // Perform external lookup / API request
-$remote_data = loadRemoteURLContentWithRange($url, null, true, 30);
+$remote_data = loadRemoteURLContentWithRange($url, null, true, 30, $headers);
 if($remote_data===false){
 
     global $glb_curl_error;
@@ -1092,6 +1111,16 @@ if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap')
     }
 
     $remote_data = json_encode($results);
+}elseif(strpos(@$params['serviceType'], 'wikidata') !== false){
+
+    $remote_data = ['status' => HEURIST_OK, 'data' => json_decode($remote_data, true)];
+
+    if(array_key_exists('error', $remote_data['data'])){
+        $remote_data['status'] = $remote_data['data']['error']['code'] === 'missingparam' ? HEURIST_INVALID_REQUEST : HEURIST_REQUEST_DENIED;
+        $remote_data['msg'] = $remote_data['data']['error']['info'];
+    }
+
+    $remote_data = json_encode($remote_data);
 }
 
 // Return response

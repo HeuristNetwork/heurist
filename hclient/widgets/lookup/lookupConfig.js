@@ -270,6 +270,10 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 $(`<tr><td>${field}</td><td><select data-field="${field}"></select></td><td class="lookup_data" data-field="${field}"></td></tr>`).appendTo(tbl);
             }
 
+            if(this._current_cfg.fields.length == 0){
+                this._$(`#no_fields_msg, #no_fields_msg .${this._current_cfg.service}`).show();
+            }
+
             let rty_ID = this._current_cfg.rty_ID > 0 ? $Db.getLocalID('rty',this._current_cfg.rty_ID) : '';
             
             //select service and type
@@ -853,7 +857,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         });
 
-        if(!is_field_mapped){
+        if(!is_field_mapped && tbl.find('select').length > 0){
             window.hWin.HEURIST4.msg.showMsgFlash('Map at least one field listed', 3000);
             return;
         }
@@ -1014,7 +1018,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
             this.options.service_config[key]['options'] = {
                 'author_codes': '', //'contributor_codes': ''
-                'dump_receord': true,
+                'dump_record': true,
                 'dump_field': 'rec_ScratchPad'
             };
             has_changes = true;
@@ -1024,11 +1028,16 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             // add default options
             
             this.options.service_config[key]['options'] = {
-                'dump_receord': true,
+                'dump_record': true,
                 'dump_field': 'rec_ScratchPad'
             };
             has_changes = true;
 
+        }
+
+        if(Object.hasOwn(this.options.service_config[key], 'options') && Object.hasOwn(this.options.service_config[key]['options'], 'dump_receord')){
+            has_changes = true;
+            delete this.options.service_config[key]['options']['dump_receord'];
         }
 
         return has_changes;

@@ -145,15 +145,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             });
 
             // Set search button status based on the existence of input
-            this._on(this.element.find('input, select'), {
+            this._on(this.element.find('input, select, .search-input'), {
                 keyup: () => {
-                    let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
+                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
                         return !window.hWin.HEURIST4.util.isempty($(ele).val());
                     });
                     window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 },
                 change: () => {
-                    let $inputs_with_value = this.element.find('input, select').filter((idx, ele) => { 
+                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
                         return !window.hWin.HEURIST4.util.isempty($(ele).val());
                     });
                     window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
