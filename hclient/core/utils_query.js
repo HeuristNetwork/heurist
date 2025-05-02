@@ -577,22 +577,23 @@ window.hWin.HEURIST4.query = {
 
     stringQueryToPlainText: function(query){
 
-        const getSubquery = /\(([^[\)])*\)/g;
-        const removeParenthesis = /(?:^[\s\(]+)|(?:[\s\)]+$)/g;
+        const getSubquery = /\(([^[)])*\)/g;
+        const removeParenthesis = /(?:^[\s(]+)|(?:[\s)]+$)/g;
 
         query = typeof query === 'string' ? query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
-        let is_invalid = typeof query !== 'string' || query === '' || /^[^\w\d]/.exec(query) !== null;
+        let is_invalid = typeof query !== 'string' || query === '' || /^[^\w]/.exec(query) !== null;
 
         if(window.hWin.HEURIST4.util.isJSON(query) || is_invalid){
             return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
         }
 
         let subqueries = [...query.matchAll(getSubquery)];
-        for(let subquery of subqueries){
+        for(const idx in subqueries){
 
-            subquery = subquery.replaceAll(removeParenthesis, '');
-
-            subquery = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
+            let subquery = subqueries[idx].replaceAll(removeParenthesis, '');
+            
+            let result = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
+            query = query.replace(subqueries[idx], result);
         }
 
         let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract via spaces, not within double quotes
