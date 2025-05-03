@@ -216,7 +216,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php
-    includeJQuery( true );
+    includeJQuery( defined('LOAD_BOOTSTRAP') );
 ?>
 
 <script src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>

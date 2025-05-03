@@ -35,7 +35,6 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
         //Init some controls
         this._$('select').each((i,selObj)=>{
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
-            //selObj.on('change', ()=>that._triggerOnChange());
         });
         
         this._$('#tabs').tabs();

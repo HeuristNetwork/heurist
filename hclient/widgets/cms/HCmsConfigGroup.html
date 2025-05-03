@@ -1,0 +1,197 @@
+<!--
+/**
+* Content for HCmsConfigGroup.js - container/group layout configuration
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @version     7.0
+*/
+-->
+                <!-- PAGE ROOT/Container -->
+                <div class="page-layout" style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                    <h3>
+                        Container
+                    </h3>
+                    <fieldset>
+                        <legend style="display:none"></legend>
+                        <div>
+                            <div class="header_narrow">Type:</div>
+                            <select name="containerType" id="containerType" style="min-width:200px">
+                                <option value="container-fluid" selected>100% width</option>
+                                <!-- <option value="container">Max width at each breakpoint</option> -->
+                                <option value="container-sm">Small (540px)</option>
+                                <option value="container-md">Medium (720px)</option>
+                                <option value="container-lg">Large (960px)</option>
+                                <option value="container-xl">XLarge (1200px)</option>
+                                <option value="container-xxl">XXLarge (1400px)</option>
+                            </select>
+                            <div class="heurist-helper3">Sets a max-width at each responsive breakpoint</div>
+                        </div>
+                    </fieldset>
+                </div>
+                
+                <!-- LAYOUT properties -->
+                <div class="group-layout" style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
+                    <h3>
+                        Layout
+                    </h3>
+                    <fieldset>
+                        <legend style="display:none"></legend>
+                            <div>
+                                <div class="header_narrow" style="font-weight:bold">Type:</div>
+                                <select name="groupType" id="groupType">
+                                    <option value="group" selected>simple</option>
+                                    <option value="tabs">page control</option>
+                                    <option value="accordion">accordion</option>
+                                    <option value="grid">grid</option>
+                                    <option value="flex">flex</option>
+                                    <!--
+                                    <option value="flexbox" disabled>flex (bootstrap)</option>
+                                    <option value="fixed" disabled>fixed</option>
+                                    -->
+                                </select>
+                            </div>
+
+                            <!-- PAGECONTROL/TABS -->
+                            <div class="props tabs">
+                                <div class="header_narrow">Appearance:</div>
+                                <select name="nav_type" class="tabs-select" id="nav_type">
+                                    <option value="nav-jquery">jQuery</option>
+                                    <option value="nav-tabs">tabs</option>
+                                    <option value="nav-pills">pills</option>
+                                    <option value="nav-links">links</option>
+                                </select>
+                            </div>
+                            <div class="props tabs">
+                                <div class="header_narrow">Direction:</div>
+                                <select name="nav_dir" class="tabs-select" id="nav_dir">
+                                    <option value="nav-row">horizontal</option>
+                                    <option value="nav-col">vertical</option>
+                                </select>
+                            </div>
+                            
+                            <!-- ACCORDION -->
+                            <div class="props accordion">
+                                <div class="header_narrow">Appearance:</div>
+                                <select name="acc_type" class="accordion-select" id="acc_type">
+                                    <option value="acc-jquery">jQuery</option>
+                                    <option value="acc-bs">Bootstrap</option>
+                                </select>
+                            </div>
+                            <div class="props accordion">
+                                <div class="header_narrow">Collapsible:</div>
+                                <input name="acc_collapse" type="checkbox" id="acc_collapse"/>
+                            </div>
+
+                            <!-- GRID -->
+                            <div class="props grid">
+                                <div class="header_narrow">Horizontal alignment:</div>
+                                <select name="justify-content" class="grid-select" id="grid-justify-content">
+                                    <option value="start">start</option> <!-- default -->
+                                    <option value="end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="between">between</option>
+                                    <option value="around">around</option>
+                                    <option value="evenly">evenly</option>
+                                </select>
+                            </div>
+                            <div class="props grid">
+                                <div class="header_narrow">Vertical alignment:</div>
+                                <select name="align-items" class="grid-select" id="grid-align-items">
+                                    <option value="start">start</option> <!-- default -->
+                                    <option value="end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="stretch">stretch</option>
+                                </select>
+                            </div>
+                            <div class="props grid">
+                                <div class="header_narrow">Gap:</div>
+                                <input name="g" class="grid-select" type="number" min="0" max="5" value="0" placeholder="0" style="width:30px" id="grid-gap" class="text ui-widget-content"/>
+                            </div>
+                            <!--
+                            <div class="props grid">
+                                <div class="header_narrow">Equal columns:</div>
+                                <input name="grid-equal" class="Xgrid-select" type="checkbox" id="grid-equal"/>
+                            </div>
+                            -->
+                            
+                            
+                            <!-- FLEX CSS -->
+                            <div class="props flex">
+                                <div class="header_narrow">Direction:</div>
+                                <select name="direction" class="flex-select" id="flex-direction">
+                                    <option value="">row</option> <!-- default -->
+                                    <option value="column">column</option>
+                                    <!-- <option value="row-reverse">row-reverse</option>-->
+                                    <!-- <option value="column-reverse">column-reverse</option>-->
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Wrap:</div>
+                                <select name="wrap" class="flex-select" id="flex-wrap">
+                                    <option value="">nowrap</option> <!-- default -->
+                                    <option value="wrap">wrap</option>
+                                    <!-- <option value="wrap-reverse">wrap-reverse</option> -->
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Main axis alignment:</div>
+                                <select name="justify-content" class="flex-select" id="justify-content">
+                                    <option value="">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="space-between">space-between</option>
+                                    <option value="space-around">space-around</option>
+                                    <option value="stretch">stretch</option>
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow">Cross axis alignment:</div>
+                                <select name="align-items" class="flex-select" id="align-items">
+                                    <option value="">stretch</option>
+                                    <option value="flex-start">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="baseline">baseline</option>
+                                </select>
+                            </div>
+                            <div class="props flex">
+                                <div class="header_narrow" title="Align lines within when there is extra space in the cross-axis">Align content:</div>
+                                <select name="align-content" class="flex-select" id="align-content">
+                                    <option value="">stretch</option>
+                                    <option value="flex-start">start</option>
+                                    <option value="flex-end">end</option>
+                                    <option value="center">center</option>
+                                    <option value="space-between">space-between</option>
+                                    <option value="space-around">space-around</option>
+                                </select>
+                            </div>
+                            
+                            <hr>
+                            <div data-flexitem="stub" style="display: none;">
+                                <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
+                                <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:40px" class="text ui-widget-content"/>
+                                <label for="">&nbsp;Size:</label>
+                            </div>                    
+                            
+                            <div data-gridcol="stub" style="display: none;">
+                                <div class="header_narrow" title="Grid column proportion">Column width:</div>
+                                <select name="grid-col-width">
+                                    <option value="">expand</option>
+                                    <option value="auto">auto</option>
+                                    <option value="proportion">proportional (1 of 12)</option>
+                                </select>
+                                <input name="grid-col" type="number" min="1" max="12" value="3" placeholder="3" style="width:30px"/>
+                            </div>                    
+                            <div class="props grid heurist-helper3" style="display: block;">
+                                Define columns width: 
+                                1) <i>Expand</i> for all available width (equal width)
+                                2) <i>Auto</i> based on internal column width
+                                3) <i>Proportional</i> - 12 columns max
+                            </div>
+                            <div class="props flex heurist-helper3"></div>
+                    
+                    </fieldset>
+                </div>                        

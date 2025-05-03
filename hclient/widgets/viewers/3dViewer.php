@@ -158,7 +158,7 @@ if($is_not_inited){
 $url = str_replace('&amp;','&',htmlspecialchars($url));
 
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta name="robots" content="noindex,nofollow">

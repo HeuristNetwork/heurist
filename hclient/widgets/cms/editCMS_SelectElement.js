@@ -75,7 +75,7 @@ function editCMS_SelectElement( callback ){
             grp4:{name:'New Widgets', description:'#widgets2', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
                 
                 HRecordList:{name:'Records list', description:'#HRecordList'},
-                HRecordView:{name:'Record view', description:'#HRecordView'},
+                //HRecordView:{name:'Record view', description:'#HRecordView'},
         
     };
 

@@ -34,7 +34,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
     exit;
 }
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <title><?=HEURIST_TITLE ?></title>

@@ -26,7 +26,7 @@ $.widget( 'heurist.HRecordView', $.heurist.HBaseView, {
     options: {
 
         // Defines where to display the record view:
-        // Possible values: '#html_id', 'inline', 'offcanvas-*', 'modal-*', 'popup' (jQuery dialog)
+        // Possible values: 'inline', 'offcanvas-*', 'modal-*', 'popup' (jQuery dialog)
         viewMode: 'popup',
 
         // Record type and ID

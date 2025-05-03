@@ -86,7 +86,7 @@ class HCmsConfig {
       cont.find('input[name^="bsMargin-"]').on('change',(e)=>that.#onMarginSyncVal(e));
       
       //Listeners for selects    
-      cont.find('select').each((i,selObj)=>{
+      cont.find('#properties_form select').each((i,selObj)=>{
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
             selObj.on('change', ()=>that.#getCss());
       });
@@ -469,11 +469,9 @@ console.log('getIdAndName');
         let cont = this.container;
         let css = {};
         
-console.log('getcss', this.l_cfg);
+//console.log('getcss', this.l_cfg);
         
         let bsClasses = [];
-        //HCmsEditor.getBsClasses(this.l_cfg.bsClasses, 'col');
-        //bsClasses = bsClasses.split(' ');
 // BORDER  get values from UI -----------------
         let val = cont.find('input[name="border"]').is(':checked');
         if(isGlobalCheck && !val){
@@ -602,8 +600,7 @@ console.log('getcss', this.l_cfg);
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
                 'background','background-image','bg-image','background-repeat','background-position','background-size',
-                'border','border-width','border-color','border-style','border-radius','--bs-border-style',
-                'flex-direction','flex-wrap','justify-content','align-items','align-content'];
+                'border','border-width','border-color','border-style','border-radius','--bs-border-style'];
             for(let i=0; i<params.length; i++){
                 let prm = params[i];
                 if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value

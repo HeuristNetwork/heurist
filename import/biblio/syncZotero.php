@@ -95,7 +95,7 @@ if($fh_data==null || is_string($fh_data)){
     exit;
 }
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">

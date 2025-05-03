@@ -15,7 +15,7 @@
 * doSearch, _onGetRecords - Search for initial search or on search domain event
 * clearContent 
 * renderMessage - adds notification/placeholder message (init, error or for empty result)
-* renderConent 
+* renderContent 
 
 * setSelection
 * getSelection

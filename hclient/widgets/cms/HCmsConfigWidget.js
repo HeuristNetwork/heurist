@@ -1,6 +1,6 @@
 /*
-* HCmsConfig.js - base configuration for CSM element
-* It containes name, border/bg/margin and direct edit
+* HCmsConfigWidget.js - configuration for Heurist widget. Besides css/classes 
+* coonfigutation forms it loads HBaseWidgetOpts - form with widget options
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -74,29 +74,4 @@ class HCmsConfigWidget extends HCmsConfig {
   #getIdAndName(){
       console.log('CGILD getIdAndName');
   }
-  
-  /*
-  * Prepare values for saving
-  */  
-  /*
-  * Setter. Assigns values from l_cfg to UI
-  */ 
-  /*
-  * Getter. Get css vaues from UI and apply to element
-  #revertChanges(){
-      super().#revertChanges();  
-  }
-
-  #getCfgFromUI(){
-    super().#getCfgFromUI();  
-  }
-
-  #setCssToUI(){
-    super().#setCssToUI();  
-  }
-  #getCss( isGlobalCheck ){
-    return super().#getCss( isGlobalCheck );      
-  }
-  */
-  
 }

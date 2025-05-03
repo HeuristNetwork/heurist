@@ -28,6 +28,7 @@ use hserv\utilities\USanitize;
 if(!defined('PDIR')) {
     define('PDIR','../../../');//need for proper path to js and css
 }
+define('LOAD_BOOTSTRAP', 1);
 require_once dirname(__FILE__).'/../../framecontent/initPage.php';
 
 if(!isset($params)){

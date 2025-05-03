@@ -131,7 +131,7 @@ if(mysql__check_dbname($db)==null){
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.basename($db).'&file='.$fileid.'&size='.$size;
 
                     ?>
-                    <!DOCTYPE HTML>
+                    <!DOCTYPE html>
                     <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <head>
                             <title>Heurist mediaplayer</title>

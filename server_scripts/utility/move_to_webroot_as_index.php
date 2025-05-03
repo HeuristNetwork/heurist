@@ -26,7 +26,7 @@
 
 /*   This is the html alternative - not tested
 
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en-US">
     <head>
         <meta charset="UTF-8">

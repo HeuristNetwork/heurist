@@ -178,10 +178,8 @@ $.widget( 'heurist.HBaseWidget', {
         }
 
         if(this._optionsEditor[optEditor]('instance')){
-console.log('show');            
             this._optionsEditor[optEditor]('show', this.options);
         }else{
-console.log('create');            
             let that = this;
             this._optionsEditor[optEditor]({editOptions: this.options, 
                         viewMode: container ?'inline':'popup', 

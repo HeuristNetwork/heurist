@@ -67,7 +67,7 @@ if($error!=null){
                     $res2 = json_encode($res);
                     //pass to window.close('echo $res;');
                     ?>
-                    <!DOCTYPE HTML>
+                    <!DOCTYPE html>
                     <html lang="en">
                     <head>
                     <title>Heurist external authentification</title>
@@ -112,7 +112,7 @@ if($msg==null){
     }
 }
 ?>
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <title>Heurist external authentification</title>

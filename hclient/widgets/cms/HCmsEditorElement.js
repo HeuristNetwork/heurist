@@ -37,12 +37,11 @@ element editor
   
   
   
-  HCmsConfig - name + border + bg + margins + direct
-  HCmsConfigPage + container type (no width, height, id)  direct HTML edit if not structured
+  +HCmsConfig - name + border + bg + margins + direct
   HCmsConfigMargin = for header and footer (no id)        direct HTML edit if not structured   
-  HCmsConfigContainer - (group, tab accordion, grid, flex) + layout type
+  HCmsConfigGroup - (group, tab accordion, grid, flex) + layout type
   HCmsConfigCardinal  only cardinal config
-  HCmsConfigWidget
+  +HCmsConfigWidget
   
   
   
@@ -335,7 +334,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         let cont = $container;
 
         let etype = cont.find('#groupType').val();
-console.log('>>>', etype);        
+
         cont.find('.props').hide();
         if(!window.hWin.HEURIST4.util.isempty(etype)){
             cont.find('.props.'+etype).show();
