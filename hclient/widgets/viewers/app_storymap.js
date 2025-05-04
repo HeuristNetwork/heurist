@@ -468,7 +468,6 @@ $.widget( "heurist.app_storymap", {
                         placeholder = `<br><h3 class="not-found" style="color:teal;display:inline-block">${placeholder}</h3>`;
                     }
                     
-console.log('on  search finish ', placeholder);
                     if(that._initial_div_message.html()!=placeholder){
                         that._initial_div_message.html(placeholder).show();    
                     }
