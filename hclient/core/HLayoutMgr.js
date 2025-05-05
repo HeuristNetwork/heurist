@@ -1381,8 +1381,9 @@ class HLayoutMgr {
     
   }
   
-  layoutInitFromJSON(layout, container, supp_options)
+  layoutInitFromJSON(layout, container, supp_options, isFirstLevel)
   {
+    isFirstLevel = (isFirstLevel!==false);
     this._supp_options = supp_options || {};
     return this.#layoutInitFromJSON(layout, container, false, true);
   }

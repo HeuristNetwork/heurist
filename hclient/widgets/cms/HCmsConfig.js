@@ -25,7 +25,9 @@ class HCmsConfig {
   codeEditor; //HCmsCodeEditor
   isChanged = false;
 
-  allAffectedBsClasses = ['container','border','bg-','text-','rounded','shadow','row',' col','justify-content','align-items','g-','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-'];
+  allAffectedBsClasses = ['border','bg-','text-','rounded','shadow','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-',
+                            'container','row','col','justify-content','align-items','g-'];
+  allStyleBsClasses = ['border','bg-','text-','rounded','shadow','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-'];
   
   constructor(options) {
       
@@ -104,13 +106,13 @@ class HCmsConfig {
       //SAVE AND CANCEL BUTTONS      
       //save entire page (in background) 
       cont.find('.btn-save-and-close').button().css('border-radius','4px').on('click', function(){
-          that.#getCfgFromUI();
+          that.getCfgFromUI();
           that.#updateConfiguration();
           that.onClose.call(this, that.l_cfg, 'close');
       });
 
       cont.find('.btn-save-only').button().css('border-radius','4px').on('click', function(){
-          that.#getCfgFromUI();
+          that.getCfgFromUI();
           that.#updateConfiguration();
           that.onClose.call(this, that.l_cfg, 'save');
           that.onContentChange( false );
@@ -118,7 +120,7 @@ class HCmsConfig {
       cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
           //restore old settings for classes, style and content
           if(that.isChanged){
-              that.#revertChanges();
+              that.revertChanges();
           }
           that.onClose.call();      
       });
@@ -126,11 +128,20 @@ class HCmsConfig {
       this.onContentChange( alreadyModified );
   }
   
-  #revertChanges(){
-      
+  /*
+  *
+  */
+  revertChanges(){
+  
+console.log('revertChanges');
       this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(this.element_cfg);
       this.#setCssToUI();
-      this.#getCss();
+      
+      HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, this.l_cfg.bsClasses);
+      $(this.element).removeAttr('style');
+      $(this.element).css(this.l_cfg.css); //assign changed css at once
+      
+      //this.#getCss();
       $(this.element).html(this.l_cfg.content);
   }
   
@@ -269,7 +280,7 @@ class HCmsConfig {
   /*
   * Get name and id from UI
   */  
-  #getIdAndName(){
+  getIdAndName(){
 console.log('getIdAndName');
       let l_cfg = this.l_cfg;
       let cont = this.container;
@@ -282,13 +293,13 @@ console.log('getIdAndName');
   /*
   * Prepare values for saving
   */  
-  #getCfgFromUI(){
+  getCfgFromUI(){
 
       let cont = this.container;
       let l_cfg = this.l_cfg;
       this.#getCss(); //assigns l_cfg.css and l_cfg.bsClasses
       
-      this.#getIdAndName();
+      this.getIdAndName();
 
       const userClasses = cont.find('textarea[name="elementClasses"]').val();
       if(window.hWin.HEURIST4.util.isempty(userClasses)){
@@ -310,9 +321,7 @@ console.log('getIdAndName');
       //
       if(!l_cfg.bsClasses){
           //get from element  TBD
-          let classes = Array.from(this.element.classList);
-          l_cfg.bsClasses = HCmsEditor.getBsClasses(classes, this.allAffectedBsClasses);
-          l_cfg.bsClasses = l_cfg.bsClasses.join(' ').trim();
+          l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
       }
 
       let hasBorder = false;
@@ -596,7 +605,7 @@ console.log('getIdAndName');
         if(this.l_cfg.css){
             let old_css = this.l_cfg.css;
             //remove these parameters from css and assign from form
-            let params = ['display','width','height',
+            let params = ['width','height',
                 'padding','padding-left','padding-top','padding-bottom','padding-right',
                 'margin','margin-left','margin-top','margin-bottom','margin-right',
                 'background','background-image','bg-image','background-repeat','background-position','background-size',
@@ -613,8 +622,8 @@ console.log('getIdAndName');
 
         //update 
         if(bsClasses.length>0){
-            this.l_cfg.bsClasses = bsClasses.join(' '); //keep
-            HCmsEditor.replaceBsClasses(this.element, this.allAffectedBsClasses, bsClasses);
+            HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, bsClasses);
+            this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
         }
         
         $(this.element).removeAttr('style');
@@ -629,6 +638,7 @@ console.log( 'assign', css );
         return css;
   }
   
+ 
   #updateConfiguration(){
       
   }
@@ -654,7 +664,7 @@ console.log( 'assign', css );
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
                         that.container.find('.btn-cancel').trigger('click');
-                        $dlg.dialog('close'); 
+                        $dlg.dialog('close');
                         if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
                     }
                 },

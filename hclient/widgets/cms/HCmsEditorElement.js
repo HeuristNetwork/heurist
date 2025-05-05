@@ -262,7 +262,7 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
             //6. restore old settings 
             element.removeAttr('style');
             if(element_cfg.css) element.css(element_cfg.css);
-            main_callback.call(this, null);
+            main_callback.call(this, null, 'cancel');
         });
         
         window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-page'), already_changed!==true);

@@ -1315,7 +1315,9 @@ function(value){
                         }
                         
                         //save page
-                        that.#saveLayoutCfg(); 
+                        if(mode!='cancel'){
+                            that.#saveLayoutCfg(); 
+                        }
                     }
                     
                     if(mode!='save'){
@@ -1334,25 +1336,26 @@ function(value){
                     
                 }
                 
-                if(element_cfg.type=='text'){ //new 
-                
-                    this._cmsEditorElement = new HCmsConfig({
+                let props = {
                             cmsEditor: this._cmsEditor,
                             container: this._panel_propertyView,
                             onClose: __onSaveElementConfig,
                             element_cfg: element_cfg,
                             alreadyModified: this.page_was_modified
-                    });
+                    };
+                
+                if(element_cfg.type=='text'){ //new 
+                
+                    this._cmsEditorElement = new HCmsConfig(props);
                     
                 }else if(element_cfg.appid?.indexOf('HRecord')===0){
                     
-                    this._cmsEditorElement = new HCmsConfigWidget({
-                            cmsEditor: this._cmsEditor,
-                            container: this._panel_propertyView,
-                            onClose: __onSaveElementConfig,
-                            element_cfg: element_cfg,
-                            alreadyModified: this.page_was_modified
-                    });
+                    this._cmsEditorElement = new HCmsConfigWidget(props);
+
+                }else if(element_cfg.folder){
+
+                    this._cmsEditorElement = new HCmsConfigGroup(props);
+
                 
                 }else{ //old
                  

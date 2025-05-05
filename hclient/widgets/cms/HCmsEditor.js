@@ -552,6 +552,15 @@ class HCmsEditor {
   //
   // returns only classes started with the given prefix
   //
+  static getBsClassesAsString(element, withPrefix){
+      let classes = Array.from(element?.classList);
+      let bsClasses = HCmsEditor.getBsClasses(classes, withPrefix);
+      return bsClasses.join(' ').trim();
+  }
+  
+  //
+  // returns only classes started with the given prefix
+  //
   static getBsClasses(classes, withPrefix){
       return HCmsEditor.getOrRemoveClasses(classes, withPrefix, false);
   }

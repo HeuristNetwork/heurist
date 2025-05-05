@@ -10,9 +10,12 @@
 
 /* global HCmsConfig */
 
-class HCmsConfigWidget extends HCmsConfig {
+class HCmsConfigGroup extends HCmsConfig {
    
    groupEditor = null; 
+   
+   allContainerBsClasses = ['container','row','col','justify-content','align-items','g-'];
+   
   /**
   * Inits inteface controls
   */
@@ -35,34 +38,44 @@ class HCmsConfigWidget extends HCmsConfig {
      }
       
      super.initControls();  
+     
+     let that = this;
+     let cont = this.container;
+     let l_cfg = this.l_cfg;
 
      //init controls in groupEditor
      let etype = l_cfg.type;
+     let group_type;
 
      if(l_cfg.isPage){
-         cont.find('.page-layout').show();    
+         cont.find('.group-layout').hide();
          let containerClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'container');
          cont.find('#containerType').val(containerClass);
          cont.find('#groupType').val('group');
+         
+         group_type = 'page-layout';
      }else{
-         cont.find('.group-layout').show();
+         cont.find('.page-layout').hide();
          let selGoupType = cont.find('#groupType');
          selGoupType.val(l_cfg.type);
          selGoupType = window.hWin.HEURIST4.ui.initHSelect(selGoupType);
          selGoupType.on({change:()=>that.#initControlsForLayoutType()});
          
-         //Listeners for selects    
-         cont.find('#groupEditor select').each((i,selObj)=>{
-                selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
-                selObj.on('change', ()=>that.#onChangeOptions());
-         });
-         
          this.#initControlsForLayoutType()
+         
+         group_type = 'group-layout';
      }
 
-     if(etype=='tabs' || etype=='accordion'){
+     //Listeners for selects    
+     cont.find(`.${group_type} select`).each((i,selObj)=>{
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
+            selObj.on('change', ()=>that.#onChangeOptions());
+     });
+         
+     
+     if(l_cfg.isPage || etype=='tabs' || etype=='accordion'){
         cont.find('input[data-type="element-id"]').parent().hide();
-     }     
+     }    
      
   }
   
@@ -173,7 +186,7 @@ class HCmsConfigWidget extends HCmsConfig {
 
                  l_cfg.children[k].bsClasses = (HCmsEditor.removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
 
-                 let child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
+                 let child_ele = that._cmsEditor.findInWebSite('div[data-hid='+l_cfg.children[k].key+']');
 
                  HCmsEditor.replaceBsClasses(child_ele[0], 'col', val);
              }
@@ -183,7 +196,6 @@ class HCmsConfigWidget extends HCmsConfig {
 
              item_last = item;
          }//for
-
 
      }else
          if(etype=='flex'){
@@ -224,18 +236,19 @@ class HCmsConfigWidget extends HCmsConfig {
                      l_cfg.children[k].css['border-radius'] = '4px';
                      l_cfg.children[k].css['margin'] = '4px';*/
 
-                     let child_ele = _layout_container.find('div[data-hid='+l_cfg.children[k].key+']');
+                     let child_ele = that._cmsEditor.findInWebSite('div[data-hid='+l_cfg.children[k].key+']');
                      child_ele.removeAttr('style');
                      child_ele.css(l_cfg.children[k].css);
                  });
 
                  item_last = item;
              }//for
+
          }else if(etype=='tabs'){
-                 cont.find('#nav_type').val(l_cfg.options?.nav_type);
+                 cont.find('#nav_type').val(l_cfg.options?.nav_type??'jQuery');
                  cont.find('#nav_dir').val(l_cfg.options?.nav_dir??'nav-row');
          }else if(etype=='accordion'){
-                 cont.find('#acc_type').val(l_cfg.options?.acc_type);
+                 cont.find('#acc_type').val(l_cfg.options?.acc_type??'jQuery');
                  cont.find('#acc_collapse').attr('checked',l_cfg.options?.acc_collapse);
          }
 
@@ -249,17 +262,17 @@ class HCmsConfigWidget extends HCmsConfig {
       let that = this;
       let cont = this.container;
       let l_cfg = this.l_cfg;
+      let css = {};
 
       let groupType = cont.find('#groupType').val();
+      let recreateGroup = false;
 
-      let bsClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'col');
+      let bsClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'col'); //in case this element is col for parent
       bsClasses = bsClasses.split(' ');
 
       if(l_cfg.isPage){
           bsClasses.push(cont.find('#containerType').val());
       }else{
-
-            let recreateGroup = false;
 
             if(groupType=='grid'){
                 bsClasses.push('row');
@@ -299,12 +312,17 @@ class HCmsConfigWidget extends HCmsConfig {
                     }
                 });
             }
+            
+            if(l_cfg.options && !(groupType=='accordion' || groupType=='tabs')){
+                delete l_cfg.options;
+            }
+            
       }
 
       if(l_cfg.css){
           let old_css = l_cfg.css;
           //remove these parameters from css and assign from form
-          let params = ['flex-direction','flex-wrap','justify-content','align-items','align-content'];
+          let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
           for(let i=0; i<params.length; i++){
               let prm = params[i];
               if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
@@ -318,11 +336,15 @@ class HCmsConfigWidget extends HCmsConfig {
       l_cfg.css = css;
       //TBD _assignCssTextArea();
 
-      if(isGroup){
+      if(l_cfg.isPage){
+          if(bsClasses.length>0){
+              HCmsEditor.replaceBsClasses(this.element, 'container', bsClasses);
+          }
+      }else{
           if(groupType!='grid' && l_cfg.type=='grid'){
               //remove grid classes for container and children
               if(l_cfg.bsClasses){
-                  bsClasses = HCmsEditor.removeBsClasses(bsClasses, 'row');
+                  bsClasses = HCmsEditor.removeBsClasses(bsClasses, this.allContainerBsClasses);
               }
               for(let i=0; i<l_cfg.children.length; i++){
                   l_cfg.children[i].bsClasses = HCmsEditor.removeBsClasses(l_cfg.children[i].bsClasses, 'col');
@@ -339,32 +361,67 @@ class HCmsConfigWidget extends HCmsConfig {
       }
 
       if(bsClasses.length>0){
-          l_cfg.bsClasses = bsClasses.join(' '); //keep
+            HCmsEditor.replaceBsClasses(this.element, this.allContainerBsClasses, bsClasses);
+            l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
       }
+      l_cfg.css = css;
 
-      if((isGroup && groupType!=l_cfg.type) || recreateGroup){
+      if(recreateGroup || (!l_cfg.isPage && groupType!=l_cfg.type)){
           //l_cfg.uiLibrary='bootstrap';
 
-          let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
           l_cfg.type = groupType;
+          
+          let groupInitMethod;
           if(groupType=='accordion'){
-              element = pageEditor.layoutMgr.layoutInitAccordion(l_cfg, element);   
+              groupInitMethod = 'layoutInitAccordion';
           }else if(groupType=='tabs'){
-              element = pageEditor.layoutMgr.layoutInitTabs(l_cfg, element);
+              groupInitMethod = 'layoutInitTabs';
           }else{
-              element = pageEditor.layoutMgr.layoutInitGroup(l_cfg, element);
+              groupInitMethod = 'layoutInitGroup';
           }
 
-          element.addClass('cms-element-editing headline');// marching-ants marching
+          this.element = this.cmsEditor.getHapi().layoutMgr[groupInitMethod](l_cfg, $(this.element));
+          this.element.addClass('cms-element-editing headline');// marching-ants marching
+          this.element = this.element[0];
 
       }else{
-          if(bsClasses.length>0){
-              HCmsEditor.replaceBsClasses(element[0], 'col', bsClasses);
-          }
-          this.element.removeAttr('style');
-          this.element.css(css); //assign changed css at once
-          this.l_cfg.css = css;
+          $(this.element).removeAttr('style');
+          $(this.element).css(css); //assign changed css at once
       }
+      
+      this.onContentChange( true );
+      
+  }
+  
+  /*
+  *
+  */
+  revertChanges(){
+      
+      super.revertChanges();
+      
+      //recreate widget
+      if(this.l_cfg.isPage){
+           HCmsEditor.replaceBsClasses(this.element, this.allContainerBsClasses, this.l_cfg.bsClasses);
+           
+//console.log('recreate page', this.l_cfg.bsClasses);          
+//console.log(this.element.classList);          
+           
+      }else{
+//console.log('recreate group');          
+           //recreate group
+           this.cmsEditor.getHapi().layoutMgr.layoutInitFromJSON(this.l_cfg, this.element, {}, false);
+      }
+      
+
+  }
+  
+  getCfgFromUI(){
+      super.getCfgFromUI();
+
+console.log(this.l_cfg.bsClasses);
+      
+      //this.#onChangeOptions();
   }
   
 }

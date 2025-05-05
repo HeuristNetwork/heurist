@@ -46,7 +46,6 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseView, {
     */
     _destroy: function() {
         // remove generated elements
-        this.clearContent();
         this._super();
     },
     

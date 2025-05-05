@@ -62,6 +62,7 @@ class HCmsConfigWidget extends HCmsConfig {
 
             this.onContentChange( true );
 
+            //apply new options
             let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
             layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'onCloseOptionEditor', widgetOptions);
       }
@@ -71,7 +72,7 @@ class HCmsConfigWidget extends HCmsConfig {
   /*
   * 
   */  
-  #getIdAndName(){
+  getIdAndName(){
       console.log('CGILD getIdAndName');
   }
 }
