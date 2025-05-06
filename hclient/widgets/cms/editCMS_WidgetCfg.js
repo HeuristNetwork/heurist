@@ -344,6 +344,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 if(opts['current_search_filter']){
                     $dlg.find('input[name="current_search_filter"]').val(opts['current_search_filter']);    
                 }
+                if(opts['showCurrentResults']){
+                    $dlg.find('input[name="showCurrentResults"]').prop('checked', opts['showCurrentResults']);
+                }
 
                 $dlg.find('button[name="basemap_filter"]')
                     .button()
@@ -1266,10 +1269,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             if($dlg.find('input[name="basemaps"]').val()){
                 layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();    
             }
-            
+
+            opts['showCurrentResults'] = $dlg.find('input[name="showCurrentResults"]').is(':checked');
+
             opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
             opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
-            
+
             layout_params['style'] = $dlg.find('#map_default_style').val();   
             layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
             

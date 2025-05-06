@@ -52,7 +52,9 @@ $.widget( "heurist.app_timemap", {
         custom_links: null,  //links to custom css and scripts to be injected into mao iframe
         current_search_filter: null,  //additional filter for current search result
         
-        init_completed: false   //flag to be set to true on full widget initializtion
+        init_completed: false,   //flag to be set to true on full widget initializtion
+
+        showCurrentResults: true // show 'Current query' within Result Sets
     },
 
     _events: null,
@@ -444,7 +446,7 @@ $.widget( "heurist.app_timemap", {
             }
         
             let that=this;
-        
+console.log(this.options.showCurrentResults, this.map_cache_got, this.options.use_cache);
             if(!that.map_curr_search_inited && that.options.recordset){
 
                     let mapping = this.mapframe[0].contentWindow.mapping;
@@ -465,8 +467,8 @@ $.widget( "heurist.app_timemap", {
                         mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection, true);                            
 
                         
-                    }else{
-                        
+                    }else if(this.options.showCurrentResults){
+
                         //add layer to virtual mapdocument
                         mapping.mapping('addSearchResult', that.options.recordset, 
                                 {name:window.hWin.HR('Current query'), viewport:that.options.preserveViewport, is_current_search:true});
