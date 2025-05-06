@@ -25,8 +25,8 @@ class HCmsConfigCardinal extends HCmsConfig {
       if(this.optionsEditor==null){
           //hide 
           this.container.find('.btn-html-edit').parent().hide();
-          this.container.find('input[data_type="element-id"]').parent().hide();
-          this.container.find('input[data_type="element-name"]').prev().text('Label');
+          this.container.find('input[data-type="element-id"]').parent().hide();
+          this.container.find('input[data-type="element-name"]').prev().text('Label');
 
           this.optionsEditor = $('<div id="cardinalForm" style="font-size:1em;border:1px solid lightgray;border-radius:4px;margin:2px 4px;"></div>');
           this.container.find('#properties_form').prepend(this.optionsEditor);

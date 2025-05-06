@@ -14,6 +14,8 @@
 class HCmsConfigWidget extends HCmsConfig {
     
   optionsEditor;  
+  
+  optionEditorForOldWidget;
 
   show(options){
      super.show(options);
@@ -24,8 +26,6 @@ class HCmsConfigWidget extends HCmsConfig {
   */
   initControls(){
       
-     //hide
-     this.container.find('#id_and_name_form').hide();
 
      //adds options dialogue
      this.container.find('#properties_form').prepend(
@@ -33,13 +33,36 @@ class HCmsConfigWidget extends HCmsConfig {
      +'<div id="widgetOptionsEditor"></div></div>'));
      
      this.optionsEditor = this.container.find('#widgetOptionsEditor');
-     
-     //load options form into container panel
-     let that = this;
-     let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
-     layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'openOptionsEditor', [this.optionsEditor, (a)=>that.onChangeOptions(a)]);
-      
+
      super.initControls();  
+     
+     let that = this;
+     
+     if(this.l_cfg.appid?.indexOf('HRecord')===0){
+        //hide
+        this.container.find('#id_and_name_form').hide();
+        //load options form into container panel
+        let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
+        layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'openOptionsEditor', [this.optionsEditor, (a)=>that.onChangeOptions(a)]);
+     }else{
+        this.container.find('.btn-html-edit').parent().hide();
+        this.container.find('input[data-type="element-id"]').parent().hide();
+        this.container.find('input[data-type="element-name"]').prev().text('Widget label');
+ 
+        const dom_id = window.hWin.HEURIST4.util.stripTags(this.container.find('input[data-type="element-id"]').val());
+        if(dom_id!=this.l_cfg.options.widget_id){
+            this.l_cfg.options.widget_id = dom_id;
+        }
+
+        this.optionEditorForOldWidget = editCMS_WidgetCfg(this.l_cfg, $(this.element), this.optionsEditor, null, function(){
+
+            const new_cfg = that.optionEditorForOldWidget.getValues();
+            if(JSON.stringify(that.l_cfg.options) != JSON.stringify(new_cfg)){
+                    that.onChangeOptions(new_cfg)
+            }
+        });
+     }
+      
   }
   
   /*
@@ -62,9 +85,14 @@ class HCmsConfigWidget extends HCmsConfig {
 
             this.onContentChange( true );
 
-            //apply new options
             let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
-            layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'onCloseOptionEditor', widgetOptions);
+            if(this.l_cfg.appid?.indexOf('HRecord')===0){
+                //apply new options
+                layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'onCloseOptionEditor', widgetOptions);
+            }else{
+                //recreate widget                
+                //TBD
+            }
       }
   }
   
@@ -73,6 +101,25 @@ class HCmsConfigWidget extends HCmsConfig {
   */  
   getIdAndName(){
       console.log('CGILD getIdAndName');
+  }
+  
+  /*
+  *
+  */
+  getCfgFromUI(){
+      super.getCfgFromUI();
+      this.onChangeOptions(false);
+
+      if(this.optionEditorForOldWidget){
+          let new_cfg = that.optionEditorForOldWidget.getValues();
+          this.l_cfg.options = new_cfg;
+
+          if(new_cfg.widget_id){
+              this.l_cfg.dom_id = new_cfg.widget_id;
+              this.container.find('input[data-type="element-id"]').val(this.l_cfg.dom_id);
+          }
+      }
+
   }
   
   /*

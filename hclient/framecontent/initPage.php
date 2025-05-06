@@ -297,7 +297,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 
         try{
             //bootstrap workaround
-            if($.fn){
+            if($.fn && window.hWin.HEURIST4.util.isFunction($.fn.button?.noConflict)){
                 $.fn.button.noConflict();
                 $.fn.tooltip.noConflict();
             }

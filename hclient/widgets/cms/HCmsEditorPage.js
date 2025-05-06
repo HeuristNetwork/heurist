@@ -1346,7 +1346,7 @@ function(value){
                     
                     this._cmsEditorElement = new HCmsConfigCardinal(props);
                     
-                }else if(element_cfg.appid?.indexOf('HRecord')===0){
+                }else if(element_cfg.appid){
                     
                     this._cmsEditorElement = new HCmsConfigWidget(props);
 
