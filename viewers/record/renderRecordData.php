@@ -2568,7 +2568,7 @@ function print_relation_details($bib) {
 
     //$move_details - array of related records without particular relmarker field
     if(is_array($move_details) && !empty($move_details)){
-        echo '<script>moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), ');</script>';
+        echo '<script>if(typeof moveRelatedDetails === "function"){ moveRelatedDetails(', json_encode($move_details, JSON_FORCE_OBJECT), '); }</script>';
     }
 
     return $link_cnt;

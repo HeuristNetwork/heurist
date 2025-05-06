@@ -1733,6 +1733,11 @@ $.widget( "heurist.app_storymap", {
                             that._cache_story_places[recID]['places'] = that._cache_story_places[recID]['places']
                                     .concat(that._cache_story_places[recID][DT_END_PLACES]);
                         }
+                        if(that._cache_story_places[recID]['places'].length == 0 && response.data.rectypes[0] == RT_PLACE){
+                            // use the current record if it is a place record
+                            that._cache_story_places[recID][DT_BEGIN_PLACES] = [recID];
+                            that._cache_story_places[recID]['places'] = [recID];
+                        }
                         
                         
                         if (that._cache_story_places[recID]['places'].length==0){
