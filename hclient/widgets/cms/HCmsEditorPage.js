@@ -9,7 +9,7 @@
 * @version     7.0
 */
 
-/* global editCMS_SelectElement, HCmsEditorElement */
+/* global editCMS_SelectElement */
 
 /*
 * HCmsEditorPage.js - web page editor - page treeview+element property editor
@@ -23,7 +23,7 @@ class HCmsEditorPage {
     //refs to parent classes
     _container = null; //general container
     _cmsEditor = null;  //HCmsEditor
-    _cmsEditorElement = null;  //instance of edit element class HCmsEditorElement
+    _cmsEditorElement = null;  //instance of edit element class HCmsConfig or its descendats
     _cmsEditorMargin = null; //instance of HCmsEditorMargin
     
     //interface elements
@@ -161,7 +161,7 @@ class HCmsEditorPage {
                             }
                             l_cfg['content'+lang] = newContent;    
                             
-                            //update in HCmsEditorElement                            
+                            //update in HCmsConfig
                             if(that._cmsEditorElement){
                                 that._cmsEditorElement.updateContent(newContent, lang);
                             }
@@ -1219,7 +1219,7 @@ function(value){
 
     
     //
-    // Opens element/widget property editor  (HCmsEditorElement/WidgetCfg)
+    // Opens element/widget property editor  (HCmsConfig)
     // 1. css properties
     // 2  flexbox properties
     // 3. widget properties
@@ -1309,7 +1309,7 @@ function(value){
                         that.#defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
                                
-                        if(new_cfg.type=='cardinal'){
+                        if(new_cfg.type=='cardinal'){ //????
                             //recreate cardinal layout
                             that.layoutMgr.layoutInitCardinal(new_cfg, that._layout_container);
                         }
@@ -1332,8 +1332,6 @@ function(value){
                         });
                         
                     }
-
-                    
                 }
                 
                 let props = {
@@ -1344,9 +1342,9 @@ function(value){
                             alreadyModified: this.page_was_modified
                     };
                 
-                if(element_cfg.type=='text'){ //new 
-                
-                    this._cmsEditorElement = new HCmsConfig(props);
+                if(element_cfg.type=='cardinal'){
+                    
+                    this._cmsEditorElement = new HCmsConfigCardinal(props);
                     
                 }else if(element_cfg.appid?.indexOf('HRecord')===0){
                     
@@ -1356,13 +1354,9 @@ function(value){
 
                     this._cmsEditorElement = new HCmsConfigGroup(props);
 
-                
-                }else{ //old
-                 
-                    this._cmsEditorElement = HCmsEditorElement(element_cfg, 
-                        this._layout_content, this._layout_container, this._panel_propertyView, this, 
-                                __onSaveElementConfig, this.page_was_modified );
-                    
+                }else{
+                    //default
+                    this._cmsEditorElement = new HCmsConfig(props);
                 }
     }
     

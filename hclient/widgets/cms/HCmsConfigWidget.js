@@ -66,7 +66,6 @@ class HCmsConfigWidget extends HCmsConfig {
             let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
             layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'onCloseOptionEditor', widgetOptions);
       }
-      
   }
   
   /*
@@ -75,4 +74,14 @@ class HCmsConfigWidget extends HCmsConfig {
   getIdAndName(){
       console.log('CGILD getIdAndName');
   }
+  
+  /*
+  *
+  */
+  revertChanges(){
+      super.revertChanges();
+      //recreate widget
+      this.cmsEditor.getHapi().layoutMgr.layoutInitFromJSON(this.l_cfg, this.element, {}, false);
+  }
+  
 }

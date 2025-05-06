@@ -150,7 +150,7 @@ class HLayoutMgr {
       const ele = layout[i];
       switch (ele.type) {
         case "cardinal":
-          this.#layoutInitCardinal(ele, container, forStorage);
+          this.layoutInitCardinal(ele, container, forStorage);
           break;
         case "tabs":
           this.layoutInitTabs(ele, container, forStorage);
@@ -489,7 +489,10 @@ class HLayoutMgr {
     }    
     
   
-  #layoutInitCardinal(layout, container, forStorage){
+    /**
+     * Edit web. Recreate cardinal layout
+     */
+    layoutInitCardinal(layout, container, forStorage){
 
         layout.dom_id = 'cms-group-'+layout.key;
         
@@ -1231,13 +1234,6 @@ class HLayoutMgr {
 
   // Public methods
 
-  /**
-  * Edit web. Recreate cardinal layout
-  */
-  layoutInitCardinal(layout, container) {
-    this.#layoutInitCardinal(layout, container);
-  }
-  
   /**
   * Inits layout from v1 format 
   * html, if div has attribute "data-heurist-app-id" it contains widget json configurations

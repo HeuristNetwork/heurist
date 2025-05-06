@@ -334,11 +334,12 @@ class HCmsEditor {
       //$(footer).on('click',()=>that.onMarginEdit(false));
       
       this.layout_container.on('click',function(event){
+
           if(that.current_edit_mode!='page'){
               //switch to page mode                
               that.switchMode('page');
           }else{
-              that._cmsEditorPage.hideMarginProperties();
+              //that._cmsEditorPage.hideMarginProperties();
           }
       });
 

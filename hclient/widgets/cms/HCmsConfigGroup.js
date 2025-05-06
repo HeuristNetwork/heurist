@@ -21,6 +21,7 @@ class HCmsConfigGroup extends HCmsConfig {
   */
   initControls(){
      
+     let that = this;
      if(this.groupEditor==null){
          //hide 
          this.container.find('.btn-html-edit').parent().hide();
@@ -30,7 +31,6 @@ class HCmsConfigGroup extends HCmsConfig {
          
          this.groupEditor = this.container.find('#groupEditor');
          
-         let that = this;
          this.groupEditor.empty().load(window.hWin.HAPI4.baseURL
               +'hclient/widgets/cms/HCmsConfigGroup.html',
               ()=>that.initControls());
@@ -39,7 +39,6 @@ class HCmsConfigGroup extends HCmsConfig {
       
      super.initControls();  
      
-     let that = this;
      let cont = this.container;
      let l_cfg = this.l_cfg;
 
@@ -71,7 +70,8 @@ class HCmsConfigGroup extends HCmsConfig {
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
             selObj.on('change', ()=>that.#onChangeOptions());
      });
-         
+     
+     cont.find(`.${group_type} input`).on('change', ()=>that.#onChangeOptions());
      
      if(l_cfg.isPage || etype=='tabs' || etype=='accordion'){
         cont.find('input[data-type="element-id"]').parent().hide();
@@ -403,25 +403,11 @@ class HCmsConfigGroup extends HCmsConfig {
       //recreate widget
       if(this.l_cfg.isPage){
            HCmsEditor.replaceBsClasses(this.element, this.allContainerBsClasses, this.l_cfg.bsClasses);
-           
-//console.log('recreate page', this.l_cfg.bsClasses);          
-//console.log(this.element.classList);          
-           
       }else{
-//console.log('recreate group');          
            //recreate group
            this.cmsEditor.getHapi().layoutMgr.layoutInitFromJSON(this.l_cfg, this.element, {}, false);
       }
       
 
   }
-  
-  getCfgFromUI(){
-      super.getCfgFromUI();
-
-console.log(this.l_cfg.bsClasses);
-      
-      //this.#onChangeOptions();
-  }
-  
 }

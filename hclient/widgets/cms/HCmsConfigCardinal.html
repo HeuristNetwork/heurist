@@ -1,0 +1,99 @@
+<!--
+/**
+* Content for HCmsConfigCardinal.js - cardinal layour properties for CMS element
+* 
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @version     7.0
+*/
+-->
+            <h3 style="display:inline-block">
+                Cardinal properties
+            </h3>
+            <fieldset><legend style="display:none"></legend>
+                    <div style="margin-top:5px">
+                        <div class="header_narrow"><b>North:</b></div>
+                        <select data-type="cardinal" data-pane="north" name="init">
+                            <option value="">initally open</option>
+                            <option value="closed">initally closed</option>
+                            <option value="hidden">hidden</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Size</div>
+                        <input data-type="cardinal" data-pane="north" name="size" type="number" min="10" value="" style="width:40px"/>
+                        <label>&nbsp;Resizeable:
+                        <input data-type="cardinal" data-pane="north" name="resizable" type="checkbox" checked="checked"/></label>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Min size:</div>
+                        <input data-type="cardinal" data-pane="north" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                        <label>&nbsp;Max size:
+                        <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>                       
+                    </div>
+
+                    <div style="margin-top:5px">
+                        <div class="header_narrow"><b>South:</b></div>
+                        <select data-type="cardinal" data-pane="south" name="init">
+                            <option value="">initally open</option>
+                            <option value="closed">initally closed</option>
+                            <option value="hidden">hidden</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Size:</div>
+                        <input data-type="cardinal" data-pane="south" name="size" type="number" min="10" value="" style="width:40px"/>
+                        <label>&nbsp;Resizeable:
+                        <input data-type="cardinal" data-pane="south" name="resizable" type="checkbox" checked/></label>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Min size:</div>
+                        <input data-type="cardinal" data-pane="south" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                        <label>&nbsp;Max size:
+                        <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                    </div>
+
+                    <div style="margin-top:5px">
+                        <div class="header_narrow"><b>West:</b></div>
+                        <select data-type="cardinal" data-pane="west" name="init">
+                            <option vaue="">initally open</option>
+                            <option value="closed">initally closed</option>
+                            <option value="hidden">hidden</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Size</div>
+                        <input data-type="cardinal" data-pane="west" name="size" type="number" min="10" value="" style="width:40px"/>
+                        <label>&nbsp;Resizeable:
+                        <input data-type="cardinal" data-pane="west" name="resizable" type="checkbox" checked/></label>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Min size:</div>
+                        <input data-type="cardinal" data-pane="west" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                        <label>&nbsp;Max size:
+                        <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                    </div>
+
+                    <div style="margin-top:5px">
+                        <div class="header_narrow"><b>East:</b></div>
+                        <select data-type="cardinal" data-pane="east" name="init">
+                            <option vaue="">initally open</option>
+                            <option value="closed">initally closed</option>
+                            <option value="hidden">hidden</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Size</div>
+                        <input data-type="cardinal" data-pane="east" name="size" type="number" min="10" value="" style="width:40px"/>
+                        <label>&nbsp;Resizeable:
+                        <input data-type="cardinal" data-pane="east" name="resizable" type="checkbox" checked/></label>
+                    </div>
+                    <div>
+                        <div class="header_narrow">Min size:</div>
+                        <input data-type="cardinal" data-pane="east" name="minSize" type="number" min="0" value="" style="width:40px"/>
+                        <label>&nbsp;Max size:
+                        <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
+                    </div>
+            </fieldset>

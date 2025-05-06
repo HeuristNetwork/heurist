@@ -88,7 +88,7 @@ class HCmsConfig {
       cont.find('input[name^="bsMargin-"]').on('change',(e)=>that.#onMarginSyncVal(e));
       
       //Listeners for selects    
-      cont.find('#properties_form select').each((i,selObj)=>{
+      cont.find('#properties_form select[data-type!="cardinal"]').each((i,selObj)=>{
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
             selObj.on('change', ()=>that.#getCss());
       });
