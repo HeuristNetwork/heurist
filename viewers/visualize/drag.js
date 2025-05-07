@@ -1,4 +1,3 @@
-
 /**
 * drag.js
 * 
@@ -10,7 +9,7 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     6.7
 */
 
 /*
@@ -21,386 +20,98 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global svg, data, settings, force, currentMode, circleSize, iconSize, _editRecStructure, 
-drag_link_source_id, drag_link_target_id, drag_link_line, selectionColor, determineColour, closeRectypeSelector,
-getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick */
+class VisualiseDrag{
 
-let currentNode = null;
+    visualiser = null;
 
-/**
-* Appends nodes to the visualisation
-*/
-function addNodes() {
-    
-   // Append nodes
-   let nodes = window.d3.select("#container")
-                  .selectAll(".node")
-                  .data(data.nodes)
-                  .enter()
-                  .append("g")
-                  .on("dblclick", (d) => {
-                    if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
-                        window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
-                    }else if(window.hWin.HAPI4.is_admin()){
-                        _editRecStructure(d.id);
-                    }
-                  });
-                 
-   // Dragging
-   let drag = window.d3.behavior.drag()
-                 .on("dragstart", dragstart)
-                 .on("drag", dragmove)
-                 .on("dragend", dragend);
-     
-   let entitycolor = getSetting('setting_entitycolor');
-      
-   // Details for each node            
-   nodes.each(function(d, i) {
-        // Restore location data
-        let record = getSetting(d.id);
-        if(record) {
-            const obj = JSON.parse(record);
-            if("x" in obj) {
-                d.x = obj.x;
-            }
-            if("y" in obj) {
-                d.y = obj.y;
-            }
-            if("px" in obj) {
-                d.px = obj.px;
-            }
-            if("py" in obj) {
-                d.py = obj.py;
-            }
-        }
+    #currentNode = null;
 
-        let node = window.d3.select(this);
-        
-        let icon_display = currentMode=='icons' ? 'initial' : 'none';
-        
-        //add infobox
-        createOverlay(0, 0, "record", "id"+d.id, d, node);
-        
-        //add outer circle
-        node.append("circle")
-            .attr("r", function(d) {
-                return getEntityRadius(d.count);
-            })
-            .attr("class", "background icon-background")
-            .style({'fill-opacity': '0.5', 'display': icon_display})
-            .attr("fill", determineColour); //entitycolor        
-        
-        //add internal circle
-        node.append("circle")
-            .attr("r", circleSize)
-            .attr("class", 'foreground icon-foreground')
-            .attr("fill", entitycolor)
-            .style({"stroke": "#ddd", 'display': icon_display})
-            .style("stroke-opacity", function(d) {
-                if(d.selected == true) {
-                    return 1;
-                }
-                return .25;
-            });
+    #drag = null;
 
-        //add icon
-        node.append("svg:image")
-            .attr("class", "icon node-icon") 
-            .attr("xlink:href", function(d) {
-                if(d.image){
-                    return d.image;
-                }else{
-                    return '';
-                }
-            })
-            .attr("x", -iconSize/2)
-            .attr("y", -iconSize/2)
-            .attr("height", iconSize)
-            .attr("width", iconSize)
-            .on("mouseover", function(d) {
-                if(drag_link_source_id!=null){
-                    window.drag_link_target_id = d.id;
-                    window.drag_link_line.attr("stroke","#00ff00");  //green
-                }
-            })
-            .on("mouseout", function(d) {
-                if(drag_link_source_id!=null){
-                setTimeout(function(){
-                    window.drag_link_target_id = null;
-                    if(window.drag_link_line) window.drag_link_line.attr("stroke","#ff0000");  //red
-                },200);
-                }
-            })
-            .style('display', icon_display);
-                           
-        let gravity = getSetting('setting_gravity');
-        
-        // Attributes
-        node  //window.d3.select(this)
-          .attr("class", "node id"+d.id)
-          .attr("transform", "translate(10, 10)")
-          .attr("x", d.x) 
-          .attr("y", d.y)
-          .attr("px", d.px)
-          .attr("py", d.py)
-          .attr("fixed", function(d) {
-              if(record && gravity == "off") {
-                  d.fixed = true;
-                  return true;
-              }
-              return false;
-          })    
-         .on("click", onNodeClick)
-         .on("contextmenu", onNodeClick)
-         .call(drag);
+    constructor(visualiserContext){
 
-     });            
-     return nodes;
-}
+        this.visualiser = visualiserContext;
 
-function onNodeClick(d){
-
-    closeRectypeSelector();
-    // Check if it's not a click after dragging
-    if(!window.d3.event.defaultPrevented) {
-        // Load record details
-        showNodeInformation(d);//Added by ISH
-    }
-}
-
-/**
- * Shows the record details in an iframe when a node is clicked
- *
- * @param {Object} d node data object from d3
- */
-function showNodeInformation(d){
-
-    let $infoDiv = $('#infoDiv');
-    let infoDiv = window.d3.select("#infoDiv"); // select the parent div
-    let infoFrame = window.d3.select("#infoIframe"); // select the iframe
-    let infoBox = window.d3.select("#infoBox"); // select the info box
-
-    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0){
-        return;
+        this.#drag = window.d3.behavior.drag()
+                        .on('dragstart', this.#dragStart)
+                        .on('drag', this.#dragMove)
+                        .on('dragend', this.#dragEnd);
     }
 
-    if($infoDiv.resizable('instance') === undefined){ // setup resizing
-        $infoDiv.resizable({
-            maxHeight: 400,
-            minHeight: settings.isDatabaseStructure ? 150 : 300,
-            resize: (event, ui) => {
-                infoFrame.style('height', `${$infoDiv.height()}px`);
-                infoBox.style('height', `${$infoDiv.height()}px`);
-            },
-            handles: 's'
-        });
+    get drag(){
+        return this.#drag;
     }
 
-    infoDiv.style("display", "block"); // make info div visible
+    #dragStart(data){
 
-    function displayRecordViewer(){
+        window.d3.event.sourceEvent.stopPropagation();
+        window.d3.event.sourceEvent.preventDefault();
 
-        $('.iframeControls').show();
-        infoFrame.style('display', 'inline');
-        infoBox.style('display', 'none');
+        this.visualiser.force.stop();
 
-        if(infoFrame.attr("data-hid") == d.id){ // block retrival of last record in quick succession
-            return;
-        }
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
-            'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
-    
-        const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${d.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
-
-        infoFrame.attr("src", srcURL)
-                 .attr("data-hid", d.id)
-                 .on('load', () => {
-
-                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
-
-                    let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
-                    viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
-
-                    let height = infoFrame.node().contentWindow.document.body.scrollHeight;
-                    height += 15;
-
-                    if(height <= 100 || height >= viewMaxHeight){
-                        height = viewMaxHeight
-                    }
-
-                    infoFrame.style('height', `${height}px`);
-
-                    infoDiv.style('max-height', `${height}px`);
-                    infoDiv.style('height', `${height}px`);
-                    $infoDiv.resizable('option', 'maxHeight', height);
-                 });//supply document to iframe
-    }
-
-    function displayRecTypeInfo(){
-
-        $('.iframeControls').hide();
-        $('#btnCtrlClose').show();
-        infoFrame.style('display', 'none');
-        infoBox.style('display', 'block');
-
-        if(infoBox.attr("data-hid") == d.id){ // block retrival of last record in quick succession
-            return;
-        }
-
-        let recType = $Db.rty(d.id);
-
-        let icon_URL = window.hWin.HAPI4.getImageUrl('rty', recType.rty_ID, 'thumb', 2, window.hWin.HAPI4.database);
-        let rty_Icon = `<img
-        height="25" width="25"
-        src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif"
-        class="rt-icon"
-        style="background-image: url(&quot;${icon_URL}&quot;);" />`;
-
-        let rectypeDetails = `<br>
-        ${rty_Icon}<br><br>
-        <strong>ID</strong>: ${recType.rty_ID}<br>
-        <strong>Name</strong>: ${recType.rty_Name}<br>
-        <strong>Count</strong>: ${recType.rty_RecCount}<br>
-        <strong>Description</strong>:<br>${recType.rty_Description}<br>
-        `;
-
-        infoBox.attr('data-hid', d.id)
-               .html(rectypeDetails);
-
-        let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
-        viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
-
-        let height = infoBox.node().scrollHeight;
-        height += 15;
-
-        if(height <= 100 || height >= viewMaxHeight){
-            height = viewMaxHeight
-        }
-
-        infoBox.style('height', `${height}px`);
-
-        infoDiv.style('max-height', `${height}px`);
-        infoDiv.style('height', `${height}px`);
-        $infoDiv.resizable('option', 'maxHeight', height);
-    }
-
-    if(settings.isDatabaseStructure){
-        displayRecTypeInfo();
-    }else{
-        displayRecordViewer();
-    }
-
-}
-
-/*Hides record details shown by showNodeInformation
-  Added by "ISH"
-*/
-function handleNodeAction(action = 'close'){
-
-    if(action == 'close'){
-        window.d3.select('#infoDiv').style('display', 'none');//close the box when clicked 
-        return;
-    }
-
-    let rec_ID = window.d3.select('#infoIframe').attr('data-hid');
-    let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
-
-    action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
-}
-
-/**
-* Updates the locations of all nodes
-*/
-function updateNodes() {
-    window.d3.selectAll(".node").attr("transform", function(d) { 
-        // Store new position
-        if(d.x==null || d.y==null || isNaN(d.x) || isNaN(d.y)){
-            d.x=0;
-            d.y=0;
-        }
-        const obj = {px: d.px, py: d.py, x: d.x, y: d.y};
-        putSetting(d.id, JSON.stringify(obj));
-        return "translate(" + d.x + "," + d.y + ")"; 
-    });
-}
-
-// Functions to make dragging, moving and zooming possible
-
-/** Called when a dragging event starts */
-function dragstart(d, i) {
-    
-    window.d3.event.sourceEvent.stopPropagation();
-    window.d3.event.sourceEvent.preventDefault();
-
-    force.stop();
-
-    // Fixed node positions?
-    const gravity = getSetting('setting_gravity');
-    svg.selectAll(".node")
-       .attr("fixed", function(d, i) {
-            d.fixed = (gravity == "off");
+        // Fixed node positions?
+        const gravity = this.visualiser.settings.get('gravity');
+        this.visualiser.svg.selectAll('.node').attr('fixed', (d, i) => {
+            d.fixed = gravity == 'off';
             return d.fixed;
-       }); 
-    d.fixed = true; 
-    currentNode = d.id;
-    
-    updateCircles(".node.id"+d.id, selectionColor, selectionColor);
-}
+        });
 
-/** Caled when a dragging move event occurs */
-function dragmove(d, i) {  
-    
-    // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
-    svg.selectAll(".node").each(function(d, i) {
-        //const color = window.d3.select(this).select(".foreground").style("fill");
-        if(d.id == currentNode) {
-            // Update locations
-            d.px += window.d3.event.dx;
-            d.py += window.d3.event.dy;
-            d.x += window.d3.event.dx;
-            d.y += window.d3.event.dy;
-        }   
-    });
+        data.fixed = true; 
 
-    // Update nodes & lines
-    tick();                                                          
+        this.#currentNode = data.id;
 
-}
-
-/** Called when a dragging event ends */
-function dragend(d, i) {
-    
-    // Update nodes & lines
-    const gravity = getSetting('setting_gravity');
-    d.fixed = ( gravity !== "aggressive");
-    
-    // Update the location in localstorage
-    const record = getSetting(d.id); 
-
-    let obj;
-    if(record === null) {
-        obj = {}; 
-    }else{
-        obj = JSON.parse(record);
-    }  
-    
-    // Set attributes 'x' and 'y' and store object
-    obj.px = d.px;
-    obj.py = d.py;
-    obj.x = d.x;
-    obj.y = d.y;
-    putSetting(d.id, JSON.stringify(obj));
-    
-    // Check if force may resume
-    if(gravity !== "off") {
-        force.resume(); 
+        let colour = this.visualiser.selection.colour;
+        this.visualiser.updateShape('circles', [`.node.id${data.id}`, colour, colour]); // updateCircles
     }
 
-    if(currentNode == d.id){
-        currentNode = null;
+    #dragMove(){
+
+        // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
+        this.visualiser.svg.selectAll(`.node.id${this.#currentNode}`).each((d, i) => {
+
+            if(d.id == currentNode) {
+                // Update locations
+                d.px += window.d3.event.dx;
+                d.py += window.d3.event.dy;
+                d.x += window.d3.event.dx;
+                d.y += window.d3.event.dy;
+            }   
+        });
+
+        // Update nodes & lines
+        this.visualiser.tick();
     }
-/*    setTimeout(function(){    //tick();
-        window.d3.select("#container").attr("transform","scale(1)");
-    },500); */
+
+    #dragEnd(data){
+
+        // Update nodes & lines
+        const gravity = this.visualiser.settings.get('gravity');
+        data.fixed = gravity !== 'aggressive';
+
+        // Update the location in localstorage
+        const record = this.visualiser.settings.get(data.id);
+
+        let obj;
+        if(record === null) {
+            obj = {};
+        }else{
+            obj = JSON.parse(record);
+        }
+
+        // Set attributes 'x' and 'y' and store object
+        obj.px = data.px;
+        obj.py = data.py;
+        obj.x = data.x;
+        obj.y = data.y;
+        this.visualiser.settings.put(data.id, JSON.stringify(obj));
+
+        // Check if force may resume
+        if(gravity !== 'off'){
+            this.visualiser.force.resume();
+        }
+
+        if(this.#currentNode == data.id){
+            this.#currentNode = null;
+        }
+    }
 }
