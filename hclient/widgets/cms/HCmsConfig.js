@@ -29,6 +29,13 @@ class HCmsConfig {
                             'container','row','col','justify-content','align-items','g-'];
   allStyleBsClasses = ['border','bg-','text-','rounded','shadow','m-','ms-','me-','mt-','mb-','p-','ps-','pe-','pt-','pb-'];
   
+  hasUserStyles = false;
+  
+  cssPaddingMarginBorder = [
+          'padding','padding-left','padding-top','padding-bottom','padding-right',
+          'margin','margin-left','margin-top','margin-bottom','margin-right',
+          'border','border-width','border-color','border-style','border-radius'];
+  
   constructor(options) {
       
       this.cmsEditor = options.cmsEditor;
@@ -68,8 +75,7 @@ class HCmsConfig {
       
       if(!l_cfg.css) l_cfg.css = {};
 
-      const activePage = 0;
-      cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:activePage,collapsible:true});
+      cont.find('#properties_form').accordion({header:'h3',heightStyle:'content',active:0,collapsible:true});
       cont.find('h3').css({padding:'1em', 'font-size': '1.1em', 'font-weight': 'bold'});
       cont.find('fieldset').css({background: 'transparent', padding: '1em'});
       
@@ -79,8 +85,8 @@ class HCmsConfig {
       cont.find('input[data-type^="element"]').on('change',()=>that.onContentChange(true));
       
       //Listeners for inputs
-      cont.find('input[data-type="css"]').on('change', ()=>that.#getCss());
-      cont.find('input[data-type="css"]').on('keyup', ()=>that.#getCss());
+      cont.find('input[data-type="css"]').on('change', (e)=>that.#getCss(e));
+      cont.find('input[data-type="css"]').on('keyup', (e)=>that.#getCss(e));
       
       //Margin sync values
       cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
@@ -90,30 +96,74 @@ class HCmsConfig {
       //Listeners for selects    
       cont.find('#properties_form select[data-type!="cardinal"]').each((i,selObj)=>{
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
-            selObj.on('change', ()=>that.#getCss());
+            selObj.on('change', (e)=>that.#getCss(e));
       });
-      
+
       //Listeneres for global border and bg checkboxes
-      cont.find('input[name="background"]').on('change',()=>that.#getCss(true) );
-      cont.find('input[name="border"]').on('change',()=>that.#getCss(true) );
+      cont.find('input[name="background"]').on('change',(e)=>that.#getCss(e) );
+      cont.find('input[name="border"]').on('change',(e)=>that.#getCss(e) );
+
+      //init color pickers
+      cont.find('input[name$="-color"]').colorpicker({
+          hideButton: false, //show button right to input
+          showOn: "both"});//,val:value
+      cont.find('input[name$="-color"]').parent('.evo-cp-wrap').css({display:'inline-block',width:'100px'});
+
+      //get from element
+      if(!l_cfg.bsClasses){
+          l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
+      }
       
       this.#setCssToUI();
+      this.assignCssTextArea();
+
+      //direct editor        
+      let textAreaCss = cont.find('textarea[name="elementCss"]');
+      textAreaCss.on('change',function(){
+
+          let vals = textAreaCss.val();
+
+          vals = vals.replace(/"/g, ' ');
+
+          vals = vals.split(';')
+          let new_css = {};
+          for (let i=0; i<vals.length; i++){
+              let vs = vals[i].split(':');
+              if(vs && vs.length>1){ //pair
+                  const key = String(vs.shift()).trim();
+                  const val = vs.join(':').trim();
+                  new_css[key] = val;
+              }
+          }
+
+          $(that.element).removeAttr('style');
+          $(that.element).css(new_css);
+          that.l_cfg.css = new_css;
+
+          that.#setCssToUI();
+          that.#getCss();
+          
+          //that.onContentChange(true);
+      });
+      
       
       //direct content editor
       let btnDirectEdit = cont.find('div.btn-html-edit');
       btnDirectEdit.button().on('click', ()=>that.#showCodeEditor());
+      
+      let btnConvert = cont.find('div.btn-css-convert');
+      btnConvert.button().on('click', ()=>that.#convertUserStyles());
+      
         
       //SAVE AND CANCEL BUTTONS      
       //save entire page (in background) 
       cont.find('.btn-save-and-close').button().css('border-radius','4px').on('click', function(){
           that.getCfgFromUI();
-          that.#updateConfiguration();
           that.onClose.call(this, that.l_cfg, 'close');
       });
 
       cont.find('.btn-save-only').button().css('border-radius','4px').on('click', function(){
           that.getCfgFromUI();
-          that.#updateConfiguration();
           that.onClose.call(this, that.l_cfg, 'save');
           that.onContentChange( false );
       });
@@ -133,7 +183,6 @@ class HCmsConfig {
   */
   revertChanges(){
   
-console.log('revertChanges');
       this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(this.element_cfg);
       this.#setCssToUI();
       
@@ -281,7 +330,6 @@ console.log('revertChanges');
   * Get name and id from UI
   */  
   getIdAndName(){
-console.log('getIdAndName');
       let l_cfg = this.l_cfg;
       let cont = this.container;
       l_cfg.name = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-name"]').val());
@@ -318,12 +366,6 @@ console.log('getIdAndName');
       let cont = this.container;
       let l_cfg = this.l_cfg;
 
-      //
-      if(!l_cfg.bsClasses){
-          //get from element  TBD
-          l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
-      }
-
       let hasBorder = false;
       let hasBackground = false;
 
@@ -341,9 +383,16 @@ console.log('getIdAndName');
                   cont.find('#bsBorder-style').val('solid');
               }
 
-              const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
-              if(clr.length==1 && clr[0].length==3){
-                  cont.find('#bsBorder-color').val(clr[0][2]);
+              cont.find('#bsBorder-color').val('default');
+              if(l_cfg.css['--bs-border-color']){
+                  cont.find('input[name="border-color"]').val(l_cfg.css['--bs-border-color']);
+                  //cont.find('input[name="border-color"]').parent().show();
+              }else{
+                  const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
+                  if(clr.length==1 && clr[0].length==3){
+                      cont.find('#bsBorder-color').val(clr[0][2]);
+                      //cont.find('input[name="border-color"]').parent().hide();
+                  }
               }
 
               //cont.find('#bsBorder-color').hSelect('refresh')
@@ -407,7 +456,9 @@ console.log('getIdAndName');
 
       cont.find('input[name="background"]').prop('checked', hasBackground);
       cont.find('input[name="border"]').prop('checked', hasBorder);
-
+      
+      
+      this.#checkUserStyleSettings();
   }
   
   /*
@@ -472,53 +523,28 @@ console.log('getIdAndName');
 
   /*
   * Getter. Get css vaues from UI and apply to element
+  * isGlobalCheck - on/off switcher from UI checkbox 
   */
-  #getCss( isGlobalCheck ){
+  #getCss( event ){
+      
+      let isGlobalCheck = false;
+      let eleName = '';
+      if(event){
+            eleName = $(event.target).attr('name');
+            isGlobalCheck = (eleName=='background' || eleName=='border');
+      }
       
         let cont = this.container;
         let css = {};
         
-//console.log('getcss', this.l_cfg);
+console.log('getcss', this.l_cfg);
         
         let bsClasses = [];
-// BORDER  get values from UI -----------------
-        let val = cont.find('input[name="border"]').is(':checked');
-        if(isGlobalCheck && !val){
-            css['border'] = 'none';
-        }else{
-            val = cont.find('#bsBorder-style').val();
-            if(val!='none' && cont.find('#bsBorder-size').val()>0){
-                css['--bs-border-style'] = val;
-                
-                bsClasses.push('border');
-                val = cont.find('#bsBorder-size').val();
-                if(val>0){
-                    bsClasses.push('border-'+val);
-                }
-                val = cont.find('#bsBorder-color').val();
-                if(val!='default'){
-                    bsClasses.push('border-'+val);
-                }
-            }
-            val = cont.find('#bsBorder-radius').val();
-            if(val!=0){
-                bsClasses.push('rounded-'+val);
-            }
-            
-            val = cont.find('#bsBorder-shadow').val();
-            if(val!='none'){
-                bsClasses.push(val);    
-            }
-            
-            const hasBorder = bsClasses.length>0;
-            cont.find('input[name="border"]').prop('checked', hasBorder);
-        }
-      
 
 // BACKGROUND  get values from UI -----------------
 
         //style - background
-        val = cont.find('input[name="background"]').is(':checked');
+        let val = cont.find('input[name="background"]').is(':checked');
         if(isGlobalCheck && !val){
             css['background'] = 'none';
         }else{
@@ -555,6 +581,49 @@ console.log('getIdAndName');
             cont.find('input[name="background"]').prop('checked', hasBg);
         }
         
+        if(!this.hasUserStyles){
+
+// BORDER  get values from UI -----------------
+        val = cont.find('input[name="border"]').is(':checked');
+        if(isGlobalCheck && !val){
+            css['border'] = 'none';
+        }else{
+            val = cont.find('#bsBorder-style').val();
+            if(val!='none' && cont.find('#bsBorder-size').val()>0){
+                css['--bs-border-style'] = val;
+                
+                bsClasses.push('border');
+                val = cont.find('#bsBorder-size').val();
+                if(val>0){
+                    bsClasses.push('border-'+val);
+                }
+                val = (eleName=='border-color')?'default':cont.find('#bsBorder-color').val();
+                if(val=='default'){
+                    const bcrl = cont.find('input[name="border-color"]').val();
+                    if(bcrl) {
+                        css['--bs-border-color'] = bcrl;
+                        cont.find('#bsBorder-color').val('default').hSelect('refresh');
+                    }
+                }else{
+                    bsClasses.push('border-'+val);
+                    cont.find('input[name="border-color"]').val('');
+                }
+            }
+            val = cont.find('#bsBorder-radius').val();
+            if(val!=0){
+                bsClasses.push('rounded-'+val);
+            }
+            
+            val = cont.find('#bsBorder-shadow').val();
+            if(val!='none'){
+                bsClasses.push(val);    
+            }
+            
+            const hasBorder = bsClasses.length>0;
+            cont.find('input[name="border"]').prop('checked', hasBorder);
+        }
+      
+        
 // MARGINS  get values from UI -----------------
         let isSync = cont.find('input.cb_sync[data-type="padding"]').is(':checked');
         if(isSync){
@@ -585,6 +654,8 @@ console.log('getIdAndName');
                 }
             });
         }
+        
+        }
                 
 //------------------------------------------------        
 
@@ -592,7 +663,7 @@ console.log('getIdAndName');
             let ele = cont.find('input[name="'+name+'"]');
             let val = ele.val();
             if( (val!='' || val!='auto') && parseInt(val)>0){
-                if(!(val.indexOf('%')>0 || val.indexOf('px')>0)){
+                if(!(val.indexOf('%')>0 || val.indexOf('px')>0 || val.indexOf('rem')>0)){
                     val = val + 'px';
                 }
                 css[name] = val;
@@ -604,12 +675,13 @@ console.log('getIdAndName');
 
         if(this.l_cfg.css){
             let old_css = this.l_cfg.css;
-            //remove these parameters from css and assign from form
+            //remove these parameters from css and assign new ones obtained from form
             let params = ['width','height',
-                'padding','padding-left','padding-top','padding-bottom','padding-right',
-                'margin','margin-left','margin-top','margin-bottom','margin-right',
-                'background','background-image','bg-image','background-repeat','background-position','background-size',
-                'border','border-width','border-color','border-style','border-radius','--bs-border-style'];
+                'color','background','background-image','bg-image','background-repeat','background-position','background-size',
+                '--bs-border-style','--bs-border-color'];
+            if(!this.hasUserStyles){
+                params = params.concat(this.cssPaddingMarginBorder);
+            }
             for(let i=0; i<params.length; i++){
                 let prm = params[i];
                 if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
@@ -621,28 +693,42 @@ console.log('getIdAndName');
         }
 
         //update 
-        if(bsClasses.length>0){
-            HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, bsClasses);
-            this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
-        }
+        //if(bsClasses.length>0){
+        HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, bsClasses);
+        this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
+        
         
         $(this.element).removeAttr('style');
         $(this.element).css(css); //assign changed css at once
         this.l_cfg.css = css;
-        //TBD _assignCssTextArea();
+console.log('new', css);        
+        this.assignCssTextArea();
             
-console.log( this.l_cfg.bsClasses );            
-console.log( 'assign', css );            
-
         this.onContentChange( true );
         return css;
-  }
+  }//getCSS
   
- 
-  #updateConfiguration(){
-      
-  }
+  /*
+   * Assigns CSS to direct edit css textarea: elementCss
+   */
+  assignCssTextArea(){
 
+        let s = '';
+        if(this.l_cfg.css){
+            
+            s = [];
+            for(const [style, value] of Object.entries(this.l_cfg.css)){
+                s.push(`${style}: ${value}`);
+            }
+
+            s = s.join(';\n');
+            s += !window.hWin.HEURIST4.util.isempty(s) ? ';' : '';
+        }
+        
+        this.container.find('textarea[name="elementCss"]').val(s);    
+  }  
+ 
+  
   /*
   *
   */  
@@ -683,5 +769,74 @@ console.log( 'assign', css );
             return false;     
         }
   }
+
+  /*
+  * Verifies the presence of users styles
+  * Hides border and margin panels
+  * Shows converter button and explanation on "Direct edit" panel
+  */
+  #checkUserStyleSettings(){
+      //1. Verifies the presence of users styles
+      let params = this.cssPaddingMarginBorder;
+      this.hasUserStyles = false;
+      for(let i=0; i<params.length; i++){
+          let prm = params[i];
+          if (this.l_cfg.css[prm] && (this.l_cfg.css[prm]!='none') 
+            && (prm.indexOf('margin')<0 || this.l_cfg[prm]!='auto'))
+          {
+              this.hasUserStyles = true;
+              break;
+          }
+      }
+
+      if(this.hasUserStyles){
+          //2. Hides border and margin panels
+          this.container.find('div[data-section="bsMargin"]').hide();
+          this.container.find('div[data-section="bsBorder"]').hide();
+
+          this.container.find('#properties_form').accordion({active:3});
+
+          this.container.find('div.btn-css-convert').parent().show();
+         
+      }else{
+          this.container.find('div[data-section="bsMargin"]').show();
+          this.container.find('div[data-section="bsBorder"]').show();
+          this.container.find('div.btn-css-convert').parent().hide();
+      }
+  }
+  
+  /*
+  *
+  */
+  #convertUserStyles(){
+      
+      const res = HCmsEditor.convertToBootstrapClasses(this.l_cfg.css);
+
+      HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, res.bsClasses);
+      this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
+
+      if(res.css){
+          //adds --bs-border-color and --bs-border-style
+          this.l_cfg.css = $.extend(this.l_cfg.css, res.css);
+      }
+
+      //remove styles that will be converted to bootstrap classes      
+      let params = this.cssPaddingMarginBorder;
+      for(let i=0; i<params.length; i++){
+          let prm = params[i];
+          if (this.l_cfg.css[prm]
+              && (prm.indexOf('margin')<0 || this.l_cfg[prm]!='auto'))
+          {
+              delete this.l_cfg.css[prm];
+          }
+      }
+
+      console.log('convert to ',res.bsClasses); 
+      this.#setCssToUI();
+      this.#getCss();
+      //this.assignCssTextArea();
+      //this.onContentChange((true);
+  }
+
   
 }

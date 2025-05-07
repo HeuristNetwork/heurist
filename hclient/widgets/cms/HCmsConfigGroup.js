@@ -272,75 +272,57 @@ class HCmsConfigGroup extends HCmsConfig {
 
       if(l_cfg.isPage){
           bsClasses.push(cont.find('#containerType').val());
-      }else{
 
-            if(groupType=='grid'){
-                bsClasses.push('row');
-                cont.find('.grid-select').each(function(i,item){
-                    if($(item).val()){
-                        bsClasses.push($(item).attr('name')+'-'+$(item).val());
-                    }
-                });
-            }else if(groupType=='tabs'){
-
-                const ntype = cont.find('#nav_type').val();
-                const nvert = ntype=='nav-jquery'?'nav-row':cont.find('#nav_dir').val();
-                
-                recreateGroup = (l_cfg.options?.nav_type != ntype || l_cfg.options?.nav_dir != nvert);
-                
-                l_cfg.options = {}; //reset
-                l_cfg.options.nav_type = ntype;
-                l_cfg.options.nav_dir = nvert;
-                
-            }else if(groupType=='accordion'){
-
-                const acc_type = cont.find('#acc_type').val();
-                const acc_collapse = cont.find('#acc_collapse').is(':checked');
-                
-                recreateGroup = (l_cfg.options?.acc_type != acc_type || l_cfg.options?.acc_collapse != acc_collapse);
-                
-                l_cfg.options = {}; //reset
-                l_cfg.options.acc_type = acc_type;
-                l_cfg.options.acc_collapse = acc_collapse;
-                
-            }else if(groupType=='flex'){
-                css['display'] = 'flex';
-
-                cont.find('select.flex-select').each(function(i,item){
-                    if($(item).val()){
-                        css[$(item).attr('id')] = $(item).val();       
-                    }
-                });
-            }
-            
-            if(l_cfg.options && !(groupType=='accordion' || groupType=='tabs')){
-                delete l_cfg.options;
-            }
-            
-      }
-
-      if(l_cfg.css){
-          let old_css = l_cfg.css;
-          //remove these parameters from css and assign from form
-          let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
-          for(let i=0; i<params.length; i++){
-              let prm = params[i];
-              if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
-                  old_css[prm] = null;
-                  delete old_css[prm];
-              };
-          }
-          css = $.extend(old_css, css);
-      }
-
-      l_cfg.css = css;
-      //TBD _assignCssTextArea();
-
-      if(l_cfg.isPage){
           if(bsClasses.length>0){
               HCmsEditor.replaceBsClasses(this.element, 'container', bsClasses);
           }
+
       }else{
+
+          if(groupType=='grid'){
+              bsClasses.push('row');
+              cont.find('.grid-select').each(function(i,item){
+                  if($(item).val()){
+                      bsClasses.push($(item).attr('name')+'-'+$(item).val());
+                  }
+              });
+          }else if(groupType=='tabs'){
+
+              const ntype = cont.find('#nav_type').val();
+              const nvert = ntype=='nav-jquery'?'nav-row':cont.find('#nav_dir').val();
+
+              recreateGroup = (l_cfg.options?.nav_type != ntype || l_cfg.options?.nav_dir != nvert);
+
+              l_cfg.options = {}; //reset
+              l_cfg.options.nav_type = ntype;
+              l_cfg.options.nav_dir = nvert;
+
+          }else if(groupType=='accordion'){
+
+              const acc_type = cont.find('#acc_type').val();
+              const acc_collapse = cont.find('#acc_collapse').is(':checked');
+
+              recreateGroup = (l_cfg.options?.acc_type != acc_type || l_cfg.options?.acc_collapse != acc_collapse);
+
+              l_cfg.options = {}; //reset
+              l_cfg.options.acc_type = acc_type;
+              l_cfg.options.acc_collapse = acc_collapse;
+
+          }else if(groupType=='flex'){
+              css['display'] = 'flex';
+
+              cont.find('select.flex-select').each(function(i,item){
+                  if($(item).val()){
+                      css[$(item).attr('id')] = $(item).val();       
+                  }
+              });
+          }
+
+          if(l_cfg.options && !(groupType=='accordion' || groupType=='tabs')){
+              delete l_cfg.options;
+          }
+
+          //set classes/css for children
           if(groupType!='grid' && l_cfg.type=='grid'){
               //remove grid classes for container and children
               if(l_cfg.bsClasses){
@@ -360,11 +342,26 @@ class HCmsConfigGroup extends HCmsConfig {
           }
       }
 
+      if(l_cfg.css){
+          let old_css = l_cfg.css;
+          //remove these flex parameters from css and assign new ones obtained from form
+          let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+          for(let i=0; i<params.length; i++){
+              let prm = params[i];
+              if (old_css[prm] && (prm.indexOf('margin')<0 || old_css[prm]!='auto')){ //drop old value
+                  old_css[prm] = null;
+                  delete old_css[prm];
+              };
+          }
+          css = $.extend(old_css, css);
+      }
+      
       if(bsClasses.length>0){
             HCmsEditor.replaceBsClasses(this.element, this.allContainerBsClasses, bsClasses);
             l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
       }
       l_cfg.css = css;
+      this.assignCssTextArea();
 
       if(recreateGroup || (!l_cfg.isPage && groupType!=l_cfg.type)){
           //l_cfg.uiLibrary='bootstrap';

@@ -269,11 +269,11 @@ function HCmsEditorElement( element_cfg, _layout_content, _layout_container, $co
         window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         
         
-        //direct editor        
-        textAreaCss = $container.find('textarea[name="elementCss"]');
         
         _assignCssTextArea();
         
+        //direct editor        
+        textAreaCss = $container.find('textarea[name="elementCss"]');
         textAreaCss.on('change',function(){
 
             let vals = textAreaCss.val();
@@ -879,7 +879,7 @@ console.log( 'assign', css );
             let border_styles = [];
             $("#border-style option").each(function()
             {
-                border_styles.push($(this).val());
+                border_styles.push($(this).val()); //list of possible opptins
             });
             
             s = [];

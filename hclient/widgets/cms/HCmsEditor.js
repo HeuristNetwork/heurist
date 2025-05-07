@@ -601,5 +601,168 @@ class HCmsEditor {
 
       return isArray?classes:classes.join(' ');
   }
+
+  /*
+  *
+  */
+  static convertToBootstrapSize(value) {
+      
+      value = value.trim();
+      
+      const spacingMap = {
+          '0': '0', '0px': '0',
+          '0.25rem': '1', '4px': '1',
+          '0.5rem': '2', '8px': '2',
+          '1rem': '3', '16px': '3',
+          '1.5rem': '4', '24px': '4',
+          '3rem': '5', '48px': '5'
+      };
+
+      const val = spacingMap[value];
+      if (val !== undefined) {
+          return val;
+      }
+      
+      if(value.indexOf('px')>0){
+          value = parseInt(value);
+          let lastkey = '48px';
+          for (const [bskey, bsvalue] of Object.entries(spacingMap)) {
+              if(bskey.indexOf('px')>0){
+                  let bskey2 = parseInt(bskey);
+                  if(value<=bskey2){
+                      lastkey = bskey;
+                      break;
+                  }
+              }
+          }
+          return spacingMap[lastkey];
+      }
+      
+  }
+  
+  /*
+  *
+  */  
+  static parseBorderShorthand(border) {
+      const result = {
+          borderStyle: '',
+          borderColor: '',
+          borderWidth: ''
+      };
+
+      const styles = [
+          'none', 'hidden', 'dotted', 'dashed', 'solid',
+          'double', 'groove', 'ridge', 'inset', 'outset'
+      ];
+
+      const parts = border.trim().split(/\s+/);
+
+      parts.forEach(part => {
+          if (styles.includes(part)) {
+              result.borderStyle = part;
+          } else if (/^\d+(px|em|rem|%)?$/.test(part)) {
+              result.borderWidth = part;
+          } else {
+              result.borderColor = part;
+          }
+      });
+
+      return result;
+  }
+
+  /*
+  *
+  */
+  static convertToBootstrapClasses(styles) {
+      const bootstrapClasses = [];
+
+      const directions = {
+          'margin': 'm',
+          'margin-top': 'mt',
+          'margin-right': 'me',
+          'margin-bottom': 'mb',
+          'margin-left': 'ms',
+          'padding': 'p',
+          'padding-top': 'pt',
+          'padding-right': 'pe',
+          'padding-bottom': 'pb',
+          'padding-left': 'ps'
+      };
+      
+      let css = {};
+
+      for (const [key, value] of Object.entries(styles)) {
+          // Margin & Padding
+          if (directions[key]) {
+              const sz = HCmsEditor.convertToBootstrapSize(value);
+              bootstrapClasses.push(`${directions[key]}-${sz}`);
+          }
+
+          // Border shorthand
+          else if (key === 'border-color') {
+                css['--bs-border-color'] = value;
+              
+          }
+          else if (key === 'border-style') {
+              
+                css['--bs-border-style'] = value;
+          }
+          else if (key === 'border' || key.startsWith('border-')) {
+
+              let base = 'border';
+              if(key.startsWith('border-')){
+                  const side = key.split('-')[1];
+                  const sideClassMap = {
+                      'top': 'border-top',
+                      'right': 'border-end',
+                      'bottom': 'border-bottom',
+                      'left': 'border-start'
+                  };
+                  base = sideClassMap[side];
+                  if (!base) continue;
+              }
+              
+              let bs = HCmsEditor.parseBorderShorthand(value);
+
+              bs.borderWidth = parseInt(bs.borderWidth);
+              if(bs.borderWidth>5){
+                  bs.borderWidth = 5;    
+              }else if(!bs.borderWidth || bs.borderWidth<1){
+                  bs.borderWidth = 0;    
+              }
+              
+              if(bs.borderWidth>0 && bs.borderStyle!='none'){
+                  bootstrapClasses.push('border')
+                  bootstrapClasses.push(`${base}-${bs.borderWidth}`);
+
+                  if(bs.borderStyle){
+                      css['--bs-border-style'] = bs.borderStyle;
+                  }
+                  if(['black', 'white'].includes(bs.borderColor)){
+                      bootstrapClasses.push(`border-${bs.borderColor}`);
+                  }else if(bs.borderColor) {
+                      css['--bs-border-color'] = bs.borderColor;
+                  }
+              
+              }else{
+                  bootstrapClasses.push(`${base}-0`);
+              }
+          }
+
+          else if (key === 'border-radius') {
+              
+              const sz = HCmsEditor.convertToBootstrapSize(value);
+              if(sz>0) bootstrapClasses.push(`rounded-${sz}`);
+              
+          }
+      }
+      
+      if(css['--bs-border-style'] && bootstrapClasses.indexOf('border')<0){
+          bootstrapClasses.push('border border-1');
+      }
+
+      return {bsClasses:[...new Set(bootstrapClasses)].join(' '), css: css};
+  }
+
   
 }

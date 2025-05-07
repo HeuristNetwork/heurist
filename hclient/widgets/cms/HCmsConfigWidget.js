@@ -71,17 +71,12 @@ class HCmsConfigWidget extends HCmsConfig {
   onChangeOptions(widgetOptions){
       
       if(widgetOptions){
-//console.log('>>>>>', widgetOptions);            
-            
-            // let newOptions = $.extend($.heurist[this.l_cfg.appid].prototype.options, widgetOptions);
-            // 
 
             //TBD clean options fro default prototype values
             let l_cfg = this.l_cfg;
             l_cfg.options = widgetOptions;
             l_cfg.dom_id = l_cfg.options.dom_id;
             l_cfg.name = l_cfg.options.name;
-            l_cfg.title = '<span data-lid="'+ l_cfg.key +'">'+l_cfg.name+'</span>';
 
             this.onContentChange( true );
 
@@ -94,13 +89,6 @@ class HCmsConfigWidget extends HCmsConfig {
                 //TBD
             }
       }
-  }
-  
-  /*
-  * 
-  */  
-  getIdAndName(){
-      console.log('CGILD getIdAndName');
   }
   
   /*
