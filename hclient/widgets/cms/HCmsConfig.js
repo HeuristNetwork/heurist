@@ -81,7 +81,6 @@ class HCmsConfig {
       
       cont.find('input[data-type="element-name"]').val(l_cfg.name);
       cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
-      cont.find('textarea[name="elementClasses"]').val(l_cfg.classes); //publisher's classes
       cont.find('input[data-type^="element"]').on('change',()=>that.onContentChange(true));
       
       //Listeners for inputs
@@ -145,7 +144,7 @@ class HCmsConfig {
           
           //that.onContentChange(true);
       });
-      
+      cont.find('textarea[name="elementClasses"]').on('change',()=>that.#applyUserClasses());
       
       //direct content editor
       let btnDirectEdit = cont.find('div.btn-html-edit');
@@ -187,6 +186,7 @@ class HCmsConfig {
       this.#setCssToUI();
       
       HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, this.l_cfg.bsClasses);
+      this.#applyUserClasses(true);
       $(this.element).removeAttr('style');
       $(this.element).css(this.l_cfg.css); //assign changed css at once
       
@@ -337,6 +337,28 @@ class HCmsConfig {
       l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(cont.find('input[data-type="element-id"]').val());
       l_cfg.title = '<span data-lid="'+l_cfg.key+'">'+l_cfg.name+'</span>';
   }
+  
+  /*
+  *
+  */
+  #applyUserClasses(isForsed){
+
+      const userClasses = this.container.find('textarea[name="elementClasses"]').val();
+      
+      if(!isForsed && userClasses==this.l_cfg.classes) return;
+      
+      if(this.l_cfg.classes){
+        $(this.element).removeClass(this.l_cfg.classes);
+      }
+      
+      if(userClasses){
+          this.l_cfg.classes = userClasses;
+          $(this.element).addClass(userClasses);
+      }else if(this.l_cfg.classes){
+          delete this.l_cfg.classes;
+      }
+      
+  }
 
   /*
   * Prepare values for saving
@@ -349,13 +371,7 @@ class HCmsConfig {
       
       this.getIdAndName();
 
-      const userClasses = cont.find('textarea[name="elementClasses"]').val();
-      if(window.hWin.HEURIST4.util.isempty(userClasses)){
-          if(l_cfg.classes) delete l_cfg['classes'];
-      }else{
-          l_cfg.classes = userClasses;    
-      }
-
+      this.#applyUserClasses();
   }
 
   /*
@@ -368,6 +384,8 @@ class HCmsConfig {
 
       let hasBorder = false;
       let hasBackground = false;
+      
+      cont.find('textarea[name="elementClasses"]').val(l_cfg.classes??''); //publisher's classes
 
       if(l_cfg.bsClasses){
           let borderClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'border');
@@ -383,17 +401,17 @@ class HCmsConfig {
                   cont.find('#bsBorder-style').val('solid');
               }
 
-              cont.find('#bsBorder-color').val('default');
+              cont.find('select[name="borderColor"]').val('');
               if(l_cfg.css['--bs-border-color']){
                   cont.find('input[name="border-color"]').val(l_cfg.css['--bs-border-color']);
-                  //cont.find('input[name="border-color"]').parent().show();
               }else{
                   const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
                   if(clr.length==1 && clr[0].length==3){
-                      cont.find('#bsBorder-color').val(clr[0][2]);
-                      //cont.find('input[name="border-color"]').parent().hide();
+console.log('>>>>>', clr);                      
+                      cont.find('select[name="borderColor"]').val(clr[0][0]);
                   }
               }
+              
 
               //cont.find('#bsBorder-color').hSelect('refresh')
               hasBorder = cont.find('#bsBorder-style').val()!='none';
@@ -407,13 +425,25 @@ class HCmsConfig {
           hasBorder = hasBorder || shadowClass!='none';
           cont.find('#bsBorder-shadow').val(shadowClass);
 
-          const bgColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'bg-');
-          hasBackground = (bgColorClass!='');
-          cont.find('select[name="bgColor"]').val(bgColorClass);
-
-          const textColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'text-');
-          hasBackground = hasBackground || (textColorClass!='');
-          cont.find('select[name="textColor"]').val(textColorClass);
+          cont.find('select[name="bgColor"]').val('');
+          if(l_cfg.css['background-color']){
+              hasBackground = true;
+              cont.find('input[name="background-color"]').val(l_cfg.css['background-color']);
+          }else{
+              const bgColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'bg-');
+              hasBackground = (bgColorClass!='');
+              cont.find('select[name="bgColor"]').val(bgColorClass);
+          }
+          
+          cont.find('select[name="textColor"]').val('');
+          if(l_cfg.css['color']){
+              hasBackground = true;
+              cont.find('input[name="text-color"]').val(l_cfg.css['color']);
+          }else{
+              const textColorClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'text-');
+              hasBackground = hasBackground || (textColorClass!='');
+              cont.find('select[name="textColor"]').val(textColorClass);
+          }
 
           function __setMargins(type, classes){
               let marginClasses = HCmsEditor.getBsClasses(l_cfg.bsClasses, classes);
@@ -551,6 +581,29 @@ console.log('getcss', this.l_cfg);
             
             let hasBg = false;
             //colors for text and bg
+            
+            val = this.#updateColorInputs('background-color', eleName, css, bsClasses);
+            if(val!=''){
+                hasBg = true;
+                /*
+                if(eleName=='background-color'){
+                    css['background-color'] = val;
+                }else{
+                    bsClasses.push(val);
+                }*/
+            }
+            
+            val = this.#updateColorInputs('text-color', eleName, css, bsClasses);
+            if(val!=''){
+                hasBg = true;
+                /*if(eleName=='text-color'){
+                    css['color'] = val;
+                }else{
+                    bsClasses.push(val);
+                    
+                }*/
+            }
+/*            
             val = cont.find('select[name="bgColor"]').val();
             if(val!=''){
                 bsClasses.push(val);
@@ -561,7 +614,7 @@ console.log('getcss', this.l_cfg);
                 bsClasses.push(val);
                 hasBg = hasBg || true;
             }
-
+*/
             //val = cont.find('input[name="background-color"]').val();
             //if(val) css['background-color'] = val;
 
@@ -597,17 +650,16 @@ console.log('getcss', this.l_cfg);
                 if(val>0){
                     bsClasses.push('border-'+val);
                 }
-                val = (eleName=='border-color')?'default':cont.find('#bsBorder-color').val();
-                if(val=='default'){
-                    const bcrl = cont.find('input[name="border-color"]').val();
-                    if(bcrl) {
-                        css['--bs-border-color'] = bcrl;
-                        cont.find('#bsBorder-color').val('default').hSelect('refresh');
+
+                val = this.#updateColorInputs('border-color', eleName, css, bsClasses);
+                if(val!=''){
+                    if(eleName=='border-color'){
+                        css['--bs-border-color'] = val;
+                    }else{
+                        bsClasses.push(val);
                     }
-                }else{
-                    bsClasses.push('border-'+val);
-                    cont.find('input[name="border-color"]').val('');
                 }
+               
             }
             val = cont.find('#bsBorder-radius').val();
             if(val!=0){
@@ -696,12 +748,11 @@ console.log('getcss', this.l_cfg);
         //if(bsClasses.length>0){
         HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, bsClasses);
         this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
-        
+        this.#applyUserClasses(true);
         
         $(this.element).removeAttr('style');
         $(this.element).css(css); //assign changed css at once
         this.l_cfg.css = css;
-console.log('new', css);        
         this.assignCssTextArea();
             
         this.onContentChange( true );
@@ -709,23 +760,59 @@ console.log('new', css);
   }//getCSS
   
   /*
-   * Assigns CSS to direct edit css textarea: elementCss
-   */
+  * Assigns CSS to direct edit css textarea: elementCss
+  */
+  #updateColorInputs(cssType, eleName, css, bsClasses){                    
+      let bsType;
+      let cssType2;
+      if(cssType=='border-color'){
+          bsType = 'borderColor';
+          cssType2 = '--bs-border-color'
+      }else if(cssType=='background-color'){
+          bsType = 'bgColor';
+          cssType2 = 'background-color'
+      }else if(cssType=='text-color'){
+          bsType = 'textColor';
+          cssType2 = 'color';
+      }
+      const bsSelect = this.container.find(`select[name="${bsType}"]`);
+      
+      let val = (eleName==cssType)?'':bsSelect.val();
+      let clrInput = this.container.find(`input[name="${cssType}"]`);
+      if(val==''){
+          const bcrl = clrInput.val();
+          if(bcrl) {
+              val = bcrl;
+              bsSelect.val('').hSelect('refresh');
+              css[cssType2] = val;
+          }
+      }else{
+          clrInput.val('');
+          clrInput.next().css('background-color','');
+          bsClasses.push(val);
+      }
+
+      return val;
+  }   
+
+  /*
+  * Assigns CSS to direct edit css textarea: elementCss
+  */
   assignCssTextArea(){
 
-        let s = '';
-        if(this.l_cfg.css){
-            
-            s = [];
-            for(const [style, value] of Object.entries(this.l_cfg.css)){
-                s.push(`${style}: ${value}`);
-            }
+      let s = '';
+      if(this.l_cfg.css){
 
-            s = s.join(';\n');
-            s += !window.hWin.HEURIST4.util.isempty(s) ? ';' : '';
-        }
-        
-        this.container.find('textarea[name="elementCss"]').val(s);    
+          s = [];
+          for(const [style, value] of Object.entries(this.l_cfg.css)){
+              s.push(`${style}: ${value}`);
+          }
+
+          s = s.join(';\n');
+          s += !window.hWin.HEURIST4.util.isempty(s) ? ';' : '';
+      }
+
+      this.container.find('textarea[name="elementCss"]').val(s);    
   }  
  
   
@@ -814,6 +901,7 @@ console.log('new', css);
 
       HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, res.bsClasses);
       this.l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
+      this.#applyUserClasses(true);
 
       if(res.css){
           //adds --bs-border-color and --bs-border-style

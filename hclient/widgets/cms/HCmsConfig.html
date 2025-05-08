@@ -80,22 +80,29 @@
                                 <div>
                                     <div class="header_narrow">Color:</div>
                                     <div>
-                                    <select data-type="bs" id="bsBorder-color">
-                                        <option value="default">select</option>
-                                        <option>primary</option>
-                                        <option>primary-subtle</option>
-                                        <option>secondary</option>
-                                        <option>success</option>
-                                        <option>danger</option>
-                                        <option>warning</option>
-                                        <option>info</option>
-                                        <option>light</option>
-                                        <option>dark</option>
-                                        <option>black</option>
-                                        <option>white</option>
+                                    <select data-type="bs" name="borderColor">
+                                        <option value="">select...</option>
+                                        <option bg-color="bg-primary">border-primary</option>
+                                        <option bg-color="bg-primary-subtle">border-primary-subtle</option>
+                                        <option bg-color="bg-secondary">border-secondary</option>
+                                        <option bg-color="bg-secondary-subtle">border-secondary-subtle</option>
+                                        <option bg-color="bg-success">border-success</option>
+                                        <option bg-color="bg-success-subtle">border-success-subtle</option>
+                                        <option bg-color="bg-danger">border-danger</option>
+                                        <option bg-color="bg-danger-subtle">border-danger-subtle</option>
+                                        <option bg-color="bg-warning">border-warning</option>
+                                        <option bg-color="bg-warning-subtle">border-warning-subtle</option>
+                                        <option bg-color="bg-info">border-info</option>
+                                        <option bg-color="bg-info-subtle">border-info-subtle</option>
+                                        <option bg-color="bg-light">border-light</option>
+                                        <option bg-color="bg-light-subtle">border-light-subtle</option>
+                                        <option bg-color="bg-dark">border-dark</option>
+                                        <option bg-color="bg-dark-subtle">border-dark-subtle</option>
+                                        <option bg-color="bg-black">border-black</option>
+                                        <option bg-color="bg-white">border-white</option>                                        
                                     </select>
                                     <span> or 
-                                        <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:50px"/>
+                                        <input data-type="css" name="border-color" type="text" value="" placeholder="black" style="width:60px" class="text ui-widget-content"/>
                                     </span>
                                     </div>
                                 </div>
@@ -159,6 +166,9 @@
                                     <option bg-color="bg-white">bg-white</option>
                                     <option bg-color="bg-transparent">bg-transparent</option>
                                 </select>
+                                <span> or 
+                                    <input data-type="css" name="background-color" type="text" value="" placeholder="black" style="width:60px" class="text ui-widget-content"/>
+                                </span>
                             </div>
                             
                             <div>
@@ -187,6 +197,9 @@
                                     <option text-color="text-black">text-black</option>
                                     <option text-color="text-white">text-white</option>
                                 </select>
+                                <span> or 
+                                    <input data-type="css" name="text-color" type="text" value="" placeholder="black" style="width:60px" class="text ui-widget-content"/>
+                                </span>
                             </div>
                         
                             <div>
