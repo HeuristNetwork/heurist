@@ -3532,8 +3532,8 @@ function validateParentRecords($system, $child_record, &$new_child_details){
 
         $rectype_list_query = "SELECT dty_PtrTargetRectypeIDs, rst_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_ID = {$parent_dty_ID} AND dty_Type = 'resource' AND rst_RecTypeID = {$parent_type} AND rst_CreateChildIfRecPtr = 1";
         [$rectype_list, $rst_ID] = mysql__select_row($mysqli, $rectype_list_query);
-        $rst_ID ??= 0;
-        $rectype_list ??= '';
+        $rst_ID = $rst_ID ?? 0;
+        $rectype_list = $rectype_list ?? '';
         $rectype_list = explode(',', $rectype_list);
 
         if($rst_ID <= 0 || !empty($rectype_list) && !in_array($rectype_ID, $rectype_list)){
