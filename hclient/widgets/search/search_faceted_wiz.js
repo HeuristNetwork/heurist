@@ -1201,7 +1201,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             let treedata = null;
 
-            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes, null, node_order );   
+            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectype, allowed_fieldtypes, null, node_order );   
 
             if(dtys_to_keep !== 'all'){ // remove fields not in dtys_to_keep, also replace labels with dty_Name
 
@@ -1284,13 +1284,13 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                         let node_order = $(that.step2).find('[name="tree_order"]:checked').val();
 
-                        let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode, node_order );
+                        let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectypes, allowed_fieldtypes, parentcode, node_order );
                         if(res.length>1){
                             data.result = res;
                         }else{
                             data.result = res[0].children;
                         }
-                    
+
                     }else{
                         let sMsg = 'Heurist limits the depth of nesting to limit memory usage. If you require deeper nexting, please contact the Heurist team. However, you can generally solve this problem more efficiently by changing the starting point of your query or using Expansion rulesets';
                         window.hWin.HEURIST4.msg.showTooltipFlash(sMsg,3000,$(node.li));                        
@@ -1681,7 +1681,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             groupby: old_facet.groupby,
                             orderby: old_facet.orderby,
                             srange: old_facet.srange,
-                            type: node.type,
+                            type: node.type === 'relationtype' ? 'reltype' : node.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new,
                             trm_tree: (old_facet.trm_tree && old_facet.trm_tree === true)
                         };
@@ -1706,7 +1706,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             groupby: null,
                             orderby: null,
                             srange: null,
-                            type:node.type,
+                            type: node.type === 'relationtype' ? 'reltype' : node.type,
                             order: order_for_new
                         } );
                         

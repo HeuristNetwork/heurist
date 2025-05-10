@@ -273,9 +273,10 @@ window.hWin.HEURIST4.dbs = {
      * @param {number} $mode - $mode 
      *    3 - for record title mask editor - without reverse, enum (id,label,code,internal id) - max levels depth is calculated
      *    4 - find reverse links and relations   
-     *    5 - for faceted search wiz, filter builder - lazy treeview with reverse links
+     *    5 - filter builder - lazy treeview with reverse links
      *    6 - for import structure, export csv - lazy tree without reverse
      *    7 - for smarty - lazy tree without reverse, with relationship stub and enum (id,label,code,internal id)
+     *    8 - for faceted search wiz - same as mode 5 minus record exists options
      * @param {Array} rectypeids - set of rty ids 
      * @param {Array} fieldtypes - array of fieldtypes, 
      *               all
@@ -645,7 +646,7 @@ window.hWin.HEURIST4.dbs = {
 
                     //--------------------------------------------
                     //find all reverse links and relations
-                    if( ($mode==4 && $recursion_depth<2) || ($mode==5 && $recursion_depth==0) )
+                    if( ($mode==4 && $recursion_depth<2) || (($mode==5 || $mode==8) && $recursion_depth==0) )
                     {
                         let rev_fields = {};
                         let reverse_fields = rst_links.reverse[$recTypeId]; //all:, dty_ID:[rty_ID,...]
@@ -716,7 +717,7 @@ window.hWin.HEURIST4.dbs = {
 
                 $res['children'] = $children;
                 
-            }else if($mode==5 || $mode==6) //----------------------------------- for query builder and facet search tree
+            }else if($mode==5 || $mode==6 || $mode==8) //----------------------------------- for query builder and facet search tree
             {
                 //record type is array - add common fields only
                 
@@ -877,7 +878,7 @@ window.hWin.HEURIST4.dbs = {
                 
                 if ($mode==4 || $mode==3){ //record titlemask
                    //max_allowed_depth = 3; calculated
-                }else if ($mode==5 || $mode==6 || $mode==7) //make it 1 for lazy load
+                }else if ($mode==5 || $mode==6 || $mode==7 || $mode==8) //make it 1 for lazy load
                    max_allowed_depth = 1; 
                                                                 
                 if($recursion_depth<max_allowed_depth){
@@ -892,7 +893,7 @@ window.hWin.HEURIST4.dbs = {
                                 $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" 
                                         + $Db.rty($recTypeId, 'rty_Name') + "</span> . " + $dt_title + '</span>';
                                 
-                                if($mode==5 || $mode==6){
+                                if($mode==5 || $mode==6 || $mode==8){
                                     $res['lazy'] = true;
                                 }
 
@@ -912,11 +913,11 @@ window.hWin.HEURIST4.dbs = {
                             let $is_required = ($dtValue['rst_RequirementType']=='required');
                             let $rectype_ids = $pointerRecTypeId.split(",");
                              
-                            if($mode==4 || $mode==5 || $mode==6){
+                            if($mode==4 || $mode==5 || $mode==6 || $mode==8){
                                 
                                 let $type_name = $Db.baseFieldType[$detailType];
                                 
-                                $dt_title = ' <span'+($mode!=5?' style="font-style:italic"':'')
+                                $dt_title = ' <span'+($mode!=5 && $mode!=8?' style="font-style:italic"':'')
                                     +'>' + $dt_title 
                                     +'</span> <span style="font-size:0.7em">(' + $type_name + ')</span>';
                             }else{
@@ -928,7 +929,7 @@ window.hWin.HEURIST4.dbs = {
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
                                
-                                if($mode==5){
+                                if($mode==5 || $mode==8){
                                     $res['rt_ids'] = '';
                                     $res['lazy'] = true;
                                 }else{
@@ -942,7 +943,7 @@ window.hWin.HEURIST4.dbs = {
                                     $res['constraint'] = $rectype_ids.length;
                                     if($mode<5) $res['children'] = [];
                                 }
-                                if($mode==5 || $mode==6 || $mode==7){ 
+                                if($mode==5 || $mode==6 || $mode==7 || $mode==8){ 
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
                                     
@@ -996,7 +997,7 @@ window.hWin.HEURIST4.dbs = {
                 
             } 
             $res['key'] = "f:"+$dtID;
-            if($mode==4 || $mode==5 || $mode==6){
+            if($mode==4 || $mode==5 || $mode==6 || $mode==8){
                     
                 let $stype = ($detailType=='resource' || $detailType=='relmarker' || $detailType=='separator')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){
