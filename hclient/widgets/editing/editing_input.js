@@ -322,7 +322,7 @@ $.widget( "heurist.editing_input", {
                                 msg += '<span style="display:inline-block;margin-top:10px;">'
                                         + 'Translate will translate the first value<br>'
                                         + 'You may block translation of some part of the text by adding an html tag with translate="no",<br>'
-                                        + 'for example:  &lt;p translate=”no”&gt;text not to be translated&lt;/p&gt;'
+                                        + 'for example:  &lt;span translate=”no”&gt;text not to be translated&lt;/span&gt;'
                                     + '</span>';
 
                                 btns[window.HR('Translate')] = function(){

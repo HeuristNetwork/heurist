@@ -334,51 +334,37 @@
         $handling_encoding = false;
         $handling_copyright = false;
 
+        if($is_xml){
+            [$string, $handling_encoding, $handling_copyright] = addNoTranslateTags($string, true);
+        }else{
 
-        // Add no translate flags where necessary
-        /**
-         * &[a-zA-Z]; html entity
-         * &#[0-9]; html code
-         * &#x[a-fA-F0-9]; hex code
-         */
-        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
-        $regex_less_than = '(?:<|&lt;)';
-        $regex_great_than = '(?:>|&gt;)';
-        $regex_quotes = '(?:\'|"|&quot;|&apos;)';
+            $cleanupQuirks = function($matches){
+                return str_replace('&amp;', '&', $matches[0]);
+            };
 
-        $add_tags = function($matches) use ($is_xml) {
-            $response = $is_xml ? "<notranslate>{$matches[0]}</notranslate>" : "<p translate='no'>{$matches[0]}</p>";
-            return $response;
-        };
-        $remove_tags = function($matches){
+            $string = mb_ereg_replace('&', '&amp;', $string); // avoid decoding encoded entities
 
-            if(count($matches) == 1){
-                return $matches[0];
+            $doc = new DOMDocument;
+            $doc->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
+            $xpath = new DOMXPath($doc); // retrieve text only
+            $textNodes = $xpath->query('//text()');
+
+            $string = mb_ereg_replace('&amp;', '&', $string);
+
+            foreach($textNodes as $node){
+
+                [$node->textContent, $encoded, $copyright] = addNoTranslateTags($node->textContent, false);
+
+                $handling_encoding |= $encoded;
+                $handling_copyright |= $copyright;
             }
 
-            return $matches[1];
-        };
+            $string = $handling_encoding || $handling_copyright ? $doc->saveHTML() : $string;
 
-        $org_string = $string; // backup string before processing
+            $string = mb_ereg_replace_callback('&amp;(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?', $cleanupQuirks, $string);
 
-        if(preg_match("/$regex_entities/", $string)){ // html encoded entities
-
-            $string = mb_ereg_replace_callback($regex_entities, $add_tags, $string);
-
-            $handling_encoding = true;
-
-            $string = $string !== false ? $string : $org_string;
-            $org_string = $string; // update backup string
-        }
-
-        if(preg_match("/©/", $string)){ // copyright symbol, sometimes gets removed by Deepl during translation
-
-            $replacement = $is_xml ? '<notranslate>©</notranslate>' : '<p translate="no">©</p>';
-            $string = mb_ereg_replace("©", $replacement, $string);
-
-            $handling_copyright = true;
-
-            $string = $string !== false ? $string : $org_string;
+            $string = mb_ereg_replace('_LT_', '<', $string);
+            $string = mb_ereg_replace('_GT_', '>', $string);
         }
 
         /**
@@ -491,30 +477,98 @@
             $res = $translation[0]['text'];
         }
 
+        return removeNoTranslateTags($res, $is_xml, $handling_encoding, $handling_copyright);
+    }
+
+    function addNoTranslateTags($string, $isXML){
+
+        $handleEntity = false;
+        $handleCopyRight = false;
+
+        // Add no translate flags where necessary
+        // Use _LT_ and _GT_ to avoid issues replacing the text via DOMDoc node 
+        /**
+         * &[a-zA-Z]; html entity
+         * &#[0-9]; html code
+         * &#x[a-fA-F0-9]; hex code
+         */
+        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
+
+        $add_tags = function($matches) use ($isXML) {
+            return $isXML ? "<notranslate>{$matches[0]}</notranslate>" : "_LT_span translate='no'_GT_{$matches[0]}_LT_/span_GT_";
+        };
+
+        $original = $string; // backup string before processing
+
+        if(mb_eregi($regex_entities, $string)){ // html encoded entities
+
+            $string = mb_ereg_replace_callback($regex_entities, $add_tags, $string);
+
+            $handleEntity = $string !== false;
+
+            $string = $string ?? $original;
+
+            $original = $string; // update backup string
+        }
+
+        if(mb_eregi("[^\w]©|©[^\w]", $string)){ // copyright symbol, sometimes gets removed by Deepl during translation
+
+            $replacement = $isXML ? '<notranslate>©</notranslate>' : '_LT_span translate="no"_GT_©_LT_/span_GT_';
+            $string = mb_ereg_replace("[^\w]©|©[^\w]", $replacement, $string);
+
+            $handleCopyRight = $string !== false;
+
+            $string = $string ?? $original;
+        }
+
+        return [$string, $handleEntity, $handleCopyRight];
+    }
+
+    function removeNoTranslateTags($string, $isXML, $handlEntity, $handleCopyRight){
+
         // Remove notranslate tags
-        $org_res = $res; // backup original result
-        if($handling_encoding && !empty($res)){
+        /**
+         * &[a-zA-Z]; html entity
+         * &#[0-9]; html code
+         * &#x[a-fA-F0-9]; hex code
+         */
+        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
+        $regex_less_than = '(?:<|&lt;)';
+        $regex_great_than = '(?:>|&gt;)';
+        $regex_quotes = '(?:\'|"|&quot;|&apos;)';
 
-            $match = $is_xml
+        $remove_tags = function($matches){
+
+            if(count($matches) == 1){
+                return $matches[0];
+            }
+
+            return $matches[1];
+        };
+
+        $original = $string; // backup original result
+        if($handlEntity && !empty($string)){
+
+            $match = $isXML
                     ? "{$regex_less_than}notranslate{$regex_great_than}($regex_entities){$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}p translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}($regex_entities){$regex_less_than}\/p{$regex_great_than}";
+                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}($regex_entities){$regex_less_than}\/span{$regex_great_than}";
 
-            $res = mb_ereg_replace_callback($match, $remove_tags, $res);
+            $string = mb_ereg_replace_callback($match, $remove_tags, $string);
 
-            $res = $res !== false ? $res : $org_res;
-            $org_res = $res; // update backup string
+            $string = $string ?? $original;
+            $original = $string; // update backup string
         }
 
-        if($handling_copyright && !empty($res)){
+        if($handleCopyRight && !empty($string)){
 
-            $match = $is_xml
+            $match = $isXML
                     ? "{$regex_less_than}notranslate{$regex_great_than}©{$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}p translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}©{$regex_less_than}\/p{$regex_great_than}";
+                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}©{$regex_less_than}\/span{$regex_great_than}";
 
-            mb_ereg_replace($match, "©", $res);
+            mb_ereg_replace($match, "©", $string);
 
-            $res = $res !== false ? $res : $org_res;
+            $string = $string ?? $original;
         }
 
-        return $res;
+        return $string;
     }

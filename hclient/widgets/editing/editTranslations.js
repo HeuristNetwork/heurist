@@ -124,7 +124,7 @@ $.widget( "heurist.editTranslations", {
 
                 let msg = 'Language: <select id="selLang"></select><br><br>'
                         + 'You may block translation of some part of the text by adding an html tag with translate="no",<br>'
-                        + 'for example:  &lt;p translate=”no”&gt;text not to be translated&lt;/p&gt;';
+                        + 'for example:  &lt;span translate=”no”&gt;text not to be translated&lt;/span&gt;';
 
                 let btns = {};
                 let labels = {yes: window.HR('Add'), no: 'Cancel', title: 'Add automatic translation'};
