@@ -284,9 +284,12 @@ class HCmsEditor {
     //, callback:(rec)=>this.onLoadPageContent(rec)}
   }
 
-  //
-  //  Event handler on page load completed
-  //
+  /*
+  *  Event handler on page load completed (see WebSite.onPageLoad)
+  *  1. Sets container element (layout_container)
+  *  2. Inits HCmsEditorPage instance
+  *  3. Switches to page mode and calls this._cmsEditorPage.initPage
+  */
   onLoadPageContent(record){
 
       let that = this;
@@ -707,6 +710,12 @@ class HCmsEditor {
               
                 css['--bs-border-style'] = value;
           }
+          else if (key === 'border-radius') {
+              
+              const sz = HCmsEditor.convertToBootstrapSize(value);
+              if(sz>0) bootstrapClasses.push(`rounded-${sz}`);
+              
+          }
           else if (key === 'border' || key.startsWith('border-')) {
 
               let base = 'border';
@@ -747,13 +756,6 @@ class HCmsEditor {
               }else{
                   bootstrapClasses.push(`${base}-0`);
               }
-          }
-
-          else if (key === 'border-radius') {
-              
-              const sz = HCmsEditor.convertToBootstrapSize(value);
-              if(sz>0) bootstrapClasses.push(`rounded-${sz}`);
-              
           }
       }
       

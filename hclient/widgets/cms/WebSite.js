@@ -23,8 +23,20 @@ class WebSite {
     currentPageRec;
     pageCache = {}; 
     
+    currentPageStyle = null;
+    
     current_language = null;
     is_execute_homepage_custom_javascript = false;
+    
+    /*
+    Workflow:
+    constructor -> inits header/footer and loads home page
+        loadPage ->  request for page content (DT_EXTENDED_DESCRIPTION)
+            #initPage -> Inits layout for given page record, keeps page tree data (for edit mode) or record cache
+                onPageLoad -> waits till all widgets are inits, updates pageId and page title, executes punlisher scrtips
+                    cmsEditor.onLoadPageContent (for edit mode)
+    */
+    
 
     // {siteId:siteId, pageId:pageId, siteMenu:menuContentJSON}
     constructor(_options) {
@@ -33,7 +45,8 @@ class WebSite {
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-        
+        window.hWin.DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
+        window.hWin.DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
 
         this.siteId = _options.siteId;
         this.pageId = _options.pageId;
@@ -43,16 +56,13 @@ class WebSite {
         this.pageCache = {};
 
         this.is_execute_homepage_custom_javascript = true; //semaphore
-        this.initWebsite();
-    }
 
-    initWebsite(){
         //init widgets in header and footer
         window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header'); 
-
+        window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer'); 
+        
         this.loadPage({pageId:this.pageId});
     }
-
 
     /**
     * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
@@ -74,10 +84,16 @@ class WebSite {
         
         const supp_options = options.supp_options; //additiona init options for widgets
         
+        let fields = ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS];
+        
+        if(window.hWin.HAPI4.sysinfo['custom_js_allowed']){
+            fields.push(DT_CMS_SCRIPT);
+        }
+        
         const server_request = {
                         q: 'ids:'+options.pageId,
                         restapi: 1,
-                        columns: ['rec_ID', window.hWin.DT_NAME, window.hWin.DT_EXTENDED_DESCRIPTION],
+                        columns: fields,
                         zip: 1,
                         format:'json'};
                         
@@ -99,6 +115,24 @@ class WebSite {
                             res[key] = res[key][ Object.keys(res[key])[0] ];
                         }
                         */
+                        var keys = Object.keys(res);
+                        for(var idx in keys){
+                            var key = keys[idx];
+
+                            if(key == DT_EXTENDED_DESCRIPTION){
+                                //the size content can be big so it stores in db as 64K chunks
+                                //implode all parts of page
+                                res[key] = Object.values(res[key]).join('');
+                            }else if(key != DT_NAME){ //for scripts and styles
+                                //takes only first value
+                                res[key] = res[key][ Object.keys(res[key])[0] ];
+                            }
+                        }
+                        if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
+                            res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
+                                    window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
+                        }
+                        
                         res['rec_ID'] = record['rec_ID'];
                         
                         //reload content of page_target
@@ -129,7 +163,7 @@ class WebSite {
     }
     
     /*
-    *
+    * Inits layout for given page record, keeps page tree data (for edit mode) or record cache
     */
     #initPage( record ){
         
@@ -142,16 +176,18 @@ class WebSite {
             window.hWin.HEURIST4.msg.showMsgErr('Web Page can not be loaded. Target element not found');
             return;
         }
+        this.container = pageElement;
+        
+        const isEditMode = window.parent?.cmsEditor;
 
-        let content = window.hWin.HAPI4.getTranslation( record[window.hWin.DT_EXTENDED_DESCRIPTION], null );
+        let content = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
         const supp_options = {};
-        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, pageElement, supp_options );
-
+        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, pageElement, supp_options, isEditMode );
 
         this.currentPageRec = record;
         this.pageId = this.currentPageRec['rec_ID'];
         
-        if(window.parent?.cmsEditor){ //keep json structure for edit mode
+        if(isEditMode){ //keep json structure for edit mode
             record['pageTreeData'] = pageTreeData;
         }else if(!this.pageCache[this.pageId]){
             //keep cache for not edit mode
@@ -166,9 +202,10 @@ class WebSite {
     }
 
     /*
-    *  Executed after layout initialization for every page
-    *  Updates pageId    
+    *  Executed after layout initialization for all widgets on the page
+    *  Updates pageId, page title
     *  Calls cmsEditor.onLoadPageContent
+    *  Executes publisher (custom) javascripts 
     */
     #onPageLoad(){
 
@@ -199,7 +236,8 @@ class WebSite {
         
         this.#assignPageTitle();
         this.#onPageLoadPublisherScripts();
-        
+       
+        //TBD  this.#initLinksAndImages();
     }
     
     /*
@@ -211,16 +249,59 @@ class WebSite {
             let pagetitle = window.hWin.HAPI4.getTranslation(this.currentPageRec[window.hWin.DT_NAME], this.current_language);
             pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         }
-        //TBD
+        //TBD - change url in browser
         
     }
     
     /*
     *
     */
-    #onPageLoadPublisherScripts(){
+    #executePublisherScript(pageId, eventdata){
+
+        let func_name = 'afterPageLoad'+pageId;
+        
+        if(window.hWin.HEURIST4.util.isFunction(window[func_name])){
+            //script may have event listener that is triggered on page exit - disable it
+            this.container.off( 'onexitpage' );
+            //execute publisher's script
+            try{
+                window[func_name]( document, pageId, eventdata );
+            }catch(e){
+                console.error(e);
+            }
+        }
+    }
     
-        let eventdata = {}; //TBD see old websiteScriptAndStyles.php
+    /*
+    * 1. Adds publisher's styles
+    * 2. Adds and executes publisher's javascript
+    * 3. Performs search if it is specified in url_params
+    */
+    #onPageLoadPublisherScripts(){
+        
+        //remove old style and add custom style per page ===========================
+        if(DT_CMS_CSS>0){
+            
+            //remove style for previous page
+            if(this.currentPageStyle){
+                document.getElementsByTagName('head')[0].removeChild(this.currentPageStyle);
+                this.currentPageStyle = null;
+            }
+
+            const stylesCode = this.currentPageRec[DT_CMS_CSS];
+            //custom website css from home page has been added already in WebSite.php
+            if(stylesCode && this.pageId!=this.siteId)
+            {
+                this.currentPageStyle = document.createElement('style');
+                this.currentPageStyle.type = 'text/css';
+                this.currentPageStyle.innerHTML = stylesCode;
+                document.getElementsByTagName('head')[0].appendChild(this.currentPageStyle);
+            }
+        }
+    
+        //--------------------------------------------
+    
+        let eventdata = {}; //data that are passed from one page to another - search query for example or parameters for publisher's js
         
         //pass url params to custom javascript
         let params = window.hWin.HEURIST4.util.getUrlParams(location.href);
@@ -228,22 +309,38 @@ class WebSite {
         if(!eventdata) eventdata = {};
         eventdata['url_params'] = params;
         
+        let func_name = 'afterPageLoad'+this.siteId;
+        
         //execute custom javascript for home page =========================
         if(this.is_execute_homepage_custom_javascript){
-            var func_name = 'afterPageLoad'+this.siteId;
-            if(window.hWin.HEURIST4.util.isFunction(window[func_name])){
-                //script may have event listener that is triggered on page exit
-                //disable it
-                $( "#main-content" ).off( "onexitpage");
-                //execute the script
-                try{
-                    window[func_name]( document, this.siteId, eventdata );
-                }catch(e){
-                    console.error(e);
-                }
-            }
+            //script for home page has been added in WebSite.php - execute once on website load
+            this.#executePublisherScript(this.siteId, eventdata);
         }
         this.is_execute_homepage_custom_javascript = false;
+        
+        //execute custom javascript per loaded page =========================
+        if(this.siteId!=this.pageId && DT_CMS_SCRIPT>0){
+            func_name = 'afterPageLoad'+this.pageId;    
+            if(!window.hWin.HEURIST4.util.isFunction(window[func_name])){
+                const script_code = this.currentPageRec[DT_CMS_SCRIPT];
+                if(script_code && script_code !== false){ //false means it is already inited
+
+                    //add script to page header
+                    let script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.text = 'function '+func_name
+                    +'(document, pageid, eventdata){\n'
+                    +'try{\n' + script_code + '\n}catch(e){console.error(e)}}';
+
+                    //$('head').append(script);
+                    //document.getElementsByTagName('head')[0].appendChild(script);
+                    document.head.appendChild(script);
+                }
+            }
+            
+            this.#executePublisherScript(this.pageId, eventdata);
+        }
+        
     
     }
     

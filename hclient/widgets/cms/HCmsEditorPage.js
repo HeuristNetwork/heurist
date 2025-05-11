@@ -537,6 +537,7 @@ class HCmsEditorPage {
         }
         this._toolbar_Page.hide();
         if(this._panel_propertyView) this._panel_propertyView.hide();
+        this._panel_treePage[0].style.removeProperty('height');
         this._cmsEditor.shrinkEditorPanel(); 
     }
     
@@ -1007,8 +1008,8 @@ function(value){
                             node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(ele_ID);
                             if(node) node.setActive(true);
 
-                            that._layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
-                            that._layout_container.find('div[data-hid='+ele_ID+']').addClass('cms-element-active');
+                            that._layout_container.find('.cms-element[data-hid]').removeClass('cms-element-active'); //remove from all
+                            that._layout_container.find('.cms-element[data-hid='+ele_ID+']').addClass('cms-element-active');
 
                         }else                            
                         {   
@@ -1032,7 +1033,7 @@ function(value){
     //
     #showOverlayForElement( ele_ID ){
         if(ele_ID>0){
-            let cms_ele = this._layout_container.find('div[data-hid='+ele_ID+']');
+            let cms_ele = this._layout_container.find('.cms-element[data-hid='+ele_ID+']');
             
             if(cms_ele.hasClass('cms-element-editing')) return;
             
@@ -1092,7 +1093,7 @@ function(value){
             //remove child
             parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
             parent_children = parent_element.children;
-            parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
+            parent_container = this._layout_container.find('.cms-element[data-hid='+parentnode.key+']');
             
         }
 
@@ -1193,7 +1194,7 @@ function(value){
     //
     #layoutTranslateElement(ele_id, lang_id){
         
-        let affected_ele = this._layout_container.find('div[data-hid="'+ele_id+'"]');
+        let affected_ele = this._layout_container.find('.cms-element[data-hid="'+ele_id+'"]');
         let lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
         
         //need switch
@@ -1266,7 +1267,7 @@ function(value){
         this._layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         this._layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
         
-        let ele = this._layout_container.find('div[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
+        let ele = this._layout_container.find('.cms-element[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
 
         if(!ele.css('background-image') || ele.css('background-image')=='none'){
             ele.addClass('headline marching-ants marching');
@@ -1520,7 +1521,7 @@ function(value){
         if(parentnode.folder){
             //add child
             parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
-            parent_container = this._layout_container.find('div[data-hid='+parentnode.key+']');
+            parent_container = this._layout_container.find('.cms-element[data-hid='+parentnode.key+']');
             parent_children = parent_element.children;
 
         }else{
@@ -1531,7 +1532,7 @@ function(value){
                 parent_children = this._layout_content;
             }else{
                 parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.parent.key);
-                parent_container = this._layout_container.find('div[data-hid='+parentnode.parent.key+']');
+                parent_container = this._layout_container.find('.cms-element[data-hid='+parentnode.parent.key+']');
                 parent_children = parent_element.children;
             }
         }

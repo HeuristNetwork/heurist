@@ -186,7 +186,7 @@ class HCmsConfigGroup extends HCmsConfig {
 
                  l_cfg.children[k].bsClasses = (HCmsEditor.removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
 
-                 let child_ele = that._cmsEditor.findInWebSite('div[data-hid='+l_cfg.children[k].key+']');
+                 let child_ele = that._cmsEditor.findInWebSite('.cms-element[data-hid='+l_cfg.children[k].key+']');
 
                  HCmsEditor.replaceBsClasses(child_ele[0], 'col', val);
              }
@@ -236,7 +236,7 @@ class HCmsConfigGroup extends HCmsConfig {
                      l_cfg.children[k].css['border-radius'] = '4px';
                      l_cfg.children[k].css['margin'] = '4px';*/
 
-                     let child_ele = that._cmsEditor.findInWebSite('div[data-hid='+l_cfg.children[k].key+']');
+                     let child_ele = that._cmsEditor.findInWebSite('.cms-element[data-hid='+l_cfg.children[k].key+']');
                      child_ele.removeAttr('style');
                      child_ele.css(l_cfg.children[k].css);
                  });

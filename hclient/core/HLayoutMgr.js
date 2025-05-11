@@ -27,8 +27,8 @@ class HLayoutMgr {
     
     pnl_counter;
     body;
-    isEditMode = false;
     _supp_options = {};
+    _isEditMode = false;
     _main_layout_cfg = null;
     
     
@@ -36,7 +36,7 @@ class HLayoutMgr {
 
     this.pnl_counter = 1;
     this.body = $(document).find("body");
-    this.isEditMode = false;
+    this._isEditMode = false;
     this._supp_options = {};
     this._main_layout_cfg = null;
   }
@@ -45,35 +45,50 @@ class HLayoutMgr {
   // assigns unique key for layout element
   //
   #layoutInitKey(layout, i) {
-    if (!layout[i].key) {
-      layout[i].key = this.pnl_counter;
-      layout[i].title = `<span data-lid="${this.pnl_counter}">${layout[i].name}</span>`;
-      layout[i].folder = layout[i].children?.length > 0;
+      
+    if(Array.isArray(layout) && i>=0){
+        layout = layout[i];
+    }  
+      
+    if (!layout.key) {
+      layout.key = this.pnl_counter;
+      layout.title = `<span data-lid="${this.pnl_counter}">${layout.name}</span>`;
+      layout.folder = layout.children?.length > 0;
       this.pnl_counter++;
     }
   }
 
+  //  if content is not json 
+  //
+  //  
+  
   /*
   *
   */
-  layoutInitFromHTML(container, supp_options)
+  layoutInitFromHTML( container, supp_options )
   {
+
       this._supp_options = supp_options || {};
 
       container = $(container);
       
-      //const layout = this.#convertHTMLtoJSON(container, 0);
-      //return this.#layoutInitFromJSON(layout, container, false, true );
-
+      let pageTreeData;
       
+      if(this._isEditMode){
+            pageTreeData = this.#convertHTMLtoJSON(container, 0);
+console.log('layoutInitFromHTML', pageTreeData);
+            //pageStructureAsJSON = this.#layoutInitFromJSON(layout, container, false, true );
+      }
+
+      //****************************
       //find all elements with data-heurist-cms
       $.each(container.find('[data-heurist-cms]'), (idx, ele) => {
           ele = $(ele);
           
           let widget_cfg = this.#convertWidgetHTMLtoJSON(ele);
           if(widget_cfg && widget_cfg.appid){
-               widget_cfg.key = this.pnl_counter;
-               this.pnl_counter++;
+               //widget_cfg.key = this.pnl_counter;
+               //this.pnl_counter++;
                ele.attr('data-hid', widget_cfg.key);
                this.#layoutInitWidget(widget_cfg, ele);
           }
@@ -85,10 +100,7 @@ class HLayoutMgr {
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
       }
       
-      //let res = this.#convertHTMLtoJSON(container, 0);
-//console.log('>>>',res)
-      
-      return null;
+      return pageTreeData;
   }
   
   //
@@ -139,7 +151,7 @@ class HLayoutMgr {
       if (this._supp_options.page_name) {
         layout[0].name = "Page";
       }
-      if (this._supp_options.keep_top_config && this.isEditMode) {
+      if (this._supp_options.keep_top_config && this._isEditMode) {
         this._main_layout_cfg = layout;
       }
     }
@@ -265,10 +277,9 @@ class HLayoutMgr {
   */
   layoutInitGroup(layout, container, forStorage) {
       
-        layout.dom_id = 'temo1';//'cms-group-'+layout.key;
         layout.dom_id = 'cms-group-'+layout.key;
         
-        let $d = this.#layoutCreateDiv(layout, 'cms-element brick', forStorage);
+        let $d = this.#layoutCreateDiv(layout, this._isEditMode?'cms-element brick':'', forStorage);
         
         this.#layoutReplaceGroupDiv(container, $d)
         
@@ -283,9 +294,10 @@ class HLayoutMgr {
   
   */
   #layoutInitText(layout, container, forStorage) {
+      
     const $d = this.#layoutCreateDiv(
       layout,
-      "editable tinymce-body cms-element brick",
+      this._isEditMode?'tinymce-body cms-element brick':'', //later need to use either cms-element or brick
       forStorage
     );
     $d.appendTo(container);
@@ -331,7 +343,7 @@ class HLayoutMgr {
  //
  #layoutAddWidget(layout, container, forStorage){
 
-        let $d = this.#layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
+        let $d = this.#layoutCreateDiv(layout, this._isEditMode?'heurist-widget cms-element brick':'');
 
         //remove previous one
         let old_widget = container.find('div[data-hid='+layout.key+']');
@@ -932,17 +944,47 @@ class HLayoutMgr {
     //
     #convertHTMLtoJSON(container, lvl){
 
-
         let res = [];
-        let is_root_div = false;
-        let that = this;
         let children = container.children();
+        let that = this;
+        
 
+        if(lvl==0 && container.find('div[data-heurist-app-id]').length==0 && container.find('div[data-heurist-cms]').length==0){
+
+            let ele;
+            if(children.length==1){
+                ele = $(children[0]);
+            }else{
+                ele = $('<div>');
+                if(children.length>0){
+                    container.children().appendTo(ele);
+                }
+                ele.appendTo( container );
+            }
+            
+            res.push({name:'Content', type:"text",  content: ele[0].outerHTML });
+            this.#layoutInitKey(res, 0);
+            ele.attr('data-hid', res[0].key);
+            ele.addClass('tinymce-body cms-element brick');
+            
+            /*
+            let root_css = {};
+            if(container.attr('style')){
+                root_css = that.#css2json(container.attr('style'));    
+            }
+            res = [{name:'Page', type:'group', isPage:true, css:root_css, children:res}];
+            this.#layoutInitKey(res, 0);
+            return res;
+            */
+        }else{
+            
         $.each(children, function(idx, ele){
 
             ele = $(ele);
-
+            
             let child;
+            
+            let cmsClasses = 'cms-element brick';
             
             let widget_cfg = that.#convertWidgetHTMLtoJSON(ele);
             /*
@@ -958,66 +1000,76 @@ class HLayoutMgr {
                 }
                 if(!child.name) child.name = "Widget "+lvl+'.'+idx;
             */
-            if(widget_cfg){
+            if(widget_cfg && widget_cfg.appid){
                 
                 child = widget_cfg;
-                if(!child.name) child.name = "Widget "+lvl+'.'+idx;
+                //widget_cfg.key = this.pnl_counter;
+                //this.pnl_counter++;
+                if(!child.name) child.name = `Widget ${lvl}.${idx}`;
                 
-            }else if(ele.attr('data-heurist-cms')){ //group|accordion|tabs|cardianl|app
-/*
-                if(res.type=='north' || res.type=='south' || res.type=='west' || res.type=='east'){
-                    let cardinal_opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-cms-options'));
-                    if(cardinal_opts){
-                        res['options'] = cardinal_opts;        
-                    }
-                }
-*/            
-            
-            }else if(ele.find('div[data-heurist-app-id]').length==0 && ele.find('div[data-heurist-cms]').length==0){ 
-                    //no widgets among children
+            }else if(widget_cfg) {
+                //publisher defined GROUP|tabs|accordion|cardinal
+                child = widget_cfg;
+                if(!child.name) child.name = `Group ${lvl}.${idx}`;
+                child.children = that.#convertHTMLtoJSON(ele, lvl+1);
+                
+            }else if(ele.find('div[data-heurist-app-id]').length==0 && ele.find('div[data-heurist-cms]').length==0){
+                
+                //no widgets among children - convert to content
+                child = {name: `Content ${lvl}.${idx}`, 
+                        type: 'text', 
+                        content: ele[0].outerHTML };
+                cmsClasses = 'tinymce-body '+cmsClasses;
 
-                    let tag = ele[0].nodeName.toLowerCase();
-                    let s = ele.html();
-                    if(lvl == 1  && children.length==1 && tag=='div'){
-                        is_root_div = true;
-                    }else{
-                        s = '<' + tag + '>'+s+'</' + tag + '>';
-                    }
-                    child = {name:"Content "+lvl+'.'+idx, 
-                        type:"text", 
-                        content: s };
-                        
             }else{
-                    //there are widgets among children
-                    child = {name:"Group "+lvl+'.'+idx,
-                        type:"group", 
-                        folder:true, 
-                        children: that.#convertHTMLtoJSON(ele, lvl+1) };
-            }
+                //assume these is a group of mixed unstructured content
+                child = {name:`Group ${lvl}.${idx}`, type:'group', folder:true};
                 
+                child.children = that.#convertHTMLtoJSON(ele, lvl+1);
+                /*                
+                cmsClasses = 'tinymce-body '+cmsClasses;
+                //find all elements with data-heurist-cms
+                $.each(ele.find('[data-heurist-cms]'), (idx, ele2) => {
+                      ele2 = $(ele2);
+                      let widget_cfg = that.#convertWidgetHTMLtoJSON(ele2);
+                      that.#layoutInitKey( widget_cfg );
+                      if(widget_cfg){
+                          widget_cfg.mixed = true;
+                          res.push(widget_cfg);
+                      }
+                });
+                */
+            }
 
             if(child){
-                if(ele.attr('style')){
-                    res['css'] = that.#css2json(ele.attr('style'));    
+                if(ele.attr('style') && !child['css']){
+                    child['css'] = that.#css2json(ele.attr('style'));    
                 }
-                if(ele.attr('class')){
-                    res['classes'] = ele.attr('class');
+                that.#layoutInitKey(child);
+                ele.attr('data-hid', child.key);
+                
+                ele.addClass(cmsClasses);
+                
+                /* publisher classes
+                if(!child['classes'] && ele.attr('class')){ 
+                    child['classes'] = ele.attr('class');
                 }
+                */
 
                 res.push(child);
             }
-        });
+        }); //each children
+        
+        }
 
-        if(lvl == 0){
-            if(res.length==1 && !res[0].folder){
-                //only content - adds top group
-                let root_css = {};
-                if(is_root_div){
-                    root_css = res[0].css;
-                    res[0].css = {};
-                }
-                res = {name:'Page', type:'group', folder:true, children:res, css:root_css};
+        if(lvl == 0){ //PAGE wrapper for root level
+            let root_css = {};
+            if(container.attr('style')){
+                root_css = that.#css2json(container.attr('style'));    
             }
+            res = [{name:'Page', type:'group', folder:true, isPage:true, children:res, css:root_css}];
+            this.#layoutInitKey(res, 0);
+            container.attr('data-hid', res[0].key).addClass('cms-element');
         }
 
         return res;
@@ -1036,7 +1088,7 @@ class HLayoutMgr {
       }
 
       if(!widgetId || widgetId=='text'){
-          //widget is not define
+          //widget is not defined
           return null;    
       }
 
@@ -1048,8 +1100,11 @@ class HLayoutMgr {
       }else{          
          //take configuration from content of div
          widget_cfg = window.hWin.HEURIST4.util.isJSON(element.text());
-         if(widgetId=='app' && widget_cfg){
-             widgetId = widget_cfg.appid;
+         if(widget_cfg){
+             element.empty();
+             if(widgetId=='app'){
+                widgetId = widget_cfg.appid;
+             }
          }
       }
       
@@ -1057,18 +1112,28 @@ class HLayoutMgr {
       if(!widget_cfg.options){
             widget_cfg.options = window.hWin.HEURIST4.util.cloneJSON(widget_cfg);
       }
-      if(!widget_cfg.appid) widget_cfg.appid = widgetId;
       
-      //if(widgetId=='group' || widgetId=='tabs' || widgetId=='accordion')
-      
-      let app = this.#getWidgetById(widget_cfg.appid);
-      
-      let defName = app?app.name:'Widget not defined';
-      if(!widget_cfg.name){
-        widget_cfg.name = defName;
+      if(widgetId=='group' || widgetId=='tabs' || widgetId=='accordion'){
+
+          widget_cfg.type = widgetId;
+          widget_cfg.folder = true;
+          
+      }else{
+          if(!widget_cfg.appid) widget_cfg.appid = widgetId;
+          let app = this.#getWidgetById(widget_cfg.appid);
+
+          if(!widget_cfg.name){
+          const defName = app?app.name:'Widget not defined';
+          widget_cfg.name = defName;
+          }
       }
       
       widget_cfg.dom_id = element.attr('id');
+      
+      if(element.attr('style') && !widget_cfg['css']){
+        widget_cfg['css'] = this.#css2json(element.attr('style'));    
+      }
+
 
       return widget_cfg;
   }
@@ -1211,9 +1276,15 @@ class HLayoutMgr {
     // NEW 
     // Convert from JSON to human readable HTML string 
     // (without widget initialization)
-    // <div id="cms-content-23" data-cms-name="Page" data-cms-type="text|group|accordion|tabs|cardianl|app" css=""> content </div>
-    // <div id="cms-widget-51" data-cms-name="Menu"  data-cms-type="app" css=""> options:{} </div>
+    // <div id="cms-content-23" data-cms-name="Page" data-heurist-cms="text|group|accordion|tabs|cardianl|app" css=""> content </div>
+    // <div id="cms-widget-51" data-cms-name="Menu"  data-heurist-cms="app" css=""> options:{} </div>
     // 
+    //  <div data-heurist-cms='cardinal|tabs|accordion|text'>
+    //  <div data-heurist-cms='{"type":"cardinal|tabs|accordion|text","options":...}'
+    //  <div data-heurist-cms='{"appid":"HRecordList","searchDomain":"sr1","viewMode": "offcanvas-start"}'
+    //  <div data-heurist-cms='{"appid":"HRecordList","searchDomain":"sr1","viewMode": "offcanvas-start"}'
+    //  <div data-heurist-cms="HRecordList">{options}</div>
+    //
     #convertJSONtoHTML(content){
         
         //from json
@@ -1292,7 +1363,7 @@ class HLayoutMgr {
   }
 
   setEditMode(newmode) {
-    this.isEditMode = newmode;
+    this._isEditMode = newmode;
   }
 
   /**
@@ -1359,22 +1430,21 @@ class HLayoutMgr {
   * supp_options - widget parameters that are not icluded into main layoout cfg
   * 
   */
-  layoutInit(layout, container, supp_options) 
+  layoutInit(layout, container, supp_options, isEditMode) 
   {
 //console.log(layout, supp_options);  
     this._supp_options = supp_options || {};
+    this._isEditMode = isEditMode;
   
     //main content
     if(layout && window.hWin.HEURIST4.util.isJSON(layout)){ //init from json
-        let res = this.#layoutInitFromJSON(layout, container, false, true);
-        return res;
-    }else{
-        if(layout){
-            $(container).html(layout);
-        }
-        return this.layoutInitFromHTML(container);
+        return this.#layoutInitFromJSON(layout, container, false, true);
     }
     
+    if(layout){
+        $(container).html(layout);
+    }
+    return this.layoutInitFromHTML(container);
   }
   
   layoutInitFromJSON(layout, container, supp_options, isFirstLevel)

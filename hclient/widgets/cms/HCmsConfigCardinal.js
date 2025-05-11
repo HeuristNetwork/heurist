@@ -102,7 +102,7 @@ class HCmsConfigCardinal extends HCmsConfig {
 
       if(recreateCardinal){
         this.cmsEditor.getHapi().layoutMgr.layoutInitCardinal(l_cfg, $(this.element));
-        this.element = this.cmsEditor.findInWebSite('div[data-hid="'+l_cfg.key+'"]');
+        this.element = this.cmsEditor.findInWebSite('.cms-element[data-hid="'+l_cfg.key+'"]');
       }
 
       this.onContentChange( true );

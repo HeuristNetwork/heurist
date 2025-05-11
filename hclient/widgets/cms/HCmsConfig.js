@@ -53,7 +53,7 @@ class HCmsConfig {
   show(options){
       
       //element = this.layoutMgr.layoutContentFindElement(this._layout_content, this.element_cfg.key);
-      this.element = this.cmsEditor.findInWebSite('div[data-hid="'+this.element_cfg.key+'"]'); //element in main-content    
+      this.element = this.cmsEditor.findInWebSite('.cms-element[data-hid="'+this.element_cfg.key+'"]'); //element in main-content    
       $(this.element).removeClass('marching-ants marching');
       
       let that = this;
@@ -866,6 +866,7 @@ console.log('getcss', this.l_cfg);
       //1. Verifies the presence of users styles
       let params = this.cssPaddingMarginBorder;
       this.hasUserStyles = false;
+      if(this.l_cfg.css)
       for(let i=0; i<params.length; i++){
           let prm = params[i];
           if (this.l_cfg.css[prm] && (this.l_cfg.css[prm]!='none') 
