@@ -330,9 +330,8 @@ class HCmsEditor {
       });
       
       //swtich to page tab automatically
-      let header = this._webPageFrame[0].contentDocument.getElementsByTagName('header'); //TBD or main-header
-      let footer = this._webPageFrame[0].contentDocument.getElementsByTagName('footer'); 
-      
+      //let header = this._webPageFrame[0].contentDocument.getElementsByTagName('header'); //TBD or main-header
+      //let footer = this._webPageFrame[0].contentDocument.getElementsByTagName('footer'); 
       //$(header).on('click',()=>that.onMarginEdit(true));
       //$(footer).on('click',()=>that.onMarginEdit(false));
       

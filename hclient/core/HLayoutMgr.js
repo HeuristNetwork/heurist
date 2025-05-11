@@ -77,7 +77,6 @@ class HLayoutMgr {
       if(this._isEditMode){
             pageTreeData = this.#convertHTMLtoJSON(container, 0);
 console.log('layoutInitFromHTML', pageTreeData);
-            //pageStructureAsJSON = this.#layoutInitFromJSON(layout, container, false, true );
       }
 
       //****************************

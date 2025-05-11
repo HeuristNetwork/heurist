@@ -16,7 +16,7 @@
 */
 class HCmsEditorPage {
 
-    _layout_content;   //JSON layout configuration for current page   
+    _layout_content;   // JSON layout configuration for current page   
     _layout_container; // main-content with CMS content
 
 
@@ -592,6 +592,58 @@ initPage(pageContainer, pageRecord){
 
 }
 
+/*
+showMarginProperties(isHeader){
+    
+        this.detachTinyMCE(false);
+
+        this._layout_container = that._cmsEditor.findInWebSite(isHeader?'header':'footer');
+        
+        this.layoutMgr = this._cmsEditor.getHapi().layoutMgr;
+
+        if(this.layoutMgr){
+            this.layoutMgr.setEditMode(true);
+        }else {
+            return;
+        }
+        
+        this._container.find('.treePageHeader > h3').text(window.hWin.HR(isHeader?'Header':'Footer'));
+        
+        this.page_was_modified = false;
+        
+        //expands structure tree, updates menu in tree
+        let request = {website:this._cmsEditor.website_id, raw:1, ver:3};
+        request[this.isHeader?'header':'footer'] = '';
+        
+        let that = this;
+        window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+            
+            if(response?.message){
+
+                that._layout_content = pageRecord['pageTreeData'];
+                that.#initTreePage(response?.message;);
+                
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `Web Home Page not found (record #${that._cmsEditor.website_id})`,
+                    error_title: 'Failed to load home page'
+                });
+            }
+        });
+        
+        
+        this._panel_propertyView = this._container.find('.propertyView');
+        
+        this._container.find('#responsiveScreen').on({change:function(event){
+            
+            let screenWidth = $(event.target).val();
+            if(screenWidth==100){
+                screenWidth = '100%';
+            }
+            $('#webPageFrame').width(screenWidth);
+        }});
+}
+*/
 //
 //
 //
