@@ -82,10 +82,12 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.7.0";// sets current program version number, determined by Heurist development lead
+$version = "6.7.2";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
 
+// 6.7.2  12 May 2025
+// 6.7.1  April 2025
 // 6.7.0  22 March 2025
 // 6.6.6  16 Feb 2025
 // 6.6.5  05 Feb 2025
@@ -183,7 +185,7 @@ $hideStandardLogin = 0;
 
 $defaultFaimsModulesPath = "";// FAIMS only: the location where FAIMS module files will be written
 
-// use webserver to fasten access to thumbnail images and uploaded files
+// use webserver to increase speed of access to thumbnail images and uploaded files
 // otherwise images will be accessed via php
 $allowWebAccessThumbnails = true;
 $allowWebAccessUploadedFiles = false;
