@@ -15,6 +15,7 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
     options: {
         isMenuMode: false, //if false - button mode
         resourcePath: 'hclient/widgets/HMenu/HPersonalMenu',
+        reloadOnLogin: false
     },
     
     _needLoadContent: true,
@@ -64,6 +65,11 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
     onChangeCredentials: function(data){
 
         if (this.HAPI.has_access()) {
+             
+             if(this.options.reloadOnLogin){
+                  location.reload();  
+             }
+            
              //
              this._$('.usrFullName').text(this.HAPI.currentUser?.ugr_FullName);
             

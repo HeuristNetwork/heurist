@@ -198,7 +198,7 @@ class WebSite
             {
                 $try_login = $this->system->getCurrentUser() == null;
                 $err_message = 'The Heurist website at this address is not yet publicly accessible. '
-                    . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
+                    . ($try_login ? '<br>Try <div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> to view this website.' : '');
             }
         }
         
@@ -230,23 +230,29 @@ class WebSite
 
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
-            
-            if(array_key_exists('header',$this->params)){
-                
-                echo $this->getPageMargin('header'); //direct output
-                
-            }elseif(array_key_exists('footer',$this->params)){
-
-                echo $this->getPageMargin('footer');
-            
-            }else{
-                ob_start();
-                include_once 'WebSiteTemplate.php';
-                $output = ob_get_contents();
-                ob_end_clean();            
-                $result = $this->handleOutput($output);
-            }
         }
+
+            
+        if(array_key_exists('header',$this->params)){
+            
+            echo $this->getPageMargin('header'); //direct output
+            
+        }elseif(array_key_exists('footer',$this->params)){
+
+            echo $this->getPageMargin('footer');
+        
+        }else{
+            ob_start();
+            if($this->messageError){
+                include_once 'WebSiteInfo.php';    
+            }else{
+                include_once 'WebSiteTemplate.php';    
+            }
+            $output = ob_get_contents();
+            ob_end_clean();            
+            $result = $this->handleOutput($output);
+        }
+        
 
         return $result;
     }
@@ -324,20 +330,29 @@ class WebSite
     * @param mixed $is_out
     */
     public function meta($field, $is_out=true){
-
-        $codes = array('title'=>DT_NAME, 
-                       'keywords'=>DT_CMS_KEYWORDS,
-                       'description'=>DT_SHORT_SUMMARY);
-                       //'content'=>DT_EXTENDED_DESCRIPTION);
         
         $val = '';
-        
-        if(in_array($field, $codes)){
-            $val = $this->getVal($codes[$field]);
-        }elseif($field=='lang'){
-            $val = $this->currentLang; 
-        }elseif($field=='favicon'){            
-            $val = $this->getFile($this->siteRecord, DT_THUMBNAIL, (HEURIST_BASE_URL.'favicon.ico'));
+        if($this->siteRecord){
+            
+            $codes = array('title'=>DT_NAME, 
+                           'keywords'=>DT_CMS_KEYWORDS,
+                           'description'=>DT_SHORT_SUMMARY);
+                           //'content'=>DT_EXTENDED_DESCRIPTION);
+            
+            $val = '';
+            
+            if(in_array($field, $codes)){
+                $val = $this->getVal($codes[$field]);
+            }elseif($field=='lang'){
+                $val = $this->currentLang; 
+            }elseif($field=='favicon'){            
+                $val = $this->getFile($this->siteRecord, DT_THUMBNAIL, (HEURIST_BASE_URL.'favicon.ico'));
+            }
+            
+        }elseif($field=='favicon'){
+            $val = HEURIST_BASE_URL.'favicon.ico';
+        }elseif($field=='title'){
+            $val = HEURIST_TITLE;
         }
         
         if($is_out){
@@ -359,12 +374,12 @@ class WebSite
     }
 
     public function getSiteId(){
-        return $this->siteRecord['rec_ID'];
+        return $this->siteRecord['rec_ID'] ?? 0;
     }
 
     public function getPageId(){
         $rec = $this->pageRecord??$this->siteRecord;
-        return $rec['rec_ID'];
+        return $rec['rec_ID'] ?? 0;
     }
     
     //
@@ -372,11 +387,15 @@ class WebSite
     //
     public function getPageContent($is_out=true){
         
-        if($this->pageRecord && !@$this->pageRecord['details']){
-            recordSearchDetails($this->system, $this->pageRecord, true);
-        }
+        if($this->messageError){
+            $val = $this->messageError;
+        }else{
         
-        $val = $this->getValue($this->pageRecord??$this->siteRecord, DT_EXTENDED_DESCRIPTION, false, $this->currentLang);
+            if($this->pageRecord && !@$this->pageRecord['details']){
+                recordSearchDetails($this->system, $this->pageRecord, true);
+            }
+            
+            $val = $this->getValue($this->pageRecord??$this->siteRecord, DT_EXTENDED_DESCRIPTION, false, $this->currentLang);
 
 /*        
             if ($this->isJsAllowed) {
@@ -385,6 +404,7 @@ class WebSite
                 $tpl_source = $this->sanitizeHtml($tpl_source, $font_styles);
             }
 */
+        }
         
         if($is_out){
             echo $val;
@@ -422,6 +442,10 @@ class WebSite
     *  Returns raw template or processed template
     */
     public function getPageMargin($type){
+        
+        if($this->messageError){
+            return '';
+        }
         
         if(@$this->params[$type]){
             //it can be eather template file name or template content
@@ -718,12 +742,12 @@ class WebSite
             if($error_msg==''){
                 $error_msg = 'Undefined error';
             }
-            $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';
+            $error_msg = '<span class="text-danger fw-bold">'.$error_msg.'</span>';
         }
 
         $this->messageError = $error_msg;
 
-        $this->handleOutput($error_msg);
+        //$this->handleOutput($error_msg);
     }
 
     public function getError(){
@@ -771,6 +795,7 @@ class WebSite
         }elseif ($this->publishmode==0) {    //browser output only
 
             echo $website_output;
+            
         }else {
             //3 - save into file and report
             //1 - save into file and info page
@@ -778,6 +803,7 @@ class WebSite
             if($this->outputfile!=null){
                 $errors = $this->saveOutputToFile($this->outputfile, $website_output);
             }
+            
             
             if($this->publishmode==3){
                 echo $website_output; //both save and output
@@ -790,9 +816,7 @@ class WebSite
         
         return true;
     }
-  
 
-  
     //
     //
     //

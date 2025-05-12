@@ -40,7 +40,7 @@ class WebSite {
 
     // {siteId:siteId, pageId:pageId, siteMenu:menuContentJSON}
     constructor(_options) {
-        
+console.log('!!!!');        
         //set global constants
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
@@ -57,11 +57,17 @@ class WebSite {
 
         this.is_execute_homepage_custom_javascript = true; //semaphore
 
-        //init widgets in header and footer
-        window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header'); 
-        window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer'); 
+        if(this.pageId>0){
         
-        this.loadPage({pageId:this.pageId});
+            //init widgets in header and footer
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header'); 
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer'); 
+            
+            this.loadPage({pageId:this.pageId});
+        
+        }else{
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, '#main-content'); 
+        }
     }
 
     /**
