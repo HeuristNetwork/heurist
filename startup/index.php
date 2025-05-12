@@ -20,7 +20,7 @@
 use hserv\utilities\USystem;
 
 if (!defined('PDIR')){
-    define('PDIR','../');
+    define('PDIR',substr($_SERVER['REQUEST_URI'] , -1)=='/'?'../':'');
     require_once dirname(__FILE__).'/../autoload.php';
 }
 

@@ -76,7 +76,6 @@ class HLayoutMgr {
       
       if(this._isEditMode){
             pageTreeData = this.#convertHTMLtoJSON(container, 0);
-console.log('layoutInitFromHTML', pageTreeData);
       }
 
       //****************************
@@ -558,7 +557,6 @@ console.log('layoutInitFromHTML', pageTreeData);
                 $d2 = this.#layoutCreateDiv( layout.children[i], '', forStorage )
             
                 if(!$.isEmptyObject(layout.children[i].options)){
-//console.log('assign css ', layout.children[i].options);                    
                     $d2.attr('data-cms-options',JSON.stringify(layout.children[i].options));
                 }
             
@@ -918,11 +916,13 @@ console.log('layoutInitFromHTML', pageTreeData);
 
                 try{
                 
+                let that = this;                    
+                    
                 let sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/blog.js';
                 // 3. Execute template script to replace template variables, adds filters and smarty templates
                     $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
                           //function in blog.js
-                          prepareTemplateBlog(layout, callback);
+                          prepareTemplateBlog(that, layout, callback);
                           
                     }).fail(function( jqxhr, settings, exception ) {
                         console.error( 'Error in template script: '+exception );

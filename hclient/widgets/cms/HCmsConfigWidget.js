@@ -99,7 +99,7 @@ class HCmsConfigWidget extends HCmsConfig {
       this.onChangeOptions(false);
 
       if(this.optionEditorForOldWidget){
-          let new_cfg = that.optionEditorForOldWidget.getValues();
+          let new_cfg = this.optionEditorForOldWidget.getValues();
           this.l_cfg.options = new_cfg;
 
           if(new_cfg.widget_id){

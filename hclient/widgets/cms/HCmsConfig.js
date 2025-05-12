@@ -407,7 +407,6 @@ class HCmsConfig {
               }else{
                   const clr = [...borderClasses.matchAll(/(border-)([a-z]+)/g)];
                   if(clr.length==1 && clr[0].length==3){
-console.log('>>>>>', clr);                      
                       cont.find('select[name="borderColor"]').val(clr[0][0]);
                   }
               }

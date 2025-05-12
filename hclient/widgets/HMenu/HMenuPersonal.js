@@ -27,8 +27,9 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
         }else{
             this.options.resourcePath = 'hclient/widgets/HMenu/HPersonalBtn';
         }
-        
         this._super();
+        
+        this.element.css('z-index',99999);
     },
     
     /**

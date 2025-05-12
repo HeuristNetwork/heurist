@@ -197,7 +197,6 @@ class WebSite
             if(!$hasAccess)
             {
                 $try_login = $this->system->getCurrentUser() == null;
-
                 $err_message = 'The Heurist website at this address is not yet publicly accessible. '
                     . ($try_login ? '<br>Try <a class="login-link">logging in</a> to view this website.' : '');
             }
@@ -453,7 +452,7 @@ class WebSite
         }
         
         //    
-        $bgImage = $this->getFile($this->siteRecord, '99-951', 'none'); //DT_CMS_BANNER
+        $bgImage = $this->getFile($this->siteRecord, '99-951', ''); //DT_CMS_BANNER
         if($bgImage!=null){
             //$bgImage = 'background-image: url(&quot;'.$bgImage
             //    .'&quot;) !important; background-repeat: repeat-x !important; background-size: auto;';
