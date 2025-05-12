@@ -338,18 +338,19 @@
             [$string, $handling_encoding, $handling_copyright] = addNoTranslateTags($string, true);
         }else{
 
-            $cleanupQuirks = function($matches){
-                return str_replace('&amp;', '&', $matches[0]);
+            $amp = '&amp;';
+            $cleanupQuirks = function($matches) use ($amp){
+                return str_replace($amp, '&', $matches[0]);
             };
 
-            $string = mb_ereg_replace('&', '&amp;', $string); // avoid decoding encoded entities
+            $string = mb_ereg_replace('&', $amp, $string); // avoid decoding encoded entities
 
             $doc = new DOMDocument;
             $doc->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
             $xpath = new DOMXPath($doc); // retrieve text only
             $textNodes = $xpath->query('//text()');
 
-            $string = mb_ereg_replace('&amp;', '&', $string);
+            $string = mb_ereg_replace($amp, '&', $string);
 
             foreach($textNodes as $node){
 
@@ -486,7 +487,7 @@
         $handleCopyRight = false;
 
         // Add no translate flags where necessary
-        // Use _LT_ and _GT_ to avoid issues replacing the text via DOMDoc node 
+        // Use _LT_ and _GT_ to avoid issues replacing the text via DOMDoc node
         /**
          * &[a-zA-Z]; html entity
          * &#[0-9]; html code

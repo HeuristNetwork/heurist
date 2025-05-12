@@ -1201,7 +1201,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             let treedata = null;
 
-            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectype, allowed_fieldtypes, null, node_order );   
+            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectype, [...allowed_fieldtypes, 'relationtype'], null, node_order );   
 
             if(dtys_to_keep !== 'all'){ // remove fields not in dtys_to_keep, also replace labels with dty_Name
 

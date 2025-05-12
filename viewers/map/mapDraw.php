@@ -160,7 +160,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     };
                     $('#get-coordinates-helper').hide();
                     $('#set-coordinates-helper').show();
-                    $('#geodata_textarea').css({top:'6em'});
+                    $('#geodata_textarea').css({top:'8.5em'});
 
                     $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top,
                         element: document.getElementById( "get-set-coordinates" ),
