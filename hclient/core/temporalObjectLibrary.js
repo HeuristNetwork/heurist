@@ -1816,7 +1816,7 @@ TDate.validateYear = function (n) {
 }
 
 TDate.getDaysInMonth = function (year, month) {
-    return [null,31, (TDate.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+    return [null,31, (TDate.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 0];
 }
 
 TDate.isLeapYear = function (year) {
@@ -2109,7 +2109,7 @@ function temporalToHumanReadableString(inputStr) {
             cld = str.match(/CL2=([^\|]+)/)[1] + ' '+
                   str.match(/CLD=([^\|]+)/)[1];
 
-            if(cld.indexOf('null')>=0) cld = cld.substr(4); //some dates were saved in wrong format - fix it
+            if(cld.indexOf('null')>=0) cld = cld.substring(4); //some dates were saved in wrong format - fix it
         }
 
         let isgj = (cldname=='gregorian' || cldname=='julian');
@@ -2166,7 +2166,13 @@ function temporalToHumanReadableString(inputStr) {
             let pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
             */
-            str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
+            if(isMonthSpan(tpq, taq)){
+                let date = new TDate(tpq);
+                month = TDate.getMonthName(date.getMonth());
+                str = `${month} ${date.getYear()}`;
+            }else{
+                str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
+            }
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             let dat = str.match(/DAT=([^\|]+)/);
             dat = dat ? formatGregJulian(dat[1], isgj): "";
@@ -2233,6 +2239,21 @@ function temporalSimplifyDate(sdate) {
     }else{
         return sdate;
     }
+}
+
+function isMonthSpan(start, end){
+
+    let startDate = new TDate(start);
+    let endDate = new TDate(end);
+
+    let startDay = Number.parseInt(startDate.getDay());
+    if(startDay !== 1){
+        return false;
+    }
+
+    let endDay = Number.parseInt(endDate.getDay());
+
+    return TDate.getDaysInMonth(endDate.getYear(), endDate.getMonth()) === endDay;
 }
 
 /**
