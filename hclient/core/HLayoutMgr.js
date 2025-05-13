@@ -191,6 +191,11 @@ class HLayoutMgr {
   }
 
   #layoutSanitize(container) {
+    
+    if(!container || container.length==0){
+        return;
+    }  
+      
     $.each(container.children(), (idx, ele) => {
       ele = $(ele);
       this.#layoutSanitize(ele);
@@ -753,6 +758,9 @@ class HLayoutMgr {
     #layoutContentFindElement(content, ele_key){
 
         if(!Array.isArray(content)){
+            if(content.key==ele_key){
+                return content;    
+            }
             if(content.children && content.children.length>0){
                 return this.#layoutContentFindElement(content.children, ele_key);    
             }else{
@@ -1017,7 +1025,7 @@ class HLayoutMgr {
                 //no widgets among children - convert to content
                 child = {name: `Content ${lvl}.${idx}`, 
                         type: 'text', 
-                        content: ele[0].outerHTML };
+                        content: ele[0].innerHTML };
                 cmsClasses = 'tinymce-body '+cmsClasses;
 
             }else{
@@ -1044,6 +1052,11 @@ class HLayoutMgr {
                 if(ele.attr('style') && !child['css']){
                     child['css'] = that.#css2json(ele.attr('style'));    
                 }
+                if(ele.attr('class')){
+                    if(!child['classes']) child['classes'] = '';
+                    child['classes'] += ele.attr('class');
+                }
+                
                 that.#layoutInitKey(child);
                 ele.attr('data-hid', child.key);
                 
@@ -1063,12 +1076,24 @@ class HLayoutMgr {
 
         if(lvl == 0){ //PAGE wrapper for root level
             let root_css = {};
+            let root_cfg = that.#convertWidgetHTMLtoJSON(container);
+            if(!root_cfg){
+                root_cfg = {name:'Page', type:'group', folder:true, isPage:true, children:res};
+            }else if(root_cfg.type=='group'){
+                root_cfg['children'] = res; 
+            }
             if(container.attr('style')){
                 root_css = that.#css2json(container.attr('style'));    
+                root_cfg['css'] = root_css;
             }
-            res = [{name:'Page', type:'group', folder:true, isPage:true, children:res, css:root_css}];
+            if(container.attr('class')){
+                if(!root_cfg['classes']) root_cfg['classes'] = '';
+                root_cfg['classes'] += container.attr('class');
+            }
+            
+            res = root_cfg;
             this.#layoutInitKey(res, 0);
-            container.attr('data-hid', res[0].key).addClass('cms-element');
+            container.attr('data-hid', res.key).addClass('cms-element');
         }
 
         return res;
@@ -1315,6 +1340,10 @@ class HLayoutMgr {
     container.empty();
     container.html(layout);
     return this.#convertHTMLtoJSON(container, 0);
+  }
+  
+  convertHTMLtoJSON(container, lvl){
+      return this.#convertHTMLtoJSON(container, lvl);
   }
   
   /**

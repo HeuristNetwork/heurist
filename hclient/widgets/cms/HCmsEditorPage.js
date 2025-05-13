@@ -444,6 +444,10 @@ class HCmsEditorPage {
       
         let that = this;
         
+        if(!Array.isArray(treeData)){
+            treeData = [treeData];
+        }
+        
         if(this._panel_treePage){
             
             $.ui.fancytree.getTree( this._panel_treePage ).reload(treeData);
@@ -1559,17 +1563,26 @@ function(value){
         this.#layoutInsertElement_continue(ele_id, new_ele);
     }       
     
+    /**
+    * Addition of template
+    * 1. getTemplateContent - loads RAW template
+    * 2. Converts html to json (if required)
+    * 3. 
+    * 
+    */
+    
     //
-    //
+    // Add new elements (defined in new_element_json)
     //    
-    #layoutInsertElement_continue(ele_id, new_element_json){
-
+    #layoutInsertElement_continue(ele_id, newElementContent){
+        
         let tree = $.ui.fancytree.getTree( this._panel_treePage );
         let parentnode = tree.getNodeByKey(ele_id);
         let parent_container, parent_children, parent_element;
 
         this.detachTinyMCE();
 
+        //detect paremt element    
         if(parentnode.folder){
             //add child
             parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
@@ -1588,23 +1601,36 @@ function(value){
                 parent_children = parent_element.children;
             }
         }
-
+        
+        let new_element_json = window.hWin.HEURIST4.util.isJSON(newElementContent);
+        if (new_element_json === false){
+            
+            let new_element = $(newElementContent);
+            parent_container.append(new_element);
+            new_element_json = this.layoutMgr.convertHTMLtoJSON(new_element, 0);
+            
+        }
+        
         if(Array.isArray(new_element_json) && new_element_json.length==1){
             new_element_json = new_element_json[0];
         }
 
+        //add to configuration
         parent_children.push(new_element_json);
+        
+        //assign unique keys
         this.layoutMgr.layoutInitKey(parent_children, parent_children.length-1);
-
-        //recreate
+        
+        //recreate elements
+        this.layoutMgr.setEditMode(true);
         if(parent_element && parent_element.type=='accordion'){
             this.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
             this.layoutMgr.layoutInitTabs(parent_element, parent_container)
             //this.layoutMgr.layoutInit(this._layout_content, this._layout_container);    
         }else{
-            this.layoutMgr.layoutInit(parent_children, parent_container, 
-                    {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
+           this.layoutMgr.layoutInit(parent_children, parent_container, 
+                    {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true);
         }   
 
 
@@ -1632,16 +1658,37 @@ function(value){
     }
 
     //
+    // Insert template as new element at the end of current page
     //
-    //
-    #prepareTemplate(ele_id, template_name){
+    #prepareTemplate(ele_id, templateName){
         
-        if(template_name.indexOf('tpl_')==0){
-            template_name = template_name.substring(4);
+        if(templateName.indexOf('tpl_')==0){
+            templateName = templateName.substring(4);
         }
         
+        if(templateName=='landing' || templateName=='about'){
+        
+            let request = {website:this._cmsEditor.website_id, raw:1, ver:3, webtemplate:templateName};
+            let that = this;
+            
+            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+            
+                if(response?.message){
+                    that.#layoutInsertElement_continue( ele_id, response?.message );
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `Template ${templateName} not found`,
+                        error_title: 'Failed to load template'
+                    });
+                }
+            });
+            
+            return;
+        }
+        
+        
         // 1. load template files
-        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+templateName+'.json';
         
         let that = this;
 
@@ -1665,7 +1712,7 @@ function(value){
     
     
     //
-    //  Save page configuration (this._layout_content) into RT_CMS_MENU record 
+    //  Saves page configuration (this._layout_content) into RT_CMS_MENU record 
     //
     #saveLayoutCfg( callback ){
         

@@ -566,8 +566,6 @@ class HCmsConfig {
         let cont = this.container;
         let css = {};
         
-console.log('getcss', this.l_cfg);
-        
         let bsClasses = [];
 
 // BACKGROUND  get values from UI -----------------

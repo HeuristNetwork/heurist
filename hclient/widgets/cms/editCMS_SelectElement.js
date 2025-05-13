@@ -35,6 +35,11 @@ function editCMS_SelectElement( callback ){
             tpl_database: {name:'Database description', description:'#database'},
             tpl_blog: {name:'Blog', description:'#blog'},
 
+            //tpl_cover:{name:'Cover', description:'#cover'},
+            tpl_landing:{name:'Landing (Welcome)', description:'#landing'},
+            tpl_about:{name:'About and our team', description:'#about'},
+            //tpl_features:{name:'Features', description:'#features'},
+
         separator:{name:' ', description:'#', is_separator: true},
 
         header2:{name:'Page Content', description:'#page_content', is_section_header: true},
@@ -76,6 +81,7 @@ function editCMS_SelectElement( callback ){
                 
                 HRecordList:{name:'Records list', description:'#HRecordList'},
                 //HRecordView:{name:'Record view', description:'#HRecordView'},
+                HMenu:{name:'Menu', description:'#HMenu'},
         
     };
 

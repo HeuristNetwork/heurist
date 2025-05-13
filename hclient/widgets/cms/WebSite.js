@@ -40,7 +40,6 @@ class WebSite {
 
     // {siteId:siteId, pageId:pageId, siteMenu:menuContentJSON}
     constructor(_options) {
-console.log('!!!!');        
         //set global constants
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];

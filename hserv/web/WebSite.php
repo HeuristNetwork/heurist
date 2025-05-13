@@ -133,7 +133,8 @@ class WebSite
             }else{
                 $try_login = $this->system->getCurrentUser() == null;
                 $this->outputError('Sorry, there are no publicly accessible websites defined for this database. '
-                .'Please ' . ($try_login ? '<a class="login-link">login</a> or' : '') . ' ask the owner to publish their website(s).');
+                .'Please ' . ($try_login ? '<div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> or' 
+                                         : '') . ' ask the owner to publish their website(s).');
                 
                 return false;
             }
@@ -233,13 +234,17 @@ class WebSite
         }
 
             
-        if(array_key_exists('header',$this->params)){
+        if(array_key_exists('header', $this->params)){
             
             echo $this->getPageMargin('header'); //direct output
             
-        }elseif(array_key_exists('footer',$this->params)){
+        }elseif(array_key_exists('footer', $this->params)){
 
             echo $this->getPageMargin('footer');
+
+        }elseif(array_key_exists('webtemplate', $this->params)){
+
+            echo $this->getTemplateContent('template', basename($this->params['webtemplate'].'.html'));
         
         }else{
             ob_start();
@@ -421,8 +426,15 @@ class WebSite
             $filename = 'default.html';
         }
         
+        $templateType = '';
+        if($type=='footer'){
+            $templateType = 'footers/';
+        }elseif($type=='header'){
+            $templateType = 'headers/';
+        }
+        
         $template = null;
-        $full_filename = HEURIST_DIR.'hserv/web/templates/'.($type=='footer'?'footers':'headers').'/'.basename($filename);
+        $full_filename = HEURIST_DIR.'hserv/web/templates/'.$templateType.basename($filename);
         if(file_exists($full_filename)){
             $template = file_get_contents($full_filename);
         }
@@ -432,7 +444,7 @@ class WebSite
         }
         return $template;
     }
-    
+
     //
     // 
     //
