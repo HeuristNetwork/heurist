@@ -178,9 +178,14 @@ $.widget( "heurist.search_faceted_wiz", {
                     let that_dlg = this;
                     if($( that_dlg ).dialog( 'option', 'modal' )){
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Discard changes?'),
-                            function(){ $( that_dlg ).dialog( "close" ); });
+                            function(){
+                                $( that_dlg ).dialog( "close" );
+                            });
                         return false;
                     }
+                }
+                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
+                    that.options.menu_locked.call(that, 'close');
                 }
             },
             buttons: [
