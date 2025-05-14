@@ -1539,19 +1539,11 @@ function(value){
 
         }
         else if(widget_type.indexOf('new_tpl_')==0){
+            
+            const pageTemplate = widget_type.substring(8); // remove 'new_tpl_'
+            
+            this._cmsEditor.addNewPage(pageTemplate)
 
-/* TBD            
-            if(!_editCMS_SiteMenu)
-            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
-
-            widget_type = widget_type.substring(8); // remove 'new_tpl_'
-
-            // Get parent page id
-            let parent_page_id = _editCMS_SiteMenu.getParentPage(window.hWin.current_page_id);
-            parent_page_id = (parent_page_id == null || parent_page_id <= 0) ? window.hWin.current_page_id : parent_page_id;
-
-            _editCMS_SiteMenu.createMenuRecord(parent_page_id, widget_name, widget_type);
-*/            
             return;
         }
         else if(widget_type.indexOf('tpl_')==0){
@@ -1665,7 +1657,8 @@ function(value){
         if(templateName.indexOf('tpl_')==0){
             templateName = templateName.substring(4);
         }
-        
+
+        // new bootstrap templates        
         if(templateName=='landing' || templateName=='about'){
         
             let request = {website:this._cmsEditor.website_id, raw:1, ver:3, webtemplate:templateName};
@@ -1685,7 +1678,6 @@ function(value){
             
             return;
         }
-        
         
         // 1. load template files
         let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+templateName+'.json';

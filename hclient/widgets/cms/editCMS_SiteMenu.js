@@ -536,58 +536,83 @@ title: "Overview"
     //
     // Create new cms menu record 
     //
-    function _createMenuRecord(parent_id, page_name, template_name, callback, $dlg_element){
-        
-        let details = {};
-        details['t:'+DT_NAME] = [ page_name ];
-        details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
-        if(DT_CMS_PAGETITLE>0 && window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
-            details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
+    function _createMenuRecord(parent_id, pageName, templateName, callback, $dlg_element){
+
+        if($dlg_element && $dlg_element.dialog('instance') !== undefined){
+            $dlg_element.dialog( "close" );
         }
 
-        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
-        $.getJSON(sURL, 
-        function( template_json ){
-
-            if($dlg_element && $dlg_element.dialog('instance') !== undefined){
-                $dlg_element.dialog( "close" );
-            }
-            if(!window.hWin.HEURIST4.util.isFunction(callback)){
+        //if callback is not defined, it is _refreshMainMenu
+        if(!window.hWin.HEURIST4.util.isFunction(callback)){
                 callback = function(new_page_id){
                     _refreshMainMenu(true, new_page_id); //after addition of new page
                 };
-            }
+        }
 
-            function ___continue_addition(tmp_json){
-                
-                details['t:'+DT_EXTENDED_DESCRIPTION] = [ JSON.stringify(tmp_json) ];
-                //add new record
-                let request = {a: 'save', 
-                    ID:0, //new record
-                    RecTypeID: RT_CMS_MENU,
-                    details: details };     
-
-                window.hWin.HAPI4.RecordMgr.saveRecord(request, 
-                    function(response){
-                        let  success = (response.status == window.hWin.ResponseStatus.OK);
-                        if(success){
-                            let menu_id = response.data;
-                            if(menu_id > 0){
-                                _addMenuEntry(parent_id, menu_id, callback)
-                            }
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    }
-                );
+        function ___continue_addition(pageContent){
+            
+            if(typeof pageContent !== 'string'){
+                pageContent = JSON.stringify(pageContent);
             }
             
-            if(template_name=='blog'){
-                window.hWin.HAPI4.layoutMgr.prepareTemplate(template_json, ___continue_addition);
-            }else{
-                ___continue_addition(template_json)
-            }
-        });
+            let details = {};
+            details['t:'+DT_NAME] = [ pageName ];
+            details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
+            if(DT_CMS_PAGETITLE>0 && window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
+                details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
+            }                
+            details['t:'+DT_EXTENDED_DESCRIPTION] = [ pageContent ];
+            //add new record
+            let request = {a: 'save', 
+                ID:0, //new record
+                RecTypeID: RT_CMS_MENU,
+                details: details };     
+
+            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+                function(response){
+                    let  success = (response.status == window.hWin.ResponseStatus.OK);
+                    if(success){
+                        let newMenuId = response.data;
+                        if(newMenuId > 0){
+                            _addMenuEntry(parent_id, newMenuId, callback)
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        } //___continue_addition        
+        
+        if(templateName=='landing' || templateName=='about'){
+        
+            let request = {website:home_page_record_id, raw:1, ver:3, webtemplate:templateName};
+            
+            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+            
+                if(response?.message){
+                    ___continue_addition( response?.message );
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `Template ${templateName} not found`,
+                        error_title: 'Failed to load template'
+                    });
+                }
+            });
+        }else{
+
+            let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+templateName+'.json';
+            $.getJSON(sURL, (templateJSON)=>{
+                
+                    if(templateName=='blog'){
+                        window.hWin.HAPI4.layoutMgr.prepareTemplate(templateJSON, ___continue_addition);
+                    }else{
+                        ___continue_addition( templateJSON );
+                    }
+                  
+            });
+            
+        }
+
     }
 
     //

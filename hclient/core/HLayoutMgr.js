@@ -1014,18 +1014,19 @@ class HLayoutMgr {
                 //this.pnl_counter++;
                 if(!child.name) child.name = `Widget ${lvl}.${idx}`;
                 
-            }else if(widget_cfg) {
+            }else if(widget_cfg && widget_cfg.type!='text') {
                 //publisher defined GROUP|tabs|accordion|cardinal
                 child = widget_cfg;
                 if(!child.name) child.name = `Group ${lvl}.${idx}`;
                 child.children = that.#convertHTMLtoJSON(ele, lvl+1);
                 
-            }else if(ele.find('div[data-heurist-app-id]').length==0 && ele.find('div[data-heurist-cms]').length==0){
+            }else if(widget_cfg?.type=='text' || ele.find('div[data-heurist-app-id]').length==0 && ele.find('div[data-heurist-cms]').length==0){
                 
                 //no widgets among children - convert to content
-                child = {name: `Content ${lvl}.${idx}`, 
-                        type: 'text', 
-                        content: ele[0].innerHTML };
+                child = widget_cfg?widget_cfg:{type: 'text'};
+                
+                if(!child.name) child.name = `Content ${lvl}.${idx}`;
+                child.content = ele[0].innerHTML;
                 cmsClasses = 'tinymce-body '+cmsClasses;
 
             }else{
@@ -1121,6 +1122,9 @@ class HLayoutMgr {
 
       if(widget_cfg){ //attribute value is valid json
          widgetId = widget_cfg.appid || widget_cfg.type;
+          if(widgetId=='text' || widgetId?.type=='text'){
+               return widget_cfg;    
+          }
       }else{          
          //take configuration from content of div
          widget_cfg = window.hWin.HEURIST4.util.isJSON(element.text());

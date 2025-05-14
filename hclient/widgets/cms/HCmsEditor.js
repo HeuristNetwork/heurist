@@ -433,6 +433,23 @@ class HCmsEditor {
         }
   }
   
+  /**
+  *   Add new page as a sibling of current page
+  */
+  addNewPage(pageTemplate){
+      
+      if(!this._editCMS_SiteMenu){
+          this._editCMS_SiteMenu = editCMS_SiteMenu( this._editor_panel.find('.treeWebSite'), this );
+      }
+
+      // Get parent page id
+      let parentPageId = this._editCMS_SiteMenu.getParentPage(this.page_id);
+      parentPageId = (parentPageId == null || parentPageId <= 0) ? window.hWin.website_id : parentPageId;
+
+      this._editCMS_SiteMenu.createMenuRecord(parentPageId, pageTemplate, pageTemplate);
+  }
+  
+  
   //#showWebSiteMenu(){}
 
   //
@@ -510,8 +527,9 @@ class HCmsEditor {
 
 
             //load website menu treeview
-            if(!this._editCMS_SiteMenu)
-            this._editCMS_SiteMenu = editCMS_SiteMenu( this._editor_panel.find('.treeWebSite'), this );
+            if(!this._editCMS_SiteMenu){
+                this._editCMS_SiteMenu = editCMS_SiteMenu( this._editor_panel.find('.treeWebSite'), this );
+            }
            
         }
   }
