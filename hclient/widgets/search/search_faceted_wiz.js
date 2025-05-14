@@ -178,9 +178,14 @@ $.widget( "heurist.search_faceted_wiz", {
                     let that_dlg = this;
                     if($( that_dlg ).dialog( 'option', 'modal' )){
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Discard changes?'),
-                            function(){ $( that_dlg ).dialog( "close" ); });
+                            function(){
+                                $( that_dlg ).dialog( "close" );
+                            });
                         return false;
                     }
+                }
+                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
+                    that.options.menu_locked.call(that, 'close');
                 }
             },
             buttons: [
@@ -1201,7 +1206,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             let treedata = null;
 
-            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectype, allowed_fieldtypes, null, node_order );   
+            treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 8, rectype, [...allowed_fieldtypes, 'relationtype'], null, node_order );   
 
             if(dtys_to_keep !== 'all'){ // remove fields not in dtys_to_keep, also replace labels with dty_Name
 

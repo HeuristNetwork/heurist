@@ -1589,6 +1589,10 @@ class Temporal {
                     }
                 }
 
+                if($is_simple){
+                    Temporal::checkMonthSpan($res, $date);
+                }
+
                 $res['Type'] = ($is_simple)?$tSimpleRange:'Fuzzy Range';
             }
 
@@ -1791,6 +1795,24 @@ class Temporal {
         }
 
         return $dtl_Value;
+    }
+
+    private static function checkMonthSpan(&$resDate, $date){
+
+        $start = strval(@$date['estMinDate']);
+        $end = strval(@$date['estMaxDate']);
+
+        if(empty($start) || empty($end)){
+            return;
+        }
+
+        if(preg_match('/01$/', $start) && preg_match('/(?:02(?:28|29)|(?:01|03|05|07|08|10|12)31|(?:04|06|09|11)30)$/', $end)){
+
+            $start = self::decimalToYMD($start);
+            $start = new DateTime($start);
+
+            $resDate['Date'] = $start->format('F Y');
+        }
     }
 
 

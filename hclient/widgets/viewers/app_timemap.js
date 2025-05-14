@@ -446,7 +446,7 @@ $.widget( "heurist.app_timemap", {
             }
         
             let that=this;
-console.log(this.options.showCurrentResults, this.map_cache_got, this.options.use_cache);
+
             if(!that.map_curr_search_inited && that.options.recordset){
 
                     let mapping = this.mapframe[0].contentWindow.mapping;
