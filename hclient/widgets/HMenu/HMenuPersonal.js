@@ -13,7 +13,7 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
 
     // default options
     options: {
-        isMenuMode: false, //if false - button mode
+        isMenuMode: false, //navbar   if false - button mode p
         resourcePath: 'hclient/widgets/HMenu/HPersonalMenu',
         reloadOnLogin: false
     },

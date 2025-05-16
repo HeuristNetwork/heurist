@@ -8,6 +8,7 @@
 * @version     7.0
 */
 import '../HBase/HBaseWidget.js';
+import '../HMenu/HMenuOpts.js';
 
 $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
@@ -16,7 +17,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         resourcePath: 'hclient/widgets/HMenu/HMenu',
         
         viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, tree    
-        //styleMode: 'links',     // pills, jquery
+        //styleMode: 'links',     // pills, buttons(?), jquery
         
         customActionHandler: null,  // replacement of default event handler via ActionHandler
         onBeforeAction: null,
@@ -203,6 +204,27 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     */    
     onChangeCredentials: function(data){
         
-    }
+    },
+    
+    /*
+    *
+    */
+    onCloseOptionEditor: function(newOptions){
+        if(newOptions){
+            
+            newOptions = $.extend($.heurist.HMenu.prototype.options, newOptions);
+cosole.log(newOptions);            
+            /*
+            if(this.recordView){
+                this.recordView.remove();   
+                this.recordView = null;
+            }
+            this._cashedItem = {};
+            this._current_page = 0;
+            */
+
+            this.element.HMenu(newOptions);
+        }
+    }    
     
 });

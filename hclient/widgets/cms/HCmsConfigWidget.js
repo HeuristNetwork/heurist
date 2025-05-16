@@ -38,7 +38,7 @@ class HCmsConfigWidget extends HCmsConfig {
      
      let that = this;
      
-     if(this.l_cfg.appid?.indexOf('HRecord')===0){
+     if(this.l_cfg.appid?.indexOf('HRecord')===0 || this.l_cfg.appid?.indexOf('HMenu')===0){
         //hide
         this.container.find('#id_and_name_form').hide();
         //load options form into container panel

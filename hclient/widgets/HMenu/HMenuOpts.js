@@ -1,5 +1,5 @@
 /**
-* HRecordListOpts - form to modify HRecordList options
+* HMenuOpts - form to modify HMenu options
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -10,11 +10,11 @@
 
 import '../HBase/HBaseOpts.js';
 
-$.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
+$.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
     
     // default options
     options: {
-        resourcePath: 'hclient/widgets/HRecordList/HRecordListOpts',
+        resourcePath: 'hclient/widgets/HMenu/HMenuOpts',
     }
     
 });
