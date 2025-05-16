@@ -3305,21 +3305,23 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $rty_count = empty($rty_IDs) ? count($complete_rty_IDs) : count($rty_IDs);
         $rty_IDs = implode(',', empty($rty_IDs) ? $complete_rty_IDs : $rty_IDs);
 
-        // Relationship type handling, get all child and inverse terms for complete searching
+        $to = $this->pred_type == 'related' || $this->pred_type == 'rt' || $this->pred_type == 'related_to' || $this->pred_type == 'relatedto';
+        $from = $this->pred_type == 'related' || $this->pred_type == 'rf' || $this->pred_type == 'related_from' || $this->pred_type == 'relatedfrom';
+
+        // Relationship type handling, get all child terms as well
         if($rel_negate){
             $rel_IDs = array_diff($complete_rel_IDs, $rel_IDs);
         }
         $rel_IDs = empty($rel_IDs) ? $complete_rel_IDs : $rel_IDs;
         $rel_IDs = !empty($rel_IDs) ? array_unique( array_merge($rel_IDs, getTermChildrenAll($mysqli, $rel_IDs)) ) : [];
-        $rel_IDs = !empty($rel_IDs) ? array_merge($rel_IDs, getTermInverseAll($mysqli, $rel_IDs)) : [];
+        if($to && $from){ // get inverse terms for a complete search
+            $rel_IDs = !empty($rel_IDs) ? array_merge($rel_IDs, getTermInverseAll($mysqli, $rel_IDs)) : [];
+        }
         $rel_count = count($rel_IDs);
 
         $rel_IDs = implode(',', $rel_IDs);
 
         // Get list of relevant record IDs
-        $to = $this->pred_type == 'related' || $this->pred_type == 'rt' || $this->pred_type == 'related_to' || $this->pred_type == 'relatedto';
-        $from = $this->pred_type == 'related' || $this->pred_type == 'rf' || $this->pred_type == 'related_from' || $this->pred_type == 'relatedfrom';
-
         $rec_IDs = [];
         $where = [];
 
