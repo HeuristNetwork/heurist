@@ -280,8 +280,8 @@ class HCmsConfig {
   //update from main editor
   //
   updateContent(newContent, lang){
-      this.l_cfg.content = newContent;
-      //this.l_cfg['content'+lang] = newContent;            
+      //this.l_cfg.content = newContent;
+      this.l_cfg['content'+lang] = newContent;            
   }
    
   /*

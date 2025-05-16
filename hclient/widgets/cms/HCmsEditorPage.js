@@ -159,11 +159,12 @@ class HCmsEditorPage {
                             if(lang==that._cmsEditor.default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 lang = '';
                             }
-                            l_cfg['content'+lang] = newContent;    
                             
                             //update in HCmsConfig
                             if(that._cmsEditorElement){
                                 that._cmsEditorElement.updateContent(newContent, lang);
+                            }else{
+                                l_cfg['content'+lang] = newContent;
                             }
                             
                         }else{
@@ -1457,7 +1458,7 @@ function(value){
             {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
             ]};
           
-        }else if(widget_type.indexOf('heurist_')===0 || widget_type.indexOf('HRecord')===0){
+        }else if(widget_type.indexOf('heurist_')===0 || widget_type.indexOf('HRecord')===0  || widget_type.indexOf('HMenu')===0){
             
             //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
             new_ele = {appid:widget_type, name:widget_name, css:{}, options:{}};
@@ -1703,10 +1704,10 @@ function(value){
     }
     
     
-    //
-    //  Saves page configuration (this._layout_content) into RT_CMS_MENU record 
-    //
-    #saveLayoutCfg( callback ){
+ //
+ //  Saves page configuration (this._layout_content) into RT_CMS_MENU record 
+ //
+ #saveLayoutCfg( callback ){
         
         if(!window.hWin.HEURIST4.util.isPositiveInt(this._cmsEditor.page_id)){
             return;
@@ -1782,12 +1783,12 @@ function(value){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
         });         
-    }
+ }
   
-   //
-  //
-  //  
-  warningOnExit( callback ){
+ //
+ //
+ //  
+ warningOnExit( callback ){
       
       let that = this;
 
@@ -1810,11 +1811,12 @@ function(value){
                 {text:window.hWin.HR('Save'), 
                     click: function(){that.#saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
-                {text:window.hWin.HR('Leave unchanged'), 
+                {text:window.hWin.HR('Discard changes'),  //Leave unchanged
                     click: function(){
                         that._toolbar_Page.hide();
                         that.page_was_modified = false; 
                         $dlg.dialog('close'); 
+                        that._cmsEditor.loadPageContent(); //reload page
                         if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                     }
                 },
@@ -1832,6 +1834,6 @@ function(value){
             return false;     
         }
       
-  }
+ }
 
 }

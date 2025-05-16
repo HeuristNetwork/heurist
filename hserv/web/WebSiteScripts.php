@@ -111,6 +111,9 @@ if(@$_REQUEST['edit']){
 
 //include custom script and styles defined in CMS_HOME
 echo $this->getCustomScriptsAndStyles();
+
+//includes minimal info about website as json - title, descripton
+echo $this->getWebSiteInfo();
 ?>
     
     <!-- move to WebSite.js -->

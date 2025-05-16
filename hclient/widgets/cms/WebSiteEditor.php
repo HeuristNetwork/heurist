@@ -76,10 +76,9 @@ $editor_options = "{website_id:$website_id, page_id:$page_id}";
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS_SiteMenu.js"></script>
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/cms/HCmsCodeEditor.js"></script>
 
+<!-- these modules need to edit options -->
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
-<!--
 <script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
--->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>

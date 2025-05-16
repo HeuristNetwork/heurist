@@ -21,12 +21,13 @@ class WebSite {
 
     timeoutCount;
     currentPageRec;
+    
     pageCache = {}; 
     
     currentPageStyle = null;
     
-    current_language = null;
-    is_execute_homepage_custom_javascript = false;
+    currentLanguage = null;
+    is_execute_homepage_custom_javascript = false; //flag
     
     /*
     Workflow:
@@ -43,6 +44,7 @@ class WebSite {
         //set global constants
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        window.hWin.DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'];
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
         window.hWin.DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
         window.hWin.DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
@@ -87,9 +89,9 @@ class WebSite {
         }
 
         
-        const supp_options = options.supp_options; //additiona init options for widgets
+        const supp_options = options.supp_options; //additional init options for widgets
         
-        let fields = ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS];
+        let fields = ['rec_ID', DT_NAME, DT_SHORT_SUMMARY, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS];
         
         if(window.hWin.HAPI4.sysinfo['custom_js_allowed']){
             fields.push(DT_CMS_SCRIPT);
@@ -128,7 +130,7 @@ class WebSite {
                                 //the size content can be big so it stores in db as 64K chunks
                                 //implode all parts of page
                                 res[key] = Object.values(res[key]).join('');
-                            }else if(key != DT_NAME){ //for scripts and styles
+                            }else if(key == DT_CMS_CSS || key == DT_CMS_SCRIPT){ //for scripts and styles
                                 //takes only first value
                                 res[key] = res[key][ Object.keys(res[key])[0] ];
                             }
@@ -185,12 +187,19 @@ class WebSite {
         
         const isEditMode = window.parent?.cmsEditor;
 
-        let content = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
-        const supp_options = {};
-        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( content, pageElement, supp_options, isEditMode );
-
         this.currentPageRec = record;
         this.pageId = this.currentPageRec['rec_ID'];
+        
+        let pageContent = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
+        let supp_options = {heurist_isJsAllowed:window.hWin.HAPI4.sysinfo['custom_js_allowed'],
+                              lang: this.currentLanguage};
+/* TBD        
+        supp_options['page'] = {title:this.#getPageRecValue(DT_NAME), description:this.#getPageRecValue(DT_SHORT_SUMMARY)};
+        if(window.hWin.websiteInfo){
+            supp_options['website'] = websiteInfo;
+        }
+*/
+        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( pageContent, pageElement, supp_options, isEditMode );
         
         if(isEditMode){ //keep json structure for edit mode
             record['pageTreeData'] = pageTreeData;
@@ -250,12 +259,18 @@ class WebSite {
     */
     #assignPageTitle(){
         
-        if(this.currentPageRec && !window.hWin.HEURIST4.util.isempty(this.currentPageRec[window.hWin.DT_NAME])){
-            let pagetitle = window.hWin.HAPI4.getTranslation(this.currentPageRec[window.hWin.DT_NAME], this.current_language);
-            pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
-        }
-        //TBD - change url in browser
+        let pagetitle = this.#getPageRecValue(DT_NAME);
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         
+        //TBD - change url in browser        
+    }
+     
+    #getPageRecValue(fieldCode){
+        if(this.currentPageRec && !window.hWin.HEURIST4.util.isempty(this.currentPageRec[fieldCode])){
+            return window.hWin.HAPI4.getTranslation(this.currentPageRec[fieldCode], this.currentLanguage);
+        }else{
+            return '';
+        }
     }
     
     /*

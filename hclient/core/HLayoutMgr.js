@@ -294,50 +294,63 @@ class HLayoutMgr {
   }
 
   /*
-  
+  * assign text content to element
   */
   #layoutInitText(layout, container, forStorage) {
-      
-    const $d = this.#layoutCreateDiv(
-      layout,
-      this._isEditMode?'tinymce-body cms-element brick':'', //later need to use either cms-element or brick
-      forStorage
-    );
-    $d.appendTo(container);
 
-    this.#layoutSetCssAndClasses(layout, $d);
-
-    let content = "content";
-    if (forStorage) {
-      const aLangs = Object.keys(layout).filter((key) =>
-        key.indexOf("content") === 0
-      );
-
-      if (aLangs.length > 1) {
-        aLangs.forEach((lang) => {
-          const lang_code = lang.substring(7) || "def";
-          $(
-            `<div css="${
-              lang_code === "def" ? "" : "display:none"
-            }" data-lang="${lang_code}">${layout[lang]}</div>`
-          ).appendTo($d);
-        });
-      } else {
-        $d.html(layout[aLangs[0]]);
-      }
-    } else {
-      if (this._supp_options["lang"]) {
-        const lang = window.hWin.HAPI4.getLangCode3(
-          this._supp_options["lang"],
-          "def"
+        const $d = this.#layoutCreateDiv(
+            layout,
+            this._isEditMode ? 'tinymce-body cms-element brick' : '', //later need to use either cms-element or brick
+            forStorage
         );
-        if (layout[content + lang]) {
-          content = content + lang;
+        $d.appendTo(container);
+
+        this.#layoutSetCssAndClasses(layout, $d);
+
+        let content = "content";
+        if (forStorage) {
+            const aLangs = Object.keys(layout).filter((key) =>
+                key.indexOf("content") === 0
+            );
+
+            if (aLangs.length > 1) {
+                aLangs.forEach((lang) => {
+                    const lang_code = lang.substring(7) || "def";
+                    $(
+                        `<div css="${lang_code === "def" ? "" : "display:none"
+                        }" data-lang="${lang_code}">${layout[lang]}</div>`
+                    ).appendTo($d);
+                });
+            } else {
+                $d.html(layout[aLangs[0]]);
+            }
+        } else {
+            //assign text content to element
+            if (this._supp_options["lang"]) {
+                const lang = window.hWin.HAPI4.getLangCode3(
+                    this._supp_options["lang"],
+                    "def"
+                );
+                if (layout[content + lang]) {
+                    content = content + lang;
+                }
+
+                $d.attr("data-lang", lang);
+            }
+            
+            content = layout[content]
+//TBD - call smarty to perform replaces                     
+/*
+console.log(content);
+            if(content.indexOf('{$')>=0 && this._supp_options['page']  || this._supp_options['website']){
+                content = content.replace('{$website.title}', this._supp_options.website?.title);
+                content = content.replace('{$website.description}', this._supp_options.website?.description)
+                content = content.replace('{$page.title}', this._supp_options.page?.title)
+                content = content.replace('{$page.description}', this._supp_options.$page?.description)
+            }
+*/            
+            $d.html(content);
         }
-        $d.attr("data-lang", lang);
-      }
-      $d.html(layout[content]);
-    }
   }
   
  //
@@ -1350,66 +1363,66 @@ class HLayoutMgr {
       return this.#convertHTMLtoJSON(container, lvl);
   }
   
-  /**
-  * assigns unique key for layout element
-  */
-  layoutInitKey(layout, i) {
+ /**
+ * assigns unique key for layout element
+ */
+ layoutInitKey(layout, i) {
     this.#layoutInitKey(layout, i);
-  }
+ }
 
-  // not used
-  layoutAddWidget(layout, container) {
+ // not used
+ layoutAddWidget(layout, container) {
     this.#layoutAddWidget(layout, container);
-  }
+ }
 
-  /**
-  * Find element by internal key
-  */
-  layoutContentFindElement(_layout_cfg, ele_key) {
+ /**
+ * Find element by internal key
+ */
+ layoutContentFindElement(_layout_cfg, ele_key) {
     return this.#layoutContentFindElement(_layout_cfg, ele_key);
-  }
+ }
 
-  layoutContentFindParent(parent, ele_key) {
+ layoutContentFindParent(parent, ele_key) {
     return this.#layoutContentFindParent(parent, ele_key);
-  }
+ }
 
-  /**
-  * Find widget by application/widget name in cfg_widgets such as "heurist_SearchInput"
-  */
-  layoutContentFindWidget(_layout_cfg, widget_name) {
+ /**
+ * Find widget by application/widget name in cfg_widgets such as "heurist_SearchInput"
+ */
+ layoutContentFindWidget(_layout_cfg, widget_name) {
     return this.#layoutContentFindWidget(_layout_cfg, widget_name);
-  }
+ }
 
-  /**
-  * Finds prevail(most used) realm id 
-  */
-  layoutContentFindMainRealm(_layout_cfg) {
+ /**
+ * Finds prevail(most used) realm id 
+ */
+ layoutContentFindMainRealm(_layout_cfg) {
     return this.#layoutContentFindMainRealm(_layout_cfg);
-  }
+ }
 
-  /**
-  * Updates layout configuration with new values (replace element in json cfg)
-  */
-  layoutContentSaveElement(_layout_cfg, new_cfg) {
+ /**
+ * Updates layout configuration with new values (replace element in json cfg)
+ */
+ layoutContentSaveElement(_layout_cfg, new_cfg) {
     return this.#layoutContentSaveElement(_layout_cfg, new_cfg);
-  }
+ }
 
-  setEditMode(newmode) {
+ setEditMode(newmode) {
     this._isEditMode = newmode;
-  }
+ }
 
-  /**
-  * Replace search id in layout template (used for blog page)
-  */
-  prepareTemplate(layout, callback) {
+ /**
+ * Replace search id in layout template (used for blog page)
+ */
+ prepareTemplate(layout, callback) {
     this.#prepareTemplate(layout, callback);
-  }
+ }
 
-  /**
-  * Returns true if all widgets in body are inited
-  */
-  layoutCheckWidgets() {
-    const widgets = this.body.find("div.heurist-widget");
+ /**
+ * Returns true if all widgets in body are inited
+ */
+ layoutCheckWidgets() {
+    const widgets = this.body.find("div[data-widgetname]");
     let are_all_widgets_inited = true;
 
     $.each(widgets, (i, item) => {
@@ -1426,7 +1439,7 @@ class HLayoutMgr {
       }
     });
     return are_all_widgets_inited;
-  }
+ }
 
   /**
   * NEW - publish page as html with cfg json either as content of widget div or in common json array

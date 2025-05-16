@@ -269,12 +269,11 @@ class HCmsEditor {
   //
   loadPageContent(pageId){
       
-    if(this.warningOnExit()){
-        return;
-    }
       
     if(!window.hWin.HEURIST4.util.isPositiveInt(pageId)){
-        pageId = this.pageId;
+        pageId = this.page_id;
+    }else if(this.warningOnExit()){
+        return;
     }
 
     if(this._webPageFrame[0].contentWindow.webSite){
