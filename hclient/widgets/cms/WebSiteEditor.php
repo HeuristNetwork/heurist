@@ -42,8 +42,9 @@ $page_id = @$params['pageid'];
 if(!isPositiveInt($page_id)){
     $page_id = $website_id;
 }
+$currentLanguage = '"'.htmlspecialchars(@$params['lang']??'def').'"';
 
-$editor_options = "{website_id:$website_id, page_id:$page_id}";
+$editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$currentLanguage}";
 ?>
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>

@@ -103,6 +103,8 @@ class WebSite
 
         $this->isJsAllowed = $this->system->settings->isJavaScriptAllowed();
         
+        $this->currentLang = $this->params['lang'];
+        
     }
     
     
@@ -298,6 +300,7 @@ class WebSite
         $this->system->defineConstant('DT_FILE_RESOURCE');
 
         $this->system->defineConstant('TRM_NO');
+        $this->system->defineConstant('DT_LANGUAGES');
         
     }
 
@@ -318,7 +321,13 @@ class WebSite
         $val = @$record['details']?@$record['details'][$field_id]:@$record[$field_id];
 
         if(is_array($val) && count($val)>0){
-            $val = array_shift($val); //get first
+            
+            if($lang==null){
+                $val = array_shift($val); //get first  
+            }else{
+                $val = getCurrentTranslation($val, $lang);    
+            }
+
         }elseif($val==null){
             $val ='';
         }
@@ -384,19 +393,6 @@ class WebSite
         }
         return $val;
     }
-
-    //
-    // Return JSON for page record - NOT USED
-    /*
-    public function getPageRecord(){
-        
-        $rec = $this->pageRecord??$this->siteRecord;
-        $res = array('rec_ID'=>$rec['rec_ID'], 
-                    DT_NAME=>$this->getValue($rec, DT_NAME, false, $this->currentLang),
-                    DT_EXTENDED_DESCRIPTION=>$this->getValue($rec, DT_EXTENDED_DESCRIPTION));
-        return json_encode($res);
-    }
-    */
 
     public function getSiteId(){
         return $this->siteRecord['rec_ID'] ?? 0;
@@ -613,10 +609,37 @@ class WebSite
     //
     private function getLanguageSelector(){
         
-        return '<select class="form-select-sm me-2 w-auto">'
-                            .'<option value="en">English</option>'
-                            .'<option value="fr">Français</option>'
-               .'</select>';
+        $res = '';
+        if(defined('DT_LANGUAGES')){
+            $website_languages = @$this->siteRecord['details'][DT_LANGUAGES];
+        
+            if(!isEmptyArray($website_languages)){
+                //$website_languages = array_values($website_languages);
+                $orig_arr = print_r($website_languages,true);
+                $website_languages_codes = getTermCodes($this->system->getMysqli(), $website_languages);
+                
+                $website_languages_res = array();//defined codes
+
+                foreach($website_languages as $term_id){
+                    $lang_code = @$website_languages_codes[$term_id];
+
+                    if($lang_code){
+                        $lang_code = strtoupper($lang_code);
+                        if($website_language_def=='') {$website_language_def = $lang_code;} //first language in list
+                        $res = $res.'<option value="'.$lang_code.'" '
+                            .(($this->currentLang==$lang_code)?'selected':'')
+                            .'>'.$lang_code.'</option>';
+                        //'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
+                    }
+                }
+                //$website_languages = $website_languages_res;
+            }
+        }        
+        
+        if($res!=''){
+             $res = '<select id="main-languages" class="form-select-sm me-2 w-auto">'.$res.'</select>';
+        }
+        return $res;
     }
     
     //
@@ -631,6 +654,9 @@ class WebSite
         }
         if(@$this->params['edit']){
               $url .= '&edit='.$this->params['edit'];
+        }
+        if($this->currentLang && $this->currentLang!='def'){
+              $url .= '&lang='.$this->currentLang;
         }
         
         return $url;

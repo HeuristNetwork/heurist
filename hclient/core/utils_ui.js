@@ -2669,6 +2669,9 @@ window.hWin.HEURIST4.ui = {
         if(options.header){
             params.push('header='+options.header);
         }
+        if(options.lang && options.lang!='def'){
+            params.push('lang='+options.lang);
+        }
         
         if(params.length>0){
             surl += '?'+params.join('&');    

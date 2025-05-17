@@ -26,7 +26,8 @@ class WebSite {
     
     currentPageStyle = null;
     
-    currentLanguage = null;
+    currentLanguage = 'def';
+    suppOptions = null;
     is_execute_homepage_custom_javascript = false; //flag
     
     /*
@@ -55,19 +56,37 @@ class WebSite {
         this.container = 'main';
         
         this.pageCache = {};
+        
+        this.isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
+        
+        let langSelector = $('#main-languages');
+        if(langSelector.length>0){
+            this.currentLanguage = langSelector.val();
+            if(!this.currentLanguage) this.currentLanguage = 'def';
+            let that = this;
+            langSelector.on('change',()=>{
+                that.currentLanguage = langSelector.val();
+                that.switchLanguage(); //reload entirely
+            });
+        }
 
+        this.suppOptions = {heurist_isJsAllowed:window.hWin.HAPI4.sysinfo['custom_js_allowed'],
+                              siteId: this.siteId,
+                              isEditMode: this.isEditMode,
+                              lang: this.currentLanguage};
+        
         this.is_execute_homepage_custom_javascript = true; //semaphore
 
         if(this.pageId>0){
         
             //init widgets in header and footer
-            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header'); 
-            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer'); 
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', this.suppOptions); 
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer', this.suppOptions); 
             
             this.loadPage({pageId:this.pageId});
         
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(null, '#main-content'); 
+            window.hWin.HAPI4.layoutMgr.layoutInit(null, '#main-content', this.suppOptions); 
         }
     }
 
@@ -88,9 +107,6 @@ class WebSite {
             return;       
         }
 
-        
-        const supp_options = options.supp_options; //additional init options for widgets
-        
         let fields = ['rec_ID', DT_NAME, DT_SHORT_SUMMARY, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS];
         
         if(window.hWin.HAPI4.sysinfo['custom_js_allowed']){
@@ -185,25 +201,19 @@ class WebSite {
         }
         this.container = pageElement;
         
-        const isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
-
         this.currentPageRec = record;
         this.pageId = this.currentPageRec['rec_ID'];
         
         let pageContent = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
-        let supp_options = {heurist_isJsAllowed:window.hWin.HAPI4.sysinfo['custom_js_allowed'],
-                              siteId: this.siteId,
-                              isEditMode: isEditMode,
-                              lang: this.currentLanguage};
 /* TBD        
-        supp_options['page'] = {title:this.#getPageRecValue(DT_NAME), description:this.#getPageRecValue(DT_SHORT_SUMMARY)};
+        this.suppOptions['page'] = {title:this.#getPageRecValue(DT_NAME), description:this.#getPageRecValue(DT_SHORT_SUMMARY)};
         if(window.hWin.websiteInfo){
-            supp_options['website'] = websiteInfo;
+            this.suppOptions['website'] = websiteInfo;
         }
 */
-        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( pageContent, pageElement, supp_options, isEditMode );
+        const pageTreeData = window.hWin.HAPI4.layoutMgr.layoutInit( pageContent, pageElement, this.suppOptions, this.isEditMode);
         
-        if(isEditMode){ //keep json structure for edit mode
+        if(this.isEditMode){ //keep json structure for edit mode
             record['pageTreeData'] = pageTreeData;
         }else if(!this.pageCache[this.pageId]){
             //keep cache for not edit mode
@@ -373,9 +383,7 @@ class WebSite {
     openPageEditor(options){
         
         if(!options){
-            //edit=3 loads WebSiteEditor and then website in iframe 
-            //edit=2 loads website in edit mode
-            options = {mode:'edit', websiteid:this.siteId, pageid:this.pageId};
+            options = {mode:'edit', websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
         }
     
         let sURL = window.hWin.HEURIST4.ui.getCmsLink(options);
@@ -385,16 +393,32 @@ class WebSite {
         }
         
         window.location.replace(sURL);
-        
-        //window.open(sURL);
-        
     }
     
+    /*
+    *
+    */    
     closePageEditor(options){
         if(window.parent){
-            let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, pageid:this.pageId});
+            let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage});
             window.parent.location.replace(sURL);
         }
+    }
+    
+    /*
+    *
+    */    
+    switchLanguage(){
+        
+        let opts = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
+        let loc = window.location;
+        if(window.parent?.cmsEditor){
+            opts['mode'] = 'edit';
+            loc = window.parent.location;
+        }
+        
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink(opts);
+        loc.replace(sURL);
     }
 
     
@@ -433,6 +457,5 @@ class WebSite {
 */    
         
     }
-    
 
 }

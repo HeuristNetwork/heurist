@@ -335,7 +335,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         let that = this;
         
         //retrieve menu content from server side
-        let request = {website:1, ver:3, webmenu:this.options.menuItems};
+        let request = {website:1, ver:3, webmenu:this.options.menuItems, lang:this.options.language};
         window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
  //console.log(response.data);  
@@ -355,16 +355,25 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     generateMenu: function( menuItems, lvl ){
         
         
-        let hoverColor = this.element.css('--bs-nav-link-hover-color');
-        if(hoverColor){
-            hoverColor = ` css="--bs-nav-link-hover-color:${hoverColor}"`;
+        let cssColor = this.element.css('--bs-nav-link-hover-color');
+        if(cssColor){
+            cssColor = `--bs-nav-link-hover-color:${cssColor}`;
         }
-        //HCmsEditor.getBsClassesAsString(this.element,'text-');
-        let classes = Array.from(this.element[0].classList);
-        classes = classes.filter(function(value) {
-          let res = ['text-'].some(substr => value.startsWith(substr));
-          return res; });        
-        const txtColor = classes.join(' ');
+        let txtColor = this.element.css('color');
+        if(txtColor){
+            cssColor = cssColor + ';color:'+txtColor;
+            txtColor = '';
+        }else{
+            //HCmsEditor.getBsClassesAsString(this.element,'text-');
+            let classes = Array.from(this.element[0].classList);
+            classes = classes.filter(function(value) {
+              let res = ['text-'].some(substr => value.startsWith(substr));
+              return res; });        
+            txtColor = classes.join(' ');
+        }
+        if(cssColor){
+            cssColor = ` css="${cssColor}"`;    
+        }
         
         let res = '';
         let itemClass = '';
@@ -401,7 +410,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
                 
                 if(lvl==0){
-                    res += '<li class="nav-item dropdown'+itemClass+'"><a '+hoverColor+' class="nav-link dropdown-toggle '+txtColor+'" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'+menuTitle+'</a>';
+                    res += '<li class="nav-item dropdown'+itemClass+'"><a '+cssColor+' class="nav-link dropdown-toggle '+txtColor+'" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'+menuTitle+'</a>';
                 }else{                                                                           
                     res += '<li class="dropdown dropend"><a class="dropdown-item dropdown-toggle '+txtColor+'" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+menuTitle+'</a>';                    
                 }
@@ -411,13 +420,19 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 res += '</li>';
                 
             }else{
-                const pageUrl = this._getPageUrl(menuItems[i].page_id);
+                
+                let opts = {mode:this.options.isEditMode?'edit':'', 
+                            websiteid:this.options.siteId, 
+                            pageid:menuItems[i].page_id, lang:this.options.language};
+                const pageURL = window.hWin.HEURIST4.ui.getCmsLink(opts);
+                
+                
                 if(lvl==0){
-                    res += '<li class="nav-item'+itemClass+'"><a '+hoverColor+' class="nav-link '+txtColor+'"';
+                    res += '<li class="nav-item'+itemClass+'"><a '+cssColor+' class="nav-link '+txtColor+'"';
                 }else{
                     res += '<li><a class="dropdown-item '+txtColor+'"';
                 }
-                res = res + ` data-heurist-pageid="${menuItems[i].page_id}" href="${pageUrl}">${menuTitle}</a></li>`;
+                res = res + ` data-heurist-pageid="${menuItems[i].page_id}" href="${pageURL}">${menuTitle}</a></li>`;
             }
         }
 
@@ -428,22 +443,6 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
         
         return res;
-    },
-    
-    _getPageUrl: function(pageId){
-        
-        let url = this.HAPI.baseURL+'?db='+this.HAPI.database
-                +'&ver=3&website='+this.options.siteId;
-        if(pageId>0){
-            url = url+'&pageid='+pageId;
-        }
-        
-        if(this.options.isEditMode){
-              url = url + '&edit=1';
-        }
-        
-        return url;
-    },
-
+    }
     
 });

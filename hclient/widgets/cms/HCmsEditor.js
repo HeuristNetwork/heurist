@@ -40,8 +40,7 @@ class HCmsEditor {
     webSite;
     website_id; // current website
     page_id;    // current page
-    current_language = 'def';
-    default_language = 'def';
+    currentLanguage = 'def';
 
     mainMenu; //main menu widget    
     layout_container; // main-content with CMS content
@@ -53,6 +52,7 @@ class HCmsEditor {
     
     this.website_id = _options.website_id;
     this.page_id = _options.page_id;
+    this.currentLanguage = _options.currentLanguage;
       
     this._ws_body = _container?$(_container):$('body');  
     
@@ -176,10 +176,10 @@ class HCmsEditor {
 
         this._editor_panel.find('.btn-website-addpage').on('click', ()=>that.#addNewRootMenu());
 
-        let url = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id});
+        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,version:3});//,lang:this.currentLanguage
         
-        this._editor_panel.find('.website-url').text(url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
-            window.hWin.HEURIST4.util.copyStringToClipboard(`${url}`);
+        this._editor_panel.find('.website-url').text(pageURL).attr('title', `Click to copy ${pageURL} to clipboard`).on('click', function(){ // save website url to clipboard
+            window.hWin.HEURIST4.util.copyStringToClipboard(`${pageURL}`);
             window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
         });
 
@@ -233,7 +233,10 @@ class HCmsEditor {
         }
       
         this._webPageFrame = $('#webPageFrame');
-        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,pageid:this.page_id,version:3,mode:'edit',edit:2});
+        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,
+                                    pageid:this.page_id,
+                                    version:3,mode:'edit',edit:2,
+                                    lang:this.currentLanguage});
         this._webPageFrame.attr('src', pageURL);
   }
   
