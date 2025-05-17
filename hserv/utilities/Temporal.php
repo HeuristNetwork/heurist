@@ -1802,7 +1802,7 @@ class Temporal {
         $start = strval(@$date['estMinDate']);
         $end = strval(@$date['estMaxDate']);
 
-        if(empty($start) || empty($end)){
+        if(empty($start) || empty($end) || substr($start, 0, -2) !== substr($end, 0, -2)){
             return;
         }
 
