@@ -218,22 +218,43 @@ class WebSite
      */
     public function execute()
     {
-        $result = false;
+        $result = null;
 
         // Check if the system is initialized
         if (!isset($this->system) || !$this->system->isInited()) {
             $this->outputError();
-        } elseif (!isset($this->params)) {
+        } 
+        
+        if(array_key_exists('webmenu', $this->params)){
+            //returns menu content as array or html
+            if($this->messageError){
+                $result = false;
+            }else{            
+                $result = $this->getMenuTree( $this->params['webmenu'] ); 
+                //fillMenuTree($this->params['webmenu']);
+            }
+
+            if (isset($result)) {
+                //json output
+                if (is_bool($result) && $result == false) {
+                    $result = $this->messageError??$this->system->getError();
+                } else {
+                    $result = ['status' => HEURIST_OK, 'data' => $result];
+                }
+                dataOutput($result);
+            }
+            return;
+        }
+            
+        //html output    
+        if (!isset($this->params)) {
             // Check if parameters are defined
             $this->outputError('Parameters for website are not defined');
-            
-        } elseif ($this->verifyWebsiteIds()) {
-
+        }elseif ($this->verifyWebsiteIds()) {
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
         }
-
-            
+        
         if(array_key_exists('header', $this->params)){
             
             echo $this->getPageMargin('header'); //direct output
@@ -243,7 +264,7 @@ class WebSite
             echo $this->getPageMargin('footer');
 
         }elseif(array_key_exists('webtemplate', $this->params)){
-
+            //returns content of page template
             echo $this->getTemplateContent('template', basename($this->params['webtemplate'].'.html'));
         
         }else{
@@ -255,11 +276,9 @@ class WebSite
             }
             $output = ob_get_contents();
             ob_end_clean();            
-            $result = $this->handleOutput($output);
+            $this->handleOutput($output);
         }
         
-
-        return $result;
     }
     
     /**
@@ -618,7 +637,7 @@ class WebSite
     }
 
     //
-    // For header - submenu 
+    // Returns submenu as html
     //
     private function getMainSubMenu($menu, $records){
         
@@ -649,6 +668,7 @@ class WebSite
     
     //
     // For header - navbar with first level of menu
+    // Returns menu as HTML snippet
     //
     private function getMainMenu(){
         
@@ -685,32 +705,47 @@ class WebSite
     //
     //
     //
-    private function fillMenuTree(){
+    private function fillMenuTree($menuRecIDs=null){
         
         $this->system->defineConstant('DT_CMS_TOP_MENU');
         $this->system->defineConstant('DT_CMS_MENU');
         $this->system->defineConstant('DT_NAME');
         //$this->system->defineConstant('DT_CMS_TARGET');
         
-        $siteID = $this->siteRecord['rec_ID'];
         if($this->menuTree==null){
-            $this->menuRecords = array();
-            $this->menuTree = recordSearchMenuItems2($this->system, array($siteID), $this->menuRecords, true );
+            $this->menuRecords = array();  //
+            //see recordSearch.php
+            $this->menuTree = recordSearchMenuItems2($this->system, $menuRecIDs, $this->menuRecords, true );
         }
     }
 
     //
+    //  Returns json tree for menu (used in _editCMS_SiteMenu)
     //
-    //
-    public function getMenuTree($menu_tree=null, $parentKey=null){
+    public function getMenuTree($parentMenuRecIDs=null, $menu_tree=null){
         
         if($menu_tree==null){ //root
-            $this->fillMenuTree();
         
-            $parentID = $this->siteRecord['rec_ID'];
-            $parentKey = $parentID;
-            $menu_tree = $this->menuTree[$parentID];
+            if($parentMenuRecIDs==null){
+                $siteID = $this->siteRecord['rec_ID'];
+                $parentMenuRecIDs = array($siteID);
+            }else{
+                $parentMenuRecIDs = prepareIds($parentMenuRecIDs);
+            }
+            
+            $this->fillMenuTree($parentMenuRecIDs);
+
+            if(count($parentMenuRecIDs)==1){
+                $parentKey = $parentMenuRecIDs[0];
+                $menu_tree = $this->menuTree[$parentKey];
+            }else{
+                $parentKey = 0;
+                $menu_tree = $this->menuTree;
+            }
+        }else{
+            $parentKey = $parentMenuRecIDs;
         }
+        
         $res = array();
 
         foreach($menu_tree as $page_id=>$subs){ //first level is list of buttons with dropdowns
@@ -735,7 +770,7 @@ class WebSite
                                
             $has_subs = !empty($subs);
             if($has_subs){
-                $item['children'] = $this->getMenuTree($subs, $key);
+                $item['children'] = $this->getMenuTree($key, $subs);
             }
             
             array_push($res, $item);
@@ -826,8 +861,6 @@ class WebSite
                 //TBD
             }
         }
-        
-        return true;
     }
 
     //

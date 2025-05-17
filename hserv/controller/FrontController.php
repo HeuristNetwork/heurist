@@ -83,11 +83,11 @@ class FrontController
      */
     public function run()
     {
-        // Detect controller class
         if (!(isset($this->system) && $this->system->isInited())) {
             return;
         }
 
+        // Detect controller class
         if (@$this->req_params['controller'] == 'ReportController'  // $this->req_params['controller']
             || @$this->req_params['template']
             || @$this->req_params['template_body']

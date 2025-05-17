@@ -134,6 +134,7 @@ $.widget( 'heurist.HBaseOpts', $.heurist.HBaseView, {
                 that.options.editOptions[this.name] = $(this).val();
             }
         });
+console.log(this.options.editOptions);        
     },
 
     /*

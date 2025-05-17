@@ -166,7 +166,7 @@ $.widget( "heurist.editing_input", {
         if((this.detailType=="resource" || this.detailType=='file') 
             && window.hWin.HEURIST4.util.isempty(this.configMode))
         {
-            this.configMode= {entity:'records'};
+            this.configMode = {entity:'records'};
         }
 
         this._isForRecords = this.options?.recordset?.entityName == 'Records' || this.configMode?.entity == 'records';

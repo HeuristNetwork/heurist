@@ -459,6 +459,10 @@ console.log(content);
             // xx - means it will use current language
             layout.options['language'] = window.hWin.HAPI4.getLangCode3(this._supp_options['lang'],'def');    
         }
+        if(this._supp_options['siteId']){
+            layout.options['siteId'] = this._supp_options['siteId'];
+        }
+        layout.options['isEditMode'] = this._supp_options['isEditMode'];
         
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 

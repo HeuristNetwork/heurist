@@ -308,7 +308,7 @@ $rtDefines = array(
     'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
 
-    //Web content
+    //Web content (used in DH)
     'RT_WEB_CONTENT' => array(1147, 25),
 
     'RT_CMS_HOME' => array(99, 51),

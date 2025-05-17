@@ -185,13 +185,15 @@ class WebSite {
         }
         this.container = pageElement;
         
-        const isEditMode = window.parent?.cmsEditor;
+        const isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
 
         this.currentPageRec = record;
         this.pageId = this.currentPageRec['rec_ID'];
         
         let pageContent = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
         let supp_options = {heurist_isJsAllowed:window.hWin.HAPI4.sysinfo['custom_js_allowed'],
+                              siteId: this.siteId,
+                              isEditMode: isEditMode,
                               lang: this.currentLanguage};
 /* TBD        
         supp_options['page'] = {title:this.#getPageRecValue(DT_NAME), description:this.#getPageRecValue(DT_SHORT_SUMMARY)};

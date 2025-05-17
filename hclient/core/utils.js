@@ -124,7 +124,7 @@ window.hWin.HEURIST4.util = {
         
         return !isNaN(n) && n>0;
     },
-
+    
     //
     //
     //

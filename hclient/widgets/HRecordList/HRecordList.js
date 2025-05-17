@@ -180,7 +180,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     onCloseOptionEditor: function(newOptions){
         if(newOptions){
             
-            newOptions = $.extend($.heurist.HRecordList.prototype.options, newOptions);
+            newOptions = $.extend(window.hWin.HEURIST4.util.cloneJSON($.heurist.HRecordList.prototype.options), newOptions);
             
             if(this.recordView){
                 this.recordView.remove();   
@@ -198,8 +198,8 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     */
     _destroy: function() {
         // remove generated elements
+        this.clearContent();
         this._clearMultiselect();       
-        this._clearPagination();
     },
     
     /*

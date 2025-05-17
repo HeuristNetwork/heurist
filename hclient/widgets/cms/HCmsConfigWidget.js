@@ -81,7 +81,7 @@ class HCmsConfigWidget extends HCmsConfig {
             this.onContentChange( true );
 
             let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
-            if(this.l_cfg.appid?.indexOf('HRecord')===0){
+            if(this.l_cfg.appid?.indexOf('HRecord')===0 || this.l_cfg.appid?.indexOf('HMenu')===0){
                 //apply new options
                 layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'onCloseOptionEditor', widgetOptions);
             }else{

@@ -87,7 +87,6 @@ $.widget( "heurist.navigation", {
                 renderNode: null,
                 extensions:[],
                 activate: function(event, data) { 
-                    //main entry point to start edit rts field - open formlet
                     if(data.node.data.page_id>0){
                         that._onMenuItemAction(data.node.data);    
                     }
