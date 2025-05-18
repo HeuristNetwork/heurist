@@ -191,7 +191,8 @@ class HCmsConfig {
       $(this.element).css(this.l_cfg.css); //assign changed css at once
       
       //this.#getCss();
-      $(this.element).html(this.l_cfg.content);
+      let content = window.hWin.HAPI4.getContentTranslation(this.l_cfg, this.cmsEditor.currentLanguage);
+      $(this.element).html(content);
   }
   
   //
@@ -264,7 +265,9 @@ class HCmsConfig {
       if(!this.codeEditor){
             this.codeEditor = this.container.find('#codemirror-container').HCmsCodeEditor({title: window.hWin.HR("Edit content of element"),
                                                                           onClose:(context)=>that.onCodeEditorApply(context),
-                                                                          helpContent: 'website_header_footer.htm'});
+                                                                          helpContent: 'website_header_footer.htm',
+                                                                          currentLanguage: this.cmsEditor.currentLanguage,
+                                                                          allLanguages: this.cmsEditor.allLanguages });
       }                                                                   
       
       //if(!that.newContent
@@ -273,7 +276,7 @@ class HCmsConfig {
             //that.#getTemplateContent('', (response)=>codeEditor.HCmsCodeEditor('show', response?.message));
       //}
             
-      this.codeEditor.HCmsCodeEditor('show', this.l_cfg.content);
+      this.codeEditor.HCmsCodeEditor('show', this.l_cfg);
   }
   
   // 
@@ -281,46 +284,43 @@ class HCmsConfig {
   //
   updateContent(newContent, lang){
       //this.l_cfg.content = newContent;
+      if(!lang || lang=='def'){
+          lang='';
+      }
       this.l_cfg['content'+lang] = newContent;            
   }
    
   /*
   * On code editor exit
   */  
-  onCodeEditorApply(newContent, lang){
+  onCodeEditorApply(newContent){
       if(!newContent){
           return;
       }
-      //replace content with new one
-      if(this.l_cfg.content != newContent){
-          this.onContentChange( true );                
-          this.l_cfg.content = newContent;
-          //this.element.innerHtml = this.l_cfg.content;
-          $(this.element).html(this.l_cfg.content);
-      }
-/* TBD      
-      if(contents==null){ //no languages defined
-      }else{ //multilang
       
-          let cur_lang = ce_container.attr('data-lang');
-          contents[cur_lang] = newval;
-          let langs = Object.keys(contents);
-          for(let i=0; i<langs.length; i++){
-              let lang_key = 'content'+langs[i];
-              if(default_language.toUpperCase()==langs[i]){
-                  lang_key = 'content';
-              }
-              if(l_cfg[lang_key] != contents[langs[i]]){
-
-                  l_cfg[lang_key] = contents[langs[i]];
-                  _enableSave();
-                  if(current_language.toUpperCase()==langs[i]){
-                      element.html(l_cfg[lang_key]);    
-                  }
+      let wasChanged = false;
+      let langs = Object.keys(newContent);
+      for(let i=0; i<langs.length; i++){
+          
+          let lang_key = 'content';
+          if(langs[i]!='DEF'){
+            lang_key = lang_key + langs[i];    
+          }
+          
+          if(this.l_cfg[lang_key] != newContent[langs[i]]){
+              this.l_cfg[lang_key] = newContent[langs[i]];
+              wasChanged = true;
+              
+              if(langs[i]=='DEF' || this.cmsEditor.currentLanguage.toUpperCase()==langs[i]){
+                $(this.element).html(this.l_cfg[lang_key]);        
               }
           }
+      }//for
+      
+      if(wasChanged){
+          this.onContentChange( true );
+          
       }
-*/          
       
       // TBD
       //this.cmsEditor.webSite.reloadMargin( this.isHeader, newContent );
@@ -839,7 +839,6 @@ class HCmsConfig {
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
-                    //TBD restore
                     click: function(){$dlg.dialog('close');}
                 }
             ];            

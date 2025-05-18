@@ -26,7 +26,8 @@ class WebSite {
     
     currentPageStyle = null;
     
-    currentLanguage = 'def';
+    currentLanguage = null;
+    allLanguages = null;
     suppOptions = null;
     is_execute_homepage_custom_javascript = false; //flag
     
@@ -60,9 +61,13 @@ class WebSite {
         this.isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
         
         let langSelector = $('#main-languages');
+        this.currentLanguage = null;
+        this.allLanguages = null;
         if(langSelector.length>0){
             this.currentLanguage = langSelector.val();
-            if(!this.currentLanguage) this.currentLanguage = 'def';
+            this.allLanguages = langSelector.find('option').map((i,opt)=>opt.value).get();
+console.log(">>>>",this.allLanguages);            
+            if(!this.currentLanguage) this.currentLanguage = null;
             let that = this;
             langSelector.on('change',()=>{
                 that.currentLanguage = langSelector.val();

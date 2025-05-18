@@ -18,13 +18,17 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
             height: 600,
             default_palette_class: 'ui-heurist-publish',
             helpContent: null,
-            keepInstance:true
+            keepInstance:true,
+            allLanguages: null,
+            currentLanguage: null
     },
     
     // Instance of CodeMirror
     codeEditor: null,
     ce_container: null,
+
     contentToBeEdited: null,
+    newContent: null,
 
     
     /*
@@ -46,41 +50,53 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
                         //disabled:'disabled',
                         css:{'float':'right'}, 
                         click: function() { 
-                            let newval = that.codeEditor.getValue();
-
-                            //if(contents==null){ //no languages defined
-                                if(that.contentToBeEdited != newval){
-//that._enableSave();                
-// element.html(newval); update element in web content
-                                    that.contentToBeEdited = newval;
-                                }
-                            /*    
-                            }else{ //multilang
-                                let cur_lang = ce_container.attr('data-lang');
-                                contents[cur_lang] = newval;
-                                let langs = Object.keys(contents);
-                                for(let i=0; i<langs.length; i++){
-                                    let lang_key = 'content'+langs[i];
-                                    if(default_language.toUpperCase()==langs[i]){
-                                        lang_key = 'content';
-                                    }
-                                    if(l_cfg[lang_key] != contents[langs[i]]){
-                                        
-                                        l_cfg[lang_key] = contents[langs[i]];
-// _enableSave();
-                                        if(current_language.toUpperCase()==langs[i]){
-// element.html(l_cfg[lang_key]);    
-                                        }
-                                    }
-                                }
-                            }*/
+                        
+                            let cur_lang;
+                            if(that.options.allLanguages && that.options.allLanguages.length>1){
+                                cur_lang = that.ce_container.attr('data-lang');
+                            }else{
+                                cur_lang = (that.options.currentLanguage??'def').toUpperCase();
+                            }
+                            that.newContent[cur_lang] = that.codeEditor.getValue();
                             
-                            that._contextOnClose = newval;
+                            that._contextOnClose = that.newContent;
                             that.close();
                 }}]; 
+         
                 
-                //TBD add language buttons
-        
+        //add language buttons
+        let website_languages = this.options.allLanguages;
+        if(website_languages && website_languages.length>1){
+                
+                for(let i=0;i<website_languages.length;i++){
+
+                     let lang = website_languages[i].toUpperCase(); 
+                    
+                     //switcth language buttons   
+                     codeEditorBtns.push({
+                text: lang,
+                'data-lang': lang,
+                css:{'float':'left'}, 
+                click: function(event) {  //switch language
+                    
+                    //keep previous
+                    let newval = that.codeEditor.getValue();
+                    let cur_lang = that.ce_container.attr('data-lang');
+                    
+                    if(that.newContent[cur_lang]!=newval){
+                        that.newContent[cur_lang] = newval; 
+                    }
+                    
+                    let new_lang = $(event.target).text();
+                    that.assign( new_lang );
+                                         
+                    that.ce_container.attr('data-lang',new_lang);
+            
+                    }});
+                    
+                }//for
+        }
+            
         return codeEditorBtns;
     },
     
@@ -132,10 +148,44 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
        
         this._super();
         
-        this.contentToBeEdited = contentToBeEdited;
+        this.contentToBeEdited = contentToBeEdited??{};
         
-        if(window.hWin.HEURIST4.util.isempty(contentToBeEdited)) contentToBeEdited = ' ';
-        this.codeEditor.setValue(contentToBeEdited);
+        this.newContent = {};
+        let website_languages = this.options.allLanguages;
+        if(website_languages && website_languages.length>1){
+                
+                for(let i=0;i<website_languages.length;i++){
+
+                     let lang = website_languages[i].toUpperCase(); 
+                     //fill newContent object
+                     if(Object.hasOwn(this.contentToBeEdited, 'content'+lang)){
+                            this.newContent[lang] = this.contentToBeEdited['content'+lang];    
+                     }else{
+                            this.newContent[lang] = this.contentToBeEdited['content']; 
+                     }
+                }                    
+                
+        }else{
+            let lang = (this.options.currentLanguage??'def').toUpperCase();
+            this.newContent = {};
+            this.newContent[lang] = (lang=='DEF')?this.contentToBeEdited['content']:this.contentToBeEdited['content'+lang];
+        }
+        
+        this.assign( this.options.currentLanguage );
+        
+        this.ce_container.find('.CodeMirror ').css('height','100%');
+    },
+
+    /*
+    *  Assign content for specified lang to code editor
+    */    
+    assign: function(lang){
+        
+        lang = (lang??'def').toUpperCase();
+        
+        if(!this.newContent[lang]) this.newContent[lang] = ' ';
+        
+        this.codeEditor.setValue(this.newContent[lang]);
 
         let that = this;
         //autoformat
@@ -148,7 +198,18 @@ $.widget( 'heurist.HCmsCodeEditor', $.heurist.HBaseView, {
                     that.codeEditor.focus()
                 },500);
                 
-        this.ce_container.find('.CodeMirror ').css('height','100%');
+        let btnPanel = that.jqDialog.parent().find('.ui-dialog-buttonset');
+        if(this.options.allLanguages && this.options.allLanguages.length>1){
+            btnPanel.css('width', '100%');
+            btnPanel.find('[data-lang]').show();
+            btnPanel.find('[data-lang]').removeClass('ui-button-action');
+            btnPanel.find(`[data-lang=${lang}]`).addClass('ui-button-action');
+        }else{
+            btnPanel.find('[data-lang]').hide();            
+        }
+                    
+                
+        
     },
     
     

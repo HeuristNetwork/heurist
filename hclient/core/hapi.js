@@ -1522,6 +1522,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //not found - English is default
             return (def ?def:(_region?_region:'ENG'));
         },
+
+        //
+        // values - object with contentLNG keys
+        //
+        getContentTranslation: function(values, lang){
+            
+            let content = 'content';
+            if (lang) {
+                lang = window.hWin.HAPI4.getLangCode3(lang, 'def');
+                if (values['content' + lang]) { //exists for this lang
+                    content = 'content' + lang;
+                }
+            }
+            return values[content];
+        },
         
         //
         // values - array of strings

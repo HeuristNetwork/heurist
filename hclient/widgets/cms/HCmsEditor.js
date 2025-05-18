@@ -40,7 +40,8 @@ class HCmsEditor {
     webSite;
     website_id; // current website
     page_id;    // current page
-    currentLanguage = 'def';
+    currentLanguage = null; //this is constant value it is changed on reload only
+    allLanguages = null;
 
     mainMenu; //main menu widget    
     layout_container; // main-content with CMS content
@@ -49,7 +50,7 @@ class HCmsEditor {
     _keep_EditPanelWidth = 0;
 
   constructor(_options, _container) {
-    
+      
     this.website_id = _options.website_id;
     this.page_id = _options.page_id;
     this.currentLanguage = _options.currentLanguage;
@@ -176,13 +177,6 @@ class HCmsEditor {
 
         this._editor_panel.find('.btn-website-addpage').on('click', ()=>that.#addNewRootMenu());
 
-        const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,version:3});//,lang:this.currentLanguage
-        
-        this._editor_panel.find('.website-url').text(pageURL).attr('title', `Click to copy ${pageURL} to clipboard`).on('click', function(){ // save website url to clipboard
-            window.hWin.HEURIST4.util.copyStringToClipboard(`${pageURL}`);
-            window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
-        });
-
         this._editor_panel.find('.btn-website-homepage').parent()
         //.addClass('fancytree-node')
         .on( 'mouseenter', function(event){ 
@@ -243,20 +237,41 @@ class HCmsEditor {
   //
   // This is event for (first)initial loading in iframe
   // For particular page - onLoadPageContent
+  // It is called in onHapiInit in WebSiteScripts.php
   //
   onWebSiteLoad()
   {
+console.log('onWebSiteLoad');
       //website menu as json tree
       if(this._webPageFrame[0].contentWindow){
         this.webSite = this._webPageFrame[0].contentWindow.webSite;
         this.menuContentJSON = this.webSite.siteMenu;
         this.website_id = this.webSite.siteId;
         this.page_id = this.webSite.pageId;
+        
+        this.currentLanguage = this.webSite.currentLanguage;
+        this.allLanguages = this.webSite.allLanguages;
+        
       }else{
         this.menuContentJSON = [];
         this.website_id = 0;
         this.page_id = 0;
+        this.allLanguages = null;
+        this.currentLanguage = null;
       }
+      
+      this._editor_panel.find('.website-url').off('click');
+      if(this.website_id>0){
+            const pageURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.website_id,version:3});//,lang:this.currentLanguage
+            
+            this._editor_panel.find('.website-url').text(pageURL).attr('title', `Click to copy ${pageURL} to clipboard`).on('click', function(){ // save website url to clipboard
+                window.hWin.HEURIST4.util.copyStringToClipboard(`${pageURL}`);
+                window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
+            }).show();
+      }else{
+          this._editor_panel.find('.website-url').hide();
+      }
+      
       
       if(this._editCMS_SiteMenu){
           //refresh website structure tree

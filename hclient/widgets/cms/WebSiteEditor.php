@@ -31,6 +31,7 @@ if(!defined('PDIR')) {
 define('LOAD_BOOTSTRAP', 1);
 require_once dirname(__FILE__).'/../../framecontent/initPage.php';
 
+
 if(!isset($params)){
     $params = USanitize::sanitizeInputArray();
 }
@@ -42,9 +43,10 @@ $page_id = @$params['pageid'];
 if(!isPositiveInt($page_id)){
     $page_id = $website_id;
 }
-$currentLanguage = '"'.htmlspecialchars(@$params['lang']??'def').'"';
 
+$currentLanguage = '"'.htmlspecialchars(@$params['lang']??'def').'"';
 $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$currentLanguage}";
+
 ?>
 
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/ui.tabs.paging.js"></script>
@@ -140,14 +142,14 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
 
         if(!success) {return;}
         
-        let options = <?php echo $editor_options;?>;
-        
         //set global constants
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
         
-        window.cmsEditor = new HCmsEditor(options);
+        let editor_options = <?php echo $editor_options;?>;
+        
+        window.cmsEditor = new HCmsEditor(editor_options);
         
     }
 </script>

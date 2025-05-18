@@ -326,19 +326,12 @@ class HLayoutMgr {
             }
         } else {
             //assign text content to element
-            if (this._supp_options["lang"]) {
-                const lang = window.hWin.HAPI4.getLangCode3(
-                    this._supp_options["lang"],
-                    "def"
-                );
-                if (layout[content + lang]) {
-                    content = content + lang;
-                }
+            let lang = window.hWin.HAPI4.getLangCode3(this._supp_options['lang'], 'def');
+            content = window.hWin.HAPI4.getContentTranslation(layout, lang);
 
-                $d.attr("data-lang", lang);
-            }
+            if(lang) $d.attr('data-lang', lang);
+
             
-            content = layout[content]
 //TBD - call smarty to perform replaces                     
 /*
 console.log(content);
