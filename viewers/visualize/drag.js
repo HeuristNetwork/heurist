@@ -26,23 +26,37 @@ class VisualiseDrag{
 
     #currentNode = null;
 
-    #drag = null;
+    #selectionDrag = null;
+    #linkDrag = null;
+
+    #linkSource = null;
+    #linkTarget = null;
+    #linkLine = null;
+    #linkTimer = null;
 
     constructor(visualiserContext){
 
         this.visualiser = visualiserContext;
 
-        this.#drag = window.d3.behavior.drag()
-                        .on('dragstart', this.#dragStart)
-                        .on('drag', this.#dragMove)
-                        .on('dragend', this.#dragEnd);
+        this.#selectionDrag = window.d3.behavior.drag()
+                        .on('dragstart', () => this.#selectionDragStart())
+                        .on('drag', () => this.#selectionDragMove())
+                        .on('dragend', () => this.#selectionDragEnd());
+
+        this.#linkDrag = window.d3.behavior.drag()
+                        .on('dragstart', () => this.#linkDragStart())
+                        .on('drag', () => this.#linkDragMove())
+                        .on('dragend', () => this.#linkDragEnd());
     }
 
-    get drag(){
-        return this.#drag;
+    get selectionDrag(){
+        return this.#selectionDrag;
+    }
+    get linkDrag(){
+        return this.#linkDrag;
     }
 
-    #dragStart(data){
+    #selectionDragStart(data){
 
         window.d3.event.sourceEvent.stopPropagation();
         window.d3.event.sourceEvent.preventDefault();
@@ -51,9 +65,9 @@ class VisualiseDrag{
 
         // Fixed node positions?
         const gravity = this.visualiser.settings.get('gravity');
-        this.visualiser.svg.selectAll('.node').attr('fixed', (d, i) => {
-            d.fixed = gravity == 'off';
-            return d.fixed;
+        this.visualiser.svg.selectAll('.node').attr('fixed', (data) => {
+            data.fixed = gravity === 'off';
+            return data.fixed;
         });
 
         data.fixed = true; 
@@ -64,17 +78,20 @@ class VisualiseDrag{
         this.visualiser.updateShape('circles', [`.node.id${data.id}`, colour, colour]); // updateCircles
     }
 
-    #dragMove(){
+    #selectionDragMove(){
 
         // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
-        this.visualiser.svg.selectAll(`.node.id${this.#currentNode}`).each((d, i) => {
+        this.visualiser.svg.selectAll(`.node.id${this.#currentNode}`).each((data) => {
 
-            if(d.id == currentNode) {
+            let event = window.d3.event;
+
+            if(data.id == currentNode){
+
                 // Update locations
-                d.px += window.d3.event.dx;
-                d.py += window.d3.event.dy;
-                d.x += window.d3.event.dx;
-                d.y += window.d3.event.dy;
+                data.px += event.dx;
+                data.py += event.dy;
+                data.x += event.dx;
+                data.y += event.dy;
             }   
         });
 
@@ -82,7 +99,7 @@ class VisualiseDrag{
         this.visualiser.tick();
     }
 
-    #dragEnd(data){
+    #selectionDragEnd(data){
 
         // Update nodes & lines
         const gravity = this.visualiser.settings.get('gravity');
@@ -112,6 +129,100 @@ class VisualiseDrag{
 
         if(this.#currentNode == data.id){
             this.#currentNode = null;
+        }
+    }
+
+    #linkDragStart(data){
+
+        let event = window.d3.event.sourceEvent;
+        event.stopPropagation();
+
+        this.#linkSource = data.id;
+
+        let node = $(`.node.id${data.id}`);
+        const x = node.offset().left - 5;
+        const y = node.offset().top - 55;
+
+        let svgPos = $('svg').position();
+        const dx = x < (event.clientX - svgPos.left) ? -2 : 2;
+        const dy = y < (event.clientY - svgPos.top) ? -2 : 2;
+
+        this.#linkLine = this.visualiser.svg.append('svg:line')
+            .attr('stroke', '#ff0000')
+            .attr('stroke-width', 4)
+            .attr('x1', x).attr('y1', y)
+            .attr('x2', event.clientX - svgPos.left + dx)
+            .attr('y2', event.clientY - svgPos.top + dy);
+    }
+
+    #linkDragMove(){
+
+        if(!this.#linkLine){
+            return;
+        }
+
+        let event = window.d3.event.sourceEvent;
+        let svgPos = this.visualiser.svg.position();
+
+        const dx = this.#linkLine.attr('x1') < (event.clientX - svgPos.left) ? -2 : 2;
+        const dy = this.#linkLine.attr('y1') < (event.clientY - svgPos.top) ? -2 : 2;
+
+        this.#linkLine
+            .attr('x2', event.clientX - svgPos.left + dx)
+            .attr('y2', event.clientY - svgPos.top + dy);
+    }
+
+    #linkDragEnd(){
+
+        if(this.#linkSource != null && this.#linkTarget != null){
+            this.visualiser.overlay.addNewLinkField(this.#linkSource, this.#linkTarget);
+            setTimeout(() => this.#linkLine.attr('stroke', '#00ff00'), 500);
+        }else{
+            this.#linkSource = null;
+            if(this.#linkLine) this.#linkLine.remove();
+            this.#linkLine = null;
+        }
+    }
+
+    linkMouseover(data){
+
+        if(!this.#linkSource){
+            return
+        }
+
+        //cancel timer
+        if(this.#linkTimer > 0){
+            clearTimeout(this.#linkTimer);
+            this.#linkTimer = 0;
+        }
+
+        this.#linkTarget = data.id;
+        this.#linkLine.attr('stroke', '#00ff00');
+    }
+
+    linkMouseout(){
+
+        if(!this.#linkSource){
+            return;
+        }
+
+        this.#linkTimer = setTimeout(() => {
+            this.#linkTarget = null;
+            if(this.#linkLine) this.#linkLine.attr('stroke', '#ff0000');
+        }, 300);
+    }
+
+    removeLink(){
+
+        this.#linkSource = null;
+        this.#linkTarget = null;
+
+        if(this.#linkLine) this.#linkLine.remove();
+        this.#linkLine = null;
+
+        if(this.#linkTimer > 0){
+            clearTimeout(this.#linkTimer);
+            this.#linkTimer = 0;
         }
     }
 }
