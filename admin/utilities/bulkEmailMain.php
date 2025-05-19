@@ -715,6 +715,7 @@ $stmt->close();
                         $("#filterMsg").show().text("Filtering Databases...");
 
                         var data = {
+                            a: 'list_databases',
                             db: CURRENT_DB,
                             db_filtering: {
                                 count: $("#recTotal").val(),
@@ -727,7 +728,7 @@ $stmt->close();
                         }
 
                         $.ajax({
-                            url: 'bulkEmailOther.php',
+                            url: 'bulkEmailController.php',
                             type: 'POST',
                             data: data,
                             dataType: 'json',
@@ -803,6 +804,7 @@ $stmt->close();
 
             function sendEmails(){
 
+                const SESSION_ID = window.hWin.HEURIST4.util.random();
                 let params = {};
                 let $prog_dlg;
                 let interval;
@@ -817,10 +819,10 @@ $stmt->close();
                     return params;
                 }, params);
 
-                const SESSION_ID = window.hWin.HEURIST4.util.random();
+                params['a'] = 'send_emails';
                 params['sessionID'] = SESSION_ID;
 
-                let mail_url = `${BASE_URL}admin/utilities/bulkEmailOther.php`;
+                let mail_url = `${BASE_URL}admin/utilities/bulkEmailController.php`;
 
                 window.hWin.HEURIST4.util.sendRequest(mail_url, params, null, (response) => {
 
@@ -829,7 +831,12 @@ $stmt->close();
                     $prog_dlg.parent().find('.ui-dialog-titlebar button').show();
                     $prog_dlg.parent().find('.ui-dialog-buttonpane').show();
 
-                    window.hWin.HEURIST4.util.sendRequest(mail_url, {session: SESSION_ID, db: CURRENT_DB}, null, (session_resp) => {
+                    if(response?.data === 'terminated'){
+                        $prog_dlg.find('#email-results').html('<strong>CANCELLED</strong>');
+                        return;
+                    }
+
+                    window.hWin.HEURIST4.util.sendRequest(mail_url, {a: 'session', session: SESSION_ID, db: CURRENT_DB}, null, (session_resp) => {
 
                         if(session_resp.status == 'ok'){
                             $prog_dlg.find('#progress-report').html(session_resp.data);
@@ -873,9 +880,9 @@ $stmt->close();
                 getting_databases = 1;
 
                 $.ajax({
-                    url: 'bulkEmailOther.php',
+                    url: 'bulkEmailController.php',
                     type: 'POST',
-                    data: {db: CURRENT_DB, db_filtering: "all", req_id: window.hWin.HEURIST4.util.random()},
+                    data: { a: 'list_databases', db: CURRENT_DB, db_filtering: "all", req_id: window.hWin.HEURIST4.util.random() },
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -931,9 +938,9 @@ $stmt->close();
             function getEmailDetails(id) {
 
                 $.ajax({
-                    url: 'bulkEmailOther.php',
+                    url: 'bulkEmailController.php',
                     type: 'POST',
-                    data: {db: CURRENT_DB, get_email: true, recid: id, req_id: window.hWin.HEURIST4.util.random()},
+                    data: { a: 'email_details', db: CURRENT_DB, recid: id, req_id: window.hWin.HEURIST4.util.random() },
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
@@ -1036,14 +1043,14 @@ $stmt->close();
                 }
 
                 var data = {
+                    a: 'record_count',
                     db: CURRENT_DB,
                     db_list: dbs,
-                    rec_count: 1,
                     req_id: window.hWin.HEURIST4.util.random()
                 };
 
                 $.ajax({
-                    url: 'bulkEmailOther.php',
+                    url: 'bulkEmailController.php',
                     type: 'POST',
                     data: data,
                     dataType: 'json',
@@ -1054,7 +1061,7 @@ $stmt->close();
                     error: (jqXHR, textStatus, errorThrown) => {
 
                         window.hWin.HEURIST4.msg.showMsgErr({
-                            message: "An error has occurred with retrieving the the user count for the selected databases and user type.<br>"
+                            message: "An error has occurred with retrieving the the record count for the selected databases.<br>"
                                     + `Error Details: ${jqXHR.status} => ${errorThrown}<br><br>`
                                     + "Please contact the Heurist team if this problem persists",
                             error_title: 'Failed to retrieve record count'
@@ -1108,6 +1115,7 @@ $stmt->close();
                 }
 
                 var data = {
+                    a: 'user_count',
                     db: CURRENT_DB,
                     user_count: $("#userSel").val(),
                     db_list: dbs.join(','),
@@ -1115,7 +1123,7 @@ $stmt->close();
                 };
 
                 $.ajax({
-                    url: 'bulkEmailOther.php',
+                    url: 'bulkEmailController.php',
                     type: 'POST',
                     data: data,
                     dataType: 'json',

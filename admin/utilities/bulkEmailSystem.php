@@ -441,6 +441,11 @@ class BulkEmailSystem {
 
         foreach ($dbs as $db){
 
+            if($this->isTerminated()){
+                $this->printMessage('<strong>CANCELLED</strong>');
+                break;
+            }
+
             $where_clause = $this->generateWhereClause($this->users, $db);
 
             if (empty($where_clause)) {
@@ -551,7 +556,12 @@ class BulkEmailSystem {
         // Create Last modified's WHERE Clause
         $lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified {$lastmod_logic} date_format(curdate(), '%Y-%m-%d') - INTERVAL {$lastmod_period} {$lastmod_unit} " : "";
 
-        foreach ($dbs as $db) {
+        foreach($dbs as $db){
+
+            if($this->isTerminated()){
+                $this->printMessage('<strong>CANCELLED</strong><br>');
+                return 1;
+            }
 
             $count = 0;
             $date = "unknown";
@@ -680,9 +690,14 @@ class BulkEmailSystem {
 
         $this->printMessage("Sending ". count($this->user_details) ." emails:<div style='padding: 10px;'>");
 
-        foreach ($this->user_details as $email => $details) {
+        foreach($this->user_details as $email => $details){
 
             $this->printMessage("$email ..... ");
+
+            if($this->isTerminated()){
+                $this->printMessage('<strong>CANCELLED</strong>');
+                break;
+            }
 
             $email_rtn = $this->processEmailForUser($email, $details, $mailer, $mailRelayPwd);
 
@@ -1107,6 +1122,7 @@ class BulkEmailSystem {
         $this->printMessage("Saving {$filler} Receipt ..... ");
 
         // Get IDs
+        $this->checkMysqli();
         $note_rectype_id = ConceptCode::getRecTypeLocalID("2-3");
         $title_detailtype_id = ConceptCode::getDetailTypeLocalID("2-1");
         $summary_detailtype_id = ConceptCode::getDetailTypeLocalID("2-3");
@@ -1117,7 +1133,7 @@ class BulkEmailSystem {
             $this->printMessage('<span style="color: red; font-weight: bold;">Missing fields</span><br>');
 
             $this->setError("Unable to retrieve the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.<br>The Heurist team has been notified.");
-            $this->system->addError(HEURIST_ERROR, "Bulk Email System Error: Unable to get the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.");
+            $this->system->addError(HEURIST_ACTION_BLOCKED, "Bulk Email System Error: Unable to get the Record Type ID for Notes, and the Detail Type IDs for Name/Title, Short Summary, and Date fields.");
             return -1;
         }
 
@@ -1215,7 +1231,22 @@ class BulkEmailSystem {
 
         $this->progress .= $msg;
 
+        $curProgress = mysql__update_progress($this->system->getMysqli, $this->sessionID, false, null);
+        if($curProgress === 'terminate'){
+            return;
+        }
+
         mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, $this->progress);
+    }
+
+    private function isTerminated(){
+
+        if(!$this->sessionID){
+            return false;
+        }
+
+        $curProgress = mysql__update_progress($this->system->getMysqli, $this->sessionID, false, null);
+        return $curProgress === 'terminate';
     }
 
     /**
@@ -1258,17 +1289,23 @@ function sendSystemEmail($data) {
     $email_obj = new BulkEmailSystem($system);
     $rtn = [];
 
-    if ($email_obj->processFormData($data) == 0) {
+    $setup_res = $email_obj->processFormData($data);
+    if($setup_res == 0){
 
         //prepare and send emails
-        if ($email_obj->constructEmails() <= -1) {
+        $email_res = $email_obj->constructEmails();
+        if($email_res <= -1){
             $rtn = ['status' => HEURIST_ERROR, 'message' => 'An error occurred with preparing and sending the system emails.<br>' . $email_obj->getLog()];
+        }elseif($email_res == 1){
+            $rtn = ['status' => HEURIST_OK, 'data' => 'terminated'];
         }else{
             // create note record with that will contain the contents of log
             return $email_obj->exportReceipt();
         }
 
-    } else {
+    }elseif($setup_res){
+        $rtn = ['status' => HEURIST_OK, 'data' => 'terminated'];
+    }else{
         $rtn = ['status' => HEURIST_INVALID_REQUEST, 'message' => 'An error occurred with processing the form\'s data.'];
     }
 
