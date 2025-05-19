@@ -761,7 +761,7 @@ class WebSite
             
             $this->fillMenuTree($parentMenuRecIDs);
 
-            if(count($parentMenuRecIDs)==1){
+            if(count($parentMenuRecIDs)==1 && false){  //include home as first level menu
                 $parentKey = $parentMenuRecIDs[0];
                 $menu_tree = $this->menuTree[$parentKey];
             }else{

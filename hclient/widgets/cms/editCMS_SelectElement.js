@@ -81,7 +81,7 @@ function editCMS_SelectElement( callback ){
                 
                 HRecordList:{name:'Records list', description:'#HRecordList'},
                 //HRecordView:{name:'Record view', description:'#HRecordView'},
-                HMenu:{name:'Menu', description:'#HMenu'},
+                HMenu:{name:'Menu/Actions/Links', description:'#HMenu'},
         
     };
 

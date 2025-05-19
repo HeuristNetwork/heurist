@@ -16,7 +16,15 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     options: {
         resourcePath: 'hclient/widgets/HMenu/HMenu',
         
-        menuItems: null,
+        //array of record ids or json array 
+        /* {title: - label
+            icon:  - optional icon image
+            page_id - cms record id
+            action_id - OR action
+            children: []
+           }
+        */
+        menuItems: null, 
         
         viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, tree    
         styleMode: 'links',     // link,pills, buttons(?), jquery
@@ -30,16 +38,12 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     _needLoadContent: false,
     _needLoadCss: true,
     
-    _actionHandler: null,
-    
-    _menuData: null, //recordset with 
+    _menuData: null, //json array with list of actions 
 
     _init: function(){
         
         this._super();
 
-        this._actionHandler = this.HAPI.actionHandler;
-        
         this._events = this.HAPI.Event.ON_CREDENTIALS;
         let that = this;
         $(window.hWin.document).on(this._events, (event, data)=>that.eventHandler(event, data) );
@@ -70,7 +74,6 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 renderNode: null,
                 extensions:[],
                 activate: function(event, data) { 
-//console.log(data.node.data);
                     if(data.node.data.page_id>0){
                         that.executeAction( 'data-heurist-pageid', {pageId:data.node.data.page_id});
                     }
@@ -78,7 +81,6 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             };
 
             this.element.fancytree(fancytree_options).addClass('tree-cms');
-            //tree.reload( this._menuData );
             if(this.options.expandLevels>0){
                 let tree = $.ui.fancytree.getTree( this.element );
                 if(this.options.expandLevels==2){
@@ -98,8 +100,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
         
         
-        if(this.element.children().length==0){
-            this.element.append(this.generateMenu( this._menuData, 0));
+        if(this.element.children().length==0){ 
+            //if content is not defined - generate it based on record ids
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(this._menuData)){
+                this.element.append(this.generateMenu( this._menuData, 0));
+            }else{
+                this.addErrorMessage();
+            }
         }
                 
         
@@ -225,7 +232,6 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             this.options.customActionHandler.call(this, action_id, opts);
         }else{
             //defeault action handler
-            //this._actionHandler
             this.HAPI.actionHandler.executeActionById(action_id, opts);
         }
     },
@@ -322,6 +328,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             this.options.menuItems = [];
             ids = '';    
         } else {
+            
+            if(window.hWin.HEURIST4.util.isJSON(this.options.menuItems)){
+                
+            }
+            
             if(Array.isArray(ids)) {ids = ids.join(',');}
             else if(window.hWin.HEURIST4.util.isNumber(ids)){
                 this.options.menuItems = [ids];
@@ -330,22 +341,44 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             } 
         }
         
+        this._menuData = null;
         this.clearContent();
 
+        if(this.options.menuItems.length==0){
+            this.addErrorMessage();
+            return;
+        }
+        
         let that = this;
         
         //retrieve menu content from server side
         let request = {website:1, ver:3, webmenu:this.options.menuItems, lang:this.options.language};
         window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
- //console.log(response.data);  
                 that._menuData = response.data;
                 that._initControls();
             }else{
-                $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.element);
-                
+                this.clearContent();
+                this.addErrorMessage(response.message);
             }
         });
+        
+    },
+
+    /*
+    *
+    */    
+    addErrorMessage: function(message){
+        
+            if(!message){
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty(this._menuData)){
+                    message = '';
+                }else{
+                    message = 'Content not defined';
+                }
+            }
+        
+            $(`<p class="ui-state-error">Can't init menu. ${message}</p>`).appendTo(this.element); 
         
     },
     
@@ -355,13 +388,15 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     generateMenu: function( menuItems, lvl ){
         
         
-        let cssColor = this.element.css('--bs-nav-link-hover-color');
+        let cssColor = this.element.css('--bs-nav-link-hover-color'); //--bs-link-hover-color-rgb
         if(cssColor){
-            cssColor = `--bs-nav-link-hover-color:${cssColor}`;
+            cssColor = `--bs-nav-link-hover-color:${cssColor};`;
+        }else{
+            cssColor = '';
         }
         let txtColor = this.element.css('color');
         if(txtColor){
-            cssColor = cssColor + ';color:'+txtColor;
+            cssColor = cssColor + '--bs-nav-link-color:'+txtColor;
             txtColor = '';
         }else{
             //HCmsEditor.getBsClassesAsString(this.element,'text-');
@@ -372,7 +407,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             txtColor = classes.join(' ');
         }
         if(cssColor){
-            cssColor = ` css="${cssColor}"`;    
+            cssColor = ` style="${cssColor}"`;    
         }
         
         let res = '';
@@ -405,7 +440,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
             const menuTitle = menuItems[i].title;
             
-            const hasSubs = menuItems[i].children?.length>0;
+            const hasSubs = window.hWin.HEURIST4.util.isArrayNotEmpty(menuItems[i].children);
             if(hasSubs){
 
                 
@@ -444,5 +479,24 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
         return res;
     }
+    
+/*
+1) menu treeview to add/edit/delete (same as site menu)  redundant?
+   or just root items (as it is)
+   
+2) Add - select CMS_page, 
+                Filter group or Saved filter, (UsrSavedSearchs entry or CMS Filter record)
+                Add Record  (CMS Action record or Dashboard entry)
+                View Record 
+                Execute Smarty with saved filter 
+                External Link (Web bookmark record)
+                
+3) 
+   
+Wrokflow/Widget links   
+   
+                
+
+*/    
     
 });
