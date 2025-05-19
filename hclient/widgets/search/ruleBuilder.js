@@ -518,7 +518,10 @@ $.widget( "heurist.ruleBuilder", {
 
             if(!window.hWin.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
 
-            if(linktype>0){
+            if(linktype == 5){
+                if(!window.hWin.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
+                query = `${rt_target}related${rt_source}${rel_type}`;
+            }else if(linktype>0){
 
                 if(linktype>2){
                     if(!window.hWin.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
@@ -578,9 +581,10 @@ $.widget( "heurist.ruleBuilder", {
                     case 'links': linktype = 0; break;
                     case 'lt': linktype = 1; break;
                     case 'lf': linktype = 2; break;
-                    case 'rt': linktype = 3; break; //
-                    case 'rf':
-                    case 'related': linktype = 4; break; //rf
+                    case 'rt': linktype = 3; break;
+                    case 'rf': linktype = 4; break;
+                    case 'related': linktype = 5; break;
+                    default: linktype = 0; break;
                 }
                 
                 if(linktype>0 && link.length>1){
@@ -624,7 +628,7 @@ $.widget( "heurist.ruleBuilder", {
                 let rel_type  = codes[2]; //empty string for pointer
                 const rt_target = codes[3];
                 let filter    = codes[4];
-                let linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
+                let linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom,5-related
 
 
                 //assign values from codes to html elements
@@ -639,12 +643,12 @@ $.widget( "heurist.ruleBuilder", {
                         sel_field = sel_field + rt_target;
                     }
                 }
-                
+
                 this.select_fields.val( sel_field );
                 this.select_fields.hSelect('refresh');
                 this._onSelectFieldtype();
 
-                if(isNaN(linktype) || linktype<0 || linktype>4){
+                if(isNaN(linktype) || linktype<0 || linktype>5){
                     linktype = 0;
                 }    
                 if(!(rel_type>0)){
@@ -748,9 +752,11 @@ $.widget( "heurist.ruleBuilder", {
                 case 0: link = 'links'; break;
                 case 1: link = 'lt'; break;
                 case 2: link = 'lf'; break;
-                case 3: link = 'related'; break; //'rt'
-                case 4: link = 'related'; break; //'rf'
-            }             
+                case 3: link = 'rt'; break; //'rt'
+                case 4: link = 'rf'; break; //'rf'
+                case 5: link = 'related'; break;
+                default: link = 'links'; break;
+            }
             
             if(linktype>0 && dty_ID>0){
                 link = link+':'+dty_ID;
