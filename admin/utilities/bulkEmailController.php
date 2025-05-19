@@ -34,10 +34,8 @@ class BulkEmailController{
     private $system;
     private $request;
     private $allowedAction = ['list_databases', 'email_details', 'record_count', 'user_count', 'send_emails', 'session'];
-    
-    private $data;
+
     private $sysadminPWD;
-    private $action;
     private $response;
 
     public function __construct($system){
@@ -74,7 +72,7 @@ class BulkEmailController{
                 }
                 break;
             case 'record_count': // Get a count of records
-                if(isset($request['db_list'])){
+                if(isset($this->request['db_list'])){
                     $this->getRecordCount();
                 }
                 break;
@@ -118,47 +116,7 @@ class BulkEmailController{
             $data['details'] = $details;
 
         }elseif(is_array($dbRequest) && count($dbRequest)==4){ // Do filtering, record count and last modified
-
-            $count = intval($dbRequest['count']);
-            if(!($count>0)){
-                $count = 0;
-            }
-
-            $lastmod_logic = $mysqli->real_escape_string( filter_var($dbRequest['lastmod_logic'],FILTER_SANITIZE_STRING) );
-            $lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
-            $lastmod_period = intval($dbRequest['lastmod_period']);
-
-            //to avoid injection
-            $lastmod_unit = 'ALL';
-            switch(strtoupper(@$dbRequest['lastmod_unit'])){
-                case 'DAY':  $lastmod_unit = 'DAY'; break;
-                case 'MONTH':  $lastmod_unit = 'MONTH'; break;
-                case 'YEAR':  $lastmod_unit = 'YEAR'; break;
-                default;
-            }
-
-            $lastmod_where = $lastmod_unit !='ALL' ? "AND rec_Modified {$lastmod_logic} date_format(curdate(), '%Y-%m-%d') - INTERVAL {$lastmod_period} {$lastmod_unit}" : "";
-
-            foreach($dbList as $db){
-
-                $db = preg_replace(REGEX_ALPHANUM, '', $db);
-
-                $isok = true;
-
-                if($count > 0){
-                    $count_res = mysql__select_value($mysqli, "select count(*) from {$db}.`Records` where (not rec_FlagTemporary)");
-                    $isok =  intval($count_res) > $count;
-                }
-                
-                if($isok && $lastmod_unit != 'ALL'){
-                    $cnt = mysql__select_value($mysqli, "select count(*) from {$db}.`Records` where (not rec_FlagTemporary) {$lastmod_where}");    
-                    $isok = $cnt > 0;
-                }
-
-                if($isok){
-                    $data[] = $db;
-                }
-            }
+            $data = $this->filterDatabases($dbList);
         }
 
         $this->response = ['status' => HEURIST_OK, 'data' => $data, 'request' => $dbRequest];
@@ -348,17 +306,16 @@ class BulkEmailController{
         $shortsum_dtyID = ConceptCode::getDetailTypeLocalID('2-3');
 
         // Validate ID
+        $missing = '';
+        $missingField = empty($title_dtyID) || empty($shortsum_dtyID);
+        if(empty($title_dtyID) && empty($shortsum_dtyID)){
+            $missing = 'for both title and short summary detail types.';
+        }elseif($missingField){
+            $missing = empty($title_dtyID) ? 'for the title detail type.' : 'for the short summary detail type.';
+        }
         if(!is_numeric($id) || intval($id) < 1){
             $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'An invalid Email record id was provided.', 'request' => htmlspecialchars($id)];
-        }elseif(empty($title_dtyID) || empty($shortsum_dtyID)){
-
-            $missing = '';
-            if(empty($title_dtyID) && empty($shortsum_dtyID)){
-                $missing = 'for both title and short summary detail types.';
-            }else{
-                $missing = empty($title_dtyID) ? 'for the title detail type.' : 'for the short summary detail type.';
-            }
-
+        }elseif($missingField){
             $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => "Unable to retrieve the local id {$missing} <br>If this problem persists, please notify the Heurist team."];
         }
 
@@ -440,6 +397,57 @@ class BulkEmailController{
 
     public function getOutput(){
         return $this->response;
+    }
+
+    private function filterDatabases($dbList){
+
+        $mysqli = $this->system->getMysqli();
+
+        $dbRequest = $this->request['db_filtering'];
+        $data = [];
+
+        $count = intval($dbRequest['count']);
+        if($count <= 0){
+            $count = 0;
+        }
+
+        $lastmod_logic = $mysqli->real_escape_string( filter_var($dbRequest['lastmod_logic'],FILTER_SANITIZE_STRING) );
+        $lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
+        $lastmod_period = intval($dbRequest['lastmod_period']);
+
+        //to avoid injection
+        $lastmod_unit = 'ALL';
+        switch(strtoupper(@$dbRequest['lastmod_unit'])){
+            case 'DAY':  $lastmod_unit = 'DAY'; break;
+            case 'MONTH':  $lastmod_unit = 'MONTH'; break;
+            case 'YEAR':  $lastmod_unit = 'YEAR'; break;
+            default;
+        }
+
+        $lastmod_where = $lastmod_unit !='ALL' ? "AND rec_Modified {$lastmod_logic} date_format(curdate(), '%Y-%m-%d') - INTERVAL {$lastmod_period} {$lastmod_unit}" : "";
+
+        foreach($dbList as $db){
+
+            $db = preg_replace(REGEX_ALPHANUM, '', $db);
+
+            $isok = true;
+
+            if($count > 0){
+                $count_res = mysql__select_value($mysqli, "select count(*) from {$db}.`Records` where (not rec_FlagTemporary)");
+                $isok =  intval($count_res) > $count;
+            }
+            
+            if($isok && $lastmod_unit != 'ALL'){
+                $cnt = mysql__select_value($mysqli, "select count(*) from {$db}.`Records` where (not rec_FlagTemporary) {$lastmod_where}");
+                $isok = $cnt > 0;
+            }
+
+            if($isok){
+                $data[] = $db;
+            }
+        }
+
+        return $data;
     }
 
     //
