@@ -371,7 +371,7 @@ $.widget( "heurist.connections", {
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
-                    function(selected){
+                    function(){
                         that._getRelations(that.options.recordset);
                     },
                     function(type, rec_ID){

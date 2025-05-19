@@ -31,7 +31,7 @@ class VisualiseExporter{
 
     gephi(){
 
-        let data = this.visualiser.getData.call(this.visualiser, this.visualiser.data);
+        let data = this.visualiser.getCurrentData(this.visualiser.data);
 
         let nodes = '<nodes>';
         for(const node of data.nodes){
@@ -117,20 +117,24 @@ class VisualiseExporter{
 
         const content = `data:${mimetype};charset=utf-8,${encodeURIComponent(this.#output)}`;
 
-        let link = document.createElement("a");
+        let link = document.createElement('a');
         link.setAttribute('download', filename);
         link.setAttribute('href', content);
 
         if(window.webkitURL !== null){
+
             // Chrome allows the link to be clicked
             // without actually adding it to the DOM.
             link.click();
             link = null;
+
         }else{
+
             // Firefox requires the link to be added to the DOM
             // before it can be clicked.
-            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link;
-            link.style.display = "none";
+            link.onclick = () => { document.body.removeChild(link); link=null; } // destroy link;
+            link.style.display = 'none';
+
             document.body.appendChild(link);
             link.click();
         }

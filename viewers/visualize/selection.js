@@ -45,10 +45,10 @@ class VisualiseSelection{
                                   .attr('x', 0)
                                   .attr('y', 0);
 
-        this.visualiser.svg.on('contextmenu', () => { window.d3.event.preventDefault() })
-                           .on('mousedown', this.#onMouseDown)
-                           .on('mousemove', this.#onMouseMove)
-                           .on('mouseup', this.#onMouseUp);
+        this.visualiser.svg.on('contextmenu', () => window.d3.event.preventDefault())
+                           .on('mousedown', () => this.#onMouseDown())
+                           .on('mousemove', () => this.#onMouseMove())
+                           .on('mouseup', () => this.#onMouseUp());
 
         if(Array.isArray(selectedNodeIds)){
             this.#selectedNodeIds = selectedNodeIds;
@@ -131,9 +131,9 @@ class VisualiseSelection{
         this.#selectionBox.style('display', 'none'); 
     
         // Calculate which nodes are in the selection box
-        window.d3.selectAll('.node').each((d, i) => {
+        window.d3.selectAll('.node').each((data) => {
     
-            let selector = `.node.id${d.id}`;
+            let selector = `.node.id${data.id}`;
             let nodePos = $(selector).offset();
     
             let isWithinX = (nodePos.left >= this.#positions.clickX1 && nodePos.left <= this.#positions.clickX2) ||

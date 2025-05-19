@@ -149,32 +149,20 @@ class VisualiseSettings{
 
         // ----- VIEW MODES -----
         $('#btnViewModeIcon').button({icon: 'ui-icon-circle', showLabel: false})
-            .on('click', () => {
-                this.#changeViewMode('icons');
-            });
+            .on('click', () => this.#changeViewMode('icons'));
         $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info', showLabel: false})
-            .on('click', () => {
-                this.#changeViewMode('infoboxes');
-            });
+            .on('click', () => this.#changeViewMode('infoboxes'));
         $('#btnViewModeFull').button({icon: 'ui-icon-circle-info', showLabel: false})
-            .on('click', () => {
-                this.#changeViewMode('infoboxes_full');
-            });
+            .on('click', () => this.#changeViewMode('infoboxes_full'));
         $('#setViewMode').controlgroup();
 
         // ----- GRAVITY MODES -----
         $('#gravityMode0').button()
-            .on('click', () => {
-                this.#setGravity('off');
-            });
+            .on('click', () => this.#setGravity('off'));
         $('#gravityMode1').button()
-            .on('click', () => {
-                this.#setGravity('touch');
-            });
+            .on('click', () => this.#setGravity('touch'));
         /*$('#gravityMode2').button()
-            .on('click', () => {
-                this.#setGravity('aggressive');
-            });*/
+            .on('click', () => this.#setGravity('aggressive'));*/
         $('#setupGravityMode').controlgroup();
     }
 
@@ -182,26 +170,20 @@ class VisualiseSettings{
 
         // ----- NODES -----
         let radius = this.get('entityradius');
-        if(radius < circleSize) radius = circleSize // min
+        if(radius < this.visualiser.circleSize) radius = this.visualiser.circleSize // min
         else if(radius > this.visualiser.maxEntityRadius) radius = this.visualiser.maxEntityRadius;
 
         $('#nodesRadius').val(radius).on('change', (event) => {
             this.put('entityradius', $(event.target).val());
-            window.d3.selectAll('.node > .background').attr('r', (d) => { return this.visualiser.getEntityRadius(d.count); });
+            window.d3.selectAll('.node > .background').attr('r', (data) => this.visualiser.getEntityRadius(data.count));
         });
 
         $('#nodesMode0').button().css('width','35px')
-            .on('click', () => {
-                this.#setFormulaMode('linear');
-            });
+            .on('click', () => this.#setFormulaMode('linear'));
         $('#nodesMode1').button().css('width','35px')
-            .on('click', () => {
-                this.#setFormulaMode('logarithmic');
-            });
+            .on('click', () => this.#setFormulaMode('logarithmic'));
         $('#nodesMode2').button().css('width','35px')
-            .on('click', () => {
-                this.#setFormulaMode('linunweightedear');
-            });
+            .on('click', () => this.#setFormulaMode('linunweightedear'));
         $('#setNodesMode').controlgroup();
 
         if($('#entityColor').length > 0){
@@ -228,26 +210,19 @@ class VisualiseSettings{
 
         // ----- LINKS -----
         $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel: false})
-            .on('click', () => {
-                this.#setLinkMode('straight');
-            });
+            .on('click', () => this.#setLinkMode('straight'));
         $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel: false})
-            .on('click', () => {
-                this.#setLinkMode('curved');
-            });
+            .on('click', () => this.#setLinkMode('curved'));
         $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel: false})
-            .on('click', () => {
-                this.#setLinkMode('stepped');
-            });
+            .on('click', () => this.#setLinkMode('stepped'));
 
-        $('#linksEmpty').on('change', function(event){
+        $('#linksEmpty').on('change', (event) => {
             this.put('line_empty_link', $(event.target).is(':checked') ? 1 : 0);
             this.visualiser.visualise();
             this.#syncUI();
         });
-        $('#expand-links').on('change', () => { // expand single links
-            this.visualiser.tick();
-        });
+
+        $('#expand-links').on('change', () => this.visualiser.tick()); // expand single links
         if(this.visualiser.isStructure){ // show all links by default for database structure vis
             $('#expand-links').prop('checked', true);
         }
@@ -258,16 +233,17 @@ class VisualiseSettings{
         let linksLength = 200;
         $('#linksLength').val(linksLength)
             .on('change', (event) => {
+
                 let newval = $(event.target).val();
                 this.put('linelength', newval);
+
                 if(this.get('gravity') != 'off'){
                     this.visualiser.visualise();
                 }
             });
 
         let linksWidth = 2;
-        if(linksWidth < 1) linksWidth = 1 // min
-        else if(linksWidth > maxLinkWidth) linksWidth = maxLinkWidth;
+        if(linksWidth > this.visualiser.maxLinkWidth) linksWidth = this.visualiser.maxLinkWidth;
         $('#linksWidth').val(linksWidth)
             .on('change', (event) => {
 
@@ -366,8 +342,10 @@ class VisualiseSettings{
 
         $('#fontSize').val(fontSize)
             .on('change', (event) => {
+
                 let newval = $(event.target).val();
                 this.put('fontsize', newval);
+
                 let isLabelVisible = this.visualiser.currentMode != 'icons' || this.get('labels', 'on')=='on';
                 if(isLabelVisible) this.visualiser.visualise();
             });
@@ -424,7 +402,7 @@ class VisualiseSettings{
             $('#setDivExport').hide();
         }else{
             $('#setDivExport').show();
-            $('#gephi-export').button();
+            $('#gephi-export').button().on('click', () => this.visualiser.exporter.gephi());
         }
 
         $toolbar.show();
@@ -483,7 +461,7 @@ class VisualiseSettings{
         let showLabels = this.visualiser.currentMode != 'icons' || this.get('labels');
         window.d3.selectAll('.nodelabel').style('display', showLabels ? 'block' : 'none');
 
-        window.d3.selectAll('image.menu-open').each((image, idx) => {
+        window.d3.selectAll('image.menu-open').each((image) => {
             let event = new MouseEvent('mouseup');
             image.dispatchEvent(event);
         });
@@ -520,13 +498,13 @@ class VisualiseSettings{
         this.put('gravity', gravity);
     
         // Update gravity impact on nodes
-        this.visualiser.svg.selectAll('.node').attr('fixed', (d, i) => {
-            d.fixed = gravity === 'aggressive';
-            return d.fixed;
+        this.visualiser.svg.selectAll('.node').attr('fixed', () => {
+            data.fixed = gravity === 'aggressive';
+            return data.fixed;
         });
 
         if(gravity !== 'off') {
-            force.resume(); 
+            this.visualiser.force.resume(); 
         }     
 
         this.#syncUI();
@@ -536,7 +514,7 @@ class VisualiseSettings{
 
         this.put('formula', formula);
 
-        window.d3.selectAll('.node > .background').attr('r', (d) => { return this.visualiser.getEntityRadius(d.count); });
+        window.d3.selectAll('.node > .background').attr('r', (data) => this.visualiser.getEntityRadius(data.count));
 
         this.#refreshLinesWidth();
 
@@ -545,11 +523,11 @@ class VisualiseSettings{
 
     #refreshLinesWidth(){
 
-        window.d3.selectAll('.bottom-lines').style('stroke-width', (d) => { return this.visualiser.getLineWidth(d.targetcount); });
+        window.d3.selectAll('.bottom-lines').style('stroke-width', (data) => this.visualiser.getLineWidth(data.targetcount));
 
         window.d3.selectAll('marker')
-            .attr('markerWidth', (d) => { return this.visualiser.getMarkerWidth(d ? d.targetcount : 0); })
-            .attr('markerHeight', (d) => { return this.visualiser.getMarkerWidth(d ? d.targetcount : 0); });
+            .attr('markerWidth', (data) => this.visualiser.getMarkerWidth(data ? data.targetcount : 0))
+            .attr('markerHeight', (data) => this.visualiser.getMarkerWidth(data ? data.targetcount : 0));
     }
 
     #setLinkMode(formula){
@@ -580,14 +558,8 @@ class VisualiseSettings{
                 slidable:false,  // disable sliding
                 resizable:false, // disable resizing
                 contentSelector: '#list_rectypes',
-                onopen_end: function(){ 
-                    $('#list_rectypes').show();
-                    $('#lblShowRectypeSelector').show();
-                },
-                onclose_start: function(){
-                    $('#list_rectypes').hide();
-                    $('#lblShowRectypeSelector').hide();
-                },
+                onopen_end: () => $('#list_rectypes, #lblShowRectypeSelector').show(),
+                onclose_start: () => $('#list_rectypes, #lblShowRectypeSelector').hide(),
                 togglerContent_open: '<div class="ui-icon ui-icon-carat-2-w" style="margin-left: 0px;font-size:20px;"></div>',
                 togglerContent_closed: '<div class="ui-icon ui-icon-carat-2-e" style="font-size:20px;"></div>'
             }
@@ -596,7 +568,9 @@ class VisualiseSettings{
         let layout = $('body.popup div.layout-container').first().layout(layout_options);
         
         if(!hidePane){ // initClosed option is inconsistent
-            setTimeout(function(){
+
+            setTimeout(() => {
+
                 layout.open('west');
                 $('#list_rectypes').show();
                 $('#lblShowRectypeSelector').show();
