@@ -1117,7 +1117,7 @@ class VisualiseOverlay{
             window.hWin.HEURIST4.msg.bringCoverallToFront(infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
                 `Loading<br><br>${window.hWin.HEURIST4.util.stripTags(truncateText(data.name, 40))}`);
 
-            const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${d.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
+            const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${data.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
 
             infoFrame.attr("src", srcURL)
                     .attr("data-hid", data.id)
