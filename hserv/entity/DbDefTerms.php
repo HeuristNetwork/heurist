@@ -1303,7 +1303,7 @@ class DbDefTerms extends DbEntityBase
                 }
                 $trm_ID = $mysqli->real_escape_string($trm_ID);
 
-                $query = 'SELECT trm_ID, count(dtl_ID) '
+                $query = 'SELECT trm_ID, COUNT(DISTINCT dtl_RecID) '
                 . 'FROM recDetails '
                 . 'INNER JOIN defTerms ON trm_ID = dtl_Value '
                 . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
