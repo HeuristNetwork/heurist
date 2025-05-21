@@ -584,7 +584,7 @@ $.widget( "heurist.ruleBuilder", {
                     case 'rt': linktype = 3; break;
                     case 'rf': linktype = 4; break;
                     case 'related': linktype = 5; break;
-                    default: linktype = 0; break;
+                    default: break;
                 }
                 
                 if(linktype>0 && link.length>1){
