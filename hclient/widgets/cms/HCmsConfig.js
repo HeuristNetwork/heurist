@@ -113,7 +113,7 @@ class HCmsConfig {
           l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
       }
       
-      this.#setCssToUI();
+      this.setCssToUI();
       this.assignCssTextArea();
 
       //direct editor        
@@ -139,7 +139,7 @@ class HCmsConfig {
           $(that.element).css(new_css);
           that.l_cfg.css = new_css;
 
-          that.#setCssToUI();
+          that.setCssToUI();
           that.#getCss();
           
           //that.onContentChange(true);
@@ -183,7 +183,7 @@ class HCmsConfig {
   revertChanges(){
   
       this.l_cfg = window.hWin.HEURIST4.util.cloneJSON(this.element_cfg);
-      this.#setCssToUI();
+      this.setCssToUI();
       
       HCmsEditor.replaceBsClasses(this.element, this.allStyleBsClasses, this.l_cfg.bsClasses);
       this.#applyUserClasses(true);
@@ -377,7 +377,7 @@ class HCmsConfig {
   /*
   * Setter. Assigns values from l_cfg to UI
   */ 
-  #setCssToUI(){
+  setCssToUI(){
 
       let cont = this.container;
       let l_cfg = this.l_cfg;
@@ -485,7 +485,9 @@ class HCmsConfig {
 
       cont.find('input[name="background"]').prop('checked', hasBackground);
       cont.find('input[name="border"]').prop('checked', hasBorder);
-      
+
+      cont.find('input[name="width"]').val(l_cfg.css?.width??'auto');
+      cont.find('input[name="height"]').val(l_cfg.css?.height??'auto');
       
       this.#checkUserStyleSettings();
   }
@@ -567,11 +569,12 @@ class HCmsConfig {
         let css = {};
         
         let bsClasses = [];
+        let val;
 
 // BACKGROUND  get values from UI -----------------
 
         //style - background
-        let val = cont.find('input[name="background"]').is(':checked');
+        val = cont.find('input[name="background"]').is(':checked');
         if(isGlobalCheck && !val){
             css['background'] = 'none';
         }else{
@@ -718,7 +721,6 @@ class HCmsConfig {
                 css[name] = val;
             }
         }
-
         __setDim('width');
         __setDim('height');
 
@@ -828,18 +830,21 @@ class HCmsConfig {
                     click: function(){
                         that.container.find('.btn-save-only').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, true);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'save');
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
                         that.container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'discard');
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
-                    click: function(){$dlg.dialog('close');}
+                    click: function(){
+                        $dlg.dialog('close');
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'cancel');
+                    }
                 }
             ];            
             
@@ -917,7 +922,7 @@ class HCmsConfig {
       }
 
       console.log('convert to ',res.bsClasses); 
-      this.#setCssToUI();
+      this.setCssToUI();
       this.#getCss();
       //this.assignCssTextArea();
       //this.onContentChange((true);

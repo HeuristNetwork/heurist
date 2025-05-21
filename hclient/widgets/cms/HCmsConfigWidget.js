@@ -76,7 +76,9 @@ class HCmsConfigWidget extends HCmsConfig {
             let l_cfg = this.l_cfg;
             l_cfg.options = widgetOptions;
             l_cfg.dom_id = window.hWin.HEURIST4.util.stripTags(l_cfg.options.dom_id);    //window.hWin.HEURIST4.util.stripTags
-            l_cfg.name = window.hWin.HEURIST4.util.stripTags(l_cfg.options.name);
+            if(l_cfg.options.name){
+                l_cfg.name = window.hWin.HEURIST4.util.stripTags(l_cfg.options.name);
+            }
             
             this.container.find('input[data-type="element-id"]').val(l_cfg.dom_id);
             this.container.find('input[data-type="element-name"]').val(l_cfg.name);

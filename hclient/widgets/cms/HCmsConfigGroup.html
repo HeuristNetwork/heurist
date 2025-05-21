@@ -10,27 +10,16 @@
 */
 -->
                 <!-- PAGE ROOT/Container -->
+                <!--
                 <div class="page-layout" style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
                     <h3>
                         Page Container
                     </h3>
                     <fieldset>
                         <legend style="display:none"></legend>
-                        <div>
-                            <div class="header_narrow">Type:</div>
-                            <select name="containerType" id="containerType" style="min-width:200px">
-                                <option value="container-fluid" selected>100% width</option>
-                                <!-- <option value="container">Max width at each breakpoint</option> -->
-                                <option value="container-sm">Small (540px)</option>
-                                <option value="container-md">Medium (720px)</option>
-                                <option value="container-lg">Large (960px)</option>
-                                <option value="container-xl">XLarge (1200px)</option>
-                                <option value="container-xxl">XXLarge (1400px)</option>
-                            </select>
-                            <div class="heurist-helper3">Sets a max-width at each responsive breakpoint</div>
-                        </div>
                     </fieldset>
                 </div>
+                -->
                 
                 <!-- LAYOUT properties -->
                 <div class="group-layout" style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;">
@@ -39,6 +28,21 @@
                     </h3>
                     <fieldset>
                         <legend style="display:none"></legend>
+
+                            <div>
+                                <div class="header_narrow">Container type:</div>
+                                <select name="containerType" id="containerType" style="min-width:200px">
+                                    <option value="container-fluid" selected>100% width</option>
+                                    <option value="container">Default</option>
+                                    <option value="container-sm">Small (540px)</option>
+                                    <option value="container-md">Medium (720px)</option>
+                                    <option value="container-lg">Large (960px)</option>
+                                    <option value="container-xl">XLarge (1200px)</option>
+                                    <option value="container-xxl">XXLarge (1400px)</option>
+                                </select>
+                                <div class="heurist-helper3">Sets a max-width at each responsive breakpoint</div>
+                            </div>
+
                             <div>
                                 <div class="header_narrow" style="font-weight:bold">Type:</div>
                                 <select name="groupType" id="groupType">
@@ -108,7 +112,7 @@
                             </div>
                             <div class="props grid">
                                 <div class="header_narrow">Gap:</div>
-                                <input name="g" class="grid-select" type="number" min="0" max="5" value="0" placeholder="0" style="width:30px" id="grid-gap" class="text ui-widget-content"/>
+                                <input name="g" class="grid-select text ui-widget-content" type="number" min="0" max="5" value="0" placeholder="0" style="width:30px" id="grid-gap"/>
                             </div>
                             <!--
                             <div class="props grid">
@@ -174,6 +178,7 @@
                                 <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
                                 <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:40px" class="text ui-widget-content"/>
                                 <label for="">&nbsp;Size:</label>
+                                <input data-type="flex-basis" type="text" value="" placeholder="auto" style="width:50px" class="text ui-widget-content"/>                       
                             </div>                    
                             
                             <div data-gridcol="stub" style="display: none;">
@@ -183,7 +188,7 @@
                                     <option value="auto">auto</option>
                                     <option value="proportion">proportional (1 of 12)</option>
                                 </select>
-                                <input name="grid-col" type="number" min="1" max="12" value="3" placeholder="3" style="width:30px"/>
+                                <input name="grid-col" type="number" min="1" max="12" value="3" placeholder="3" style="width:30px" class="text ui-widget-content"/>
                             </div>                    
                             <div class="props grid heurist-helper3" style="display: block;">
                                 Define columns width: 

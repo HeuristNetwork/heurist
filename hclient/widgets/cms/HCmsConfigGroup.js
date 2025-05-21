@@ -42,36 +42,38 @@ class HCmsConfigGroup extends HCmsConfig {
      let cont = this.container;
      let l_cfg = this.l_cfg;
 
-     //init controls in groupEditor
      let etype = l_cfg.type;
-     let group_type;
-
+     if(l_cfg.type=='group' && l_cfg.css?.display=='flex'){
+         etype = 'flex';
+     }
+     
+     //init controls in groupEditor
      if(l_cfg.isPage){
-         cont.find('.group-layout').hide();
+         //cont.find('.group-layout').hide();
          let containerClass = HCmsEditor.getBsClasses(l_cfg.bsClasses, 'container');
          cont.find('#containerType').val(containerClass);
          cont.find('#groupType').val('group');
-         
-         group_type = 'page-layout';
      }else{
-         cont.find('.page-layout').hide();
-         let selGoupType = cont.find('#groupType');
-         selGoupType.val(l_cfg.type);
-         selGoupType = window.hWin.HEURIST4.ui.initHSelect(selGoupType);
-         selGoupType.on({change:()=>that.#initControlsForLayoutType()});
-         
-         this.#initControlsForLayoutType()
-         
-         group_type = 'group-layout';
+         //cont.find('.page-layout').hide();
+         cont.find('#containerType').parent().hide();
      }
-
+     
+     let selGoupType = cont.find('#groupType');
+     selGoupType.val(etype);
+     selGoupType = window.hWin.HEURIST4.ui.initHSelect(selGoupType);
+     selGoupType.on({change:()=>that.#initControlsForLayoutType()});
+     
+     this.#initControlsForLayoutType()
+         
      //Listeners for selects    
-     cont.find(`.${group_type} select`).each((i,selObj)=>{
+     cont.find('.group-layout select').each((i,selObj)=>{
+         if(!$(selObj).hSelect('instance')){
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
-            selObj.on('change', ()=>that.#onChangeOptions());
+         }
+         $(selObj).on('change', ()=>that.#onChangeOptions());
      });
      
-     cont.find(`.${group_type} input`).on('change', ()=>that.#onChangeOptions());
+     cont.find('.group-layout input').on('change', ()=>that.#onChangeOptions());
      
      if(l_cfg.isPage || etype=='tabs' || etype=='accordion'){
         cont.find('input[data-type="element-id"]').parent().hide();
@@ -186,12 +188,14 @@ class HCmsConfigGroup extends HCmsConfig {
 
                  l_cfg.children[k].bsClasses = (HCmsEditor.removeBsClasses(l_cfg.children[k].bsClasses, 'col') + ' ' + val).trim();
 
-                 let child_ele = that._cmsEditor.findInWebSite('.cms-element[data-hid='+l_cfg.children[k].key+']');
+                 let child_ele = that.cmsEditor.findInWebSite('.cms-element[data-hid="'+l_cfg.children[k].key+'"]');
 
-                 HCmsEditor.replaceBsClasses(child_ele[0], 'col', val);
+                 HCmsEditor.replaceBsClasses(child_ele, 'col', val);
              }
 
-             inputColWidth.hSelect({change: __onColWidthChange});
+             //inputColWidth.hSelect({change: __onColWidthChange});
+             inputColWidth = window.hWin.HEURIST4.ui.initHSelect(inputColWidth);
+             inputColWidth.on('change', __onColWidthChange);
              inputCol.on('change', __onColWidthChange);
 
              item_last = item;
@@ -236,9 +240,9 @@ class HCmsConfigGroup extends HCmsConfig {
                      l_cfg.children[k].css['border-radius'] = '4px';
                      l_cfg.children[k].css['margin'] = '4px';*/
 
-                     let child_ele = that._cmsEditor.findInWebSite('.cms-element[data-hid='+l_cfg.children[k].key+']');
-                     child_ele.removeAttr('style');
-                     child_ele.css(l_cfg.children[k].css);
+                     let child_ele = that.cmsEditor.findInWebSite('.cms-element[data-hid="'+l_cfg.children[k].key+'"]');
+                     $(child_ele).removeAttr('style');
+                     $(child_ele).css(l_cfg.children[k].css);
                  });
 
                  item_last = item;
@@ -404,7 +408,22 @@ class HCmsConfigGroup extends HCmsConfig {
            //recreate group
            this.cmsEditor.getHapi().layoutMgr.layoutInitFromJSON(this.l_cfg, this.element, {}, false);
       }
-      
-
   }
+  
+  /**
+  * 
+  */
+  setCssToUI(){
+      super.setCssToUI();
+
+      //assign flex css parameters
+      let params = ['display','flex-direction','flex-wrap','justify-content','align-items','align-content'];
+      for(let i=0; i<params.length; i++){
+            let prm = params[i];
+            if (this.l_cfg.css[prm]) this.container.find('#'+prm).val(this.l_cfg.css[prm]);
+      }
+      
+  }
+  
+  
 }

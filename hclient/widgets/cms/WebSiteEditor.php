@@ -248,7 +248,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
                     <div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"></div>
 
                     <div class="propertyView ent_content_full ui-widget-content-gray" 
-                        style="top:190px;padding:10px 0px;display:none;"></div>
+                        style="top:190px;display:none;"></div>
 
                 </div>
             </div>

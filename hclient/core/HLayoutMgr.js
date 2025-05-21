@@ -315,7 +315,7 @@ class HLayoutMgr {
 
             if (aLangs.length > 1) {
                 aLangs.forEach((lang) => {
-                    const lang_code = lang.substring(7) || "def";
+                    const lang_code = lang.substring(7) || 'def';
                     $(
                         `<div css="${lang_code === "def" ? "" : "display:none"
                         }" data-lang="${lang_code}">${layout[lang]}</div>`
@@ -629,8 +629,8 @@ console.log(content);
 
         layout.dom_id = 'cms-group-'+layout.key;
         
-        let $d = this.#layoutCreateDiv(layout, '', forStorage);
-        
+        let $d = this.#layoutCreateDiv(layout, this._isEditMode?'cms-element brick':'', forStorage);
+                                          
         this.#layoutReplaceGroupDiv(container, $d)
         this.#layoutSetCssAndClasses(layout, $d);     
         
@@ -701,7 +701,7 @@ console.log(content);
        
         layout.dom_id = 'cms-group-'+layout.key;
         
-        let $d = this.#layoutCreateDiv(layout, '', forStorage);
+        let $d = this.#layoutCreateDiv(layout, this._isEditMode?'cms-element brick':'', forStorage);
         
         this.#layoutReplaceGroupDiv(container, $d)
         this.#layoutSetCssAndClasses(layout, $d);    
@@ -1323,7 +1323,7 @@ console.log(content);
     //  <div data-heurist-cms='{"appid":"HRecordList","searchDomain":"sr1","viewMode": "offcanvas-start"}'
     //  <div data-heurist-cms="HRecordList">{options}</div>
     //
-    #convertJSONtoHTML(content){
+    convertJSONtoHTML(content){
         
         //from json
         //to html for storage 
@@ -1437,14 +1437,6 @@ console.log(content);
     });
     return are_all_widgets_inited;
  }
-
-  /**
-  * NEW - publish page as html with cfg json either as content of widget div or in common json array
-  */
-  convertJSONtoHTML(content) {
-    return this.#convertJSONtoHTML(content);
-  }
-  
   
   /**
   * Finds predifined layout by id

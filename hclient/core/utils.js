@@ -45,6 +45,8 @@ window.hWin.HEURIST4.util = {
             return true;
         }else if(Array.isArray(obj)){
             return obj.length<1;
+        }else if($.isPlainObject(obj)){
+            return $.isEmptyObject(obj);
         }else{
             return (obj==="") || (obj==="null");
         }

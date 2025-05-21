@@ -35,6 +35,7 @@ class HCmsEditorPage {
     layoutMgr; //instance form website frame
 
     //interface flags and states
+    currentElementId = null;
     page_was_modified = false;
     delay_onmove = 0;
     __timeout = 0;
@@ -534,7 +535,10 @@ class HCmsEditorPage {
             this._toolbar_Page.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'})
                         .on('click',()=>that.#saveLayoutCfg())
             this._toolbar_Page.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'})
-                        .on('click',()=>that._cmsEditor.loadPageContent());  //reload this page
+                        .on('click',()=>{
+                                that.page_was_modified = false;
+                                that._cmsEditor.loadPageContent()   
+                        });  //reload this page
                         
             //this._panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click', this.#closeCMS);
 
@@ -1170,13 +1174,14 @@ function(value){
         node.remove();
         
         //recreate parent element
+        this.layoutMgr.setEditMode(true);
         if(parent_element && parent_element.type=='accordion'){
             this.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
             this.layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
             this.layoutMgr.layoutInit(parent_children, parent_container, 
-                        {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}); 
+                        {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true); 
         }
         
         this.page_was_modified = true;
@@ -1239,7 +1244,7 @@ function(value){
         
         //redraw page
         this.layoutMgr.layoutInit(this._layout_content, this._layout_container, 
-                {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language});
+                {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true);
         this.#updateActionIcons(200); //it inits tinyMCE also
         
         this.page_was_modified = true;
@@ -1291,11 +1296,14 @@ function(value){
             if(this._layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
             
             //save previous element
-            if(this.warningOnExit(function(){that.#layoutEditElement(ele_id);})) return;
+            if(this.warningOnExit(function(){that.#layoutEditElement(ele_id);})){
+                return;  
+            } 
             
             this._layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         }
 
+        this.currentElementId = ele_id;
       
         //1. show div with properties over treeview
         let h = this._panel_treePage.find('ul.fancytree-container').height() + 10;
@@ -1369,6 +1377,7 @@ function(value){
                                
                         if(new_cfg.type=='cardinal'){ //????
                             //recreate cardinal layout
+                            that.layoutMgr.setEditMode(true);
                             that.layoutMgr.layoutInitCardinal(new_cfg, that._layout_container);
                         }
                         
@@ -1721,16 +1730,27 @@ function(value){
         // each content:lang value will be saved in separate detail
         function __cleanLayout(items){
             
+            if(Array.isArray(items))
             for(let i=0; i<items.length; i++){
                 items[i].key = null;
                 delete items[i].key;
                 items[i].title = null;
                 delete items[i].title;
+                if(window.hWin.HEURIST4.util.isempty(items[i].css)){
+                    delete items[i].css;
+                }
+                if(window.hWin.HEURIST4.util.isempty(items[i].bsClasses)){
+                    delete items[i].bsClasses;
+                }
                 
                 if(items[i].children){
                     __cleanLayout(items[i].children);    
                 }
             }
+        }
+        
+        if(!Array.isArray(newval)){
+            newval = [newval];
         }
         __cleanLayout(newval);
 
@@ -1786,25 +1806,35 @@ function(value){
  }
   
  //
- //
+ // callback - function to continue, otherwaise it returns true
  //  
  warningOnExit( callback ){
       
       let that = this;
 
         //at first check if element editor is active
-        if(this._cmsEditorElement && this._cmsEditorElement.warningOnExit(function(needSave){
-            if(needSave){
+        if(this._cmsEditorElement && this._cmsEditorElement.warningOnExit(function(action){
+            if(action=='save'){
                 that.page_was_modified = true;
                 that.#saveLayoutCfg(callback);
-            }else{
+            }else if(action=='discard'){
                 //discard changes
                 that.page_was_modified = false;
                 if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
+            }else{
+                //cancel
+                if(that.currentElementId){
+                    //highlight in treeview                                        
+                    let node = $.ui.fancytree.getTree( that._panel_treePage ).getNodeByKey(that.currentElementId);
+                    if(node) node.setActive(true);
+                    that._layout_container.find('.cms-element[data-hid]').removeClass('cms-element-active'); //remove from all
+                    that._layout_container.find('.cms-element[data-hid='+that.currentElementId+']').addClass('cms-element-active');
+                }
             }
         })) return true;
         
         if(that.page_was_modified){
+            //show small dialogue - save/discard/cancel
             
             let $dlg;
             let _buttons = [
@@ -1821,7 +1851,9 @@ function(value){
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
-                    click: function(){$dlg.dialog('close');}
+                    click: function(){
+                        $dlg.dialog('close');
+                    }
                 }
             ];            
             

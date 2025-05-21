@@ -302,9 +302,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             element.css(new_css);
             l_cfg.css = new_css;
 
-           
-           
-
             _assignCssToUI();
            
         }).trigger('change');
