@@ -220,19 +220,15 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
 
                 <div id="treePage" style="font-size:0.9em;top:2em;" class="ent_wrapper ui-widget-content">
 
-                    <div class="treePageHeader ent_header" style="height:85px;line-height:normal;">
-
-                        <h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 65%; display: inline-block">
-                            Page title
-                        </h3>
+                    <div class="treePageHeader ent_header" style="height:85px;line-height:normal;padding:5px">
 
                         <span style="float: right; padding-top: 2px;" class="heurist-helper1 element_edit">
-                            <a href="?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">
+                            <a href="#" target="_blank" id="helpLink">
                                 <span class="ui-icon ui-icon-circle-help" style="font-size:12px;"></span>
                             </a>
                         </span>
                         
-                        <select name="responsiveScreen" id="responsiveScreen" title="Responsive screen width" style="float: right; font-size: 10px;max-width:60px;">
+                        <select name="responsiveScreen" id="responsiveScreen" title="Responsive screen width" style="float: right; font-size: 10px;max-width:80px;">
                             <option value="100" selected>100%</option>
                             <option value="540">Small (540px)</option>
                             <option value="720">Medium (720px)</option>
@@ -240,7 +236,12 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
                             <option value="1200">XLarge (1200px)</option>
                             <option value="1400">XXLarge (1400px)</option>
                         </select>
+
+                        <label for="responsiveScreen" style="float: right;line-height:15px">Screen width: </label>
                         
+                        <div id="pageTitle" class="truncate" style="margin-block-start: 1.8em; margin-block-end: 0.7em; font-size: 10px; font-family: revert;width:100%;">
+                            Page title
+                        </div>
                     </div>
 
                     <div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;"></div>

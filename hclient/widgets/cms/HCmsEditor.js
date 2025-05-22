@@ -74,65 +74,44 @@ class HCmsEditor {
             
             window.onbeforeunload = this.onBeforeUnload;
             
-                this._editor_panel = $('div.ui-layout-west');
+             this._editor_panel = $('div.ui-layout-west');
+    
+            let layout_opts =  {
+                applyDefaultStyles: true,
+                maskContents:       true,  //alows resize over iframe
+                //togglerContent_open:    '&nbsp;',
+                //togglerContent_closed:  '&nbsp;',
+                center:{
+                    minWidth:400,
+                    contentSelector: '.heurist-website', //@todo !!!! for particule template heurist-website can be missed
+                    //pane_name, pane_element, pane_state, pane_options, layout_name
+                    onresize_end : function(){
+                        //that.handleTabsResize();                            
+                    }    
+                }
+            };
             
-                    let layout_opts =  {
-                        applyDefaultStyles: true,
-                        maskContents:       true,  //alows resize over iframe
-                        //togglerContent_open:    '&nbsp;',
-                        //togglerContent_closed:  '&nbsp;',
-                        center:{
-                            minWidth:400,
-                            contentSelector: '.heurist-website', //@todo !!!! for particule template heurist-website can be missed
-                            //pane_name, pane_element, pane_state, pane_options, layout_name
-                            onresize_end : function(){
-                                //that.handleTabsResize();                            
-                            }    
-                        }
-                    };
-                    
-                    layout_opts[this.editor_pos] = {
-                        size: 230, //@todo this.usrPreferences.structure_width,
-                        maxWidth:800,
-                        minWidth:230,
-                        spacing_open:6,
-                        spacing_closed:40,  
-                        togglerAlign_open:'center',
-                        //togglerAlign_closed:'top',
-                        togglerAlign_closed:16,   //top position   
-                        togglerLength_closed:80,  //height of toggler button
-                        initHidden: false, //!this.options.edit_structure,   //show structure list at once 
-                        initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
-                        slidable:false,  //otherwise it will be over center and autoclose
-                        contentSelector: '.editStructure',   
-                        onopen_start : function( ){ 
-                            let tog = that._ws_body.find('.ui-layout-toggler-'+that.editor_pos);
-                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
-                            tog.find('.heurist-helper2.'+that.editor_pos+'TogglerVertical').hide();
-                        },
-                        onclose_end : function( ){ 
-                            let tog = that._ws_body.find('.ui-layout-toggler-'+that.editor_pos);
-                            tog.addClass('prominent-cardinal-toggler togglerVertical');
-
-                            if(tog.find('.heurist-helper2.'+this.editor_pos+'TogglerVertical').length > 0){
-                                tog.find('.heurist-helper2.'+this.editor_pos+'TogglerVertical').show();
-                            }else{
-
-                                let margin = (this.editor_pos=='west') ? 'margin-top:270px;' : '';
-                                $('<span class="heurist-helper2 '+this.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
-                            }
-                        },
-                        onresize_end: function(){
-                            let width = that._ws_body.layout().state['west']['outerWidth'] <= 215 ? '60%' : '70%';
-                            that._editor_panel.find('a.website-url').css('width', width);
-                        },
-                        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(this.editor_pos=='west'?'w':'e')+'"></div>',
-                        togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(this.editor_pos=='west'?'e':'w')+'"></div>',
-                    };
-
-                    this._ws_body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
-
-                    let tog = this._ws_body.find('.ui-layout-toggler-'+this.editor_pos);
+            layout_opts[this.editor_pos] = {
+                size: 230, //@todo this.usrPreferences.structure_width,
+                maxWidth:800,
+                minWidth:230,
+                spacing_open:6,
+                spacing_closed:40,  
+                togglerAlign_open:'center',
+                //togglerAlign_closed:'top',
+                togglerAlign_closed:16,   //top position   
+                togglerLength_closed:80,  //height of toggler button
+                initHidden: false, //!this.options.edit_structure,   //show structure list at once 
+                initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
+                slidable:false,  //otherwise it will be over center and autoclose
+                contentSelector: '.editStructure',   
+                onopen_start : function( ){ 
+                    let tog = that._ws_body.find('.ui-layout-toggler-'+that.editor_pos);
+                    tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                    tog.find('.heurist-helper2.'+that.editor_pos+'TogglerVertical').hide();
+                },
+                onclose_end : function( ){ 
+                    let tog = that._ws_body.find('.ui-layout-toggler-'+that.editor_pos);
                     tog.addClass('prominent-cardinal-toggler togglerVertical');
 
                     if(tog.find('.heurist-helper2.'+this.editor_pos+'TogglerVertical').length > 0){
@@ -142,10 +121,36 @@ class HCmsEditor {
                         let margin = (this.editor_pos=='west') ? 'margin-top:270px;' : '';
                         $('<span class="heurist-helper2 '+this.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                     }
+                },
+                onresize_end: function(){
+                    let width = that._ws_body.layout().state['west']['outerWidth'] <= 215 ? '60%' : '70%';
+                    that._editor_panel.find('a.website-url').css('width', width);
+                },
+                togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(this.editor_pos=='west'?'w':'e')+'"></div>',
+                togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-'+(this.editor_pos=='west'?'e':'w')+'"></div>',
+            };
 
+            this._ws_body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
+
+            let tog = this._ws_body.find('.ui-layout-toggler-'+this.editor_pos);
+            tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+            if(tog.find('.heurist-helper2.'+this.editor_pos+'TogglerVertical').length > 0){
+                tog.find('.heurist-helper2.'+this.editor_pos+'TogglerVertical').show();
+            }else{
+
+                let margin = (this.editor_pos=='west') ? 'margin-top:270px;' : '';
+                $('<span class="heurist-helper2 '+this.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
+            }
+
+            let helpURL = window.hWin.HRes( 'website_instructions.htm' );
+            this._editor_panel.find('#helpLink').attr('href',helpURL)
+            
+            
             this.#initEditControls();
         }//editor panel is already inited
         
+        $(helpLink)
         this._ws_body.layout().show(this.editor_pos, true );
       
         //load the entire website
@@ -271,8 +276,9 @@ class HCmsEditor {
             this._editor_panel.find('.btn-website-edit').button('option','label','WebPage Properties');
             this._tabControl.find('ul.ui-tabs-nav').hide();
             this._editor_panel.find('#treePage').show();
-            //this._tabControl.find('li.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
+            this._editor_panel.find('#pageTitle').hide();
       }else{
+          this._editor_panel.find('div.treePage').css('top','40px');
           if(this._editCMS_SiteMenu){
             //refresh website structure tree
             this._editCMS_SiteMenu.initControls();

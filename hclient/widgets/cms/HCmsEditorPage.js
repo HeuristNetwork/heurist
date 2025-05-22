@@ -582,7 +582,7 @@ initPage(pageContainer, pageRecord){
         }else{ 
             sTitle = window.hWin.HEURIST4.util.stripTags(window.hWin.HAPI4.getTranslation(pageRecord[window.hWin.DT_NAME], null));
         }
-        let ele_title = this._container.find('.treePageHeader > h3')
+        let ele_title = this._container.find('#pageTitle')
         ele_title.attr('title',sTitle).text(sTitle);
         
         this.page_was_modified = false;
@@ -616,7 +616,7 @@ showMarginProperties(isHeader){
             return;
         }
         
-        this._container.find('.treePageHeader > h3').text(window.hWin.HR(isHeader?'Header':'Footer'));
+        this._container.find('$pageTitle').text(window.hWin.HR(isHeader?'Header':'Footer'));
         
         this.page_was_modified = false;
         
@@ -659,7 +659,7 @@ showMarginProperties(isHeader){
 showMarginProperties(isHeader){
 
     this.detachTinyMCE(false);
-    this._container.find('.treePageHeader > h3').text(window.hWin.HR(isHeader?'Header':'Footer'));
+    this._container.find('#pageTitle').text(window.hWin.HR(isHeader?'Header':'Footer'));
     this._panel_propertyView.text('data-top', this._panel_propertyView.css('top'));
     
     this._panel_propertyView.css('top',21);
@@ -691,7 +691,7 @@ hideMarginProperties(){
         this._panel_propertyView.css('top', this._panel_propertyView.attr('data-top'));
         this.hidePropertyView();
         //restore title
-        let ele_title = this._container.find('.treePageHeader > h3');
+        let ele_title = this._container.find('#pageTitle');
         ele_title.text(ele_title.attr('title'));
     }
 }
@@ -1858,7 +1858,7 @@ function(value){
                 }
             ];            
             
-            let sMsg = '"'+ this._container.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
+            let sMsg = '"'+ this._container.find('#pageTitle').text() +'" '+window.hWin.HR('page has been modified');
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
                             {appendTo: 'body', default_palette_class:this._cmsEditor.default_palette_class});
 
