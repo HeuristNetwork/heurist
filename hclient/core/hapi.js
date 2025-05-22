@@ -1624,7 +1624,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 _regional = {};
             }
             
-            if (!_regional[region]) {
+            let getLocaleFile = region === 'ENG' || that.sysinfo.localization_files.indexOf(region.toLowerCase()) >= 0;
+            if (!_regional[region] && getLocaleFile) {
                 
                 _region = region;
                 

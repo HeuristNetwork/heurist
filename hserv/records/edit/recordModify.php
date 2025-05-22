@@ -832,6 +832,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         $msg = str_replace(['#title#', '#link_v#', '#link_e#'], [$newTitle, $rec_view, $rec_edit], $msg);
 
+        $firstEmail = array_pop($swf_emails);
+        $swf_emails = empty($swf_emails) ? [$firstEmail] : ['to' => [$firstEmail], 'bcc' => $swf_emails];
+
         $res = sendPHPMailer(HEURIST_MAIL_TO_ADMIN, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification',
                     $swf_emails, $title, $msg, null, true);
 

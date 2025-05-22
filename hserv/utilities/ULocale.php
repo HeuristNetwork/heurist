@@ -573,3 +573,43 @@
 
         return $string;
     }
+
+    function getPreparedLanguageList(){
+
+        global $common_languages_for_translation, $glb_lang_codes;
+
+        // extracts from $glb_lang_codes names and alpha2 codes to be sent to client
+        initLangCodes();
+
+        // ordered as in $commonLanguages (defined in heuristConfigIni)
+        $commonLanguages = [];
+        foreach($common_languages_for_translation as $code){
+
+            $lang = strtolower($code);
+
+            $key = array_search($lang, array_column($glb_lang_codes, 'a3'));
+            if($key!==false){
+                $commonLanguages[strtoupper($lang)] = $glb_lang_codes[$key];
+            }
+        }
+
+        // Get list of available localisation files
+        $localisationDir = __DIR__ . '/../hclient/assets/localization/';
+        $localeFiles = [];
+        $localisationFiles = is_dir($localisationDir) ? scandir($localisationDir) : null;
+        if(!empty($localisationFiles)){
+
+            foreach($localisationFiles as $filename){
+
+                if($filename == '.' || $filename == '..' || is_dir($filename)){
+                    continue;
+                }
+
+                $filename = explode('.', $filename)[0];
+                $language = explode('_', $filename)[1];
+                $localeFiles[] = $language;
+            }
+        }
+
+        return [$commonLanguages, $localeFiles];
+    }

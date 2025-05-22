@@ -986,19 +986,7 @@ class System {
             $needEncodeRecordDetails = 0;
         }
 
-        // extracts from $glb_lang_codes names and alpha2 codes to be sent to client
-        initLangCodes();
-
-        $common_languages = array();
-        //ordered as in $common_languages_for_translation (defined in heuristConfigIni)
-        foreach($common_languages_for_translation as $code){
-            $lang = strtolower($code);
-
-            $key = array_search($lang, array_column($glb_lang_codes, 'a3'));
-            if($key!==false){
-                $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
-            }
-        }
+        [$common_languages, $locale_files] = getPreparedLanguageList();
         
         //$useRewriteRulesForRecordLink = true;
         
@@ -1029,6 +1017,7 @@ class System {
                     'saml_service_provides'=>$saml_service_provides,
                     'hideStandardLogin' => $hideStandardLogin,
                     'common_languages'=>$common_languages,
+                    'localization_files' => $locale_files,
                     'use_redirect' => @$useRewriteRulesForRecordLink
                 );
             }
@@ -1096,6 +1085,7 @@ class System {
                     'custom_js_allowed'=>$this->settings->isJavaScriptAllowed(),
 
                     'common_languages'=>$common_languages,
+                    'localization_files' => $locale_files,
 
                     'saml_service_provides'=>$saml_service_provides,
                     'hideStandardLogin' => $hideStandardLogin,

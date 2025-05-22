@@ -679,6 +679,7 @@ window.hWin.HEURIST4.query = {
 
             if(key === 'r' && !field){ // Relation type field handling
 
+                value = typeof value !== 'string' ? value.toString() : value;
                 let cond = value.startsWith('-') ? 'not' : '';
                 if(window.hWin.HEURIST4.util.isPositiveInt(value) || commaListRegex.exec(value)){
                     value = value.split(',');
