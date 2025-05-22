@@ -1732,10 +1732,9 @@ function(value){
             
             if(Array.isArray(items))
             for(let i=0; i<items.length; i++){
-                items[i].key = null;
-                delete items[i].key;
-                items[i].title = null;
-                delete items[i].title;
+                if(items[i].hasOwnProperty('key')) delete items[i].key;
+                if(items[i].hasOwnProperty('title')) delete items[i].title;
+                if(items[i].hasOwnProperty('folder')) delete items[i].folder;
                 if(window.hWin.HEURIST4.util.isempty(items[i].css)){
                     delete items[i].css;
                 }
@@ -1754,6 +1753,8 @@ function(value){
         }
         __cleanLayout(newval);
 
+        //TEST this.layoutMgr.convertJSONtoHTML(newval);
+        
         // if page consists one group and one text without css - save only content of this text
         // it allows edit content in standard record edit
         /*
