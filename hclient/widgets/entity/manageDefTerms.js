@@ -55,6 +55,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     use_remote: false,
 
     _cachedUsages: {}, // cached term usages
+    _cachedLabels: {}, // cached translated term labels
+
+    _getTranslatedLabels: false, // get translated labels, runs once
 
     //
     //                                                  
@@ -93,6 +96,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
         }
+
+        this._getTranslatedLabels = this.options.select_mode == 'manager' && this.options.auxilary == 'term';
+
         /*
         if(this.options.auxilary=='vocabulary'){
         this.options.edit_height = 440;
@@ -580,6 +586,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         if(that._cachedUsages[trmid]){ // add usage count
                             content += `<p>Usage count: ${that._cachedUsages[trmid]}</p>`;
                         }
+
+                        content = content.replace('__LABELS__', that._cachedLabels[trmid] ? that._cachedLabels[trmid]['labels'] : ''); // add translated labels
+
                         if(window.hWin.HEURIST4.util.isPositiveInt(trmid) && $Db.trmHasIcon(trmid)){ // add term image
 
                             let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
@@ -958,6 +967,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 });
 
+                // Retrieve Term labels
+                if(this._getTranslatedLabels){
+                    this._getTranslatedLabels = false;
+                    window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, () => this.updateTermTranslations);
+                }else if(this.options.select_mode == 'manager' && this.options.auxilary == 'term'){
+                    this.updateTermTranslations();
+                }
+
             }else{
                 this.recordList.resultList('clearAllRecordDivs',null,
                     '<div style="padding: 8px;">Select vocabulary'+
@@ -994,7 +1011,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         let sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
         let recTitle = '', sFontSize='';
         let html;
-
 
         if(this.options.auxilary=='vocabulary'){
             sBold = 'font-weight:bold;';
@@ -1067,6 +1083,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             let sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
 
             sHint = 'title="'+sLabelHint+'<br>'
+            + '__LABELS__'
             + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
             + (sCode?('<p>Code: '+sCode+'</p>'):'')
             + (sURI?('<p>URI: '+sURI+'</p>'):'')
@@ -1089,7 +1106,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             +sLabel+'&nbsp;&nbsp;'
             //+`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); background-size:contain; background-repeat:no-repeat; vertical-align:bottom;' />`
             //+'&nbsp;&nbsp;'
-            +'<span class="term_usage"></span></div>';
+            +'<span class="term_usage"></span>'
+            +'<span class="term_languages"></span></div>';
 
             let html_thumb = '';
             
@@ -1707,6 +1725,36 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._loadData(); // update cached recset			
 			
            
+        }
+
+        let $recDiv = this.recordList.find(`.recordDiv[recid="${recID}"]`);
+        if($recDiv.length > 0){
+
+            if(Array.isArray(fieldvalues['trm_Label'])){
+
+                let trmLabels = fieldvalues['trm_Label'];
+                let languages = [];
+                let labels = [];
+
+                for(let label of trmLabels){
+
+                    if(label.indexOf(':') !== 3){
+                        continue;
+                    }
+
+                    languages.push(label.split(':')[0]);
+                    labels.push(label);
+                }
+
+                if(languages.length > 0){
+                    this._cachedLabels[recID]['langs'] = languages.join(' ');
+                    this._cachedLabels[recID]['labels'] = labels.join('<br>');
+                }else{
+                    this._cachedLabels[recID] = false;
+                }
+            }else if(this._cachedLabels[recID]){
+                this._cachedLabels[recID] = false;
+            }
         }
 
         this._super( recID, fieldvalues );
@@ -2987,7 +3035,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             const trm_id = $record.attr('recid');
 
             if(trm_id && that._cachedUsages[trm_id] && that._cachedUsages[trm_id] > 0){ // has usage
-                $usage.text('[' + that._cachedUsages[trm_id] + ']')
+                $usage.text(`[${that._cachedUsages[trm_id]}]`)
                       .addClass('has-usage')
                       .css({
                         'text-decoration': 'underline',
@@ -3013,8 +3061,63 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 const id = $parent_div.attr('recid');
 
                 let query = `[{"f":"=${id}"}]`;
-                window.open(window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&q=' + encodeURIComponent(query), '_blank');
+                window.open(`${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=${encodeURIComponent(query)}`, '_blank');
             }
+        });
+    },
+
+    updateTermTranslations: function(){
+
+        let termTranslations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
+
+        if(!termTranslations){
+            return;
+        }
+
+        $.each(this.recordList.find('.recordDiv'), (idx, record) => {
+
+            let $record = $(record);
+            let $label = $record.find('.label_term');
+            let $langs = $label.find('.term_languages');
+
+            const trm_ID = $record.attr('recid');
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(trm_ID) || this._cachedLabels[trm_ID] === false){
+                $langs.empty();
+                return;
+            }else if(this._cachedLabels[trm_ID]){
+                $langs.html(`<span class="ui-icon ui-icon-translate"></span><span style="font-size: smaller; color: grey;">${this._cachedLabels[trm_ID]['langs']}</span>`).css('margin-left', '5px');
+                return;
+            }
+
+            let records = termTranslations.getSubSetByRequest({trn_Code: trm_ID, trn_Source: 'trm_Label'});
+            records = records.getRecords();
+
+            let languages = [];
+            let translatedLabels = [];
+            for(const recID in records){
+
+                const record = records[recID];
+
+                let lang = termTranslations.fld(record, 'trn_LanguageCode');
+
+                languages.push(lang);
+                translatedLabels.push(`${lang}:${termTranslations.fld(record, 'trn_Translation')}`);
+            }
+            languages = languages.join(' ');
+            translatedLabels = translatedLabels.join('<br>');
+
+            if(window.hWin.HEURIST4.util.isempty(languages)){
+                this._cachedLabels[trm_ID] = false;
+                return;
+            }
+
+            this._cachedLabels[trm_ID] = {
+                langs: languages,
+                labels: translatedLabels
+            };
+
+            $langs.html(`<span class="ui-icon ui-icon-translate"></span><span style="font-size: smaller; color: grey;">${languages}</span>`).css('margin-left', '5px');
         });
     },
 
