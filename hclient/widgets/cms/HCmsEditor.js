@@ -54,6 +54,7 @@ class HCmsEditor {
     this.website_id = _options.website_id;
     this.page_id = _options.page_id;
     this.currentLanguage = _options.currentLanguage;
+    this.isWebPage = false;
       
     this._ws_body = _container?$(_container):$('body');  
     
@@ -141,9 +142,8 @@ class HCmsEditor {
                         let margin = (this.editor_pos=='west') ? 'margin-top:270px;' : '';
                         $('<span class="heurist-helper2 '+this.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                     }
-                    
+
             this.#initEditControls();
-           
         }//editor panel is already inited
         
         this._ws_body.layout().show(this.editor_pos, true );
@@ -166,14 +166,11 @@ class HCmsEditor {
         this._editor_panel.find('.btn-website-footer').on('click', ()=>that.onMarginEdit(false));
 
         
-        this._editor_panel.find('.btn-website-edit').on('click', ()=>that.#editHomePageRecord()); //open record edit
-        
-        if(!this.isWebPage){
-            this._editor_panel.find('.btn-website-edit')
-                         .button({classes:{'ui-button': 'ui-button-action'}})
+        let btnEdit = this._editor_panel.find('.btn-website-edit');
+        btnEdit.on('click', ()=>that.#editHomePageRecord()); //open record edit
+        btnEdit.button({classes:{'ui-button': 'ui-button-action'}})
                          .css({'padding':'5px','font-size':'smaller'});
-        }
-
+        
 
         this._editor_panel.find('.btn-website-addpage').on('click', ()=>that.#addNewRootMenu());
 
@@ -211,9 +208,6 @@ class HCmsEditor {
         this._tabControl.find('.ui-tabs-nav')[0].style.setProperty('background', 'none', 'important');
         this._tabControl.find('.ui-tabs-nav')[0].style.setProperty('padding', '0px', 'important');
         
-        if(this.isWebPage){
-            this._tabControl.find('.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
-        }
   }
   
   
@@ -241,7 +235,6 @@ class HCmsEditor {
   //
   onWebSiteLoad()
   {
-console.log('onWebSiteLoad');
       //website menu as json tree
       if(this._webPageFrame[0].contentWindow){
         this.webSite = this._webPageFrame[0].contentWindow.webSite;
@@ -251,6 +244,8 @@ console.log('onWebSiteLoad');
         
         this.currentLanguage = this.webSite.currentLanguage;
         this.allLanguages = this.webSite.allLanguages;
+        
+        this.isWebPage = this.webSite.isWebPage;
         
       }else{
         this.menuContentJSON = [];
@@ -271,11 +266,17 @@ console.log('onWebSiteLoad');
       }else{
           this._editor_panel.find('.website-url').hide();
       }
-      
-      
-      if(this._editCMS_SiteMenu){
-          //refresh website structure tree
-          this._editCMS_SiteMenu.initControls();
+
+      if(this.isWebPage){
+            this._editor_panel.find('.btn-website-edit').button('option','label','WebPage Properties');
+            this._tabControl.find('ul.ui-tabs-nav').hide();
+            this._editor_panel.find('#treePage').show();
+            //this._tabControl.find('li.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
+      }else{
+          if(this._editCMS_SiteMenu){
+            //refresh website structure tree
+            this._editCMS_SiteMenu.initControls();
+          }
       }
       
       this.mainMenu = null;
@@ -445,8 +446,8 @@ console.log('onWebSiteLoad');
   #addNewRootMenu(){
 
         if(this._editCMS_SiteMenu){
-          //refresh website structure tree
-          this._editCMS_SiteMenu.selectMenuRecord(this.website_id);
+            //refresh website structure tree
+            this._editCMS_SiteMenu.selectMenuRecord(this.website_id);
         }
   }
   
@@ -458,12 +459,12 @@ console.log('onWebSiteLoad');
       if(!this._editCMS_SiteMenu){
           this._editCMS_SiteMenu = editCMS_SiteMenu( this._editor_panel.find('.treeWebSite'), this );
       }
-
       // Get parent page id
       let parentPageId = this._editCMS_SiteMenu.getParentPage(this.page_id);
       parentPageId = (parentPageId == null || parentPageId <= 0) ? window.hWin.website_id : parentPageId;
 
       this._editCMS_SiteMenu.createMenuRecord(parentPageId, pageTemplate, pageTemplate);
+      
   }
   
   
@@ -499,7 +500,9 @@ console.log('onWebSiteLoad');
   */
   switchMode(mode){
 
-        if(!mode){
+        if(this.isWebPage){
+            mode = 'page';
+        }else if(!mode){
             if(this._tabControl.tabs('option','active')==0){
                 mode='website';           
             }else{

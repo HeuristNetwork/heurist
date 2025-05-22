@@ -52,7 +52,8 @@ class WebSite
     private $publishmode;
     
     private $outputfile; 
-    
+
+    private $isWebPage = false;    
     private $isEditMode = false;
     private $isJsAllowed = false;
     private $isHeadless; //output main conent only - without header and footer
@@ -142,17 +143,16 @@ class WebSite
             }
         }
 
-
-        $this->siteRecord = $this->verifyTypeAndAccess($siteId, RT_CMS_HOME);
+        $this->siteRecord = $this->verifyTypeAndAccess($siteId, true);
         $res = ($this->siteRecord!=null);
         
         if(!$res){
             return false;
         }
         
-        if(isPositiveInt($pageId)){ 
+        if(!$this->isWebPage && isPositiveInt($pageId)){ 
         
-            $this->pageRecord = $this->verifyTypeAndAccess($pageId, RT_CMS_MENU);
+            $this->pageRecord = $this->verifyTypeAndAccess($pageId, false);
             $res = ($this->pageRecord!=null);
 
             $this->outputfile = $pageId.'.html';
@@ -175,7 +175,7 @@ class WebSite
     * @param mixed $recordType
     * @return {record|null}
     */
-    private function verifyTypeAndAccess($recId, $recordType){
+    private function verifyTypeAndAccess($recId, $isMainRecord){
         
         //static url in external links may have outdated id - check if this record has been replaced (merged)
         $recId = recordSearchReplacement($this->system->getMysqli(), $recId, 0);
@@ -185,7 +185,7 @@ class WebSite
         if($rec==null){
             $err_message = 'Webpage with given ID not found';
             
-        }elseif($rec['rec_RecTypeID']!==$recordType){
+        }elseif(!($isMainRecord && $rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_MENU)){
             $err_message = 'Record is not a Webpage';
         }else {
             
@@ -203,6 +203,7 @@ class WebSite
                 $err_message = 'The Heurist website at this address is not yet publicly accessible. '
                     . ($try_login ? '<br>Try <div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> to view this website.' : '');
             }
+            
         }
         
         if($err_message==null){
@@ -255,6 +256,15 @@ class WebSite
         }elseif ($this->verifyWebsiteIds()) {
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
+            
+            if($this->siteRecord['rec_RecTypeID']==RT_CMS_MENU){
+                $this->isWebPage = (defined('DT_CMS_PAGETYPE') &&
+                        $this->getVal(DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));//TRM_PAGETYPE_WEBPAGE
+                        
+                if(!$this->isWebPage){
+                    $this->outputError('Record is not a Website Home');
+                }
+            }
         }
         
         if(array_key_exists('header', $this->params)){
@@ -301,6 +311,7 @@ class WebSite
 
         $this->system->defineConstant('TRM_NO');
         $this->system->defineConstant('DT_LANGUAGES');
+        $this->system->defineConstant('DT_CMS_PAGETYPE');
         
     }
 
@@ -483,13 +494,17 @@ class WebSite
             }
         }else{
             //take from website home 
-            $template = $this->getVal($type=='footer'?DT_CMS_FOOTER:DT_CMS_HEADER, false);    
-            if(!$template){ //not defined
-                $template = $this->getTemplateContent($type);
+            if($this->isWebPage){
+                $template = '<header><div data-heurist-cms="HMenuPersonal" style="display:{$website.showLogin};position:fixed;left:10px;z-index:9999"></div><div style="position:fixed;right:10px;z-index:9999">{$website.languages}</div></header>';
+            }else{
+                $template = $this->getVal($type=='footer'?DT_CMS_FOOTER:DT_CMS_HEADER, false);    
+                if(!$template){ //not defined
+                    $template = $this->getTemplateContent($type);
+                }
             }
         }
         
-        if(strpos($template,'<'.$type.' ')!==0){
+        if(!$this->isWebPage && strpos($template,'<'.$type.' ')!==0){
             if($type=='header'){
                 $template = '<header id="main-header" style="background-image: url(&quot;{$website.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">'.$template.'</header>';
             }else{
@@ -697,6 +712,10 @@ class WebSite
     // Returns menu as HTML snippet
     //
     private function getMainMenu(){
+        
+        if($this->isWebPage){
+            return '';
+        }
         
         $this->fillMenuTree();
         

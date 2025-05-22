@@ -136,8 +136,6 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
     window.cmsEditor = null;
     let tinymce;
     
-    let isWebPage = false;
-
     function onPageInit(success){
 
         if(!success) {return;}

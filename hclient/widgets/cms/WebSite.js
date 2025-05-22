@@ -26,6 +26,8 @@ class WebSite {
     
     currentPageStyle = null;
     
+    isWebPage = false;
+    
     currentLanguage = null;
     allLanguages = null;
     suppOptions = null;
@@ -54,6 +56,7 @@ class WebSite {
         this.siteId = _options.siteId;
         this.pageId = _options.pageId;
         this.siteMenu = _options.siteMenu;
+        this.isWebPage = _options.isWebPage;
         this.container = 'main';
         
         this.pageCache = {};

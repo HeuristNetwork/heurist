@@ -1,7 +1,8 @@
 <?php
 /**
 * WebSiteScripts.php - minimal set of scripts and styles for Heurist CMS website
-* It is included in website output by 
+* It is included in website output by WebSiteTemplate.php that in turn is included in WebSite.php
+*  $this - is instance of WebSite class
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -109,6 +110,9 @@ if(@$_REQUEST['edit']){
 <?php
 }//edit
 
+// this script is included into WebSiteTemplate that in turn in WebSite.php
+// $this - is instance of WebSite class
+
 //include custom script and styles defined in CMS_HOME
 echo $this->getCustomScriptsAndStyles();
 
@@ -168,11 +172,12 @@ echo $this->getWebSiteInfo();
                     print 'let pageContentJSON = null;';
                 }
                 
-                print 'let siteId = '.$this->getSiteId().';';
-                print 'let pageId = '.$this->getPageId().';';
+                print 'const siteId = '.$this->getSiteId().';';
+                print 'const pageId = '.$this->getPageId().';';
+                print 'const isWebPage = '.($this->isWebPage?'true':'false').';';
             ?>
             
-            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON});
+            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON, isWebPage:isWebPage});
             
             if(window.parent?.cmsEditor){
                 //called once - on website init
