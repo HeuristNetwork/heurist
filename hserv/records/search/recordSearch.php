@@ -2992,7 +2992,8 @@ function recordSearch($system, $params, $relation_query=null)
 
                                     if($check_res){
 
-                                        $field_error = $check_res->num_rows == 0 ? 'This date has not been indexed' : null;
+                                        $extraMsg = $system->isAdmin() ? ', try running the "Date Index" option under "Admin > Verify integerity" or saving this record' : ', saving this record will attempt to index this date';
+                                        $field_error = $check_res->num_rows == 0 ? "This date has not been indexed{$extraMsg}" : null;
 
                                         if(!$field_error){ // has been indexed
                                             $row = $check_res->fetch_row();

@@ -2425,6 +2425,8 @@ FIXMSG
     */
     public function check_date_values($params=null){
 
+        global $useNewTemporalFormatInRecDetails;
+
         $this->_outStreamInit();
 
         $resStatus = true;
@@ -2502,8 +2504,11 @@ FIXMSG
                     }elseif(preg_match( $year_range_regex, $date_val)){
 
                         list($y1, $y2) = explode('-',$date_val);
-                        if($y1>31 && $y2>12){
+                        if(preg_match('/^\d{4}$/', $y1) && preg_match('/^\d{4}$/', $y2)){
                             //this is year range
+                            $row['new_value'] = \Temporal::getValueForRecDetails($date_val, $useNewTemporalFormatInRecDetails);
+                            $autofix = true;
+                        }else{
                             $row['is_ambig'] = 'we suggest using a date range';
                         }
                     }
