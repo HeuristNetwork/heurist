@@ -1194,12 +1194,12 @@ $.widget( "heurist.mapping", {
             let that = this;
             
             let new_layer = L.geoJSON(geojson_data, {
-                    default_style: null
-                    , layer_name: dataset_name
-                    , popup_template: popup_template
-                    , origination_db: options.origination_db
-                    , dataset_type: options.dataset_type
-                    , selectable: selectable
+                default_style: null,
+                layer_name: dataset_name,
+                popup_template: popup_template,
+                origination_db: options.origination_db,
+                dataset_type: options.dataset_type,
+                selectable: selectable
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
                     , onEachFeature: function(feature, layer) {
@@ -1288,7 +1288,9 @@ $.widget( "heurist.mapping", {
             if(!preserveViewport){
                 this.zoomToLayer(new_layer._leaflet_id);           
             }
-            
+
+            this.addStoryIDToPaths(geojson_data, new_layer);
+
             return new_layer._leaflet_id;
         }        
 
@@ -4747,6 +4749,45 @@ $.widget( "heurist.mapping", {
 
         if(zoom && zoom <= this.nativemap.getMaxZoom() && zoom >= this.nativemap.getMinZoom()){
             this.nativemap.setZoom(zoom);
+        }
+    },
+
+    //
+    // Add story element record ID as an attribute to path elements
+    //
+    addStoryIDToPaths: function(geojsonData, newLayer){
+
+        for(const geojson of geojsonData){
+
+            const recID = geojson['id'];
+
+            for(const topLayerID in newLayer._layers){
+
+                if(!Object.hasOwn(newLayer._layers, topLayerID)){
+                    continue;
+                }
+
+                const topLayer = newLayer._layers[topLayerID];
+
+                if(!topLayer._layers){
+                    continue;
+                }
+
+                for(const layerID in topLayer._layers){
+
+                    if(!Object.hasOwn(topLayer._layers, layerID)){
+                        continue;
+                    }
+
+                    const layer = topLayer._layers[layerID];
+
+                    if(!layer._path){
+                        continue;
+                    }
+
+                    layer._path.setAttribute('story-element-id', recID);
+                }
+            }
         }
     }
     
