@@ -18,6 +18,7 @@ $.widget( 'heurist.HBaseOpts', $.heurist.HBaseView, {
         title: 'Options editor',
         default_palette_class: 'ui-heurist-publish',
         resourcePath: '', //relative path+filename to form html
+        menuParent: null, //parent element for HSelect
         editOptions: {},
         onChange: null
     },
@@ -34,7 +35,7 @@ $.widget( 'heurist.HBaseOpts', $.heurist.HBaseView, {
         
         //Init some controls
         this._$('select').each((i,selObj)=>{
-            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
+            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj,false,null,null,{menu_parent: this.options.menuParent });
         });
         
         this._$('#tabs').tabs();
@@ -97,15 +98,7 @@ $.widget( 'heurist.HBaseOpts', $.heurist.HBaseView, {
                 }
             };
         });
-
         
-        this._$('select[name^="template"]').each((i,sel)=>{
-        window.hWin.HEURIST4.ui.createTemplateSelector(  
-                        $(sel), [{key:'',title:'standard template'}], 
-                           that.options.editOptions[sel.name],  //$select3.attr('data-template')
-                           {extraOptions: {menu_parent: that.jqDialog}});  // or bsModal bsOffcanvas
-                        }); 
-
         if (this.$H.isFunction(this.options.onChange)) { 
             //event listeners for all input,select and textarea
             this._on(allFields, {change:this._triggerOnChange});

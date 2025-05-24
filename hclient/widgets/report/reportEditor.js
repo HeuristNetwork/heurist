@@ -35,7 +35,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         rty_ID:null, 
         
         keep_instance: true,
-        template: null,
+        template: null,  //path to smarty tpl
+        template_body: null, //template text 
         
         onChange: null
     },
@@ -222,9 +223,12 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             
             this._loadRecordTypeTreeView();
             this._loadTestRecords();
-            
+        }
+        
+        if(!this.options.template && this.options.is_snippet_editor)
             this._initEditor(this.options.template_body);
         }else{
+            this._$('.editForm').css({top:'0px'});
             //init editor (load codeMirror)
             this._loadTemplate();
         }        
@@ -330,7 +334,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     _loadTemplate: function(){    
         
-        if(this.options.is_snippet_editor){
+        if(this.options.is_snippet_editor && !this.options.template){
             this._initEditor(this.options.template_body);
         }else
         // null means new template
@@ -1339,14 +1343,15 @@ this_id       : "term"
         res[1].text = window.hWin.HR('Save');
         res[1].disabled = null;
         
-        if(!this.options.is_snippet_editor){
-        res.splice(1,0,{text:window.hWin.HR('Save As'),
-                    class:'ui-button-action btnDoAction2',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction(true); 
-                    }}
-                    );
+        if(!this.options.template || !this.options.is_snippet_editor)
+        {
+            res.splice(1,0,{text:window.hWin.HR('Save As'),
+                        class:'ui-button-action btnDoAction2',
+                        css:{'float':'right'},  
+                        click: function() { 
+                                that.doAction(true); 
+                        }}
+                        );
         }
         
         return res;
@@ -1359,7 +1364,7 @@ this_id       : "term"
 
         let that = this;
         
-        if(this.options.is_snippet_editor)
+        if(!this.options.template && this.options.is_snippet_editor)
         {
             if(this.isModified()){
                 this._context_on_close = this.codeEditor.getValue();    

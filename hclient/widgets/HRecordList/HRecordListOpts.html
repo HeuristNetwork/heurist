@@ -1,12 +1,18 @@
+<span style="display: block;text-align: right;" class="heurist-helper1">
+    <a href="#" target="_blank" class="widgetHelpLink">
+        <span class="ui-icon ui-icon-circle-help" style="font-size:12px;"></span>
+    </a>
+</span>
+
 <div id="tabs">
 <ul style="font-size: 0.5rem;">
     <li><a href="#tab-setup">Setup</a></li>
-    <li><a href="#tab-templates">Custom templates</a></li>
+    <li><a href="#tab-templates">Appearance</a></li>
     <li><a href="#tab-messages">Messages</a></li> <!-- Various custom messages, e.g. placeholder and no data -->
     <li><a href="#tab-connect">Connect</a></li>
 </ul>
 
-<fieldset id="tab-connect"><legend style="display:none"></legend>
+<fieldset id="tab-connect" style="min-height:300px"><legend style="display:none"></legend>
 
         <div>
             <div class="header header_narrow">
@@ -34,7 +40,7 @@
         
 
 </fieldset>
-<fieldset id="tab-setup"><legend style="display:none"></legend>
+<fieldset id="tab-setup" style="min-height:300px"><legend style="display:none"></legend>
 
         <div>
             <div class="header header_wide">
@@ -42,12 +48,11 @@
             </div>
             <input name="searchInitial" size="40" class="text ui-widget-content"/>
         </div>
-        <!-- appearance -->
         <div>
             <div class="header header_wide">
                 Page size:
             </div>
-            <select name="pageSize" class="text ui-widget-content" style="min-width:50px">
+            <select name="pageSize" class="text ui-widget-content" style="min-width:200px">
                 <option value="0">no pagination (limit 1,000)</option>
                 <option value="50">50 (optimum)</option>
                 <option value="100">100</option>
@@ -68,7 +73,7 @@
             <div class="header header_wide">
                 Action on item click:
             </div>
-            <select name="selectAction" style="min-width:50px">
+            <select name="selectAction" style="min-width:200px">
                 <option value="select">select</option>
                 <option value="view">view details</option>
                 <option value="edit" disabled>edit details</option>
@@ -80,7 +85,7 @@
             <div class="header header_wide">
                 Selection mode:
             </div>
-            <select name="selectMode" style="min-width:50px" disabled="disabled">
+            <select name="selectMode" style="min-width:200px" disabled="disabled">
                 <option value="single">single</option>
                 <option value="multi">multi</option>
             </select>
@@ -93,14 +98,43 @@
             <input type="checkbox" name="selectFirstRecord" disabled="disabled"/>
         </div>
         
+</fieldset>
+<fieldset id="tab-templates"  style="min-height:300px"><legend style="display:none"></legend>
+
         <div>
             <div class="header header_wide">
-                View details as:
+                View mode:
             </div>
-            <select name="viewRecordMode" style="min-width:50px">
+            <select name="viewMode" class="text ui-widget-content ui-corner-all" title="">
+                <option value="grid">grid</option>
+                <option value="list">vertical list</option>
+                <option value="row">horizontal list</option>
+            </select>
+            <div class="heurist-helper3">Define view mode for record cards/items.</div>
+        </div>
+
+        <div>
+            <div class="header header_wide">
+                Record card template:
+            </div>
+            <span>
+                <select name="templateCard" class="text ui-widget-content ui-corner-all" title="">
+                </select>
+                <button name="btnTemplateCardEdit" title="Edit the selected template">Edit</button>
+            </span>
+            <div class="heurist-helper3">Define custom report that generates invidual record cards. Record card div must have 
+                attribute 'data-heurist-rec' with record ID value and  class 'recordList-item'</div>
+        </div>
+
+        <div>
+            <div class="header header_wide">
+                View record details as:
+            </div>
+            <select name="viewRecordMode" style="min-width:200px">
                 <option value="popup">popup</option>
-                <option value="inline">inline</option>
+                <option value="website" disabled="disabled">website viewer</option>
                 <option value="target" disabled="disabled">target element</option>
+                <option value="inline">inline</option>
                 <option value="modal-sm">modal small</option>
                 <option value="modal-md">modal medium</option>
                 <option value="modal-lg">modal large</option>
@@ -113,29 +147,10 @@
                 <option value="offcanvas-bottom">offcanvas bottom</option>
             </select>
         </div>
-</fieldset>
-<fieldset id="tab-templates"><legend style="display:none"></legend>
         
         <div>
             <div class="header header_wide">
-                Record card custom template
-            </div>
-            <select name="templateCard" class="text ui-widget-content ui-corner-all" title="">
-            </select>
-            <div class="heurist-helper3">Define custom report that generates invidual record cards. Record card div must have 
-                attribute 'data-heurist-rec' with record ID value and  class 'recordList-item'</div>
-        </div>
-        <div>
-            <div class="header header_wide">
-                Row custom template
-            </div>
-            <select name="templateTable" class="text ui-widget-content ui-corner-all" title="">
-            </select>
-            <div class="heurist-helper3">Define custom report that generates table ROW</div>
-        </div>
-        <div>
-            <div class="header header_wide">
-                View custom template
+                View record details template:
             </div>
             <select name="templateView" class="text ui-widget-content ui-corner-all" title="">
             </select>
@@ -153,7 +168,7 @@
 
             <label><input type="checkbox" name="placeholderInitBlank"> check to leave blank</label>,
             otherwise defaults to <br>
-            "<span id="placeholderInitBlankDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
+            "<span id="placeholderInitDef" class="truncate" style="width: auto;max-width: 235px;line-height: 1em;display: inline-block;cursor: default;"></span>"
         </div>
 
         <textarea name="placeholderInit" rows="10" cols="45"></textarea>

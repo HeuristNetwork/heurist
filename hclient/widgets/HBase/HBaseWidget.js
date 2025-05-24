@@ -169,7 +169,7 @@ $.widget( 'heurist.HBaseWidget', {
     /*
     * Opens options editor popup
     */
-    openOptionsEditor: function(container, onChange){
+    openOptionsEditor: function(container, onChange, menuParent){
         
         const optEditor = this.widgetName+'Opts';
         
@@ -183,7 +183,8 @@ $.widget( 'heurist.HBaseWidget', {
             let that = this;
             this._optionsEditor[optEditor]({editOptions: this.options, 
                         viewMode: container ?'inline':'popup', 
-                        isHeaderVisible: container ?false:true, 
+                        isHeaderVisible: container ?false:true,
+                        menuParent: menuParent, 
                         onChange: onChange,
                         onClose:this.onCloseOptionEditor});
                                         //recordTemplate: this.options.templateView,

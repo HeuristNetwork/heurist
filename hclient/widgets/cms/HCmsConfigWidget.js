@@ -43,7 +43,8 @@ class HCmsConfigWidget extends HCmsConfig {
         this.container.find('#id_and_name_form').hide();
         //load options form into container panel
         let layoutMgr = this.cmsEditor.getHapi().layoutMgr;
-        layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'openOptionsEditor', [this.optionsEditor, (a)=>that.onChangeOptions(a)]);
+        layoutMgr.executeWidgetMethod(this.element, this.l_cfg.appid, 'openOptionsEditor', 
+                    [this.optionsEditor, (a)=>that.onChangeOptions(a), $('#treePage')]);
      }else{
         this.container.find('.btn-html-edit').parent().hide();
         this.container.find('input[data-type="element-id"]').parent().hide();

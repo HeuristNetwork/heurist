@@ -36,7 +36,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         searchDomain: null,     // unique id to distiguish search/select events 
         searchInitial: null,    // initial search query
         
-        recordSet:null         // initial recordset
+        recordSet:null,         // initial recordset
+        
+        placeholderInitBlank: false,
+        placeholderInit: null,
+        placeholderInitDef: 'Initial set is empty',
     },
     
     _needLoadContent: false,
@@ -91,8 +95,8 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }else if(this.options.searchInitial)
         {
             this.doSearch(this.options.searchInitial);
-        }else{
-            this.renderMessage('initial');
+        }else if(!this.options.placeholderInitBlank){
+            this.renderMessage(this.options.placeholderInit || this.options.placeholderInitDef);
         }
     },
 

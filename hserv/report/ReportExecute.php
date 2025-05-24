@@ -351,7 +351,7 @@ class ReportExecute
      */
     private function loadTemplateContent()
     {
-        $templateFile = isset($this->params['template']) ? basename($this->params['template']) : null;
+        $templateFile = isset($this->params['template']) ? $this->params['template'] : null;
         $template_body = isset($this->params['template_body']) ? $this->params['template_body'] : null;
 
         if ($templateFile) {
@@ -390,15 +390,23 @@ class ReportExecute
         if (substr($templateFile, -4) !== ".tpl") {
             $templateFile .= ".tpl";
         }
-
-        $template_path = $this->system->getSysDir('smarty-templates') . $templateFile;
+        
+        if(strpos($templateFile,'def/')===0){
+            $template_path = HEURIST_DIR.'hclient/widgets/HRecordList/'. basename($templateFile);
+            $this->templateFile = null;
+        }else{
+            $templateFile = basename($templateFile);
+            $template_path = $this->system->getSysDir('smarty-templates') . $templateFile;    
+            $this->templateFile = $templateFile;
+        }
+        
         if (!file_exists($template_path)) {
             $error = 'Template file ' . htmlspecialchars($templateFile) . ' does not exist';
             $this->outputError($error);
             return false;
         }
 
-        $this->templateFile = $templateFile;
+        
         return file_get_contents($template_path);
     }
 

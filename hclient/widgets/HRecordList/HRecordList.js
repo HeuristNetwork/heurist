@@ -82,6 +82,8 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         selectMode: 'single',   //TBD none, single, multi
 
+        viewMode: 'grid', // grid, list (vertical list), row (horizontal list)
+        
         //where to show view or edit 
         viewRecordMode: 'popup', // none, inline, offcanvas-*, modal-*, popup (jquery dialog), target id, event
         editRecordMode: 'none',   //TBD none, inline, offset, full, main, page, popup, event
@@ -90,14 +92,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         rendererTable: null,
         
         templateCard: null,     // template for card renderer 
-        templateTable: null,
         templateView: null,     //(if not defined it uses entity default smarty report)
         
-        placeholderInitBlank: false,
         placeholderEmptyBlank: false,
-        placeholderInit: null,
         placeholderEmpty: null,
-        placeholderInitDef: '',
         placeholderEmptyDef: 'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)',
     },
     
@@ -243,7 +241,9 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
         if(this.recordSet==null || this.recordSet.count_total()==0){
             //render placeholder
-            this.renderMessage('empty recordset');
+            if(!this.options.placeholderEmptyBlank){
+                this.renderMessage(this.options.placeholderEmpty || this.options.placeholderEmptyDef);
+            }
         }else{
             this._setPageStyle();
             this._renderPage(0);
@@ -435,16 +435,23 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     //    
     _setPageStyle: function(){
         //grid - move to renderPage
-        this.div_content[0].className = 'row row-cols-auto g-3';  //row-cols-1 row-cols-sm-2 row-cols-md-auto   
-        this.div_content[0].style.overflowX = 'hidden';
-        this.div_content[0].style.overflowY = 'auto';
+        if(this.options.viewMode=='row'){
+        
+            this.div_content[0].className = 'd-flex flex-row flex-nowrap';    
+            this.div_content[0].style.overflowX = 'auto';
+            this.div_content[0].style.overflowY = 'hidden';
+            
+        }else if(this.options.viewMode=='list'){
 
-        //horizontal        
-        //this.div_content[0].className = 'd-flex flex-row flex-nowrap';    
-        //this.div_content[0].style.overflowX = 'auto';
-        //this.div_content[0].style.overflowY = 'hidden';
-
-        //table
+            this.div_content[0].className = 'd-flex flex-column';    
+            this.div_content[0].style.overflowX = 'hidden';
+            this.div_content[0].style.overflowY = 'auto';
+            
+        }else { //}if(this.options.viewMode=='grid'){    
+            this.div_content[0].className = 'row row-cols-auto g-0';  //row-cols-1 row-cols-sm-2 row-cols-md-auto   
+            this.div_content[0].style.overflowX = 'hidden';
+            this.div_content[0].style.overflowY = 'auto';
+        }
         
     },
     
@@ -520,9 +527,8 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         let ids = rec_toload.join(',');        
             
         // template for records
-        if(this.options.templateCard || this.options.templateTable){
+        if(this.options.templateCard){
             //loads template results
-            
             let request = {q:`ids:${ids}`, 
                            db:this.HAPI.database, 
                            snippet: 1, //without header

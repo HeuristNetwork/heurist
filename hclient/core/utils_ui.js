@@ -1140,10 +1140,6 @@ window.hWin.HEURIST4.ui = {
 
         selObj = $(selObj);
 
-        if(!extraOptions || !$.isPlainObject(extraOptions)){
-            extraOptions = {};
-        }
-            
         //for usual HTML select we have to add spaces for indent
         if(useHtmlSelect){
             
@@ -1294,7 +1290,7 @@ window.hWin.HEURIST4.ui = {
                     width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
             }
 
-            if(extraOptions.menu_parent && extraOptions.menu_parent.length > 0){
+            if(extraOptions?.menu_parent && extraOptions.menu_parent.length > 0){
                 menuwidget.parent().appendTo(extraOptions.menu_parent);
             }
         }

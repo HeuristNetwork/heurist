@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+
+        <title>HEURIST Context Help - HRecordList wigdet</title>
+        <link rel=stylesheet href="../../h4styles.css">
+    </head>
+
+    <body width=600 height=500 class="popup">
+
+        <span style="font-size:1em;font-weight:bold">HEURIST Help</span>
+
+        <h2>HRecordList is the main widget to represent your data</h2>
+        <hr>
+
+        <h4>Usage</h4>
+
+        <p>HRecordList is intended to display the list of records from your database. It can be used as a main tool to discover of your database data or as a helper widget for list of sponsors, social network links or team memebrs.</p>
+        <p>This list may be a result of filter execution obtained from other widget (see HFilter), the selected records (for example on map), or result of initial interna filter (defined as an option).</p>
+        
+        <h4>Presentation</h4>
+        
+        <p>Each record is presented as an item/card. Cards can be arranged as grid or vertical or horizontal list. The size of card is specified by its content</p>
+        <p>The record list can be paginated. Navigation buttons will be added into header of widget.</p>
+        <p>It is possible to define custom messages/placeholders for initial state and empty result set.</p>
+
+        <h4>Content of record's item</h4>
+
+        <p>Record card can be rendered by internal function or by using (smarty) template. You can select among predefined build-in or user's templates. Build-in templates can be modify and saved into common user's templates folder.</p>
+        <p>HTML element for record have must have attribute 'data-heurist-rec' with record ID value and  class 'recordList-item'</p>
+        
+        <h4>Actions</h4>
+
+        <p>Need to define what is default action when user clicks on record's card: none, trigger select event or open record view.</p>
+
+        <h4>Connect with other widgets/elements</h4>
+
+        <p></p>
+
+        <h4>Styles and themes</h4>
+        
+        <p></p>
+        
+    </body>
+
+</html>
