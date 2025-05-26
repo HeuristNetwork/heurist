@@ -2612,7 +2612,7 @@ window.hWin.HEURIST4.ui = {
         
         const mode = options.mode??'production';
 
-        const isEdit = options.edit??0;
+        const isEdit = (options.mode=='edit' || options.edit)??0;
         
         const version = options.version??'';
         
@@ -2635,11 +2635,7 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     surl += '/'+pageid;
                 }
-                if(isEdit){
-                    params.push('edit=2');
-                }            
             }
-            
         }else{
 
             params.push(`db=${window.hWin.HAPI4.database}`);
@@ -2649,11 +2645,13 @@ window.hWin.HEURIST4.ui = {
                 if(pageid>0){
                     params.push(`pageid=${pageid}`);
                 }
-                if(isEdit){
-                    params.push('edit=2');
-                }            
+            }else{
+                params.push('website');
             }
         }
+        if(isEdit){
+            params.push('edit=2');
+        }            
         if(version>0){
             params.push('ver='+version);
         }
