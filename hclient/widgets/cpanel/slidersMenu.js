@@ -1743,17 +1743,17 @@ $.widget( "heurist.slidersMenu", {
             is_modal, 
             true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
-                if(is_mouseleave){
-                    that._resetCloseTimers();
-
-                }else if(is_locked=='close'){
+                if(is_locked=='close'){
                     that.coverAll.hide();                 
                     
-                }else{
+                }else if(is_mouseleave){
+                    that._resetCloseTimers();
+                }else 
+{
                     that._resetCloseTimers();    
                     
                     if(is_locked=='delay'){
-                        that.coverAll.show();
+                        //that.coverAll.show();
                         that._delayOnCollapse_ExploreMenu = 2000;        
                     }else{
                         that._explorer_menu_locked = is_locked;     

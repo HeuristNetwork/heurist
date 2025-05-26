@@ -1130,7 +1130,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
     //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);// don't verify peer cert
     if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     }
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);// timeout after ten seconds
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);// no more than 5 redirections

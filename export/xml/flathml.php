@@ -1202,7 +1202,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         //add attributes
         $recAttr['xmlns'] = 'https://heuristnetwork.org';
         $recAttr['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
-        $recAttr['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation/scheme_record.xsd';
+        $recAttr['xsi:schemaLocation'] = 'https://heuristref.net/scheme_record.xsd';
     }
 
     if(!$rectype_templates){
@@ -1867,7 +1867,7 @@ $hmlAttrs = array();
 
 $hmlAttrs['xmlns'] = 'https://heuristnetwork.org';
 $hmlAttrs['xmlns:xsi'] = 'https://www.w3.org/2001/XMLSchema-instance';
-$hmlAttrs['xsi:schemaLocation'] = 'https://heuristnetwork.org/documentation/scheme_hml.xsd';
+$hmlAttrs['xsi:schemaLocation'] = 'https://heuristref.net/scheme_hml.xsd';
 
 if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'https://www.w3.org/2001/XInclude';

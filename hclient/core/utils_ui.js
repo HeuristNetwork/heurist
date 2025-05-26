@@ -2641,7 +2641,6 @@ window.hWin.HEURIST4.ui = {
                     surl += '/'+pageid;
                 }
             }
-            
         }else{
 
             params.push(`db=${window.hWin.HAPI4.database}`);

@@ -817,10 +817,10 @@ class DbUtils {
 
         if ($check_exist_or_unique>0 && $error_msg==null) {
 
+            $resereved = array('deleted_databases','dbs_to_restore','aaa_logs','installation','tutorials','heurist','startup','matomo');
+
             if($check_exist_or_unique==1 &&
-               (strcasecmp($database_name,'DELETED_DATABASES')==0 ||
-                strcasecmp($database_name,'DBS_TO_RESTORE')==0 ||
-                strcasecmp($database_name,'AAA_LOGS')==0)){
+                in_array( strtolower($database_name), $resereved ) ){
 
                 $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';
 
