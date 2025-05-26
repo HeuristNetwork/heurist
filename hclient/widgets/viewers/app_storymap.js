@@ -1025,93 +1025,95 @@ $.widget( "heurist.app_storymap", {
     //
     updateOverviewPanel: function(recID){
 
-            let infoURL;
-            let isSmarty = false;
-            
-            if( typeof this.options.reportOverview === 'string' 
-                            && this.options.reportOverview.substr(-4)=='.tpl' ){
-            
-                infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
-                        + recID 
-                        + '&db='+window.hWin.HAPI4.database+'&template='
-                        + encodeURIComponent(this.options.reportOverview);
-                        
-                isSmarty = true;
-            }else{
-                infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  // mapPopup=1 returns html snippet
-                        +recID
-                        +'&db='+window.hWin.HAPI4.database;
-            }
-            
-            if(this.options.language && this.options.language!='def'){
-                    infoURL = infoURL + '&lang='+this.options.language;
-            }
-            
-            //reportOverviewMode: inline | tab | header | no
-            //reportElementMode: vertical | slide | tab
-            
-            if (!((this.options.reportOverviewMode=='no') ||
-              (this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs')))
-            { //inline, tab, header
-                let that = this;
-                this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
-                    .load(infoURL, function(){ 
-                        
-                        let ele2 = $(this);
-                        ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
-
-                        if(ele2.find('div[data-recid]').length>0){ //for standard view
-                            ele2.find('div[data-recid]')[0].style = null;
-                        }
-                            
-                        if(that.options.reportOverviewMode=='inline'){
-                            //loads overview as first element in story list
-                            
-                            if(that.options.reportElementMode=='slide'){ //as first slide     
-                                that._currentElementID = 0;
-                                that._onNavigateStatus( -1 );    
-                                that.pnlStoryReport.html(that.pnlOverview.html())
-                            }else
-                            if(that.options.reportElementMode!='tabs'){
-
-                                let ele = that._resultList.find('.div-result-list-content');    
-                                $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
-                                    .html(that.pnlOverview.html()).prependTo(ele);
-                            }
-                            
-                        }else if(that.options.reportOverviewMode=='header'){
-                            
-                            if(that._initialElementID==0){
-                                that._onNavigateStatus( 0 );    
-                                that._startNewStoryElement( that._resultset.getOrder()[0] );
-                            }
-                                
-                        }else{
-                            //tab
-                            let h = ele2[0].scrollHeight+10;
-                            if(ele2.find('div[data-recid]').length>0){
-                                ele2.find('div[data-recid]').css('max-height','100%');
-                            }
-                        }
-
-                        if(that._initialElementID>0){
-                            that._scrollToStoryElement( that._initialElementID );
-                            that._initialElementID = 0;   
-                        }
-                    });   
+        let infoURL;
+        let isSmarty = false;
+        
+        if( typeof this.options.reportOverview === 'string' 
+                        && this.options.reportOverview.substr(-4)=='.tpl' ){
+        
+            infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
+                    + recID 
+                    + '&db='+window.hWin.HAPI4.database+'&template='
+                    + encodeURIComponent(this.options.reportOverview);
                     
-            }else 
-            {
-                if(this._initialElementID>0){
-                    this._scrollToStoryElement( this._initialElementID );
-                    this._initialElementID = 0;   
-                }else{
-                    this._onNavigateStatus( 0 );    
-                    this._startNewStoryElement( this._resultset.getOrder()[0] );
-                }
-            }
+            isSmarty = true;
+        }else{
+            infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='  // mapPopup=1 returns html snippet
+                    +recID
+                    +'&db='+window.hWin.HAPI4.database;
+        }
+        
+        if(this.options.language && this.options.language!='def'){
+                infoURL = infoURL + '&lang='+this.options.language;
+        }
+        
+        //reportOverviewMode: inline | tab | header | no
+        //reportElementMode: vertical | slide | tab
+        
+        if (!((this.options.reportOverviewMode=='no') ||
+            (this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs')))
+        { //inline, tab, header
+            let that = this;
+            this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
+                .load(infoURL, function(){ 
+                    
+                    let ele2 = $(this);
+                    ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
+
+                    if(ele2.find('div[data-recid]').length>0){ //for standard view
+                        ele2.find('div[data-recid]')[0].style = null;
+                    }
                         
-            
+                    if(that.options.reportOverviewMode=='inline'){
+                        //loads overview as first element in story list
+                        
+                        if(that.options.reportElementMode=='slide'){ //as first slide     
+                            that._currentElementID = 0;
+                            that._onNavigateStatus( -1 );    
+                            that.pnlStoryReport.html(that.pnlOverview.html())
+                        }else
+                        if(that.options.reportElementMode!='tabs'){
+
+                            let ele = that._resultList.find('.div-result-list-content');
+
+                            let $overview_ele = ele.find('.overview-panel');
+                            if($overview_ele.length === 0){
+                                $overview_ele = $('<div class="recordDiv outline_suppress expanded overview-panel" recid="0" tabindex="0">').prependTo(ele);
+                            }
+                            $overview_ele.html(that.pnlOverview.html());
+                        }
+                        
+                    }else if(that.options.reportOverviewMode=='header'){
+                        
+                        if(that._initialElementID==0){
+                            that._onNavigateStatus( 0 );    
+                            that._startNewStoryElement( that._resultset.getOrder()[0] );
+                        }
+                            
+                    }else{
+                        //tab
+                        let h = ele2[0].scrollHeight+10;
+                        if(ele2.find('div[data-recid]').length>0){
+                            ele2.find('div[data-recid]').css('max-height','100%');
+                        }
+                    }
+
+                    if(that._initialElementID>0){
+                        that._scrollToStoryElement( that._initialElementID );
+                        that._initialElementID = 0;   
+                    }
+                });   
+                
+        }else 
+        {
+            if(this._initialElementID>0){
+                this._scrollToStoryElement( this._initialElementID );
+                this._initialElementID = 0;   
+            }else{
+                this._onNavigateStatus( 0 );    
+                this._startNewStoryElement( this._resultset.getOrder()[0] );
+            }
+        }
     },
 
     //
@@ -1185,23 +1187,31 @@ $.widget( "heurist.app_storymap", {
                             $('<li><a href="#end_page" class="truncate" style="max-width: 20ex; width: auto; margin-right: 20px; font-size: 1em; line-height: 1.5em;">End page</a></li>')
                                 .appendTo($tabs_nav);
 
-                            $('<div id="end_page" recid="0">').html(that.pnlEndPage.html()).appendTo($tabs); //recid = 0, to 'close' currently open record, resultList.js [func __loadTabContent]
+                            let $end_tab = $tabs.find('#end_page');
+                            if($end_tab.length === 0){
+                                $end_tab = $('<div id="end_page" recid="0">').appendTo($tabs); //recid = 0, to 'close' currently open record, resultList.js [func __loadTabContent]
+                            }
+                            $end_tab.html(that.pnlEndPage.html());
 
                             $tabs.tabs('refresh');
                         }else{
 
                             let $ele = that._resultList.find('.recordDiv');
-                            let $div = $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">').html(that.pnlEndPage.html());
-
                             if($ele.length == 0 && that._resultList.find('.stub_space').length == 0){
                                 $ele = that._resultList.find('.div-result-list-content');
                             }
 
+                            let $end_panel = $ele.find('.end-panel');
+                            if($end_panel.length === 0){
+                                $end_panel = $('<div class="recordDiv outline_suppress expanded end-panel" recid="0" tabindex="0">').html(that.pnlEndPage.html());
+                            }
+
+
                             if($ele.length > 0){
-                                $div.insertAfter($ele.last());
+                                $end_panel.insertAfter($ele.last());
                             }else if(that._resultList.find('.stub_space').length > 0){
                                 $ele = that._resultList.find('.stub_space');
-                                $div.insertBefore($ele);
+                                $end_panel.insertBefore($ele);
                             }else{
                                 // something has gone wrong
                             }
@@ -1646,7 +1656,7 @@ $.widget( "heurist.app_storymap", {
             }
             
             if(this._mapping && this._mapping.length>0){
-               
+
                 if(recID==0 || Number.parseInt(recID)==this.options.storyRecordID){
                     //zoom for entire story
                     
