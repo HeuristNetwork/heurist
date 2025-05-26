@@ -1289,8 +1289,6 @@ $.widget( "heurist.mapping", {
                 this.zoomToLayer(new_layer._leaflet_id);           
             }
 
-            this.addStoryIDToPaths(geojson_data, new_layer);
-
             return new_layer._leaflet_id;
         }        
 
@@ -4750,48 +4748,6 @@ $.widget( "heurist.mapping", {
         if(zoom && zoom <= this.nativemap.getMaxZoom() && zoom >= this.nativemap.getMinZoom()){
             this.nativemap.setZoom(zoom);
         }
-    },
-
-    //
-    // Add story element record ID as an attribute to path elements
-    //
-    addStoryIDToPaths: function(geojsonData, newLayer){
-
-        for(const geojson of geojsonData){
-
-            const recID = geojson['id'];
-
-            for(const topLayerID in newLayer._layers){
-
-                if(!Object.hasOwn(newLayer._layers, topLayerID)){
-                    continue;
-                }
-
-                const topLayer = newLayer._layers[topLayerID];
-
-                if(!topLayer._layers){
-                    continue;
-                }
-
-                for(const layerID in topLayer._layers){
-
-                    if(!Object.hasOwn(topLayer._layers, layerID)){
-                        continue;
-                    }
-
-                    const layer = topLayer._layers[layerID];
-
-                    if(!layer._path){
-                        continue;
-                    }
-
-                    layer._path.setAttribute('story-element-id', recID);
-                }
-            }
-        }
     }
     
 });
-
-
-

@@ -1473,7 +1473,9 @@ $.widget( "heurist.app_storymap", {
                  selectable: false,
                  dataset_name: 'Story Timeline',
                  preserveViewport: false });
-                
+
+            this.addStoryIDToPaths(mapwidget.all_layers[this._storylayer_id]);
+
             //
             //     
             if(this._currentTime!=null){
@@ -1861,10 +1863,8 @@ $.widget( "heurist.app_storymap", {
         */
 
         //or several actions per scope
-       
-        
+
         //let anime = [{scope:'all',range:1,action:'fade_in_out',duration:500}]; //show one by one
-        
         
         //zoom to story element on timeline
         // @todo  It would be brilliant if 
@@ -1900,6 +1900,8 @@ $.widget( "heurist.app_storymap", {
                 
             }
         }
+
+        this.addStoryIDToPaths(mapwidget.all_layers[this._nativelayer_id]);
     },
     
     //
@@ -2483,7 +2485,7 @@ $.widget( "heurist.app_storymap", {
             
             //PAIRS: many start points and transition points - star from start points to first transition
             if(begin_pnt.length>1 || end_pnt.length>1){
-                path = {geometry:{coordinates:[], type:'MultiLineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0}};
+                path = {geometry:{coordinates:[], type:'MultiLineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0, story_ID: recID}};
                 
                 if(tran_pnt.length>0){
 
@@ -2513,7 +2515,7 @@ $.widget( "heurist.app_storymap", {
                 
                 
             }else{
-                path = {geometry:{coordinates:[], type:'LineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0}};
+                path = {geometry:{coordinates:[], type:'LineString'}, id:'xxx', type:'Feature', properties:{rec_ID:0, story_ID: recID}};
                 
                 if(begin_pnt.length>0) path.geometry.coordinates.push(begin_pnt[0]);
 
@@ -2531,6 +2533,50 @@ $.widget( "heurist.app_storymap", {
             }
         }    
     
+    },
+
+    //
+    // Add story element record ID as an attribute to path elements
+    //
+    addStoryIDToPaths: function(newLayer){
+
+        for(const topLayerID in newLayer._layers){
+
+            if(!Object.hasOwn(newLayer._layers, topLayerID)){
+                continue;
+            }
+
+            const topLayer = newLayer._layers[topLayerID];
+            const recID = topLayer.feature.properties.rec_ID || topLayer.feature.properties.story_ID;
+
+            if(topLayer._path){
+
+                topLayer._path.setAttribute('story-element-id', recID);
+                continue;
+
+            }else if(!topLayer._layers){
+                continue;
+            }
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(recID)){
+                continue;
+            }
+
+            for(const layerID in topLayer._layers){
+
+                if(!Object.hasOwn(topLayer._layers, layerID)){
+                    continue;
+                }
+
+                const layer = topLayer._layers[layerID];
+
+                if(!layer._path){
+                    continue;
+                }
+
+                layer._path.setAttribute('story-element-id', recID);
+            }
+        }
     }
 
 });
