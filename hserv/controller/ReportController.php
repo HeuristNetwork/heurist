@@ -104,13 +104,14 @@ class ReportController
         $filename = null;
 
         try {
-            $template_file = $this->getTemplateFileName();
-            $template_body = $this->getTemplateBody();
-
+            $action = null;
             if ($this->req_params['template_id'] > 0 || $this->req_params['id'] > 0) {
                 $action = 'update';
             }
 
+            $template_file = $this->getTemplateFileName($action);
+            $template_body = $this->getTemplateBody();
+            
             if ($template_file && $action == null) {
                 $action = 'execute';
             }
@@ -217,10 +218,17 @@ class ReportController
      *
      * @return string|null The sanitized template file name.
      */
-    private function getTemplateFileName()
+    private function getTemplateFileName($action)
     {
         if (array_key_exists('template', $this->req_params)) {
-            return USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false);
+            
+            $templateName = USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false);
+
+            if($action==='get' &&  strpos($this->req_params['template'],'def/')){
+                $templateName = 'def/'.$templateName;
+            }
+            
+            return $templateName;
         }
 
         return null;

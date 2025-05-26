@@ -225,7 +225,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             this._loadTestRecords();
         }
         
-        if(!this.options.template && this.options.is_snippet_editor)
+        if(!this.options.template && this.options.is_snippet_editor){
             this._initEditor(this.options.template_body);
         }else{
             this._$('.editForm').css({top:'0px'});

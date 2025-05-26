@@ -219,12 +219,18 @@ class ReportTemplateMgr
      * @return string The full path to the template file.
      * @throws \Exception If the file is not found.
      */
-    public function checkTemplate($template_file)
+    public function checkTemplate($templateFile)
     {
-        $safeFileName = basename($template_file);
-        $template_file = $this->dir . $safeFileName;
-        if (file_exists($template_file)) {
-            return $template_file;
+                
+        if(strpos($templateFile,'def/')){
+            $safeFileName = HEURIST_DIR.'hclient/widgets/HRecordList/'. basename($templateFile);
+        }else{
+            $safeFileName = basename($templateFile);
+            $templateFile = $this->dir . $safeFileName;
+        }
+        
+        if (file_exists($templateFile)) {
+            return $templateFile;
         } else {
             throw new \Exception("Template file $safeFileName not found");
         }
