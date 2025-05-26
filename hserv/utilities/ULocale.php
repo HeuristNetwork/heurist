@@ -346,7 +346,7 @@
             $string = mb_ereg_replace('&', $amp, $string); // avoid decoding encoded entities
 
             $doc = new DOMDocument;
-            $doc->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
+            $doc->loadHTML(mb_encode_numericentity($string, [0x80, 0x10FFFF, 0, ~0], 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
             $xpath = new DOMXPath($doc); // retrieve text only
             $textNodes = $xpath->query('//text()');
 
@@ -594,7 +594,7 @@
         }
 
         // Get list of available localisation files
-        $localisationDir = __DIR__ . '/../hclient/assets/localization/';
+        $localisationDir = __DIR__ . '/../../hclient/assets/localization/';
         $localeFiles = [];
         $localisationFiles = is_dir($localisationDir) ? scandir($localisationDir) : null;
         if(!empty($localisationFiles)){
