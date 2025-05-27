@@ -385,9 +385,9 @@
         }
 
         if($is_xml){ // possible xml
-            $url .= '&tag_handling=xml&ignore_tags=notranslate';
+            $url .= '&tag_handling=xml&ignore_tags=notranslate&split_sentences=0';
         }else{ // assume html
-            $url .= '&tag_handling=html';
+            $url .= '&tag_handling=html&split_sentences=0';
         }
 
         $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
