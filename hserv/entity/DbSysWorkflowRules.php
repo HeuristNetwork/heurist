@@ -157,8 +157,15 @@ class DbSysWorkflowRules extends DbEntityBase
             }
 
             if(!empty($this->records[$idx]['swf_EmailText'])){
+
                 $this->records[$idx]['swf_EmailText'] = USanitize::sanitizeString($this->records[$idx]['swf_EmailText']);
                 $this->records[$idx]['swf_EmailText'] = str_replace(["\r\n", "\r", "\n"], "<br>", $this->records[$idx]['swf_EmailText']);
+
+                $mysqli = $this->system->getMysqli();
+                if(mb_strlen($this->records[$idx]['swf_EmailText']) >= 200 && hasColumn($mysqli, 'sysWorkflowRules', 'swf_EmailText', '', 'varchar(255)')){
+                    // @temporary
+                    $mysqli->query("ALTER TABLE `sysWorkflowRules` MODIFY swf_EmailText TEXT DEFAULT NULL");
+                }
             }
         }
 

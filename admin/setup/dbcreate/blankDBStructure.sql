@@ -617,7 +617,7 @@ CREATE TABLE sysWorkflowRules  (
   swf_SendEmail  varchar(255) default NULL COMMENT 'Comma separated list of ugr_ID that will be emailed on stage change',
   swf_EmailList varchar(255) default NULL COMMENT 'Comma separated list of extra email address that will be emailed on stage change',
   swf_RecEmailField smallint NULL default NULL COMMENT 'Field within the record structure that contains an email to also be emailed',
-  swf_EmailText varchar(255) default NULL COMMENT 'Email body text to be sent on stage change, allows field value substitutions',
+  swf_EmailText TEXT default NULL COMMENT 'Email body text to be sent on stage change, allows field value substitutions',
 PRIMARY KEY  (swf_ID),
 UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
 ) ENGINE=InnoDB COMMENT='Describes the rules to be applied when the value of the Workflow stage field is changed to this value';
