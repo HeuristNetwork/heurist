@@ -120,7 +120,7 @@
             <span>
                 <select name="templateCard" class="text ui-widget-content ui-corner-all" title="">
                 </select>
-                <button name="btnTemplateCardEdit" title="Edit the selected template">Edit</button>
+                <button data-btn-editor="templateCard" title="Edit the selected template">Edit</button>
             </span>
             <div class="heurist-helper3">Define custom report that generates invidual record cards. Record card div must have 
                 attribute 'data-heurist-rec' with record ID value and  class 'recordList-item'</div>
@@ -152,8 +152,11 @@
             <div class="header header_wide">
                 View record details template:
             </div>
-            <select name="templateView" class="text ui-widget-content ui-corner-all" title="">
-            </select>
+            <span>
+                <select name="templateView" class="text ui-widget-content ui-corner-all" title="">
+                </select>
+                <button data-btn-editor="templateView" title="Edit the selected template">Edit</button>
+            </span>
             <div class="heurist-helper3">Define custom report for detail view</i>
         </div>
         

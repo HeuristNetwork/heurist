@@ -104,7 +104,7 @@ class ReportController
         $filename = null;
 
         try {
-            $action = null;
+
             if ($this->req_params['template_id'] > 0 || $this->req_params['id'] > 0) {
                 $action = 'update';
             }
@@ -113,7 +113,7 @@ class ReportController
             $template_body = $this->getTemplateBody();
             
             if ($template_file && $action == null) {
-                $action = 'execute';
+                $action = 'execute'; //by default
             }
 
             switch ($action) {
@@ -224,7 +224,7 @@ class ReportController
             
             $templateName = USanitize::sanitizeFileName(basename(urldecode($this->req_params['template'])), false);
 
-            if($action==='get' &&  strpos($this->req_params['template'],'def/')){
+            if($action==='get' &&  strpos($this->req_params['template'],'def/')===0){
                 $templateName = 'def/'.$templateName;
             }
             

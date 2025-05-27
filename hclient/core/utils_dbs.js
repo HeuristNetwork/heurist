@@ -2682,7 +2682,7 @@ window.hWin.HEURIST4.dbs = {
                                                 title: 'Edit calculation field',
                                                 keep_instance:false, 
                                                 
-                                                is_snippet_editor: true, 
+                                                isCalcFieldTemplate: true, 
                                                 rty_ID:rectypes, 
                                                 rec_ID:0,
                                                 template_body:cfn_Content,

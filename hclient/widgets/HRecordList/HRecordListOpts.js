@@ -28,54 +28,73 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
         let helpURL = window.hWin.HRes( 'HRecordList.htm' );
         this._$('a.widgetHelpLink').attr('href',helpURL)
         
-        //templateCard, templateView
+        this._updateTemplatesList('templateCard', this.options.editOptions['templateCard']);
+        this._updateTemplatesList('templateView', this.options.editOptions['templateView']);
         
-        const templateCard = [{key:'',title:'build-in renderer'}, 
-         {key:'def/HRecordListCard', title:'Card'}, 
-         {key:'def/HRecordListMin',  title:'Icon+title (minimal)'}, 
-         {key:'def/HRecordListRow',  title:'Table row'},
-         {key:'',title:'<hr>',disabled:true}];
-        
-        //templateCard
-        let that = this;
-        this._$('select[name^="template"]').each((i,sel)=>{
-        window.hWin.HEURIST4.ui.createTemplateSelector(  
-                        $(sel), templateCard, 
-                           that.options.editOptions[sel.name],  //$select3.attr('data-template')
-                           {extraOptions: {menu_parent:  that.jqDialog??$('#treePage') }});  // or bsModal bsOffcanvas
-                        }); 
-        
-        let btn = this._$('button[name="btnTemplateCardEdit"]').button({showLabel:false, icon:'ui-icon-pencil'});
-        this._on(btn, {click: ()=>this._onTemplateEdit()});                                
+        let btn = this._$('button[data-btn-editor]').button({showLabel:false, icon:'ui-icon-pencil'});
+        this._on(btn, {click: (e)=>this._onTemplateEdit(e)});                                
 
     },
 
     //
     // Show popup with template editor
     //
-    _onTemplateEdit: function() {
+    _onTemplateEdit: function(event) {
         
-        let _currentTemplate = this._$('select[name="templateCard"]').val()
+        const btn = ($(event.target).is('button'))?$(event.target):$(event.target).parents('button');
+        
+        const templateType = btn.attr('data-btn-editor');
+        
+        let _currentTemplate = this._$(`select[name="${templateType}"]`).val()
         
         if(!_currentTemplate) return;
-        
-        //if(_currentTemplate.indexOf('def/')==0){
-        //    _currentTemplate = 'def/'+_currentTemplate.substring(4);
-        //}
         
         let that = this;
         let popupDialogOptions = {path: 'widgets/report/', 
                     keep_instance: false, 
                     template: _currentTemplate,
-                    is_snippet_editor: true,
+                    isWidgetTemplate: true,
                     onClose: function(is_update_list){
                         if(is_update_list){
-                            //that._updateTemplatesList();
+                            that._updateTemplatesList(templateType);
                         }
                     }
         };
         window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popupDialogOptions);
     },
+    
+    /*
+    *
+    */ 
+    _updateTemplatesList: function(templateType, currentTemplate) {
+ 
+        const selector = this._$(`select[name="${templateType}"]`);       
+        if(!currentTemplate){
+            currentTemplate = selector.val()    
+        }
         
+        let templateCard;
+        if(currentTemplate=='templateCard'){
+            templateCard = [{key:'',title:'build-in renderer'}, 
+             {key:'def/HRecordListCard', title:'Card'}, 
+             {key:'def/HRecordListMin',  title:'Icon+title (minimal)'}, 
+             {key:'def/HRecordListRow',  title:'Table row'},
+             {key:'',title:'<hr>',disabled:true}];
+        }else{
+            templateCard = [{key:'',title:'build-in renderer'}, 
+             {key:'def/HRecordView', title:'Record View template'}, 
+             {key:'',title:'<hr>',disabled:true}];
+        }
+
+        
+        selector.empty();
+        
+        window.hWin.HEURIST4.ui.createTemplateSelector(  
+                           selector, templateCard, 
+                           currentTemplate,
+                           {extraOptions: {menu_parent:  this.jqDialog??$('#treePage') }});  // or bsModal bsOffcanvas
+        
+    },        
+    
     
 });

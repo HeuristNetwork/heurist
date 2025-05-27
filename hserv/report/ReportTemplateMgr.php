@@ -221,11 +221,14 @@ class ReportTemplateMgr
      */
     public function checkTemplate($templateFile)
     {
-                
-        if(strpos($templateFile,'def/')){
-            $safeFileName = HEURIST_DIR.'hclient/widgets/HRecordList/'. basename($templateFile);
+            
+        //$safeFileName = basename($templateFile);
+        $path_parts = pathinfo($templateFile);
+        $safeFileName = $path_parts['filename'] . '.tpl';
+        
+        if(strpos($templateFile,'def/')===0){
+            $templateFile = HEURIST_DIR.'hclient/widgets/HRecordList/'.$safeFileName;
         }else{
-            $safeFileName = basename($templateFile);
             $templateFile = $this->dir . $safeFileName;
         }
         

@@ -8,13 +8,13 @@
 {$recordThumbnail = $heurist->getRecordThumbnail($r)}
 {if ($recordThumbnail==null)}
   {$recordThumbnail = "`$baseURL`&icon=`$r.recTypeID`&version=thumb"}
-  {$opacity = 'opacity:0.5;'}
+  {$opacity = ' semitransparent'}
 {else}
   {$opacity=''}
 {/if}
 
   <div class="col" data-heurist-rec="{$r.recID}"><div class="card recordList-item">
-  		  <div class="card-img-top recordList-thumb" style="{$opacity}background-image: url('{$recordThumbnail}');">
+  		  <div class="card-img-top recordList-thumb{$opacity}" style="background-image: url('{$recordThumbnail}');">
         </div>
   		<div class="card-body p-1 recordList-text">
         <p class="card-text">AA{$r.recTitle}</p>

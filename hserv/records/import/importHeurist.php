@@ -960,7 +960,7 @@ EOD;
                         if(@$records_corr_alphanum[$rec_id_low]){ //aplhanum->random int
                             $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_low];
                         }else{
-                            $rand_id = rand(900000000,999999999);//random_int
+                            $rand_id = rand(900000000,999999999);//replace with random_int but it is slow
                             $records_corr_alphanum[$rec_id_low] = $rand_id;
                             $record_src['rec_ID'] = $rand_id;
                         }

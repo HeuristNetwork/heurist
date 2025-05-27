@@ -153,7 +153,7 @@ use hserv\utilities\USystem;
         $res = folderExists($folder, $testWrite);
 
         if($res == -1){
-            if (!mkdir($folder, 0777, true)) {
+            if (!mkdir($folder, 0775, true)) {
                 //echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
                 return false;
             }

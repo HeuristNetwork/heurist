@@ -33,6 +33,9 @@
     background-size: contain; 
     min-height:50%;
 }        
+.semitransparent {
+    opacity:0.5;
+}
 .recordList-text {
     max-height:45%;
     overflow:hidden;

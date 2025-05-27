@@ -370,7 +370,7 @@ class HCmsConfigGroup extends HCmsConfig {
       if(recreateGroup || (!l_cfg.isPage && groupType!=l_cfg.type)){
           //l_cfg.uiLibrary='bootstrap';
 
-          l_cfg.type = groupType;
+          l_cfg.type = (groupType=='flex')?'group':groupType; //special case for flex to be compatible with v2
           
           let groupInitMethod;
           if(groupType=='accordion'){

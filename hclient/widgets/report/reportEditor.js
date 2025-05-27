@@ -31,12 +31,15 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         htmlContent: 'reportEditor.html',
         path: 'widgets/report/',
 
-        is_snippet_editor: false,
+        isWidgetTemplate: false,
+        isCalcFieldTemplate: false,
+        
         rty_ID:null, 
         
         keep_instance: true,
         template: null,  //path to smarty tpl
-        template_body: null, //template text 
+        template_body: null, // template text 
+        template_css: null,  // css file to be added to html output
         
         onChange: null
     },
@@ -60,9 +63,14 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     
     _last_disabled_message: null,
     
+    is_snippet_editor: false,
+    
     _create: function() {
         this._super();
-        if(this.options.is_snippet_editor){
+        
+        this.is_snippet_editor = this.options.isWidgetTemplate || this.options.isCalcFieldTemplate;
+        
+        if(this.options.isCalcFieldTemplate){
             this.options.width  = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.7
             this.options.height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.7
            
@@ -202,7 +210,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
            const rty_ID = this._$('#rectype_selector').val();
            this._loadTestRecords( rty_ID );
         }});
-        if(!this.options.rty_ID && this.options.is_snippet_editor){
+        if(!this.options.rty_ID && this.is_snippet_editor){
             rtSelect.val(rtSelect.find('option').get(1).value);
             rtSelect.trigger('change');
         }
@@ -215,7 +223,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             {click:()=>{this._doTest();}});
         
 
-        if(this.options.is_snippet_editor){
+        if(this.is_snippet_editor){
             this._$('.editForm').css({top:'90px'});
             this._$('.insertForm > .ent_content_full').css({top:'50px'});
             this._$('.hide-for-snippet').hide();
@@ -225,9 +233,11 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             this._loadTestRecords();
         }
         
-        if(!this.options.template && this.options.is_snippet_editor){
+        if(this.options.isCalcFieldTemplate){ 
+            //snippet for calculation field
             this._initEditor(this.options.template_body);
         }else{
+            //template for widget
             this._$('.editForm').css({top:'0px'});
             //init editor (load codeMirror)
             this._loadTemplate();
@@ -256,7 +266,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                        recordset: 1,
                        template_body:1};
 
-        if(this.options.is_snippet_editor){
+        if(this.is_snippet_editor){
                 let rec_ID = this._$('#listRecords').val();
                 if(!window.hWin.HEURIST4.util.isPositiveInt(rec_ID)){
                     window.hWin.HEURIST4.msg.showMsgErr({
@@ -265,7 +275,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     });
                     return;
                 }
-                request['publish'] = 4;
+                request['publish'] = this.options.template?0:4;
                 recset = {records:[rec_ID], reccount:1}; //JSON.stringify(
                 
         }else if(window.hWin.HAPI4.currentRecordset?.length()==0){
@@ -287,6 +297,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             replevel = 0;
         }
         request['replevel'] = replevel;
+        if(this.options.isWidgetTemplate){
+            request['testwidget'] = 1;
+        }
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('.testForm'));
         
@@ -334,7 +347,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
     //
     _loadTemplate: function(){    
         
-        if(this.options.is_snippet_editor && !this.options.template){
+        if(this.options.isCalcFieldTemplate){
+            //for calculation field
             this._initEditor(this.options.template_body);
         }else
         // null means new template
@@ -795,7 +809,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         treedata[0].expanded = true; //first expanded
 
-        if(this.options.is_snippet_editor){
+        if(this.is_snippet_editor){
             //hide root - record type title
             treedata = treedata[0];
         }
@@ -842,7 +856,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 if(ele.is('a')){
                     
                     if(ele.text()=='insert'){
-                        if(that.options.is_snippet_editor){
+                        if(that.is_snippet_editor){
                             that._insertSelectedVars2(data.node, 0, false, 0);
                         }else{
                             //insert-popup
@@ -1318,9 +1332,11 @@ this_id       : "term"
 
     _beforeClose: function() {
         if(this.isModified()){
-        
+            
+            const isSaveAs = this.options.isWidgetTemplate && this.options.template.indexOf('def/')===0;
+      
             window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
-                ()=>{this.doAction(false, true);}, //save
+                ()=>{this.doAction(isSaveAs, true);}, //save
                 ()=>{this._keepTemplateValue=false; this.closeDialog();}); //ignore and close
            
             return false;
@@ -1341,9 +1357,13 @@ this_id       : "term"
         res[0].text = window.hWin.HR('Close');
         
         res[1].text = window.hWin.HR('Save');
-        res[1].disabled = null;
+        if(this.options.isWidgetTemplate && this.options.template.indexOf('def/')==0){
+            res[1].disabled = true;
+        }else{
+            res[1].disabled = null;
+        }
         
-        if(!this.options.template || !this.options.is_snippet_editor)
+        if(!this.options.isCalcFieldTemplate)
         {
             res.splice(1,0,{text:window.hWin.HR('Save As'),
                         class:'ui-button-action btnDoAction2',
@@ -1352,6 +1372,23 @@ this_id       : "term"
                                 that.doAction(true); 
                         }}
                         );
+        }
+        
+        if(this.options.isWidgetTemplate){
+
+            res.splice(2,0,{text:window.hWin.HR('Delete'),
+                        class:'ui-button-action btnDoAction3',
+                        css:{'float':'left','margin-right':'150px'},  
+                        click: function() { 
+                                that._onTemplateDelete(); 
+                        }}
+                        );
+            
+            if(this.options.template.indexOf('def/')<0){
+                res[2].disabled = null;
+            }else{
+                res[2].disabled = true;
+            }
         }
         
         return res;
@@ -1364,8 +1401,9 @@ this_id       : "term"
 
         let that = this;
         
-        if(!this.options.template && this.options.is_snippet_editor)
+        if(this.options.isCalcFieldTemplate)
         {
+            //snippet for calculation field
             if(this.isModified()){
                 this._context_on_close = this.codeEditor.getValue();    
             }
@@ -1380,7 +1418,7 @@ this_id       : "term"
             window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
                 if(!window.hWin.HEURIST4.util.isempty(tmp_name)){
                     that._currentTemplate = tmp_name;
-                    that._context_on_close = true;
+                    that._context_on_close = true; //to update list in parent window
                     that.doAction(false);
                 }
                 }, {title:'Save template as',yes:'Save as',no:"Cancel"});
@@ -1399,6 +1437,8 @@ this_id       : "term"
                     window.hWin.HEURIST4.msg.showMsgFlash('Report template has been saved');
                     if(need_close){
                         that.closeDialog();
+                    }else{
+                        window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('.btnDoAction'), false); 
                     }
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1412,7 +1452,7 @@ this_id       : "term"
     //
     _loadTestRecords: function( rty_ID )
     {
-        if(!this.options.is_snippet_editor){
+        if(!this.is_snippet_editor){
             return;
         }
         
@@ -1447,7 +1487,41 @@ this_id       : "term"
                            }
                 });            
         }
-    }    
+    },
+    
+    //
+    //
+    //
+    _onTemplateDelete: function(unconditionally) {
+
+        let that = this;
+        
+        if(!this.options.template || this.options.template.indexOf('def/')===0){
+            return;
+        }
+
+        if(unconditionally===true){
+
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'delete', template:this.options.template}, 
+                function(response){
+                    if (response.status == window.hWin.ResponseStatus.OK) {
+                        that._context_on_close = true;
+                        that.closeDialog();                        
+                    } else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete template "'+this.options.template+'"?', 
+                function(){ that._onTemplateDelete(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    },
+
+        
+
         
 });
 

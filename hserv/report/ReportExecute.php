@@ -47,6 +47,8 @@ class ReportExecute
 
     private $outputfile;
     private $outputmode; //output format
+    private $testForWidgetTemplate; //test template for widget (HRecordList) - need to include bootstrap and css files
+    
     private $isVoid = false;   //if true - not browser output
     //private $maxAllowedDepth = 2; not used
 
@@ -191,14 +193,17 @@ class ReportExecute
         $this->isJsAllowed = $this->system->settings->isJavaScriptAllowed();
 
         $this->replevel = 0;
+        $this->testForWidgetTemplate = false;
         if (@$params['template_body']){
 
-            if ($this->publishmode != 4) {
+            if ($this->publishmode != 4) { //4 - calc field snippet
                 $this->publishmode = 0;
             }
             $this->outputmode = 'html'; //always html in test or snippet mode
 
             $this->replevel = isset($params['replevel']) ? intval($params['replevel']) : 0;
+            
+            $this->testForWidgetTemplate = isset($params['testwidget']);
         }
     }
 
@@ -849,8 +854,8 @@ class ReportExecute
 
                  $baseURL = HEURIST_BASE_URL;
                  $head .= <<<EXP
-                            {$script_tag}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-                            {$script_tag}external/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+                            {$script_tag}external/external/jquery/jquery-3.7.1.js"></script>
+                            {$script_tag}external/external/jquery/jquery-ui.js"></script>
                             {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
                             {$script_tag}hclient/core/detectHeurist.js"></script>
                             {$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>
@@ -888,8 +893,8 @@ class ReportExecute
              if(strpos($tpl_source,'fancybox-thumb')>0){
 
                  $head = <<<EXP
-    {$script_tag}external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-    {$script_tag}external/jquery-ui-1.12.1/jquery-ui.js"></script>
+    {$script_tag}external/external/jquery/jquery-3.7.1.js"></script>
+    {$script_tag}external/external/jquery/jquery-ui.js"></script>
     {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
     {$script_tag}hclient/core/detectHeurist.js"></script>
     {$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>
@@ -1068,6 +1073,18 @@ class ReportExecute
             if(!empty($tinymce_styles)){
                 $font_styles = "<style> $tinymce_styles </style>".$font_styles;
             }
+            if($this->testForWidgetTemplate){
+                //$font_styles = '<style type="text/css"> @import url("hclient/widgets/HRecordList/HRecordList.css"); </style>'.$font_styles;
+                
+                $font_styles = '<script src="'.HEURIST_BASE_URL.'external/bootstrap/bootstrap.bundle.min.js"></script>'
+                .'<link href="'.HEURIST_BASE_URL.'external/bootstrap/bootstrap.min.css" rel="stylesheet">'
+                .'<link href="'.HEURIST_BASE_URL.'hclient/widgets/HRecordList/HRecordList.css" rel="stylesheet">'
+                .'<link href="'.HEURIST_BASE_URL.'h4styles.css" rel="stylesheet">'
+                .'<link href="'.HEURIST_BASE_URL.'h6styles.css" rel="stylesheet">'
+                .$font_styles;
+                
+            }
+            
 
             // Allow JavaScript or sanitize HTML
             if ($this->isJsAllowed) {

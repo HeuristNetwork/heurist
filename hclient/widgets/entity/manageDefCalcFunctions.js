@@ -200,7 +200,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     //default_palette_class: 'ui-heurist-design',
                     keep_instance:false, 
                     
-                    is_snippet_editor: true, 
+                    isCalcFieldTemplate: true, 
                     //rty_ID:rectypes, 
                     rec_ID:0,
                     template_body:cfn_Content,
