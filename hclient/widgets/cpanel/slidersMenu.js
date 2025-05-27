@@ -269,7 +269,7 @@ $.widget( "heurist.slidersMenu", {
                     that._onPreferencesChange(e, data);
 
                 }
-                else{  //ON_STRUCTURE_CHANGE
+                else if(!data || data.type != 'ulf'){  //ON_STRUCTURE_CHANGE
                     //refresh list of rectypes after structure edit
                     that._updateDefaultAddRectype();
                     window.hWin.HEURIST4.browseRecordCache = {};

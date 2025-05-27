@@ -909,10 +909,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         let recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
-        
-        let html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
-        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                    fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
+
+        let thumbURL = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&thumb=${fld('ulf_ObfuscatedFileID')}&${window.hWin.HEURIST4.util.random()}`;
+        let html_thumb = `<div class="recTypeThumb realThumb" style="background-image: url(&quot;${thumbURL}&quot;);opacity:1"></div>`;
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
@@ -1186,6 +1185,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
     
+        if(this._currentEditID > 0){
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
+        }
 
         if(recID>0){
             
