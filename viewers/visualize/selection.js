@@ -23,11 +23,11 @@ class VisualiseSelection{
     visualiser = null;
 
     mode = 'single';
-    colour = '#BEE4F8';
 
     #defForegroundColour = '#FFF';
     #rightClicked = false; // @todo - rename
 
+    #selectionColour = '#BEE4F8';
     #selectionBox = null;
     #selectedNodeIds = [];
 
@@ -55,6 +55,7 @@ class VisualiseSelection{
         }else if(window.hWin.HEURIST4.util.isPositiveInt(selectedNodeIds)){
             this.#selectedNodeIds = [selectedNodeIds];
         }
+        this.#cleanSelectedIDs();
     }
 
     #onMouseDown(){
@@ -143,7 +144,7 @@ class VisualiseSelection{
     
             if(isWithinX && isWithinY){
                 // Node is in selection box
-                this.updateCircles(selector, selectionColor, selectionColor);
+                this.updateCircles(selector, this.#selectionColour, this.#selectionColour);
             }
         });
     
@@ -171,27 +172,88 @@ class VisualiseSelection{
     highlightSelection(selectedNodeIds){
 
         this.#selectedNodeIds = selectedNodeIds; // Update settings object
+        this.#cleanSelectedIDs();
 
         let entity_colour = this.visualiser.settings.get('entitycolor');
         if(this.visualiser.currentMode == 'icons'){
             this.updateCircles('.node', this.#defForegroundColour, entity_colour); // Deselect all
-        }else if(selectedNodeIds && selectedNodeIds.length > 0){
+        }else if(this.#selectedNodeIds && this.#selectedNodeIds.length > 0){
             this.updateRectangles('.node', entity_colour);
         }else{
             this.updateRectangles('.node', this.#defForegroundColour);
         }
 
         // Select new nodes
-        if(selectedNodeIds && selectedNodeIds.length>0){
-            for(let i=0; i < selectedNodeIds.length; i++){
-                let selector = `.id${selectedNodeIds[i]}`;
+        if(this.#selectedNodeIds && this.#selectedNodeIds.length>0){
+            for(let i=0; i < this.#selectedNodeIds.length; i++){
+                let selector = `.id${this.#selectedNodeIds[i]}`;
 
                 if(this.visualiser.currentMode == 'icons'){
-                    this.updateCircles(selector, selectionColor, selectionColor);
+                    this.updateCircles(selector, this.#selectionColour, this.#selectionColour);
                 }else{
-                    this.updateRectangles(selector, selectionColor);
+                    this.updateRectangles(selector, this.#selectionColour);
                 }
             }
         }
+    }
+
+    onSelection(data){
+
+        let event = window.d3.event.sourceEvent;
+        const rec_ID = typeof data.id === 'string' ? data.id : data.id.toString();
+        let selector = `.id${rec_ID}`;
+        
+        if(this.#selectedNodeIds === null){
+            this.#selectedNodeIds = [];
+        }
+
+        const bgColour = this.visualiser.settings.get('entitycolor');
+
+        if(event.ctrlKey){
+            let idx = this.#selectedNodeIds.indexOf(rec_ID);
+            if(idx !== -1){
+
+                this.updateCircles(selector, this.#defForegroundColour, bgColour);
+
+                this.#selectedNodeIds.splice(idx, 1);
+                this.visualiser.selectNode(this.#selectedNodeIds);
+
+                return;
+            }
+        }else{
+            this.updateCircles('.node', this.#defForegroundColour, bgColour);
+            this.#selectedNodeIds = [];
+        }
+
+        data.selected = true;
+        this.#selectedNodeIds.push(rec_ID);
+
+        this.updateCircles(selector, this.#selectionColour, this.#selectionColour);
+
+        let position = $(selector).offset();
+        const r = this.visualiser.getEntityRadius(data.count);
+
+        const dx = event.x - event.offsetX;
+        const dy = event.y - event.offsetY;
+
+        this.visualiser.overlay.createOverlay(Math.round(position.left - dx + r), Math.round(position.top - dy + r), 'record', `id${rec_ID}`, data);
+
+        this.visualiser.selectNode(this.#selectedNodeIds);
+    }
+
+    #cleanSelectedIDs(){
+
+        if(!Array.isArray(this.#selectedNodeIds)){
+            this.#selectedNodeIds = [];
+            return;
+        }
+
+        this.#selectedNodeIds = this.#selectedNodeIds.reduce((selected, id) => {
+            if(!window.hWin.HEURIST4.util.isPositiveInt(id)){
+                return selected;
+            }
+
+            selected.push(typeof id === 'string' ? id : id.toString());
+        }, []);
     }
 }
