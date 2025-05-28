@@ -271,18 +271,6 @@ if(@$isDatabaseStructure == 1){
 }
 ?>
 
-<!--*html for information box which will show information when a node is clicked
-    *information box is initially hidden
-    *ADDED BY ISH
--->
-<div id="infoDiv">
-    <button id="btnCtrlNewtab" class="iframeControls" onclick="handleNodeAction('tab')" title="Open in new tab"><span class="ui-icon ui-icon-newwin"></span></button>
-    <button id="btnCtrlPopup" class="iframeControls" onclick="handleNodeAction('popup')" title="Open in popup"><span class="ui-icon ui-icon-comment"></span></button>
-    <button id="btnCtrlClose" class="iframeControls" onclick="handleNodeAction('close')" title="Close record viewer"><span class="ui-icon ui-icon-close"></span></button>
-    <iframe title id="infoIframe"></iframe>
-    <div id="infoBox" style="padding: 10px;"></div>
-</div>
-
 <div id="embed-dialog" style="display:none">
      <p>Embed this Network Diagram in your own web page. Enclose within &lt;code&gt; &lt;/code&gt;
  for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>

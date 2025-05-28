@@ -27,9 +27,19 @@ class VisualiseOverlay{
     #iconCount = 4;
     #iconSize = 16;
 
+    // Node information, right hand side
+    infoDiv = null;
+    infoFrame = null;
+    infoBox = null;
+    infoButtons = {};
+    infoControllers = null;
+
     constructor(visualiserContext){
+
         this.visualiser = visualiserContext;
         this.#iconCount = this.visualiser.isStructure ? 4 : 3;
+
+        this.#addInfoDiv();
     }
 
     addNodes(data){
@@ -581,16 +591,14 @@ class VisualiseOverlay{
     }
 
     createOverlay(x, y, type, selector, nodeObject, parent_node) {
-    
-        let info = this.#getRelationOverlayData(nodeObject);
+
+        let info = [];
         if(type=='record'){
             info = this.#getRecordOverlayData(nodeObject);
         }
+        info = this.#getRelationOverlayData(nodeObject);
 
         const is_admin = window.hWin.HAPI4.is_admin();
-
-        let field_dividers = null;
-        let divider = null;
 
         // Add overlay container    
         if(parent_node){
@@ -755,23 +763,23 @@ class VisualiseOverlay{
                 let last_field = info.pop(); // ignore last field
                 let positionX = 26, positionY = 26; // for y1 and y2 values
 
-                field_dividers = this.#overlay.selectAll('line')
-                                        .data(info)
-                                        .enter()
-                                        .append('svg:line')
-                                        .attr('class', 'inner_divider')
-                                        .attr('X1', 0)
-                                        .attr('y1', (data) => {
-                                            positionX += data.xpos;
-                                            return positionX;
-                                        })
-                                        .attr('x2', maxWidth)
-                                        .attr('y2', (data) => {
-                                            positionY += data.xpos
-                                            return positionY;
-                                        })
-                                        .attr('stroke', 'gray')
-                                        .attr('stroke-width', 0.75);
+                this.#overlay.selectAll('line')
+                        .data(info)
+                        .enter()
+                        .append('svg:line')
+                        .attr('class', 'innerDividers')
+                        .attr('X1', 0)
+                        .attr('y1', (data) => {
+                            positionX += data.xpos;
+                            return positionX;
+                        })
+                        .attr('x2', maxWidth)
+                        .attr('y2', (data) => {
+                            positionY += data.xpos
+                            return positionY;
+                        })
+                        .attr('stroke', 'gray')
+                        .attr('stroke-width', 0.75);
 
                 info.unshift(rectype_details); // re-add the shifted item
                 info.push(last_field); // re-add the pop'd item
@@ -780,15 +788,15 @@ class VisualiseOverlay{
             if(info.length > 1){
 
                 // Add line between rectype and fields here
-                divider = this.#overlay.append('svg:line')
-                                .attr('class', 'inner_divider')
-                                .attr('x1', 0)
-                                .attr('y1', 23)
-                                .attr('x2', maxWidth)
-                                .attr('y2', 23)
-                                .attr('stroke', '#666')
-                                .attr('stroke-width', 1.25)
-                                .attr('id', 'line_divider');
+                this.#overlay.append('svg:line')
+                        .attr('class', 'innerDividers')
+                        .attr('x1', 0)
+                        .attr('y1', 23)
+                        .attr('x2', maxWidth)
+                        .attr('y2', 23)
+                        .attr('stroke', '#666')
+                        .attr('stroke-width', 1.25)
+                        .attr('id', 'line_divider');
             }
 
         }else if(currentMode=='icons'){
@@ -825,9 +833,7 @@ class VisualiseOverlay{
                         rectFull.attr('width', box_width);
                         rectMin.attr('width', box_width);
 
-                        if(divider != null) divider.attr('x2', box_width);
-
-                        if(field_dividers != null) field_dividers.attr('x2', box_width);
+                        rectFull.selectAll('.innerDividers').attr('x2', box_width);
 
                         $(this.#overlay.node()).find('.addLink, .editBtn, .close').show();
                     }else{
@@ -838,9 +844,7 @@ class VisualiseOverlay{
                         rectFull.attr('width', maxWidth);  
                         rectMin.attr('width', maxWidth);
 
-                        if(divider != null) divider.attr('x2', maxWidth);
-
-                        if(field_dividers) field_dividers.attr('x2', maxWidth);
+                        rectFull.selectAll('.innerDividers').attr('x2', maxWidth);
 
                         $(this.#overlay.node()).find('.addLink, .editBtn, .close').hide();
                     }
@@ -1077,18 +1081,21 @@ class VisualiseOverlay{
         if(!window.d3.event.defaultPrevented){
             this.showNodeInformation(data); // Load record details
         }
+
+        if(this.visualiser.isStructure || !window.hWin.HEURIST4.util.isPositiveInt(data?.id)){
+            return;
+        }
+
+        this.visualiser.selection.onSelection(data);
     }
 
     showNodeInformation(data){
 
-        let $infoDiv = $('#infoDiv');
-        let infoDiv = window.d3.select("#infoDiv"); // select the parent div
-        let infoFrame = window.d3.select("#infoIframe"); // select the iframe
-        let infoBox = window.d3.select("#infoBox"); // select the info box
-
-        if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0){
+        if(this.infoDiv.length == 0 || this.infoFrame.length == 0 || this.infoBox.length == 0){
             return;
         }
+
+        let $infoDiv = $(this.infoDiv.node());
 
         if($infoDiv.resizable('instance') === undefined){ // setup resizing
             $infoDiv.resizable({
@@ -1102,24 +1109,24 @@ class VisualiseOverlay{
             });
         }
 
-        infoDiv.style("display", "block"); // make info div visible
+        this.infoDiv.style("display", "block"); // make info div visible
 
         function displayRecordViewer(){
 
-            $('.iframeControls').show();
-            infoFrame.style('display', 'inline');
-            infoBox.style('display', 'none');
+            this.infoControllers.style('display', 'block');
+            this.infoFrame.style('display', 'inline');
+            this.infoBox.style('display', 'none');
 
-            if(infoFrame.attr("data-hid") == data.id){ // block retrival of last record in quick succession
+            if(this.infoFrame.attr("data-hid") == data.id){ // block retrival of last record in quick succession
                 return;
             }
 
-            window.hWin.HEURIST4.msg.bringCoverallToFront(infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
                 `Loading<br><br>${window.hWin.HEURIST4.util.stripTags(truncateText(data.name, 40))}`);
 
             const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${data.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
 
-            infoFrame.attr("src", srcURL)
+            this.infoFrame.attr("src", srcURL)
                     .attr("data-hid", data.id)
                     .on('load', () => {
 
@@ -1128,27 +1135,27 @@ class VisualiseOverlay{
                         let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
                         viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
 
-                        let height = infoFrame.node().contentWindow.document.body.scrollHeight;
+                        let height = this.infoFrame.node().contentWindow.document.body.scrollHeight;
                         height += 15;
 
                         if(height <= 100 || height >= viewMaxHeight){
                             height = viewMaxHeight
                         }
 
-                        infoFrame.style('height', `${height}px`);
+                        this.infoFrame.style('height', `${height}px`);
 
-                        infoDiv.style('max-height', `${height}px`);
-                        infoDiv.style('height', `${height}px`);
+                        this.infoDiv.style('max-height', `${height}px`);
+                        this.infoDiv.style('height', `${height}px`);
                         $infoDiv.resizable('option', 'maxHeight', height);
                     });//supply document to iframe
         }
 
         function displayRecTypeInfo(){
 
-            $('.iframeControls').hide();
-            $('#btnCtrlClose').show();
-            infoFrame.style('display', 'none');
-            infoBox.style('display', 'block');
+            this.infoControllers.style('display', 'none');
+            this.infoButtons.close.style('display', 'block');
+            this.infoFrame.style('display', 'none');
+            this.infoBox.style('display', 'block');
 
             if(infoBox.attr("data-rtyID") == data.id){ // block retrival of last record in quick succession
                 return;
@@ -1171,23 +1178,23 @@ class VisualiseOverlay{
             <strong>Description</strong>:<br>${recType.rty_Description}<br>
             `;
 
-            infoBox.attr('data-rtyID', data.id)
+            this.infoBox.attr('data-rtyID', data.id)
                 .html(rectypeDetails);
 
             let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
             viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
 
-            let height = infoBox.node().scrollHeight;
+            let height = this.infoBox.node().scrollHeight;
             height += 15;
 
             if(height <= 100 || height >= viewMaxHeight){
                 height = viewMaxHeight
             }
 
-            infoBox.style('height', `${height}px`);
+            this.infoBox.style('height', `${height}px`);
 
-            infoDiv.style('max-height', `${height}px`);
-            infoDiv.style('height', `${height}px`);
+            this.infoDiv.style('max-height', `${height}px`);
+            this.infoDiv.style('height', `${height}px`);
             $infoDiv.resizable('option', 'maxHeight', height);
         }
 
@@ -1197,5 +1204,61 @@ class VisualiseOverlay{
             displayRecordViewer();
         }
 
+    }
+
+    #addInfoDiv(){
+
+        if(window.d3.select('#infoDiv').length > 0){
+            this.#assignInfoDivVars();
+            return;
+        }
+
+        this.infoDiv = window.d3.select('body').append('div').attr('id', 'infoDiv');
+        this.infoFrame = this.infoDiv.append('iframe').attr('id', 'infoIframe');
+        this.infoBox = this.infoDiv.append('div').attr('id', 'infoBox');
+
+        this.infoBox.style('padding', '10px');
+
+        this.infoButtons = {
+            tab: this.infoDiv.append('button').attr('id', 'btnCtrlNewtab').attr('class', 'iframeControls').attr('title', 'Open in new tab').on('click', () => this.#handleInfoAction('tab')),
+            expand: this.infoDiv.append('button').attr('id', 'btnCtrlPopup').attr('class', 'iframeControls').attr('title', 'Open in popup').on('click', () => this.#handleInfoAction('popup')),
+            close: this.infoDiv.append('button').attr('id', 'btnCtrlClose').attr('class', 'iframeControls').attr('title', 'Close record viewer').on('click', () => this.#handleInfoAction('close'))
+        };
+
+        this.infoButtons.tab.append('span').attr('class', 'ui-icon ui-icon-newwin');
+        this.infoButtons.expand.append('span').attr('class', 'ui-icon ui-icon-comment');
+        this.infoButtons.close.append('span').attr('class', 'ui-icon ui-icon-close');
+
+        this.infoControllers = this.infoDiv.selectAll('.iframeControls');
+    }
+
+    #assignInfoDivVars(){
+
+        this.infoDiv = window.d3.select('#infoDiv');
+        this.infoFrame = this.infoDiv.select('#infoIframe');
+        this.infoBox = this.infoDiv.select('#infoBox');
+
+        this.infoButtons = {
+            tab: this.infoDiv.select('#btnCtrlNewtab'),
+            expand: this.infoDiv.select('#btnCtrlPopup'),
+            close: this.infoDiv.select('#btnCtrlClose'),
+        };
+
+        this.infoControllers = this.infoDiv.selectAll('.iframeControls');
+    }
+
+    #handleInfoAction(action = 'close'){
+
+        if(action == 'close'){
+            window.d3.select('#infoDiv').style('display', 'none');//close the box when clicked 
+            return;
+        }
+
+        let rec_ID = this.infoFrame.attr('data-hid');
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(rec_ID)){
+            let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
+            action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
+        }
     }
 }

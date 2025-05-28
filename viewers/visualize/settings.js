@@ -29,7 +29,8 @@ class VisualiseSettings{
         line_empty_link: 1,
         linelength: 200,
         linewidth: 2,
-        linecolor: '#0070c0'
+        linecolor: '#0070c0',
+        advanced: false
     };
 
     #keyPrefix = window.hWin.HAPI4.database;
@@ -482,7 +483,7 @@ class VisualiseSettings{
 
         window.d3.selectAll('.info-mode').style('display', info_mode);
         window.d3.selectAll('.info-mode-full').style('display', full_mode);
-        window.d3.selectAll('line.inner_divider').style('display', full_mode);
+        window.d3.selectAll('line.innerDividers').style('display', full_mode);
 
         window.d3.selectAll('.rect-info').style('display', simple_mode);
         window.d3.selectAll('.rect-info-full').style('display', full_mode);
