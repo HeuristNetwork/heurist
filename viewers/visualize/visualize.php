@@ -129,10 +129,7 @@ if(@$isDatabaseStructure == 1){
         </div>
 
 
-        <div id="setDivExport" class="toolbar-section advanced"
-            style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;">
-            <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
-            <button type="button" id="embed-export">Embed</button>
+        <div id="setDivExport" class="toolbar-section advanced" style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;">
         </div>
 
     </div> <!-- end of toolbar -->
@@ -228,8 +225,6 @@ if(@$isDatabaseStructure == 1){
 
                 <div id="setDivExport">
                     <span class="ui-controlgroup-label" style="border:none;background:none">Export:</span>
-                    <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
-                    <button type="button" id="embed-export">Embed</button>
                 </div>
             </div>
 

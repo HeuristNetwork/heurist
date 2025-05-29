@@ -25,8 +25,14 @@ class VisualiseExporter{
 
     #output = '';
 
+    exportDiv = null;
+    exportButtons = {};
+
     constructor(visualiserContext){
+
         this.visualiser = visualiserContext;
+
+        this.#addExportButtons();
     }
 
     gephi(){
@@ -103,6 +109,22 @@ class VisualiseExporter{
         this.#downloadFile(`${window.hWin.HAPI4.database}.gexf`);
     }
 
+    links(){
+
+        // url
+        let query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+        query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+        query += `${query === '?' ? '' : '&'}db=${window.hWin.HAPI4.database}`;
+        const url = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;
+
+        // encode url
+        query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+        query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+        const url_enc = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;
+
+        window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
+    }
+
     #downloadFile(filename, mimetype){
 
         if(window.hWin.HEURIST4.util.isempty(this.#output)){
@@ -138,5 +160,21 @@ class VisualiseExporter{
             document.body.appendChild(link);
             link.click();
         }
+    }
+
+    #addExportButtons(){
+
+        this.exportDiv = window.d3.select('#setDivExport');
+
+        this.exportButtons = {
+            gephi: this.exportDiv.append('button').button({label: 'GEPHI'}).on('click', () => this.gephi()).attr('id', 'gephi-export'),
+            embed: this.exportDiv.append('button').button({label: 'Embed', icon: 'ui-icon-globe', showLabel: false}).on('click', () => this.links()).attr('id', 'embed-export')
+        };
+
+        if(this.visualiser.isStructure || window.isStandAlone){
+            this.exportButtons.embed.style('visibility', 'hidden');
+        }
+
+        delete window.isStandAlone;
     }
 }

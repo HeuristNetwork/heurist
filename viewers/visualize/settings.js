@@ -403,7 +403,6 @@ class VisualiseSettings{
             $('#setDivExport').hide();
         }else{
             $('#setDivExport').show();
-            $('#gephi-export').button().on('click', () => this.visualiser.exporter.gephi());
         }
 
         $toolbar.show();
