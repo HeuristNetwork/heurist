@@ -1375,6 +1375,7 @@ console.log(content);
     if(layout){
         $(container).html(layout);
     }
+    
     return this.layoutInitFromHTML(container);
   }
   

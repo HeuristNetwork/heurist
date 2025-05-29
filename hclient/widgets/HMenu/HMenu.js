@@ -30,6 +30,8 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         styleMode: 'links',     // link,pills, buttons(?), jquery
         expandLevels: 0,        // for treeview
         
+        isEditMode: false,
+        
         customActionHandler: null,  // replacement of default event handler via ActionHandler
         onBeforeAction: null,
         onActionComplete: null    // invoked in ActionHandler after action execution
@@ -182,8 +184,14 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             ele = ui.item;
         }else{
             ele = $(event.target);
-            if(ele.is('span')){
-                ele = ele.parent();// If a span inside a button is clicked
+            if(!(ele.attr('data-heurist-action') || ele.attr('data-heurist-pageid'))){
+                //must have data-heurist-action or data-heurist-pageid attribute
+                let ele2 = ele.parents('[data-heurist-action]');// If a span inside a button is clicked
+                if(ele2.length==0){
+                    ele = ele.parents('[data-heurist-pageid]');
+                }else{
+                    ele = ele2;
+                }
             }
         }
         

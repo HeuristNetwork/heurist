@@ -1845,7 +1845,7 @@ function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
 
     if($isRoot){
             //find details
-            $records = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU), false);
+            $records = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU, DT_CMS_MENU_FORMAT, DT_THUMBNAIL), false);
             
             foreach($resultTree as $rec_ID=>$subs){
                 recordSearchMenuItemsTree($rec_ID, $resultTree[$rec_ID], $records);

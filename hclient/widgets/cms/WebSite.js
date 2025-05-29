@@ -28,7 +28,7 @@ class WebSite {
     
     isWebPage = false;
     
-    //contains website properties siteId, pageId, siteMenu, isWebPage, isShowTitle, isFixedFooter, version (if =3 use bootstrap)
+    //contains website properties siteId, pageId, siteMenu, isWebPage, isShowTitle, isFixedFooter, isEmbeded, version (if =3 use bootstrap)
     siteOptions = {}; 
     
     currentLanguage = null;
@@ -55,18 +55,22 @@ class WebSite {
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
         window.hWin.DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
         window.hWin.DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
+        window.hWin.DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'];
+        window.hWin.TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'];
         
         this.siteOptions = _options;
 
         this.siteId = _options.siteId;
         this.pageId = _options.pageId;
         this.siteMenu = _options.siteMenu;
-        this.isWebPage = _options.isWebPage;
+        this.isWebPage = _options.isWebPage??false;
         this.container = 'main';
         
         this.pageCache = {};
         
         this.isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
+        
+        this.siteOptions.isEmbeded = this.isEditMode || _options.isEmbeded;
         
         //language selector has been filled on server side
         let langSelector = $('#main-languages');
@@ -125,7 +129,7 @@ class WebSite {
             return;       
         }
 
-        let fields = ['rec_ID', DT_NAME, DT_SHORT_SUMMARY, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS];
+        let fields = ['rec_ID', DT_NAME, DT_SHORT_SUMMARY, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS, DT_CMS_PAGETITLE];
         
         if(window.hWin.HAPI4.sysinfo['custom_js_allowed']){
             fields.push(DT_CMS_SCRIPT);
@@ -223,6 +227,9 @@ class WebSite {
         this.pageId = this.currentPageRec['rec_ID'];
         
         let pageContent = record[window.hWin.DT_EXTENDED_DESCRIPTION]; //window.hWin.HAPI4.getTranslation( , null );
+        if(!pageContent || pageContent==''){
+            pageContent = ' ';
+        }
 /* TBD        
         this.suppOptions['page'] = {title:this.#getPageRecValue(DT_NAME), description:this.#getPageRecValue(DT_SHORT_SUMMARY)};
         if(window.hWin.websiteInfo){
@@ -293,20 +300,35 @@ class WebSite {
         let pagetitle = this.#getPageRecValue(DT_NAME);
         pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         
-        //Change url in browser        
+        let isShowTitlePerPage = this.#getPageRecValue(DT_CMS_PAGETITLE); 
+        if( window.hWin.HEURIST4.util.isempty(isShowTitlePerPage)){
+            isShowTitlePerPage = this.siteOptions.isShowTitle; //per website setting
+        }else{
+            isShowTitlePerPage = isShowTitlePerPage!=TRM_NO;
+        }
         
         //Add page as a header for this.container (main-content)
-        if(this.siteOptions.isShowTitle && !window.hWin.HEURIST4.util.isempty(pagetitle)){
+        let title_container = $('#main-pagetitle');
+        if(isShowTitlePerPage && !window.hWin.HEURIST4.util.isempty(pagetitle)){
             
-            let title_container = $('#main-pagetitle');
             if(title_container.length==0){ //not found on page - add new one as a first element of main-content
                 title_container = $('<h2 class="m-1"></h2>').prependTo(this.container); //.25rem
                 
             }
-            title_container.html(pagetitle);
+            title_container.html(pagetitle).show();
+        }else{
+            title_container.empty().hide();
         }
 
         
+        //Change url in browser 
+        if(this.siteOptions.isEmbeded){
+            return;
+        }
+        
+        const options = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
+        const surl = window.hWin.HEURIST4.ui.getCmsLink(options);
+        window.history.pushState({}, "Title", surl);
         
     }
      

@@ -81,9 +81,29 @@ class WebSite
             // Initialize properties from parameters or set defaults
             $this->setParameters($params);
         }
-        
+
         $this->system->defineConstant('RT_CMS_HOME');
         $this->system->defineConstant('RT_CMS_MENU');
+        
+        $this->system->defineConstant('DT_NAME');
+        $this->system->defineConstant('DT_SHORT_SUMMARY');
+        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        $this->system->defineConstant('DT_THUMBNAIL');
+        $this->system->defineConstant('DT_FILE_RESOURCE');
+        
+        $this->system->defineConstant('DT_CMS_KEYWORDS');
+        $this->system->defineConstant('DT_CMS_HEADER');
+        $this->system->defineConstant('DT_CMS_FOOTER');
+        $this->system->defineConstant('DT_CMS_FOOTER_FIXED');
+
+        $this->system->defineConstant('TRM_NO');
+        $this->system->defineConstant('DT_LANGUAGES');
+        $this->system->defineConstant('DT_CMS_PAGETYPE');
+        
+        
+        $this->system->defineConstant('TRM_ICON_ONLY'); //2-9635
+        $this->system->defineConstant('TRM_NAME_ONLY'); //2-9634
+        
     }
     
     /**
@@ -297,23 +317,7 @@ class WebSite
     * Load details of record (logo, title, langs, bg images, keywords)
     */
     private function loadWebHomePage(){
-
         recordSearchDetails($this->system, $this->siteRecord, true);
-        
-        $this->system->defineConstant('DT_NAME');
-        $this->system->defineConstant('DT_CMS_KEYWORDS');
-        $this->system->defineConstant('DT_SHORT_SUMMARY');
-        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
-        $this->system->defineConstant('DT_CMS_HEADER');
-        $this->system->defineConstant('DT_CMS_FOOTER');
-        $this->system->defineConstant('DT_CMS_FOOTER_FIXED');
-        $this->system->defineConstant('DT_THUMBNAIL');
-        $this->system->defineConstant('DT_FILE_RESOURCE');
-
-        $this->system->defineConstant('TRM_NO');
-        $this->system->defineConstant('DT_LANGUAGES');
-        $this->system->defineConstant('DT_CMS_PAGETYPE');
-        
     }
 
     
@@ -350,7 +354,7 @@ class WebSite
     //
     // Move to new class HRecord
     //
-    private function getFile($record, $field_id, $def=''){
+    private function getFile($record, $field_id, $def='', $type='file'){
 
         if(is_string($field_id) && strpos($field_id,'-')){
             $field_id = ConceptCode::getDetailTypeLocalID($field_id);
@@ -360,7 +364,7 @@ class WebSite
 
         if(is_array($val)){
             $file = array_shift($val);
-            $file = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file['fileid'];
+            $file = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&'.$type.'='.$file['fileid'];
         }else{
             $file = $def;
         }
@@ -594,7 +598,7 @@ class WebSite
             'pageId'=>$this->getPageId(),   //initial page
             'siteMenu'=>$menuContent,       //need for edit mode only
             'isWebPage' =>$this->isWebPage,
-            'isShowTitle'=>$this->getVal('99-952')!=TRM_NO,
+            'isShowTitle'=>$this->getVal('99-952')!=TRM_NO, //DT_CMS_PAGETITLE
             'isFixedFooter'=>$isFixedFooter,
             //'languageCodes'=>$this->getLanguages()
         );
@@ -716,8 +720,8 @@ class WebSite
         
         foreach($menu as $id=>$subs){
             
-            $menu_title = $this->getValue($records[$id], DT_NAME, true, $this->currentLang);
-
+            $menu_title = $this->getMainMenuTitle($id);
+            
             $has_subs = !empty($subs);
             if($has_subs){ 
                 $res .= '<li class="dropdown dropend"><a class="dropdown-item dropdown-toggle" href="#" id="dropdown-layouts" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.$menu_title.'</a>';
@@ -737,6 +741,26 @@ class WebSite
                 
     }
     
+    /*
+    *
+    */ 
+    private function getMainMenuTitle($page_id)
+    {
+            $menu_title = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
+            
+            $menuFormat = $this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT);
+            $menuIcon = $this->getFile($this->menuRecords[$page_id], DT_THUMBNAIL, '', 'thumb');
+            
+            if($menuIcon && $menuFormat!=TRM_NAME_ONLY){
+                if($menuFormat==TRM_ICON_ONLY){
+                    $menu_title = '';
+                }
+                $menu_title = '<span><img src="'.$menuIcon.'" style="max-height:40px"></span>'.$menu_title;
+            }
+
+            return $menu_title;
+    }
+    
     //
     // For header - navbar with first level of menu
     // Returns menu as HTML snippet
@@ -752,16 +776,25 @@ class WebSite
         $siteID = $this->siteRecord['rec_ID'];
         $menu_tree = $this->menuTree[$siteID];
         
+        $isMenuWithSubsSelectable = $this->getVal('2-938')!=TRM_NO; //DT_CMS_TOPMENUSELECTABLE
+        
         $res = '<ul class="navbar-nav ms-auto dropdown-hover-all">'; //nav nav-pills  navbar-nav
         
         foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
         
-            $menu_title = $this->getValue($this->menuRecords[$id], DT_NAME, true, $this->currentLang);
+            $menu_title = $this->getMainMenuTitle($id);
             
             $has_subs = !empty($subs);
             if($has_subs){
-
-                $res .= '<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'.$menu_title.'</a>';
+                
+                if($isMenuWithSubsSelectable){
+                    $res .= '<li class="nav-item dropdown"><a class="nav-link" data-heurist-pageid="'
+                            .$id.'" href="'.$this->getPageUrl($id)
+                            .'" role="button" style="display:inline-block;padding-right:2px">'.$menu_title.'</a>';
+                    $res .= '<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false"  style="display:inline-block;padding-left:0px"></a>';
+                }else{
+                    $res .= '<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'.$menu_title.'</a>';
+                }
                 
                 $res .= $this->getMainSubMenu($subs, $this->menuRecords);
                 
@@ -784,6 +817,7 @@ class WebSite
         
         $this->system->defineConstant('DT_CMS_TOP_MENU');
         $this->system->defineConstant('DT_CMS_MENU');
+        $this->system->defineConstant('DT_CMS_MENU_FORMAT');
         $this->system->defineConstant('DT_NAME');
         //$this->system->defineConstant('DT_CMS_TARGET');
         
@@ -827,6 +861,9 @@ class WebSite
         
             $menuName = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
             
+            $menuFormat = $this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT);
+            $menuIcon = $this->getValue($this->menuRecords[$page_id], DT_THUMBNAIL);
+            
             $key = $parentKey.','.$page_id;
             
             $item = array();
@@ -834,6 +871,8 @@ class WebSite
             $item['title'] = $menuName;
             $item['parent_id'] = $parentKey; //reference to parent menu(or home)
             $item['page_id'] = $page_id;
+            if($menuFormat) $item['menuFormat'] = $menuFormat;
+            if($menuIcon) $item['menuIcon'] = $menuIcon;
             /*
             $item['page_showtitle'] = 1;
             $item['page_target'] = ''; //(this.options.target=='popup')?'popup':pageTarget;
