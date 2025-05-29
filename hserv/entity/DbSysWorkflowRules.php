@@ -164,7 +164,7 @@ class DbSysWorkflowRules extends DbEntityBase
                 $mysqli = $this->system->getMysqli();
                 if(mb_strlen($this->records[$idx]['swf_EmailText']) >= 200 && hasColumn($mysqli, 'sysWorkflowRules', 'swf_EmailText', '', 'varchar(255)')){
                     // @temporary
-                    $mysqli->query("ALTER TABLE `sysWorkflowRules` MODIFY swf_EmailText TEXT DEFAULT NULL");
+                    $mysqli->query("ALTER TABLE `sysWorkflowRules` MODIFY `swf_EmailText` TEXT DEFAULT NULL COMMENT 'Email body text to be sent on stage change, allows field value substitutions'");
                 }
             }
         }
