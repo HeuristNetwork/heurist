@@ -827,7 +827,7 @@ $.widget( "heurist.navigation", {
                                         $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                                     } 
                                     
-                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
+                                    window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
 
                                     if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
