@@ -158,10 +158,8 @@ echo $this->getWebSiteInfo();
             window.Hul = window.hWin.HEURIST4.util; //TBR: need only for consts in svs_list 
 
             <?php
-                //main menu - json array 
-                $menu_content = $this->getMenuTree();
-                print 'let menuContentJSON = '.json_encode($menu_content).';'; //used in _editCMS_SiteMenu
                 
+                /* not used, it loads page content on client site in WebSite.#iniPage
                 $page_content = $this->getPageContent(false);
                 $page_content_json = json_decode($page_content, true);
                 if($page_content_json){
@@ -171,13 +169,18 @@ echo $this->getWebSiteInfo();
                 }else{
                     print 'let pageContentJSON = null;';
                 }
-                
+                print 'let menuContentJSON = '.json_encode($menu_content).';'; //used in _editCMS_SiteMenu
                 print 'const siteId = '.$this->getSiteId().';';
                 print 'const pageId = '.$this->getPageId().';';
                 print 'const isWebPage = '.($this->isWebPage?'true':'false').';';
+                //{siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON, isWebPage:isWebPage}
+                */
+
+                $webSiteOptions = $this->getWebSiteOptions(false);
+                $webSiteOptions = json_encode($webSiteOptions);
             ?>
             
-            window.hWin.webSite = new WebSite({siteId:siteId, pageId:pageId, siteMenu:menuContentJSON, pageContent:pageContentJSON, isWebPage:isWebPage});
+            window.hWin.webSite = new WebSite(<?php echo $webSiteOptions; ?>);
             
             if(window.parent?.cmsEditor){
                 //called once - on website init

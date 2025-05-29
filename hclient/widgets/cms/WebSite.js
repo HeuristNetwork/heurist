@@ -28,6 +28,9 @@ class WebSite {
     
     isWebPage = false;
     
+    //contains website properties siteId, pageId, siteMenu, isWebPage, isShowTitle, isFixedFooter, version (if =3 use bootstrap)
+    siteOptions = {}; 
+    
     currentLanguage = null;
     allLanguages = null;
     suppOptions = null;
@@ -52,6 +55,8 @@ class WebSite {
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
         window.hWin.DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
         window.hWin.DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'];
+        
+        this.siteOptions = _options;
 
         this.siteId = _options.siteId;
         this.pageId = _options.pageId;
@@ -63,13 +68,14 @@ class WebSite {
         
         this.isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
         
+        //language selector has been filled on server side
         let langSelector = $('#main-languages');
         this.currentLanguage = null;
         this.allLanguages = null;
         if(langSelector.length>0){
             this.currentLanguage = langSelector.val();
             this.allLanguages = langSelector.find('option').map((i,opt)=>opt.value).get();
-console.log(">>>>",this.allLanguages);            
+           
             if(!this.currentLanguage) this.currentLanguage = null;
             let that = this;
             langSelector.on('change',()=>{
@@ -95,6 +101,10 @@ console.log(">>>>",this.allLanguages);
         
         }else{
             window.hWin.HAPI4.layoutMgr.layoutInit(null, '#main-content', this.suppOptions); 
+        }
+        
+        if(this.siteOptions.isFixedFooter){
+            $('footer').addClass('fixed-bottom');
         }
     }
 
@@ -275,16 +285,34 @@ console.log(">>>>",this.allLanguages);
     }
     
     /*
-    *
+    *  1. Assign current page title (if website setting is ON)
+    *  2. Change address line for browser 
     */
     #assignPageTitle(){
         
         let pagetitle = this.#getPageRecValue(DT_NAME);
         pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         
-        //TBD - change url in browser        
+        //Change url in browser        
+        
+        //Add page as a header for this.container (main-content)
+        if(this.siteOptions.isShowTitle && !window.hWin.HEURIST4.util.isempty(pagetitle)){
+            
+            let title_container = $('#main-pagetitle');
+            if(title_container.length==0){ //not found on page - add new one as a first element of main-content
+                title_container = $('<h2 class="m-1"></h2>').prependTo(this.container); //.25rem
+                
+            }
+            title_container.html(pagetitle);
+        }
+
+        
+        
     }
      
+    /*
+    *
+    */ 
     #getPageRecValue(fieldCode){
         if(this.currentPageRec && !window.hWin.HEURIST4.util.isempty(this.currentPageRec[fieldCode])){
             return window.hWin.HAPI4.getTranslation(this.currentPageRec[fieldCode], this.currentLanguage);
