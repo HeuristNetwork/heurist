@@ -1006,17 +1006,16 @@ $.widget( "heurist.search", {
                                         .fadeIn(100)
                                         .effect('highlight', {color: '#4477B9'}, 1000);
                 }
-            }else 
-                if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
+            }else if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE && (!data || data.type != 'ulf')){
 
-                    //force recreate rectype selectors
-                    if(this.select_rectype_addrec!=null){
-                        this.select_rectype_addrec.remove();
-                        this.select_rectype_addrec = null;
-                        this._refresh();
-                    }
-
+                //force recreate rectype selectors
+                if(this.select_rectype_addrec!=null){
+                    this.select_rectype_addrec.remove();
+                    this.select_rectype_addrec = null;
+                    this._refresh();
                 }
+
+            }
 
 
 

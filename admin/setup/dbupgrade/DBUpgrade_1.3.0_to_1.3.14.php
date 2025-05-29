@@ -223,7 +223,7 @@ EXP
 
             [$is_added, $report[]] = alterTable($system, 'sysWorkflowRules', 'swf_EmailList', "ALTER TABLE `sysWorkflowRules` ADD COLUMN `swf_EmailList` varchar(255) default NULL COMMENT 'Comma separated list of email addresses that will be emailed on stage change'", true);
             [$is_added, $report[]] = alterTable($system, 'sysWorkflowRules', 'swf_RecEmailField', "ALTER TABLE `sysWorkflowRules` ADD COLUMN `swf_RecEmailField` smallint default NULL COMMENT 'Field within the record structure that contains an email to also be emailed'", true);
-            [$is_added, $report[]] = alterTable($system, 'sysWorkflowRules', 'swf_EmailText', "ALTER TABLE `sysWorkflowRules` ADD COLUMN `swf_EmailText` varchar(255) default NULL COMMENT 'Email body text to be sent on stage change, allows field value substitutions'", true);
+            [$is_added, $report[]] = alterTable($system, 'sysWorkflowRules', 'swf_EmailText', "ALTER TABLE `sysWorkflowRules` ADD COLUMN `swf_EmailText` TEXT default NULL COMMENT 'Email body text to be sent on stage change, allows field value substitutions'", true);
 
             $report[] = 'Upgraded to 1.3.18';
        }

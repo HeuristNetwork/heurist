@@ -1659,9 +1659,9 @@ $.widget( "heurist.resultList", {
         //get thumbnail if available for this record, or generic thumbnail for record type
         let html_thumb = '', rectypeTitleClass = '';
         if(fld('rec_ThumbnailURL')){
-            html_thumb = '<div class="recTypeThumb realThumb" title="'+
-                recTitle_strip_all+'" style="background-image: url(&quot;'
-                + fld('rec_ThumbnailURL') + '&quot;);" data-id="'+recID+'"></div>';
+            let thumbURL = fld('rec_ThumbnailURL');
+            thumbURL += `${thumbURL.indexOf('?') > 0 ? '' : '?'}${this._icon_timer_suffix}`;
+            html_thumb = `<div class="recTypeThumb realThumb" title="${recTitle_strip_all}" style="background-image: url(&quot;${thumbURL}&quot;);" data-id="${recID}"></div>`;
         }else{
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
             if(this.options.view_mode=='horizontal' || this.options.view_mode=='vertical'){
