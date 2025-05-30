@@ -1614,10 +1614,10 @@ function uploadFileToNakala($system, $params) {
     $herror = HEURIST_ACTION_BLOCKED;
 
     $NAKALA_BASE_URL = @$params['use_test_url'] == 1 ? 'https://test.nakala.fr/u/datas/' : 'https://nakala.fr/u/datas/';
-    $NAKALA_BASE_URL_API = @$params['use_test_url'] == 1 ? 'https://apitest.nakala.fr/datas/' : 'https://api.nakala.fr/datas/';
+    $NAKALA_BASE_URL_API = @$params['use_test_url'] == 1 ? 'https://apitest.nakala.fr/datas' : 'https://api.nakala.fr/datas';
 
     $missing_key = '<br><br>Your Nakala API key is either missing or invalid, please ';
-    $missing_key .= $system->isAdmin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
+    $missing_key .= !$system->isAdmin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
     $missing_key .= ' Database properties';
 
     $unknow_error_msg = 'An unknown response was receiveed from Nakala after uploading the selected file.<br>Please contact the Heurist team if this persists.';
@@ -1668,7 +1668,7 @@ function uploadFileToNakala($system, $params) {
     $curl_file = new CURLFile($params['file']['path'], $params['file']['type'], $params['file']['name']);
     $local_sha1 = sha1_file($params['file']['path']);
 
-    curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}uploads");
+    curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}/uploads");
 
     // Check if file has already been uploaded - may have previously failed
     $file_list = curl_exec($ch);

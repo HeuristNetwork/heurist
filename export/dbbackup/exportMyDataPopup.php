@@ -202,7 +202,6 @@ if($mode>1){
                             }
 
                             if(value == 'Nakala'){
-                                $('#nakala-url').hide();
                                 getNakalaLicenses();
                             }
                         }
@@ -213,10 +212,6 @@ if($mode>1){
 
                             let repo = $repos.val();
                             let value = $accounts.val();
-
-                            if(repo == 'Nakala'){
-                                value != '' && value.indexOf('_') >= 0 ? $('#nakala-url').show() : $('#nakala-url').hide();
-                            }
 
                             value != '' && value.indexOf('_') == -1 ? $('.setup-keys').show() : $('.setup-keys').hide();
                         }
@@ -892,7 +887,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         }
 
                         $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey'];
-                        $params['use_test_url'] = @$_REQUEST['use_test_url'] == 1 || strpos($repo_account,'nakala')===1 ? 1 : 0; // use test version
+                        $params['use_test_url'] = strpos($repo_account,'nakala') === 1 ? 1 : 0; // use test version
 
                         $params['status'] = 'pending';// keep new record private, so it can be deleted
                         $params['return_type'] = 'editor';// return link to private record, will require login

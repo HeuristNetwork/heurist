@@ -469,7 +469,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             if(repo.indexOf('nakala')===0 || repo.indexOf('nakala')===1){
                                 $('#sel_license').parent().show();
                                 _popuplateNakalaLicense();
-                                repo.indexOf('nakala')===0 ? $('#ch_use_test_server').parent().show() : $('#ch_use_test_server').parent().hide();
                             }
                         });
                         
@@ -836,8 +835,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
                         return;
                     }
-                    request['use_test_url'] = $('#ch_use_test_server').is(':checked') || request['repository'].indexOf('nakala')===1 ?
-                                                1 : 0;
+                    request['use_test_url'] = request['repository'].indexOf('nakala') === 1 ? 1 : 0;
                 }
 
             }else if(action_type=='delete_detail'){
