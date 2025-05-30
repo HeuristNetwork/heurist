@@ -1,4 +1,4 @@
-<input name="menuItems" type="hidden" value=""/>
+<input name="menuItems" Xtype="hidden" value=""/>
 <div id="tabs">
 <ul style="font-size: 0.5rem;">
     <li><a href="#tab-content">Content</a></li>
@@ -8,12 +8,12 @@
 
 
         <!-- content -->
-<fieldset  id="tab-content" style="padding:10px 0px !important">
+<div  id="tab-content" style="padding:10px 0px !important">
         <legend class="header" style="font-size: 0.7rem;padding-left: 10px;">Menu items (pages or actions)</legend>
         
-        <div id="menuItems"></div>
+        <div id="menuTree"></div>
         
-</fieldset>        
+</div>        
 <!--
                     <input name="menu_recIDs" type="hidden" value=""/>
                     <div id="menu_recIDs" style="display:table-row"></div>
@@ -21,6 +21,8 @@
 
 
 <fieldset id="tab-setup"><legend style="display:none"></legend>
+
+        <div id="menuItems"></div>
 
         <!-- appearance -->
         <div>

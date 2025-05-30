@@ -26,7 +26,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         */
         menuItems: null, 
         
-        viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, tree    
+        viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, treeview    
         styleMode: 'links',     // link,pills, buttons(?), jquery
         expandLevels: 0,        // for treeview
         
@@ -41,6 +41,9 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     _needLoadCss: true,
     
     _menuData: null, //json array with list of actions 
+    
+    _selectorInput: null, //hidden input to select/add menu intems in edit mode
+    _browseFunction: null, //function that opend menu items selector popup
 
     _init: function(){
         
@@ -73,14 +76,74 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 source: this._menuData,
                 quicksearch: false, //true,
                 selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
-                renderNode: null,
-                extensions:[],
+                //renderNode: null,
+                //extensions:[],
                 activate: function(event, data) { 
                     if(data.node.data.page_id>0){
                         that.executeAction( 'data-heurist-pageid', {pageId:data.node.data.page_id});
                     }
                 }
             };
+            
+            if(this.options.isEditMode){
+                
+                let fancytree_options_edit =
+                {
+                    renderNode: function(event, data) {
+                            let item = data.node;
+                            that._defineActionIcons( item );
+                    },
+                    extensions:["edit", "dnd"],
+                    dnd:{
+                        preventVoidMoves: true,
+                        preventRecursiveMoves: true,
+                        autoExpandMS: 400,
+                        dragStart: function(node, data) {
+                            return true; //data.has_access;
+                        },
+                        dragEnter: function(node, data) {
+                            //data.otherNode - dragging node
+                            //node - target node
+                            return true;
+                        },
+                        dragDrop: function(node, data) {
+                            //data.otherNode - dragging node
+                            //node - target node
+                            let source_parent = data.otherNode.parent.data.page_id;
+                            if(!(source_parent>0))
+                                source_parent = home_page_record_id;
+
+                            data.otherNode.moveTo(node, data.hitMode);
+
+                            let target_parent = data.otherNode.parent.data.page_id;
+                            if(!(target_parent>0))
+                                target_parent = home_page_record_id;
+                            data.otherNode.data.parent_id = target_parent;
+                        }
+                    },
+                    edit:{
+                        triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
+                        close: function(event, data){
+                            // Editor was removed
+                            if( data.save ) {
+                                // Since we started an async request, mark the node as preliminary
+                                $(data.node.span).addClass("pending");
+                            }
+                        },                                    
+                        save:function(event, data){
+                            if(''!=data.input.val()){
+                                let new_name = data.input.val();
+//TBD                            _renameMenuEntry(data.node.data.page_id, new_name, function(){});
+                            }else{
+                                $(data.node.span).removeClass("pending");    
+                            }
+                        }
+                    }
+                };
+                
+                fancytree_options = $.extend(fancytree_options, fancytree_options_edit);                
+            }
+            
 
             this.element.fancytree(fancytree_options).addClass('tree-cms');
             if(this.options.expandLevels>0){
@@ -238,7 +301,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         if(this.options.customActionHandler){
             //custom handler
             this.options.customActionHandler.call(this, action_id, opts);
-        }else{
+        }else if (this.HAPI.actionHandler) {
             //defeault action handler
             this.HAPI.actionHandler.executeActionById(action_id, opts);
         }
@@ -363,6 +426,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         let request = {website:1, ver:3, webmenu:this.options.menuItems, lang:this.options.language};
         window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
+console.log(response.data);                
                 that._menuData = response.data;
                 that._initControls();
             }else{
@@ -486,8 +550,259 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
         
         return res;
-    }
+    },
     
+    /*
+    *  render actions buttons for edit mode
+    */
+    _defineActionIcons: function(item){
+        let tree_element = this.element;
+        let that = this;
+        
+        let item_li = $(item.li);
+        let menu_id = item.data.page_id;
+
+        if($(item).find('.svs-contextmenu3').length==0){
+
+            let parent_span = item_li.children('span.fancytree-node');
+
+            //add,edit menu,edit page,remove
+            let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                +item.data.parent_id+'" data-menuid="'+menu_id+'">'
+                //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
+                +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
+                +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
+                //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
+                +'<span class="ui-icon ui-icon-trash" '
+                +'" title="Remove menu entry from website"></span>'
+                +'</div>').appendTo(parent_span);
+
+            $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
+
+            actionspan.find('.ui-icon').on('click', function(event){
+                let ele = $(event.target);
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                let parent_span = ele.parents('span.fancytree-node');
+                
+                function __in_progress(){
+                    parent_span.find('.svs-contextmenu4').show();
+                    parent_span.find('.svs-contextmenu3').hide();
+                }
+
+                //timeout need to activate current node    
+                setTimeout(function(){                         
+                    let ele2 = ele.parents('.svs-contextmenu3');
+                    let menuid = ele2.attr('data-menuid');
+                    let parent_id = ele2.attr('data-parentid');
+
+                    if(ele.hasClass('ui-icon-plus')){ //add new menu to 
+
+                        that._selectMenuRecord(menuid); 
+
+                    }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
+
+                        function __editPageRecord(record_id){
+                            __in_progress();
+                            //edit menu item
+                            window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
+                                {selectOnSave:true,
+                                    onClose: function(){ 
+                                        parent_span.find('.svs-contextmenu4').hide();
+                                    },
+                                    onselect:function(event, data){
+                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                            
+                                            let recordset = data.selection;
+                                            let page_id = recordset.getOrder()[0];
+/*                                            
+                                            window.hWin.page_cache[page_id] = null; //remove from cache
+                                            delete window.hWin.page_cache[page_id];
+                                            
+                                            if(page_id == _currentPageId()){
+                                                _refreshCurrentPage(page_id);
+                                            }
+                                            // Update website tree and in site menu
+                                            let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                            let refresh_menus = false;
+
+                                            if(window.hWin.page_cache[page_id]) window.hWin.page_cache[page_id][DT_NAME] = new_name;
+
+                                            // Update tree nodes
+                                            $.ui.fancytree.getTree( $container ).visit((node) => {
+
+                                                let old_name = node.title;
+                                                if(node.data.page_id == page_id){
+
+                                                    if(old_name == new_name){ return false; } // name wasn't updated
+
+                                                    node.setTitle( new_name );
+                                                    _defineActionIcons(node);
+                                                    refresh_menus = true;
+                                                }
+
+                                            });
+
+                                            if(refresh_menus){ that._refreshMainMenu(false); } // update menu
+*/
+                                            
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                        
+/*                      if( (menuid == _currentPageId())
+                            && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
+                        {                                    
+                                return;
+                        }else{
+                                
+                        }*/
+                        __editPageRecord(menuid);
+
+                    }else 
+                        if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+
+                            function __doRemove(){
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let isDelete = $dlg.find('#del_menu').is(':checked');
+                                $dlg.dialog( "close" );
+
+                                let to_del = [];
+                                item.visit(function(node){
+                                    to_del.push(node.data.page_id);
+                                },true);
+
+                                if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
+                                    to_del = null;
+                                }
+/*                                
+                                that._removeMenuEntry(parent_id, menuid, to_del, function(){
+                                    item.remove();    
+                                    
+                                    //after deletion select home page
+                                    that._refreshMainMenu( false, home_page_record_id); //after delete
+                                });
+*/                                
+                            }
+
+                            let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+                            
+                            let buttons = {};
+                            buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
+                                __doRemove();
+                            };
+                            buttons[window.hWin.HR('Cancel')]  = function() {
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                $dlg.dialog( "close" );
+                            };
+
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
+                                + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
+                                + '<input type="checkbox" id="del_menu">'
+                                + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
+                                + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
+                                'Remove "'+ menu_title +'" Menu');
+
+                        }
+
+                },500);
+            });
+
+            //hide icons on mouse exit
+            function _onmouseexit(event){
+                let node;
+                if($(event.target).is('li')){
+                    node = $(event.target).find('.fancytree-node');
+                }else if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    //hide icon for parent 
+                    node = $(event.target).parents('.fancytree-node');
+                    if(node) node = $(node[0]);
+                }
+                let ele = node.find('.svs-contextmenu3');
+                ele.hide();
+            }               
+
+            function _onmouseenter(event){
+                let node;
+                if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    node = $(event.target).parents('.fancytree-node');
+                }
+                if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
+                    let ele = $(node).find('.svs-contextmenu3');
+                    ele.css({'display':'inline-block'});
+                }
+            }
+
+            $(parent_span).on('mouseenter',
+                _onmouseenter
+            ).on('mouseleave',
+                _onmouseexit
+            );                                                  
+            
+        }
+    }, //end _defineActionIcons
+
+    //
+    // refresh main menu and reload current page
+    //
+    _refreshMainMenu: function ( need_refresh_tree, new_page_id ){
+        
+        
+    },
+    
+    _selectMenuRecord: function( parent_id, callback ){
+        
+            if(this._selectorInput!=null){
+                this._browseFunction();
+                return;
+            }
+
+            this._selectorInput = $('<div>').uniqueId();
+        
+            //constraint
+            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']]; 
+            
+            let that = this;
+        
+            const ed_options = {
+                recID: -1,                                                                                       
+                dtID: this._selectorInput.attr('id'), //'group_selector',
+                values: [],
+                readonly: false,
+                show_header: false,
+                showclear_button: true,
+                dtFields:{
+                    dty_Type:"resource", rst_MaxValues:0,
+                    rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
+                    rst_PtrFilteredIDs: rty_IDs,
+                    rst_FieldConfig: {entity:'records', csv:false}
+                },
+                change: ()=>{
+                    //result
+                    //hiddenInput.val(uiInput.editing_input('getValues')).change();
+console.log('resutl ',that._selectorInput.attr('data-value')); //editing_input('getValues'));
+                }
+            };
+            
+            this._selectorInput.editing_input(ed_options);
+            this._selectorInput.appendTo(this.element);
+            
+            this._browseFunction = browseRecords(this._selectorInput.editing_input('instance'), this._selectorInput);
+            
+            this._browseFunction();
+
+console.log('inited');        
+        
+    },
+
+
 /*
 1) menu treeview to add/edit/delete (same as site menu)  redundant?
    or just root items (as it is)
@@ -506,5 +821,7 @@ Wrokflow/Widget links
                 
 
 */    
+
+    
     
 });

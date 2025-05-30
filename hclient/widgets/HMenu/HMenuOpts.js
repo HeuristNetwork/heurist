@@ -34,7 +34,7 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
         if(!uiInput.editing_input('instance')){
             
             let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']];
-            if(window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']){
+            if(window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']){ //for Digital Harlem
                 rty_IDs.push(window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']);
             }
 
@@ -59,6 +59,10 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
 
             uiInput.editing_input(ed_options);
         }
+        
+        let uiTree = this._$('#menuTree');
+
+        uiTree.HMenu({menuItems:rval, viewMode:'treeview', isEditMode: true, expandLevels: 2});
 
     }    
     
