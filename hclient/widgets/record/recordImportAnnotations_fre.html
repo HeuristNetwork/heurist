@@ -1,0 +1,72 @@
+<div id="div_header" class="ent_wrapper" style="margin:10px 10px 0px 40px;font-size:0.95em">
+
+    <h2>UTILISATEURS AVANCÉS</h2>
+    <p style="font-weight:bold;font-size:larger;padding:10 0">Créer des enregistrements d'annotation à partir de manifestes IIIF enregistrés</p>
+
+    <p>Remarque : utilisez cette fonction avec précaution, car elle peut créer de nombreux enregistrements supplémentaires s'il existe de nombreux manifestes enregistrés</p>
+
+    <p>Cette fonction lit le manifeste IIIF et la liste d'annotations liée, puis crée ou met à jour les enregistrements d'annotation dans la base de données Heurist.
+        <br>
+        <ul>
+            <li>Il annule toutes les modifications locales dans ces enregistrements.</li>
+            <li>Les enregistrements d'annotation sont liés au manifeste parent soit via un lien d'enregistrement, soit via un champ de fichier (qui fait référence au manifeste enregistré)</li>
+            <li>Il est possible de définir des annotations internes via la visionneuse Mirador. Elles sont indépendantes de celles importées et restent inchangées par cette opération</li>
+        </ul>
+    </p>
+    <p>
+        <label><input type='checkbox' id="chb_create_thumbs"> Créer des miniatures pour les enregistrements d'annotation (ralentit le processus)</label>
+        <br>
+        <label><input type='checkbox' checked id="chb_direct_link"> Lier l'enregistrement d'annotation directement au manifeste enregistré (sinon via l'enregistrement multimédia)</label>
+    </p>
+
+    <p>
+        <button class="ui-button-action btnAction">Continuer</button>
+    </p>
+
+</div>
+
+<div id="div_result" class="ent_wrapper" style="padding:40px;margin-top:75px;overflow:auto; display: none;">
+    <h3 style="margin:0">Rapport :</h3>
+    <br>
+    <div class="table">
+        <div class="t-row">
+            <div class="cell" style="width:200px">Nombre total de manifestes :</div>
+            <div class="cell" id="total"></div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Traité manifestes :</div>
+            <div class="cell" id="processed"></div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Manifestes manqués :</div>
+            <div class="cell" id="missed"></div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Sans annotations :</div>
+            <div class="cell" id="without_annotations"></div>
+        </div>
+        <div class="t-row" style="height:22px"></div>
+
+        <div class="t-row">
+            <div class="cell" style="width:200px">Annotations</div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Ajouté :</div>
+            <div class="cell" id="added"></div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Mis à jour :</div>
+            <div class="cell" id="updated"></div>
+        </div>
+        <div class="t-row">
+            <div class="cell" style="width:200px">Inchangé :</div>
+            <div class="cell" id="retained"></div>
+        </div>
+        <div class="t-row" style="height:22px"></div>
+
+        <div class="t-row">
+            <div class="cell" style="width:200px;vertical-align:top">Problèmes :</div>
+            <div class="cell" id="issues"></div>
+        </div>
+    </div>        
+</div>
