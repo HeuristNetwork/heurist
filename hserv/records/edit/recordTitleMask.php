@@ -334,8 +334,9 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
 
-            $puncts = '-:;,.@#|+=&(){}';// These are stripped from begining and end of title
-            $puncts2 = '-:;,@#|+=&';// same less period
+            $puncts = '-:;,.@#|+=&(){}'; // These are stripped from begining and end of title
+            $punctsNoFullstops = '-:;,@#|+=&(){}'; // as above, minus fullstops
+            $puncts2 = '-:;,@#|+=&'; // as above, minus brackets
 
             $regex_ = '/\\s]*(.*?)[';
             $regex_2 = '!\\([';
@@ -343,11 +344,10 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
             $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
             $title = preg_replace($regex_2.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
             $title = preg_replace($regex_2.$puncts.$regex_.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
-            $title = preg_replace($regex_2.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace($regex_2.$puncts.'/\\s]*\\)|\\[['.$punctsNoFullstops.'/\\s]*\\]|\\[[.]{,2}\\]|\\[[.]{4,}\\]!s', '', $title);// remove brackets containing only punctuation
             $title = preg_replace('!^['.$puncts.$regex_.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
             $title = preg_replace('!,\\s*,+!s', ',', $title);// replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
             $title = preg_replace('!\\s+,!s', ',', $title);// remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
-
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));//remove double spaces
 
