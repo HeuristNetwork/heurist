@@ -358,11 +358,11 @@ class VisualiseOverlay{
 
         let new_fields = [];
 
-        for(let i = 0; i < count; i++){
+        for(const recID of order){
 
-            let field = record[order[i]];
+            let field = record[recID];
             let alreadyListed = false;
-
+    
             // only record pointer or relamrkers
             if($Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'resource' && $Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'relmarker'){
                 continue;
@@ -371,24 +371,23 @@ class VisualiseOverlay{
             if(field['rst_RequirementType'] == 'forbidden'){
                 continue;
             }
-
+    
             // check if field is already listed
-            for(let j = 1; j < node_info.length; j++){
-
-                if(node_info[j]['dtyid'] == field['rst_DetailTypeID']){
+            for(const node of node_info){
+                if(node['dtyid'] == field['rst_DetailTypeID']){
                     alreadyListed = true;
                     break;
                 }
             }
-
+    
             if(alreadyListed){
                 continue;
             }
-
+    
             let weight = field['rst_RequirementType'] == 'required' ? 'bold' : 'normal';
             let isRequired = weight == 'bold' ? 'y' : 'n';
             let name = truncateText(window.hWin.HEURIST4.util.stripTags(field['rst_DisplayName']), maxLength);
-
+    
             // add new field
             new_fields.push({
                 text: name, size: '8px', xpos: xpos, multiline: true, weight: weight, style:"italic",

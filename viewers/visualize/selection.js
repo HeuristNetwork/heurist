@@ -184,15 +184,14 @@ class VisualiseSelection{
         }
 
         // Select new nodes
-        if(this.#selectedNodeIds && this.#selectedNodeIds.length>0){
-            for(let i=0; i < this.#selectedNodeIds.length; i++){
-                let selector = `.id${this.#selectedNodeIds[i]}`;
+        for(const nodeID of this.#selectedNodeIds){
 
-                if(this.visualiser.currentMode == 'icons'){
-                    this.updateCircles(selector, this.#selectionColour, this.#selectionColour);
-                }else{
-                    this.updateRectangles(selector, this.#selectionColour);
-                }
+            let selector = `.id${nodeID}`;
+    
+            if(this.visualiser.currentMode == 'icons'){
+                this.updateCircles(selector, this.#selectionColour, this.#selectionColour);
+            }else{
+                this.updateRectangles(selector, this.#selectionColour);
             }
         }
     }
