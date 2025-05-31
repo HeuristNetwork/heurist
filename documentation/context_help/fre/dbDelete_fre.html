@@ -1,0 +1,39 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <div style="display:inline-block;background-color:yellow;padding:6px;border: 1px solid red; border-radius: 3px;font-size: 14px;color:red;">
+            <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+            DANGER 
+            &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+        </div>
+        <h2 style='display:inline-block;vertical-align: middle;'>SUPPRESSION DE LA BASE DE DONNÉES ACTUELLE</h2><br>
+        <h2>Cela supprimera PERMANENTEMENT ET IRRÉVOCABLEMENT la base de données actuelle :</h2>
+        <h2>Base de données: <span class="dbname"></span></h2>
+
+        <label><input type='checkbox' checked id="db-archive"> Archiver tous les fichiers de la base de données</label>
+        
+        <p>Entrez les mots "DELETE MY DATABASE" ci-dessous en MAJUSCULES pour confirmer que vous souhaitez supprimer la base de données actuelle.</p>
+        <p>Tapez les mots ci-dessus pour confirmer la suppression
+            <input type='input' maxlength='20' size='20' id='db-password' autocomplete="off" autocorrect="off"/>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="ui-button-action" id="btnDelete">OK to Delete</button>
+        </p>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    <h3 style="margin:0">La base de données <span class="dbname"></span> a été supprimée</h3>
+                                 
+    <p class="archive">Les fichiers associés stockés dans les sous-répertoires de téléchargement ont été archivés et déplacés vers le dossier "DELETED_DATABASES".</p>
+    <p class="archive">Si vous supprimez des bases de données contenant un grand volume de données, veuillez demander à votre administrateur système de vider ce dossier.</p>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+                <li>Permission validation</li>
+                <li class="archive">Create SQL dump</li>
+                <li class="archive">Archive database dump and folders</li>
+                <li>Database drop</li>
+                <li>Delete database folder</li>
+            </ol>
+        </div>
+</div>

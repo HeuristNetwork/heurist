@@ -1,0 +1,35 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <div style="display:inline-block;background-color:yellow;padding:6px;border: 1px solid red; border-radius: 3px;font-size: 14px;color:red;">
+            <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+            DANGER 
+            &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+        </div>
+        
+        <h2 style='display:inline-block;vertical-align: middle;'>VIDER TOUS LES ENREGISTREMENTS DE LA BASE DE DONNÉES ACTUELLE</h2><br>
+        <h2>Cela effacera (vider) tous les enregistrements et réinitialisera le compteur à 1 pour la base de données actuelle : </h2>
+        <h2>Vider la base de données :<span class="dbname"></span></h2>
+
+        <p>Les définitions de base de données (types d'enregistrement, champs, termes, balises, utilisateurs, etc.) ne sont pas affectées.<br>
+           Les fichiers téléchargés ne sont pas supprimés. Les signets et les balises sur des enregistrements spécifiques sont supprimés.<br>
+           Cette opération peut prendre quelques minutes sur une base de données volumineuse
+        </p>
+        <p>Entrez les mots "CLEAR ALL RECORDS" en MAJUSCULES pour confirmer que vous souhaitez effacer tous les enregistrements de la base de données actuelle.</p>
+        <p>Tapez les mots ci-dessus pour confirmer la suppression des enregistrements :
+            <input type='input' maxlength='20' size='20' id='db-password' autocomplete="off" autocorrect="off"/>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="ui-button-action" id="btnDelete">Commencer à effacer</button>
+        </p>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    Les données d'enregistrement, les signets et les balises ont été supprimés de <b><span class="dbname"></span></b><br>
+    La structure de la base de données (types d'enregistrements, champs, termes, contraintes, etc.) et les utilisateurs n'ont pas été affectés.
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+            </ol>
+        </div>
+</div>

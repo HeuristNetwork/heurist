@@ -35,9 +35,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     
     _init: function() {
 
+        
         if(this.options.htmlContent=='' && this.options.actionName){
-            this.options.htmlContent = this.options.actionName
-                    +(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
+            this.options.htmlContent = this.options.actionName+'.html';
+                    //+(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
         }
         
         // dbCreate => create
