@@ -31,8 +31,8 @@ $.widget( "heurist.recordUploadedFilesIndex", $.heurist.recordAction, {
     },
     
     _init: function() {
-        this.options.htmlContent = this.options.htmlContent
-                    +(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
+        this.options.htmlContent = this.options.htmlContent+'.html';
+                    //+(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')
         this._super();    
     },
     
