@@ -44,18 +44,17 @@ function getSetting(key, defvalue, split_string = '') {
 
     let value = '';
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
+    if(key.startsWith('setting_')){
+        key = pref_key.split('_');
+        key.shift();
+        key = pref_key.join('_');
+    }
 
-        let pref_key = key;
-        if(key.startsWith('setting_')){
-            pref_key = pref_key.split('_');
-            pref_key.shift();
-            pref_key = pref_key.join('_');
-        }
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
 
-        value = Object.hasOwn(window.preference_settings, pref_key) ? window.preference_settings[pref_key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
+        value = Object.hasOwn(window.preference_settings, key) ? window.preference_settings[key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
 
-        if(!Object.hasOwn(window.preference_settings, pref_key)){
+        if(!Object.hasOwn(window.preference_settings, key)){
             putSetting(key, value);
         }
     }else{
@@ -79,7 +78,7 @@ function getSetting(key, defvalue, split_string = '') {
 */
 function putSetting(key, value) {
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
+    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
 
         if(key.startsWith('setting_')){
             key = key.split('_');
