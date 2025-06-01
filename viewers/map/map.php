@@ -19,9 +19,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-//&callback=initMap" async defer  for gmap
-//<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
-//
 define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 

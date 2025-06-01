@@ -117,7 +117,7 @@ $.widget( "heurist.searchInput", {
         let linkGear = $('<a>',{href:'#', 
             title:window.hWin.HR('filter_builder_hint')})
             .css({'display':'inline-block','opacity':'0.5','margin-top': '0.6em', width:'20px'})
-            .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
+            .addClass('ui-icon ui-icon-magnify-explore')
             .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
         

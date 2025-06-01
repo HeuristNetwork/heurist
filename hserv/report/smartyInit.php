@@ -32,7 +32,7 @@ class HeuristSecurityPolicy extends Security {
   public $static_classes = null;
 
   public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
-                    'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
+                    'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 'split',
                     'array_key_exists', 'array_column', 'array_keys', 'array_multisort',
                     'array_diff', 'array_count_values', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'array_values', 'cat',

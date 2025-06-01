@@ -1245,12 +1245,10 @@ console.error('Cardinal layout widget does not have proper options');
                         $(window).trigger('resize'); 
                         //change/restore z-index and background color
                         $(ui.newTab[0]).css({'z-index': ui.newTab.attr('data-zmax'),
-                                       'background': 'url(hclient/assets/tab_shape_sel.png)',
                             'background-size': 'cover',
                             'background-repeat': 'no-repeat',
                         });
                         $(ui.oldTab[0]).css({'z-index': ui.newTab.attr('data-zkeep'),
-                                       'background': 'url(hclient/assets/tab_shape.png)',
                             'background-size': 'cover',
                             'background-repeat': 'no-repeat',
                         });   
@@ -1274,9 +1272,6 @@ console.error('Cardinal layout widget does not have proper options');
                             'padding': '12px 20px 0 1px',
                             'margin': '12px 0px 0px -4px',
                             'z-index': 3,
-                            'background': 'url(hclient/assets/tab_shape.png)',
-                            'background-size': 'cover',
-                            'background-repeat': 'no-repeat',
                             'text-align': 'center',
                             'width': '200px',
                             'height': (navigator.userAgent.indexOf('Firefox')<0)?'33px':'45px' });

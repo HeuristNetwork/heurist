@@ -2068,29 +2068,6 @@ background: #8ea9b9
 
 .ui-iconalign { display: inline-block; vertical-align: text-bottom; padding-right:1em }
 
-.ui-icon-filter { 
-    background-image: url(hclient/assets/filter_icon24.png) !important; 
-    width: 22px;
-    height: 22px;
-    /*margin-top: -0.8em !important;*/
-    margin-left: -0.3em;
-}
-
-.ui-icon-filter-28 { 
-    background-image: url(hclient/assets/filter_icon_28.png) !important; 
-    width: 28px;
-    height: 28px;
-    margin-top: -0.5em !important;
-    margin-left: -0.3em;
-}
-
-.ui-icon-addtodb-28{ 
-    background-image: url(hclient/assets/add_to_db_28.png) !important; 
-    width: 28px;
-    height: 28px;
-    margin-top: -0.5em !important;
-    margin-left: -0.3em;
-}
 
 .ui-icon-gear-crossed{ 
     background-image: url(hclient/assets/gear_crossed.png) !important; 
@@ -2140,14 +2117,13 @@ background: #8ea9b9
     background-size: contain;
 }
 
-.ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
-
 .ui-icon-aa { 
     background-image: url(hclient/assets/Aa.png) !important; 
     width: 18px;
     height: 18px;
 }
 
+/* for faceted search wizard */
 .ui-icon-input-slider { 
     background-image: url(hclient/assets/input_slider.png) !important; 
     width: 18px;

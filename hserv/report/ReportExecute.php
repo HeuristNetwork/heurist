@@ -1510,15 +1510,6 @@ Javascript wrap:<br>
                                 $point = $geom->centroid();
                                 if($label=="") {$label = "on map";}
                                 $result = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
-
-                            /* static maps by third party service is blocked 2024-09-29
-                            if(array_key_exists('mode',$params) && $params['mode']=="link"){
-                            }else{
-                                $recid = $value['recid'];
-                                $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$this->system->dbname();//"&t="+d;
-                                return "<img src=\"".$url."\" ".$size."/>";
-                            }
-                            */
                         }
                     }
                     break;
