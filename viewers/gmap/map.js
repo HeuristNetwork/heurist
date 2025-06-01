@@ -65,7 +65,6 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     customTheme = new TimeMapTheme({
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
-            //"icon": "assets/star-red.png",
             "iconSize": [24,24],  //[16,16]
             "iconShadow": null,
             "iconAnchor":[12,12]

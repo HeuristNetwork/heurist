@@ -1633,8 +1633,8 @@ function browseRecords(_editing_input, $input){
                     $(that.selObj).appendTo($inputdiv);
                     $(that.selObj).hide();
 
-                    let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/magglass_12x11.gif',
-                        filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
+                    let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/magglass_12x11.gif',
+                        filter_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png';
                     let opt = window.hWin.HEURIST4.ui.addoption(that.selObj, 'select', 
                     '<div style="width:300px;padding:15px 0px">'
                     +'<span style="padding:0px 4px 0 10px;vertical-align:sub">'
@@ -1935,7 +1935,7 @@ function browseTerms(_editing_input, $input, value){
         }
 
 
-        let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/filter_icon_black18.png';
+        let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png';
 
         let  filter_form = '<div style="padding:10px 0px">'
         +'<span style="padding-right:10px;vertical-align:sub">'
