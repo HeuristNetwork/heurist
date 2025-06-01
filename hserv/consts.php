@@ -312,7 +312,8 @@ $rtDefines = array(
     'RT_WEB_CONTENT' => array(1147, 25),
 
     'RT_CMS_HOME' => array(99, 51),
-    'RT_CMS_MENU' => array(99, 52)
+    'RT_CMS_MENU' => array(99, 52),
+    'RT_CMS_ACTION' => array(2, 107)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -442,6 +443,9 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGES' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
+    
+    'DT_CMS_ACTION' => array(2, 1148),
+    
 
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 

@@ -28,9 +28,10 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
         
         let hiddenInput = this._$('input[name="menuItems"]');
         
-        let rval = hiddenInput.val();
-        rval =  rval?rval.split(','):[];
+        //let rval = hiddenInput.val();
+        //rval =  rval?rval.split(','):[];
         
+        /*
         if(!uiInput.editing_input('instance')){
             
             let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']];
@@ -58,11 +59,16 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
             };
 
             uiInput.editing_input(ed_options);
-        }
+        }   */
         
         let uiTree = this._$('#menuTree');
 
-        uiTree.HMenu({menuItems:rval, viewMode:'treeview', isEditMode: true, expandLevels: 2});
+        uiTree.HMenu({menuItems:hiddenInput.val(), viewMode:'treeview', isEditMode: true, expandLevels: 2, 
+                onStructureChanged:(menuItems)=>{
+                    hiddenInput.val(JSON.stringify(menuItems)).change();
+                }});
+                
+        this._on(this._$('#menuTreeAdd').button(), {click: ()=>uiTree.HMenu('addMenuEntry',0)});
 
     }    
     

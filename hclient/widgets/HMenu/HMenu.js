@@ -30,11 +30,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         styleMode: 'links',     // link,pills, buttons(?), jquery
         expandLevels: 0,        // for treeview
         
-        isEditMode: false,
-        
         customActionHandler: null,  // replacement of default event handler via ActionHandler
         onBeforeAction: null,
-        onActionComplete: null    // invoked in ActionHandler after action execution
+        onActionComplete: null,    // invoked in ActionHandler after action execution
+        
+        isEditMode: false,
+        onStructureChanged: null
+
     },
     
     _needLoadContent: false,
@@ -93,7 +95,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                             let item = data.node;
                             that._defineActionIcons( item );
                     },
-                    extensions:["edit", "dnd"],
+                    extensions:["dnd"], //"edit", 
                     dnd:{
                         preventVoidMoves: true,
                         preventRecursiveMoves: true,
@@ -111,14 +113,16 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                             //node - target node
                             let source_parent = data.otherNode.parent.data.page_id;
                             if(!(source_parent>0))
-                                source_parent = home_page_record_id;
+                                source_parent = 0; //root
 
                             data.otherNode.moveTo(node, data.hitMode);
 
                             let target_parent = data.otherNode.parent.data.page_id;
                             if(!(target_parent>0))
-                                target_parent = home_page_record_id;
+                                target_parent = 0; //root
                             data.otherNode.data.parent_id = target_parent;
+                            
+                            that._getMenuStructure();
                         }
                     },
                     edit:{
@@ -363,6 +367,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             
             newOptions = $.extend(window.hWin.HEURIST4.util.cloneJSON($.heurist.HMenu.prototype.options), newOptions);
             
+            /*
             let newids = null;
             if (Array.isArray(newOptions.menuItems)){
                 newids = newOptions.menuItems.join(',');   
@@ -375,8 +380,12 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             }else{
                 oldids = this.options.menuItems;
             }
+            */
+            //if( isJSON)
+            //JSON.stringify(newOptions.menuItems)!=JSON.stringify(this.options.menuItems)
             
-            if(newids!=oldids)
+            
+            if(true) //newids!=oldids
             {
                 this._menuData = null;    //reset
             }
@@ -400,19 +409,24 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             ids = '';    
         } else {
             
-            if(window.hWin.HEURIST4.util.isJSON(this.options.menuItems)){
-                
+            
+            ids = window.hWin.HEURIST4.util.isJSON(this.options.menuItems);
+            if(ids)
+            {
+                this.options.menuItems = ids;
+            }else{
+                ids = this.options.menuItems;
+                if(Array.isArray(ids)) {ids = ids.join(',');}
+                else if(window.hWin.HEURIST4.util.isNumber(ids)){
+                    this.options.menuItems = [ids];
+                }else{
+                    this.options.menuItems = ids.split(',')  
+                } 
             }
             
-            if(Array.isArray(ids)) {ids = ids.join(',');}
-            else if(window.hWin.HEURIST4.util.isNumber(ids)){
-                this.options.menuItems = [ids];
-            }else{
-                this.options.menuItems = ids.split(',')  
-            } 
         }
         
-        this._menuData = null;
+        this._menuData = null; //result - full json 
         this.clearContent();
 
         if(this.options.menuItems.length==0){
@@ -423,10 +437,9 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         let that = this;
         
         //retrieve menu content from server side
-        let request = {website:1, ver:3, webmenu:this.options.menuItems, lang:this.options.language};
+        let request = {website:1, ver:3, webmenu:JSON.stringify(this.options.menuItems), isTree:true, lang:this.options.language};
         window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
-console.log(response.data);                
                 that._menuData = response.data;
                 that._initControls();
             }else{
@@ -560,7 +573,7 @@ console.log(response.data);
         let that = this;
         
         let item_li = $(item.li);
-        let menu_id = item.data.page_id;
+        let menu_id = item.key;//item.data.page_id;
 
         if($(item).find('.svs-contextmenu3').length==0){
 
@@ -574,7 +587,7 @@ console.log(response.data);
                 +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
                 //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
                 +'<span class="ui-icon ui-icon-trash" '
-                +'" title="Remove menu entry from website"></span>'
+                +'" title="Remove menu entry"></span>'
                 +'</div>').appendTo(parent_span);
 
             $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
@@ -598,7 +611,7 @@ console.log(response.data);
 
                     if(ele.hasClass('ui-icon-plus')){ //add new menu to 
 
-                        that._selectMenuRecord(menuid); 
+                        that.addMenuEntry(menuid); 
 
                     }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
 
@@ -614,98 +627,30 @@ console.log(response.data);
                                         if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                             
                                             let recordset = data.selection;
-                                            let page_id = recordset.getOrder()[0];
-/*                                            
-                                            window.hWin.page_cache[page_id] = null; //remove from cache
-                                            delete window.hWin.page_cache[page_id];
+                                            let pageId = recordset.getOrder()[0];
                                             
-                                            if(page_id == _currentPageId()){
-                                                _refreshCurrentPage(page_id);
-                                            }
-                                            // Update website tree and in site menu
+                                            // Update tree
                                             let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                            let refresh_menus = false;
-
-                                            if(window.hWin.page_cache[page_id]) window.hWin.page_cache[page_id][DT_NAME] = new_name;
-
-                                            // Update tree nodes
-                                            $.ui.fancytree.getTree( $container ).visit((node) => {
-
-                                                let old_name = node.title;
-                                                if(node.data.page_id == page_id){
-
-                                                    if(old_name == new_name){ return false; } // name wasn't updated
-
+                                            let node = $.ui.fancytree.getTree( that.element ).getNodeByKey( pageId );
+                                            if(node.title != new_name){
                                                     node.setTitle( new_name );
-                                                    _defineActionIcons(node);
-                                                    refresh_menus = true;
-                                                }
-
-                                            });
-
-                                            if(refresh_menus){ that._refreshMainMenu(false); } // update menu
-*/
-                                            
+                                                    that._defineActionIcons(node);
+                                                    that._getMenuStructure();
+                                            }
                                         }
                                     }
                                 }
                             );
                         }
-                        
-/*                      if( (menuid == _currentPageId())
-                            && editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
-                        {                                    
-                                return;
-                        }else{
-                                
-                        }*/
+
                         __editPageRecord(menuid);
 
                     }else 
                         if(ele.hasClass('ui-icon-trash')){    //remove menu entry
-
-                            function __doRemove(){
-                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                let isDelete = $dlg.find('#del_menu').is(':checked');
-                                $dlg.dialog( "close" );
-
-                                let to_del = [];
-                                item.visit(function(node){
-                                    to_del.push(node.data.page_id);
-                                },true);
-
-                                if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
-                                    to_del = null;
-                                }
-/*                                
-                                that._removeMenuEntry(parent_id, menuid, to_del, function(){
-                                    item.remove();    
-                                    
-                                    //after deletion select home page
-                                    that._refreshMainMenu( false, home_page_record_id); //after delete
-                                });
-*/                                
-                            }
-
-                            let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
-                            
-                            let buttons = {};
-                            buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
-                                __doRemove();
-                            };
-                            buttons[window.hWin.HR('Cancel')]  = function() {
-                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                                $dlg.dialog( "close" );
-                            };
-
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).<br><br>'
-                                + 'To avoid removing sub-menus, move them out of this menu before removing it.<br><br>'
-                                + '<input type="checkbox" id="del_menu">'
-                                + '<label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove<br>'
-                                + 'the menu entreis from this website, check this box. Note that this is not reversible.</label>', buttons,
-                                'Remove "'+ menu_title +'" Menu');
-
+                            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Delete menu entry? Please confirm"),  function(){
+                                item.remove();  
+                                that._getMenuStructure();  
+                            });
                         }
 
                 },500);
@@ -757,7 +702,85 @@ console.log(response.data);
         
     },
     
-    _selectMenuRecord: function( parent_id, callback ){
+    /*
+    *
+    */
+    _findNodeByPageId: function(pageId){
+        
+        let resultNode = null;
+
+        $.ui.fancytree.getTree( this.element ).visit((node) => {
+            if(node.data.page_id == pageId){
+                resultNode = node;
+                return false; //found
+            }
+        });
+        
+        return resultNode;
+    },
+    
+    /*
+    * Converts treeview strucuture to json {id1:{}   }
+    */
+    _getMenuStructure: function( struct ){
+        
+        let isRoot = false;
+        if(!struct){
+            isRoot = true;
+            this._menuData = $.ui.fancytree.getTree( this.element ).toDict(true);
+            struct = this._menuData.children;
+        }                 
+        
+        let item = {};
+        if(struct){
+            for(let i=0; i<struct.length; i++){
+                
+                item[struct[i].key] = {};
+                
+                if(struct[i].children?.length>0){
+                      item[struct[i].key] = this._getMenuStructure(struct[i].children);
+                }
+                
+            }
+        }
+        
+        if(isRoot && window.hWin.HEURIST4.util.isFunction(this.options.onStructureChanged)){
+                this.options.onStructureChanged.call(this, item);
+        }
+        
+        return item;
+    },
+    
+    /*
+    *
+    */
+    _verifyUniqueMenuKeys(menuData){
+        
+        let tree = $.ui.fancytree.getTree( this.element );
+        let duplications = [];
+        
+        for (let idx in menuData){
+            
+            let item = menuData[idx];
+            if(tree.getNodeByKey(item.key)){
+                duplications.push(item.key);
+            }
+            
+            if(item.children){
+                let dups = this._verifyUniqueMenuKeys(item.children);            
+                if(dups.length>0){
+                    duplications = duplications.concat(dups);        
+                }
+            }
+        }
+        
+        return duplications;
+    },
+    
+    /*
+    *
+    */
+    addMenuEntry: function( parentNodeKey ){
         
             if(this._selectorInput!=null){
                 this._browseFunction();
@@ -768,6 +791,9 @@ console.log(response.data);
         
             //constraint
             let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']]; 
+            if(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']){
+                rty_IDs.push(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']);
+            }
             
             let that = this;
         
@@ -780,27 +806,66 @@ console.log(response.data);
                 showclear_button: true,
                 dtFields:{
                     dty_Type:"resource", rst_MaxValues:0,
-                    rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
+                    rst_DisplayName: 'Menu items', rst_DisplayHelpText:'',
                     rst_PtrFilteredIDs: rty_IDs,
                     rst_FieldConfig: {entity:'records', csv:false}
                 },
                 change: ()=>{
                     //result
-                    //hiddenInput.val(uiInput.editing_input('getValues')).change();
-console.log('resutl ',that._selectorInput.attr('data-value')); //editing_input('getValues'));
+                    
+                    const page_id = that._selectorInput.attr('data-value');
+                    
+                    const tree = $.ui.fancytree.getTree( that.element );
+                    
+                    let parentNode = null;
+                    if(tree){
+                        if(parentNodeKey>0){
+                            parentNode = tree.getNodeByKey(parentNodeKey);
+                        }
+                        if(!parentNode){
+                            parentNode = tree.getRootNode();
+                            if(window.hWin.HEURIST4.util.isempty(that._menuData)){
+                                tree.clear();
+                            }
+                        }
+                    }
+                    
+                    //retrieve menu content from server side
+                    let request = {website:1, ver:3, webmenu:[page_id], isTree:true, lang:that.options.language};
+                    window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            if(parentNode==null){ //treeview not inited
+                                that._menuData = response.data;
+                                that._initControls(); 
+                                return;
+                            }
+                            
+                            const dups = that._verifyUniqueMenuKeys(response.data);
+                            
+                            if(dups.length>0){
+                                window.hWin.HEURIST4.msg.showMsgErr('It is not possible to add new menu entry. It is already in menu');    
+                            }else{
+                                parentNode.addNode( response.data, parentNode.isRootNode() || parentNode.hasChildren()? 'child': 'after' );
+                                that._getMenuStructure();
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                        
+                    });
                 }
             };
             
             this._selectorInput.editing_input(ed_options);
-            this._selectorInput.appendTo(this.element);
+            this._selectorInput.appendTo($('<div>').appendTo(this.element));
+            this._selectorInput.parent().hide();
             
-            this._browseFunction = browseRecords(this._selectorInput.editing_input('instance'), this._selectorInput);
+            this._browseFunction = browseRecords(this._selectorInput.editing_input('instance'), this._selectorInput, 'Select menu items');
             
             this._browseFunction();
-
-console.log('inited');        
-        
     },
+    
 
 
 /*

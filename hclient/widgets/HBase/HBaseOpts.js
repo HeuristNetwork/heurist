@@ -93,6 +93,8 @@ $.widget( 'heurist.HBaseOpts', $.heurist.HBaseView, {
             if(opt){
                 if(this.type=="checkbox"){
                     this.checked = (opt=='1' || opt=='true')
+                }else if(window.hWin.HEURIST4.util.isJSON(opt)){
+                    $(this).val(JSON.stringify(opt));
                 }else{
                     $(this).val(opt);
                 }

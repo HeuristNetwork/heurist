@@ -1275,7 +1275,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 // It uses window.hWin.HEURIST4.browseRecordCache
 // It returns selection function that opens record selection popup dialog
 //
-function browseRecords(_editing_input, $input){
+function browseRecords(_editing_input, $input, popupTitle){
 
     let that = _editing_input;
     
@@ -1303,15 +1303,19 @@ function browseRecords(_editing_input, $input){
         s_action = 'select or create';
         pointerMode = 'addorbrowse';
     }
+    
+    if(!popupTitle){
+        popupTitle = window.hWin.HR((isparententity)
+                        ?('CHILD record pointer: '+s_action+' a linked child record')
+                        :('Record pointer: '+s_action+' a linked record'));    
+    }
 
     let popup_options = {
                     select_mode: (that.configMode.csv==true?'select_multi':'select_single'),
                     select_return_mode: 'recordset',
                     edit_mode: 'popup',
                     selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                    title: window.hWin.HR((isparententity)
-                        ?('CHILD record pointer: '+s_action+' a linked child record')
-                        :('Record pointer: '+s_action+' a linked record')),
+                    title: popupTitle,
                     rectype_set: that.f('rst_PtrFilteredIDs'),
                     pointer_mode: pointerMode,
                     pointer_filter: that.f('rst_PointerBrowseFilter'),  //initial filter

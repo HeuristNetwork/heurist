@@ -64,8 +64,8 @@ class WebSite
     
     private $currentLang = 'en';
     
-    private $menuTree = null;
-    private $menuRecords = null;
+    private $menuTree = null;    // hierarchy of ids
+    private $menuRecords = null; // array of records with details
 
     /**
      * Constructor
@@ -103,6 +103,12 @@ class WebSite
         
         $this->system->defineConstant('TRM_ICON_ONLY'); //2-9635
         $this->system->defineConstant('TRM_NAME_ONLY'); //2-9634
+
+        $this->system->defineConstant('DT_CMS_TOP_MENU');
+        $this->system->defineConstant('DT_CMS_MENU');
+        $this->system->defineConstant('DT_CMS_MENU_FORMAT');
+        $this->system->defineConstant('DT_THUMBNAIL');
+        
         
     }
     
@@ -253,8 +259,20 @@ class WebSite
             if($this->messageError){
                 $result = false;
             }else{            
-                $result = $this->getMenuTree( $this->params['webmenu'] ); 
-                //fillMenuTree($this->params['webmenu']);
+                
+                if(@$this->params['isTree']){
+                    
+                    if(is_string($this->params['webmenu'])){
+                        $this->params['webmenu'] = json_decode($this->params['webmenu'],true);
+                    }
+    
+                    $this->menuTree = [];
+                    $this->fillMenuTreeDetails($this->params['webmenu'], $this->menuTree, true);
+                    $result = $this->getMenuTree(0, $this->menuTree);
+                    
+                }else{
+                    $result = $this->getMenuTree( $this->params['webmenu'] );
+                }
             }
 
             if (isset($result)) {
@@ -815,25 +833,51 @@ class WebSite
     //
     private function fillMenuTree($menuRecIDs=null){
         
-        $this->system->defineConstant('DT_CMS_TOP_MENU');
-        $this->system->defineConstant('DT_CMS_MENU');
-        $this->system->defineConstant('DT_CMS_MENU_FORMAT');
-        $this->system->defineConstant('DT_NAME');
-        //$this->system->defineConstant('DT_CMS_TARGET');
-        
         if($this->menuTree==null){
             $this->menuRecords = array();  //
             //see recordSearch.php
             $this->menuTree = recordSearchMenuItems2($this->system, $menuRecIDs, $this->menuRecords, true );
         }
     }
+    
+    //
+    //
+    //
+    private function fillMenuTreeDetails($menuTreeIds, &$menuTree, $isRoot){
+        
+        //get flat array 
+        $allIds = array();
+        
+        foreach($menuTreeIds as $recID=>$subs){
+            if(is_array($subs)){
+                $menuTree[$recID] = [];
+                
+                array_push($allIds, $recID);
+                $has_subs = !empty($subs);
+                if($has_subs){
+                    $allIds = array_merge($allIds, $this->fillMenuTreeDetails($subs, $menuTree[$recID], false));
+                }
+            }elseif(is_numeric($subs)){
+                $menuTree[$subs] = [];
+                
+                array_push($allIds, $subs);
+            }
+        }
+        if(!$isRoot){
+            return $allIds;  
+        } 
+        
+        $this->menuTree = $menuTree;
+        //fill $this->menuRecords with details
+        $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, array(DT_NAME, DT_CMS_MENU_FORMAT, DT_THUMBNAIL), false);
+    }
 
     //
     //  Returns json tree for menu (used in _editCMS_SiteMenu)
     //
-    public function getMenuTree($parentMenuRecIDs=null, $menu_tree=null){
+    public function getMenuTree($parentMenuRecIDs=null, $menuTree=null){ //$parentKey=null, 
         
-        if($menu_tree==null){ //root
+        if($menuTree==null){ //root
         
             if($parentMenuRecIDs==null){
                 $siteID = $this->siteRecord['rec_ID'];
@@ -845,11 +889,11 @@ class WebSite
             $this->fillMenuTree($parentMenuRecIDs);
 
             if(count($parentMenuRecIDs)==1 && false){  //include home as first level menu
-                $parentKey = $parentMenuRecIDs[0];
-                $menu_tree = $this->menuTree[$parentKey];
+                //$parentKey = $parentMenuRecIDs[0];
+                $menuTree = $this->menuTree[$parentKey];
             }else{
                 $parentKey = 0;
-                $menu_tree = $this->menuTree;
+                $menuTree = $this->menuTree;
             }
         }else{
             $parentKey = $parentMenuRecIDs;
@@ -857,14 +901,14 @@ class WebSite
         
         $res = array();
 
-        foreach($menu_tree as $page_id=>$subs){ //first level is list of buttons with dropdowns
+        foreach($menuTree as $page_id=>$subs){ //first level is list of buttons with dropdowns
         
             $menuName = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
             
             $menuFormat = $this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT);
             $menuIcon = $this->getValue($this->menuRecords[$page_id], DT_THUMBNAIL);
             
-            $key = $parentKey.','.$page_id;
+            $key = $page_id; //$parentKey.','.$page_id;
             
             $item = array();
             $item['key'] = $key; // set unique key

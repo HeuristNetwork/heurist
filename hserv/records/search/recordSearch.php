@@ -1810,7 +1810,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 
 //
 // $menuitems - ids for current level
-// $resultIds - all ids in menu
+// $resultIds - all ids in menu - array
 //
 function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
 
