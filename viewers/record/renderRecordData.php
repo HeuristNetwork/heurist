@@ -1167,11 +1167,6 @@ if(defined('FONT_SIZE') && FONT_SIZE!==''){
     </head>
     <body class="popup" style="overflow-x: hidden;">
 
-        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>viewers/gmap/mapViewer.js"></script>
-        <script>
-            mapStaticURL = "<?php echo HEURIST_BASE_URL;?>viewers/gmap/mapStatic.php?width=300&height=300&db=<?php echo HEURIST_DBNAME;?>";
-        </script>
-
         <?php
 } //$is_map_popup
 elseif(!$is_map_popup){

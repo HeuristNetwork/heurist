@@ -5,7 +5,7 @@
 KML is loaded as a single collection (without access to particular feature) Need to use our kml parser to parse and load each kml' placemark individually
 Altough our kml parser supports Placemarks only. It means no external links, image overlays and other complex kml features. 
 Selector map tool (rectangle and polygon/lasso)
-Editor map tool (to replace mapDraw.js based on gmap)
+Editor map tool 
 Thematic mapping
  
 * options for preferences
@@ -161,7 +161,7 @@ $.widget( "heurist.mapping", {
     hie_places_wo_events_style: null,
     */
     
-    //reference to google or leaflet map
+    //reference to leaflet map object
     
     //main elements
     nativemap: null,     //map container
