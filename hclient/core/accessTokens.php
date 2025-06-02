@@ -30,5 +30,5 @@ if (is_file($parentIni)){
 }
 
 echo 'var accessToken_MapBox="'.$accessToken_MapBox.'",';
-echo 'accessToken_MapTiles="'.$accessToken_MapTiles.'",';
+echo 'accessToken_MapTiles="'.$accessToken_MapTiles.'";';
 ?>

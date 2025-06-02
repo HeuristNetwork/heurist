@@ -558,7 +558,7 @@ $.widget( "heurist.app_timemap", {
     }
 
     //leaflet
-    zoomToSelection:function(selection, fly_params){
+    , zoomToSelection:function(selection, fly_params){
         let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
             mapping.mapping('zoomToSelection', selection, fly_params );
