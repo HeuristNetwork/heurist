@@ -1844,8 +1844,13 @@ function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
     }
 
     if($isRoot){
+            $detailIds = array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU, DT_THUMBNAIL);
+            if(defined('DT_CMS_MENU_FORMAT')){
+                array_push($detailIds, DT_CMS_MENU_FORMAT);
+            }
+        
             //find details
-            $records = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU, DT_CMS_MENU_FORMAT, DT_THUMBNAIL), false);
+            $records = recordSearchDetailsForRecIds($system, $resultIds, $detailIds, false);
             
             foreach($resultTree as $rec_ID=>$subs){
                 recordSearchMenuItemsTree($rec_ID, $resultTree[$rec_ID], $records);

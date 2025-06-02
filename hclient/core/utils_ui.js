@@ -3456,7 +3456,35 @@ window.hWin.HEURIST4.ui = {
         
         ele.editing_input(ed_options);
   },
-      
+  
+  /*
+  *  IntersectionObserver should be used instead of this method 
+  *  see HRecordList for example
+  */
+  isElementInViewport: function(el, container) {
+
+      const elRect = element.getBoundingClientRect();
+      let conRect;
+      if(container){
+          conRect = container.getBoundingClientRect();    
+      }else{
+          conRect = {x:0, y:0, 
+                    width: window.innerWidth || document.documentElement.clientWidth,
+                    height: window.innerHeight || document.documentElement.clientHeight};
+      }
+
+      let result = false;
+
+      if(elRect.x >= conRect.x && elRect.y >= conRect.y
+          && elRect.x + elRect.width <= conRect.x + conRect.width 
+          && elRect.y + elRect.height <= conRect.y + conRect.height)
+      {
+          result = true
+      }
+
+      return result;
+  },
+
     
 }//end ui
 

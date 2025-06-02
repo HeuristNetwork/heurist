@@ -766,7 +766,7 @@ class WebSite
     {
             $menu_title = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
             
-            $menuFormat = $this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT);
+            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT):null;
             $menuIcon = $this->getFile($this->menuRecords[$page_id], DT_THUMBNAIL, '', 'thumb');
             
             if($menuIcon && $menuFormat!=TRM_NAME_ONLY){
@@ -869,7 +869,11 @@ class WebSite
         
         $this->menuTree = $menuTree;
         //fill $this->menuRecords with details
-        $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, array(DT_NAME, DT_CMS_MENU_FORMAT, DT_THUMBNAIL), false);
+        $detailIds = array(DT_NAME, DT_CMS_MENU_FORMAT, DT_THUMBNAIL);
+        if(defined('DT_CMS_MENU_FORMAT')){
+            array_push($detailIds, DT_CMS_MENU_FORMAT);
+        }
+        $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);
     }
 
     //
@@ -905,7 +909,7 @@ class WebSite
         
             $menuName = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
             
-            $menuFormat = $this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT);
+            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT):null;
             $menuIcon = $this->getValue($this->menuRecords[$page_id], DT_THUMBNAIL);
             
             $key = $page_id; //$parentKey.','.$page_id;

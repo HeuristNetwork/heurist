@@ -74,11 +74,12 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
         }
         
         let templateCard;
-        if(currentTemplate=='templateCard'){
+        if(templateType=='templateCard'){
             templateCard = [{key:'',title:'build-in renderer'}, 
              {key:'def/HRecordListCard', title:'Card'}, 
              {key:'def/HRecordListMin',  title:'Icon+title (minimal)'}, 
              {key:'def/HRecordListRow',  title:'Table row'},
+             {key:'def/HRecordListBig',  title:'Extended info'},
              {key:'',title:'<hr>',disabled:true}];
         }else{
             templateCard = [{key:'',title:'build-in renderer'}, 

@@ -165,8 +165,14 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             this._$('[data-heurist-role="recordList-selection"]').hide();
         }
         
+        this._$('[data-heurist-role="recordList-options"]').hide();
+        /* this button is for debug 
         this._on(this._$('[data-heurist-role="recordList-options"]'),
             {click: ()=>this.openOptionsEditor()});
+        */
+            
+        // create observer to check record's cards visibility within scrollable div_content viewport
+        this._createIntersectionObserver();
 
         //triggers onInitFinished and performs initial search
         this._super();
@@ -207,6 +213,9 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     clearContent: function(){
         
         if(!this._initCompleted) return;
+        
+        //stop observing
+        this.observer.disconnect();
         
         //_off all clicks for actions per record cards
         this._off( this.div_content.find(`div[${this.record_id_attr}]`), 'click');
@@ -462,7 +471,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
         let html = ''; //result html for content
         
-        //TBD - if pageSize>1000 - imlement implicit pagination - for visible viewport
+        //TBD - if pageSize>1000 - imlement implicit pagination - render for visible viewport only
         pageno = (pageno<0) ?0:pageno;
 
         let pagesize = this.options.pageSize;
@@ -499,23 +508,70 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
                 html  += this._renderRecordStub(recID);
             
-                rec_toload.push(recID);
+                //check if it is visible
+                rec_toload.push(''+recID);
             }
         }
         
         if(rec_toload.length>0){
-            //loads record to be rendered
-            this._loadRecordsDetails( rec_toload );
+            // loads record to be rendered
+            // this._loadRecordsDetails( rec_toload );
         }else{
-            this._renderPagination(true);    
+            
         }
+        this._renderPagination(true);
+        
+        this.observer.disconnect();
         
         this.div_content[0].innerHTML = html;
         
-        this._on( this.div_content.find(`div[${this.record_id_attr}]`), {
+        let allCards = this.div_content.find(`div[${this.record_id_attr}]`);
+        
+        this._on( allCards, {
             click: this._recordDivOnClick
         });
+        
+        if(rec_toload.length>0){
+            let that = this;
+            allCards.each((idx, item)=>{
+                if(rec_toload.indexOf( item.getAttribute(that.record_id_attr) )>=0){
+                    that.observer.observe(item);    
+                }
+            });
+        }
+        
+        
 
+    },
+    
+    _createIntersectionObserver: function () {
+
+          let options = {
+            root: null, //this.div_content[0],
+            rootMargin: '0px',
+            threshold: [0, 0.25, 0.5, 0.75, 1],
+            delay: 300
+          };
+
+          let that = this;
+          this.observer = new IntersectionObserver((entries, observer)=>that._handleIntersect(entries, observer), options);
+    },
+    
+    _handleIntersect: function(entries, observer){
+         
+         let that = this;
+         let rec_toload = [];
+         entries.forEach((entry) => {
+            if (entry.intersectionRatio > 0.44) {        
+                rec_toload.push( entry.target.getAttribute(that.record_id_attr) );
+                that.observer.unobserve( entry.target );
+            }
+         });
+         
+         if(rec_toload.length>0){
+             this._loadRecordsDetails(rec_toload);
+         }
+                
     },
     
     //
@@ -525,7 +581,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         let that = this;
         let ids = rec_toload.join(',');        
-            
+        
         // template for records
         if(this.options.templateCard){
             //loads template results
@@ -536,23 +592,23 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
                            lang: this.HAPI.getLocale()
                           };
             
-            const temp_ele = document.createElement('div');
+            let temp_ele = document.createElement('div');
             let that = this;
 
             $(temp_ele).load(this.HAPI.baseURL, request, function(){ 
                 for (const child of temp_ele.children) {
-                    //find card among stub
+                    //find card among stubs and replace 
                     const recID = child.getAttribute(that.record_id_attr);
                     if(recID>0){
                         that._cashedItem[recID] = child.outerHTML; //keep in cache
-                        let ele = that.div_content[0].querySelector(`div[${that.record_id_attr}="${recID}"]`);
-                        if(ele){
-                            ele.innerHTML = child.innerHTML;
-                        }
+                        
+                        that._replaceStubWithContent(recID);
                     }
-                }   
+                }
+                
+                temp_ele = null;//clear   
             });
-            this._renderPagination(true);
+            //this._renderPagination(true);
             
         }else{
 
@@ -606,14 +662,34 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
                     let recID = rec_toload[i];
                     if(resp.getById(recID)==null){ //not found
                         this.recordSet.removeRecord(recID);
+                    }else{
+                        this._cashedItem[recID] = this._renderRecord(recID);
+                        this._replaceStubWithContent(recID);
                     }        
                 }
 
-                this._renderPage( this._current_page );
+                //this._renderPage( this._current_page );
             }
 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
+        }
+        
+    },
+    
+    _replaceStubWithContent(recID){
+        
+        //get stub
+        let ele = this.div_content[0].querySelector(`div[${this.record_id_attr}="${recID}"]`);
+        if(ele){
+            //replace content
+            /*
+            ele.outerHTML = this._cashedItem[recID];
+            this._on( $(ele), {
+                click: this._recordDivOnClick
+            });
+            */
+            ele.innerHTML = $(this._cashedItem[recID]).html();
         }
         
     },
@@ -710,7 +786,7 @@ console.log(interpolate(template, { ...data
     //
     _recordDivOnClick: function(event){
 
-        if($(event.target).is('a')) return;
+        if($(event.target).is('a')) return; // || $(event.target).parents('a')
 
         let recdiv = event.target;
         
