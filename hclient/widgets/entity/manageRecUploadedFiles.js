@@ -909,9 +909,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         let recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
-
-        let thumbURL = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&thumb=${fld('ulf_ObfuscatedFileID')}&${window.hWin.HEURIST4.util.random()}`;
-        let html_thumb = `<div class="recTypeThumb realThumb" style="background-image: url(&quot;${thumbURL}&quot;);opacity:1"></div>`;
+        
+        let html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
+        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                    fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
@@ -944,12 +945,18 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
 
-            html = html 
-                + `<div title="Click to edit file" ${action_style} role="button" aria-disabled="false" data-key="edit" `
+            let refreshBtn = rectype != 'external' || fld('ulf_OrigFileName') != '_remote' ? '' :
+                `<div title="Click to refresh the thumbnail" ${action_style} role="button" aria-disabled="false"
+                    data-key="refresh" class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">
+                    <span class="ui-button-icon-primary ui-icon ui-icon-refresh"></span><span class="ui-button-text"></span>
+                </div>`;
+
+            html += `<div title="Click to edit file" ${action_style} role="button" aria-disabled="false" data-key="edit" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
                 + `${url_icon}&nbsp;&nbsp;`
+                + refreshBtn
                 + `<div title="Click to delete file" ${action_style} role="button" aria-disabled="false" data-key="delete" `
                 +   'class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
@@ -988,6 +995,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         is_resolved = true;
 
+        let recordset = this.getRecordSet();
+        let record = recordset.getById(ulf_ID);
+        let ulf_ObfuscatedFileID = recordset.fld(record, 'ulf_ObfuscatedFileID');
+
         switch (action) {
 
             case 'view': {
@@ -1007,15 +1018,41 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }
             case 'url': {
 
-                let recordset = this.getRecordSet();
-                let record = recordset.getById(ulf_ID);
-                let ulf_ObfuscatedFileID = recordset.fld(record, 'ulf_ObfuscatedFileID');
-
                 window.hWin.HEURIST4.util.copyStringToClipboard(`${window.hWin.HAPI4.baseURL_pro}?db=${window.hWin.HAPI4.database}&file=${ulf_ObfuscatedFileID}`);
 
                 window.hWin.HEURIST4.msg.showMsgFlash('Copied URL to clipboard', 3000);
 
                 break;
+            }
+            case 'refresh': {
+
+                let type = recordset.fld(record, 'ulf_ExternalFileReference') ? recordset.fld(record, 'ulf_OrigFileName') : '_local';
+                if(type === '_remote'){
+
+                    let refreshURL = `${window.hWin.HAPI4.baseURL}hserv/controller/fileDownload.php`;
+                    let request = {
+                        db: window.hWin.HAPI4.database,
+                        thumb: ulf_ObfuscatedFileID,
+                        refresh: 1
+                    };
+
+                    let $thumb = this.recordList.find(`[recID=${ulf_ID}] .recTypeThumb`);
+                    window.hWin.HEURIST4.util.sendRequest(refreshURL, request, null, (response) => {
+
+                        if(response.message.startsWith('Error_')){
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            return;
+                        }
+
+                        let url = window.hWin.HAPI4.getImageUrl(null, ulf_ObfuscatedFileID, null, null, null, true);
+                        url = url.replace('icon=', 'thumb=');
+                        $thumb.css('background-image', `url("${url}")`);
+
+                        window.hWin.HEURIST4.msg.showMsgFlash('Thumbnail has been refreshed', 3000);
+
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
+                    });
+                }
             }
             default: {
                 is_resolved = false;
@@ -1184,7 +1221,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
-    
+
         if(this._currentEditID > 0){
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
         }
@@ -1348,7 +1385,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                                     + '</div>'
                                 + '</div>'
 
-                                + '<div id="nakala-url">'
+                                + '<div id="nakala-url" style="display: none;">'
                                     + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Use test server:</label></div>'
                                     + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
                                     + '<div class="input-cell" style="padding-bottom: 12px;">'
@@ -1484,7 +1521,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             license: license
                         },
                         api_key: account,
-                        use_test_url: $dlg.find('#use_test_url').is(':checked') || account.indexOf('_') == -1 ? 1 : 0
+                        use_test_url: account.indexOf('_') == -1 ? 1 : 0
                     };
 
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._edit_dialog);
@@ -1603,7 +1640,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         let value = $accounts.val();
 
-                        value != '' && value.indexOf('_') >= 0 ? $dlg.find('#nakala-url').show() : $dlg.find('#nakala-url').hide();
                         value != '' && value.indexOf('_') >= 0 ? $dlg.find('#acc-helper').hide() : $dlg.find('#acc-helper').show();
                     }
                 });
