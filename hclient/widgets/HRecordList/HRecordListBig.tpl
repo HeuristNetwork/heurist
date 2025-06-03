@@ -19,7 +19,7 @@
 
 {* <div class="card-img-top recordList-thumb{$opacity}" style="background-image: url('{$recordThumbnail}');"> *}
 
-<div class="col" data-heurist-rec="{$r.recID}"><div class="recordList-item" style="height:auto;width:90%">
+<div class="col" data-heurist-rec="{$r.recID}"><div class="recordList-item border round-1" style="height:auto;width:98%;">
     
 <div class="HeaderRow" style="margin-bottom:15px;min-height:0px;">
 	<h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;">{$r.recTitle}</h2>

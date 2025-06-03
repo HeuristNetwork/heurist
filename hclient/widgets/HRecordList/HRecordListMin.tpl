@@ -13,11 +13,11 @@
   {$opacity=''}
 {/if}
 
-  <div class="col" data-heurist-rec="{$r.recID}"><div class="card recordList-item">
-  		  <div class="card-img-top recordList-thumb" style="{$opacity}background-image: url('{$recordThumbnail}');">
+  <div class="col" data-heurist-rec="{$r.recID}"><div class="recordList-item d-flex" style="width:14rem;height:4rem;">
+            <div class="recordList-thumb" style="{$opacity}background-image: url('{$recordThumbnail}');min-width:4rem">
         </div>
-  		<div class="card-body p-1 recordList-text">
-        <p class="card-text">MIN {$r.recTitle}</p>
-      </div>
+        <div class="ps-1 recordList-text" style="max-height: 3rem;line-height: 1rem;">
+            {$r.recTitle}
+        </div>
   </div></div>
 {/foreach}

@@ -5,6 +5,7 @@
 {if ($r==null)}
 {continue}
 {/if}
+{$recordIcon = "`$baseURL`&icon=`$r.recTypeID`"}
 {$recordThumbnail = $heurist->getRecordThumbnail($r)}
 {if ($recordThumbnail==null)}
   {$recordThumbnail = "`$baseURL`&icon=`$r.recTypeID`&version=thumb"}
@@ -13,11 +14,10 @@
   {$opacity=''}
 {/if}
 
-  <div class="col" data-heurist-rec="{$r.recID}"><div class="card recordList-item">
-  		  <div class="card-img-top recordList-thumb" style="{$opacity}background-image: url('{$recordThumbnail}');">
-        </div>
-  		<div class="card-body p-1 recordList-text">
-        <p class="card-text">ROW {$r.recTitle}</p>
-      </div>
-  </div></div>
+  <tr data-heurist-rec="{$r.recID}">
+    <td>{$r.recID}</td>
+  	<td><div class="recordList-icon" style="background-image: url('{$recordIcon}');"></div></td>
+  	<td>{$r.recTitle}</td>
+    <td>{$r.recAdded}</td>
+  </tr>
 {/foreach}

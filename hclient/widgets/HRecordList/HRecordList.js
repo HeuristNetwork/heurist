@@ -82,7 +82,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         selectMode: 'single',   //TBD none, single, multi
 
-        viewMode: 'grid', // grid, list (vertical list), row (horizontal list)
+        viewMode: 'grid', // grid, list (vertical list), row (horizontal list), table
         
         //where to show view or edit 
         viewRecordMode: 'popup', // none, inline, offcanvas-*, modal-*, popup (jquery dialog), target id, event
@@ -108,7 +108,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     */ 
     
     record_id_attr: null, //name of attribute of record div that have record ID
-
+    
     //sub-elements
     div_counter: null,
     div_pagination: null,
@@ -207,6 +207,24 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     },
     
     /*
+    * Returns element with atribute data-heurist-rec=recID (this.record_id_attr)
+    */
+    getRecordCard(recID){
+        
+        return this.div_content[0].querySelector(`${this.options.viewMode=='table'?'tr':'div'}[${this.record_id_attr}="${recID}"]`);
+    },
+    
+    /*
+    * Returns array of elements atribute data-heurist-rec (this.record_id_attr)
+    */
+    getRecordCardAll(){
+        let searchFor = `${this.options.viewMode=='table'?'tr':'div'}[${this.record_id_attr}]`;
+        
+        return this.div_content.find( searchFor );
+    },
+    
+    
+    /*
     * Removes all record elements
     *  overwrites parent's method
     */
@@ -218,7 +236,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         this.observer.disconnect();
         
         //_off all clicks for actions per record cards
-        this._off( this.div_content.find(`div[${this.record_id_attr}]`), 'click');
+        this._off( this.getRecordCardAll(), 'click');
 
         this.div_content[0].innerHTML = '';
         
@@ -276,7 +294,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         if( this.$H.isArrayNotEmpty(this.recordSetSelected) ){
             
             let that = this;
-            this.div_content.find(`div[${this.record_id_attr}]`).each(function(ids, rdiv){
+            this.div_content.getRecordCardAll().each(function(ids, rdiv){
                     let rec_id = $(rdiv).attr(that.record_id_attr);
                     let idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, that.recordSetSelected);
                     if(idx>=0){ 
@@ -456,6 +474,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             this.div_content[0].style.overflowX = 'hidden';
             this.div_content[0].style.overflowY = 'auto';
             
+        }else if(this.options.viewMode=='table'){
+            
+            this.div_content[0].className='';
+            this.div_content[0].style.overflowX = 'auto';
+            this.div_content[0].style.overflowY = 'auto';
+            
         }else { //}if(this.options.viewMode=='grid'){    
             this.div_content[0].className = 'row row-cols-auto g-0';  //row-cols-1 row-cols-sm-2 row-cols-md-auto   
             this.div_content[0].style.overflowX = 'hidden';
@@ -523,9 +547,16 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
         this.observer.disconnect();
         
-        this.div_content[0].innerHTML = html;
+        if(this.options.viewMode=='table'){
+            
+            let tbl = $('<table class="table table-striped table-hover"></table').appendTo(this.div_content);
+            tbl[0].innerHTML = html;
+        }else{
+            this.div_content[0].innerHTML = html;
+        }
         
-        let allCards = this.div_content.find(`div[${this.record_id_attr}]`);
+        
+        let allCards = this.getRecordCardAll();
         
         this._on( allCards, {
             click: this._recordDivOnClick
@@ -594,7 +625,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             
             let temp_ele = document.createElement('div');
             let that = this;
-
+                                                            
             $(temp_ele).load(this.HAPI.baseURL, request, function(){ 
                 for (const child of temp_ele.children) {
                     //find card among stubs and replace 
@@ -680,7 +711,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     _replaceStubWithContent(recID){
         
         //get stub
-        let ele = this.div_content[0].querySelector(`div[${this.record_id_attr}="${recID}"]`);
+        let ele = this.getRecordCard(recID);
         if(ele){
             //replace content
             /*
@@ -698,8 +729,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     // Stub while loading the entire data
     //    
     _renderRecordStub: function(recID){
-
-        return `<div class="col" ${this.record_id_attr}="${recID}"><div class="recordList-item shadow-sm">${recID}</div></div>`;
+        
+        if(this.options.viewMode=='table'){
+            return `<tr ${this.record_id_attr}="${recID}"><td>${recID}</td></tr>`;    
+        }else{
+            return `<div class="col" ${this.record_id_attr}="${recID}"><div class="recordList-item shadow-sm">${recID}</div></div>`;    
+        }
         
     },
     
@@ -728,56 +763,28 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             
             recTypeIcon = `<div class="recordList-icon" style="background-image:url(${recTypeIcon})"></div>`;
             
-            let recThumbImg = '';
-            if(recThumb){
-                recThumbImg = `<div class="recordList-thumb" style="background-image: url(&quot;${recThumb}&quot;);" data-id="${recID}"></div>`;
-            }else{
-                recThumbImg = `<div class="recordList-thumb" style="opacity:0.5;background-image: url(&quot;${this.HAPI.iconBaseURL  + recTypeID}&version=thumb&quot;);"></div>`; //this._icon_timer_suffix
-            }
             
-            html = `<div class="col" ${this.record_id_attr}="${recID}"><div class="recordList-item shadow-sm">${recTypeIcon} ${recThumbImg} <div class="recordList-text">${recID}: ${recTitle}</div></div></div>`;
+            if(this.options.viewMode=='table'){
+
+                html = `<tr ${this.record_id_attr}="${recID}"><td>${recID}</td><td>${recTypeIcon}</td><td>${recTitle}</td></tr>`;
+                
+            }else{
+            
+                let recThumbImg = '';
+                if(recThumb){
+                    recThumbImg = `<div class="recordList-thumb" style="background-image: url(&quot;${recThumb}&quot;);" data-id="${recID}"></div>`;
+                }else{
+                    recThumbImg = `<div class="recordList-thumb" style="opacity:0.5;background-image: url(&quot;${this.HAPI.iconBaseURL  + recTypeID}&version=thumb&quot;);"></div>`; //this._icon_timer_suffix
+                }
+                html = `<div class="col" ${this.record_id_attr}="${recID}"><div class="recordList-item shadow-sm">${recTypeIcon} ${recThumbImg} <div class="recordList-text">${recID}: ${recTitle}</div></div></div>`;
+                
+            }
             
         }
 
         this._cashedItem[recID] = html; //keep in cache
         return html;
-        
-/*
-const interpolate = (str, obj) => {
-  return str.replace(/\${([^}]+)}/g, (_, target) => {
-    let keys = target.split(".");
-    return keys.reduce((prev, curr) => {
-      if (curr.search(/\[/g) > -1) {
-        //if element/key in target array is array, get the value and return
-        let m_curr = curr.replace(/\]/g, "");
-        let arr = m_curr.split("[");
-        return arr.reduce((pr, cu) => {
-          return pr && pr[cu];
-        }, prev);
-      } else {
-        //else it is a object, get the value and return
-        return prev && prev[curr];
-      }
-    }, obj);
-  });
-};
-
-let template = "hello ${a[0][0].b.c}";
-let data = {
-  a: [
-    [{
-      b: {
-        c: "world",
-        f: "greetings"
-      }
-    }, 2], 3
-  ],
-  d: 12,
-  e: 14
-}
-console.log(interpolate(template, { ...data
-}));
-*/        
+       
     },
     
     
@@ -791,7 +798,7 @@ console.log(interpolate(template, { ...data
         let recdiv = event.target;
         
         if(!recdiv.hasAttribute(this.record_id_attr)){
-            recdiv = $(recdiv).parents(`div[${this.record_id_attr}]`);
+            recdiv = $(recdiv).parents(`${this.options.viewMode=='table'?'tr':'div'}[${this.record_id_attr}]`);
             if(recdiv.length==0){
                 return;
             }
@@ -804,38 +811,69 @@ console.log(interpolate(template, { ...data
         //this.div_content.find('.selected').removeClass('selected');
         this.div_content[0].querySelectorAll('.selected').forEach(sub=>sub.classList.remove('selected'));
         
-        let recdiv_card = recdiv.firstChild;        
-        recdiv_card.classList.add('selected'); //highlight record card
+        let recdiv_card = (this.options.viewMode=='table')?recdiv:recdiv.firstChild;        
+        if(recdiv_card.classList){
+            recdiv_card.classList.add('selected'); //highlight record card
+        }else{
+            recdiv_card.className = 'selected';
+        }
+        
         
         if(this.options.selectAction=='view' && this.options.viewRecordMode!='none')
         {
             if(this.options.viewRecordMode=='inline'){
                 
-                let expanded_col = this.div_content[0].querySelector('.selected_col');
-                if(expanded_col){
-                    // hide expanded column
-                    expanded_col.classList.remove('selected_col');
-                    let recdiv_card = expanded_col.firstChild;
-                    [...recdiv_card.children].forEach((sub)=>{ 
-                        sub.style.display = sub.classList.contains('recordList-fullview')?'none':'block'; 
-                    });
-                }
-                
-                //expand col - record card is a parent
-                recdiv.classList.add('selected_col');
-                
-                //load content
-                let view_div = recdiv_card.querySelector('.recordList-fullview');
-                if(!view_div){
-                    //create new container
-                    view_div = document.createElement('div');
-                    view_div.classList.add('recordList-fullview');
-                    recdiv_card.append(view_div);
-                }
-                [...recdiv_card.children].forEach(function (sub) { sub.style.display = 'none'; });
-                view_div.style.display = 'block';
+                if(this.options.viewMode=='table'){
+                    
+                    //recdiv_card - selected TR
 
-                this.recordView = $(view_div);
+                    // hide expanded TR and show usual row
+                    let expanded_row = this.div_content[0].querySelector('.selected_row');
+                    if(expanded_row){
+                        $(expanded_row).prev().show();
+                        expanded_row.remove();
+                        expanded_row = null;
+                    }
+                    
+                    //insert expanded TR                    
+                    let ncount = recdiv_card.children.length;
+                    this.recordView = $(`<tr class="selected_row"><td class="recordList-fullview" colspan="${ncount}"></td></tr>`).insertAfter($(recdiv_card));
+                    
+                    recdiv_card.style.display = 'none';
+                    
+                    this.recordView = this.recordView.find('.recordList-fullview');
+                    
+                }else{
+                
+                    let expanded_col = this.div_content[0].querySelector('.selected_col');
+                    if(expanded_col){
+                        // hide expanded column
+                        expanded_col.classList.remove('selected_col');
+                        let recdiv_card = expanded_col.firstChild;
+                        [...recdiv_card.children].forEach((sub)=>{ 
+                            sub.style.display = sub.classList.contains('recordList-fullview')?'none':'block'; 
+                        });
+                    }
+                    
+                    //expand col - record card is a parent
+                    recdiv.classList.add('selected_col');
+                    
+                    //load content
+                    let view_div = recdiv_card.querySelector('.recordList-fullview');
+                    if(!view_div){
+                        //create new container
+                        view_div = document.createElement('div');
+                        view_div.classList.add('recordList-fullview');
+                        recdiv_card.append(view_div);
+                    }
+                    [...recdiv_card.children].forEach(function (sub) { sub.style.display = 'none'; });
+                    view_div.style.display = 'block';
+                    
+                    this.recordView = $(view_div);
+                }
+                
+                
+                
             }
             else if ( this.recordView==null ){
                 this.recordView = $('<div>').appendTo(this.element);
@@ -875,7 +913,7 @@ console.log(interpolate(template, { ...data
         let rdiv = null;
         if( this.$H.isPositiveInt(selected) ){
             const recID = selected;
-            rdiv = this.div_content[0].querySelector(`div[${this.record_id_attr}="${recID}"]`);
+            rdiv = this.getRecordCard(recID);
         }else{
             rdiv = selected;
         }

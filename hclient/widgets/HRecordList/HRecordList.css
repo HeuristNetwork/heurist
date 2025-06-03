@@ -27,6 +27,15 @@
 .recordList-item.selected {
     
 }
+
+.recordList-icon{
+    width: 18px;
+    height: 18px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain; 
+}
+
 .recordList-thumb {
     background-position: center center;
     background-repeat: no-repeat;
