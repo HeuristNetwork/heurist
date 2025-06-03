@@ -944,12 +944,61 @@ if(!$system->hasAccess()){
                 $map_frame.attr('src', URL);
             }
 
+            function initImageRefreshLink(){
+
+                let refreshing = false;
+
+                $('.refreshThumb_link').on('click', (event) => {
+
+                    if(refreshing){
+                        window.hWin.HEURIST4.msg.showMsgErr('A thumbnail is already being refreshed, please wait for it to complete before refreshing another thumbnail.');
+                        return;
+                    }
+                    refreshing = true;
+
+                    let ulf_ObfuscatedFileID = $(event.target).attr('data-id');
+                    let $thumb = $(event.target).parent().next().find('img');
+
+                    if(window.hWin.HEURIST4.util.isempty(ulf_ObfuscatedFileID) || $thumb.length === 0){
+                        return;
+                    }
+
+                    let refreshURL = `${baseURL}hserv/controller/fileDownload.php`;
+                    let request = {
+                        db: database,
+                        thumb: ulf_ObfuscatedFileID,
+                        refresh: 1
+                    };
+
+                    window.hWin.HEURIST4.msg.showMsgFlash('Refreshing thumbnail...', 2500);
+
+                    window.hWin.HEURIST4.util.sendRequest(refreshURL, request, null, (response) => {
+
+                        refreshing = false;
+
+                        if(response.message.startsWith('Error_')){
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            return;
+                        }
+
+                        window.hWin.HEURIST4.msg.showMsgFlash('Thumbnail has been refreshed', 3000);
+
+                        let url = `${baseURL}?db=${database}&offer_download=1&thumb=${ulf_ObfuscatedFileID}&${window.hWin.HEURIST4.util.random()}`;
+                        $thumb.attr('src', url);
+
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
+                    });
+                });
+            }
+
             $(document).ready(function() {
                 showHidePrivateInfo(null);
 
                 initMediaViewer();
 
                 showMediaViewer();//init thumbs for iiif
+
+                initImageRefreshLink();
 
                 // Set default setting for show linked media, stored within session
                 let def_ImageSettings = sessionStorage.getItem('Heurist_RecView_LinkedMedia');
@@ -2114,6 +2163,11 @@ function print_public_details($bib) {
                     print '<a href="' . htmlspecialchars($thumb['external_url'])
                                     . '" class="external-link" target=_blank>open in new tab'
                                     . (@$thumb['linked']?'<br>(linked media)':'').'</a>';
+
+                    if($system->hasAccess()){
+                        print '<a href="#" data-id="'. htmlspecialchars($thumb['nonce']) .'" class="refreshThumb_link">'
+                            . '<span class="ui-icon ui-icon-refresh" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;refresh thumbnail</a>';
+                    }
                 }else{
                     print '<a href="' . htmlspecialchars($download_url)
                                     . '" class="image_tool" target="_surf">'

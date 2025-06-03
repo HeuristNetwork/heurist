@@ -807,7 +807,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
 
     //send notification email
-    if($swf_emails!=null && !$block_swf_email){
+    $bugreportRecType = ConceptCode::getRecTypeLocalID('8-23');
+    if($bugreportRecType && $bugreportRecType == $rectype){
+        bugreportUpdate($system, $recID);
+    }elseif($swf_emails!=null && !$block_swf_email){
 
         $stage_name = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID='.$new_swf_stage);
         $user = $system->getCurrentUser();
@@ -3770,5 +3773,77 @@ function updateMaskFields($type, $value, $length, $range){
     }
 
     return [$value, $reason];
+}
+
+function bugreportUpdate($system, $recID){
+
+    $mysqli = $system->getMysqli();
+    $recRecTypeID = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID = ?', ['i', $recID]);
+
+    // Get local IDs for bug report fields
+    $bugreportRecType = ConceptCode::getRecTypeLocalID('8-23');
+    $doneTrmID = ConceptCode::getTermLocalID('1037-3246');
+    $statusDtyID = ConceptCode::getDetailTypeLocalID('2-810');
+    $titleDtyID = ConceptCode::getDetailTypeLocalID('2-1');
+    $descDtyID = ConceptCode::getDetailTypeLocalID('2-3');
+    $reporterEmailDtyID = ConceptCode::getDetailTypeLocalID('1317-242');
+    $reporterNameDtyID = ConceptCode::getDetailTypeLocalID('1317-243');
+    $databaseDtyID = ConceptCode::getDetailTypeLocalID('1623-993');
+
+    // Get bug report details
+    $details = recordSearchDetailsRaw($system, $recID);
+
+    if(!isset($recRecTypeID, $bugreportRecType, $doneTrmID, $statusDtyID, $titleDtyID, $descDtyID, $reporterEmailDtyID, $reporterNameDtyID, $databaseDtyID) || empty($details) || $bugreportRecType != $recRecTypeID){
+        return;
+    }
+
+    // Get child terms of status DONE, to check against
+    $terms = getTermChildrenAll($mysqli, $doneTrmID);
+    $status = array_key_exists($statusDtyID, $details) ? $details[$statusDtyID] : null;
+    $status = is_array($status) ? $status[0] : $status;
+
+    $reportersEmail = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
+    $reportersEmail = is_array($reportersEmail) ? $reportersEmail[0] : $reportersEmail;
+
+    $reportersName = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
+    $reportersName = is_array($reportersEmail) ? $reportersEmail[0] : $reportersName;
+    $reportersName = empty($reportersName) ? $reportersEmail : $reportersName;
+
+    if(!$status || !$reportersEmail || !in_array($status, $terms)){
+        return;
+    }
+
+    // Retrieve specific report details (database, title, description) and prepare email
+    $status = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $status]);
+
+    $database = array_key_exists($databaseDtyID, $details) ? $details[$databaseDtyID] : null;
+    $database = is_array($database) ? $database[0] : $database;
+    $database = !empty($database) ? "Database: {$database}<br>" : '';
+
+    $title = array_key_exists($titleDtyID, $details) ? $details[$titleDtyID] : null;
+    $title = is_array($title) ? $title[0] : $title;
+    $title = !empty($title) ? $title : "Bug report #{$recID}";
+
+    $desc = array_key_exists($descDtyID, $details) ? $details[$descDtyID] : null;
+    $desc = is_array($desc) ? $desc[0] : $desc;
+    $desc = !empty($desc) ? $desc : "Description is missing";
+
+    $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
+
+    $updateEmail = <<<EMAIL
+    The status of the following bug report has been completed, final status: <strong>$status</strong>.<br><br>
+    You can view the report here: <a href="$url">$url</a><br><br>
+    Reporter: $reportersName<br>
+    $database
+    Title: $title<br>
+    Bug description:<br>
+    $desc<br><br>
+    When an issue is fixed and marked as DONE, the change will typically appear in the alpha version (/h6-alpha/, /h7-alpha/, ...) within a couple of days on HeuristRef.net<br>
+    and any server which has automated daily update of the alpha version, and a week or more on the Huma-Num server (due to new approval protocols from July 2025).
+    EMAIL;
+
+    $to = [$reportersEmail];
+
+    sendPHPMailer(null, 'Bug report updater', ['to' => $to], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
 }
 ?>
