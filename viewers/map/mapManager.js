@@ -1673,7 +1673,7 @@ function HMapManager( _options )
         
         //
         //  add entries into search result mapdocument (id=0) and refresh legend
-        // (see HMapLayer2._addQueryLayer)        
+        // (see HMapLayer._addQueryLayer)        
         //
         addLayerRecords: function( layers_ids ) {
             

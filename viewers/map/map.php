@@ -75,7 +75,7 @@ if(isLocalHost()){
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/cheapRuler.js" charset="utf-8"></script>
 
 <!-- this scripts can be omitted for publishing -->

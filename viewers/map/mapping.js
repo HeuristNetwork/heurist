@@ -624,7 +624,7 @@ $.widget( "heurist.mapping", {
         if( record_id==0 || this.basemap_layer_id==record_id) return; //base map is not changed
 
         //continuousWorld
-        this.basemap_layer = HMapLayer2({record_id:record_id, mapwidget:this.element});
+        this.basemap_layer = HMapLayer({record_id:record_id, mapwidget:this.element});
         this.basemap_layer_id = record_id;
     
         var cnt = 0;
