@@ -946,7 +946,7 @@ function dbs_GetRectypeConstraint($system) {
         $labels = array();
         if ($termIDs) {
             $labels = mysql__select_assoc2($mysqli,
-            'select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
+            'select trm_ID, LOWER(trm_Label) from defTerms '.SQL_WHERE.predicateId('trm_ID', $termIDs));
         }
         return $labels;
     }
@@ -958,7 +958,7 @@ function dbs_GetRectypeConstraint($system) {
         $labels = array();
         if ($termIDs) {
             $labels = mysql__select_assoc2($mysqli,
-            'select trm_ID, LOWER(trm_Code) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
+            'select trm_ID, LOWER(trm_Code) from defTerms '.SQL_WHERE.predicateId('trm_ID', $termIDs));
         }
         return $labels;
     }

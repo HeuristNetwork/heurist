@@ -2343,3 +2343,64 @@ function selectRecord(options, callback)
         
         window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
 }
+
+
+//
+// Select arbitrary entity record 
+//
+function selectEntity(options, callback)
+{
+    
+        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+options.entity, 
+            {width: null,  //null triggers default width within particular widget
+             height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        //default option
+        let popup_options = {
+            isdialog: true,
+            select_mode: (options.csv==true?'select_multi':'select_single'),
+            select_return_mode: options.select_return_mode!='ids'?'recordset':'ids',
+            title: window.hWin.HR(options.title??'Select'),
+            
+            width: usrPreferences.width,
+            height: usrPreferences.height,
+            
+            filter_group_selected: null,
+            filter_groups: options.filter_group,
+            filters: options.filters,
+            
+            initial_filter: options.initial_filter,
+            search_form_visible: options.search_form_visible??true, 
+
+            selection_on_init: window.hWin.HEURIST4.util.isempty(options.values)?null:options.values.split(','),
+            selectOnSave: options.selectOnSave??true, //it means that select popup will be closed after add/edit is completed
+            
+            //edit_mode: 'popup',//'none'
+            //rectype_set: null,
+            //parententity: 0,
+            default_palette_class: options.default_palette_class??'ui-heurist-populate',
+            onselect:function(event, data){
+                
+                if(!data) return;
+                
+                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                    let recordset = data.selection;
+                    callback(data.selection);
+                }else{
+                    let newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
+                    callback(newsel);
+                }
+            }
+        };//popup_options
+
+        if(options.popup_options){
+            popup_options = $.extend(popup_options, options.popup_options);
+        }
+        
+        if(options.entity=='records'){
+            popup_options.width = Math.max(popup_options.width,710);   
+        }     
+        
+        window.hWin.HEURIST4.ui.showEntityDialog(options.entity, popup_options);
+}
+

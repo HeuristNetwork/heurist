@@ -68,7 +68,9 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
                     hiddenInput.val(JSON.stringify(menuItems)).change();
                 }});
                 
-        this._on(this._$('#menuTreeAdd').button(), {click: ()=>uiTree.HMenu('addMenuEntry',0)});
+        this._on(this._$('#menuAddFolder').button(), {click: ()=>uiTree.HMenu('addMenuFolder',0)});
+        this._on(this._$('#menuAddEntry').button(), {click: ()=>uiTree.HMenu('addMenuEntry',0)});
+        this._on(this._$('#menuAddSavedFilter').button(), {click: ()=>uiTree.HMenu('addMenuFilterEntry',0)});
 
     }    
     

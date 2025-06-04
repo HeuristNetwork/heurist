@@ -212,6 +212,23 @@ abstract class DbEntityBase
         $this->records = $records;
     }
 
+    /**
+     * Get the current records
+     *
+     * @return array Returns the current records in format
+     *           [id=>[field1=>val1, field2=>val2,....]
+     */    
+    public function getRecords(){
+        $res = array();
+        foreach($records as $id=>$values){
+            $res[id] = array();
+            foreach($this->fields as $idx=>$field){
+                $res[id][$field] = $values[$idx];
+            }
+        }
+        return $res;
+    }
+    
 
     /**
      * Get the current records.

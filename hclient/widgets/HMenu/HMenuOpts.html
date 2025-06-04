@@ -12,7 +12,11 @@
         <label class="header" style="font-size: 0.7rem;padding-left: 10px;">Menu items (pages or actions)</label>
         <div id="menuTree"></div>
 
-        <button id="menuTreeAdd" style="width: 50%;margin: 0 25%;">Add top level menu entry</button>
+        <div style="text-align:center">
+            <button id="menuAddFolder">Add sub-menu</button>
+            <button id="menuAddEntry">Add top level menu entry</button>
+            <button id="menuAddSavedFilter">Add filter as menu</button>
+        </div>
 </div>        
 <!--
                     <input name="menu_recIDs" type="hidden" value=""/>
@@ -75,6 +79,14 @@
 
             <input name="name" class="text ui-widget-content"/>
             <div class="heurist-helper3">Please edit to clarify the tree</div>
+        </div>
+        
+        <div>
+            <div class="header header_narrow">
+                Search group
+            </div>
+            <input name="searchDomain" class="text ui-widget-content" value="search_group_1"/>
+            <div class="heurist-helper3">Arbitrary identifier for a group of widgets which accept search events</div>
         </div>
 
 </fieldset>

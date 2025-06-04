@@ -24,6 +24,7 @@ namespace hserv\web;
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\structure\ConceptCode;
+use hserv\entity\DbUsrSavedSearches;
 
 require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
@@ -65,7 +66,7 @@ class WebSite
     private $currentLang = 'en';
     
     private $menuTree = null;    // hierarchy of ids
-    private $menuRecords = null; // array of records with details
+    private $menuRecords = null; // flat array of records with menu details
 
     /**
      * Constructor
@@ -109,6 +110,8 @@ class WebSite
         $this->system->defineConstant('DT_CMS_MENU_FORMAT');
         $this->system->defineConstant('DT_THUMBNAIL');
         
+        $this->system->defineConstant('DT_CMS_ACTION');
+        $this->system->defineConstant('DT_QUERY_STRING');
         
     }
     
@@ -762,12 +765,12 @@ class WebSite
     /*
     *
     */ 
-    private function getMainMenuTitle($page_id)
+    private function getMainMenuTitle($pageId)
     {
-            $menu_title = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
+            $menu_title = $this->getValue($this->menuRecords[$pageId], DT_NAME, true, $this->currentLang);
             
-            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT):null;
-            $menuIcon = $this->getFile($this->menuRecords[$page_id], DT_THUMBNAIL, '', 'thumb');
+            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$pageId], DT_CMS_MENU_FORMAT):null;
+            $menuIcon = $this->getFile($this->menuRecords[$pageId], DT_THUMBNAIL, '', 'thumb');
             
             if($menuIcon && $menuFormat!=TRM_NAME_ONLY){
                 if($menuFormat==TRM_ICON_ONLY){
@@ -849,7 +852,7 @@ class WebSite
         $allIds = array();
         
         foreach($menuTreeIds as $recID=>$subs){
-            if(is_array($subs)){
+            if(is_array($subs)){ //has childten
                 $menuTree[$recID] = [];
                 
                 array_push($allIds, $recID);
@@ -873,7 +876,41 @@ class WebSite
         if(defined('DT_CMS_MENU_FORMAT')){
             array_push($detailIds, DT_CMS_MENU_FORMAT);
         }
-        $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);
+        if(defined('DT_CMS_ACTION')){
+            array_push($detailIds, DT_CMS_ACTION);
+        }
+        if(defined('DT_QUERY_STRING')){
+            array_push($detailIds, DT_QUERY_STRING);
+        }
+        
+        $allFilterIds = [];
+        $allPageIds = [];
+        foreach($allIds as $id){
+            if(is_string($id) && strpos($id,'svs')===0){
+                array_push($allFilterIds, substr($id,3));
+            }else{
+                array_push($allPageIds, $id);
+            }
+        }
+        
+        //flat array with menu items details
+        $this->menuRecords = [];
+        if(!empty($allPageIds)){
+            $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);    
+        }
+        if(!empty($allFilterIds)){
+                $svs = new DbUsrSavedSearches($this->system, array('svs_ID'=>$allFilterIds, 'details'=>'full'));
+                $svs->search();
+                $res = $svs->getRecords();
+                
+                if(empty($res)){ //not found
+                    return;
+                }
+                foreach($res as $id=>$filter){        
+                    $this->menuRecords["svs$id"] = $filter;
+                }
+        }
+        
     }
 
     //
@@ -905,22 +942,41 @@ class WebSite
         
         $res = array();
 
-        foreach($menuTree as $page_id=>$subs){ //first level is list of buttons with dropdowns
+        foreach($menuTree as $pageId=>$subs){ //first level is list of buttons with dropdowns
         
-            $menuName = $this->getValue($this->menuRecords[$page_id], DT_NAME, true, $this->currentLang);
+            $menuRec = $this->menuRecords[$pageId];
+        
+            $menuName = $this->getValue($menuRec, DT_NAME, true, $this->currentLang);
             
-            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$page_id], DT_CMS_MENU_FORMAT):null;
-            $menuIcon = $this->getValue($this->menuRecords[$page_id], DT_THUMBNAIL);
+            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($menuRec, DT_CMS_MENU_FORMAT):null;
+            $menuIcon = $this->getValue($menuRec, DT_THUMBNAIL);
             
-            $key = $page_id; //$parentKey.','.$page_id;
+            $key = $pageId; //$parentKey.','.$pageId;
             
             $item = array();
             $item['key'] = $key; // set unique key
             $item['title'] = $menuName;
             $item['parent_id'] = $parentKey; //reference to parent menu(or home)
-            $item['page_id'] = $page_id;
+            
             if($menuFormat) $item['menuFormat'] = $menuFormat;
             if($menuIcon) $item['menuIcon'] = $menuIcon;
+            
+            $action = null;
+            if(defined('DT_CMS_ACTION')){
+                $action = $this->getValue($menuRec, DT_CMS_ACTION);
+                if($action){
+                    $action = getTermCodes($this->system->getMysqli(), $action);
+                    if(is_array($action)) $action = array_shift($action);
+                }
+            }
+            if($action){
+                $item['action'] = $action;
+                $item['actionParams'] = $this->getValue($menuRec, DT_QUERY_STRING);
+            }else{
+                $item['pageId'] = $pageId;    
+            }
+            
+            
             /*
             $item['page_showtitle'] = 1;
             $item['page_target'] = ''; //(this.options.target=='popup')?'popup':pageTarget;

@@ -881,5 +881,25 @@
       "data": {
         "container": "main"
       }
+    },
+    {
+      "id": "action-search",
+      "text": "Execute query",
+      "data": {
+        "target": "",
+        "query" : "",
+        "searchGroup": ""
+      }
+    },
+    {
+      "id": "action-search-id",
+      "text": "Execute saved filter",
+      "data": {
+        "svsId": "",
+        "target": "",
+        "searchGroup": ""
+      }
     }
+    
+    
 ]

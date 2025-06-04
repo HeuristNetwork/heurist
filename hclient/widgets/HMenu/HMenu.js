@@ -19,8 +19,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         //array of record ids or json array 
         /* {title: - label
             icon:  - optional icon image
-            page_id - cms record id
-            action_id - OR action
+            pageId - cms record id
+            action - OR action
+            actionParams
+            
+            menuFormat,
+            menuIcon
+            
             children: []
            }
         */
@@ -45,7 +50,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     _menuData: null, //json array with list of actions 
     
     _selectorInput: null, //hidden input to select/add menu intems in edit mode
-    _browseFunction: null, //function that opend menu items selector popup
+    _browseFunction: null, //function that opens menu items selector popup
 
     _init: function(){
         
@@ -81,8 +86,10 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 //renderNode: null,
                 //extensions:[],
                 activate: function(event, data) { 
-                    if(data.node.data.page_id>0){
-                        that.executeAction( 'data-heurist-pageid', {pageId:data.node.data.page_id});
+                    if(data.node.data.pageId>0){
+                        that.executeAction( 'data-heurist-pageid', {pageId:data.node.data.pageId});
+                    }else if(data.node.data.action){
+                        that.executeAction( data.node.data.action, data.node.data.actionParams );    
                     }
                 }
             };
@@ -111,13 +118,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                         dragDrop: function(node, data) {
                             //data.otherNode - dragging node
                             //node - target node
-                            let source_parent = data.otherNode.parent.data.page_id;
+                            let source_parent = data.otherNode.parent.key; //data.pageId;
                             if(!(source_parent>0))
                                 source_parent = 0; //root
 
                             data.otherNode.moveTo(node, data.hitMode);
 
-                            let target_parent = data.otherNode.parent.data.page_id;
+                            let target_parent = data.otherNode.parent.key; //data.pageId;
                             if(!(target_parent>0))
                                 target_parent = 0; //root
                             data.otherNode.data.parent_id = target_parent;
@@ -137,7 +144,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                         save:function(event, data){
                             if(''!=data.input.val()){
                                 let new_name = data.input.val();
-//TBD                            _renameMenuEntry(data.node.data.page_id, new_name, function(){});
+//TBD                            _renameMenuEntry(data.node.data.pageId, new_name, function(){});
                             }else{
                                 $(data.node.span).removeClass("pending");    
                             }
@@ -276,7 +283,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
         let opts = {};
         let action_id = ele.attr('data-heurist-action');
-        if(!action_id){
+        if(action_id){
+            opts = ele.attr('data-heurist-actionParams');
+            const opts2 = window.hWin.HEURIST4.util.isJSON(opts);
+            if(opts2) opts = opts2;
+        }else{
             //open webpage with give id
             action_id = ele.attr('data-heurist-pageid');
             opts.pageId = action_id;
@@ -288,6 +299,9 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this.executeAction(action_id, opts);    
     },
      
+    /*
+    *
+    */
     executeAction: function(action_id, opts){
 
         if(window.hWin.HEURIST4.util.isFunction(this.options.onBeforeAction)){
@@ -441,6 +455,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
                 that._menuData = response.data;
+console.log( that._menuData );                
                 that._initControls();
             }else{
                 this.clearContent();
@@ -541,10 +556,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 
             }else{
                 
-                let opts = {mode:this.options.isEditMode?'edit':'', 
+                let pageURL = '#';
+                if(menuItems[i].pageId>0){
+                    let opts = {mode:this.options.isEditMode?'edit':'', 
                             websiteid:this.options.siteId, 
-                            pageid:menuItems[i].page_id, lang:this.options.language};
-                const pageURL = window.hWin.HEURIST4.ui.getCmsLink(opts);
+                            pageid:menuItems[i].pageId, lang:this.options.language};
+                    pageURL = window.hWin.HEURIST4.ui.getCmsLink(opts);
+                }
                 
                 
                 if(lvl==0){
@@ -552,7 +570,16 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 }else{
                     res += '<li><a class="dropdown-item '+txtColor+'"';
                 }
-                res = res + ` data-heurist-pageid="${menuItems[i].page_id}" href="${pageURL}">${menuTitle}</a></li>`;
+                if(menuItems[i].pageId>0){
+                    res = res + ` data-heurist-pageid="${menuItems[i].pageId}"`
+                }else{
+                    res = res + ` data-heurist-action="${menuItems[i].action}"`
+                    if(menuItems[i].actionParams){
+                        res = res + ` data-heurist-actionParams="${menuItems[i].actionParams}"`
+                    }
+                }
+                
+                res = res + ` href="${pageURL}">${menuTitle}</a></li>`;
             }
         }
 
@@ -573,7 +600,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         let that = this;
         
         let item_li = $(item.li);
-        let menu_id = item.key;//item.data.page_id;
+        let menu_id = item.key;//item.data.pageId;
 
         if($(item).find('.svs-contextmenu3').length==0){
 
@@ -583,7 +610,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
                 +item.data.parent_id+'" data-menuid="'+menu_id+'">'
                 //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
-                +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
+                +'<span class="ui-icon ui-icon-plus" title="Add menu item"></span>'
                 +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
                 //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
                 +'<span class="ui-icon ui-icon-trash" '
@@ -694,31 +721,6 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
     }, //end _defineActionIcons
 
-    //
-    // refresh main menu and reload current page
-    //
-    _refreshMainMenu: function ( need_refresh_tree, new_page_id ){
-        
-        
-    },
-    
-    /*
-    *
-    */
-    _findNodeByPageId: function(pageId){
-        
-        let resultNode = null;
-
-        $.ui.fancytree.getTree( this.element ).visit((node) => {
-            if(node.data.page_id == pageId){
-                resultNode = node;
-                return false; //found
-            }
-        });
-        
-        return resultNode;
-    },
-    
     /*
     * Converts treeview strucuture to json {id1:{}   }
     */
@@ -745,6 +747,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
         
         if(isRoot && window.hWin.HEURIST4.util.isFunction(this.options.onStructureChanged)){
+console.log(item);            
                 this.options.onStructureChanged.call(this, item);
         }
         
@@ -813,7 +816,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 change: ()=>{
                     //result
                     
-                    const page_id = that._selectorInput.attr('data-value');
+                    const menuRecId = that._selectorInput.attr('data-value');
                     
                     const tree = $.ui.fancytree.getTree( that.element );
                     
@@ -831,11 +834,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                     }
                     
                     //retrieve menu content from server side
-                    let request = {website:1, ver:3, webmenu:[page_id], isTree:true, lang:that.options.language};
+                    let request = {website:1, ver:3, webmenu:[menuRecId], isTree:true, lang:that.options.language};
                     window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            if(parentNode==null){ //treeview not inited
+                            if(parentNode==null){ //treeview not inited - first call
                                 that._menuData = response.data;
                                 that._initControls(); 
                                 return;
@@ -865,6 +868,57 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             
             this._browseFunction();
     },
+    
+    addMenuFolder: function( parentNodeKey ){
+        
+    },
+
+    addMenuFilterEntry: function( parentNodeKey ){
+            
+            let that = this;
+        
+            //see editing_exts.js    
+            selectEntity(
+                {entity:'usrSavedSearches', csv:true, title:'Select saved filters', default_palette_class:'ui-heurist-publish'},
+                (sel)=>{
+                    
+                    if(!sel || sel.length()==0) return;
+                    
+                    let toadd = [];
+
+                    sel.each2(( recID, record )=>{
+//console.log(recID, record);
+                        toadd.push({key:'svs'+recID, action:'action-search-id', actionParams:record['svs_Query'], parent_id:0, title: record['svs_Name']});
+                    });
+
+
+                    const tree = $.ui.fancytree.getTree( that.element );
+                    
+                    let parentNode = null;
+                    if(tree){
+                        if(parentNodeKey>0){
+                            parentNode = tree.getNodeByKey(parentNodeKey);
+                        }
+                        if(!parentNode){
+                            parentNode = tree.getRootNode();
+                            if(window.hWin.HEURIST4.util.isempty(that._menuData)){
+                                tree.clear();
+                            }
+                        }
+                    }
+
+                    if(parentNode==null){ //treeview not inited
+                        that._menuData = toadd;
+                        that._initControls(); 
+                        return;
+                    }
+                    
+                    parentNode.addNode( toadd, parentNode.isRootNode() || parentNode.hasChildren()? 'child': 'after' );
+                    that._getMenuStructure();
+            
+                }
+            );
+    }
     
 
 
