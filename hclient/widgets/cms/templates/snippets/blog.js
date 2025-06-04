@@ -18,6 +18,8 @@ function prepareTemplateBlog(layoutMgr, new_element_json, callback){
     window.hWin.HAPI4.SystemMgr.ssearch_save(request,
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
+                
+                let layoutMgr = window.hWin.HAPI4.layoutMgr;
 
                 let svsID = response.data;
                 //replace search realm

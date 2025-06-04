@@ -57,7 +57,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/latlon-ellipsoidal.js"></script>
