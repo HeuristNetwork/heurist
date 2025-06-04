@@ -44,10 +44,10 @@ function getSetting(key, defvalue, split_string = '') {
 
     let value = '';
 
-    if(key.startsWith('setting_')){
-        key = pref_key.split('_');
+    if(typeof key === 'string' && key.startsWith('setting_')){
+        key = key.split('_');
         key.shift();
-        key = pref_key.join('_');
+        key = key.join('_');
     }
 
     if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
