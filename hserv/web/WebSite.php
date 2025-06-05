@@ -269,7 +269,8 @@ class WebSite
                         $this->params['webmenu'] = json_decode($this->params['webmenu'],true);
                     }
     
-                    $this->menuTree = [];
+                    $this->menuTree = [];   //tree
+                    $this->menuRecords = []; //flat array with data
                     $this->fillMenuTreeDetails($this->params['webmenu'], $this->menuTree, true);
                     $result = $this->getMenuTree(0, $this->menuTree);
                     
@@ -852,7 +853,15 @@ class WebSite
         $allIds = array();
         
         foreach($menuTreeIds as $recID=>$subs){
-            if(is_array($subs)){ //has childten
+            
+            if(is_string($recID) && strpos($recID,'folder')===0){ //TBD  || $recID=='action'
+            
+               $recID = 'folder'.(count($this->menuRecords)+1); 
+               $this->menuRecords[$recID] = array('title'=>@$subs['title']??'submenu', 'isFolder'=>true);
+               $allIds = array_merge($allIds, $this->fillMenuTreeDetails($subs, $menuTree[$recID], false));
+               
+            }elseif(is_array($subs) ){ //has childten
+            
                 $menuTree[$recID] = [];
                 
                 array_push($allIds, $recID);
@@ -860,7 +869,7 @@ class WebSite
                 if($has_subs){
                     $allIds = array_merge($allIds, $this->fillMenuTreeDetails($subs, $menuTree[$recID], false));
                 }
-            }elseif(is_numeric($subs)){
+            }elseif(is_numeric($subs) || strpos($subs,'svs')===0){
                 $menuTree[$subs] = [];
                 
                 array_push($allIds, $subs);
@@ -894,14 +903,23 @@ class WebSite
         }
         
         //flat array with menu items details
-        $this->menuRecords = [];
         if(!empty($allPageIds)){
-            $this->menuRecords = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);    
+            //
+            $recs = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);
+            //add submenu/folders    
+            if(count($this->menuRecords)>0){
+                foreach($this->menuRecords as $id=>$params){
+                    $recs[$id] = $params;        
+                }
+            }
+            $this->menuRecords = $recs;
+             
         }
+        
         if(!empty($allFilterIds)){
-                $svs = new DbUsrSavedSearches($this->system, array('svs_ID'=>$allFilterIds, 'details'=>'full'));
-                $svs->search();
-                $res = $svs->getRecords();
+                $svs = new DbUsrSavedSearches($this->system, array('svs_ID'=>$allFilterIds, 'details'=>'name'));
+                $res = $svs->search();
+                 $res = $svs->getRecords($res);
                 
                 if(empty($res)){ //not found
                     return;
@@ -942,37 +960,64 @@ class WebSite
         
         $res = array();
 
-        foreach($menuTree as $pageId=>$subs){ //first level is list of buttons with dropdowns
+        foreach($menuTree as $menuId=>$subs){ //first level is list of buttons with dropdowns
         
-            $menuRec = $this->menuRecords[$pageId];
-        
-            $menuName = $this->getValue($menuRec, DT_NAME, true, $this->currentLang);
-            
-            $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($menuRec, DT_CMS_MENU_FORMAT):null;
-            $menuIcon = $this->getValue($menuRec, DT_THUMBNAIL);
-            
-            $key = $pageId; //$parentKey.','.$pageId;
-            
+            $menuRec = $this->menuRecords[$menuId];
+            $menuFormat = null;
+            $menuIcon = null;
+            $action = null;
+            $actionParams = null;
+            $pageId = null;
+            $key = $menuId; //$parentKey.','.$pageId;
             $item = array();
+        
+            if(is_string($menuId) && strpos($menuId,'svs')===0){ //saved filter
+                $menuName = $menuRec['svs_Name'];
+                $action = 'search-saved-filter';
+                $actionParams = $menuRec['svs_ID'];
+
+            }elseif(is_string($menuId) && strpos($menuId,'folder')===0){
+                
+                $menuName = $menuRec['title'];
+                $item['isFolder'] = true;
+                
+            }elseif(is_string($menuId) && strpos($menuId,'dsh')===0){ //TBD action
+            
+                $menuName = $menuRec['dsh_Label'];
+                $action = $menuRec['dsh_CommandToRun'];
+                $actionParams = $menuRec['dsh_Parameters'];
+            
+            }else{
+                $pageId = $menuId;
+                $menuName = $this->getValue($menuRec, DT_NAME, true, $this->currentLang);
+                $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($menuRec, DT_CMS_MENU_FORMAT):null;
+                $menuIcon = $this->getValue($menuRec, DT_THUMBNAIL);
+                if(defined('DT_CMS_ACTION')){
+                    $action = $this->getValue($menuRec, DT_CMS_ACTION);
+                    if($action){
+                        $action = getTermCodes($this->system->getMysqli(), $action);
+                        if(is_array($action)) $action = array_shift($action);
+                        
+                        $actionParams = $this->getValue($menuRec, DT_QUERY_STRING);
+                    }
+                }else{
+                    $action = 'data-heurist-pageid';
+                    $actionParams = $pageId;
+                }
+            }
+            
+            
             $item['key'] = $key; // set unique key
             $item['title'] = $menuName;
-            $item['parent_id'] = $parentKey; //reference to parent menu(or home)
+            //$item['parent_id'] = $parentKey; //reference to parent menu(or home)
             
             if($menuFormat) $item['menuFormat'] = $menuFormat;
             if($menuIcon) $item['menuIcon'] = $menuIcon;
             
-            $action = null;
-            if(defined('DT_CMS_ACTION')){
-                $action = $this->getValue($menuRec, DT_CMS_ACTION);
-                if($action){
-                    $action = getTermCodes($this->system->getMysqli(), $action);
-                    if(is_array($action)) $action = array_shift($action);
-                }
-            }
             if($action){
                 $item['action'] = $action;
-                $item['actionParams'] = $this->getValue($menuRec, DT_QUERY_STRING);
-            }else{
+                if($actionParams) $item['actionParams'] = $actionParams;
+            }elseif($pageId){
                 $item['pageId'] = $pageId;    
             }
             

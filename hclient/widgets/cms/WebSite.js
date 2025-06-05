@@ -124,6 +124,10 @@ class WebSite {
             return;
         }
         
+        if(window.hWin.HEURIST4.util.isPositiveInt(options)){
+            options = {pageId:options};
+        }                              
+        
         if(this.pageCache[options.pageId]){ //this page has been already loaded
             this.#initPage( this.pageCache[options.pageId] );
             return;       

@@ -154,7 +154,7 @@ $.widget( "heurist.search_faceted", {
         ispreview: false,
         showclosebutton: true,
         showresetbutton: true,
-        svs_ID: null,
+        svs_ID: null,   //for hamburg only
         onclose: null,// callback
         is_publication: false,
         respect_relation_direction: false, //global otherwise use facet.relation=='directed'

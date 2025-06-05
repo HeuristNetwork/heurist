@@ -25,7 +25,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     // Default options
     options: {
         // View mode: Determines how the content is displayed
-        viewMode: 'popup', // Options: 'offcanvas-*', 'modal-*', 'popup' (jQuery dialog), 'inline'
+        viewMode: 'popup', // Options: 'offcanvas-*', 'modal-*', 'popup' (jQuery dialog), 'inline', 'full' (over main), 'container' (by dom id)
         showMargin: true,
 
         // Dialog-specific options

@@ -883,20 +883,21 @@
       }
     },
     {
-      "id": "action-search",
+      "id": "search-query",
       "text": "Execute query",
       "data": {
-        "target": "",
+        "icon": "ui-icon-search",
         "query" : "",
         "searchGroup": ""
       }
     },
     {
-      "id": "action-search-id",
+      "id": "search-saved-filter",
       "text": "Execute saved filter",
       "data": {
+        "icon": "ui-icon-filter",
         "svsId": "",
-        "target": "",
+        "container": "",
         "searchGroup": ""
       }
     }

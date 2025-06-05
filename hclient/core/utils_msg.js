@@ -244,12 +244,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     showPrompt: function(message, callbackFunc, sTitle, ext_options){
         
         if(message.indexOf('dlg-prompt-value')<0){
+            const value = window.hWin.HEURIST4.util.htmlEscape(ext_options?.value??'');
+            
             message = message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
-                + (ext_options && ext_options['password']?'type="password"':'') 
-                + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
+                + (ext_options?.password?'type="password"':'') 
+                + ` style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em" value="${value}"/>`;    
+                
         }
 
-        let dlg_id = ext_options && ext_options['dialogId'] ? ext_options['dialogId'] : 'dialog-common-messages';
+        let dlg_id = ext_options?.dialogId??'dialog-common-messages';
 
         return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){

@@ -9,12 +9,14 @@
 */
 
 import '../HBase/HBaseOpts.js';
+import './HMenuEdit.js';
 
 $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
     
     // default options
     options: {
         resourcePath: 'hclient/widgets/HMenu/HMenuOpts',
+        
     },
     
     /*
@@ -63,14 +65,14 @@ $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
         
         let uiTree = this._$('#menuTree');
 
-        uiTree.HMenu({menuItems:hiddenInput.val(), viewMode:'treeview', isEditMode: true, expandLevels: 2, 
+        uiTree.HMenuEdit({menuItems:hiddenInput.val(), 
                 onStructureChanged:(menuItems)=>{
                     hiddenInput.val(JSON.stringify(menuItems)).change();
                 }});
                 
-        this._on(this._$('#menuAddFolder').button(), {click: ()=>uiTree.HMenu('addMenuFolder',0)});
-        this._on(this._$('#menuAddEntry').button(), {click: ()=>uiTree.HMenu('addMenuEntry',0)});
-        this._on(this._$('#menuAddSavedFilter').button(), {click: ()=>uiTree.HMenu('addMenuFilterEntry',0)});
+        this._on(this._$('#menuAddFolder').button(), {click: ()=>uiTree.HMenuEdit('addMenuFolder',0)});
+        this._on(this._$('#menuAddEntry').button(), {click: ()=>uiTree.HMenuEdit('addMenuEntry',0)});
+        this._on(this._$('#menuAddSavedFilter').button(), {click: ()=>uiTree.HMenuEdit('addMenuFilterEntry',0)});
 
     }    
     

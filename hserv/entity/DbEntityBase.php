@@ -218,12 +218,13 @@ abstract class DbEntityBase
      * @return array Returns the current records in format
      *           [id=>[field1=>val1, field2=>val2,....]
      */    
-    public function getRecords(){
+    public function getRecords($records){
         $res = array();
-        foreach($records as $id=>$values){
-            $res[id] = array();
-            foreach($this->fields as $idx=>$field){
-                $res[id][$field] = $values[$idx];
+        if(is_array(@$records['records']))
+        foreach($records['records'] as $id=>$values){
+            $res[$id] = array();
+            foreach($records['fields'] as $idx=>$field){
+                $res[$id][$field] = $values[$idx];
             }
         }
         return $res;
@@ -1106,7 +1107,7 @@ abstract class DbEntityBase
     // extracts records from "data" parameter and fills $this->recordIDs and $this->records
     // it is used in delete, save
     //
-    //  fields:[fldname:value,fieldname2:values,.....]
+    //  fields:[fldname1:value,fieldname2:values,.....]
     //  translation:[fldname:"lang:value",fieldname2:"lang:value",.....]
     //
     protected function prepareRecords(){

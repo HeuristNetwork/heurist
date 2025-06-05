@@ -8,7 +8,7 @@
 * @version     7.0
 */
 import '../HBase/HBaseWidget.js';
-import '../HMenu/HMenuOpts.js';
+import '../HFilter/HFilter.js';
 
 $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
@@ -35,13 +35,14 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         styleMode: 'links',     // link,pills, buttons(?), jquery
         expandLevels: 0,        // for treeview
         
+        viewFilterMode: 'inline',
+        searchDomain: null, 
+        
         customActionHandler: null,  // replacement of default event handler via ActionHandler
         onBeforeAction: null,
         onActionComplete: null,    // invoked in ActionHandler after action execution
         
-        isEditMode: false,
-        onStructureChanged: null
-
+        isEditMode: false
     },
     
     _needLoadContent: false,
@@ -49,8 +50,8 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     
     _menuData: null, //json array with list of actions 
     
-    _selectorInput: null, //hidden input to select/add menu intems in edit mode
-    _browseFunction: null, //function that opens menu items selector popup
+    __fancytreeOptionsEdit: null,    
+    filterView: null,
 
     _init: function(){
         
@@ -73,10 +74,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             return;
         }
         
+//console.log(this.options, this._fancytreeOptionsEdit);        
         
         if(this.options.viewMode=='treeview'){
             
-            let fancytree_options =
+            let fancytreeOptions =
             {
                 checkbox: false,
                 //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -93,70 +95,12 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                     }
                 }
             };
-            
-            if(this.options.isEditMode){
-                
-                let fancytree_options_edit =
-                {
-                    renderNode: function(event, data) {
-                            let item = data.node;
-                            that._defineActionIcons( item );
-                    },
-                    extensions:["dnd"], //"edit", 
-                    dnd:{
-                        preventVoidMoves: true,
-                        preventRecursiveMoves: true,
-                        autoExpandMS: 400,
-                        dragStart: function(node, data) {
-                            return true; //data.has_access;
-                        },
-                        dragEnter: function(node, data) {
-                            //data.otherNode - dragging node
-                            //node - target node
-                            return true;
-                        },
-                        dragDrop: function(node, data) {
-                            //data.otherNode - dragging node
-                            //node - target node
-                            let source_parent = data.otherNode.parent.key; //data.pageId;
-                            if(!(source_parent>0))
-                                source_parent = 0; //root
 
-                            data.otherNode.moveTo(node, data.hitMode);
-
-                            let target_parent = data.otherNode.parent.key; //data.pageId;
-                            if(!(target_parent>0))
-                                target_parent = 0; //root
-                            data.otherNode.data.parent_id = target_parent;
-                            
-                            that._getMenuStructure();
-                        }
-                    },
-                    edit:{
-                        triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
-                        close: function(event, data){
-                            // Editor was removed
-                            if( data.save ) {
-                                // Since we started an async request, mark the node as preliminary
-                                $(data.node.span).addClass("pending");
-                            }
-                        },                                    
-                        save:function(event, data){
-                            if(''!=data.input.val()){
-                                let new_name = data.input.val();
-//TBD                            _renameMenuEntry(data.node.data.pageId, new_name, function(){});
-                            }else{
-                                $(data.node.span).removeClass("pending");    
-                            }
-                        }
-                    }
-                };
-                
-                fancytree_options = $.extend(fancytree_options, fancytree_options_edit);                
+            if(this._fancytreeOptionsEdit){
+                fancytreeOptions = $.extend(fancytreeOptions, this._fancytreeOptionsEdit);
             }
             
-
-            this.element.fancytree(fancytree_options).addClass('tree-cms');
+            this.element.fancytree(fancytreeOptions).addClass('tree-cms');
             if(this.options.expandLevels>0){
                 let tree = $.ui.fancytree.getTree( this.element );
                 if(this.options.expandLevels==2){
@@ -213,26 +157,8 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             });
         });                
         
-
-        /*
-        document.querySelectorAll('.dropdown-hover-all .dropdown').forEach(function(dd) { //.dropdown-hover,  .dropdown-toggle
-        dd.addEventListener('mouseenter', function(e) {
-        let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
-        if (!toggle?.classList.contains('show')) {
-        $bs.Dropdown.getOrCreateInstance(toggle).toggle();
-        dd.classList.add(CLASS_NAME);
-        $bs.Dropdown.clearMenus(e);
-        }
-        });
-        dd.addEventListener('mouseleave', function(e) {
-        let toggle = e.target.querySelector(':scope>[data-bs-toggle="dropdown"]');
-        if (toggle?.classList.contains('show')) {
-        $bs.Dropdown.getOrCreateInstance(toggle).toggle();
-        }
-        });                
-        });        
-        */
         //init action event listener
+        this._on( this._$('a[data-heurist-search]'), {click : this.menuActionHandler }); //system actions
         this._on( this._$('a[data-heurist-action]'), {click : this.menuActionHandler }); //system actions
         this._on( this._$('a[data-heurist-pageid]'), {click : this.menuActionHandler }); //load cms record (web page)
         
@@ -258,11 +184,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             ele = ui.item;
         }else{
             ele = $(event.target);
-            if(!(ele.attr('data-heurist-action') || ele.attr('data-heurist-pageid'))){
+            if(!(ele.attr('data-heurist-action') || ele.attr('data-heurist-pageid') || ele.attr('data-heurist-search'))){
                 //must have data-heurist-action or data-heurist-pageid attribute
                 let ele2 = ele.parents('[data-heurist-action]');// If a span inside a button is clicked
                 if(ele2.length==0){
                     ele = ele.parents('[data-heurist-pageid]');
+                }else if(ele2.length==0){
+                    ele = ele.parents('[data-heurist-search]');
                 }else{
                     ele = ele2;
                 }
@@ -287,11 +215,19 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             opts = ele.attr('data-heurist-actionParams');
             const opts2 = window.hWin.HEURIST4.util.isJSON(opts);
             if(opts2) opts = opts2;
+        }else if(ele.attr('data-heurist-search')>0) {
+            
+            action_id = 'search-saved-filter';
+            opts = {svsID:ele.attr('data-heurist-search')};
         }else{
             //open webpage with give id
             action_id = ele.attr('data-heurist-pageid');
-            opts.pageId = action_id;
-            action_id = 'data-heurist-pageid';
+            if(action_id>0){
+                opts.pageId = action_id;
+                action_id = 'data-heurist-pageid';
+            }else{
+                return; //no action
+            }
         }
         this._$('a.nav-link').removeClass('active');
         ele.addClass('active');
@@ -320,8 +256,14 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             //custom handler
             this.options.customActionHandler.call(this, action_id, opts);
         }else if (this.HAPI.actionHandler) {
-            //defeault action handler
-            this.HAPI.actionHandler.executeActionById(action_id, opts);
+            
+            if(action_id=='search-saved-filter'){
+                // execute saved search
+                this.executeSavedSearch( opts );
+            }else{
+                // default action handler
+                this.HAPI.actionHandler.executeActionById(action_id, opts);
+            }
         }
     },
 
@@ -381,7 +323,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             
             newOptions = $.extend(window.hWin.HEURIST4.util.cloneJSON($.heurist.HMenu.prototype.options), newOptions);
             
-            /*
+            /* TBD reload if menuItems param has been changed
             let newids = null;
             if (Array.isArray(newOptions.menuItems)){
                 newids = newOptions.menuItems.join(',');   
@@ -572,7 +514,11 @@ console.log( that._menuData );
                 }
                 if(menuItems[i].pageId>0){
                     res = res + ` data-heurist-pageid="${menuItems[i].pageId}"`
-                }else{
+                }else if(menuItems[i].action=='search-saved-filter'){
+                    
+                    res = res + ` data-heurist-search="${menuItems[i].actionParams}"`;
+                    
+                }else if(menuItems[i].action){
                     res = res + ` data-heurist-action="${menuItems[i].action}"`
                     if(menuItems[i].actionParams){
                         res = res + ` data-heurist-actionParams="${menuItems[i].actionParams}"`
@@ -593,354 +539,28 @@ console.log( that._menuData );
     },
     
     /*
-    *  render actions buttons for edit mode
-    */
-    _defineActionIcons: function(item){
-        let tree_element = this.element;
-        let that = this;
-        
-        let item_li = $(item.li);
-        let menu_id = item.key;//item.data.pageId;
-
-        if($(item).find('.svs-contextmenu3').length==0){
-
-            let parent_span = item_li.children('span.fancytree-node');
-
-            //add,edit menu,edit page,remove
-            let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
-                +item.data.parent_id+'" data-menuid="'+menu_id+'">'
-                //since 12-05 +'<span class="ui-icon ui-icon-structure" title="Edit page"></span>'
-                +'<span class="ui-icon ui-icon-plus" title="Add menu item"></span>'
-                +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
-                //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
-                +'<span class="ui-icon ui-icon-trash" '
-                +'" title="Remove menu entry"></span>'
-                +'</div>').appendTo(parent_span);
-
-            $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
-
-            actionspan.find('.ui-icon').on('click', function(event){
-                let ele = $(event.target);
-                window.hWin.HEURIST4.util.stopEvent(event);
-                
-                let parent_span = ele.parents('span.fancytree-node');
-                
-                function __in_progress(){
-                    parent_span.find('.svs-contextmenu4').show();
-                    parent_span.find('.svs-contextmenu3').hide();
-                }
-
-                //timeout need to activate current node    
-                setTimeout(function(){                         
-                    let ele2 = ele.parents('.svs-contextmenu3');
-                    let menuid = ele2.attr('data-menuid');
-                    let parent_id = ele2.attr('data-parentid');
-
-                    if(ele.hasClass('ui-icon-plus')){ //add new menu to 
-
-                        that.addMenuEntry(menuid); 
-
-                    }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
-
-                        function __editPageRecord(record_id){
-                            __in_progress();
-                            //edit menu item
-                            window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
-                                {selectOnSave:true,
-                                    onClose: function(){ 
-                                        parent_span.find('.svs-contextmenu4').hide();
-                                    },
-                                    onselect:function(event, data){
-                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                            
-                                            let recordset = data.selection;
-                                            let pageId = recordset.getOrder()[0];
-                                            
-                                            // Update tree
-                                            let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                            let node = $.ui.fancytree.getTree( that.element ).getNodeByKey( pageId );
-                                            if(node.title != new_name){
-                                                    node.setTitle( new_name );
-                                                    that._defineActionIcons(node);
-                                                    that._getMenuStructure();
-                                            }
-                                        }
-                                    }
-                                }
-                            );
-                        }
-
-                        __editPageRecord(menuid);
-
-                    }else 
-                        if(ele.hasClass('ui-icon-trash')){    //remove menu entry
-                            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Delete menu entry? Please confirm"),  function(){
-                                item.remove();  
-                                that._getMenuStructure();  
-                            });
-                        }
-
-                },500);
-            });
-
-            //hide icons on mouse exit
-            function _onmouseexit(event){
-                let node;
-                if($(event.target).is('li')){
-                    node = $(event.target).find('.fancytree-node');
-                }else if($(event.target).hasClass('fancytree-node')){
-                    node =  $(event.target);
-                }else{
-                    //hide icon for parent 
-                    node = $(event.target).parents('.fancytree-node');
-                    if(node) node = $(node[0]);
-                }
-                let ele = node.find('.svs-contextmenu3');
-                ele.hide();
-            }               
-
-            function _onmouseenter(event){
-                let node;
-                if($(event.target).hasClass('fancytree-node')){
-                    node =  $(event.target);
-                }else{
-                    node = $(event.target).parents('.fancytree-node');
-                }
-                if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
-                    let ele = $(node).find('.svs-contextmenu3');
-                    ele.css({'display':'inline-block'});
-                }
-            }
-
-            $(parent_span).on('mouseenter',
-                _onmouseenter
-            ).on('mouseleave',
-                _onmouseexit
-            );                                                  
-            
-        }
-    }, //end _defineActionIcons
-
-    /*
-    * Converts treeview strucuture to json {id1:{}   }
-    */
-    _getMenuStructure: function( struct ){
-        
-        let isRoot = false;
-        if(!struct){
-            isRoot = true;
-            this._menuData = $.ui.fancytree.getTree( this.element ).toDict(true);
-            struct = this._menuData.children;
-        }                 
-        
-        let item = {};
-        if(struct){
-            for(let i=0; i<struct.length; i++){
-                
-                item[struct[i].key] = {};
-                
-                if(struct[i].children?.length>0){
-                      item[struct[i].key] = this._getMenuStructure(struct[i].children);
-                }
-                
-            }
-        }
-        
-        if(isRoot && window.hWin.HEURIST4.util.isFunction(this.options.onStructureChanged)){
-console.log(item);            
-                this.options.onStructureChanged.call(this, item);
-        }
-        
-        return item;
-    },
-    
-    /*
     *
     */
-    _verifyUniqueMenuKeys(menuData){
+    executeSavedSearch: function(opts){
         
-        let tree = $.ui.fancytree.getTree( this.element );
-        let duplications = [];
+        if(window.hWin.HEURIST4.util.isPositiveInt(opts)){
+            opts = {svsID:options};
+        }                              
         
-        for (let idx in menuData){
-            
-            let item = menuData[idx];
-            if(tree.getNodeByKey(item.key)){
-                duplications.push(item.key);
-            }
-            
-            if(item.children){
-                let dups = this._verifyUniqueMenuKeys(item.children);            
-                if(dups.length>0){
-                    duplications = duplications.concat(dups);        
-                }
-            }
+        if(this.options.viewFilterMode=='inline'){
+        }else{
         }
         
-        return duplications;
-    },
-    
-    /*
-    *
-    */
-    addMenuEntry: function( parentNodeKey ){
+        this.filterView = $('<div>').appendTo(this.element);
         
-            if(this._selectorInput!=null){
-                this._browseFunction();
-                return;
-            }
-
-            this._selectorInput = $('<div>').uniqueId();
-        
-            //constraint
-            let rty_IDs = [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']]; 
-            if(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']){
-                rty_IDs.push(window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_ACTION']);
-            }
-            
-            let that = this;
-        
-            const ed_options = {
-                recID: -1,                                                                                       
-                dtID: this._selectorInput.attr('id'), //'group_selector',
-                values: [],
-                readonly: false,
-                show_header: false,
-                showclear_button: true,
-                dtFields:{
-                    dty_Type:"resource", rst_MaxValues:0,
-                    rst_DisplayName: 'Menu items', rst_DisplayHelpText:'',
-                    rst_PtrFilteredIDs: rty_IDs,
-                    rst_FieldConfig: {entity:'records', csv:false}
-                },
-                change: ()=>{
-                    //result
-                    
-                    const menuRecId = that._selectorInput.attr('data-value');
-                    
-                    const tree = $.ui.fancytree.getTree( that.element );
-                    
-                    let parentNode = null;
-                    if(tree){
-                        if(parentNodeKey>0){
-                            parentNode = tree.getNodeByKey(parentNodeKey);
-                        }
-                        if(!parentNode){
-                            parentNode = tree.getRootNode();
-                            if(window.hWin.HEURIST4.util.isempty(that._menuData)){
-                                tree.clear();
-                            }
-                        }
-                    }
-                    
-                    //retrieve menu content from server side
-                    let request = {website:1, ver:3, webmenu:[menuRecId], isTree:true, lang:that.options.language};
-                    window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            if(parentNode==null){ //treeview not inited - first call
-                                that._menuData = response.data;
-                                that._initControls(); 
-                                return;
-                            }
-                            
-                            const dups = that._verifyUniqueMenuKeys(response.data);
-                            
-                            if(dups.length>0){
-                                window.hWin.HEURIST4.msg.showMsgErr('It is not possible to add new menu entry. It is already in menu');    
-                            }else{
-                                parentNode.addNode( response.data, parentNode.isRootNode() || parentNode.hasChildren()? 'child': 'after' );
-                                that._getMenuStructure();
-                            }
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                        
-                    });
-                }
-            };
-            
-            this._selectorInput.editing_input(ed_options);
-            this._selectorInput.appendTo($('<div>').appendTo(this.element));
-            this._selectorInput.parent().hide();
-            
-            this._browseFunction = browseRecords(this._selectorInput.editing_input('instance'), this._selectorInput, 'Select menu items');
-            
-            this._browseFunction();
-    },
-    
-    addMenuFolder: function( parentNodeKey ){
-        
-    },
-
-    addMenuFilterEntry: function( parentNodeKey ){
-            
-            let that = this;
-        
-            //see editing_exts.js    
-            selectEntity(
-                {entity:'usrSavedSearches', csv:true, title:'Select saved filters', default_palette_class:'ui-heurist-publish'},
-                (sel)=>{
-                    
-                    if(!sel || sel.length()==0) return;
-                    
-                    let toadd = [];
-
-                    sel.each2(( recID, record )=>{
-//console.log(recID, record);
-                        toadd.push({key:'svs'+recID, action:'action-search-id', actionParams:record['svs_Query'], parent_id:0, title: record['svs_Name']});
-                    });
-
-
-                    const tree = $.ui.fancytree.getTree( that.element );
-                    
-                    let parentNode = null;
-                    if(tree){
-                        if(parentNodeKey>0){
-                            parentNode = tree.getNodeByKey(parentNodeKey);
-                        }
-                        if(!parentNode){
-                            parentNode = tree.getRootNode();
-                            if(window.hWin.HEURIST4.util.isempty(that._menuData)){
-                                tree.clear();
-                            }
-                        }
-                    }
-
-                    if(parentNode==null){ //treeview not inited
-                        that._menuData = toadd;
-                        that._initControls(); 
-                        return;
-                    }
-                    
-                    parentNode.addNode( toadd, parentNode.isRootNode() || parentNode.hasChildren()? 'child': 'after' );
-                    that._getMenuStructure();
-            
-                }
-            );
+                
+        if(this.filterView.HFilter('instance')){
+            this.filterView.HFilter('show', opts.svsID);
+        }else{
+            this.filterView.HFilter({svsID: opts.svsID,
+                                        viewMode: this.options.viewFilterMode, 
+                                        keepInstance: true});
+        }
     }
-    
-
-
-/*
-1) menu treeview to add/edit/delete (same as site menu)  redundant?
-   or just root items (as it is)
-   
-2) Add - select CMS_page, 
-                Filter group or Saved filter, (UsrSavedSearchs entry or CMS Filter record)
-                Add Record  (CMS Action record or Dashboard entry)
-                View Record 
-                Execute Smarty with saved filter 
-                External Link (Web bookmark record)
-                
-3) 
-   
-Wrokflow/Widget links   
-   
-                
-
-*/    
-
-    
     
 });

@@ -132,9 +132,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         menu_entries.push({key:'menu-structure-fieldtypes',title:'Edit base fields'});
         menu_entries.push({key:'menu-profile-groups',title:'Edit workgroups'});
         menu_entries.push({key:'menu-cms-edit',title:'Edit website'});
-        menu_entries.push({key:'action-CreateFilter',title:'Filter builder'});
-        menu_entries.push({key:'action-SearchById',title:'Filter - saved filter'});
-        menu_entries.push({key:'action-Search',title:'Filter - specific string'});
+        menu_entries.push({key:'search-builder',title:'Filter builder'});
+        menu_entries.push({key:'search-saved-filter',title:'Filter - saved filter'});
+        menu_entries.push({key:'search-query',title:'Filter - specific string'});
         menu_entries.push({key:'menu-export-csv',title:'Export CSV'});
         menu_entries.push({key:'menu-help-online',title:'Help'});
         menu_entries.push({key:'menu-files-upload',title:'Import media'});
@@ -337,7 +337,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 let params = recordset.fld(record, 'dsh_Parameters');
                 if(command=='action-AddRecord'){
                     recordset.setFld(record, 'dsh_ParameterAddRecord', params);
-                }else if(command=='action-SearchById'){
+                }else if(command=='search-saved-filter'){
                     recordset.setFld(record, 'dsh_ParameterSavedSearch', params);
                 }
         }
@@ -374,10 +374,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                        if(dsh_command=='action-AddRecord'){
                            $(ele_param_ar).show();
                            
-                       }else if(dsh_command=='action-Search'){
+                       }else if(dsh_command=='search-query'){
                             $(ele_param).show();
                            
-                       }else if(dsh_command=='action-SearchById'){
+                       }else if(dsh_command=='search-saved-filter'){
                             $(ele_param_sf).show();
                            
                        }
@@ -560,7 +560,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:params});
                     }
                 
-                }else if(command=='action-SearchById'){ //search saved filter
+                }else if(command=='search-saved-filter'){ //search saved filter
                     
                     this.closeDialog();
                 
@@ -571,7 +571,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     }
                     
 
-                }else if(command=='action-Search'){ //search query saved as param
+                }else if(command=='search-query'){ //search query saved as param
                 
                     this.closeDialog();
                 
@@ -583,7 +583,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     }
 
 
-                }else if(command=='action-CreateFilter'){ //add new record
+                }else if(command=='search-builder'){ //add new record
                 
                     this.closeDialog();
 

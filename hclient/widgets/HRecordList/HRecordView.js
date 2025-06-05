@@ -52,6 +52,7 @@ $.widget( 'heurist.HRecordView', $.heurist.HBaseView, {
         if(this.iframe) {
             this.iframe.remove();
         }
+        this._super();
     },
     
     /**
@@ -149,53 +150,4 @@ $.widget( 'heurist.HRecordView', $.heurist.HBaseView, {
         }
     }        
 
-/*
-    //
-    // Loads record details for page
-    //
-    _loadRecordDetails: function(){
-        
-        let that = this;
-
-        //request for records
-        if(this.options.entityType=='rec'){
-
-            const request = { q: `{"ids":this.options.recID}`,
-                w: 'a',
-                detail: 'header',
-                pageno: that._current_page };
-
-            this.HAPI.RecordMgr.search(request, function(response){
-                that._onGetRecordDetails(response);   
-            });
-                
-            
-        }else{
-            //TBD
-            const request = {
-                    'a'          : 'search',
-                    'entity'     : this.options.entityType,
-                    'details'    : 'list',
-                    'pageno'    : that._current_page
-            };
-            //request[this.options.entity.keyField] = ids;
-            this.HAPI.EntityMgr.doRequest(request, function(response){
-                that._onGetRecordDetails(response)
-            });
-        }
-        
-    },
-    
-    //
-    //
-    //
-    _onGetRecordDetails: function(response){
-        if(response.status == window.hWin.ResponseStatus.OK){
-            let recordSet = new HRecordSet( response.data );
-            this.options.customRecordRender(recordSet)
-        }else{
-            window.hWin.HEURIST4.msg.showMsgErr(response);
-        }
-    },
-*/    
 });

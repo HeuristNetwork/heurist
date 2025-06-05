@@ -245,6 +245,7 @@ class ActionHandler {
     }
     
     /**
+     * TO BE REMOVED TO SEPARATE CLASS
      * Helper Method: _importUsers
      * 
      * Handles the import of users into the system through a series of dialog steps.
@@ -437,6 +438,10 @@ class ActionHandler {
         let url;
         
         switch (actionid) {
+            case "search-saved-filter":
+            
+            
+                break;
             case "menu-database-create":
             case "menu-database-restore":
             case "menu-database-delete":
