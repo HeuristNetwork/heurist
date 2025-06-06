@@ -79,7 +79,6 @@ if(array_key_exists('refresh', $req_params)){
 
     dataOutput(['status' => HEURIST_OK, 'data' => 1]);
     exitScript();
-    exit;
 }
 
 // Uploading stats from external server
@@ -122,13 +121,12 @@ if(count($_FILES) == 1 && array_key_exists('stats_file', $_FILES)){
 
     dataOutput(['status' => HEURIST_OK, 'data' => 1]);
     exitScript();
-    exit;
 }
 
 /**
  * Send db_stats.txt to main server's _ALL_STATS
  *
- * @return never
+ * @return void [exits]
  */
 function sendStatsToMain(){
 
@@ -146,17 +144,17 @@ function sendStatsToMain(){
 
         dataOutput(['status' => HEURIST_OK, 'data' => 1]);
         exitScript();
-        exit;
     }
 
     $file_path = resolveFilePath(DB_STATS_FILE);
+    $file_name = pathinfo($file_path, PATHINFO_BASENAME);
 
-    $curl_file = new CURLFile($file_path);
+    $curl_file = new CURLFile($file_path, 'text/plain', $file_name);
 
     $ch = curl_init($script);
 
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['stats_file' => $curl_file, 'server' => SERVER_NAME, 'type' => 'db_stats']));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, ['stats_file' => $curl_file, 'server' => SERVER_NAME, 'type' => 'db_stats']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     curl_setopt($ch, CURLOPT_FAILONERROR, true);
@@ -177,7 +175,6 @@ function sendStatsToMain(){
 
     dataOutput($response);
     exitScript();
-    exit;
 }
 
 /**
@@ -254,7 +251,6 @@ function zipStats($file_to_zip, $server_name, $delete_original = false){
 
     if(!$zip->addFile($file_to_zip, "db_stats.txt")){
         $zip->close();
-        fileDelete($zip_name);
         exitScript(HEURIST_ERROR, 'Failed to add stats into zip', true);
     }
     $zip->close();
@@ -301,4 +297,6 @@ function exitScript($status = null, $msg = null, $is_error = false){
     if($is_error){
         empty($msg) ? $system->errorExitApi(null, null, false) : $system->errorExit($msg, $status);
     }
+
+    exit;
 }
