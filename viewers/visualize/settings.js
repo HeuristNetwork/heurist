@@ -25,11 +25,27 @@ class VisualiseSettings{
     #usePreferences = false;
     settings = {};
     defaultSettings = {
+        // Line options
         linetype: 'straight',
         line_empty_link: 1,
         linelength: 200,
         linewidth: 2,
         linecolor: '#0070c0',
+        markercolor: '#000',
+        // Node options
+        entityradius: 30,
+        entitycolor: '#b5b5b5',
+        // Text options
+        labels: true,
+        fontsize: 12,
+        textlength: 200,
+        textcolor: '#000',
+        // Other options
+        formula: 'linear',
+        gravity: 'off',
+        translatex: 200,
+        translatey: 200,
+        scale: 1,
         advanced: false
     };
 
@@ -53,13 +69,13 @@ class VisualiseSettings{
 
         let value = '';
 
-        if(key.startsWith('setting_')){
+        if(typeof key === 'string' && key.startsWith('setting_')){
             key = key.split('_');
             key.shift();
             key = key.join('_');
         }
 
-        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
+        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && !key.startsWith('translate') && !key.startsWith('scale')){
             value = this.settings[key];
         }else{
             value = localStorage.getItem(`${this.#keyPrefix}${key}`);
@@ -79,13 +95,13 @@ class VisualiseSettings{
 
     put(key, value){
 
-        if(key.startsWith('setting_')){
+        if(typeof key === 'string' && key.startsWith('setting_')){
             key = key.split('_');
             key.shift();
             key = key.join('_');
         }
 
-        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
+        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && !key.startsWith('translate') && !key.startsWith('scale')){
 
             this.settings[key] = value;
     
@@ -97,16 +113,16 @@ class VisualiseSettings{
 
     delete(key){
 
-        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') > 0 && key.indexOf('scale') > 0){
+        if(typeof key === 'string' && key.startsWith('setting_')){
+            key = key.split('_');
+            key.shift();
+            key = key.join('_');
+        }
 
-            if(key.startsWith('setting_')){
-                key = key.split('_');
-                key.shift();
-                key = key.join('_');
-            }
-    
+        if(this.#usePreferences && !window.hWin.HEURIST4.util.isNumber(key) && !key.startsWith('translate') && !key.startsWith('scale')){
+
             delete this.settings[key];
-    
+
             this.#save();
         }else{
             localStorage.removeItem(`${this.#keyPrefix}${key}`);
