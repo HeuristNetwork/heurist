@@ -1,5 +1,41 @@
 /**
-* RecordList - listing of record from given HRecordSet
+* RecordList - widget for presentation of the set of records
+* 
+* Content:
+*     Initial content can be defined via:
+* 
+* - A Heurist query (as initial filter to be applied at start) 
+* - Programmatically (via method setRecordSet) 
+* - Smarty template output 
+* - Html or csv content of widget element. 
+* 
+* For smarty and html cases, html elements which are considered as record cards/table rows must have an attribute  data-heurist-rec="nnn"  where nnn is the record ID.
+* 
+* For csv input, the value in the column H-ID is considered as the Heurist record ID.
+* 
+* Appearance/Presentation:
+* The list can be split into pages (via a parameter in the widget properties). In any case, record cards/rows are rendered incrementally (only in visible viewport), so pagination is useful for quick navigation or for very large recordsets (> 10K entries).
+* 
+* The publisher of the recordset can define two kinds of messages: for the initial state and where there are no data (empty search result).
+* 
+* Each record card/row can be rendered with:
+* 
+* - Built-in renderer (function within widget) corresponding with the standard views in previous versions of Heurist
+* - One of four sample built-in smarty templates 
+* - The publisher’s smarty template.  
+* - Programmatically it can be defined as a function in options.rendererCard or it can overwrite method _renderRecord if you use HRecordView as a template for a new widget.
+* When creating a smarty template for this purpose, each record card or row (html element) must be specified with attribute  data-heurist-rec="nnn".
+* 
+* Record cards can be presented in four view modes: grid, horizontal, vertical list or as a table. For table mode, the publisher’s smarty template should generate <tr><td> for records. Otherwise the appearance will look like a vertical list.
+* 
+* Interaction with other widgets:
+* If a search group property is specified, HRecordList accepts ON_REC_SEARCHSTART, ON_REC_SEARCH_FINISH, ON_REC_SELECT and triggers ON_REC_SELECT events. So it can accept search result events from HFilter or selection events from other HRecordSet widgets.
+* 
+* The widget has a built-in HRecordView widget. It handles view action (on record card click, or action link click). See HRecordView for details.
+* 
+* Record card/rows can have html elements: links or buttons (to be specified in smarty template) that can trigger an arbitrary or record-specific action. For this purpose they must have an attribute data-heurist-action.  
+* For example  <a href=”#” data-heurist-action=”record-edit”>Edit</a> will open the record edit dialog.
+* 
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -28,10 +64,6 @@
 * page renderer implementation 
 * selection
 * open view/edit record
-* 
-* Plan:
-* BaseList, RecordList->RecordTable, RecordCards, 
-* RecordReport 
 * 
 */
 import './HRecordView.js';
@@ -69,7 +101,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         searchDomain: null,     // reference to entity HSearchDomains
         searchInitial: null,    // initial search query
         
-        showCounter: true,
+        showCounter: true,      // If `true`, displays the total count of records in the list.
         selectFirstRecord:false,
         
         pageSize: 0, //   if zero it shows all records, and no pagination, maxvalue is 1000

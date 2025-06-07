@@ -1,5 +1,8 @@
 /**
-* HMenuPersonal - login button and dropdown menu
+* HMenuPersonal - extension for persoanl menu actions (including login, signin, logout)
+* 
+* HPersonalBtn.html - as buttons
+* HPersonalMenu.html - as dropdown menu
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

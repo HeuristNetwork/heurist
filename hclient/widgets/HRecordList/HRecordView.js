@@ -1,14 +1,23 @@
 /**
-* HRecordView - A widget for displaying records in different formats:
-* - Custom renderer
-* - Standard PHP script output
-* - Custom Smarty template
+* HRecordView - widget to render info for a particular Heurist record
 * 
-* Supported display modes:
-* - In a given container
-* - jQuery Dialog
-* - Bootstrap Modal
-* - Bootstrap Offcanvas
+* Content can be:
+* - The built-in renderer (renderRecordData.php)
+* - A built-in smarty template
+* - A publisher’s smarty template.  
+* 
+* Programmatically render function can be defined as options.customRecordRender or overwrite the method renderContent if you use HRecordView as a template for a new widget.
+* 
+* As a descendant of HBaseView it can be presented in 
+* - a given container (inline)
+* - float or modal popup (jQuery Dialog or Bootstrap Modal)
+* - offcanvas(side slide panel).  (Bootstrap Offcanvas)
+* 
+* This widget is integrated with HRecordList and its properties can be defined 
+* along with the HRecordList property editor. As a standalone widget 
+* the ID of the record (to be rendered) can be obtained via the search group 
+* ON_SELECT event or defined as a widget property.
+* 
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -16,8 +25,6 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @version     7.0
 */
-
-
 import '../HBase/HBaseView.js';
 
 $.widget( 'heurist.HRecordView', $.heurist.HBaseView, {

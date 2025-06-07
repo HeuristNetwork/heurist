@@ -1,5 +1,17 @@
 /**
-* HMenu - menu handler
+* HMenu - widget for page navigation, actions and saved filters links
+* 
+* Content:
+* Content of the menu widget can be defined via the widget property form in the CMS editor which provinces a treeview that consists of menu and submenu items. Each menu item refers to a “CMS page” record, a Saved filter (usrSavedSearches) or an Action (sysDashboard). The Submenu (folder) structure implies no difference in the pages, it exists solely to create a hierarchy within the menu. Technically the CMS page and saved filter can be defined via an action.
+* * An alternative (advanced) way is to define an html snippet with buttons and/or links with one of  the attributes: data-heurist-action, data-heurist-pageid or data-heurist-search.  
+* 
+* Appearance/Presentation:
+* If the content is defined via json or html, snippet elements have attributes that define their role (eg. data-heurist-role="menu-dropdown"). It is possible to define the appearance of the menu via the widget property form. Menus can be vertical, horizontal or treeview. They can be bootstrap or jquery (tbd). They can be collapsable.
+* 
+* Interaction:
+* On menu selection, the widget executes the specified action, loads the web page or starts the saved filter. It also triggers the ON_ACTION event. HMenu has a built-in HFilter widget. It handles Saved Filters. 
+* 
+* If Saved Filter has entries to be defined by the website visitor (faceted search), HMenu opens the Filter form. The appearance of this form is similar to HRecordView for HRecordList. It can be inline (over menu), in a floating popup, in a modal dialog, in an offcanvas (side slide panel).  If the publisher prefers to specify their own HForm, it can be connected to HMenu via the search group.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

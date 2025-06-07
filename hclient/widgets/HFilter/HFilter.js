@@ -1,5 +1,11 @@
 /**
-* HFilter - A widget that is container for filter dialog (includig faceted search)
+* HFilter - widget for search form and execution of filters
+* 
+* HFilter generates a search form to define a search query. At the moment it uses the search_faceted widget.
+* 
+* As a descendant of HBaseView the search form can be presented in the provided container (inline div), float or modal popup or offcanvas(side slide panel).
+* 
+* This widget is integrated with HMenu and its properties can be defined along with its property editor. For standalone mode, the saved filter ID can be obtained from HMenu (via search group link ON_ACTION event) or defined as a widget property.
 * 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -13,10 +19,8 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
 
     // Default options
     options: {
-        svsID: 0,  //Saved Filter ID  to display
-        //svsQuery: null  heurist query
-        
-        searchDomain: null
+        svsID: 0,  //Saved Filter ID to display
+        searchDomain: null // reference to entity HSearchDomains
     },
 
     currentSearch: null,    
