@@ -12,12 +12,6 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @version     7.0
 */
-
-
-/*
-* HBaseView
-*
-*/
 import './HBaseWidget.js';
 
 $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {

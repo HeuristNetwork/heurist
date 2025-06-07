@@ -1,5 +1,5 @@
 /**
-* HBaseWidget - Base widget for all Heurist UI widgets
+* HBaseWidget - Base (abstract) widget for all Heurist UI widgets
 *
 * This widget handles the initialization process:
 *  1) Loads resources (CSS, HTML, localization) from `options.resourcePath` or `options.htmlContent`

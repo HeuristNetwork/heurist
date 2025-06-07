@@ -1,5 +1,5 @@
 /**
-* HBaseList - template widget for listing of record
+* HBaseList - template widget to represent set of record
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -9,7 +9,7 @@
 */
 
 /*
-* HBaseWidget->HBaseList->HRecordList, HRecordCards, HRecordMap, HRecordNetwork
+* HBaseWidget->HBaseList->HRecordList, TBD: HRecordMap, HRecordNetwork
 *
 * setRecordSet - sets new recordset to this record list
 * doSearch, _onGetRecords - Search for initial search or on search domain event
