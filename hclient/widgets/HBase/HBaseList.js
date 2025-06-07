@@ -9,7 +9,7 @@
 */
 
 /*
-* HBaseWidget->HBaseList->HRecordList, HRecordTable, HRecordCards, HRecordMap, HRecordNetwork
+* HBaseWidget->HBaseList->HRecordList, HRecordCards, HRecordMap, HRecordNetwork
 *
 * setRecordSet - sets new recordset to this record list
 * doSearch, _onGetRecords - Search for initial search or on search domain event

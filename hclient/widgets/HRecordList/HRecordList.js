@@ -9,7 +9,7 @@
 */
 
 /*
-* HBaseWidget->HRecordList->HRecordTable, HRecordCards, HRecordMap, HRecordNetwork
+* HBaseWidget->HBaseList->HRecordList ( TBD HRecordCards, HRecordMap, HRecordNetwork)
 *
 * HBaseWidget - loads resources: html, css, localization
 * HRecordList - setDomain, setRecordSet, loadRecordDetails, doSearch(?)
@@ -89,7 +89,6 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         editRecordMode: 'none',   //TBD none, inline, offset, full, main, page, popup, event
         
         rendererCard: null,     // custom record card renderer that overrides default renderer
-        rendererTable: null,
         
         templateCard: null,     // template for card renderer 
         templateView: null,     //(if not defined it uses entity default smarty report)

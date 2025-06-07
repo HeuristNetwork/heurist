@@ -900,7 +900,26 @@
         "container": "",
         "searchGroup": ""
       }
+    },
+    {
+      "id": "record-edit",
+      "text": "Open record edit dialog",
+      "data": {
+        "icon": "ui-icon-pencil",
+        "recID": "",
+        "container": ""
+      }
+    },
+    {
+      "id": "record-view",
+      "text": "Open record edit dialog",
+      "data": {
+        "icon": "ui-icon-table",
+        "recID": "",
+        "container": ""
+      }
     }
+
     
     
 ]

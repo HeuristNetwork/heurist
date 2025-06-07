@@ -50,7 +50,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     
     _menuData: null, //json array with list of actions 
     
-    __fancytreeOptionsEdit: null,    
+    _fancytreeOptionsEdit: null,    
     filterView: null,
 
     _init: function(){
@@ -547,19 +547,17 @@ console.log( that._menuData );
             opts = {svsID:options};
         }                              
         
-        if(this.options.viewFilterMode=='inline'){
-        }else{
+        if(!this.filterView){
+            this.filterView = $('<div>').appendTo(this.element);
         }
         
-        this.filterView = $('<div>').appendTo(this.element);
-        
-                
         if(this.filterView.HFilter('instance')){
-            this.filterView.HFilter('show', opts.svsID);
+            this.filterView.HFilter('doSearchByID', opts.svsID);
         }else{
             this.filterView.HFilter({svsID: opts.svsID,
                                         viewMode: this.options.viewFilterMode, 
-                                        keepInstance: true});
+                                        keepInstance: true,
+                                        searchDomain: this.options.searchDomain});
         }
     }
     

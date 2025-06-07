@@ -18,8 +18,9 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
         
         searchDomain: null
     },
-    
-    _savedFilters: {},
+
+    currentSearch: null,    
+    _savedFilters: {},  //cache
     
     /**
      * Cleanup function. Removes generated elements and event listeners.
@@ -34,7 +35,7 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
      */    
     _initControls:function(){
         this._super();
-        this.show();  
+        this.doSearchByID(this.options.svsID);  
     },
     
     /**
@@ -49,46 +50,14 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     },
 
     /**
-     * Displays the record viewer.
-     * @param {number} recID - The record ID to display (optional).
+     * Gets saved filter parameters and calls doSearch
+     * @param {number} svsID - Saved filter ID
      */
-    show: function(svsID) {
-        this._super();
-
-        // If a new record ID is provided, update and render content
-        if (svsID !== this.options.svsID) {
-            if (svsID > 0) this.options.svsID = svsID;
-            this.doSearchByID( svsID );
-        }
-    },
-    
-    /**
-     * Renders the record content inside the container.
-     */
-    renderContent: function() {
-        const selectedRecID = this.options.svsID;
-
-        // Validate the record ID
-        if (!this.$H.isPositiveInt(selectedRecID)) {
-            this.clearContent();
-            return;
-        }
-
-        let viewDiv = this.getContainer();
-        let request;
-        
-        $(viewDiv).html('FILTER '+selectedRecID);
-
-    },
-                
-    //
-    //
-    //
     doSearchByID: function(svsID){
-    
+        
         if(this._savedFilters[svsID])
         {
-            this.doSearch( this._savedFilters[svsID] );
+            this.doSearch( svsID, this._savedFilters[svsID] );
         }
         else{
             //not found - try to find
@@ -108,7 +77,7 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                         if(response.data){
                             let resp = new HRecordSet( response.data );
                             that._savedFilters[svsID] = resp.fld(resp.getFirstRecord(), 'svs_Query');
-                            that.doSearch( that._savedFilters[svsID] );
+                            that.doSearch( svsID, that._savedFilters[svsID] );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgFlash('Saved filter not found ( ID: '+svsID+' )');    
                         }
@@ -120,13 +89,11 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     //
     //
     //
-    doSearch: function( qsearch ){
+    doSearch: function( svsID, qsearch ){
 
-        if ( !qsearch ) retunr;
+            if ( !qsearch ) return;
 
             let params = window.hWin.HEURIST4.query.parseHeuristQuery( qsearch );
-            
-            let context_on_exit = null;
             
             let qname = '';
             
@@ -144,7 +111,7 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
             
             if(params.type==3){ //isfaceted
             
-                if(params['version']==2){
+                if(params['version']!=2){
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: "This faceted search is in an old format. "
                                 + "Please delete it and add a new one (right click in the saved search list). "
@@ -162,6 +129,21 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                 //if(that.options.sup_filter){
                 //    params.sup_filter = that.options.sup_filter;
                 //}
+
+                
+                let viewDiv = $(this.getContainer());
+                if(this.options.viewMode=='inline'){
+                    viewDiv.css({'min-height':'300px',background:'white'}).show();
+                }else{
+                    this.show();    
+                }
+                
+                if(this.options.svsID==svsID && viewDiv.search_faceted('instance')){
+                    return;
+                }
+                
+                this.options.svsID=svsID;
+                //this.clearContent();
                 
                 //options for faceted search
                 let noptions = { 
@@ -172,13 +154,16 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                     search_realm: this.options.searchDomain,
                     // search_page: this.options.search_page,
                     // language: this.options.language,
+                    is_publication: true,
                     hide_no_value_facets: true,  //this.options.hide_no_value_facets
                     onclose: ()=>{
-                        that.close();
+                        if(that.options.viewMode=='inline'){
+                            $(that.getContainer()).hide();
+                        }else{
+                            that.close();
+                        }
                     }
                 };
-
-                let viewDiv = $(this.getContainer());
                 
                 if(viewDiv.search_faceted('instance')){
                     viewDiv.search_faceted('option', noptions ); //assign new parameters
@@ -187,6 +172,8 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                 }
 
             }else {
+                
+                this.close();
 
                 let request = params;
 
@@ -195,9 +182,10 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                 //query is not defenied, but rules are - this is pure RuleSet - apply it to current result set
                 if(window.hWin.HEURIST4.util.isempty(request.q)&&!window.hWin.HEURIST4.util.isempty(request.rules)){
 
-                    if(this.currentSearch){
-                        this.currentSearch.rules = window.hWin.HEURIST4.util.cloneJSON(request.rules);
-                    }
+                    //TBR
+                    //if(this.currentSearch){
+                    //    this.currentSearch.rules = window.hWin.HEURIST4.util.cloneJSON(request.rules);
+                    //}
                     
                     if(request.rulesonly===true) request.rulesonly = 1;
                     

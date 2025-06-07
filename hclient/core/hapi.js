@@ -938,6 +938,43 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     callback(this, true);
                 }
             },
+                                                                
+            //
+            //
+            //
+            initialLoadDatabaseDefintions: function (params, callback){
+
+                if(!$.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ 
+                    //defintions are already loaded
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(true);}
+                    return;
+                }
+                   
+                //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
+                var entities = (params)?params:'all';
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
+                    let res = false;
+                    if(arguments){
+                        if(arguments[1]){
+                            res = true;
+                        }else{
+                            var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
+                            +'This is probably due to a network timeout. However, if the problem '
+                            +'persists please report to Heurist developers as it could indicate '
+                            +'corruption of the database.';
+
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: sMsg,
+                                error_title: 'Issue with database definitions',
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
+                            
+                        }
+                    }
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(res);}
+                });
+            },
             
             //
             // refresh several entity data at once
@@ -1001,7 +1038,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if ($.isEmptyObject(entity_data[entityName]) || force_reload == true) {
 
                     let det = 'list';
-                    if (entityName == 'defRecStructure'){ //|| entityName == 'defTerms') {
+                    if (entityName == 'defRecStructure') {// || entityName == 'defDetailTypes' || entityName == 'defTerms'
                         det = 'full';
                     }
                     
@@ -1013,6 +1050,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                                 if (response.data.entityName == 'defRecStructure') {
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                /*}else if (entityName == 'defTerms') {
+                                    entity_data['trm_Links'] = response.data[entityName]['trm_Links'];
+                                    entity_data['trm_Icons'] = response.data[entityName]['trm_Icons'] ?? [];*/
                                 }
 
                                 if (window.hWin.HEURIST4.util.isFunction(callback)) {
@@ -1190,6 +1230,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
             ON_CUSTOM_EVENT: "ON_CUSTOM_EVENT", //special event for custom link various widgets
+            ON_ACTION: 'ON_ACTION',
             ON_REC_UPDATE: "ON_REC_UPDATE",
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_REC_STATUS: "ON_REC_STATUS",

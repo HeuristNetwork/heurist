@@ -67,6 +67,7 @@ if($useOldCode){
     include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';
 ?>    
     <!-- old widgets -->
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/baseAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hRecordSearch.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
@@ -156,7 +157,7 @@ echo $this->getWebSiteInfo();
             window.isHapiInited = true;
 
             window.Hul = window.hWin.HEURIST4.util; //TBR: need only for consts in svs_list 
-
+            
             <?php
                 
                 /* not used, it loads page content on client site in WebSite.#iniPage
@@ -180,12 +181,16 @@ echo $this->getWebSiteInfo();
                 $webSiteOptions = json_encode($webSiteOptions);
             ?>
             
-            window.hWin.webSite = new WebSite(<?php echo $webSiteOptions; ?>);
-            
-            if(window.parent?.cmsEditor){
-                //called once - on website init
-                window.parent.cmsEditor.onWebSiteLoad();
-            }
+            window.hWin.HAPI4.EntityMgr.initialLoadDatabaseDefintions('all', ()=>{
+                
+                window.hWin.webSite = new WebSite(<?php echo $webSiteOptions; ?>);
+                
+                if(window.parent?.cmsEditor){
+                    //called once - on website init
+                    window.parent.cmsEditor.onWebSiteLoad();
+                }
+                
+            });
         }
         
         /*

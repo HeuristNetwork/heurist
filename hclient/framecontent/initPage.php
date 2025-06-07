@@ -336,9 +336,8 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
                 updateDatabaseStatistics();
             }
 
-            if(initialLoadDatabaseDefintions(null, window.onPageInit)){
-                return;
-            }
+            window.hWin.HAPI4.EntityMgr.initialLoadDatabaseDefintions('all', window.onPageInit);
+            return;
 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr({
@@ -382,7 +381,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     }
 
     //
-    //
+    //  TBR - NOT USED
     //
     function initialLoadDatabaseDefintions(params, callback){
 

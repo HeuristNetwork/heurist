@@ -118,6 +118,7 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
      * Returns the container element.
      */
     getContainer: function() {
+        //for inline and jquery popup this is this.element
         return this._container[0];
     },
 
