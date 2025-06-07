@@ -74,8 +74,8 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                     'svs_ID'     : svsID
             };
             
-            //window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svsID },
-            window.hWin.HAPI4.EntityMgr.doRequest(request,
+            //this.HAPI.SystemMgr.ssearch_get( { svsIDs:svsID },
+            this.HAPI.EntityMgr.doRequest(request,
                 (response)=>{
                     if(response.status == window.hWin.ResponseStatus.OK){
                         if(response.data){
@@ -102,7 +102,7 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
             let qname = '';
             
             let s = window.hWin.HRJ('ui_name', params, this.options.language);
-            if(!window.hWin.HEURIST4.util.isempty(s)){
+            if(!this.$H.isempty(s)){
                  qname = s;
             } 
             
@@ -184,25 +184,25 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                 request.rules = window.hWin.HEURIST4.query.cleanRules(request.rules);
                 
                 //query is not defenied, but rules are - this is pure RuleSet - apply it to current result set
-                if(window.hWin.HEURIST4.util.isempty(request.q)&&!window.hWin.HEURIST4.util.isempty(request.rules)){
+                if(this.$H.isempty(request.q)&&!this.$H.isempty(request.rules)){
 
                     //TBR
                     //if(this.currentSearch){
-                    //    this.currentSearch.rules = window.hWin.HEURIST4.util.cloneJSON(request.rules);
+                    //    this.currentSearch.rules = this.$H.cloneJSON(request.rules);
                     //}
                     
                     if(request.rulesonly===true) request.rulesonly = 1;
                     
                     //target is required
-                    if(! window.hWin.HAPI4.RecordSearch.doApplyRules( this, request.rules, 
+                    if(! this.HAPI.RecordSearch.doApplyRules( this, request.rules, 
                                         (request.rulesonly>0)?request.rulesonly:0, this.options.searchDomain ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }else{
-                        //window.hWin.HAPI4.SystemMgr.user_log('search_Record_applyrules');
+                        //this.HAPI.SystemMgr.user_log('search_Record_applyrules');
                     }
                     
-                }else if(window.hWin.HEURIST4.util.isempty(request.q)){
+                }else if(this.$H.isempty(request.q)){
 
                     window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this search due to corrupted parameters. '
                         +'Please redefine filter parameters.'), null, window.hWin.HR('Warning'));                    
@@ -216,10 +216,10 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                     request.search_realm = this.options.searchDomain;
                     //TBD request.search_page = this.options.search_page;
                     
-                    //window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
+                    //this.HAPI.SystemMgr.user_log('search_Record_savedfilter');
                     
                     //get hapi and perform search
-                    window.hWin.HAPI4.RecordSearch.doSearch( this, request );
+                    this.HAPI.RecordSearch.doSearch( this, request );
                 }
                 
             }

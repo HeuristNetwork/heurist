@@ -215,7 +215,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     onCloseOptionEditor: function(newOptions){
         if(newOptions){
             
-            newOptions = $.extend(window.hWin.HEURIST4.util.cloneJSON($.heurist.HRecordList.prototype.options), newOptions);
+            newOptions = $.extend(this.$H.cloneJSON($.heurist.HRecordList.prototype.options), newOptions);
             
             if(this.recordView){
                 this.recordView.remove();   
@@ -327,7 +327,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             let that = this;
             this.div_content.getRecordCardAll().each(function(ids, rdiv){
                     let rec_id = $(rdiv).attr(that.record_id_attr);
-                    let idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, that.recordSetSelected);
+                    let idx = that.$H.findArrayIndex(rec_id, that.recordSetSelected);
                     if(idx>=0){ 
                         $(rdiv).addClass('selected');
                     }
@@ -786,7 +786,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             let recTypeID = this.recordSet.fld(record, 'rec_RecTypeID');
             let recThumb = this.recordSet.fld(record, 'rec_ThumbnailURL');
             
-            let recTitleStripped = this.$H.htmlEscape(window.hWin.HEURIST4.util.stripTags(recTitle))+' id:'+recID;
+            let recTitleStripped = this.$H.htmlEscape(this.$H.stripTags(recTitle))+' id:'+recID;
             recTitle = this.$H.stripTags(recTitle,'u, i, b, strong, em');
             //let recTitle_strip2 = this.$H.stripTags(recTitle,'a, u, i, b, strong, em');
             let recTypeIcon = this.HAPI.iconBaseURL+recTypeID;

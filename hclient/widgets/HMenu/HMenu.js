@@ -44,7 +44,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         menuItems: null, 
         
         viewMode: 'horizontal', // none, horizontal or vertical buttonsMenu, treeview    
-        styleMode: 'links',     // link,pills, buttons(?), jquery
+        styleMode: 'links',     // link,pills, buttons (jquery)
         expandLevels: 0,        // for treeview
         
         viewFilterMode: 'inline',
@@ -134,7 +134,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
         if(this.element.children().length==0){ 
             //if content is not defined - generate it based on record ids
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(this._menuData)){
+            if(this.$H.isArrayNotEmpty(this._menuData)){
                 this.element.append(this.generateMenu( this._menuData, 0));
             }else{
                 this.addErrorMessage();
@@ -225,7 +225,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         let action_id = ele.attr('data-heurist-action');
         if(action_id){
             opts = ele.attr('data-heurist-actionParams');
-            const opts2 = window.hWin.HEURIST4.util.isJSON(opts);
+            const opts2 = this.$H.isJSON(opts);
             if(opts2) opts = opts2;
         }else if(ele.attr('data-heurist-search')>0) {
             
@@ -252,7 +252,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     */
     executeAction: function(action_id, opts){
 
-        if(window.hWin.HEURIST4.util.isFunction(this.options.onBeforeAction)){
+        if(this.$H.isFunction(this.options.onBeforeAction)){
             const is_locked = this.options.onBeforeAction.call(this, action_id, opts);
             if(is_locked){
                 return;
@@ -333,7 +333,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     onCloseOptionEditor: function(newOptions){
         if(newOptions){
             
-            newOptions = $.extend(window.hWin.HEURIST4.util.cloneJSON($.heurist.HMenu.prototype.options), newOptions);
+            newOptions = $.extend(this.$H.cloneJSON($.heurist.HMenu.prototype.options), newOptions);
             
             /* TBD reload if menuItems param has been changed
             let newids = null;
@@ -378,14 +378,14 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         } else {
             
             
-            ids = window.hWin.HEURIST4.util.isJSON(this.options.menuItems);
+            ids = this.$H.isJSON(this.options.menuItems);
             if(ids)
             {
                 this.options.menuItems = ids;
             }else{
                 ids = this.options.menuItems;
                 if(Array.isArray(ids)) {ids = ids.join(',');}
-                else if(window.hWin.HEURIST4.util.isNumber(ids)){
+                else if(this.$H.isNumber(ids)){
                     this.options.menuItems = [ids];
                 }else{
                     this.options.menuItems = ids.split(',')  
@@ -406,7 +406,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
         //retrieve menu content from server side
         let request = {website:1, ver:3, webmenu:JSON.stringify(this.options.menuItems), isTree:true, lang:this.options.language};
-        window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+        this.$H.sendRequest(this.HAPI.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
                 that._menuData = response.data;
 console.log( that._menuData );                
@@ -425,7 +425,7 @@ console.log( that._menuData );
     addErrorMessage: function(message){
         
             if(!message){
-                if(window.hWin.HEURIST4.util.isArrayNotEmpty(this._menuData)){
+                if(this.$H.isArrayNotEmpty(this._menuData)){
                     message = '';
                 }else{
                     message = 'Content not defined';
@@ -494,7 +494,7 @@ console.log( that._menuData );
         
             const menuTitle = menuItems[i].title;
             
-            const hasSubs = window.hWin.HEURIST4.util.isArrayNotEmpty(menuItems[i].children);
+            const hasSubs = this.$H.isArrayNotEmpty(menuItems[i].children);
             if(hasSubs){
 
                 
@@ -555,7 +555,7 @@ console.log( that._menuData );
     */
     executeSavedSearch: function(opts){
         
-        if(window.hWin.HEURIST4.util.isPositiveInt(opts)){
+        if(this.$H.isPositiveInt(opts)){
             opts = {svsID:options};
         }                              
         

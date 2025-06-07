@@ -1,5 +1,5 @@
 /**
-* HMenuOpts - form to modify HMenu options
+* HMenuOpts - Widget for HMenu's property editor form, used for configuring HMenu instances, within CMS editor.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
