@@ -366,7 +366,7 @@ $.widget( "heurist.connections", {
         
         if(this._isVisualizeInited() ){
             let that = this;
-            this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest,
+            this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest, false,
                     function(selected){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );

@@ -37,7 +37,7 @@ class VisualiseOverlay{
     constructor(visualiserContext){
 
         this.visualiser = visualiserContext;
-        this.#iconCount = this.visualiser.isStructure ? 4 : 3;
+        this.#iconCount = this.visualiser.options.isStructure ? 4 : 3;
 
         this.#addInfoDiv();
     }
@@ -51,7 +51,7 @@ class VisualiseOverlay{
                 .enter()
                 .append('g')
                 .on('dblclick', (data) => {
-                    if(!this.visualiser.isStructure){ // Added Double Click to Edit Function
+                    if(!this.visualiser.options.isStructure){ // Added Double Click to Edit Function
                         window.open(`${window.hWin.HAPI4.baseURL}?fmt=edit&db=${window.hWin.HAPI4.database}&recID=${data.id}`, '_blank');
                     }else if(window.hWin.HAPI4.is_admin()){
                         _editRecStructure(data.id);
@@ -160,7 +160,7 @@ class VisualiseOverlay{
                     count: record.count, rtyid: record.id,
                     size: '9px', weight: 'bold', height: 15, enter: true, image:record.image}; 
 
-        if(this.visualiser.showCounts){
+        if(this.visualiser.options.showCounts){
             header.text += `, n=${record.count}`;  
         }
 
@@ -178,7 +178,7 @@ class VisualiseOverlay{
         let map = {};
         for(const link of data.links){
 
-            let isRequired = this.visualiser.isStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required' ? 'y' : 'n';
+            let isRequired = this.visualiser.options.isStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required' ? 'y' : 'n';
             let sourceName = truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength);
             let targetName = truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength);
             let weight = isRequired == 'y' ? 'bold' : 'normal';
@@ -195,10 +195,10 @@ class VisualiseOverlay{
                     map[link.relation.name] = { require_type: isRequired, dtyid: link.relation.id, weight: weight };
                 }
         
-                if(!this.visualiser.isStructure){
+                if(!this.visualiser.options.isStructure){
                     // Relation
                     let relation = { text: `➜ ${targetName}`, size: '8px', height: 11, subheader: 1, xpos: xpos, multiline: true };
-                    if(this.visualiser.showCounts) {
+                    if(this.visualiser.options.showCounts) {
                         relation.text += `, n=${link.targetcount}`;                      
                     }
                 
@@ -219,7 +219,7 @@ class VisualiseOverlay{
             
                 // Relation
                 let relation = { text: `${sourceName} ↔ ${targetName}`, size: '8px', height: fontSize, xpos: xpos, multiline: true };
-                if(this.visualiser.showCounts) {
+                if(this.visualiser.options.showCounts) {
                     relation.text += `, n=${link.relation.count}`;
                 }
                 
@@ -263,7 +263,7 @@ class VisualiseOverlay{
 
     #getRelationOverlayData(line){
 
-        if(!this.visualiser.isStructure){
+        if(!this.visualiser.options.isStructure){
             return node_info;
         }
 
@@ -285,7 +285,7 @@ class VisualiseOverlay{
 
         if(!data || data.links.leng === 0 || $('#expand-links').is(':checked')){
 
-            let count = !this.visualiser.isStructure && line.targetcount <= 1 ? '' : ', n=' + line.targetcount;
+            let count = !this.visualiser.options.isStructure && line.targetcount <= 1 ? '' : ', n=' + line.targetcount;
 
             // Show information for this link only
             let text = `${truncateText(window.hWin.HEURIST4.util.stripTags(line.relation.name), maxLength)}${count}`;
@@ -295,7 +295,7 @@ class VisualiseOverlay{
 
         for(const link of data.links){
 
-            let count = !this.visualiser.isStructure && link.targetcount <= 1 ? '' : `, n=${link.targetcount}`;
+            let count = !this.visualiser.options.isStructure && link.targetcount <= 1 ? '' : `, n=${link.targetcount}`;
             const linkName = `${truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength)}${count}`;
 
             // Show information for all links, with same source and target ids
@@ -303,7 +303,7 @@ class VisualiseOverlay{
 
                 array.push({ type: link.relation.type, cnt: link.targetcount, text: linkName, size: '10px', dir: 'to' });
 
-                if(this.visualiser.isStructure){
+                if(this.visualiser.options.isStructure){
 
                     if($Db.rst(link.source.id, link.relation.id, 'rst_MaxValues') != 1){
                         array.push({ text: 'multi value', size: '9px', style: 'italic', subheader: 1 });
@@ -320,7 +320,7 @@ class VisualiseOverlay{
 
                 array.push({ type: link.relation.type, cnt: link.targetcount, text: linkName, size: '10px', dir: 'from' });
 
-                if(!this.visualiser.isStructure){
+                if(!this.visualiser.options.isStructure){
                     continue;
                 }
 
@@ -413,7 +413,7 @@ class VisualiseOverlay{
             offset = type == 'record' ? 29 : 25;
         }
 
-        if(this.visualiser.isStructure){
+        if(this.visualiser.options.isStructure){
             info = this.#addMissingFields(info);
         }
 
@@ -454,7 +454,7 @@ class VisualiseOverlay{
                     .style('font-style', (data) => data.style, 'important') // Font style based on style property
                     .style('font-size', (data) => data.size, 'important'); // Font size based on size property
 
-        if(this.visualiser.isStructure){
+        if(this.visualiser.options.isStructure){
 
 			// Display rectypes used by selected fields
             this.#overlay.selectAll('text.info-mode-full, text.nodelabel').on('click', (data) => {
@@ -489,7 +489,7 @@ class VisualiseOverlay{
             }).style('cursor', 'pointer');
         }else{
             // Add context menu for nodes, allowing users to expand node connections
-            // @todo: allow for both vis, disabled and hide based on: this.visualiser.isStructure and typeof onExpandNode === 'function'
+            // @todo: allow for both vis, disabled and hide based on: this.visualiser.options.isStructure and typeof onExpandNode === 'function'
 
             let data = this.#overlay.data();
 
@@ -561,7 +561,7 @@ class VisualiseOverlay{
                     return `${window.hWin.HAPI4.baseURL}viewers/visualize/assets/arrow_${type == 'resource' ? 1 : 2}.png`;
                 })
                 .attr('x', (d) => link.dir=='to' || $('#expand-links').is(':checked') ? 2 : -18) // if the icon has been rotated it needs to be moved left to keep it next to text
-                .attr('y', () => this.visualiser.isStructure && $('#expand-links').is(':checked') ? position : (position + 7.5)) // move relation icon down to sit next to text
+                .attr('y', () => this.visualiser.options.isStructure && $('#expand-links').is(':checked') ? position : (position + 7.5)) // move relation icon down to sit next to text
                 .attr('height', this.#iconSize)
                 .attr('width', this.#iconSize);
 
@@ -617,7 +617,7 @@ class VisualiseOverlay{
 
         if(type=='record'){
 
-            if(this.visualiser.isStructure){
+            if(this.visualiser.options.isStructure){
 
                 rty_ID = selector.substring(2);
                 const desc = $Db.rty(rty_ID, 'rty_Description');
@@ -715,17 +715,17 @@ class VisualiseOverlay{
             widthTitle += (this.#iconSize + 3) * 2;
             if(widthTitle > maxWidth) maxWidth = widthTitle;
 
-            if(!this.visualiser.isStructure || is_admin){
+            if(!this.visualiser.options.isStructure || is_admin){
                 this.#addExpanderButton(maxWidth, rect_full, rect_info);
             }
 
-            if(!this.visualiser.isStructure){
+            if(!this.visualiser.options.isStructure){
                 this.#addLinkButton(maxWidth);
             }
 
             this.#addEditButton(maxWidth, rty_ID);
 
-            if(this.visualiser.isStructure){
+            if(this.visualiser.options.isStructure){
                 this.#addRemoveButton(maxWidth);
             }
         }else{
@@ -824,7 +824,7 @@ class VisualiseOverlay{
                         const x = dem.x + dem.width / 2;
                         const y = dem.y + dem.height / 2;
 
-                        let box_width = maxWidth + this.#iconCount * this.#iconSize - (this.visualiser.isStructure ? 3 : 12);
+                        let box_width = maxWidth + this.#iconCount * this.#iconSize - (this.visualiser.options.isStructure ? 3 : 12);
 
                         $icon.attr('transform', `${iconPlacement}rotate(180,${x},${y})`);
 
@@ -909,14 +909,14 @@ class VisualiseOverlay{
 
         btnLink.append('title').text(() => 'Click and drag to another node to create link');
 
-        if(this.visualiser.isStructure && !window.hWin.HAPI4.is_admin()){
+        if(this.visualiser.options.isStructure && !window.hWin.HAPI4.is_admin()){
             btnLink.style('display', 'none');
         }
     }
 
     #addEditButton(maxWidth, rty_ID){
 
-        if(this.visualiser.isStructure && !window.hWin.HAPI4.is_admin()){
+        if(this.visualiser.options.isStructure && !window.hWin.HAPI4.is_admin()){
             return;
         }
 
@@ -938,14 +938,14 @@ class VisualiseOverlay{
 
                     event.preventDefault();
                     
-                    if(!this.visualiser.isStructure){
+                    if(!this.visualiser.options.isStructure){
                         window.open(`${window.hWin.HAPI4.baseURL}?fmt=edit&db=${window.hWin.HAPI4.database}&recID=${rec_ID}`, '_new');
                     }else if(window.hWin.HAPI4.is_admin()){
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, { new_record_params: { RecTypeID: rty_ID }, edit_structure: true });
                     }  
                 });
 
-        if(this.visualiser.isStructure){ 
+        if(this.visualiser.options.isStructure){ 
             btnEdit.append("title").text(() => 'Click to edit the entity / record type structure');
         }else{ // add edit button
             btnEdit.append("title").text(() => 'Click to edit the record');
@@ -987,7 +987,7 @@ class VisualiseOverlay{
 
         let dim = { h: 480, w: 700 };
 
-        if(!this.visualiser.isStructure){
+        if(!this.visualiser.options.isStructure){
             this.#linkTwoRecords(source_ID, target_ID);
             return;
         }
@@ -1019,7 +1019,7 @@ class VisualiseOverlay{
                 const sMsg = context == true ? 'Link created...' : context;
                 hWin.HEURIST4.msg.showMsgFlash(sMsg, 3000);
 
-                if(this.visualiser.isStructure){
+                if(this.visualiser.options.isStructure){
                     this.#getDataFromServer();    
                 }else{
                     // Trigger refresh
@@ -1081,7 +1081,7 @@ class VisualiseOverlay{
             this.showNodeInformation(data); // Load record details
         }
 
-        if(this.visualiser.isStructure || !window.hWin.HEURIST4.util.isPositiveInt(data?.id)){
+        if(this.visualiser.options.isStructure || !window.hWin.HEURIST4.util.isPositiveInt(data?.id)){
             return;
         }
 
@@ -1099,7 +1099,7 @@ class VisualiseOverlay{
         if($infoDiv.resizable('instance') === undefined){ // setup resizing
             $infoDiv.resizable({
                 maxHeight: 400,
-                minHeight: this.visualiser.isStructure ? 150 : 300,
+                minHeight: this.visualiser.options.isStructure ? 150 : 300,
                 resize: (event, ui) => {
                     infoFrame.style('height', `${$infoDiv.height()}px`);
                     infoBox.style('height', `${$infoDiv.height()}px`);
@@ -1197,7 +1197,7 @@ class VisualiseOverlay{
             $infoDiv.resizable('option', 'maxHeight', height);
         }
 
-        if(this.visualiser.isStructure){
+        if(this.visualiser.options.isStructure){
             displayRecTypeInfo();
         }else{
             displayRecordViewer();

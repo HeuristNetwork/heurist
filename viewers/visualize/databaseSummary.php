@@ -422,10 +422,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                         $("#visualisation").visualize({
                             data: json_data,
-                            getData: function(data) { return data_to_vis; },
-                            linelength: 200,
-                            isDatabaseStructure: true,
-                            showCounts: false
+                            getData: () => data_to_vis,
+                            isStructure: true,
+                            isStandAlone: false
                         });
                     }
 

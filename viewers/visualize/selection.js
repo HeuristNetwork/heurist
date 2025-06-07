@@ -60,7 +60,7 @@ class VisualiseSelection{
 
     #onMouseDown(){
 
-        if(this.visualiser.isStructure){
+        if(this.visualiser.options.isStructure){
             $('body.popup div.layout-container').first().layout().close('west');
         }
 

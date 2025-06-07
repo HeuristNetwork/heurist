@@ -50,8 +50,6 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
         <script type="text/javascript">
 
-var isStandAlone = false;
-
 // Callback function on page initialization - see initPage.php
 function onPageInit(success){
 
@@ -63,8 +61,6 @@ function onPageInit(success){
         // Perform database query if possible (for standalone mode - when map.php is separate page)
         if( !window.hWin.HEURIST4.util.isempty(q) )
         {
-            isStandAlone = true;
-
             var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
 
             if(!window.hWin.HEURIST4.util.isempty(rules)){
@@ -98,7 +94,7 @@ function onPageInit(success){
                                     // Parse response to spring diagram format
                                     var data = __parseData(records_ids, response.data);
 
-                                    showData(data, [], query, null, null, null);
+                                    showData(data, [], query, true, null, null, null);
 
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -218,71 +214,48 @@ function onPageInit(success){
 
         /** Shows data visually */
         function showSelection( selectedRecordsIds ){
-             visualizeSelection( selectedRecordsIds );
+            $("#visualize").visualize('selection').highlightSelection( selectedRecordsIds );
         }
 
         //
         //
         //
-        function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords) {
-               // Processing...
-                if(data && data.nodes){
-                    $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
-                }else{
-                    $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
-                    return;
-                }
+        function showData(data, selectedRecordsIds, new_request, isStandAlone, onSelectEvent, onRefreshData, onExpandRecords) {
+            // Processing...
+            if(data && data.nodes){
+                $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
+            }else{
+                $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
+                return;
+            }
 
-                // Custom data parsing
-                function getData(data) {
-                    return data;
-                }
+            $(window).on('onresize',onVisualizeResize);
+            onVisualizeResize();
 
-                // Calculates the line length
-                function getLineLength(record) {
-                    var length = getSetting('setting_linelength');
-                    if(record !== undefined && record.hasOwnProperty("depth")) {
-                        length = length / (record.depth+1);
-                    }
-                    return length;
-                }
+            $("#visualize").visualize({
 
-                $(window).on('onresize',onVisualizeResize);
-                onVisualizeResize();
+                data: data,
+                request: new_request,
+                getData: (data) => data,
 
-                $("#visualize").visualize({
-                    data: data,
-                    request: new_request,
-                    getData: function(data) { return getData(data);},
-                    getLineLength: function(record) { return getLineLength(record);},
+                isStructure: false,
+                isStandAlone: isStandAlone,
 
-                    selectedNodeIds: selectedRecordsIds,   //assign current selection
-                    triggerSelection: onSelectEvent,
-                    onRefreshData: onRefreshData,
-                    onExpandNode: onExpandRecords,
-                    /*function(selection){
-                        //parentDocument    top.window.document
-                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } );//this.element.attr('id')} );
-                    },*/
+                selectedNodeIds: selectedRecordsIds,   //assign current selection
+                onSelectNode: onSelectEvent,
+                onRefreshData: onRefreshData,
+                onExpandNode: onExpandRecords
+            });
 
-                    entityradius: 1,
-                    linewidth: 1,
+            //setTimeout(function(){ setGravity('off');}, 3000);// turn off gravity
 
-                    showCounts: false,
-                    showEntitySettings: false,
-                    showFormula: false,
-                    gravity: 'off' //'touch', activate gravity, for a moment, to scatter graph
-                });
-
-                //setTimeout(function(){ setGravity('off');}, 3000);// turn off gravity
-
-                changeViewMode('icons');
+            changeViewMode('icons');
         }
 
         function onVisualizeResize(){
-                var width = $(window).width();
-                var supw = 3.5;//(width<744)?3.8:3.5;
-                $('#divSvg').css('top', supw+'em');
+            var width = $(window).width();
+            var supw = 3.5;//(width<744)?3.8:3.5;
+            $('#divSvg').css('top', supw+'em');
         }
 
         </script>

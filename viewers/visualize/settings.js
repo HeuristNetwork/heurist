@@ -55,6 +55,8 @@ class VisualiseSettings{
 
         this.visualiser = visualiserContext;
 
+        this.defaultSettings.entityradius = this.visualiser.options.isStructure ? 30 : 1;
+
         this.#usePreferences = window.hWin.HAPI4.has_access();
 
         this.settings = this.#usePreferences ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
@@ -240,7 +242,7 @@ class VisualiseSettings{
         });
 
         $('#expand-links').on('change', () => this.visualiser.tick()); // expand single links
-        if(this.visualiser.isStructure){ // show all links by default for database structure vis
+        if(this.visualiser.options.isStructure){ // show all links by default for database structure vis
             $('#expand-links').prop('checked', true);
         }
         $('#setLinksMode').controlgroup();    
@@ -384,7 +386,7 @@ class VisualiseSettings{
                 if(isAdvanced){
                     $advanced.show();
                     $advancedMode.find('a').hide();
-                    if(this.visualiser.isStructure){
+                    if(this.visualiser.options.isStructure){
                         $('#setDivExport').hide();
                     }
                 }else{
@@ -401,7 +403,7 @@ class VisualiseSettings{
         if(isAdvanced !== 'false'){
             $advanced.show();
             $advancedMode.find('a').hide();
-            if(this.visualiser.isStructure){
+            if(this.visualiser.options.isStructure){
                 $('#setDivExport').hide();
             }
         }else{
@@ -414,7 +416,7 @@ class VisualiseSettings{
         this.#setupLinks();
         this.#setupLabels();
 
-        if(this.visualiser.isStructure){
+        if(this.visualiser.options.isStructure){
             this.#initRecTypeSelector();
             $('#setDivExport').hide();
         }else{

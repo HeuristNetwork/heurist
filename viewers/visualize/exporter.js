@@ -171,10 +171,8 @@ class VisualiseExporter{
             embed: this.exportDiv.append('button').button({label: 'Embed', icon: 'ui-icon-globe', showLabel: false}).on('click', () => this.links()).attr('id', 'embed-export')
         };
 
-        if(this.visualiser.isStructure || window.isStandAlone){
+        if(this.visualiser.options.isStructure || this.visualiser.options.isStandAlone){
             this.exportButtons.embed.style('visibility', 'hidden');
         }
-
-        delete window.isStandAlone;
     }
 }
