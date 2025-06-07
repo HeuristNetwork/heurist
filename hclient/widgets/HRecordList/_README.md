@@ -88,7 +88,7 @@ This directory (`/hclient/widgets/HRecordList`) contains the following key files
 -   **`HRecordList.js`**: The core JavaScript file implementing the `HRecordList` widget and its logic.
 -   **`HRecordList.css`**: CSS styles specifically for the `HRecordList` widget, ensuring proper layout and appearance for different view modes and components.
 -   **`HRecordList.html`**: An HTML snippet that defines the basic structure (layout and toolbar) for the `HRecordList` widget.
--   **`HRecordListOpts.js`**: JavaScript for the property editor form associated with `HRecordList`, allowing configuration of the widget's options, likely within a Heurist administrative interface.
+-   **`HRecordListOpts.js`**: JavaScript for the property editor form associated with `HRecordList`, allowing configuration of the widget's options in CMS editor.
 -   **`HRecordListOpts.html`**: HTML snippet for the property editor form used by `HRecordListOpts.js`.
 -   **`HRecordView.js`**: A separate widget responsible for displaying a detailed view of a single record, often used in conjunction with `HRecordList` when a user selects a record to view.
 -   **`HRecordList*.tpl`**: A set of built-in sample Smarty templates that can be used for rendering record cards or rows within the `HRecordList`. These provide default layouts that can be customized or replaced.
