@@ -1,42 +1,41 @@
 <?php
+/**
+* DbSysBugreport.php - Class DbSysBugreport
+*
+* Handles bug reports and contact form submissions.
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       6.6.5
+*/
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\System;
 use hserv\entity\DbRecUploadedFiles;
 
-    /**
-     * Class DbSysBugreport
-     *
-     * Handles bug reports and contact form submissions.
-     *
-     * This class has two main functionalities:
-     * 1. Creating bug report records: It can create new task records (Type 56, e.g., "Features, Bug, Issue")
-     *    in a designated Heurist bug tracker database (often `HEURIST_BUGREPORT_DATABASE` on `HEURIST_MAIN_SERVER`).
-     *    This may involve remote communication if the current Heurist instance is not the main server.
-     *    It also handles sending email notifications about the bug report.
-     * 2. Processing website contact forms: If specific 'email' and 'content' fields are provided,
-     *    it sends an email to the database owner or a specified address.
-     *
-     * Search and direct delete/batch operations on bug reports via this class are typically disabled.
-     *
-     * @package     Heurist academic knowledge management system
-     * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     6.6.5
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
+/**
+* Class DbSysBugreport
+*
+* Handles bug reports and contact form submissions.
+*
+* This class has two main functionalities:
+* 1. Creating bug report records: It can create new task records (Type 56, e.g., "Features, Bug, Issue")
+*    in a designated Heurist bug tracker database (often `HEURIST_BUGREPORT_DATABASE` on `HEURIST_MAIN_SERVER`).
+*    This may involve remote communication if the current Heurist instance is not the main server.
+*    It also handles sending email notifications about the bug report.
+* 2. Processing website contact forms: If specific 'email' and 'content' fields are provided,
+*    it sends an email to the database owner or a specified address.
+*
+* Search and direct delete/batch operations on bug reports via this class are typically disabled.
+*
+* @package  hserv\entity 
+*/
 class DbSysBugreport extends DbEntityBase
 {
 

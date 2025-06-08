@@ -1,35 +1,34 @@
 <?php
+/**
+* DbSysUsers.php - Class DbSysUsers
+*
+* Operations for user accounts stored in the `sysUGrps` table.
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       6.0
+*/
 namespace hserv\entity;
 use hserv\System;
 use hserv\entity\DbEntityBase;
-
-/**
- * Class DbSysUsers
- *
- * Provides database access and operations for user accounts stored in the `sysUGrps` table (where `ugr_Type` = 'user').
- * It handles searching, creating, updating, and deleting users, as well as special actions
- * like transferring database ownership and importing users from another database.
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';//for recordDelete
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
 
+/**
+* Class DbSysUsers
+*
+* Provides database access and operations for user accounts stored in the `sysUGrps` table (where `ugr_Type` = 'user').
+* It handles searching, creating, updating, and deleting users, as well as special actions
+* like transferring database ownership and importing users from another database.
+*
+* @package  hserv\entity
+*/
 class DbSysUsers extends DbEntityBase
 {
     /** @var bool Stores the original autocommit status during a transaction. */

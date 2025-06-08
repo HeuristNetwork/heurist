@@ -1,66 +1,64 @@
 <?php
+/**
+* DbDefRecStructure.php - Class DbDefRecStructure
+*
+* Operations for the `defRecStructure` table.
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       6.0
+*/
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
-    /**
-     * Class DbDefRecStructure
-     *
-     * Provides database access and operations for the `defRecStructure` table,
-     * which defines the structure of record types (i.e., which fields they include and how).
-     *
-     * @package     Heurist academic knowledge management system
-     * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
 require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 
-
+/**
+* Class DbDefRecStructure
+*
+* Provides database access and operations for the `defRecStructure` table,
+* which defines the structure of record types (i.e., which fields they include and how).
+*
+* @package  hserv\entity 
+*/
 class DbDefRecStructure extends DbEntityBase
 {
 
-  /**
-     * Searches for record structure definitions (`defRecStructure` entries) based on criteria in `$this->data`.
-     *
-     * This method extends the base search functionality. It first calls `parent::search()`
-     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
-     * common search parameters from `$this->data`.
-     *
-     * It then adds specific predicates for this entity:
-     * - `rst_ID`: If provided in `$this->data['rst_ID']`.
-     * - `rst_RecTypeID`: If provided in `$this->data['rst_RecTypeID']`.
-     * - `rst_DetailTypeID`: If provided in `$this->data['rst_DetailTypeID']`.
-     * - `rst_CalcFunctionID`: If provided in `$this->data['rst_CalcFunctionID']`.
-     *
-     * The fields returned in the search results depend on `$this->data['details']`:
-     * - 'id': Returns only `rst_ID`.
-     * - 'name': Returns `rst_ID`, `rst_DisplayName`.
-     * - 'rectype': Returns `rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`.
-     * - 'listshort': Returns key fields including a calculated `rst_DisplayName` (preferring `rst_DisplayName` over `dty_Name`) and `dty_Type`. Involves a JOIN with `defDetailTypes`.
-     * - 'list': Returns an extended set of fields, including calculated display names and help texts (preferring `rst_` values over `dty_` ones). Involves a JOIN with `defDetailTypes`.
-     * - 'structure': Returns a comprehensive set of fields for defining structure, using `dty_` values as fallbacks or for specific overrides. Involves a JOIN with `defDetailTypes`.
-     * - 'full': Returns all fields defined in `$this->fieldNames` for this entity.
-     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
-     *
-     * Results are ordered by `rst_DisplayOrder ASC`.
-     * For modes 'listshort', 'list', and 'structure', a `LEFT JOIN` with `defDetailTypes` is performed.
-     *
-     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
-     *                     typically including 'records', 'count', 'total_count', etc.
-     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
-     *                     or if the database query fails.
-     */
+    /**
+    * Searches for record structure definitions (`defRecStructure` entries) based on criteria in `$this->data`.
+    *
+    * This method extends the base search functionality. It first calls `parent::search()`
+    * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+    * common search parameters from `$this->data`.
+    *
+    * It then adds specific predicates for this entity:
+    * - `rst_ID`: If provided in `$this->data['rst_ID']`.
+    * - `rst_RecTypeID`: If provided in `$this->data['rst_RecTypeID']`.
+    * - `rst_DetailTypeID`: If provided in `$this->data['rst_DetailTypeID']`.
+    * - `rst_CalcFunctionID`: If provided in `$this->data['rst_CalcFunctionID']`.
+    *
+    * The fields returned in the search results depend on `$this->data['details']`:
+    * - 'id': Returns only `rst_ID`.
+    * - 'name': Returns `rst_ID`, `rst_DisplayName`.
+    * - 'rectype': Returns `rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`.
+    * - 'listshort': Returns key fields including a calculated `rst_DisplayName` (preferring `rst_DisplayName` over `dty_Name`) and `dty_Type`. Involves a JOIN with `defDetailTypes`.
+    * - 'list': Returns an extended set of fields, including calculated display names and help texts (preferring `rst_` values over `dty_` ones). Involves a JOIN with `defDetailTypes`.
+    * - 'structure': Returns a comprehensive set of fields for defining structure, using `dty_` values as fallbacks or for specific overrides. Involves a JOIN with `defDetailTypes`.
+    * - 'full': Returns all fields defined in `$this->fieldNames` for this entity.
+    * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+    *
+    * Results are ordered by `rst_DisplayOrder ASC`.
+    * For modes 'listshort', 'list', and 'structure', a `LEFT JOIN` with `defDetailTypes` is performed.
+    *
+    * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+    *                     typically including 'records', 'count', 'total_count', etc.
+    *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+    *                     or if the database query fails.
+    */
     public function search(){
 
         if(parent::search()===false){

@@ -2,7 +2,7 @@
 /**
 * DbDefCalcFunctions.php - Class DbDefCalcFunctions
 *
-* Operations for the `defCalcFunctions` table
+* Operations for the `defCalcFunctions` table.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -10,9 +10,8 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @since       4.0
+* @since       6.0
 */
-
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
@@ -21,7 +20,8 @@ use hserv\entity\DbEntityBase;
 *
 * Provides database access and operations for the `defCalcFunctions` table,
 * which stores definitions for calculated fields.
-* 
+*
+* @package  hserv\entity 
 */
 class DbDefCalcFunctions extends DbEntityBase
 {
