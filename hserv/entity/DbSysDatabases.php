@@ -31,29 +31,29 @@ use hserv\entity\DbEntityBase;
 class DbSysDatabases extends DbEntityBase
 {
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array containing a list of accessible database names under the 'records' key,
-    *                     formatted similarly to other entity search results. Returns false on error (though
-    *                     current implementation doesn't explicitly return false from this path).
-    *                     The 'fields' key will contain ['sys_Database'].
-    */
+     * Lists databases accessible to the current user, optionally filtered by email.
+     *
+     * This method does not perform a typical entity search using `DbEntitySearch`.
+     * Instead, it calls the global function `mysql__getdatabases4` to retrieve a list
+     * of database names. If `$this->data['ugr_eMail']` is provided, it's used to
+     * filter the list of databases to those accessible by the user with that email.
+     *
+     * The returned array is structured to mimic the format of a standard Heurist search result,
+     * containing keys like 'records', 'count', 'fields', etc. The 'records' themselves
+     * are associative arrays where the key is the database name and the value is an array
+     * containing just the database name.
+     *
+     * @return array An array structured like a search result:
+     *               - `queryid`: From `$this->data['request_id']`.
+     *               - `entityName`: The name of this entity (`sysDatabases`).
+     *               - `pageno`: From `$this->data['pageno']`.
+     *               - `offset`: From `$this->data['offset']`.
+     *               - `count`: Total number of accessible databases found.
+     *               - `reccount`: Number of databases returned (same as `count`).
+     *               - `records`: An associative array of database entries (e.g., `['dbname' => ['dbname']]`).
+     *               - `order`: A simple array of database names in the order they were retrieved.
+     *               - `fields`: An array containing a single string: `['sys_Database']`.
+     */
     public function search(){
 
         //compose WHERE

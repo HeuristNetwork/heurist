@@ -29,18 +29,34 @@ class DbSysWorkflowRules extends DbEntityBase
 {
 
     /**
-    *  search usrReminders
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found workflow rules, or false on error.
-    *                     If `details` is 'rty', returns a list of distinct `swf_RecTypeID`s.
-    *                     The structure of other returned array elements depends on the 'details' parameter.
-    */
+     * Searches for workflow rules (`sysWorkflowRules`) based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters.
+     *
+     * A special case exists if `$this->data['details'] == 'rty'`, where it returns a distinct list
+     * of `swf_RecTypeID`s that have workflow rules defined.
+     *
+     * Otherwise, it adds specific predicates for this entity:
+     * - `swf_ID`: If provided in `$this->data['swf_ID']`.
+     * - `swf_RecTypeID`: If provided in `$this->data['swf_RecTypeID']`.
+     * - `swf_Stage`: If provided in `$this->data['swf_Stage']`.
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns only `swf_ID`.
+     * - 'name' (treats as 'list'): Returns `swf_ID`, `swf_RecTypeID`, `swf_Stage`, `swf_Order`, `swf_StageRestrictedTo`,
+     *   `swf_SetOwnership`, `swf_SetVisibility`, `swf_SendEmail`, `swf_EmailList`, `swf_RecEmailField`, `swf_EmailText`.
+     * - 'list': Same as 'name'.
+     * - 'full': Same as 'list'.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * Results are ordered by `swf_RecTypeID, swf_Order, swf_Stage ASC`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     or a simple array of `swf_RecTypeID`s if `details` is 'rty'.
+     *                     Returns `false` if `parent::search()` fails or a database query fails.
+     */
     public function search(){
 
 

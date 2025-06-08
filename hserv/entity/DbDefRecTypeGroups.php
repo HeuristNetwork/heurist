@@ -46,14 +46,29 @@ class DbDefRecTypeGroups extends DbEntityBase
     }
 
     /**
-     * Searches for record type groups.
+     * Searches for Record Type Groups based on criteria in `$this->data`.
      *
-     * Supports searching by `rtg_ID` and `rtg_Name`.
-     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
-     * The 'list' and 'full' details include an `rtg_RtCount` which counts the number of record types in each group.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `rtg_ID`: If provided in `$this->data['rtg_ID']`.
+     * - `rtg_Name`: If provided in `$this->data['rtg_Name']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `rtg_ID`.
+     * - 'name': Returns `rtg_ID`, `rtg_Name`.
+     * - 'list': Returns `rtg_ID`, `rtg_Name`, `rtg_Description`, `rtg_Order`, and `rtg_RtCount` (calculated).
+     * - Default ('full'): Returns all fields defined in `$this->fieldNames` plus `rtg_RtCount`.
+     * The `rtg_RtCount` is a calculated field representing the number of record types within each group.
+     *
      * Results are ordered by `rtg_Order`.
      *
-     * @return array|false An array of found record type groups, or false on error.
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

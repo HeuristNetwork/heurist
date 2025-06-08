@@ -29,18 +29,32 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 class DbUsrBookmarks extends DbEntityBase
 {
 
-    /**
-    *  search bookmarks
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found bookmark records, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    */
+   /**
+     * Searches for user bookmarks (`usrBookmarks`) based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `bkm_ID`: If provided in `$this->data['bkm_ID']`.
+     * - `bkm_UGrpID`: If provided in `$this->data['bkm_UGrpID']`.
+     * - `bkm_RecID`: If provided in `$this->data['bkm_RecID']`.
+     * - `bkm_Rating`: If provided in `$this->data['bkm_Rating']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `bkm_ID`.
+     * - Default (if 'details' is not 'id'): Returns `bkm_ID`, `bkm_UGrpID`, `bkm_RecID`,
+     *   `bkm_Rating`, `bkm_PwdReminder`, `bkm_Notes`.
+     *
+     * Ordering is not explicitly defined in this method (passed as `null` to `composeAndExecute`),
+     * so it relies on the database's default order or an externally set order via `DbEntitySearch::setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
         if(parent::search()===false){

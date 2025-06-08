@@ -80,12 +80,28 @@ class DbUsrRecPermissions extends DbEntityBase
 
 
     /**
-     * Searches for record permission entries in the `usrRecPermissions` table.
+     * Searches for record permission entries (`usrRecPermissions`) based on criteria in `$this->data`.
      *
-     * Supports filtering by `rcp_RecID` and `rcp_UGrpID`.
-     * The level of detail returned (`id` or `full`) is controlled by `$this->data['details']`.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
      *
-     * @return array|false An array of found permission entries, or false on error.
+     * It then adds specific predicates for this entity:
+     * - `rcp_RecID`: If provided in `$this->data['rcp_RecID']`.
+     * - `rcp_UGrpID`: If provided in `$this->data['rcp_UGrpID']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `rcp_ID`.
+     * - 'full' (or default if 'details' is not 'id'): Returns all fields defined in `$this->fields` for this entity.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * Ordering is not explicitly defined in this method, relying on `DbEntitySearch::setOrderBy()`
+     * or default database order.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

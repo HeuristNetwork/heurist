@@ -57,10 +57,14 @@ class DbSysUsers extends DbEntityBase
      *
      * Filters by `ugr_Type="user"`. Supports searching by `ugr_ID`, `ugr_Name`, `ugr_Enabled`, `ugr_eMail`,
      * and group membership/role (`ugl_GroupID`, `ugl_Role`).
-     * Can also find users *not* in a specified group.
-     * The level of detail returned is controlled by `$this->data['details']`.
+     * Can also find users *not* in a specified group (`not:ugl_GroupID`).
+     * The level of detail returned is controlled by `$this->data['details']` (e.g., 'id', 'name', 'fullname', 'count', 'list', 'full').
      *
-     * @return array|false An array of found user records, or false on error.
+     * Special handling for `$this->data['ugr_eMail']`: if not prefixed with an operator, '=' is prepended.
+     * `ugr_Password` is always excluded from results. `ugr_eMail` and `ugr_Name` are excluded if the current session user is not logged in.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc., or false on error.
      */
     public function search(){
 

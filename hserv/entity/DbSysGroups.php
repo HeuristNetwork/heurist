@@ -48,15 +48,36 @@ class DbSysGroups extends DbEntityBase
     }
 
     /**
-     * Searches for workgroups.
+     * Searches for workgroups (records in `sysUGrps` where `ugr_Type="workgroup"`)
+     * based on criteria in `$this->data`.
      *
-     * Filters by `ugr_Type="workgroup"`. Supports searching by `ugr_ID`, `ugr_Name`,
-     * and user membership/role (`ugl_UserID`, `ugl_Role`).
-     * The level of detail returned (`id`, `name`, `list`, `full`, or `count`) is
-     * controlled by `$this->data['details']`.
-     * 'list' and 'full' details can include member count (`ugr_Members`) and user role (`ugl_Role`).
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
      *
-     * @return array|false An array of found workgroups, or false on error.
+     * A mandatory filter `ugr_Type="workgroup"` is always applied.
+     * It then adds specific predicates for:
+     * - `ugr_ID`: If provided in `$this->data['ugr_ID']`.
+     * - `ugr_Name`: If provided in `$this->data['ugr_Name']`.
+     * - User membership: If `ugl_UserID` is provided in `$this->data`, it joins with `sysUsrGrpLinks`
+     *   to find groups the user is part of. `$this->data['ugl_Role']` can further filter by role.
+     *   The `$this->data['ugl_Join']` parameter can affect how this join is constructed (LEFT JOIN vs. implicit JOIN in WHERE).
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns only `ugr_ID`.
+     * - 'name': Returns `ugr_ID`, `ugr_Name`.
+     * - 'count': Returns `ugr_ID` and a calculated `ugr_Members` count (number of users in the group).
+     * - 'list' or 'full': Returns core group fields (`ugr_ID`, `ugr_Name`, `ugr_LongName`, `ugr_Description`, `ugr_Enabled`).
+     *   If user membership was part of the criteria (`ugl_UserID` provided), `ugl_Role` is also included.
+     *   Both 'list' and 'full' modes also include the calculated `ugr_Members` count.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected (plus `ugr_Members` if sorting by it).
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

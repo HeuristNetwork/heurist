@@ -28,18 +28,35 @@ class DbRecThreadedComments extends DbEntityBase
 {
 
     /**
-    *  search usrReminders
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found comments, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    *                     'list' and 'name' details include `cmt_RecTitle` by joining with the `Records` table.
-    */
+     * Searches for threaded comments based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters. If `cmt_OwnerUgrpID` is not provided in `$this->data`,
+     * it defaults to the current user's ID.
+     *
+     * It then adds specific predicates for this entity:
+     * - `cmt_ID`: If provided in `$this->data['cmt_ID']`.
+     * - `cmt_OwnerUgrpID`: If provided or defaulted.
+     * - `cmt_RecID`: If provided in `$this->data['cmt_RecID']`.
+     * - `cmt_Text`: If provided in `$this->data['cmt_Text']` (searches with LIKE).
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `cmt_ID`.
+     * - 'list' or 'name': Returns `cmt_ID`, `cmt_RecID`, `cmt_ParentCmtID`, `cmt_OwnerUgrpID`,
+     *   a substring of `cmt_Text` (50 chars), `cmt_Modified`. Additionally, if these details
+     *   are requested or if sorting is by `recTitle`, it joins with the `Records` table
+     *   to include `rec_Title` as `cmt_RecTitle`.
+     * - Default ('full'): Returns `cmt_ID`, `cmt_RecID`, `cmt_ParentCmtID`, `cmt_OwnerUgrpID`,
+     *   `cmt_Text`, `cmt_Modified`.
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
         if(!@$this->data['cmt_OwnerUgrpID']){

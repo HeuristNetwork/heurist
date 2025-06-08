@@ -35,9 +35,20 @@ class DbUsrSavedSearches extends DbEntityBase
      *
      * Supports filtering by `svs_ID`, `svs_Name`, and `svs_UGrpID`.
      * The level of detail returned (`id`, `name`, or `list`/`full`) is controlled by `$this->data['details']`.
-     * Results are ordered by `svs_Name` ASC by default.
+     * Results are ordered by `svs_Name` ASC by default if no other sort order is specified.
      *
-     * @return array|false An array of found saved search records, or false on error.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns only `svs_ID`.
+     * - 'name': Returns `svs_ID`, `svs_Name`.
+     * - Default ('list', 'full', or unspecified): Returns `svs_ID`, `svs_Name`, `svs_UGrpID`, `svs_Query`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails or a database query fails.
      */
     public function search(){
 

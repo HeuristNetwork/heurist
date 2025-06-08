@@ -41,28 +41,31 @@ class DbDefFileExtToMimetype extends DbEntityBase
     'trm_LocallyModified'=>'bool2',
     */
 
-    /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found MIME type mappings, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    */
+   /**
+     * Searches for file extension to MIME type mappings based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `fxm_Extension`: If provided in `$this->data['fxm_Extension']`.
+     * - `fxm_MimeType`: If provided in `$this->data['fxm_MimeType']`.
+     * - `fxm_FiletypeName`: If provided in `$this->data['fxm_FiletypeName']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `fxm_Extension` (which is the primary key for this table).
+     * - 'name': Returns `fxm_Extension`, `fxm_MimeType`.
+     * - 'list' or 'full': Returns all fields defined in `$this->fields` for this entity.
+     *
+     * Results are ordered by `fxm_Extension`.
+     * The primary key `fxm_Extension` is always included as the first field in the results.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
         if(parent::search()===false){
