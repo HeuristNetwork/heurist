@@ -35,6 +35,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         isCalcFieldTemplate: false,
         
         rty_ID:null, 
+        listAllRecTypes: false,
         
         keep_instance: true,
         template: null,  //path to smarty tpl

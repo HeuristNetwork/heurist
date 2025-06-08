@@ -107,17 +107,14 @@ class DbSysBugreport extends DbEntityBase
         return $res;
     }
 
-    /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return null This method is disabled for DbSysBugreport.
-    */
+   /**
+     * Searches for bug reports (currently disabled).
+     *
+     * This method is intended for searching bug reports but is currently disabled
+     * and will always return null.
+     *
+     * @return null This method is disabled and always returns null.
+     */
     public function search(){
         return null;
     }

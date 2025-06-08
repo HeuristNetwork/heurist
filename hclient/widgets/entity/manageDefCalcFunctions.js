@@ -238,17 +238,17 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     keep_instance:false, 
                     
                     isCalcFieldTemplate: true, 
+                    is_snippet_editor: true, 
+                    
                     //rty_ID:rectypes, 
-                    rec_ID:0,
-                    template_body:cfn_Content,
+                    rec_ID: 0,
+                    rty_ID: rty_ID,
+                    listAllRecTypes: true,
+                    
+                    template_body: cfn_Content,
                     
                     isdialog: false,
                     container: this.formulaeditor,
-
-                    is_snippet_editor: true, 
-                    rty_ID: rty_ID,
-                    listAllRecTypes: true,
-                    rec_ID: 0,
 
                     onChange: function(context){
                         if(!context) return;
